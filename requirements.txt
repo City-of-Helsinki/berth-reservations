@@ -8,9 +8,12 @@ certifi==2018.10.15       # via requests
 chardet==3.0.4            # via requests
 coreapi==2.3.3
 coreschema==0.0.4         # via coreapi
+django-anymail==4.3
 django-cors-headers==2.4.0
+django-enumfields==0.10.1
 django-environ==0.4.5
 django-filter==2.0.0
+django-parler==1.9.2
 django==2.1.2
 djangorestframework==3.9.0
 idna==2.7                 # via requests
@@ -18,8 +21,9 @@ itypes==1.1.0             # via coreapi
 jinja2==2.10              # via coreschema
 markupsafe==1.0           # via jinja2
 psycopg2-binary==2.7.5
-pytz==2018.5              # via django
+pytz==2018.6              # via django
 raven==6.9.0
-requests==2.20.0          # via coreapi
+requests==2.20.0          # via coreapi, django-anymail
+six==1.11.0               # via django-anymail
 uritemplate==3.0.0        # via coreapi
 urllib3==1.24             # via requests

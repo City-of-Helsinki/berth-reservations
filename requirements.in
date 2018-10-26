@@ -6,3 +6,6 @@ djangorestframework
 django-filter
 django-cors-headers
 coreapi
+django-parler
+django-enumfields
+django-anymail
