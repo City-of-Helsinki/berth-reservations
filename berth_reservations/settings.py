@@ -25,6 +25,7 @@ env = environ.Env(
     EMAIL_URL=(str, 'consolemail://'),
     SENTRY_DSN=(str, ''),
     CORS_ORIGIN_WHITELIST=(list, []),
+    NOTIFICATIONS_ENABLED=(bool, False),
 )
 if os.path.exists(env_file):
     env.read_env(env_file)
@@ -76,8 +77,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'corsheaders',
+    'parler',
+    'anymail',
 
     'reservations',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -110,6 +114,14 @@ SITE_ID = 1
 
 # TODO: Make this editable from the admin
 DEFAULT_FROM_EMAIL = "dev@hel.fi"
+
+NOTIFICATIONS_ENABLED = env('NOTIFICATIONS_ENABLED')
+
+PARLER_LANGUAGES = {
+    SITE_ID: (
+        {'code': 'fi'},
+    )
+}
 
 CORS_ORIGIN_WHITELIST = env.list('CORS_ORIGIN_WHITELIST')
 
