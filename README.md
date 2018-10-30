@@ -44,6 +44,10 @@ Create user and database
 
     sudo -u postgres createuser -P -R -S berth_reservations  # use password `berth_reservations`
     sudo -u postgres createdb -O berth_reservations berth_reservations
+    
+Create extensions in the database
+    
+    sudo -u postgres psql berth_reservations -c "CREATE EXTENSION postgis;"
 
 Allow user to create test database
 

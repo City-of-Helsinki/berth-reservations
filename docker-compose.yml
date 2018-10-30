@@ -1,19 +1,21 @@
 version: '3'
 services:
     postgres:
-        image: postgres:9.6
+        build: ./docker/postgres/
         environment:
             POSTGRES_USER: berth_reservations
             POSTGRES_PASSWORD: berth_reservations
             POSTGRES_DB: berth_reservations
         ports:
-            - 5432:5432
+            - "5432:5432"
         volumes:
             - berth-postgres-data-volume:/var/lib/postgresql/data
         container_name: berth-db
 
     django:
-        build: .
+        build:
+            context: ./
+            dockerfile: ./docker/django/Dockerfile
         command: python manage.py runserver 0:8000
         env_file:
             - ./.env

@@ -21,7 +21,7 @@ env = environ.Env(
     SECRET_KEY=(str, ''),
     VAR_ROOT=(str, default_var_root),
     ALLOWED_HOSTS=(list, []),
-    DATABASE_URL=(str, 'postgres://berth_reservations:berth_reservations@localhost/berth_reservations'),
+    DATABASE_URL=(str, 'postgis://berth_reservations:berth_reservations@localhost/berth_reservations'),
     CACHE_URL=(str, 'locmemcache://'),
     EMAIL_URL=(str, 'consolemail://'),
     SENTRY_DSN=(str, ''),
@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis',
     'raven.contrib.django.raven_compat',
 
     'rest_framework',
@@ -117,6 +118,8 @@ TEMPLATES = [
 ]
 
 SITE_ID = 1
+
+DEFAULT_SRID = 4326
 
 # TODO: Make this editable from the admin
 DEFAULT_FROM_EMAIL = "dev@hel.fi"
