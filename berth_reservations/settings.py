@@ -2,6 +2,7 @@ import os
 
 import environ
 import raven
+from django.utils.translation import ugettext_lazy as _
 
 checkout_dir = environ.Path(__file__) - 2
 assert os.path.exists(checkout_dir('manage.py'))
@@ -58,6 +59,11 @@ ROOT_URLCONF = 'berth_reservations.urls'
 WSGI_APPLICATION = 'berth_reservations.wsgi.application'
 
 LANGUAGE_CODE = 'fi'
+LANGUAGES = (
+    ('fi', _('Finnish')),
+    ('en', _('English')),
+    ('sv', _('Swedish'))
+)
 TIME_ZONE = 'Europe/Helsinki'
 USE_I18N = True
 USE_L10N = True
@@ -120,6 +126,8 @@ NOTIFICATIONS_ENABLED = env('NOTIFICATIONS_ENABLED')
 PARLER_LANGUAGES = {
     SITE_ID: (
         {'code': 'fi'},
+        {'code': 'en'},
+        {'code': 'sv'},
     )
 }
 
