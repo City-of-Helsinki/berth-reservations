@@ -85,6 +85,7 @@ INSTALLED_APPS = [
     'django_filters',
     'corsheaders',
     'parler',
+    'parler_rest',
     'anymail',
 
     'reservations',
