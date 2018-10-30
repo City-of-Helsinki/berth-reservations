@@ -9,3 +9,4 @@ coreapi
 django-parler
 django-enumfields
 django-anymail
+pillow
