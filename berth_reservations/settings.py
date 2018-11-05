@@ -36,6 +36,8 @@ try:
 except Exception:
     version = None
 
+BASE_DIR = str(checkout_dir)
+
 DEBUG = env.bool('DEBUG')
 TIER = env.str('TIER')
 SECRET_KEY = env.str('SECRET_KEY')
@@ -45,6 +47,9 @@ if DEBUG and not SECRET_KEY:
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
 DATABASES = {'default': env.db()}
+# Ensure postgis engine
+DATABASES['default']['ENGINE'] = 'django.contrib.gis.db.backends.postgis'
+
 CACHES = {'default': env.cache()}
 vars().update(env.email_url())  # EMAIL_BACKEND etc.
 RAVEN_CONFIG = {'dsn': env.str('SENTRY_DSN'), 'release': version}
