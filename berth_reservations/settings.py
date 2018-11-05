@@ -87,6 +87,8 @@ INSTALLED_APPS = [
     'parler',
     'parler_rest',
     'anymail',
+    'mptt',
+    'munigeo',
 
     'reservations',
     'notifications',
