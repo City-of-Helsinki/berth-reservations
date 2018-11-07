@@ -77,4 +77,4 @@ target/
 var/
 venv/
 .pytest_cache/
-
+data/

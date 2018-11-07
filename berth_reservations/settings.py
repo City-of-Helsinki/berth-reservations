@@ -2,6 +2,7 @@ import os
 
 import environ
 import raven
+from django.utils.translation import ugettext_lazy as _
 
 checkout_dir = environ.Path(__file__) - 2
 assert os.path.exists(checkout_dir('manage.py'))
@@ -20,7 +21,7 @@ env = environ.Env(
     SECRET_KEY=(str, ''),
     VAR_ROOT=(str, default_var_root),
     ALLOWED_HOSTS=(list, []),
-    DATABASE_URL=(str, 'postgres://berth_reservations:berth_reservations@localhost/berth_reservations'),
+    DATABASE_URL=(str, 'postgis://berth_reservations:berth_reservations@localhost/berth_reservations'),
     CACHE_URL=(str, 'locmemcache://'),
     EMAIL_URL=(str, 'consolemail://'),
     SENTRY_DSN=(str, ''),
@@ -35,6 +36,8 @@ try:
 except Exception:
     version = None
 
+BASE_DIR = str(checkout_dir)
+
 DEBUG = env.bool('DEBUG')
 TIER = env.str('TIER')
 SECRET_KEY = env.str('SECRET_KEY')
@@ -44,6 +47,9 @@ if DEBUG and not SECRET_KEY:
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
 DATABASES = {'default': env.db()}
+# Ensure postgis engine
+DATABASES['default']['ENGINE'] = 'django.contrib.gis.db.backends.postgis'
+
 CACHES = {'default': env.cache()}
 vars().update(env.email_url())  # EMAIL_BACKEND etc.
 RAVEN_CONFIG = {'dsn': env.str('SENTRY_DSN'), 'release': version}
@@ -58,6 +64,11 @@ ROOT_URLCONF = 'berth_reservations.urls'
 WSGI_APPLICATION = 'berth_reservations.wsgi.application'
 
 LANGUAGE_CODE = 'fi'
+LANGUAGES = (
+    ('fi', _('Finnish')),
+    ('en', _('English')),
+    ('sv', _('Swedish'))
+)
 TIME_ZONE = 'Europe/Helsinki'
 USE_I18N = True
 USE_L10N = True
@@ -72,16 +83,21 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis',
     'raven.contrib.django.raven_compat',
 
     'rest_framework',
     'django_filters',
     'corsheaders',
     'parler',
+    'parler_rest',
     'anymail',
+    'mptt',
+    'munigeo',
 
     'reservations',
     'notifications',
+    'harbors',
 ]
 
 MIDDLEWARE = [
@@ -112,6 +128,8 @@ TEMPLATES = [
 
 SITE_ID = 1
 
+DEFAULT_SRID = 4326
+
 # TODO: Make this editable from the admin
 DEFAULT_FROM_EMAIL = "dev@hel.fi"
 
@@ -120,6 +138,8 @@ NOTIFICATIONS_ENABLED = env('NOTIFICATIONS_ENABLED')
 PARLER_LANGUAGES = {
     SITE_ID: (
         {'code': 'fi'},
+        {'code': 'en'},
+        {'code': 'sv'},
     )
 }
 

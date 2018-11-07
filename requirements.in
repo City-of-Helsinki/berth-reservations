@@ -9,3 +9,6 @@ coreapi
 django-parler
 django-enumfields
 django-anymail
+pillow
+django-parler-rest
+django-munigeo
