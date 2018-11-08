@@ -9,7 +9,7 @@ class BoatTypeAdmin(TranslatableAdmin):
 
 
 class HarborAdmin(TranslatableAdmin, admin.OSMGeoAdmin):
-    pass
+    filter_horizontal = ('suitable_boat_types',)
 
 
 admin.site.register(BoatType, BoatTypeAdmin)

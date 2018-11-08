@@ -39,7 +39,7 @@ class Harbor(TranslatableModel):
     email = models.EmailField(verbose_name=_('Email'), max_length=100, null=True, blank=True)
     www_url = models.URLField(verbose_name=_('WWW link'), max_length=400, null=True, blank=True)
 
-    location = models.PointField(verbose_name=_('Location'), null=True, srid=settings.DEFAULT_SRID)
+    location = models.PointField(verbose_name=_('Location'), blank=True, null=True, srid=settings.DEFAULT_SRID)
 
     municipality = models.ForeignKey(
         Municipality, null=True, blank=True, verbose_name=_('Municipality'),
@@ -58,7 +58,7 @@ class Harbor(TranslatableModel):
     lighting = models.BooleanField(verbose_name=_('Lighting'), default=False)
 
     suitable_boat_types = models.ManyToManyField(
-        BoatType, verbose_name=_('Suitable boat types'), related_name='harbors'
+        BoatType, verbose_name=_('Suitable boat types'), related_name='harbors', blank=True
     )
 
     number_of_places = models.PositiveSmallIntegerField(verbose_name=_('Number of places'), null=True, blank=True)
@@ -68,10 +68,10 @@ class Harbor(TranslatableModel):
 
     translations = TranslatedFields(
         name=models.CharField(
-            verbose_name=_('name'), max_length=200, help_text=_('Name of the harbor')
+            verbose_name=_('name'), max_length=200, help_text=_('Name of the harbor'), blank=True
         ),
         street_address=models.CharField(
-            verbose_name=_('street address'), max_length=200, help_text=_('Street address of the harbor')
+            verbose_name=_('street address'), max_length=200, help_text=_('Street address of the harbor'), blank=True
         ),
     )
 
