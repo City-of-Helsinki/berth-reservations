@@ -130,9 +130,6 @@ SITE_ID = 1
 
 DEFAULT_SRID = 4326
 
-# TODO: Make this editable from the admin
-DEFAULT_FROM_EMAIL = "dev@hel.fi"
-
 NOTIFICATIONS_ENABLED = env('NOTIFICATIONS_ENABLED')
 
 PARLER_LANGUAGES = {

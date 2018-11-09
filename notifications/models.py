@@ -21,6 +21,8 @@ class NotificationTemplate(TranslatableModel):
 
     type = EnumField(NotificationType, max_length=50, verbose_name=_('type'), unique=True)
 
+    from_email = models.EmailField(verbose_name=_('From email'), max_length=100, default="dev@hel.fi")
+
     translations = TranslatedFields(
         subject=models.CharField(
             verbose_name=_('subject'), max_length=200, help_text=_('Subject for email notifications')
