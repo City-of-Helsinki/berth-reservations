@@ -61,3 +61,10 @@ Allow user to create test database
 * Run `python manage.py runserver 0:8000`
 
 The project is now running at [localhost:8000](http://localhost:8000)
+
+## Helsinki Harbors' data
+
+There is a fixtures file available, that contains basic data about public
+harbors of the City of Helsinki. It can be loaded with the following command:
+
+    python manage.py loaddata helsinki-harbors.json
