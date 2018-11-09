@@ -1,3 +1,4 @@
+import django_filters
 from parler_rest.serializers import TranslatableModelSerializer, TranslatedFieldsField
 from rest_framework import serializers, viewsets
 from munigeo.api import GeoModelSerializer
@@ -88,6 +89,26 @@ class HarborSerializer(TranslatedModelSerializer, GeoModelSerializer):
             return None
 
 
+class HarborFilter(django_filters.FilterSet):
+    suitable_boat_types = django_filters.CharFilter(
+        field_name='suitable_boat_types__identifier'
+    )
+    maximum_width = django_filters.NumberFilter(
+        lookup_expr='gte'
+    )
+    maximum_length = django_filters.NumberFilter(
+        lookup_expr='gte'
+    )
+
+    class Meta:
+        model = Harbor
+        fields = (
+            'mooring', 'electricity', 'water', 'waste_collection', 'gate', 'lighting',
+            'suitable_boat_types', 'maximum_width', 'maximum_length'
+        )
+
+
 class HarborViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Harbor.objects.all()
     serializer_class = HarborSerializer
+    filter_class = HarborFilter
