@@ -77,6 +77,7 @@ class HarborSerializer(TranslatedModelSerializer, GeoModelSerializer):
 
     def to_representation(self, obj):
         """
+        Combine `image_file` and `image_link` into one `image` field.
         Image_file field has higher priority.
         We check image_link field only if there is no image_file.
         """

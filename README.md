@@ -68,3 +68,8 @@ There is a fixtures file available, that contains basic data about public
 harbors of the City of Helsinki. It can be loaded with the following command:
 
     python manage.py loaddata helsinki-harbors.json
+    
+You can also import default images for Helsinki harbors:
+
+    python manage.py collectstatic  # make sure you have static files in place
+    python manage.py add_helsinki_harbors_images
