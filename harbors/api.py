@@ -70,23 +70,27 @@ class HarborSerializer(TranslatedModelSerializer, GeoModelSerializer):
         many=True, read_only=True, slug_field='identifier'
     )
     municipality = MunicipalityRelatedField()
-    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Harbor
-        exclude = ['id', 'servicemap_id', 'image_file', 'image_link', 'maximum_depth']
+        exclude = ['id', 'servicemap_id', 'maximum_depth']
 
-    def get_image(self, obj):
+    def to_representation(self, obj):
         """
         Image_file field has higher priority.
         We check image_link field only if there is no image_file.
         """
-        if obj.image_file:
-            return obj.image_file
-        elif obj.image_link:
-            return obj.image_link
-        else:
-            return None
+        representation = super().to_representation(obj)
+
+        representation['image'] = None
+        if representation['image_file']:
+            representation['image'] = representation['image_file']
+        elif representation['image_link']:
+            representation['image'] = representation['image_link']
+
+        representation.pop('image_file')
+        representation.pop('image_link')
+        return representation
 
 
 class HarborFilter(django_filters.FilterSet):
