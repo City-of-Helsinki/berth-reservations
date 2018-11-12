@@ -10,16 +10,19 @@ assert os.path.exists(checkout_dir('manage.py'))
 parent_dir = checkout_dir.path('..')
 if os.path.isdir(parent_dir('etc')):
     env_file = parent_dir('etc/env')
-    default_var_root = parent_dir('var')
+    default_var_root = environ.Path(parent_dir('var'))
 else:
     env_file = checkout_dir('.env')
-    default_var_root = checkout_dir('var')
+    default_var_root = environ.Path(checkout_dir('var'))
 
 env = environ.Env(
     DEBUG=(bool, False),
     TIER=(str, 'dev'),  # one of: prod, qa, stage, test, dev
     SECRET_KEY=(str, ''),
-    VAR_ROOT=(str, default_var_root),
+    MEDIA_ROOT=(environ.Path(), default_var_root('media')),
+    STATIC_ROOT=(environ.Path(), default_var_root('static')),
+    MEDIA_URL=(str, '/media/'),
+    STATIC_URL=(str, '/static/'),
     ALLOWED_HOSTS=(list, []),
     DATABASE_URL=(str, 'postgis://berth_reservations:berth_reservations@localhost/berth_reservations'),
     CACHE_URL=(str, 'locmemcache://'),
@@ -54,11 +57,10 @@ CACHES = {'default': env.cache()}
 vars().update(env.email_url())  # EMAIL_BACKEND etc.
 RAVEN_CONFIG = {'dsn': env.str('SENTRY_DSN'), 'release': version}
 
-var_root = env.path('VAR_ROOT')
-MEDIA_ROOT = var_root('media')
-STATIC_ROOT = var_root('static')
-MEDIA_URL = "/media/"
-STATIC_URL = "/static/"
+MEDIA_ROOT = env('MEDIA_ROOT')
+STATIC_ROOT = env('STATIC_ROOT')
+MEDIA_URL = env.str('MEDIA_URL')
+STATIC_URL = env.str('STATIC_URL')
 
 ROOT_URLCONF = 'berth_reservations.urls'
 WSGI_APPLICATION = 'berth_reservations.wsgi.application'
