@@ -1,5 +1,9 @@
+import os
+import shutil
+
 from django.conf import settings
 from django.contrib.gis.db import models
+from django.core.files.storage import FileSystemStorage
 from django.utils.translation import ugettext_lazy as _
 from parler.models import TranslatableModel, TranslatedFields
 from munigeo.models import Municipality
@@ -20,6 +24,25 @@ class BoatType(TranslatableModel):
 
     def __str__(self):
         return "{} ({})".format(self.safe_translation_getter('name'), self.identifier)
+
+
+def get_harbor_media_folder(instance, filename):
+    return 'harbors/{harbor_identifier}/{filename}'.format(
+        harbor_identifier=instance.identifier, filename=filename
+    )
+
+
+class OverwriteStorage(FileSystemStorage):
+    """
+    Custom storage that deletes previous harbor images
+    by deleting the /harbors/{harbor_identifier}/ folder
+    """
+
+    def get_available_name(self, name, max_length=None):
+        dir_name, file_name = os.path.split(name)
+        if self.exists(dir_name):
+            shutil.rmtree(os.path.join(settings.MEDIA_ROOT, dir_name))
+        return name
 
 
 class Harbor(TranslatableModel):
@@ -46,7 +69,10 @@ class Harbor(TranslatableModel):
         related_name='harbors', on_delete=models.CASCADE
     )
 
-    image_file = models.ImageField(verbose_name=_('Image file'),upload_to='harbors/', null=True, blank=True)
+    image_file = models.ImageField(
+        upload_to=get_harbor_media_folder, storage=OverwriteStorage(),
+        verbose_name=_('Image file'), null=True, blank=True
+    )
     image_link = models.URLField(verbose_name=_('Image link'), max_length=400, null=True, blank=True)
 
     # Available services
