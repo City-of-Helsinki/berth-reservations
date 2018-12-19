@@ -132,7 +132,7 @@
     "pk": 1,
     "fields": {
         "language_code": "fi",
-        "name": "Airorannan venesatama",
+        "name": "Airorannan venesatama A",
         "street_address": "Airoranta 2",
         "master": 1
     }
@@ -142,7 +142,7 @@
     "pk": 2,
     "fields": {
         "language_code": "sv",
-        "name": "\u00c5rstrands sm\u00e5b\u00e5tshamn",
+        "name": "\u00c5rstrands sm\u00e5b\u00e5tshamn A",
         "street_address": "\u00c5rstrand 2",
         "master": 1
     }
@@ -153,7 +153,7 @@
     "fields": {
         "language_code": "fi",
         "name": "Aurinkolahden venesatama (Aurinkoranta)",
-        "street_address": "Aurinkoranta",
+        "street_address": "Aurinkoranta 1",
         "master": 2
     }
 },
@@ -163,7 +163,7 @@
     "fields": {
         "language_code": "sv",
         "name": "Solvikens sm\u00e5b\u00e5tshamn (Solstranden)",
-        "street_address": "Solstranden",
+        "street_address": "Solstranden 1",
         "master": 2
     }
 },
@@ -172,8 +172,8 @@
     "pk": 5,
     "fields": {
         "language_code": "fi",
-        "name": "Merisatama (Ehrenstr\u00f6mintie) / Venesatama",
-        "street_address": "Ehrenstr\u00f6mintie 1a",
+        "name": "Merisatama (Ehrenstr\u00f6mintie 21)",
+        "street_address": "Ehrenstr\u00f6mintie 21",
         "master": 3
     }
 },
@@ -182,8 +182,8 @@
     "pk": 6,
     "fields": {
         "language_code": "sv",
-        "name": "Havshamnen (Ehrenstr\u00f6msv\u00e4gen) / Sm\u00e5b\u00e5tshamn",
-        "street_address": "Ehrenstr\u00f6msv\u00e4gen 1a",
+        "name": "Havshamnen (Ehrenstr\u00f6msv\u00e4gen 21)",
+        "street_address": "Ehrenstr\u00f6msv\u00e4gen 21",
         "master": 3
     }
 },
@@ -442,7 +442,7 @@
     "pk": 32,
     "fields": {
         "language_code": "sv",
-        "name": "Havshagens sm\u00e5b\u00e5tshamn (Hakaniemenranta 13)",
+        "name": "Havshagens sm\u00e5b\u00e5tshamn (Hagn\u00e4skajen 13)",
         "street_address": "Hagn\u00e4skajen 13",
         "master": 16
     }
@@ -453,7 +453,7 @@
     "fields": {
         "language_code": "fi",
         "name": "Meri-Rastilan venesatama",
-        "street_address": "M\u00e4rssykuja",
+        "street_address": "M\u00e4rssykuja 7",
         "master": 17
     }
 },
@@ -463,7 +463,7 @@
     "fields": {
         "language_code": "sv",
         "name": "Havsrastb\u00f6le sm\u00e5b\u00e5tshamn",
-        "street_address": "M\u00e4rsgr\u00e4nden",
+        "street_address": "M\u00e4rsgr\u00e4nden 7",
         "master": 17
     }
 },
@@ -472,8 +472,8 @@
     "pk": 35,
     "fields": {
         "language_code": "fi",
-        "name": "Merisatamanranta / Venesatama",
-        "street_address": "Merisatamanranta 2",
+        "name": "Merisatama (Merisatama 28)",
+        "street_address": "Merisatama 28",
         "master": 18
     }
 },
@@ -482,8 +482,8 @@
     "pk": 36,
     "fields": {
         "language_code": "sv",
-        "name": "Havshamn / Sm\u00e5b\u00e5tshamn",
-        "street_address": "Havshamnensstrand 2",
+        "name": "Havshamn (Havshamnen 28)",
+        "street_address": "Havshamnen 28",
         "master": 18
     }
 },
@@ -492,8 +492,8 @@
     "pk": 37,
     "fields": {
         "language_code": "fi",
-        "name": "Merisatamanranta 8 / Venesatama",
-        "street_address": "Merisatamanranta 6",
+        "name": "Merisatama (Merisatamanranta 20)",
+        "street_address": "Merisatamanranta 20",
         "master": 19
     }
 },
@@ -502,8 +502,8 @@
     "pk": 38,
     "fields": {
         "language_code": "sv",
-        "name": "Havshamn 8 / Sm\u00e5b\u00e5tshamn",
-        "street_address": "Havshamnensstrand 6",
+        "name": "Havshamn (Havsstranden 20)",
+        "street_address": "Havsstranden 20",
         "master": 19
     }
 },
@@ -632,7 +632,7 @@
     "pk": 51,
     "fields": {
         "language_code": "fi",
-        "name": "Pohjoisranta 3 / Venesatama",
+        "name": "Pohjoisranta 3 (17-59) / Venesatama",
         "street_address": "Pohjoisranta 3",
         "master": 26
     }
@@ -642,7 +642,7 @@
     "pk": 52,
     "fields": {
         "language_code": "sv",
-        "name": "Norra kajen 3 / Sm\u00e5b\u00e5tshamn",
+        "name": "Norra kajen 3 (17-59) / Sm\u00e5b\u00e5tshamn",
         "street_address": "Norra kajen 3",
         "master": 26
     }
@@ -693,7 +693,7 @@
     "fields": {
         "language_code": "fi",
         "name": "Aurinkolahden venesatama (Pursilahdenranta)",
-        "street_address": "Pursilahdenranta",
+        "street_address": "Pursilahdenranta 1",
         "master": 29
     }
 },
@@ -703,7 +703,7 @@
     "fields": {
         "language_code": "sv",
         "name": "Solvikens sm\u00e5b\u00e5tshamn (Slupviksstranden)",
-        "street_address": "Slupviksstranden",
+        "street_address": "Slupviksstranden 1",
         "master": 29
     }
 },
@@ -712,7 +712,7 @@
     "pk": 59,
     "fields": {
         "language_code": "fi",
-        "name": "Ramsaynrannan venesatama (Ramsaynranta 4)",
+        "name": "Ramsaynrannan venesatama (A) (Ramsaynranta 4)",
         "street_address": "Ramsaynranta 4",
         "master": 30
     }
@@ -722,7 +722,7 @@
     "pk": 60,
     "fields": {
         "language_code": "sv",
-        "name": "Ramsays strands sm\u00e5b\u00e5tshamn (Ramsays strand 4)",
+        "name": "Ramsays strands sm\u00e5b\u00e5tshamn (A) (Ramsays strand 4)",
         "street_address": "Ramsays strand 4",
         "master": 30
     }
@@ -792,8 +792,8 @@
     "pk": 67,
     "fields": {
         "language_code": "fi",
-        "name": "Saunalahden venesatama (Ramsaynranta 2)",
-        "street_address": "Ramsaynranta 2",
+        "name": "Saunalahden venesatama (Ramsaynranta 6)",
+        "street_address": "Ramsaynranta 6",
         "master": 34
     }
 },
@@ -802,8 +802,8 @@
     "pk": 68,
     "fields": {
         "language_code": "sv",
-        "name": "Bastuvikens sm\u00e5b\u00e5tshamn (Ramsays strand 2)",
-        "street_address": "Ramsays strand 2",
+        "name": "Bastuvikens sm\u00e5b\u00e5tshamn (Ramsays strand 6)",
+        "street_address": "Ramsays strand 6",
         "master": 34
     }
 },
@@ -813,7 +813,7 @@
     "fields": {
         "language_code": "fi",
         "name": "Siltavuoren venesatama",
-        "street_address": "Siltavuorenranta",
+        "street_address": "Siltavuorenranta 3",
         "master": 35
     }
 },
@@ -823,7 +823,7 @@
     "fields": {
         "language_code": "sv",
         "name": "Brobergets sm\u00e5b\u00e5tshamn",
-        "street_address": "Brobergskajen",
+        "street_address": "Brobergskajen 3",
         "master": 35
     }
 },
@@ -852,7 +852,7 @@
     "pk": 73,
     "fields": {
         "language_code": "fi",
-        "name": "Tammasaarenallas / Venesatama",
+        "name": "Tammarsaaren allas (paikat 1-31)",
         "street_address": "Tammasaarenaukio 4",
         "master": 37
     }
@@ -862,7 +862,7 @@
     "pk": 74,
     "fields": {
         "language_code": "sv",
-        "name": "M\u00e4raholmsbass\u00e4ngen / Sm\u00e5b\u00e5tshamn",
+        "name": "M\u00e4raholmsbass\u00e4ngen (platser 1-31)",
         "street_address": "M\u00e4raholmsplatsen 4",
         "master": 37
     }
@@ -948,10 +948,230 @@
     }
 },
 {
+    "model": "harbors.harbortranslation",
+    "pk": 83,
+    "fields": {
+        "language_code": "fi",
+        "name": "Katajanokan venesatama (rantamuuri)",
+        "street_address": "Laivastokatu 1c",
+        "master": 42
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 84,
+    "fields": {
+        "language_code": "fi",
+        "name": "Kipparlahden venesatama (rantamuuri)",
+        "street_address": "Kipparlahdenkuja 3",
+        "master": 43
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 85,
+    "fields": {
+        "language_code": "fi",
+        "name": "Mustikkamaan venesatama (rantamuuri)",
+        "street_address": "Mustikkamaantie 1",
+        "master": 44
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 86,
+    "fields": {
+        "language_code": "fi",
+        "name": "Pajalahden venesatama (rantamuuri)",
+        "street_address": "Meripuistotie 1a",
+        "master": 45
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 87,
+    "fields": {
+        "language_code": "sv",
+        "name": "Skatuddens sm\u00e5b\u00e5tshamn (strandmuren)",
+        "street_address": "Maringatan 1 C",
+        "master": 42
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 88,
+    "fields": {
+        "language_code": "sv",
+        "name": "Skepparvikens sm\u00e5b\u00e5tshamn (strandmuren)",
+        "street_address": "Skepparviksgr\u00e4nden 3",
+        "master": 43
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 89,
+    "fields": {
+        "language_code": "sv",
+        "name": "Bl\u00e5b\u00e4rslandets sm\u00e5b\u00e5tshamn (strandmuren)",
+        "street_address": "Bl\u00e5b\u00e4rslandsv\u00e4gen 1",
+        "master": 44
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 90,
+    "fields": {
+        "language_code": "sv",
+        "name": "Smedjevikens sm\u00e5b\u00e5tshamn (strandmuren)",
+        "street_address": "Hallonn\u00e4sstranden 5",
+        "master": 45
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 91,
+    "fields": {
+        "language_code": "fi",
+        "name": "Airorannan venesatama B",
+        "street_address": "Airoranta 2",
+        "master": 46
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 92,
+    "fields": {
+        "language_code": "sv",
+        "name": "\u00c5rstrands sm\u00e5b\u00e5tshamn B",
+        "street_address": "\u00c5rstrand 2",
+        "master": 46
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 93,
+    "fields": {
+        "language_code": "fi",
+        "name": "Laivalahden venesatama (Reginankuja)",
+        "street_address": "Reginankuja",
+        "master": 47
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 94,
+    "fields": {
+        "language_code": "sv",
+        "name": "B\u00e5tsvikens sm\u00e5b\u00e5tshamn (Reginagr\u00e4nden)",
+        "street_address": "Reginagr\u00e4nden",
+        "master": 47
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 95,
+    "fields": {
+        "language_code": "fi",
+        "name": "Laivalahden venesatama (aallonmurtaja)",
+        "street_address": "Simppurinkatu 2",
+        "master": 48
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 96,
+    "fields": {
+        "language_code": "sv",
+        "name": "B\u00e5tsvikens sm\u00e5b\u00e5tshamn (v\u00e5gbrytaren)",
+        "street_address": "Simp\u00f6rsgatan 2",
+        "master": 48
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 97,
+    "fields": {
+        "language_code": "fi",
+        "name": "Merihaan venesatama (Hakaniemenranta 30)",
+        "street_address": "Hakaniemenranta 30",
+        "master": 49
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 98,
+    "fields": {
+        "language_code": "sv",
+        "name": "Havshagens sm\u00e5b\u00e5tshamn (Hagn\u00e4skajen 30)",
+        "street_address": "Hagn\u00e4skajen 30",
+        "master": 49
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 99,
+    "fields": {
+        "language_code": "fi",
+        "name": "Merisatama (Ehrenstr\u00f6mintie 22)",
+        "street_address": "Ehrenstr\u00f6mintie 22",
+        "master": 50
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 100,
+    "fields": {
+        "language_code": "sv",
+        "name": "Havshamnen (Ehrenstr\u00f6msv\u00e4gen 22)",
+        "street_address": "Ehrenstr\u00f6msv\u00e4gen 22",
+        "master": 50
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 101,
+    "fields": {
+        "language_code": "fi",
+        "name": "Tammarsaaren allas (paikat 32-75)",
+        "street_address": "Tammasaarenaukio 4",
+        "master": 51
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 102,
+    "fields": {
+        "language_code": "sv",
+        "name": "M\u00e4raholmsbass\u00e4ngen (platser 32-75)",
+        "street_address": "M\u00e4raholmsplatsen 4",
+        "master": 51
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 103,
+    "fields": {
+        "language_code": "fi",
+        "name": "Hietalahdenallas (J\u00e4tk\u00e4saaren puoli) / Venesatama",
+        "street_address": "Hietalahdenranta 10",
+        "master": 52
+    }
+},
+{
+    "model": "harbors.harbortranslation",
+    "pk": 104,
+    "fields": {
+        "language_code": "sv",
+        "name": "Sandviksbass\u00e4ngen (Busholmens sida) / Sm\u00e5b\u00e5tshamn",
+        "street_address": "Sandvikskajen 10",
+        "master": 52
+    }
+},
+{
     "model": "harbors.harbor",
     "pk": 1,
     "fields": {
-        "identifier": "airoranta",
+        "identifier": "airoranta-a",
         "servicemap_id": "40393",
         "zip_code": "00830",
         "phone": null,
@@ -959,7 +1179,7 @@
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/airorannan-venesatama",
         "location": "SRID=4326;POINT (25.06610500000001 60.18807999999999)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/airoranta-a/40393.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": false,
@@ -967,7 +1187,7 @@
         "waste_collection": false,
         "gate": false,
         "lighting": false,
-        "number_of_places": 11,
+        "number_of_places": 6,
         "maximum_width": 200,
         "maximum_length": 500,
         "maximum_depth": null,
@@ -989,7 +1209,7 @@
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/aurinkolahden-venesatama",
         "location": "SRID=4326;POINT (25.14785400000001 60.20036299999999)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/aurinkolahti/41636.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1006,7 +1226,8 @@
             3,
             4,
             5,
-            6
+            6,
+            8
         ]
     }
 },
@@ -1014,7 +1235,7 @@
     "model": "harbors.harbor",
     "pk": 3,
     "fields": {
-        "identifier": "ehrenstromintie",
+        "identifier": "ehrenstromintie-21",
         "servicemap_id": "40971",
         "zip_code": "00140",
         "phone": null,
@@ -1022,20 +1243,19 @@
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/merisatama",
         "location": "SRID=4326;POINT (24.95243999999998 60.15479299999998)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/ehrenstromintie-21/40971.jpg",
         "image_link": null,
         "mooring": true,
-        "electricity": true,
-        "water": true,
+        "electricity": false,
+        "water": false,
         "waste_collection": true,
-        "gate": true,
+        "gate": false,
         "lighting": true,
-        "number_of_places": 142,
+        "number_of_places": 62,
         "maximum_width": 350,
-        "maximum_length": 1500,
+        "maximum_length": 1400,
         "maximum_depth": null,
         "suitable_boat_types": [
-            2,
             3,
             4,
             5,
@@ -1053,9 +1273,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/elaintarhanlahden-venesatama",
-        "location": "SRID=4326;POINT (24.94178200000002 60.17999999999999)",
+        "location": "SRID=4326;POINT (24.941782 60.18)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/elaintarhanlahti/39913.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1087,7 +1307,7 @@
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/hietalahdenallas",
         "location": "SRID=4326;POINT (24.92907700000001 60.16155199999997)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/hietalahdenallas/41390.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": false,
@@ -1103,7 +1323,8 @@
             3,
             4,
             5,
-            6
+            6,
+            8
         ]
     }
 },
@@ -1117,9 +1338,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/honkaluoto",
-        "location": "SRID=4326;POINT (25.00117000000002 60.18107199999997)",
+        "location": "SRID=4326;POINT (25.00117 60.181072)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/honkaluoto/40672.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1149,9 +1370,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/hopeasalmen-venesatama",
-        "location": "SRID=4326;POINT (24.99573099999997 60.18447499999999)",
+        "location": "SRID=4326;POINT (24.995731 60.184475)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/hopeasalmi/41926.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1181,9 +1402,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/sarvaston-venesatama",
-        "location": "SRID=4326;POINT (25.05870200000003 60.16715999999997)",
+        "location": "SRID=4326;POINT (25.058702 60.16716)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/iso-sarvasto/40166.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1214,9 +1435,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/ruoholahden-venesatama",
-        "location": "SRID=4326;POINT (24.91271000000004 60.161034)",
+        "location": "SRID=4326;POINT (24.91271 60.161034)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/jaalaranta/40827.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": false,
@@ -1246,9 +1467,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/katajanokan-venesatama",
-        "location": "SRID=4326;POINT (24.96587799999999 60.169144)",
+        "location": "SRID=4326;POINT (24.965878 60.169144)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/katajanokka/48272.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1256,16 +1477,14 @@
         "waste_collection": true,
         "gate": true,
         "lighting": true,
-        "number_of_places": 27,
-        "maximum_width": 300,
-        "maximum_length": 1300,
+        "number_of_places": 11,
+        "maximum_width": 250,
+        "maximum_length": 1000,
         "maximum_depth": null,
         "suitable_boat_types": [
             2,
             3,
-            4,
-            5,
-            6
+            5
         ]
     }
 },
@@ -1279,9 +1498,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/ruoholahden-venesatama",
-        "location": "SRID=4326;POINT (24.91256300000001 60.16163299999998)",
+        "location": "SRID=4326;POINT (24.912563 60.161633)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/kellosaarenranta/40310.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": false,
@@ -1310,9 +1529,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/kipparlahden-venesatama",
-        "location": "SRID=4326;POINT (25.02330600000002 60.19106699999998)",
+        "location": "SRID=4326;POINT (25.023306 60.191067)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/kipparlahti/41189.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": false,
@@ -1320,7 +1539,7 @@
         "waste_collection": true,
         "gate": true,
         "lighting": false,
-        "number_of_places": 50,
+        "number_of_places": 25,
         "maximum_width": 300,
         "maximum_length": 1000,
         "maximum_depth": null,
@@ -1343,9 +1562,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/koivuniemen-venesatama",
-        "location": "SRID=4326;POINT (25.09772699999996 60.20078699999999)",
+        "location": "SRID=4326;POINT (25.097727 60.200787)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/koivuniemen-venesatama/39950.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": false,
@@ -1375,7 +1594,7 @@
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/laivalahden-venesatama",
         "location": "SRID=4326;POINT (25.02712199999996 60.18698499999997)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/laivalahti/40864.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1383,9 +1602,9 @@
         "waste_collection": true,
         "gate": true,
         "lighting": true,
-        "number_of_places": 248,
-        "maximum_width": 700,
-        "maximum_length": 2500,
+        "number_of_places": 211,
+        "maximum_width": 450,
+        "maximum_length": 1800,
         "maximum_depth": null,
         "suitable_boat_types": [
             2,
@@ -1408,9 +1627,9 @@
         "phone": "040 827 8310",
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/lahteela",
-        "location": "SRID=4326;POINT (24.43913699999998 59.981045)",
+        "location": "SRID=4326;POINT (24.439137 59.981045)",
         "municipality": "kirkkonummi",
-        "image_file": "",
+        "image_file": "harbors/lahteela/40290.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": false,
@@ -1440,7 +1659,7 @@
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/merihaan-venesatama",
         "location": "SRID=4326;POINT (24.959497 60.17813499999998)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/merihaka/41454.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1448,9 +1667,9 @@
         "waste_collection": true,
         "gate": true,
         "lighting": true,
-        "number_of_places": 41,
-        "maximum_width": 400,
-        "maximum_length": 2100,
+        "number_of_places": 31,
+        "maximum_width": 300,
+        "maximum_length": 900,
         "maximum_depth": null,
         "suitable_boat_types": [
             2,
@@ -1473,7 +1692,7 @@
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/meri-rastilan-venesatama",
         "location": "SRID=4326;POINT (25.113478 60.20614000000001)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/meri-rastila/41066.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1507,7 +1726,7 @@
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/merisatama",
         "location": "SRID=4326;POINT (24.94809499999996 60.15480999999998)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/merisatama/40948.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1540,7 +1759,7 @@
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/merisatama",
         "location": "SRID=4326;POINT (24.94499199999997 60.154316)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/merisatamaranta/45995.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": false,
@@ -1570,9 +1789,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/mustikkamaan-venesatama",
-        "location": "SRID=4326;POINT (24.99457400000004 60.18247199999998)",
+        "location": "SRID=4326;POINT (24.994574 60.182472)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/mustikkamaa/40359.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1580,7 +1799,7 @@
         "waste_collection": true,
         "gate": true,
         "lighting": true,
-        "number_of_places": 76,
+        "number_of_places": 66,
         "maximum_width": 350,
         "maximum_length": 1100,
         "maximum_depth": null,
@@ -1602,9 +1821,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/nandelstadhin-venesatama",
-        "location": "SRID=4326;POINT (25.01524699999996 60.182655)",
+        "location": "SRID=4326;POINT (25.015247 60.182655)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/nandelstadh/42225.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1636,9 +1855,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/naurissalmen-venesatama",
-        "location": "SRID=4326;POINT (25.01592299999999 60.19148599999995)",
+        "location": "SRID=4326;POINT (25.015923 60.191486)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/naurissalmi/40712.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1669,9 +1888,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/pajalahden-venesatama",
-        "location": "SRID=4326;POINT (24.88904799999996 60.15822599999999)",
+        "location": "SRID=4326;POINT (24.889048 60.158226)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/pajalahti/41359.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1679,7 +1898,7 @@
         "waste_collection": true,
         "gate": true,
         "lighting": true,
-        "number_of_places": 189,
+        "number_of_places": 173,
         "maximum_width": 400,
         "maximum_length": 1700,
         "maximum_depth": null,
@@ -1702,9 +1921,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/pikku-kallahden-venesatama",
-        "location": "SRID=4326;POINT (25.14131499999998 60.19891000000001)",
+        "location": "SRID=4326;POINT (25.141315 60.19891)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/pikku-kallahden-venesatama/40590.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1734,9 +1953,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/elaintarhanlahden-venesatama",
-        "location": "SRID=4326;POINT (24.946941 60.17735700000001)",
+        "location": "SRID=4326;POINT (24.946941 60.177357)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/pitkansillanranta/41669.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1766,9 +1985,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/pohjoisranta",
-        "location": "SRID=4326;POINT (24.96115099999998 60.172394)",
+        "location": "SRID=4326;POINT (24.961151 60.172394)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/pohjoisranta/41150.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": false,
@@ -1800,9 +2019,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/porslahden-venesatama",
-        "location": "SRID=4326;POINT (25.17723500000004 60.20771399999995)",
+        "location": "SRID=4326;POINT (25.177235 60.207714)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/porslahden-venesatama/40842.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1833,9 +2052,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/puotilan-venesatama",
-        "location": "SRID=4326;POINT (25.10433199999997 60.207024)",
+        "location": "SRID=4326;POINT (25.104332 60.207024)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/puotila/40897.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1869,7 +2088,7 @@
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/aurinkolahden-venesatama",
         "location": "SRID=4326;POINT (25.14818799999996 60.20052999999999)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/pursilahti/40800.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": false,
@@ -1901,9 +2120,9 @@
         "phone": null,
         "email": "venepaikkavaraukset@hel.fi",
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/ramsaynrannan-venesatama",
-        "location": "SRID=4326;POINT (24.88408300000004 60.19365299999998)",
+        "location": "SRID=4326;POINT (24.884083 60.193653)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/ramsaynranta/41074.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1933,9 +2152,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/ruoholahden-venesatama",
-        "location": "SRID=4326;POINT (24.915993 60.16185799999995)",
+        "location": "SRID=4326;POINT (24.915993 60.161858)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/ruoholahden-kanava/40203.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": false,
@@ -1965,9 +2184,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/salmisaaren-venesatama",
-        "location": "SRID=4326;POINT (24.90000199999996 60.16529500000001)",
+        "location": "SRID=4326;POINT (24.900002 60.165295)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/salmisaari/40535.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -1997,9 +2216,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/saukonpaaden-venesatama",
-        "location": "SRID=4326;POINT (24.90732199999999 60.15931299999999)",
+        "location": "SRID=4326;POINT (24.907322 60.159313)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/saukonpaasi/40627.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -2031,7 +2250,7 @@
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/saunalahden-venesatama",
         "location": "SRID=4326;POINT (24.88216800000003 60.19230999999998)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/saunalahti/41857.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -2063,7 +2282,7 @@
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/sltavuoren-enesatama",
         "location": "SRID=4326;POINT (24.95591200000003 60.17663599999999)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/siltavuoren-venesatama/40876.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -2093,9 +2312,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/stromsinlahden-venesatama",
-        "location": "SRID=4326;POINT (25.06527100000002 60.19763999999999)",
+        "location": "SRID=4326;POINT (25.065271 60.19764)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/stromsinlahti/42276.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -2120,7 +2339,7 @@
     "model": "harbors.harbor",
     "pk": 37,
     "fields": {
-        "identifier": "tammasaarenallas",
+        "identifier": "tammasaarenallas-1",
         "servicemap_id": "41472",
         "zip_code": "00180",
         "phone": null,
@@ -2128,17 +2347,17 @@
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/tammasaarenallas",
         "location": "SRID=4326;POINT (24.906261 60.16098399999997)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/tammasaarenallas-1/41472.jpg",
         "image_link": null,
         "mooring": true,
-        "electricity": true,
+        "electricity": false,
         "water": true,
         "waste_collection": true,
         "gate": false,
         "lighting": true,
-        "number_of_places": 75,
-        "maximum_width": 500,
-        "maximum_length": 1700,
+        "number_of_places": 31,
+        "maximum_width": 300,
+        "maximum_length": 1300,
         "maximum_depth": null,
         "suitable_boat_types": [
             3,
@@ -2158,9 +2377,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/tervasaari",
-        "location": "SRID=4326;POINT (24.96509200000001 60.17399199999996)",
+        "location": "SRID=4326;POINT (24.965092 60.173992)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/tervasaari/42136.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -2192,9 +2411,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/vasikkasaaren-venesatama",
-        "location": "SRID=4326;POINT (25.01452799999996 60.15482999999995)",
+        "location": "SRID=4326;POINT (25.014528 60.15483)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/vasikkasaari/41415.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": false,
@@ -2224,9 +2443,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/vuosaarenlahden-venesatama",
-        "location": "SRID=4326;POINT (25.18621999999997 60.21003700000001)",
+        "location": "SRID=4326;POINT (25.18622 60.210037)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/vuosaarenlahden-venesatama/41637.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -2257,9 +2476,9 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/vahaniityn-venesatama",
-        "location": "SRID=4326;POINT (25.01650000000001 60.18398699999997)",
+        "location": "SRID=4326;POINT (25.0165 60.183987)",
         "municipality": "helsinki",
-        "image_file": "",
+        "image_file": "harbors/vahaniitty/42130.jpg",
         "image_link": null,
         "mooring": true,
         "electricity": true,
@@ -2278,6 +2497,357 @@
             5,
             6
         ]
+    }
+},
+{
+    "model": "harbors.harbor",
+    "pk": 42,
+    "fields": {
+        "identifier": "katajanokka-rm",
+        "servicemap_id": "48272",
+        "zip_code": "00170",
+        "phone": null,
+        "email": null,
+        "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/katajanokan-venesatama",
+        "location": "SRID=4326;POINT (24.96587799999999 60.169144)",
+        "municipality": "helsinki",
+        "image_file": "harbors/katajanokka-rm/48272.jpg",
+        "image_link": null,
+        "mooring": true,
+        "electricity": true,
+        "water": true,
+        "waste_collection": true,
+        "gate": false,
+        "lighting": true,
+        "number_of_places": 16,
+        "maximum_width": 300,
+        "maximum_length": 1300,
+        "maximum_depth": null,
+        "suitable_boat_types": [
+            3,
+            4,
+            5,
+            6
+        ]
+    }
+},
+{
+    "model": "harbors.harbor",
+    "pk": 43,
+    "fields": {
+        "identifier": "kipparlahti-rm",
+        "servicemap_id": "41189",
+        "zip_code": "00810",
+        "phone": null,
+        "email": null,
+        "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/kipparlahden-venesatama",
+        "location": "SRID=4326;POINT (25.02330600000002 60.19106699999998)",
+        "municipality": "helsinki",
+        "image_file": "harbors/kipparlahti-rm/41189.jpg",
+        "image_link": null,
+        "mooring": true,
+        "electricity": false,
+        "water": false,
+        "waste_collection": true,
+        "gate": false,
+        "lighting": false,
+        "number_of_places": 25,
+        "maximum_width": 300,
+        "maximum_length": 800,
+        "maximum_depth": null,
+        "suitable_boat_types": [
+            2,
+            3,
+            4,
+            5,
+            6
+        ]
+    }
+},
+{
+    "model": "harbors.harbor",
+    "pk": 44,
+    "fields": {
+        "identifier": "mustikkamaa-rm",
+        "servicemap_id": "40359",
+        "zip_code": "00570",
+        "phone": null,
+        "email": null,
+        "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/mustikkamaan-venesatama",
+        "location": "SRID=4326;POINT (24.99457400000004 60.18247199999998)",
+        "municipality": "helsinki",
+        "image_file": "harbors/mustikkamaa-rm/40359.jpg",
+        "image_link": null,
+        "mooring": true,
+        "electricity": false,
+        "water": false,
+        "waste_collection": true,
+        "gate": false,
+        "lighting": true,
+        "number_of_places": 10,
+        "maximum_width": 350,
+        "maximum_length": 1100,
+        "maximum_depth": null,
+        "suitable_boat_types": [
+            3,
+            4,
+            5
+        ]
+    }
+},
+{
+    "model": "harbors.harbor",
+    "pk": 45,
+    "fields": {
+        "identifier": "pajalahti-rm",
+        "servicemap_id": "41359",
+        "zip_code": "00210",
+        "phone": null,
+        "email": null,
+        "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/pajalahden-venesatama",
+        "location": "SRID=4326;POINT (24.88904799999996 60.15822599999999)",
+        "municipality": "helsinki",
+        "image_file": "harbors/pajalahti-rm/41359.jpg",
+        "image_link": null,
+        "mooring": true,
+        "electricity": false,
+        "water": true,
+        "waste_collection": true,
+        "gate": true,
+        "lighting": true,
+        "number_of_places": 16,
+        "maximum_width": 300,
+        "maximum_length": 900,
+        "maximum_depth": null,
+        "suitable_boat_types": [
+            2,
+            3,
+            4,
+            5,
+            6
+        ]
+    }
+},
+{
+    "model": "harbors.harbor",
+    "pk": 46,
+    "fields": {
+        "identifier": "airoranta-b",
+        "servicemap_id": "40393",
+        "zip_code": "00830",
+        "phone": null,
+        "email": null,
+        "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/airorannan-venesatama",
+        "location": "SRID=4326;POINT (25.06610500000001 60.18807999999999)",
+        "municipality": "helsinki",
+        "image_file": "harbors/airoranta-b/40393.jpg",
+        "image_link": null,
+        "mooring": false,
+        "electricity": false,
+        "water": false,
+        "waste_collection": false,
+        "gate": false,
+        "lighting": false,
+        "number_of_places": 5,
+        "maximum_width": 200,
+        "maximum_length": 400,
+        "maximum_depth": null,
+        "suitable_boat_types": [
+            2,
+            3
+        ]
+    }
+},
+{
+    "model": "harbors.harbor",
+    "pk": 47,
+    "fields": {
+        "identifier": "laivalahti-reginankuja",
+        "servicemap_id": "40864",
+        "zip_code": "00810",
+        "phone": null,
+        "email": null,
+        "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/laivalahden-venesatama",
+        "location": "SRID=4326;POINT (25.02712199999996 60.18698499999997)",
+        "municipality": "helsinki",
+        "image_file": "harbors/laivalahti-reginankuja/40864.jpg",
+        "image_link": null,
+        "mooring": true,
+        "electricity": false,
+        "water": true,
+        "waste_collection": false,
+        "gate": false,
+        "lighting": true,
+        "number_of_places": 7,
+        "maximum_width": 700,
+        "maximum_length": 2500,
+        "maximum_depth": null,
+        "suitable_boat_types": [
+            3,
+            4,
+            5,
+            7,
+            8
+        ]
+    }
+},
+{
+    "model": "harbors.harbor",
+    "pk": 48,
+    "fields": {
+        "identifier": "laivalahti-am",
+        "servicemap_id": "40864",
+        "zip_code": "00810",
+        "phone": null,
+        "email": null,
+        "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/laivalahden-venesatama",
+        "location": "SRID=4326;POINT (25.027122 60.186985)",
+        "municipality": "helsinki",
+        "image_file": "harbors/laivalahti-am/40864.jpg",
+        "image_link": null,
+        "mooring": true,
+        "electricity": false,
+        "water": true,
+        "waste_collection": true,
+        "gate": false,
+        "lighting": true,
+        "number_of_places": 30,
+        "maximum_width": 700,
+        "maximum_length": 1400,
+        "maximum_depth": null,
+        "suitable_boat_types": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+        ]
+    }
+},
+{
+    "model": "harbors.harbor",
+    "pk": 49,
+    "fields": {
+        "identifier": "merihaka-f",
+        "servicemap_id": "41454",
+        "zip_code": "00530",
+        "phone": null,
+        "email": null,
+        "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/merihaan-venesatama",
+        "location": "SRID=4326;POINT (24.959497 60.17813499999998)",
+        "municipality": "helsinki",
+        "image_file": "harbors/merihaka-f/41454.jpg",
+        "image_link": null,
+        "mooring": true,
+        "electricity": true,
+        "water": true,
+        "waste_collection": true,
+        "gate": false,
+        "lighting": true,
+        "number_of_places": 10,
+        "maximum_width": 400,
+        "maximum_length": 2100,
+        "maximum_depth": null,
+        "suitable_boat_types": [
+            3,
+            4,
+            5,
+            6
+        ]
+    }
+},
+{
+    "model": "harbors.harbor",
+    "pk": 50,
+    "fields": {
+        "identifier": "ehrenstromintie-22",
+        "servicemap_id": "40971",
+        "zip_code": "00140",
+        "phone": null,
+        "email": null,
+        "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/merisatama",
+        "location": "SRID=4326;POINT (24.95243999999998 60.15479299999998)",
+        "municipality": "helsinki",
+        "image_file": "harbors/ehrenstromintie-22/40971.jpg",
+        "image_link": null,
+        "mooring": true,
+        "electricity": true,
+        "water": true,
+        "waste_collection": true,
+        "gate": true,
+        "lighting": true,
+        "number_of_places": 80,
+        "maximum_width": 350,
+        "maximum_length": 1500,
+        "maximum_depth": null,
+        "suitable_boat_types": [
+            2,
+            3,
+            4,
+            5,
+            6
+        ]
+    }
+},
+{
+    "model": "harbors.harbor",
+    "pk": 51,
+    "fields": {
+        "identifier": "tammasaarenallas-32",
+        "servicemap_id": "41472",
+        "zip_code": "00180",
+        "phone": null,
+        "email": null,
+        "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/tammasaarenallas",
+        "location": "SRID=4326;POINT (24.906261 60.16098399999997)",
+        "municipality": "helsinki",
+        "image_file": "harbors/tammasaarenallas-32/41472.jpg",
+        "image_link": null,
+        "mooring": true,
+        "electricity": true,
+        "water": true,
+        "waste_collection": true,
+        "gate": false,
+        "lighting": true,
+        "number_of_places": 44,
+        "maximum_width": 500,
+        "maximum_length": 1700,
+        "maximum_depth": null,
+        "suitable_boat_types": [
+            3,
+            4,
+            5,
+            6,
+            8
+        ]
+    }
+},
+{
+    "model": "harbors.harbor",
+    "pk": 52,
+    "fields": {
+        "identifier": "hietalahdenallas-jatkasaaren-puoli",
+        "servicemap_id": "41390",
+        "zip_code": "00180",
+        "phone": null,
+        "email": null,
+        "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/hietalahdenallas",
+        "location": "SRID=4326;POINT (24.929077 60.161552)",
+        "municipality": "helsinki",
+        "image_file": "harbors/hietalahdenallas-jatkasaaren-puoli/41390.jpg",
+        "image_link": null,
+        "mooring": true,
+        "electricity": false,
+        "water": false,
+        "waste_collection": true,
+        "gate": false,
+        "lighting": true,
+        "number_of_places": 5,
+        "maximum_width": 500,
+        "maximum_length": 1800,
+        "maximum_depth": null,
+        "suitable_boat_types": []
     }
 }
 ]
