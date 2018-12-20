@@ -4,7 +4,7 @@ from rest_framework import serializers, viewsets
 from munigeo.api import GeoModelSerializer
 from munigeo.models import Municipality
 
-from .models import BoatType, Harbor
+from .models import AvailabilityLevel, BoatType, Harbor
 
 
 class TranslatedModelSerializer(TranslatableModelSerializer):
@@ -44,6 +44,18 @@ class BoatTypeViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = BoatTypeSerializer
 
 
+class AvailabilityLevelSerializer(TranslatedModelSerializer):
+
+    class Meta:
+        model = AvailabilityLevel
+        fields = ['identifier', 'translations']
+
+
+class AvailabilityLevelViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = AvailabilityLevel.objects.all()
+    serializer_class = AvailabilityLevelSerializer
+
+
 class MunicipalityRelatedField(TranslatedModelSerializer):
     """
     Fetch Municipality's translations for `name` field and
@@ -68,6 +80,9 @@ class MunicipalityRelatedField(TranslatedModelSerializer):
 class HarborSerializer(TranslatedModelSerializer, GeoModelSerializer):
     suitable_boat_types = serializers.SlugRelatedField(
         many=True, read_only=True, slug_field='identifier'
+    )
+    availability_level = serializers.SlugRelatedField(
+        read_only=True, slug_field='identifier'
     )
     municipality = MunicipalityRelatedField()
 

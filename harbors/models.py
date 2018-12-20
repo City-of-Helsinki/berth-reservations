@@ -45,6 +45,23 @@ class OverwriteStorage(FileSystemStorage):
         return name
 
 
+class AvailabilityLevel(TranslatableModel):
+    identifier = models.CharField(verbose_name=_('Unique identifier'), max_length=100, unique=True)
+    translations = TranslatedFields(
+        description=models.TextField(
+            verbose_name=_('description'), max_length=200, help_text=_('Description of the availability level')
+        ),
+    )
+
+    class Meta:
+        verbose_name = _('availability level')
+        verbose_name_plural = _('availability levels')
+        ordering = ('id',)
+
+    def __str__(self):
+        return self.identifier
+
+
 class Harbor(TranslatableModel):
     identifier = models.CharField(
         verbose_name=_('Unique identifier'), max_length=100, unique=True,
@@ -66,7 +83,7 @@ class Harbor(TranslatableModel):
 
     municipality = models.ForeignKey(
         Municipality, null=True, blank=True, verbose_name=_('Municipality'),
-        related_name='harbors', on_delete=models.CASCADE
+        related_name='harbors', on_delete=models.SET_NULL
     )
 
     image_file = models.ImageField(
@@ -85,6 +102,11 @@ class Harbor(TranslatableModel):
 
     suitable_boat_types = models.ManyToManyField(
         BoatType, verbose_name=_('Suitable boat types'), related_name='harbors', blank=True
+    )
+
+    availability_level = models.ForeignKey(
+        AvailabilityLevel, null=True, blank=True, verbose_name=_('Availability level'),
+        related_name='harbors', on_delete=models.SET_NULL
     )
 
     number_of_places = models.PositiveSmallIntegerField(verbose_name=_('Number of places'), null=True, blank=True)
