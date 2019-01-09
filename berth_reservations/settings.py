@@ -27,6 +27,8 @@ env = environ.Env(
     DATABASE_URL=(str, 'postgis://berth_reservations:berth_reservations@localhost/berth_reservations'),
     CACHE_URL=(str, 'locmemcache://'),
     EMAIL_URL=(str, 'consolemail://'),
+    DEFAULT_FROM_EMAIL=(str, 'venepaikkavaraukset@hel.fi'),
+    MAIL_MAILGUN_KEY=(str, ''),
     SENTRY_DSN=(str, ''),
     CORS_ORIGIN_WHITELIST=(list, []),
     NOTIFICATIONS_ENABLED=(bool, False),
@@ -54,7 +56,15 @@ DATABASES = {'default': env.db()}
 DATABASES['default']['ENGINE'] = 'django.contrib.gis.db.backends.postgis'
 
 CACHES = {'default': env.cache()}
+
 vars().update(env.email_url())  # EMAIL_BACKEND etc.
+DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL')
+if env('MAIL_MAILGUN_KEY'):
+    ANYMAIL = {
+        'MAILGUN_API_KEY': env('MAIL_MAILGUN_KEY')
+    }
+    EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
+
 RAVEN_CONFIG = {'dsn': env.str('SENTRY_DSN'), 'release': version}
 
 MEDIA_ROOT = env('MEDIA_ROOT')
