@@ -32,6 +32,7 @@ env = environ.Env(
     MAIL_MAILGUN_KEY=(str, ''),
     SENTRY_DSN=(str, ''),
     CORS_ORIGIN_WHITELIST=(list, []),
+    CORS_ORIGIN_ALLOW_ALL=(bool, False),
     NOTIFICATIONS_ENABLED=(bool, False),
 )
 if os.path.exists(env_file):
@@ -156,6 +157,7 @@ PARLER_LANGUAGES = {
 }
 
 CORS_ORIGIN_WHITELIST = env.list('CORS_ORIGIN_WHITELIST')
+CORS_ORIGIN_ALLOW_ALL = env.bool('CORS_ORIGIN_ALLOW_ALL')
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
