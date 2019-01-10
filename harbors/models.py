@@ -48,8 +48,13 @@ class OverwriteStorage(FileSystemStorage):
 class AvailabilityLevel(TranslatableModel):
     identifier = models.CharField(verbose_name=_('Unique identifier'), max_length=100, unique=True)
     translations = TranslatedFields(
+        title=models.CharField(
+            verbose_name=_('title'), max_length=64, blank=True,
+            help_text=_('Title of the availability level'),
+        ),
         description=models.TextField(
-            verbose_name=_('description'), max_length=200, help_text=_('Description of the availability level')
+            verbose_name=_('description'), max_length=200, blank=True,
+            help_text=_('Description of the availability level')
         ),
     )
 
