@@ -24,6 +24,7 @@ env = environ.Env(
     MEDIA_URL=(str, '/media/'),
     STATIC_URL=(str, '/static/'),
     ALLOWED_HOSTS=(list, []),
+    USE_X_FORWARDED_HOST=(bool, False),
     DATABASE_URL=(str, 'postgis://berth_reservations:berth_reservations@localhost/berth_reservations'),
     CACHE_URL=(str, 'locmemcache://'),
     EMAIL_URL=(str, 'consolemail://'),
@@ -50,6 +51,7 @@ if DEBUG and not SECRET_KEY:
     SECRET_KEY = 'xxx'
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
+USE_X_FORWARDED_HOST = env.bool('USE_X_FORWARDED_HOST')
 
 DATABASES = {'default': env.db()}
 # Ensure postgis engine
