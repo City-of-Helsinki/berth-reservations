@@ -132,7 +132,8 @@
     "pk": 1,
     "fields": {
         "language_code": "fi",
-        "description": "V\u00e4hiten jonoa.",
+        "title": "V\u00e4h\u00e4n jonoa",
+        "description": "",
         "master": 1
     }
 },
@@ -141,7 +142,8 @@
     "pk": 2,
     "fields": {
         "language_code": "fi",
-        "description": "Jonkin verran jonoa.",
+        "title": "Jonkin verran jonoa",
+        "description": "",
         "master": 2
     }
 },
@@ -150,7 +152,68 @@
     "pk": 3,
     "fields": {
         "language_code": "fi",
+        "title": "Paljon jonoa",
         "description": "Satamat, joihin on paljon hakijoita ja yleens\u00e4 useamman vuoden jonotusaika. N\u00e4ist\u00e4 satamista vapautuu paikkoja p\u00e4\u00e4asiassa venepaikan vaihtajille.",
+        "master": 3
+    }
+},
+{
+    "model": "harbors.availabilityleveltranslation",
+    "pk": 4,
+    "fields": {
+        "language_code": "sv",
+        "title": "Lite k\u00f6",
+        "description": "",
+        "master": 1
+    }
+},
+{
+    "model": "harbors.availabilityleveltranslation",
+    "pk": 5,
+    "fields": {
+        "language_code": "en",
+        "title": "Short waiting periods.",
+        "description": "",
+        "master": 1
+    }
+},
+{
+    "model": "harbors.availabilityleveltranslation",
+    "pk": 6,
+    "fields": {
+        "language_code": "en",
+        "title": "Medium waiting periods",
+        "description": "",
+        "master": 2
+    }
+},
+{
+    "model": "harbors.availabilityleveltranslation",
+    "pk": 7,
+    "fields": {
+        "language_code": "sv",
+        "title": "En del k\u00f6",
+        "description": "",
+        "master": 2
+    }
+},
+{
+    "model": "harbors.availabilityleveltranslation",
+    "pk": 8,
+    "fields": {
+        "language_code": "en",
+        "title": "Long waiting periods",
+        "description": "Harbours with many applicants and, usually, waiting periods of several years. Berths in these harbours are typically only available to those who exchange berths.",
+        "master": 3
+    }
+},
+{
+    "model": "harbors.availabilityleveltranslation",
+    "pk": 9,
+    "fields": {
+        "language_code": "sv",
+        "title": "L\u00e5nga v\u00e4ntetider",
+        "description": "Hamnar med m\u00e5nga s\u00f6kande och i regel flera \u00e5rs k\u00f6tid. I r\u00f6da hamnar blir platser lediga huvudsakligen f\u00f6r dem som byter b\u00e5tplats.",
         "master": 3
     }
 },
@@ -1225,7 +1288,7 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/airorannan-venesatama",
-        "location": "SRID=4326;POINT (25.06610500000001 60.18807999999999)",
+        "location": "SRID=4326;POINT (25.06585287235345 60.18815467436053)",
         "municipality": "helsinki",
         "image_file": "harbors/airoranta-a/40393.jpg",
         "image_link": null,
@@ -1291,7 +1354,7 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/merisatama",
-        "location": "SRID=4326;POINT (24.95243999999998 60.15479299999998)",
+        "location": "SRID=4326;POINT (24.95324466270327 60.15452603410284)",
         "municipality": "helsinki",
         "image_file": "harbors/ehrenstromintie-21/40971.jpg",
         "image_link": null,
@@ -1524,7 +1587,7 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/katajanokan-venesatama",
-        "location": "SRID=4326;POINT (24.96587799999999 60.169144)",
+        "location": "SRID=4326;POINT (24.96585654232736 60.16959497046764)",
         "municipality": "helsinki",
         "image_file": "harbors/katajanokka/48272.jpg",
         "image_link": null,
@@ -1588,7 +1651,7 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/kipparlahden-venesatama",
-        "location": "SRID=4326;POINT (25.02330600000002 60.19106699999998)",
+        "location": "SRID=4326;POINT (25.02156792855906 60.19045365285283)",
         "municipality": "helsinki",
         "image_file": "harbors/kipparlahti/41189.jpg",
         "image_link": null,
@@ -1653,7 +1716,7 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/laivalahden-venesatama",
-        "location": "SRID=4326;POINT (25.02712199999996 60.18698499999997)",
+        "location": "SRID=4326;POINT (25.02772281481857 60.18698499999979)",
         "municipality": "helsinki",
         "image_file": "harbors/laivalahti/40864.jpg",
         "image_link": null,
@@ -1856,7 +1919,7 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/mustikkamaan-venesatama",
-        "location": "SRID=4326;POINT (24.99457400000004 60.18247199999998)",
+        "location": "SRID=4326;POINT (24.99521236574618 60.18296813265754)",
         "municipality": "helsinki",
         "image_file": "harbors/mustikkamaa/40359.jpg",
         "image_link": null,
@@ -2429,7 +2492,7 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/tammasaarenallas",
-        "location": "SRID=4326;POINT (24.906261 60.16098399999997)",
+        "location": "SRID=4326;POINT (24.90518811639428 60.16102670629775)",
         "municipality": "helsinki",
         "image_file": "harbors/tammasaarenallas-1/41472.jpg",
         "image_link": null,
@@ -2598,7 +2661,7 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/katajanokan-venesatama",
-        "location": "SRID=4326;POINT (24.96587799999999 60.169144)",
+        "location": "SRID=4326;POINT (24.96636079762264 60.16910397273679)",
         "municipality": "helsinki",
         "image_file": "harbors/katajanokka-rm/48272.jpg",
         "image_link": null,
@@ -2697,7 +2760,7 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/pajalahden-venesatama",
-        "location": "SRID=4326;POINT (24.88904799999996 60.15822599999999)",
+        "location": "SRID=4326;POINT (24.88626923146144 60.15691264404675)",
         "municipality": "helsinki",
         "image_file": "harbors/pajalahti-rm/41359.jpg",
         "image_link": null,
@@ -2731,7 +2794,7 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/airorannan-venesatama",
-        "location": "SRID=4326;POINT (25.06610500000001 60.18807999999999)",
+        "location": "SRID=4326;POINT (25.0665395178596 60.18808000000039)",
         "municipality": "helsinki",
         "image_file": "harbors/airoranta-b/40393.jpg",
         "image_link": null,
@@ -2762,7 +2825,7 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/laivalahden-venesatama",
-        "location": "SRID=4326;POINT (25.02712199999996 60.18698499999997)",
+        "location": "SRID=4326;POINT (25.02545366599298 60.18744105954804)",
         "municipality": "helsinki",
         "image_file": "harbors/laivalahti-reginankuja/40864.jpg",
         "image_link": null,
@@ -2796,7 +2859,7 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/laivalahden-venesatama",
-        "location": "SRID=4326;POINT (25.02712199999996 60.18698499999997)",
+        "location": "SRID=4326;POINT (25.02497623278769 60.1852353794545)",
         "municipality": "helsinki",
         "image_file": "harbors/laivalahti-am/40864.jpg",
         "image_link": null,
@@ -2831,7 +2894,7 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/merihaan-venesatama",
-        "location": "SRID=4326;POINT (24.959497 60.17813499999998)",
+        "location": "SRID=4326;POINT (24.96268346431036 60.17795892787458)",
         "municipality": "helsinki",
         "image_file": "harbors/merihaka-f/41454.jpg",
         "image_link": null,
@@ -2864,7 +2927,7 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/merisatama",
-        "location": "SRID=4326;POINT (24.95243999999998 60.15479299999998)",
+        "location": "SRID=4326;POINT (24.95173726123831 60.15503326745377)",
         "municipality": "helsinki",
         "image_file": "harbors/ehrenstromintie-22/40971.jpg",
         "image_link": null,
@@ -2898,7 +2961,7 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/tammasaarenallas",
-        "location": "SRID=4326;POINT (24.906261 60.16098399999997)",
+        "location": "SRID=4326;POINT (24.90454438623086 60.16034873726631)",
         "municipality": "helsinki",
         "image_file": "harbors/tammasaarenallas-32/41472.jpg",
         "image_link": null,
@@ -2932,7 +2995,7 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/hietalahdenallas",
-        "location": "SRID=4326;POINT (24.92907700000001 60.16155199999997)",
+        "location": "SRID=4326;POINT (24.9269634192952 60.1609861460934)",
         "municipality": "helsinki",
         "image_file": "harbors/hietalahdenallas-jatkasaaren-puoli/41390.jpg",
         "image_link": null,
