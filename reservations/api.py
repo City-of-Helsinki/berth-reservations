@@ -1,4 +1,4 @@
-from rest_framework import mixins, permissions, serializers, viewsets
+from rest_framework import mixins, permissions, renderers, serializers, viewsets
 
 from .models import Reservation
 
@@ -10,6 +10,7 @@ class ReservationSerializer(serializers.ModelSerializer):
 
 
 class ReservationViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    renderer_classes = [renderers.JSONRenderer]
     permission_classes = [permissions.AllowAny]
     serializer_class = ReservationSerializer
     queryset = Reservation.objects.all()
