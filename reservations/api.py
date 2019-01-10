@@ -11,6 +11,6 @@ class ReservationSerializer(serializers.ModelSerializer):
 
 class ReservationViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     renderer_classes = [renderers.JSONRenderer]
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = ReservationSerializer
     queryset = Reservation.objects.all()
