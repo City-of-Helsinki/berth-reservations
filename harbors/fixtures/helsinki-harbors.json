@@ -72,6 +72,150 @@
     }
 },
 {
+    "model": "harbors.boattypetranslation",
+    "pk": 9,
+    "fields": {
+        "language_code": "en",
+        "name": "Dinghy",
+        "master": 1
+    }
+},
+{
+    "model": "harbors.boattypetranslation",
+    "pk": 10,
+    "fields": {
+        "language_code": "sv",
+        "name": "Jolle",
+        "master": 1
+    }
+},
+{
+    "model": "harbors.boattypetranslation",
+    "pk": 11,
+    "fields": {
+        "language_code": "en",
+        "name": "Rowing boat",
+        "master": 2
+    }
+},
+{
+    "model": "harbors.boattypetranslation",
+    "pk": 12,
+    "fields": {
+        "language_code": "sv",
+        "name": "Roddb\u00e5t",
+        "master": 2
+    }
+},
+{
+    "model": "harbors.boattypetranslation",
+    "pk": 13,
+    "fields": {
+        "language_code": "en",
+        "name": "Outboard motor boat",
+        "master": 3
+    }
+},
+{
+    "model": "harbors.boattypetranslation",
+    "pk": 14,
+    "fields": {
+        "language_code": "sv",
+        "name": "Utombordsmotorb\u00e5t",
+        "master": 3
+    }
+},
+{
+    "model": "harbors.boattypetranslation",
+    "pk": 15,
+    "fields": {
+        "language_code": "en",
+        "name": "Inboard motor boat",
+        "master": 4
+    }
+},
+{
+    "model": "harbors.boattypetranslation",
+    "pk": 16,
+    "fields": {
+        "language_code": "sv",
+        "name": "Drevb\u00e5t",
+        "master": 4
+    }
+},
+{
+    "model": "harbors.boattypetranslation",
+    "pk": 17,
+    "fields": {
+        "language_code": "en",
+        "name": "Mid-engined boat",
+        "master": 5
+    }
+},
+{
+    "model": "harbors.boattypetranslation",
+    "pk": 18,
+    "fields": {
+        "language_code": "sv",
+        "name": "Inombordsmotorb\u00e5t",
+        "master": 5
+    }
+},
+{
+    "model": "harbors.boattypetranslation",
+    "pk": 19,
+    "fields": {
+        "language_code": "en",
+        "name": "Sailing boat / motor-sailing boat",
+        "master": 6
+    }
+},
+{
+    "model": "harbors.boattypetranslation",
+    "pk": 20,
+    "fields": {
+        "language_code": "sv",
+        "name": "Segelb\u00e5t / motorseglare",
+        "master": 6
+    }
+},
+{
+    "model": "harbors.boattypetranslation",
+    "pk": 21,
+    "fields": {
+        "language_code": "en",
+        "name": "Trawler",
+        "master": 7
+    }
+},
+{
+    "model": "harbors.boattypetranslation",
+    "pk": 22,
+    "fields": {
+        "language_code": "sv",
+        "name": "Tr\u00e5lare",
+        "master": 7
+    }
+},
+{
+    "model": "harbors.boattypetranslation",
+    "pk": 23,
+    "fields": {
+        "language_code": "en",
+        "name": "Large vessel (more than 20 tonnes)",
+        "master": 8
+    }
+},
+{
+    "model": "harbors.boattypetranslation",
+    "pk": 24,
+    "fields": {
+        "language_code": "sv",
+        "name": "Stort fartyg (\u00f6ver 20 t)",
+        "master": 8
+    }
+},
+{
     "model": "harbors.boattype",
     "pk": 1,
     "fields": {
