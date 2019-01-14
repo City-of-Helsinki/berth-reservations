@@ -1107,7 +1107,7 @@
     "pk": 73,
     "fields": {
         "language_code": "fi",
-        "name": "Tammarsaaren allas (paikat 1-31)",
+        "name": "Tammasaaren allas (paikat 1-31)",
         "street_address": "Tammasaarenaukio 4",
         "master": 37
     }
@@ -1387,7 +1387,7 @@
     "pk": 101,
     "fields": {
         "language_code": "fi",
-        "name": "Tammarsaaren allas (paikat 32-75)",
+        "name": "Tammasaaren allas (paikat 32-75)",
         "street_address": "Tammasaarenaukio 4",
         "master": 51
     }
@@ -2704,7 +2704,7 @@
         "phone": null,
         "email": null,
         "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/vasikkasaaren-venesatama",
-        "location": "SRID=4326;POINT (25.01452799999996 60.15482999999998)",
+        "location": "SRID=4326;POINT (25.01452799999996 60.15482999999995)",
         "municipality": "helsinki",
         "image_file": "harbors/vasikkasaari/41415.jpg",
         "image_link": null,
@@ -2714,7 +2714,7 @@
         "waste_collection": false,
         "gate": false,
         "lighting": false,
-        "availability_level": 2,
+        "availability_level": 3,
         "number_of_places": 32,
         "maximum_width": 350,
         "maximum_length": 1500,
