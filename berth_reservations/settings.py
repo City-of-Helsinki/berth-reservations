@@ -30,6 +30,8 @@ env = environ.Env(
     EMAIL_URL=(str, 'consolemail://'),
     DEFAULT_FROM_EMAIL=(str, 'venepaikkavaraukset@hel.fi'),
     MAIL_MAILGUN_KEY=(str, ''),
+    MAIL_MAILGUN_DOMAIN=(str, ''),
+    MAIL_MAILGUN_API=(str, ''),
     SENTRY_DSN=(str, ''),
     CORS_ORIGIN_WHITELIST=(list, []),
     CORS_ORIGIN_ALLOW_ALL=(bool, False),
@@ -64,7 +66,9 @@ vars().update(env.email_url())  # EMAIL_BACKEND etc.
 DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL')
 if env('MAIL_MAILGUN_KEY'):
     ANYMAIL = {
-        'MAILGUN_API_KEY': env('MAIL_MAILGUN_KEY')
+        'MAILGUN_API_KEY': env('MAIL_MAILGUN_KEY'),
+        'MAILGUN_SENDER_DOMAIN': env('MAIL_MAILGUN_DOMAIN'),
+        'MAILGUN_API_URL': env('MAIL_MAILGUN_API'),
     }
     EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
 
