@@ -24,8 +24,16 @@ def send_notification(email, notification_type, context=None, language=DEFAULT_L
     if context is None:
         context = {}
 
+    template = NotificationTemplate.objects.filter(type=notification_type).first()
+
+    if not template:
+        logger.warning(
+            'No notification template created for "{}" event, not sending anything.'.format(notification_type)
+        )
+        return
+
     try:
-        subject, html_body, text_body = render_notification_template(notification_type, context, language)
+        subject, html_body, text_body = render_notification_template(template, context, language)
     except NotificationTemplate.DoesNotExist:
         logger.debug('NotificationTemplate "{}" does not exist, not sending anything.'.format(notification_type))
         return
@@ -45,16 +53,26 @@ def send_notification(email, notification_type, context=None, language=DEFAULT_L
         )
         return
 
-    send_mail(subject, html_body, text_body, email)
+    send_mail(subject, text_body, email, from_email=template.from_email, html_body=html_body)
+
+    if (
+        template.admins_to_notify.exists() and
+        template.admin_notification_subject and
+        template.admin_notification_text
+    ):
+        admin_subject = template.admin_notification_subject
+        admin_text = template.admin_notification_text
+
+        for admin in template.admins_to_notify.all():
+            send_mail(admin_subject, admin_text, admin.email, from_email=template.from_email)
 
 
-def render_notification_template(notification_type, context, language_code=DEFAULT_LANGUAGE):
+def render_notification_template(template, context, language_code=DEFAULT_LANGUAGE):
     """
     Render a notification template with given context in given language
 
     Returns a namedtuple containing all content fields (subject, html_body, text_body) of the template.
     """
-    template = NotificationTemplate.objects.get(type=notification_type)
     env = SandboxedEnvironment(trim_blocks=True, lstrip_blocks=True, undefined=StrictUndefined)
 
     with switch_language(template, language_code):
@@ -73,6 +91,6 @@ def render_notification_template(notification_type, context, language_code=DEFAU
             raise NotificationTemplateException(e) from e
 
 
-def send_mail(subject, html_body, text_body, to_address):
+def send_mail(subject, text_body, to_address, from_email=settings.DEFAULT_FROM_EMAIL, html_body=None):
     logger.info('Sending notification email to {}: "{}"'.format(to_address, subject))
-    django_send_mail(subject, text_body, settings.DEFAULT_FROM_EMAIL, [to_address], html_message=html_body)
+    django_send_mail(subject, text_body, from_email, [to_address], html_message=html_body)

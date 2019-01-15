@@ -1,6 +1,7 @@
 import logging
 
 from django.db import models
+from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumField
 from parler.models import TranslatableModel, TranslatedFields
@@ -23,6 +24,22 @@ class NotificationTemplate(TranslatableModel):
 
     from_email = models.EmailField(verbose_name=_('From email'), max_length=100, default="dev@hel.fi")
 
+    admins_to_notify = models.ManyToManyField(
+        get_user_model(), related_name='+',
+        blank=True, verbose_name=_('Admins to notify'),
+        help_text=_('Choose admin users you want to be notified when this event happens.'),
+    )
+    admin_notification_subject = models.CharField(
+        verbose_name=_('admin notification subject'),
+        max_length=200, help_text=_("Subject for admins' notification"),
+        blank=True,
+    )
+    admin_notification_text = models.TextField(
+        verbose_name=_('admin notification text'),
+        help_text=_("Text body for admins' notification."),
+        blank=True,
+    )
+
     translations = TranslatedFields(
         subject=models.CharField(
             verbose_name=_('subject'), max_length=200, help_text=_('Subject for email notifications')
@@ -32,7 +49,7 @@ class NotificationTemplate(TranslatableModel):
             verbose_name=_('text body'),
             help_text=_('Text body for email notifications. If left blank, HTML body without HTML tags will be used.'),
             blank=True,
-        )
+        ),
     )
 
     class Meta:
