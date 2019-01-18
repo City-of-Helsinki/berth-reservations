@@ -12,3 +12,4 @@ django-anymail
 pillow
 django-parler-rest
 django-munigeo
+django-mailer

@@ -71,7 +71,8 @@ if env('MAIL_MAILGUN_KEY'):
         'MAILGUN_SENDER_DOMAIN': env('MAIL_MAILGUN_DOMAIN'),
         'MAILGUN_API_URL': env('MAIL_MAILGUN_API'),
     }
-    EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
+
+EMAIL_BACKEND = "mailer.backend.DbBackend"
 
 RAVEN_CONFIG = {'dsn': env.str('SENTRY_DSN'), 'release': version, 'environment': env('SENTRY_ENVIRONMENT')}
 
@@ -114,6 +115,7 @@ INSTALLED_APPS = [
     'anymail',
     'mptt',
     'munigeo',
+    'mailer',
 
     'reservations',
     'notifications',
