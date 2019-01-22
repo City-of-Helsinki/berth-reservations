@@ -4,6 +4,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from harbors.models import BoatType, Harbor
+from .utils import localize_datetime
 
 
 class HarborChoice(models.Model):
@@ -140,3 +141,10 @@ class Reservation(models.Model):
 
     def __str__(self):
         return '{}: {} {}'.format(self.pk, self.first_name, self.last_name)
+
+    def get_notification_context(self):
+        return {
+            'created_at': localize_datetime(self.created_at, self.language),
+            'harbor_choices': self.harborchoice_set.all(),
+            'reservation': self
+        }

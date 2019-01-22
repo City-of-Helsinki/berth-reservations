@@ -2,6 +2,7 @@ from rest_framework import mixins, permissions, renderers, serializers, viewsets
 
 from harbors.models import BoatType, Harbor
 from .models import HarborChoice, Reservation
+from .signals import reservation_saved
 
 
 class HarborChoiceSerializer(serializers.ModelSerializer):
@@ -38,6 +39,8 @@ class ReservationSerializer(serializers.ModelSerializer):
                     priority=choice["priority"],
                     reservation=reservation
                 )
+        # Send notifications when all m2m relations are saved
+        reservation_saved.send(sender=reservation)
         return reservation
 
 
