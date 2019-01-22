@@ -83,8 +83,9 @@ class Reservation(models.Model):
         verbose_name=_('boat draught'), decimal_places=2, max_digits=5,
         null=True, blank=True
     )
-    boat_weight = models.PositiveIntegerField(
-        verbose_name=_('boat weight'), null=True, blank=True
+    boat_weight = models.DecimalField(
+        verbose_name=_('boat weight'), decimal_places=2, max_digits=10,
+        null=True, blank=True
     )
     accessibility_required = models.BooleanField(
         verbose_name=_('accessibility required'), default=False
