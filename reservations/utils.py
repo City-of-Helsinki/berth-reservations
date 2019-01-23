@@ -1,5 +1,8 @@
 from csv import DictWriter
 
+from django.conf import settings
+from django.utils import dateformat, formats, timezone, translation
+
 
 def export_reservations_as_csv(reservations, stream):
     fieldnames = [
@@ -21,3 +24,9 @@ def export_reservations_as_csv(reservations, stream):
             'data': reservation.data
         })
     return stream
+
+
+def localize_datetime(dt, language=settings.LANGUAGES[0][0]):
+    translation.activate(language)
+    return dateformat.format(
+        timezone.localtime(dt), formats.get_format('DATETIME_FORMAT', lang=language))
