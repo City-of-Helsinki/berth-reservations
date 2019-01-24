@@ -40,7 +40,7 @@ class ReservationSerializer(serializers.ModelSerializer):
                     reservation=reservation
                 )
         # Send notifications when all m2m relations are saved
-        reservation_saved.send(sender=reservation.__class__, reservation=reservation)
+        reservation_saved.send(sender=self.__class__, reservation=reservation)
         return reservation
 
 
