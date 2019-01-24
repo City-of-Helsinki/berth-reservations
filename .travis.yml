@@ -1,0 +1,19 @@
+branches: {only: [master]}
+sudo: false
+language: python
+python: "3.6"
+cache: pip
+
+addons:
+  postgresql: 9.6
+  apt:
+    packages:
+    - postgresql-9.6-postgis-2.3
+
+matrix:
+  include:
+    - name: Coding Style
+      install: pip install -r requirements.txt -r requirements-dev.txt
+      script:
+        - flake8
+        - isort -c
