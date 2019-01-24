@@ -1,11 +1,10 @@
 from anymail.exceptions import AnymailError
 from django.conf import settings
-from django.dispatch import Signal, receiver
+from django.dispatch import receiver, Signal
 from raven import Client
 
 from notifications.enums import NotificationType
 from notifications.utils import send_notification
-
 
 reservation_saved = Signal(providing_args=['reservation'])
 

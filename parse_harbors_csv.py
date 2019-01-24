@@ -24,7 +24,6 @@ import argparse
 import csv
 import json
 
-
 # all of these IDs were manually taken from the servicemap,
 # based on the given CSV and the data at hel.fi
 HARBORS_TO_SERVICEMAP_IDS_MAP = {
@@ -112,12 +111,12 @@ def pull_data_from_row(row, target_dict):
         # check that this row has a berth place number, i.e. is an actual berth
         if row['NRO']:
             target_dict[row['SATAMA']]["berth_count"] += 1
-            
+
             if row['PITUUS']:
                 target_dict[row['SATAMA']]["max_length"] = max(
                     target_dict[row['SATAMA']]["max_length"], m_to_cm(row['PITUUS'])
                 )
-            
+
             if row['LEVEYS']:
                 target_dict[row['SATAMA']]["max_width"] = max(
                     target_dict[row['SATAMA']]["max_width"], m_to_cm(row['LEVEYS'])

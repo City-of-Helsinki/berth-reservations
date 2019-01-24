@@ -1,8 +1,10 @@
 import django_filters
-from parler_rest.serializers import TranslatableModelSerializer, TranslatedFieldsField
-from rest_framework import serializers, viewsets
 from munigeo.api import GeoModelSerializer
 from munigeo.models import Municipality
+from parler_rest.serializers import (
+    TranslatableModelSerializer, TranslatedFieldsField
+)
+from rest_framework import serializers, viewsets
 
 from .models import AvailabilityLevel, BoatType, Harbor
 

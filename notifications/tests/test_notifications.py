@@ -1,7 +1,9 @@
 import pytest
 
 from notifications.enums import NotificationType
-from notifications.models import NotificationTemplate, NotificationTemplateException
+from notifications.models import (
+    NotificationTemplate, NotificationTemplateException
+)
 from notifications.utils import render_notification_template
 
 

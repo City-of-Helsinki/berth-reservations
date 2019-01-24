@@ -24,8 +24,8 @@ class HarborChoiceInline(admin.TabularInline):
 
 
 class ReservationAdmin(admin.ModelAdmin):
-    inlines = [HarborChoiceInline,]
-    readonly_fields = ['created_at',]
+    inlines = [HarborChoiceInline, ]
+    readonly_fields = ['created_at', ]
     fieldsets = [
         (None, {
             'fields': [
