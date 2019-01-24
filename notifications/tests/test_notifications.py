@@ -36,13 +36,13 @@ def test_notification_template_rendering(notification_template):
         'text_body_var': 'text_baz',
     }
 
-    rendered = render_notification_template(NotificationType.RESERVATION_CREATED, context, 'en')
+    rendered = render_notification_template(notification_template, context, 'en')
     assert len(rendered) == 3
     assert rendered.subject == "test subject, variable value: bar!"
     assert rendered.html_body == "<b>test html body</b>, variable value: html_baz!"
     assert rendered.text_body == "test text body, variable value: text_baz!"
 
-    rendered = render_notification_template(NotificationType.RESERVATION_CREATED, context, 'fi')
+    rendered = render_notification_template(notification_template, context, 'fi')
     assert len(rendered) == 3
     assert rendered.subject == "testiotsikko, muuttujan arvo: bar!"
     assert rendered.html_body == "<b>testihötömölöruumis</b>, muuttujan arvo: html_baz!"
@@ -63,13 +63,13 @@ def test_notification_template_rendering_no_text_body_provided(notification_temp
     notification_template.text_body = ''
     notification_template.save()
 
-    rendered = render_notification_template(NotificationType.RESERVATION_CREATED, context, 'en')
+    rendered = render_notification_template(notification_template, context, 'en')
     assert len(rendered) == 3
     assert rendered.subject == "test subject, variable value: bar!"
     assert rendered.html_body == "<b>test html body</b>, variable value: html_baz!"
     assert rendered.text_body == "test html body, variable value: html_baz!"
 
-    rendered = render_notification_template(NotificationType.RESERVATION_CREATED, context, 'fi')
+    rendered = render_notification_template(notification_template, context, 'fi')
     assert len(rendered) == 3
     assert rendered.subject == "testiotsikko, muuttujan arvo: bar!"
     assert rendered.html_body == "<b>testihötömölöruumis</b>, muuttujan arvo: html_baz!"
@@ -84,5 +84,5 @@ def test_undefined_rendering_context_variable(notification_template):
     }
 
     with pytest.raises(NotificationTemplateException) as e:
-        render_notification_template(NotificationType.RESERVATION_CREATED, context, 'fi')
+        render_notification_template(notification_template, context, 'fi')
     assert "'html_body_var' is undefined" in str(e)

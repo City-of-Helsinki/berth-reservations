@@ -1,9 +1,6 @@
 import pytest
 
-
-@pytest.fixture(autouse=True)
-def no_more_mark_django_db(transactional_db):
-    pass
+from berth_reservations.tests.conftest import *  # noqa
 
 
 @pytest.fixture(autouse=True)
