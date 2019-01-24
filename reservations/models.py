@@ -4,6 +4,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from harbors.models import BoatType, Harbor
+
 from .utils import localize_datetime
 
 

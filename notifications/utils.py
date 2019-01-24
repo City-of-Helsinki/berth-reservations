@@ -9,7 +9,9 @@ from jinja2.exceptions import TemplateError
 from jinja2.sandbox import SandboxedEnvironment
 from parler.utils.context import switch_language
 
-from notifications.models import NotificationTemplate, NotificationTemplateException
+from notifications.models import (
+    NotificationTemplate, NotificationTemplateException
+)
 
 logger = logging.getLogger(__name__)
 

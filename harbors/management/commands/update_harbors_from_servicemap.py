@@ -1,10 +1,8 @@
 import requests
-
-from django.contrib.gis.geos import Point
 from django.conf import settings
+from django.contrib.gis.geos import Point
 from django.core.management.base import BaseCommand
 from django.db import transaction
-
 from munigeo.models import Municipality
 
 from harbors.models import Harbor

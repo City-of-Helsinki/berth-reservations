@@ -24,7 +24,6 @@ import argparse
 import csv
 import json
 
-
 # all of these IDs were manually taken from the servicemap,
 # based on the given CSV and the data at hel.fi
 HARBORS_TO_SERVICEMAP_IDS_MAP = {
