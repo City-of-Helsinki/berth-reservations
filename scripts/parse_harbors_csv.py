@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 This script parses harbors' data from a CSV file, provided by the City Of Helsinki.
