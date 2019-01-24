@@ -33,6 +33,7 @@ env = environ.Env(
     MAIL_MAILGUN_DOMAIN=(str, ''),
     MAIL_MAILGUN_API=(str, ''),
     SENTRY_DSN=(str, ''),
+    SENTRY_ENVIRONMENT=(str, ''),
     CORS_ORIGIN_WHITELIST=(list, []),
     CORS_ORIGIN_ALLOW_ALL=(bool, False),
     NOTIFICATIONS_ENABLED=(bool, False),
@@ -72,7 +73,7 @@ if env('MAIL_MAILGUN_KEY'):
     }
     EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
 
-RAVEN_CONFIG = {'dsn': env.str('SENTRY_DSN'), 'release': version}
+RAVEN_CONFIG = {'dsn': env.str('SENTRY_DSN'), 'release': version, 'environment': env('SENTRY_ENVIRONMENT')}
 
 MEDIA_ROOT = env('MEDIA_ROOT')
 STATIC_ROOT = env('STATIC_ROOT')
