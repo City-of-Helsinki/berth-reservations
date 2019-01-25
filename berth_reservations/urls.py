@@ -14,7 +14,7 @@ router = routers.DefaultRouter()
 router.register('availability-levels', AvailabilityLevelViewSet)
 router.register('boat-types', BoatTypeViewSet)
 router.register('harbors', HarborViewSet)
-router.register('reservations', ReservationViewSet)
+router.register('reservations', ReservationViewSet, basename='reservation')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

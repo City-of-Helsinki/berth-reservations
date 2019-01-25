@@ -12,7 +12,17 @@ addons:
 
 matrix:
   include:
-    - name: Coding Style
+    - name: Unit tests
+      env: DEBUG=1 DATABASE_URL=postgis:///berth_reservations
+      services: [postgresql]
+      install: pip install -r requirements.txt -r requirements-dev.txt
+      before_script:
+        - psql -U postgres -c "create extension postgis"
+        - createdb berth_reservations
+      script: pytest -ra -vv --doctest-modules --cov=.
+      after_success: pip install codecov && codecov
+
+    - name: Coding style
       install: pip install -r requirements.txt -r requirements-dev.txt
       script:
         - flake8
