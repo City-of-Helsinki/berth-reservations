@@ -7,7 +7,7 @@ RUN apt-get update \
 
 RUN mkdir /code
 
-COPY requirements.txt /code/
+COPY requirements.txt requirements-dev.txt /code/
 
 WORKDIR /code
 
