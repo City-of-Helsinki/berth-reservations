@@ -27,6 +27,6 @@ def export_reservations_as_csv(reservations, stream):
 
 
 def localize_datetime(dt, language=settings.LANGUAGES[0][0]):
-    translation.activate(language)
-    return dateformat.format(
-        timezone.localtime(dt), formats.get_format('DATETIME_FORMAT', lang=language))
+    with translation.override(language):
+        return dateformat.format(
+            timezone.localtime(dt), formats.get_format('DATETIME_FORMAT', lang=language))
