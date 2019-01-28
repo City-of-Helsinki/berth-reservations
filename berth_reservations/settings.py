@@ -73,6 +73,7 @@ if env('MAIL_MAILGUN_KEY'):
     }
 
 EMAIL_BACKEND = "mailer.backend.DbBackend"
+MAILER_EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
 
 RAVEN_CONFIG = {'dsn': env.str('SENTRY_DSN'), 'release': version, 'environment': env('SENTRY_ENVIRONMENT')}
 
