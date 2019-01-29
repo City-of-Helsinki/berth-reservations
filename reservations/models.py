@@ -146,6 +146,6 @@ class Reservation(models.Model):
     def get_notification_context(self):
         return {
             'created_at': localize_datetime(self.created_at, self.language),
-            'harbor_choices': self.harborchoice_set.all(),
+            'harbor_choices': self.harborchoice_set.order_by('priority'),
             'reservation': self
         }
