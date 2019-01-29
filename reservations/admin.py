@@ -3,6 +3,8 @@ import logging
 
 from anymail.exceptions import AnymailError
 from django.contrib import admin, messages
+from django.contrib.auth import get_permission_codename
+from django.contrib.auth.models import Permission
 from django.http import HttpResponse
 from django.utils.translation import ugettext_lazy as _
 
@@ -101,7 +103,12 @@ class ReservationAdmin(admin.ModelAdmin):
         resent_count = 0
         for reservation in queryset:
             try:
-                send_notification(reservation.email, NotificationType.RESERVATION_CREATED)
+                send_notification(
+                    reservation.email,
+                    NotificationType.RESERVATION_CREATED,
+                    reservation.get_notification_context(),
+                    reservation.language
+                )
                 resent_count += 1
             except (OSError, AnymailError):
                 logger.error(
@@ -114,6 +121,15 @@ class ReservationAdmin(admin.ModelAdmin):
             messages.SUCCESS)
 
     resend_reservation_confirmation.short_description = _("Send confirmation again for chosen reservation")
+    resend_reservation_confirmation.allowed_permissions = ('resend',)
+
+    def has_resend_permission(self, request):
+        opts = self.opts
+        codename = get_permission_codename('resend', opts)
+        return request.user.has_perm('%s.%s' % (opts.app_label, codename))
 
 
 admin.site.register(Reservation, ReservationAdmin)
+
+# Register Permission model for GUI management of permissions
+admin.site.register(Permission)

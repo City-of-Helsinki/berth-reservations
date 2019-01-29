@@ -140,6 +140,11 @@ class Reservation(models.Model):
 
     data = JSONField(blank=True, null=True)
 
+    class Meta:
+        permissions = (
+            ('resend_reservation', _('Can resend confirmation for reservations')),
+        )
+
     def __str__(self):
         return '{}: {} {}'.format(self.pk, self.first_name, self.last_name)
 
