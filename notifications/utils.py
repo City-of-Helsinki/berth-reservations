@@ -7,6 +7,8 @@ from django.utils.html import strip_tags
 from jinja2 import StrictUndefined
 from jinja2.exceptions import TemplateError
 from jinja2.sandbox import SandboxedEnvironment
+from mailer.engine import send_all
+from mailer.models import Message
 from parler.utils.context import switch_language
 
 from notifications.models import (
@@ -67,6 +69,10 @@ def send_notification(email, notification_type, context=None, language=DEFAULT_L
 
         for admin in template.admins_to_notify.all():
             send_mail(admin_subject, admin_text, admin.email, from_email=template.from_email)
+
+    # also immediately fire django-mailer's commands
+    Message.objects.retry_deferred()
+    send_all()
 
 
 def render_notification_template(template, context, language_code=DEFAULT_LANGUAGE):
