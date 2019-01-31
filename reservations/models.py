@@ -140,12 +140,17 @@ class Reservation(models.Model):
 
     data = JSONField(blank=True, null=True)
 
+    class Meta:
+        permissions = (
+            ('resend_reservation', _('Can resend confirmation for reservations')),
+        )
+
     def __str__(self):
         return '{}: {} {}'.format(self.pk, self.first_name, self.last_name)
 
     def get_notification_context(self):
         return {
             'created_at': localize_datetime(self.created_at, self.language),
-            'harbor_choices': self.harborchoice_set.all(),
+            'harbor_choices': self.harborchoice_set.order_by('priority'),
             'reservation': self
         }
