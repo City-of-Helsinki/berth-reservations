@@ -6,3 +6,5 @@ pytest
 pytest-cov
 pytest-django
 factory-boy
+xlrd
+freezegun

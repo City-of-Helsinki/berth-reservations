@@ -13,6 +13,7 @@ decorator==4.3.0          # via ipython, traitlets
 factory-boy==2.11.1
 faker==1.0.2              # via factory-boy
 flake8==3.6.0
+freezegun==0.3.11
 ipython-genutils==0.2.0   # via traitlets
 ipython==7.2.0
 isort==4.3.4
@@ -32,8 +33,9 @@ pygments==2.3.1           # via ipython
 pytest-cov==2.6.1
 pytest-django==3.4.5
 pytest==4.1.1
-python-dateutil==2.7.5    # via faker
-six==1.11.0               # via faker, more-itertools, prompt-toolkit, pytest, python-dateutil, traitlets
+python-dateutil==2.7.5    # via faker, freezegun
+six==1.11.0               # via faker, freezegun, more-itertools, prompt-toolkit, pytest, python-dateutil, traitlets
 text-unidecode==1.2       # via faker
 traitlets==4.3.2          # via ipython
 wcwidth==0.1.7            # via prompt-toolkit
+xlrd==1.2.0

@@ -2,17 +2,19 @@ import datetime
 import logging
 
 from anymail.exceptions import AnymailError
+from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.auth import get_permission_codename
 from django.contrib.auth.models import Permission
 from django.http import HttpResponse
 from django.utils.translation import ugettext_lazy as _
+from pytz import timezone
 
 from notifications.enums import NotificationType
 from notifications.utils import send_notification
 
 from .models import HarborChoice, Reservation
-from .utils import export_reservations_as_csv
+from .utils import export_reservations_as_xlsx
 
 logger = logging.getLogger(__name__)
 
@@ -89,15 +91,21 @@ class ReservationAdmin(admin.ModelAdmin):
     actions = ["export_reservations", "resend_reservation_confirmation"]
 
     def export_reservations(self, request, queryset):
-        response = HttpResponse(content_type='text/csv')
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
-        filename = "berth_reservations_" + datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        response['Content-Disposition'] = 'attachment; filename=%s.csv' % filename
+        local_datetime_now_as_str = (
+            datetime.datetime
+            .now(timezone(settings.TIME_ZONE))
+            .strftime('%Y-%m-%d_%H-%M-%S')
+        )
+        filename = "berth_reservations_" + local_datetime_now_as_str
+        response['Content-Disposition'] = 'attachment; filename=%s.xlsx' % filename
 
-        export_reservations_as_csv(queryset, response)
+        response.content = export_reservations_as_xlsx(queryset)
         return response
 
-    export_reservations.short_description = _("Download list of chosen reservations in CSV format")
+    export_reservations.short_description = _("Download list of chosen reservations in Excel file")
 
     def resend_reservation_confirmation(self, request, queryset):
         resent_count = 0
