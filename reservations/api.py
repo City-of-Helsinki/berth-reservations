@@ -27,16 +27,16 @@ class ReservationSerializer(serializers.ModelSerializer):
     )
 
     boat_length = serializers.DecimalField(
-        decimal_places=2, max_digits=5, localize=True
+        decimal_places=2, max_digits=5, localize=True, required=False
     )
     boat_width = serializers.DecimalField(
-        decimal_places=2, max_digits=5, localize=True
+        decimal_places=2, max_digits=5, localize=True, required=False
     )
     boat_draught = serializers.DecimalField(
-        decimal_places=2, max_digits=5, localize=True
+        decimal_places=2, max_digits=5, localize=True, required=False
     )
     boat_weight = serializers.DecimalField(
-        decimal_places=2, max_digits=10, localize=True
+        decimal_places=2, max_digits=10, localize=True, required=False
     )
 
     class Meta:
