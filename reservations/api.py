@@ -26,6 +26,19 @@ class ReservationSerializer(serializers.ModelSerializer):
         slug_field='identifier'
     )
 
+    boat_length = serializers.DecimalField(
+        decimal_places=2, max_digits=5, localize=True
+    )
+    boat_width = serializers.DecimalField(
+        decimal_places=2, max_digits=5, localize=True
+    )
+    boat_draught = serializers.DecimalField(
+        decimal_places=2, max_digits=5, localize=True
+    )
+    boat_weight = serializers.DecimalField(
+        decimal_places=2, max_digits=10, localize=True
+    )
+
     class Meta:
         model = Reservation
         fields = '__all__'
