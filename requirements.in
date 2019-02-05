@@ -13,3 +13,4 @@ pillow
 django-parler-rest
 django-munigeo
 django-mailer
+xlsxwriter

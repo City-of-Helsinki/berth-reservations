@@ -36,3 +36,4 @@ requests==2.20.0          # via coreapi, django-anymail, django-munigeo, request
 six==1.11.0               # via django-anymail, django-munigeo
 uritemplate==3.0.0        # via coreapi
 urllib3==1.24             # via requests
+xlsxwriter==1.1.2
