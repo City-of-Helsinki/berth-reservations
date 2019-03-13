@@ -70,9 +70,7 @@ def send_notification(email, notification_type, context=None, language=DEFAULT_L
         for admin in template.admins_to_notify.all():
             send_mail(admin_subject, admin_text, admin.email, from_email=template.from_email)
 
-    # also immediately fire django-mailer's commands
-    Message.objects.retry_deferred()
-    send_all()
+    fire_django_mailer_manually()
 
 
 def render_notification_template(template, context, language_code=DEFAULT_LANGUAGE):
@@ -102,3 +100,13 @@ def render_notification_template(template, context, language_code=DEFAULT_LANGUA
 def send_mail(subject, text_body, to_address, from_email=settings.DEFAULT_FROM_EMAIL, html_body=None):
     logger.info('Sending notification email to {}: "{}"'.format(to_address, subject))
     django_send_mail(subject, text_body, from_email, [to_address], html_message=html_body)
+
+
+def fire_django_mailer_manually():
+    Message.objects.retry_deferred()
+    # TODO: implement a more robust error handling.
+    #  maybe move from django-mailer to cellery?
+    try:
+        send_all()
+    except:  # noqa
+        pass
