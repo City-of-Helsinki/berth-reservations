@@ -4,10 +4,13 @@
 #
 #    pip-compile --output-file requirements-dev.txt requirements-dev.in
 #
+appdirs==1.4.3            # via black
 atomicwrites==1.2.1       # via pytest
-attrs==18.2.0             # via pytest
+attrs==18.2.0             # via black, pytest
 autopep8==1.4.3
 backcall==0.1.0           # via ipython
+black==19.3b0
+click==7.0                # via black
 coverage==4.5.2           # via pytest-cov
 decorator==4.3.0          # via ipython, traitlets
 factory-boy==2.11.1
@@ -36,6 +39,7 @@ pytest==4.1.1
 python-dateutil==2.7.5    # via faker, freezegun
 six==1.11.0               # via faker, freezegun, more-itertools, prompt-toolkit, pytest, python-dateutil, traitlets
 text-unidecode==1.2       # via faker
+toml==0.10.0              # via black
 traitlets==4.3.2          # via ipython
 wcwidth==0.1.7            # via prompt-toolkit
 xlrd==1.2.0
