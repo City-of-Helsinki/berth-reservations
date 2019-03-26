@@ -9,19 +9,21 @@ from harbors.models import Harbor
 
 
 class Command(BaseCommand):
-
     def handle(self, **options):
         updated_harbors = 0
         missing_images = []
 
-        for harbor in Harbor.objects.exclude(Q(servicemap_id=None) | Q(servicemap_id='')):
+        for harbor in Harbor.objects.exclude(
+            Q(servicemap_id=None) | Q(servicemap_id="")
+        ):
             self.stdout.write(
-                'Assigning image for harbor with servicemap ID {}'.format(harbor.servicemap_id)
+                "Assigning image for harbor with servicemap ID {}".format(
+                    harbor.servicemap_id
+                )
             )
-            image_filename = '{}.jpg'.format(harbor.servicemap_id)
+            image_filename = "{}.jpg".format(harbor.servicemap_id)
             absolute_file_path = os.path.join(
-                settings.STATIC_ROOT,
-                'img/helsinki_harbors/{}'.format(image_filename)
+                settings.STATIC_ROOT, "img/helsinki_harbors/{}".format(image_filename)
             )
 
             if not os.path.isfile(absolute_file_path):
@@ -34,9 +36,11 @@ class Command(BaseCommand):
 
             updated_harbors += 1
 
-        self.stdout.write('Successfully updated {} harbors'.format(updated_harbors))
+        self.stdout.write("Successfully updated {} harbors".format(updated_harbors))
 
         if missing_images:
-            self.stderr.write('Could not find images for harbors with following Servicemap IDs:')
+            self.stderr.write(
+                "Could not find images for harbors with following Servicemap IDs:"
+            )
             for id in missing_images:
                 self.stderr.write(id)

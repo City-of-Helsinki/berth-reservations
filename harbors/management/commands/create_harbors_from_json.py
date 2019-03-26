@@ -20,28 +20,31 @@ from harbors.models import Harbor
 
 
 class Command(BaseCommand):
-
     def add_arguments(self, parser):
-        parser.add_argument('--file', action='store', dest='file',
-                            help="Path to JSON file with harbors' data")
+        parser.add_argument(
+            "--file",
+            action="store",
+            dest="file",
+            help="Path to JSON file with harbors' data",
+        )
 
     def handle(self, **options):
-        json_filepath = options['file']
+        json_filepath = options["file"]
         if not json_filepath:
-            raise CommandError('No path to JSON file provided')
+            raise CommandError("No path to JSON file provided")
 
         number_of_created_harbors = 0
         number_of_modified_harbors = 0
 
-        with open(json_filepath, 'r') as json_file:
+        with open(json_filepath, "r") as json_file:
             harbors_dict = json.load(json_file)
             for harbor_name, harbor_data in harbors_dict.items():
                 with transaction.atomic():
                     defaults = {
-                        "servicemap_id": harbor_data['servicemap_id'],
-                        "number_of_places": harbor_data['berth_count'],
-                        "maximum_length": harbor_data['max_length'],
-                        "maximum_width": harbor_data['max_width']
+                        "servicemap_id": harbor_data["servicemap_id"],
+                        "number_of_places": harbor_data["berth_count"],
+                        "maximum_length": harbor_data["max_length"],
+                        "maximum_width": harbor_data["max_width"],
                     }
                     harbor, created = Harbor.objects.update_or_create(
                         identifier=slugify(harbor_name), defaults=defaults
@@ -52,5 +55,5 @@ class Command(BaseCommand):
                     else:
                         number_of_modified_harbors += 1
 
-        self.stdout.write('Created {} harbors'.format(number_of_created_harbors))
-        self.stdout.write('Modified {} harbors'.format(number_of_modified_harbors))
+        self.stdout.write("Created {} harbors".format(number_of_created_harbors))
+        self.stdout.write("Modified {} harbors".format(number_of_modified_harbors))

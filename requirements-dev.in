@@ -1,10 +1,11 @@
 autopep8
+black
+factory-boy
 flake8
+freezegun
 ipython
 isort
 pytest
 pytest-cov
 pytest-django
-factory-boy
 xlrd
-freezegun

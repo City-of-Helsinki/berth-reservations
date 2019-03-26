@@ -1,9 +1,7 @@
 import django_filters
 from munigeo.api import GeoModelSerializer
 from munigeo.models import Municipality
-from parler_rest.serializers import (
-    TranslatableModelSerializer, TranslatedFieldsField
-)
+from parler_rest.serializers import TranslatableModelSerializer, TranslatedFieldsField
 from rest_framework import serializers, viewsets
 
 from .models import AvailabilityLevel, BoatType, Harbor
@@ -21,7 +19,7 @@ class TranslatedModelSerializer(TranslatableModelSerializer):
     def translated_fields_to_representation(self, obj, ret):
         translated_fields = {}
 
-        for lang_key, trans_dict in ret.pop('translations', {}).items():
+        for lang_key, trans_dict in ret.pop("translations", {}).items():
 
             for field_name, translation in trans_dict.items():
                 if field_name not in translated_fields:
@@ -35,10 +33,9 @@ class TranslatedModelSerializer(TranslatableModelSerializer):
 
 
 class BoatTypeSerializer(TranslatedModelSerializer):
-
     class Meta:
         model = BoatType
-        fields = ['identifier', 'translations']
+        fields = ["identifier", "translations"]
 
 
 class BoatTypeViewSet(viewsets.ReadOnlyModelViewSet):
@@ -47,10 +44,9 @@ class BoatTypeViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class AvailabilityLevelSerializer(TranslatedModelSerializer):
-
     class Meta:
         model = AvailabilityLevel
-        fields = ['identifier', 'translations']
+        fields = ["identifier", "translations"]
 
 
 class AvailabilityLevelViewSet(viewsets.ReadOnlyModelViewSet):
@@ -72,25 +68,25 @@ class MunicipalityRelatedField(TranslatedModelSerializer):
 
     class Meta:
         model = Municipality
-        fields = ['translations']
+        fields = ["translations"]
 
     def to_representation(self, obj):
         ret = super(MunicipalityRelatedField, self).to_representation(obj)
-        return ret['name']
+        return ret["name"]
 
 
 class HarborSerializer(TranslatedModelSerializer, GeoModelSerializer):
     suitable_boat_types = serializers.SlugRelatedField(
-        many=True, read_only=True, slug_field='identifier'
+        many=True, read_only=True, slug_field="identifier"
     )
     availability_level = serializers.SlugRelatedField(
-        read_only=True, slug_field='identifier'
+        read_only=True, slug_field="identifier"
     )
     municipality = MunicipalityRelatedField()
 
     class Meta:
         model = Harbor
-        exclude = ['id', 'servicemap_id', 'maximum_depth']
+        exclude = ["id", "servicemap_id", "maximum_depth"]
 
     def to_representation(self, obj):
         """
@@ -100,33 +96,36 @@ class HarborSerializer(TranslatedModelSerializer, GeoModelSerializer):
         """
         representation = super().to_representation(obj)
 
-        representation['image'] = None
-        if representation['image_file']:
-            representation['image'] = representation['image_file']
-        elif representation['image_link']:
-            representation['image'] = representation['image_link']
+        representation["image"] = None
+        if representation["image_file"]:
+            representation["image"] = representation["image_file"]
+        elif representation["image_link"]:
+            representation["image"] = representation["image_link"]
 
-        representation.pop('image_file')
-        representation.pop('image_link')
+        representation.pop("image_file")
+        representation.pop("image_link")
         return representation
 
 
 class HarborFilter(django_filters.FilterSet):
     suitable_boat_types = django_filters.CharFilter(
-        field_name='suitable_boat_types__identifier'
+        field_name="suitable_boat_types__identifier"
     )
-    maximum_width = django_filters.NumberFilter(
-        lookup_expr='gte'
-    )
-    maximum_length = django_filters.NumberFilter(
-        lookup_expr='gte'
-    )
+    maximum_width = django_filters.NumberFilter(lookup_expr="gte")
+    maximum_length = django_filters.NumberFilter(lookup_expr="gte")
 
     class Meta:
         model = Harbor
         fields = (
-            'mooring', 'electricity', 'water', 'waste_collection', 'gate', 'lighting',
-            'suitable_boat_types', 'maximum_width', 'maximum_length'
+            "mooring",
+            "electricity",
+            "water",
+            "waste_collection",
+            "gate",
+            "lighting",
+            "suitable_boat_types",
+            "maximum_width",
+            "maximum_length",
         )
 
 

@@ -2,7 +2,7 @@ from django.apps import AppConfig
 
 
 class ReservationsConfig(AppConfig):
-    name = 'reservations'
+    name = "reservations"
 
     def ready(self):
         import reservations.signals  # noqa

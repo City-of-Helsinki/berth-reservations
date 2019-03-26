@@ -8,23 +8,38 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('notifications', '0002_add_from_email'),
+        ("notifications", "0002_add_from_email"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='notificationtemplate',
-            name='admin_notification_subject',
-            field=models.CharField(blank=True, help_text="Subject for admins' notification", max_length=200, verbose_name='admin notification subject'),
+            model_name="notificationtemplate",
+            name="admin_notification_subject",
+            field=models.CharField(
+                blank=True,
+                help_text="Subject for admins' notification",
+                max_length=200,
+                verbose_name="admin notification subject",
+            ),
         ),
         migrations.AddField(
-            model_name='notificationtemplate',
-            name='admin_notification_text',
-            field=models.TextField(blank=True, help_text="Text body for admins' notification.", verbose_name='admin notification text'),
+            model_name="notificationtemplate",
+            name="admin_notification_text",
+            field=models.TextField(
+                blank=True,
+                help_text="Text body for admins' notification.",
+                verbose_name="admin notification text",
+            ),
         ),
         migrations.AddField(
-            model_name='notificationtemplate',
-            name='admins_to_notify',
-            field=models.ManyToManyField(blank=True, help_text='Choose admin users you want to be notified when this event happens.', related_name='_notificationtemplate_admins_to_notify_+', to=settings.AUTH_USER_MODEL, verbose_name='Admins to notify'),
+            model_name="notificationtemplate",
+            name="admins_to_notify",
+            field=models.ManyToManyField(
+                blank=True,
+                help_text="Choose admin users you want to be notified when this event happens.",
+                related_name="_notificationtemplate_admins_to_notify_+",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Admins to notify",
+            ),
         ),
     ]

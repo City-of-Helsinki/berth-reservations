@@ -6,14 +6,18 @@ import harbors.models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('harbors', '0002_add_blank_true'),
-    ]
+    dependencies = [("harbors", "0002_add_blank_true")]
 
     operations = [
         migrations.AlterField(
-            model_name='harbor',
-            name='image_file',
-            field=models.ImageField(blank=True, null=True, storage=harbors.models.OverwriteStorage(), upload_to=harbors.models.get_harbor_media_folder, verbose_name='Image file'),
-        ),
+            model_name="harbor",
+            name="image_file",
+            field=models.ImageField(
+                blank=True,
+                null=True,
+                storage=harbors.models.OverwriteStorage(),
+                upload_to=harbors.models.get_harbor_media_folder,
+                verbose_name="Image file",
+            ),
+        )
     ]
