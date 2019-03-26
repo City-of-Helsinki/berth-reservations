@@ -25,5 +25,6 @@ matrix:
     - name: Coding style
       install: pip install -r requirements.txt -r requirements-dev.txt
       script:
+        - black --check .
         - flake8
         - isort -c
