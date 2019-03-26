@@ -37,7 +37,7 @@ pytest-cov==2.6.1
 pytest-django==3.4.5
 pytest==4.1.1
 python-dateutil==2.7.5    # via faker, freezegun
-six==1.11.0               # via faker, freezegun, more-itertools, prompt-toolkit, pytest, python-dateutil, traitlets
+six==1.12.0               # via faker, freezegun, more-itertools, prompt-toolkit, pytest, python-dateutil, traitlets
 text-unidecode==1.2       # via faker
 toml==0.10.0              # via black
 traitlets==4.3.2          # via ipython
