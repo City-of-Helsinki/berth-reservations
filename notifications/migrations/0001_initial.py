@@ -11,42 +11,99 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='NotificationTemplate',
+            name="NotificationTemplate",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', enumfields.fields.EnumField(enum=notifications.enums.NotificationType, max_length=50, unique=True, verbose_name='type')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "type",
+                    enumfields.fields.EnumField(
+                        enum=notifications.enums.NotificationType,
+                        max_length=50,
+                        unique=True,
+                        verbose_name="type",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Notification',
-                'verbose_name_plural': 'Notifications',
+                "verbose_name": "Notification",
+                "verbose_name_plural": "Notifications",
             },
             bases=(parler.models.TranslatableModelMixin, models.Model),
         ),
         migrations.CreateModel(
-            name='NotificationTemplateTranslation',
+            name="NotificationTemplateTranslation",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('language_code', models.CharField(db_index=True, max_length=15, verbose_name='Language')),
-                ('subject', models.CharField(help_text='Subject for email notifications', max_length=200, verbose_name='subject')),
-                ('html_body', models.TextField(help_text='HTML body for email notifications', verbose_name='HTML body')),
-                ('text_body', models.TextField(help_text='Text body for email notifications. If left blank, HTML body without HTML tags will be used.', verbose_name='text body', blank=True)),
-                ('master', models.ForeignKey(editable=False, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='translations', to='notifications.NotificationTemplate')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "language_code",
+                    models.CharField(
+                        db_index=True, max_length=15, verbose_name="Language"
+                    ),
+                ),
+                (
+                    "subject",
+                    models.CharField(
+                        help_text="Subject for email notifications",
+                        max_length=200,
+                        verbose_name="subject",
+                    ),
+                ),
+                (
+                    "html_body",
+                    models.TextField(
+                        help_text="HTML body for email notifications",
+                        verbose_name="HTML body",
+                    ),
+                ),
+                (
+                    "text_body",
+                    models.TextField(
+                        help_text="Text body for email notifications. If left blank, HTML body without HTML tags will be used.",
+                        verbose_name="text body",
+                        blank=True,
+                    ),
+                ),
+                (
+                    "master",
+                    models.ForeignKey(
+                        editable=False,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="translations",
+                        to="notifications.NotificationTemplate",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Notification Translation',
-                'db_table': 'notifications_notificationtemplate_translation',
-                'db_tablespace': '',
-                'managed': True,
-                'default_permissions': (),
+                "verbose_name": "Notification Translation",
+                "db_table": "notifications_notificationtemplate_translation",
+                "db_tablespace": "",
+                "managed": True,
+                "default_permissions": (),
             },
         ),
         migrations.AlterUniqueTogether(
-            name='notificationtemplatetranslation',
-            unique_together={('language_code', 'master')},
+            name="notificationtemplatetranslation",
+            unique_together={("language_code", "master")},
         ),
     ]

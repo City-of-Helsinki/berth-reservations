@@ -5,21 +5,19 @@ from django.urls import include, path
 from rest_framework import routers
 from rest_framework.documentation import include_docs_urls
 
-from harbors.api import (
-    AvailabilityLevelViewSet, BoatTypeViewSet, HarborViewSet
-)
+from harbors.api import AvailabilityLevelViewSet, BoatTypeViewSet, HarborViewSet
 from reservations.api import ReservationViewSet
 
 router = routers.DefaultRouter()
-router.register('availability-levels', AvailabilityLevelViewSet)
-router.register('boat-types', BoatTypeViewSet)
-router.register('harbors', HarborViewSet)
-router.register('reservations', ReservationViewSet, basename='reservation')
+router.register("availability-levels", AvailabilityLevelViewSet)
+router.register("boat-types", BoatTypeViewSet)
+router.register("harbors", HarborViewSet)
+router.register("reservations", ReservationViewSet, basename="reservation")
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('v1/', include(router.urls)),
-    path('docs/', include_docs_urls(title='Berth reservations')),
+    path("admin/", admin.site.urls),
+    path("v1/", include(router.urls)),
+    path("docs/", include_docs_urls(title="Berth reservations")),
 ]
 
 if settings.DEBUG:

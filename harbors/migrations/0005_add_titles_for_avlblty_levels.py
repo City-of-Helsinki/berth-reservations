@@ -5,19 +5,27 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('harbors', '0004_add_availablity_level'),
-    ]
+    dependencies = [("harbors", "0004_add_availablity_level")]
 
     operations = [
         migrations.AddField(
-            model_name='availabilityleveltranslation',
-            name='title',
-            field=models.CharField(blank=True, help_text='Title of the availability level', max_length=64, verbose_name='title'),
+            model_name="availabilityleveltranslation",
+            name="title",
+            field=models.CharField(
+                blank=True,
+                help_text="Title of the availability level",
+                max_length=64,
+                verbose_name="title",
+            ),
         ),
         migrations.AlterField(
-            model_name='availabilityleveltranslation',
-            name='description',
-            field=models.TextField(blank=True, help_text='Description of the availability level', max_length=200, verbose_name='description'),
+            model_name="availabilityleveltranslation",
+            name="description",
+            field=models.TextField(
+                blank=True,
+                help_text="Description of the availability level",
+                max_length=200,
+                verbose_name="description",
+            ),
         ),
     ]

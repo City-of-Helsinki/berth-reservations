@@ -5,14 +5,18 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('reservations', '0003_from_data_to_main_fields'),
-    ]
+    dependencies = [("reservations", "0003_from_data_to_main_fields")]
 
     operations = [
         migrations.AlterField(
-            model_name='reservation',
-            name='boat_weight',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True, verbose_name='boat weight'),
-        ),
+            model_name="reservation",
+            name="boat_weight",
+            field=models.DecimalField(
+                blank=True,
+                decimal_places=2,
+                max_digits=10,
+                null=True,
+                verbose_name="boat weight",
+            ),
+        )
     ]

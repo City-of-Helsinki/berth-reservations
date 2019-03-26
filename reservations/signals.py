@@ -6,7 +6,7 @@ from raven import Client
 from notifications.enums import NotificationType
 from notifications.utils import send_notification
 
-reservation_saved = Signal(providing_args=['reservation'])
+reservation_saved = Signal(providing_args=["reservation"])
 
 
 def reservation_notification_handler(sender, reservation, **kwargs):
@@ -15,7 +15,7 @@ def reservation_notification_handler(sender, reservation, **kwargs):
             reservation.email,
             NotificationType.RESERVATION_CREATED,
             reservation.get_notification_context(),
-            reservation.language
+            reservation.language,
         )
     except (OSError, AnymailError):
         raven_client = Client()

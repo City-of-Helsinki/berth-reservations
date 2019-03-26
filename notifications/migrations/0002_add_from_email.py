@@ -5,14 +5,14 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('notifications', '0001_initial'),
-    ]
+    dependencies = [("notifications", "0001_initial")]
 
     operations = [
         migrations.AddField(
-            model_name='notificationtemplate',
-            name='from_email',
-            field=models.EmailField(default='dev@hel.fi', max_length=100, verbose_name='From email'),
-        ),
+            model_name="notificationtemplate",
+            name="from_email",
+            field=models.EmailField(
+                default="dev@hel.fi", max_length=100, verbose_name="From email"
+            ),
+        )
     ]

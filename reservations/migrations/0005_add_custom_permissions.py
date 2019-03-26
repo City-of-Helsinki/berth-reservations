@@ -5,13 +5,15 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('reservations', '0004_allow_decimal_weight'),
-    ]
+    dependencies = [("reservations", "0004_allow_decimal_weight")]
 
     operations = [
         migrations.AlterModelOptions(
-            name='reservation',
-            options={'permissions': (('resend_reservation', 'Can resend confirmation for reservations'),)},
-        ),
+            name="reservation",
+            options={
+                "permissions": (
+                    ("resend_reservation", "Can resend confirmation for reservations"),
+                )
+            },
+        )
     ]

@@ -10,8 +10,8 @@ class MailerFailureException(Exception):
 
 @receiver(post_save, sender=MessageLog)
 def mailer_message_failure_handler(sender, **kwargs):
-    message_failure_log = kwargs.get('instance')
-    created = kwargs.get('created')
+    message_failure_log = kwargs.get("instance")
+    created = kwargs.get("created")
 
     if created and message_failure_log.result == RESULT_FAILURE:
         raven_client = Client()

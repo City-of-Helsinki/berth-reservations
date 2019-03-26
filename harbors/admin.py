@@ -13,7 +13,7 @@ class BoatTypeAdmin(TranslatableAdmin):
 
 
 class HarborAdmin(TranslatableAdmin, admin.OSMGeoAdmin):
-    filter_horizontal = ('suitable_boat_types',)
+    filter_horizontal = ("suitable_boat_types",)
 
 
 admin.site.register(AvailabilityLevel, AvailabilityLevelAdmin)
