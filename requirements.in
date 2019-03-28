@@ -14,3 +14,5 @@ django-parler-rest
 django-munigeo
 django-mailer
 xlsxwriter
+graphene-django
+django-graphql-geojson

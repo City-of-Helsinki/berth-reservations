@@ -25,5 +25,6 @@ def harbor():
 
     harbor.set_current_language("fi")
     harbor.name = "Aurinkoinen satama"
+    harbor.zip_code = "00100"
     harbor.save()
     return harbor

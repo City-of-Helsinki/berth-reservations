@@ -118,6 +118,7 @@ INSTALLED_APPS = [
     "mptt",
     "munigeo",
     "mailer",
+    "graphene_django",
     # Local apps
     "reservations",
     "notifications",
@@ -128,6 +129,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -170,6 +172,8 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
 }
+
+GRAPHENE = {"SCHEMA": "berth_reservations.schema.schema"}
 
 LOGGING = {
     "version": 1,
