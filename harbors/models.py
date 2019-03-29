@@ -10,9 +10,6 @@ from parler.models import TranslatableModel, TranslatedFields
 
 
 class BoatType(TranslatableModel):
-    identifier = models.CharField(
-        verbose_name=_("Unique identifier"), max_length=100, unique=True
-    )
     translations = TranslatedFields(
         name=models.CharField(
             verbose_name=_("name"), max_length=200, help_text=_("Name of the boat type")
@@ -25,19 +22,19 @@ class BoatType(TranslatableModel):
         ordering = ("id",)
 
     def __str__(self):
-        return "{} ({})".format(self.safe_translation_getter("name"), self.identifier)
+        return self.safe_translation_getter("name", super().__str__())
 
 
 def get_harbor_media_folder(instance, filename):
-    return "harbors/{harbor_identifier}/{filename}".format(
-        harbor_identifier=instance.identifier, filename=filename
+    return "harbors/{harbor_id}/{filename}".format(
+        harbor_id=instance.id, filename=filename
     )
 
 
 class OverwriteStorage(FileSystemStorage):
     """
     Custom storage that deletes previous harbor images
-    by deleting the /harbors/{harbor_identifier}/ folder
+    by deleting the /harbors/{harbor_id}/ folder
     """
 
     def get_available_name(self, name, max_length=None):
@@ -48,9 +45,6 @@ class OverwriteStorage(FileSystemStorage):
 
 
 class AvailabilityLevel(TranslatableModel):
-    identifier = models.CharField(
-        verbose_name=_("Unique identifier"), max_length=100, unique=True
-    )
     translations = TranslatedFields(
         title=models.CharField(
             verbose_name=_("title"),
@@ -72,19 +66,10 @@ class AvailabilityLevel(TranslatableModel):
         ordering = ("id",)
 
     def __str__(self):
-        return self.identifier
+        return self.safe_translation_getter("title", super().__str__())
 
 
 class Harbor(TranslatableModel):
-    identifier = models.CharField(
-        verbose_name=_("Unique identifier"),
-        max_length=100,
-        unique=True,
-        help_text=_(
-            "Unique string to identify the harbor, e.g. `elaintarhanlahti` for Eläintarhanlahti"
-        ),
-    )
-
     # For importing coordinates and address from servicemap.hel.fi
     servicemap_id = models.CharField(
         verbose_name=_("Servicemap ID"),
@@ -191,4 +176,4 @@ class Harbor(TranslatableModel):
         ordering = ("id",)
 
     def __str__(self):
-        return "{} ({})".format(self.safe_translation_getter("name"), self.identifier)
+        return self.safe_translation_getter("name", super().__str__())
