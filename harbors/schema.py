@@ -41,6 +41,7 @@ class HarborType(graphql_geojson.GeoJSONType):
 
     name = graphene.String()
     street_address = graphene.String()
+    municipality = graphene.String()
 
 
 class Query:
