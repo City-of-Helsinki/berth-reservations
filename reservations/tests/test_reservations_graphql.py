@@ -1,3 +1,5 @@
+from string import Template
+
 from graphene.test import Client
 
 from berth_reservations.schema import schema
@@ -5,9 +7,14 @@ from berth_reservations.schema import schema
 
 def test_create_reservation(harbor):
     client = Client(schema)
-    mutation = """
-        mutation createReservation {
+    t = Template(
+        """mutation createReservation {
             createReservation(
+                berthSwitch: {
+                    harborId: ${harbor},
+                    pier: "dinkkypier",
+                    berthNumber: "D33"
+                },
                 reservation: {
                     firstName: "John",
                     lastName: "Doe",
@@ -16,6 +23,9 @@ def test_create_reservation(harbor):
                 ]
             }) {
             reservation{
+                berthSwitch{
+                    berthNumber
+                },
                 chosenHarbors{
                     edges{
                     node{
@@ -28,15 +38,18 @@ def test_create_reservation(harbor):
                 }
             }
         }
-    """
+        """
+    )
+    mutation = t.substitute(harbor=harbor.id)
     executed = client.execute(mutation)
     assert executed == {
         "data": {
             "createReservation": {
                 "reservation": {
+                    "berthSwitch": {"berthNumber": "D33"},
                     "chosenHarbors": {
                         "edges": [{"node": {"properties": {"zipCode": "00100"}}}]
-                    }
+                    },
                 }
             }
         }
