@@ -107,6 +107,7 @@ class ReservationAdmin(admin.ModelAdmin):
                     "accept_library_news",
                     "accept_other_culture_news",
                     "information_accuracy_confirmed",
+                    "comment",
                 ]
             },
         ),

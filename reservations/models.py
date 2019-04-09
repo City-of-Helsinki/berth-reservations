@@ -163,6 +163,8 @@ class Reservation(models.Model):
 
     data = JSONField(blank=True, null=True)
 
+    comment = models.TextField(verbose_name=_("comment"), blank=True)
+
     class Meta:
         permissions = (
             ("resend_reservation", _("Can resend confirmation for reservations")),
