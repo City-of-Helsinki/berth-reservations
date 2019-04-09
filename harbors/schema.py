@@ -42,6 +42,10 @@ class HarborType(graphql_geojson.GeoJSONType):
     name = graphene.String()
     street_address = graphene.String()
     municipality = graphene.String()
+    image_file = graphene.String()
+
+    def resolve_image_file(self, info, **kwargs):
+        return info.context.build_absolute_uri(self.image_file.url)
 
 
 class Query:
