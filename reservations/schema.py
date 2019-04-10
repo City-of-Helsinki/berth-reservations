@@ -1,7 +1,7 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 
-from .models import BoatType, Harbor, HarborChoice, Reservation
+from .models import BerthSwitch, BoatType, Harbor, HarborChoice, Reservation
 
 
 class HarborChoiceType(DjangoObjectType):
@@ -14,9 +14,20 @@ class ReservationType(DjangoObjectType):
         model = Reservation
 
 
+class BerthSwitchType(DjangoObjectType):
+    class Meta:
+        model = BerthSwitch
+
+
 class HarborChoiceInput(graphene.InputObjectType):
     harbor_id = graphene.String()
     priority = graphene.Int()
+
+
+class BerthSwitchInput(graphene.InputObjectType):
+    harbor_id = graphene.Int()
+    pier = graphene.String()
+    berth_number = graphene.String()
 
 
 class ReservationInput(graphene.InputObjectType):
@@ -57,7 +68,8 @@ class ReservationInput(graphene.InputObjectType):
 
 class CreateReservation(graphene.Mutation):
     class Arguments:
-        reservation = ReservationInput()
+        reservation = ReservationInput(required=True)
+        berth_switch = BerthSwitchInput()
 
     ok = graphene.Boolean()
     reservation = graphene.Field(ReservationType)
@@ -70,6 +82,20 @@ class CreateReservation(graphene.Mutation):
             obj_id = None
         if obj_id:
             reservation_data["boat_type"] = BoatType.objects.get(id=obj_id)
+
+        try:
+            switch_data = kwargs.pop("berth_switch")
+        except KeyError:
+            switch_data = None
+        if switch_data:
+            obj_id = switch_data["harbor_id"]
+            old_harbor = Harbor.objects.get(id=switch_data["harbor_id"])
+            berth_switch = BerthSwitch.objects.create(
+                harbor=old_harbor,
+                pier=switch_data["pier"],
+                berth_number=switch_data["berth_number"],
+            )
+            reservation_data["berth_switch"] = berth_switch
         try:
             choices = reservation_data.pop("choices")
         except KeyError:
@@ -80,6 +106,7 @@ class CreateReservation(graphene.Mutation):
             HarborChoice.objects.get_or_create(
                 harbor=harbor, priority=choice["priority"], reservation=reservation
             )
+
         ok = True
         return CreateReservation(reservation=reservation, ok=ok)
 

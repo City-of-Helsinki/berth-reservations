@@ -17,6 +17,12 @@ class HarborChoice(models.Model):
         unique_together = ("reservation", "priority")
 
 
+class BerthSwitch(models.Model):
+    harbor = models.ForeignKey(Harbor, on_delete=models.CASCADE)
+    pier = models.CharField(verbose_name=_("pier"), max_length=40, blank=True)
+    berth_number = models.CharField(verbose_name=_("berth number"), max_length=20)
+
+
 class Reservation(models.Model):
     created_at = models.DateTimeField(verbose_name=_("created at"), auto_now_add=True)
 
@@ -31,6 +37,14 @@ class Reservation(models.Model):
 
     chosen_harbors = models.ManyToManyField(
         Harbor, through=HarborChoice, verbose_name=_("chosen harbors"), blank=True
+    )
+
+    berth_switch = models.ForeignKey(
+        BerthSwitch,
+        verbose_name=_("berth switch"),
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
 
     # Applicant info

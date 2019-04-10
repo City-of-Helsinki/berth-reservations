@@ -19,6 +19,23 @@ from .utils import export_reservations_as_xlsx
 logger = logging.getLogger(__name__)
 
 
+class ReservationTypeFilter(admin.SimpleListFilter):
+    title = _("Reservation type")
+
+    parameter_name = "berth_switch"
+
+    def lookups(self, request, model_admin):
+        return (("0", _("Reservation")), ("1", _("Switch application")))
+
+    def queryset(self, request, queryset):
+        kwargs = {"{}".format(self.parameter_name): None}
+        if self.value() == "0":
+            return queryset.filter(**kwargs)
+        if self.value() == "1":
+            return queryset.exclude(**kwargs)
+        return queryset
+
+
 class HarborChoiceInline(admin.TabularInline):
     model = HarborChoice
     ordering = ("priority",)
@@ -94,8 +111,12 @@ class ReservationAdmin(admin.ModelAdmin):
             },
         ),
     ]
-    list_display = ("created_at", "first_name", "last_name")
+    list_display = ("created_at", "first_name", "last_name", "reservation_type")
+    list_filter = (ReservationTypeFilter,)
     actions = ["export_reservations", "resend_reservation_confirmation"]
+
+    def reservation_type(self, obj):
+        return _("Reservation") if obj.berth_switch is None else _("Switch application")
 
     def export_reservations(self, request, queryset):
         response = HttpResponse(
