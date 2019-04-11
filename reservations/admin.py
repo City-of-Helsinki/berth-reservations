@@ -46,9 +46,15 @@ class HarborChoiceInline(admin.TabularInline):
 
 class ReservationAdmin(admin.ModelAdmin):
     inlines = [HarborChoiceInline]
-    readonly_fields = ["created_at"]
+    readonly_fields = [
+        "reservation_type",
+        "created_at",
+        "get_berth_switch_harbor",
+        "get_berth_switch_pier",
+        "get_berth_switch_berth_number",
+    ]
     fieldsets = [
-        (None, {"fields": ["created_at", "is_processed"]}),
+        (None, {"fields": ["reservation_type", "created_at", "is_processed"]}),
         (
             _("Contact information"),
             {
@@ -98,6 +104,16 @@ class ReservationAdmin(admin.ModelAdmin):
             },
         ),
         (
+            _("Switch berth information"),
+            {
+                "fields": [
+                    "get_berth_switch_harbor",
+                    "get_berth_switch_pier",
+                    "get_berth_switch_berth_number",
+                ]
+            },
+        ),
+        (
             _("Other information"),
             {
                 "fields": [
@@ -117,6 +133,21 @@ class ReservationAdmin(admin.ModelAdmin):
 
     def reservation_type(self, obj):
         return _("Reservation") if obj.berth_switch is None else _("Switch application")
+
+    def get_berth_switch_harbor(self, obj):
+        return obj.berth_switch.harbor
+
+    get_berth_switch_harbor.short_description = _("Harbor")
+
+    def get_berth_switch_pier(self, obj):
+        return obj.berth_switch.pier
+
+    get_berth_switch_pier.short_description = _("Pier")
+
+    def get_berth_switch_berth_number(self, obj):
+        return obj.berth_switch.berth_number
+
+    get_berth_switch_berth_number.short_description = _("Berth number")
 
     def export_reservations(self, request, queryset):
         response = HttpResponse(
