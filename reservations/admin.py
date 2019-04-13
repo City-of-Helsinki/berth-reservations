@@ -19,6 +19,23 @@ from .utils import export_reservations_as_xlsx
 logger = logging.getLogger(__name__)
 
 
+class ReservationTypeFilter(admin.SimpleListFilter):
+    title = _("Reservation type")
+
+    parameter_name = "berth_switch"
+
+    def lookups(self, request, model_admin):
+        return (("0", _("Reservation")), ("1", _("Switch application")))
+
+    def queryset(self, request, queryset):
+        kwargs = {"{}".format(self.parameter_name): None}
+        if self.value() == "0":
+            return queryset.filter(**kwargs)
+        if self.value() == "1":
+            return queryset.exclude(**kwargs)
+        return queryset
+
+
 class HarborChoiceInline(admin.TabularInline):
     model = HarborChoice
     ordering = ("priority",)
@@ -29,9 +46,15 @@ class HarborChoiceInline(admin.TabularInline):
 
 class ReservationAdmin(admin.ModelAdmin):
     inlines = [HarborChoiceInline]
-    readonly_fields = ["created_at"]
+    readonly_fields = [
+        "reservation_type",
+        "created_at",
+        "get_berth_switch_harbor",
+        "get_berth_switch_pier",
+        "get_berth_switch_berth_number",
+    ]
     fieldsets = [
-        (None, {"fields": ["created_at", "is_processed"]}),
+        (None, {"fields": ["reservation_type", "created_at", "is_processed"]}),
         (
             _("Contact information"),
             {
@@ -81,6 +104,16 @@ class ReservationAdmin(admin.ModelAdmin):
             },
         ),
         (
+            _("Switch berth information"),
+            {
+                "fields": [
+                    "get_berth_switch_harbor",
+                    "get_berth_switch_pier",
+                    "get_berth_switch_berth_number",
+                ]
+            },
+        ),
+        (
             _("Other information"),
             {
                 "fields": [
@@ -94,8 +127,27 @@ class ReservationAdmin(admin.ModelAdmin):
             },
         ),
     ]
-    list_display = ("created_at", "first_name", "last_name")
+    list_display = ("created_at", "first_name", "last_name", "reservation_type")
+    list_filter = (ReservationTypeFilter,)
     actions = ["export_reservations", "resend_reservation_confirmation"]
+
+    def reservation_type(self, obj):
+        return _("Reservation") if obj.berth_switch is None else _("Switch application")
+
+    def get_berth_switch_harbor(self, obj):
+        return obj.berth_switch.harbor
+
+    get_berth_switch_harbor.short_description = _("Harbor")
+
+    def get_berth_switch_pier(self, obj):
+        return obj.berth_switch.pier
+
+    get_berth_switch_pier.short_description = _("Pier")
+
+    def get_berth_switch_berth_number(self, obj):
+        return obj.berth_switch.berth_number
+
+    get_berth_switch_berth_number.short_description = _("Berth number")
 
     def export_reservations(self, request, queryset):
         response = HttpResponse(
