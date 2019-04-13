@@ -84,17 +84,18 @@ We follow the basic config, without any modifications. Basic `black` commands:
 
 ## Helsinki Harbors' data
 
-There is a fixtures file available, that contains basic data about public
-harbors of the City of Helsinki. If you don't have divisions of Helsinki 
+There are some fixtures available, that contain basic data about public
+harbors and winter areas of the City of Helsinki. If you don't have divisions of Helsinki 
 imported yet through [`django-munigeo`](https://github.com/City-of-Helsinki/django-munigeo),
 import them first:
 
     ./manage.py geo_import finland --municipalities
     ./manage.py geo_import helsinki --divisions
 
-Then you can load the fixtures with the following command:
+Then you can load the fixtures with the following commands:
 
     ./manage.py loaddata helsinki-harbors.json
+    ./manage.py loaddata helsinki-winter-areas.json
     
 You can also import default images for Helsinki harbors:
 
