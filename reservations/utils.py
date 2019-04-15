@@ -40,6 +40,7 @@ def export_reservations_as_xlsx(reservations):
         ("Boat is insured", "boat_is_insured", 15),
         ("Boat is inspected", "boat_is_inspected", 15),
         ("Agree to terms", "agree_to_terms", 15),
+        ("Application code", "application_code", 15),
     )
 
     output = io.BytesIO()

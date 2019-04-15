@@ -149,6 +149,8 @@ class Reservation(models.Model):
 
     data = JSONField(blank=True, null=True)
 
+    application_code = models.TextField(verbose_name=_("application code"), blank=True)
+
     class Meta:
         permissions = (
             ("resend_reservation", _("Can resend confirmation for reservations")),

@@ -37,6 +37,7 @@ def test_exporting_reservations_to_excel(boat_type, harbor):
         "boat_is_insured": True,
         "boat_is_inspected": True,
         "agree_to_terms": True,
+        "application_code": "1234567890",
     }
     reservation = ReservationFactory(**reservation_data)
     HarborChoice.objects.create(reservation=reservation, priority=1, harbor=harbor)
@@ -52,7 +53,7 @@ def test_exporting_reservations_to_excel(boat_type, harbor):
 
     boat_type.set_current_language("fi")
 
-    assert xl_sheet.ncols == 30
+    assert xl_sheet.ncols == 31
 
     assert row[0].value == "2019-01-14 10:00"
     assert row[1].value == "1: Aurinkoinen satama"
@@ -84,3 +85,4 @@ def test_exporting_reservations_to_excel(boat_type, harbor):
     assert row[27].value == "Yes"
     assert row[28].value == "Yes"
     assert row[29].value == "Yes"
+    assert row[30].value == "1234567890"
