@@ -63,6 +63,7 @@ class ReservationInput(graphene.InputObjectType):
     accept_library_news = graphene.Boolean()
     accept_other_culture_news = graphene.Boolean()
     information_accuracy_confirmed = graphene.Boolean()
+    application_code = graphene.String()
     choices = graphene.List(HarborChoiceInput)
 
 
