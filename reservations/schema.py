@@ -1,5 +1,6 @@
 import graphene
 from graphene_django.types import DjangoObjectType
+from graphql_relay.node.node import from_global_id
 
 from .models import BerthSwitch, BoatType, Harbor, HarborChoice, Reservation
 
@@ -25,9 +26,9 @@ class HarborChoiceInput(graphene.InputObjectType):
 
 
 class BerthSwitchInput(graphene.InputObjectType):
-    harbor_id = graphene.Int()
+    harbor_id = graphene.String(required=True)
     pier = graphene.String()
-    berth_number = graphene.String()
+    berth_number = graphene.String(required=True)
 
 
 class ReservationInput(graphene.InputObjectType):
@@ -77,35 +78,31 @@ class CreateReservation(graphene.Mutation):
 
     def mutate(self, info, **kwargs):
         reservation_data = kwargs.pop("reservation")
-        try:
-            obj_id = reservation_data.pop("boat_type")
-        except KeyError:
-            obj_id = None
-        if obj_id:
-            reservation_data["boat_type"] = BoatType.objects.get(id=obj_id)
 
-        try:
-            switch_data = kwargs.pop("berth_switch")
-        except KeyError:
-            switch_data = None
+        boat_type_id = reservation_data.pop("boat_type", None)
+        if boat_type_id:
+            reservation_data["boat_type"] = BoatType.objects.get(id=boat_type_id)
+
+        switch_data = kwargs.pop("berth_switch", None)
         if switch_data:
-            obj_id = switch_data["harbor_id"]
-            old_harbor = Harbor.objects.get(id=switch_data["harbor_id"])
+            harbor_id = from_global_id(switch_data.get("harbor_id"))[1]
+            old_harbor = Harbor.objects.get(id=harbor_id)
             berth_switch = BerthSwitch.objects.create(
                 harbor=old_harbor,
-                pier=switch_data["pier"],
-                berth_number=switch_data["berth_number"],
+                pier=switch_data.get("pier"),
+                berth_number=switch_data.get("berth_number"),
             )
             reservation_data["berth_switch"] = berth_switch
-        try:
-            choices = reservation_data.pop("choices")
-        except KeyError:
-            choices = []
+
+        choices = reservation_data.pop("choices", [])
+
         reservation = Reservation.objects.create(**reservation_data)
+
         for choice in choices:
-            harbor = Harbor.objects.get(identifier=choice["harbor_id"])
+            harbor_id = from_global_id(choice.get("harbor_id"))[1]
+            harbor = Harbor.objects.get(id=harbor_id)
             HarborChoice.objects.get_or_create(
-                harbor=harbor, priority=choice["priority"], reservation=reservation
+                harbor=harbor, priority=choice.get("priority"), reservation=reservation
             )
 
         ok = True
