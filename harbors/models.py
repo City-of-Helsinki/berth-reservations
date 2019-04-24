@@ -223,6 +223,15 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
         verbose_name=_("Summer storage for boats"), default=False
     )
 
+    availability_level = models.ForeignKey(
+        AvailabilityLevel,
+        null=True,
+        blank=True,
+        verbose_name=_("Availability level"),
+        related_name="winter_storage_areas",
+        on_delete=models.SET_NULL,
+    )
+
     # Ruutupaikat (~ appointed marked places)
     # We can see in advance who gets a place and who does not.
     # We know their lengths and widths.
