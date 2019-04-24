@@ -1,34 +1,31 @@
-from graphene.test import Client
-
-from berth_reservations.schema import schema
+from berth_reservations.tests.utils import GraphQLTestClient
 
 
 def test_get_boat_type(boat_type):
-    client = Client(schema)
+    client = GraphQLTestClient()
     query = """
         {
-            boatTypes{
-                identifier
+            boatTypes {
+                name
             }
         }
     """
     executed = client.execute(query)
-    assert executed == {"data": {"boatTypes": [{"identifier": "dinghy"}]}}
+    assert executed == {"data": {"boatTypes": [{"name": "Dinghy"}]}}
 
 
 def test_get_harbors(harbor):
-    client = Client(schema)
+    client = GraphQLTestClient()
     query = """
         {
-            harbors{
-                edges{
-                node{
-                            properties{
-                    identifier
-                    zipCode
+            harbors {
+                edges {
+                    node {
+                        properties {
+                            name
+                            zipCode
+                        }
                     }
-
-                }
                 }
             }
         }
@@ -40,10 +37,7 @@ def test_get_harbors(harbor):
                 "edges": [
                     {
                         "node": {
-                            "properties": {
-                                "identifier": "sunny-harbor",
-                                "zipCode": "00100",
-                            }
+                            "properties": {"name": "Sunny Harbor", "zipCode": "00100"}
                         }
                     }
                 ]

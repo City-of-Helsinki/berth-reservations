@@ -1,27 +1,33 @@
 from string import Template
 
-from graphene.test import Client
+from graphql_relay.node.node import to_global_id
 
-from berth_reservations.schema import schema
+from berth_reservations.tests.utils import GraphQLTestClient
+from harbors.schema import HarborType
 
 
 def test_create_reservation(harbor):
-    client = Client(schema)
+    client = GraphQLTestClient()
     t = Template(
-        """mutation createReservation {
+        """
+        mutation createReservation {
             createReservation(
                 berthSwitch: {
-                    harborId: ${harbor},
+                    harborId: \"${current_harbor}\",
                     pier: "dinkkypier",
                     berthNumber: "D33"
                 },
                 reservation: {
                     firstName: "John",
                     lastName: "Doe",
-                choices: [
-                    { harborId: "sunny-harbor", priority: 1}
-                ]
-            }) {
+                    choices: [
+                        {
+                            harborId: \"${desired_harbor}\",
+                            priority: 1
+                        }
+                    ]
+                }
+            ) {
             reservation{
                 berthSwitch{
                     berthNumber
@@ -40,7 +46,10 @@ def test_create_reservation(harbor):
         }
         """
     )
-    mutation = t.substitute(harbor=harbor.id)
+    harbor_node_id = to_global_id(HarborType._meta.name, harbor.id)
+    mutation = t.substitute(
+        current_harbor=harbor_node_id, desired_harbor=harbor_node_id
+    )
     executed = client.execute(mutation)
     assert executed == {
         "data": {
