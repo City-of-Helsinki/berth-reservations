@@ -217,35 +217,43 @@
 },
 {
     "model": "harbors.boattype",
-    "pk": 1
+    "pk": 1,
+    "fields": {}
 },
 {
     "model": "harbors.boattype",
-    "pk": 2
+    "pk": 2,
+    "fields": {}
 },
 {
     "model": "harbors.boattype",
-    "pk": 3
+    "pk": 3,
+    "fields": {}
 },
 {
     "model": "harbors.boattype",
-    "pk": 4
+    "pk": 4,
+    "fields": {}
 },
 {
     "model": "harbors.boattype",
-    "pk": 5
+    "pk": 5,
+    "fields": {}
 },
 {
     "model": "harbors.boattype",
-    "pk": 6
+    "pk": 6,
+    "fields": {}
 },
 {
     "model": "harbors.boattype",
-    "pk": 7
+    "pk": 7,
+    "fields": {}
 },
 {
     "model": "harbors.boattype",
-    "pk": 8
+    "pk": 8,
+    "fields": {}
 },
 {
     "model": "harbors.availabilityleveltranslation",
@@ -339,15 +347,18 @@
 },
 {
     "model": "harbors.availabilitylevel",
-    "pk": 1
+    "pk": 1,
+    "fields": {}
 },
 {
     "model": "harbors.availabilitylevel",
-    "pk": 2
+    "pk": 2,
+    "fields": {}
 },
 {
     "model": "harbors.availabilitylevel",
-    "pk": 3
+    "pk": 3,
+    "fields": {}
 },
 {
     "model": "harbors.harbortranslation",
