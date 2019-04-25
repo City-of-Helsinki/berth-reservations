@@ -42,7 +42,7 @@ class ReservationInput(graphene.InputObjectType):
     municipality = graphene.String()
     company_name = graphene.String()
     business_id = graphene.String()
-    boat_type = graphene.Int()
+    boat_type = graphene.String()
     boat_registration_number = graphene.String()
     boat_name = graphene.String()
     boat_model = graphene.String()
@@ -82,7 +82,7 @@ class CreateReservation(graphene.Mutation):
 
         boat_type_id = reservation_data.pop("boat_type", None)
         if boat_type_id:
-            reservation_data["boat_type"] = BoatType.objects.get(id=boat_type_id)
+            reservation_data["boat_type"] = BoatType.objects.get(id=int(boat_type_id))
 
         switch_data = kwargs.pop("berth_switch", None)
         if switch_data:
