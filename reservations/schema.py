@@ -22,12 +22,12 @@ class BerthSwitchType(DjangoObjectType):
 
 
 class HarborChoiceInput(graphene.InputObjectType):
-    harbor_id = graphene.String()
+    harbor_id = graphene.ID()
     priority = graphene.Int()
 
 
 class BerthSwitchInput(graphene.InputObjectType):
-    harbor_id = graphene.String(required=True)
+    harbor_id = graphene.ID(required=True)
     pier = graphene.String()
     berth_number = graphene.String(required=True)
 
@@ -42,7 +42,7 @@ class ReservationInput(graphene.InputObjectType):
     municipality = graphene.String()
     company_name = graphene.String()
     business_id = graphene.String()
-    boat_type = graphene.String()
+    boat_type = graphene.ID()
     boat_registration_number = graphene.String()
     boat_name = graphene.String()
     boat_model = graphene.String()
