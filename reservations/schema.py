@@ -3,6 +3,7 @@ from graphene_django.types import DjangoObjectType
 from graphql_relay.node.node import from_global_id
 
 from .models import BerthSwitch, BoatType, Harbor, HarborChoice, Reservation
+from .signals import reservation_saved
 
 
 class HarborChoiceType(DjangoObjectType):
@@ -104,6 +105,9 @@ class CreateReservation(graphene.Mutation):
             HarborChoice.objects.get_or_create(
                 harbor=harbor, priority=choice.get("priority"), reservation=reservation
             )
+
+        # Send notifications when all m2m relations are saved
+        reservation_saved.send(sender="CreateReservation", reservation=reservation)
 
         ok = True
         return CreateReservation(reservation=reservation, ok=ok)
