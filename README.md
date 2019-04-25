@@ -22,7 +22,7 @@ The project is now running at [localhost:8000](http://localhost:8000)
 
 Project uses following software verisons:
 
-* Postgres 9.5
+* Postgres 9.6
 * Postgis 2.4
 * Python 3.6
 
