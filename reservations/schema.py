@@ -2,7 +2,7 @@ import graphene
 from graphene_django.types import DjangoObjectType
 from graphql_relay.node.node import from_global_id
 
-from .models import BerthSwitch, BoatType, Harbor, HarborChoice, Reservation
+from .models import BerthReservation, BerthSwitch, BoatType, Harbor, HarborChoice
 from .signals import reservation_saved
 
 
@@ -11,9 +11,9 @@ class HarborChoiceType(DjangoObjectType):
         model = HarborChoice
 
 
-class ReservationType(DjangoObjectType):
+class BerthReservationType(DjangoObjectType):
     class Meta:
-        model = Reservation
+        model = BerthReservation
 
 
 class BerthSwitchType(DjangoObjectType):
@@ -32,7 +32,7 @@ class BerthSwitchInput(graphene.InputObjectType):
     berth_number = graphene.String(required=True)
 
 
-class ReservationInput(graphene.InputObjectType):
+class BerthReservationInput(graphene.InputObjectType):
     first_name = graphene.String()
     last_name = graphene.String()
     email = graphene.String()
@@ -69,16 +69,16 @@ class ReservationInput(graphene.InputObjectType):
     choices = graphene.List(HarborChoiceInput)
 
 
-class CreateReservation(graphene.Mutation):
+class CreateBerthReservation(graphene.Mutation):
     class Arguments:
-        reservation = ReservationInput(required=True)
+        berth_reservation = BerthReservationInput(required=True)
         berth_switch = BerthSwitchInput()
 
     ok = graphene.Boolean()
-    reservation = graphene.Field(ReservationType)
+    berth_reservation = graphene.Field(BerthReservationType)
 
     def mutate(self, info, **kwargs):
-        reservation_data = kwargs.pop("reservation")
+        reservation_data = kwargs.pop("berth_reservation")
 
         boat_type_id = reservation_data.pop("boat_type", None)
         if boat_type_id:
@@ -97,7 +97,7 @@ class CreateReservation(graphene.Mutation):
 
         choices = reservation_data.pop("choices", [])
 
-        reservation = Reservation.objects.create(**reservation_data)
+        reservation = BerthReservation.objects.create(**reservation_data)
 
         for choice in choices:
             harbor_id = from_global_id(choice.get("harbor_id"))[1]
@@ -107,11 +107,11 @@ class CreateReservation(graphene.Mutation):
             )
 
         # Send notifications when all m2m relations are saved
-        reservation_saved.send(sender="CreateReservation", reservation=reservation)
+        reservation_saved.send(sender="CreateBerthReservation", reservation=reservation)
 
         ok = True
-        return CreateReservation(reservation=reservation, ok=ok)
+        return CreateBerthReservation(berth_reservation=reservation, ok=ok)
 
 
 class Mutation(graphene.ObjectType):
-    create_reservation = CreateReservation.Field()
+    create_berth_reservation = CreateBerthReservation.Field()

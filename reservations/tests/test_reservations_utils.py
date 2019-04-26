@@ -1,9 +1,9 @@
 import xlrd
 from freezegun import freeze_time
 
-from ..models import HarborChoice, Reservation
+from ..models import BerthReservation, HarborChoice
 from ..utils import export_reservations_as_xlsx
-from .factories import ReservationFactory
+from .factories import BerthReservationFactory
 
 
 @freeze_time("2019-01-14T08:00:00Z")
@@ -39,10 +39,10 @@ def test_exporting_reservations_to_excel(boat_type, harbor):
         "agree_to_terms": True,
         "application_code": "1234567890",
     }
-    reservation = ReservationFactory(**reservation_data)
+    reservation = BerthReservationFactory(**reservation_data)
     HarborChoice.objects.create(reservation=reservation, priority=1, harbor=harbor)
 
-    queryset = Reservation.objects.all()
+    queryset = BerthReservation.objects.all()
     xlsx_bytes = export_reservations_as_xlsx(queryset)
     wb = xlrd.open_workbook(file_contents=xlsx_bytes)
 

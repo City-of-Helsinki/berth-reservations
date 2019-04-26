@@ -4,7 +4,6 @@ import logging
 from anymail.exceptions import AnymailError
 from django.conf import settings
 from django.contrib import admin, messages
-from django.contrib.auth import get_permission_codename
 from django.contrib.auth.models import Permission
 from django.http import HttpResponse
 from django.utils.translation import ugettext_lazy as _
@@ -13,7 +12,7 @@ from pytz import timezone
 from notifications.enums import NotificationType
 from notifications.utils import send_notification
 
-from .models import HarborChoice, Reservation
+from .models import BerthReservation, HarborChoice
 from .utils import export_reservations_as_xlsx
 
 logger = logging.getLogger(__name__)
@@ -44,7 +43,7 @@ class HarborChoiceInline(admin.TabularInline):
     max_num = 10
 
 
-class ReservationAdmin(admin.ModelAdmin):
+class BerthReservationAdmin(admin.ModelAdmin):
     inlines = [HarborChoiceInline]
     readonly_fields = [
         "reservation_type",
@@ -199,11 +198,11 @@ class ReservationAdmin(admin.ModelAdmin):
 
     def has_resend_permission(self, request):
         opts = self.opts
-        codename = get_permission_codename("resend", opts)
+        codename = "resend_reservation"
         return request.user.has_perm("%s.%s" % (opts.app_label, codename))
 
 
-admin.site.register(Reservation, ReservationAdmin)
+admin.site.register(BerthReservation, BerthReservationAdmin)
 
 # Register Permission model for GUI management of permissions
 admin.site.register(Permission)

@@ -10,7 +10,7 @@ from .utils import localize_datetime
 
 class HarborChoice(models.Model):
     harbor = models.ForeignKey(Harbor, on_delete=models.CASCADE)
-    reservation = models.ForeignKey("Reservation", on_delete=models.CASCADE)
+    reservation = models.ForeignKey("BerthReservation", on_delete=models.CASCADE)
     priority = models.PositiveSmallIntegerField(verbose_name=_("priority"))
 
     class Meta:
@@ -23,7 +23,7 @@ class BerthSwitch(models.Model):
     berth_number = models.CharField(verbose_name=_("berth number"), max_length=20)
 
 
-class Reservation(models.Model):
+class BaseReservation(models.Model):
     created_at = models.DateTimeField(verbose_name=_("created at"), auto_now_add=True)
 
     is_processed = models.BooleanField(verbose_name=_("is processed"), default=False)
@@ -33,18 +33,6 @@ class Reservation(models.Model):
         max_length=10,
         choices=settings.LANGUAGES,
         default=settings.LANGUAGES[0][0],
-    )
-
-    chosen_harbors = models.ManyToManyField(
-        Harbor, through=HarborChoice, verbose_name=_("chosen harbors"), blank=True
-    )
-
-    berth_switch = models.ForeignKey(
-        BerthSwitch,
-        verbose_name=_("berth switch"),
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
     )
 
     # Applicant info
@@ -64,6 +52,7 @@ class Reservation(models.Model):
         verbose_name=_("municipality"), max_length=64, blank=True
     )
 
+    # Company info (if applicable)
     company_name = models.CharField(
         verbose_name=_("company name"), max_length=150, blank=True
     )
@@ -101,47 +90,8 @@ class Reservation(models.Model):
         null=True,
         blank=True,
     )
-    boat_draught = models.DecimalField(
-        verbose_name=_("boat draught"),
-        decimal_places=2,
-        max_digits=5,
-        null=True,
-        blank=True,
-    )
-    boat_weight = models.DecimalField(
-        verbose_name=_("boat weight"),
-        decimal_places=2,
-        max_digits=10,
-        null=True,
-        blank=True,
-    )
     accessibility_required = models.BooleanField(
         verbose_name=_("accessibility required"), default=False
-    )
-
-    # Large vessel specific info
-    boat_propulsion = models.CharField(
-        verbose_name=_("boat propulsion"), max_length=64, blank=True
-    )
-    boat_hull_material = models.CharField(
-        verbose_name=_("boat hull material"), max_length=64, blank=True
-    )
-    boat_intended_use = models.CharField(
-        verbose_name=_("boat intended use"), max_length=150, blank=True
-    )
-    renting_period = models.CharField(
-        verbose_name=_("renting period"), max_length=64, blank=True
-    )
-    rent_from = models.CharField(verbose_name=_("rent from"), max_length=64, blank=True)
-    rent_till = models.CharField(verbose_name=_("rent till"), max_length=64, blank=True)
-    boat_is_inspected = models.BooleanField(
-        verbose_name=_("boat is inspected"), null=True, blank=True
-    )
-    boat_is_insured = models.BooleanField(
-        verbose_name=_("boat is insured"), null=True, blank=True
-    )
-    agree_to_terms = models.BooleanField(
-        verbose_name=_("agree to terms"), null=True, blank=True
     )
 
     accept_boating_newsletter = models.BooleanField(
@@ -166,12 +116,68 @@ class Reservation(models.Model):
     application_code = models.TextField(verbose_name=_("application code"), blank=True)
 
     class Meta:
+        abstract = True
         permissions = (
             ("resend_reservation", _("Can resend confirmation for reservations")),
         )
 
     def __str__(self):
         return "{}: {} {}".format(self.pk, self.first_name, self.last_name)
+
+
+class BerthReservation(BaseReservation):
+    chosen_harbors = models.ManyToManyField(
+        Harbor, through=HarborChoice, verbose_name=_("chosen harbors"), blank=True
+    )
+
+    berth_switch = models.ForeignKey(
+        BerthSwitch,
+        verbose_name=_("berth switch"),
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+
+    # Extra boat dimensions
+    boat_draught = models.DecimalField(
+        verbose_name=_("boat draught"),
+        decimal_places=2,
+        max_digits=5,
+        null=True,
+        blank=True,
+    )
+    boat_weight = models.DecimalField(
+        verbose_name=_("boat weight"),
+        decimal_places=2,
+        max_digits=10,
+        null=True,
+        blank=True,
+    )
+
+    # Large vessel specific info (if applicable)
+    boat_propulsion = models.CharField(
+        verbose_name=_("boat propulsion"), max_length=64, blank=True
+    )
+    boat_hull_material = models.CharField(
+        verbose_name=_("boat hull material"), max_length=64, blank=True
+    )
+    boat_intended_use = models.CharField(
+        verbose_name=_("boat intended use"), max_length=150, blank=True
+    )
+    renting_period = models.CharField(
+        verbose_name=_("renting period"), max_length=64, blank=True
+    )
+    rent_from = models.CharField(verbose_name=_("rent from"), max_length=64, blank=True)
+    rent_till = models.CharField(verbose_name=_("rent till"), max_length=64, blank=True)
+    boat_is_inspected = models.BooleanField(
+        verbose_name=_("boat is inspected"), null=True, blank=True
+    )
+    boat_is_insured = models.BooleanField(
+        verbose_name=_("boat is insured"), null=True, blank=True
+    )
+    agree_to_terms = models.BooleanField(
+        verbose_name=_("agree to terms"), null=True, blank=True
+    )
 
     def get_notification_context(self):
         return {
