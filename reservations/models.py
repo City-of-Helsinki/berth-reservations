@@ -2,15 +2,28 @@ from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from enumfields import EnumField
 
-from harbors.models import BoatType, Harbor
+from harbors.models import BoatType, Harbor, WinterStorageArea
 
+from .enums import WinterStorageMethod
 from .utils import localize_datetime
 
 
 class HarborChoice(models.Model):
     harbor = models.ForeignKey(Harbor, on_delete=models.CASCADE)
     reservation = models.ForeignKey("BerthReservation", on_delete=models.CASCADE)
+    priority = models.PositiveSmallIntegerField(verbose_name=_("priority"))
+
+    class Meta:
+        unique_together = ("reservation", "priority")
+
+
+class WinterStorageAreaChoice(models.Model):
+    winter_storage_area = models.ForeignKey(WinterStorageArea, on_delete=models.CASCADE)
+    reservation = models.ForeignKey(
+        "WinterStorageReservation", on_delete=models.CASCADE
+    )
     priority = models.PositiveSmallIntegerField(verbose_name=_("priority"))
 
     class Meta:
@@ -64,7 +77,7 @@ class BaseReservation(models.Model):
     boat_type = models.ForeignKey(
         BoatType,
         verbose_name=_("boat type"),
-        related_name="reservations",
+        related_name="+",
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
@@ -89,9 +102,6 @@ class BaseReservation(models.Model):
         max_digits=5,
         null=True,
         blank=True,
-    )
-    accessibility_required = models.BooleanField(
-        verbose_name=_("accessibility required"), default=False
     )
 
     accept_boating_newsletter = models.BooleanField(
@@ -154,6 +164,10 @@ class BerthReservation(BaseReservation):
         blank=True,
     )
 
+    accessibility_required = models.BooleanField(
+        verbose_name=_("accessibility required"), default=False
+    )
+
     # Large vessel specific info (if applicable)
     boat_propulsion = models.CharField(
         verbose_name=_("boat propulsion"), max_length=64, blank=True
@@ -183,5 +197,30 @@ class BerthReservation(BaseReservation):
         return {
             "created_at": localize_datetime(self.created_at, self.language),
             "harbor_choices": self.harborchoice_set.order_by("priority"),
+            "reservation": self,
+        }
+
+
+class WinterStorageReservation(BaseReservation):
+    chosen_areas = models.ManyToManyField(
+        WinterStorageArea,
+        through=WinterStorageAreaChoice,
+        verbose_name=_("chosen winter storage areas"),
+        blank=True,
+    )
+
+    storage_method = EnumField(
+        WinterStorageMethod, verbose_name=_("Storage method"), max_length=60
+    )
+
+    # If boat stored on a trailer, trailer's registration number is required
+    trailer_registration_number = models.CharField(
+        verbose_name=_("trailer registration number"), max_length=64, blank=True
+    )
+
+    def get_notification_context(self):
+        return {
+            "created_at": localize_datetime(self.created_at, self.language),
+            "area_choices": self.winterstorageareachoice_set.order_by("priority"),
             "reservation": self,
         }
