@@ -2,7 +2,7 @@ import pytest
 
 from berth_reservations.tests.conftest import *  # noqa
 
-from ..models import BoatType, Harbor
+from ..models import BoatType, Harbor, WinterStorageArea
 
 
 @pytest.fixture
@@ -22,3 +22,13 @@ def harbor():
     harbor.zip_code = "00100"
     harbor.save()
     return harbor
+
+
+@pytest.fixture
+def winter_area():
+    winter_area = WinterStorageArea.objects.language("en").create(name="Snowy Area")
+    winter_area.set_current_language("fi")
+    winter_area.name = "Luminen alue"
+    winter_area.zip_code = "00200"
+    winter_area.save()
+    return winter_area

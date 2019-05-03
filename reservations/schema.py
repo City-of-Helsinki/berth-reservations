@@ -2,8 +2,21 @@ import graphene
 from graphene_django.types import DjangoObjectType
 from graphql_relay.node.node import from_global_id
 
-from .models import BerthReservation, BerthSwitch, BoatType, Harbor, HarborChoice
+from harbors.models import WinterStorageArea
+
+from .enums import WinterStorageMethod
+from .models import (
+    BerthReservation,
+    BerthSwitch,
+    BoatType,
+    Harbor,
+    HarborChoice,
+    WinterStorageAreaChoice,
+    WinterStorageReservation,
+)
 from .signals import reservation_saved
+
+WinterStorageMethodEnum = graphene.Enum.from_enum(WinterStorageMethod)
 
 
 class HarborChoiceType(DjangoObjectType):
@@ -21,9 +34,19 @@ class BerthSwitchType(DjangoObjectType):
         model = BerthSwitch
 
 
+class WinterStorageReservationType(DjangoObjectType):
+    class Meta:
+        model = WinterStorageReservation
+
+
 class HarborChoiceInput(graphene.InputObjectType):
     harbor_id = graphene.ID()
     priority = graphene.Int()
+
+
+class WinterStorageAreaChoiceInput(graphene.InputObjectType):
+    winter_area_id = graphene.ID(required=True)
+    priority = graphene.Int(required=True)
 
 
 class BerthSwitchInput(graphene.InputObjectType):
@@ -32,22 +55,32 @@ class BerthSwitchInput(graphene.InputObjectType):
     berth_number = graphene.String(required=True)
 
 
-class BerthReservationInput(graphene.InputObjectType):
-    first_name = graphene.String()
-    last_name = graphene.String()
-    email = graphene.String()
-    phone_number = graphene.String()
-    address = graphene.String()
-    zip_code = graphene.String()
-    municipality = graphene.String()
+class BaseReservationInput(graphene.InputObjectType):
+    language = graphene.String(required=True)
+    first_name = graphene.String(required=True)
+    last_name = graphene.String(required=True)
+    email = graphene.String(required=True)
+    phone_number = graphene.String(required=True)
+    address = graphene.String(required=True)
+    zip_code = graphene.String(required=True)
+    municipality = graphene.String(required=True)
     company_name = graphene.String()
     business_id = graphene.String()
-    boat_type = graphene.ID()
+    boat_type = graphene.ID(required=True)
     boat_registration_number = graphene.String()
     boat_name = graphene.String()
     boat_model = graphene.String()
-    boat_length = graphene.Float()
-    boat_width = graphene.Float()
+    boat_length = graphene.Float(required=True)
+    boat_width = graphene.Float(required=True)
+    application_code = graphene.String()
+    accept_boating_newsletter = graphene.Boolean(required=True)
+    accept_fitness_news = graphene.Boolean(required=True)
+    accept_library_news = graphene.Boolean(required=True)
+    accept_other_culture_news = graphene.Boolean(required=True)
+    information_accuracy_confirmed = graphene.Boolean(required=True)
+
+
+class BerthReservationInput(BaseReservationInput):
     boat_draught = graphene.Float()
     boat_weight = graphene.Float()
     accessibility_required = graphene.Boolean()
@@ -60,13 +93,13 @@ class BerthReservationInput(graphene.InputObjectType):
     boat_is_inspected = graphene.Boolean()
     boat_is_insured = graphene.Boolean()
     agree_to_terms = graphene.Boolean()
-    accept_boating_newsletter = graphene.Boolean()
-    accept_fitness_news = graphene.Boolean()
-    accept_library_news = graphene.Boolean()
-    accept_other_culture_news = graphene.Boolean()
-    information_accuracy_confirmed = graphene.Boolean()
-    application_code = graphene.String()
     choices = graphene.List(HarborChoiceInput)
+
+
+class WinterStorageReservationInput(BaseReservationInput):
+    storage_method = WinterStorageMethodEnum(required=True)
+    trailer_registration_number = graphene.String()
+    chosen_areas = graphene.List(WinterStorageAreaChoiceInput, required=True)
 
 
 class CreateBerthReservation(graphene.Mutation):
@@ -113,5 +146,42 @@ class CreateBerthReservation(graphene.Mutation):
         return CreateBerthReservation(berth_reservation=reservation, ok=ok)
 
 
+class CreateWinterStorageReservation(graphene.Mutation):
+    class Arguments:
+        winter_storage_reservation = WinterStorageReservationInput(required=True)
+
+    ok = graphene.Boolean()
+    winter_storage_reservation = graphene.Field(WinterStorageReservationType)
+
+    def mutate(self, info, **kwargs):
+        reservation_data = kwargs.pop("winter_storage_reservation")
+
+        boat_type_id = reservation_data.pop("boat_type", None)
+        if boat_type_id:
+            reservation_data["boat_type"] = BoatType.objects.get(id=int(boat_type_id))
+
+        chosen_areas = reservation_data.pop("chosen_areas", [])
+
+        reservation = WinterStorageReservation.objects.create(**reservation_data)
+
+        for choice in chosen_areas:
+            winter_area_id = from_global_id(choice.get("winter_area_id"))[1]
+            winter_storage_area = WinterStorageArea.objects.get(id=winter_area_id)
+            WinterStorageAreaChoice.objects.get_or_create(
+                winter_storage_area=winter_storage_area,
+                priority=choice.get("priority"),
+                reservation=reservation,
+            )
+
+        # TODO: send notifications
+        # Send notifications when all m2m relations are saved
+
+        ok = True
+        return CreateWinterStorageReservation(
+            winter_storage_reservation=reservation, ok=ok
+        )
+
+
 class Mutation(graphene.ObjectType):
     create_berth_reservation = CreateBerthReservation.Field()
+    create_winter_storage_reservation = CreateWinterStorageReservation.Field()
