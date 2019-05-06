@@ -1,13 +1,22 @@
 import xlrd
 from freezegun import freeze_time
 
-from ..models import BerthReservation, HarborChoice
-from ..utils import export_reservations_as_xlsx
-from .factories import BerthReservationFactory
+from ..enums import WinterStorageMethod
+from ..models import (
+    BerthReservation,
+    HarborChoice,
+    WinterStorageAreaChoice,
+    WinterStorageReservation,
+)
+from ..utils import (
+    export_berth_reservations_as_xlsx,
+    export_winter_storage_reservations_as_xlsx,
+)
+from .factories import BerthReservationFactory, WinterStorageReservationFactory
 
 
 @freeze_time("2019-01-14T08:00:00Z")
-def test_exporting_reservations_to_excel(boat_type, harbor):
+def test_exporting_berth_reservations_to_excel(boat_type, harbor):
     reservation_data = {
         "first_name": "Kyösti",
         "last_name": "Testaaja",
@@ -43,7 +52,7 @@ def test_exporting_reservations_to_excel(boat_type, harbor):
     HarborChoice.objects.create(reservation=reservation, priority=1, harbor=harbor)
 
     queryset = BerthReservation.objects.all()
-    xlsx_bytes = export_reservations_as_xlsx(queryset)
+    xlsx_bytes = export_berth_reservations_as_xlsx(queryset)
     wb = xlrd.open_workbook(file_contents=xlsx_bytes)
 
     assert "berth_reservations" in wb.sheet_names()
@@ -86,3 +95,69 @@ def test_exporting_reservations_to_excel(boat_type, harbor):
     assert row[28].value == "Yes"
     assert row[29].value == "Yes"
     assert row[30].value == "1234567890"
+
+
+@freeze_time("2019-01-14T08:00:00Z")
+def test_exporting_winter_storage_reservations_to_excel(boat_type, winter_area):
+    reservation_data = {
+        "first_name": "Kyösti",
+        "last_name": "Testaaja",
+        "email": "kyosti.testaaja@example.com",
+        "address": "Mariankatu 2",
+        "zip_code": "00170",
+        "municipality": "Helsinki",
+        "phone_number": "0411234567",
+        "storage_method": WinterStorageMethod.ON_TRESTLES,
+        "trailer_registration_number": "hel001",
+        "boat_type": boat_type,
+        "boat_width": "2",
+        "boat_length": "3.5",
+        "boat_registration_number": "B0A7",
+        "boat_name": "Vene",
+        "boat_model": "BMW S 12",
+        "accept_boating_newsletter": False,
+        "accept_fitness_news": False,
+        "accept_library_news": False,
+        "accept_other_culture_news": True,
+        "application_code": "1234567890",
+    }
+    reservation = WinterStorageReservationFactory(**reservation_data)
+    WinterStorageAreaChoice.objects.create(
+        reservation=reservation, priority=1, winter_storage_area=winter_area
+    )
+
+    queryset = WinterStorageReservation.objects.all()
+    xlsx_bytes = export_winter_storage_reservations_as_xlsx(queryset)
+    wb = xlrd.open_workbook(file_contents=xlsx_bytes)
+
+    assert "winter_storage_reservations" in wb.sheet_names()
+
+    xl_sheet = wb.sheet_by_name("winter_storage_reservations")
+    row = xl_sheet.row(1)
+
+    boat_type.set_current_language("fi")
+
+    assert xl_sheet.ncols == 22
+
+    assert row[0].value == "2019-01-14 10:00"
+    assert row[1].value == "1: {}".format(winter_area.name)
+    assert row[2].value == "Kyösti"
+    assert row[3].value == "Testaaja"
+    assert row[4].value == "kyosti.testaaja@example.com"
+    assert row[5].value == "Mariankatu 2"
+    assert row[6].value == "00170"
+    assert row[7].value == "Helsinki"
+    assert row[8].value == "0411234567"
+    assert row[9].value == WinterStorageMethod.ON_TRESTLES.label
+    assert row[10].value == "hel001"
+    assert row[11].value == boat_type.name
+    assert row[12].value == 2.0
+    assert row[13].value == 3.5
+    assert row[14].value == "B0A7"
+    assert row[15].value == "Vene"
+    assert row[16].value == "BMW S 12"
+    assert row[17].value == ""
+    assert row[18].value == ""
+    assert row[19].value == ""
+    assert row[20].value == "Yes"
+    assert row[21].value == "1234567890"
