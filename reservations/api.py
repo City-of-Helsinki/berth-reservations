@@ -2,7 +2,7 @@ from rest_framework import mixins, permissions, renderers, serializers, viewsets
 
 from harbors.models import BoatType, Harbor
 
-from .models import HarborChoice, Reservation
+from .models import BerthReservation, HarborChoice
 from .signals import reservation_saved
 
 
@@ -36,7 +36,7 @@ class ReservationSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = Reservation
+        model = BerthReservation
         fields = "__all__"
 
     def create(self, validated_data):
@@ -60,4 +60,4 @@ class ReservationViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     renderer_classes = [renderers.JSONRenderer]
     permission_classes = [permissions.AllowAny]
     serializer_class = ReservationSerializer
-    queryset = Reservation.objects.all()
+    queryset = BerthReservation.objects.all()
