@@ -12,6 +12,7 @@ def export_berth_reservations_as_xlsx(reservations):
         # Common fields
         ("Reserved at", "created_at", 15),
         ("Chosen harbors", "chosen_harbors", 55),
+        ("Current berth", "berth_switch", 15),
         ("First name", "first_name", 15),
         ("Last name", "last_name", 15),
         ("Email", "email", 15),
@@ -70,6 +71,8 @@ def export_berth_reservations_as_xlsx(reservations):
                 attr_name = field[1]
                 if attr_name == "boat_type" and reservation.boat_type:
                     value = reservation.boat_type.name
+                elif attr_name == "berth_switch" and reservation.berth_switch:
+                    value = parse_berth_switch_str(reservation.berth_switch)
                 else:
                     value = getattr(reservation, attr_name)
                     if isinstance(value, bool):
@@ -181,6 +184,31 @@ def parse_choices_to_multiline_string(choices):
         else:
             choices_str += single_choice_line
     return choices_str
+
+
+def parse_berth_switch_str(berth_switch):
+    """
+    Parse a string with berth switch information.
+
+    Examples:
+
+        'Aurinkosatama (B): 5'
+        'Mustikkamaan satama: 6'
+
+    :type berth_switch: reservations.models.BerthSwitch
+    :rtype: str
+    """
+
+    if berth_switch.pier:
+        berth_switch_str = "{} ({}): {}".format(
+            berth_switch.harbor.name, berth_switch.pier, berth_switch.berth_number
+        )
+    else:
+        berth_switch_str = "{}: {}".format(
+            berth_switch.harbor.name, berth_switch.berth_number
+        )
+
+    return berth_switch_str
 
 
 def localize_datetime(dt, language=settings.LANGUAGES[0][0]):
