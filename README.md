@@ -97,7 +97,8 @@ Then you can load the fixtures with the following commands:
     ./manage.py loaddata helsinki-harbors.json
     ./manage.py loaddata helsinki-winter-areas.json
     
-You can also import default images for Helsinki harbors:
+You can also import default images for Helsinki harbors / winter storage areas:
 
     ./manage.py collectstatic  # make sure you have static files in place
     ./manage.py add_helsinki_harbors_images
+    ./manage.py add_helsinki_winter_areas_images
