@@ -13,7 +13,7 @@ def reservation_notification_handler(sender, reservation, **kwargs):
     try:
         send_notification(
             reservation.email,
-            NotificationType.RESERVATION_CREATED,
+            NotificationType.BERTH_RESERVATION_CREATED,
             reservation.get_notification_context(),
             reservation.language,
         )

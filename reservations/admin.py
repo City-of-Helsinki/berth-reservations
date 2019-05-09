@@ -181,21 +181,21 @@ class BerthReservationAdmin(admin.ModelAdmin):
             try:
                 send_notification(
                     reservation.email,
-                    NotificationType.RESERVATION_CREATED,
+                    NotificationType.BERTH_RESERVATION_CREATED,
                     reservation.get_notification_context(),
                     reservation.language,
                 )
                 resent_count += 1
             except (OSError, AnymailError):
                 logger.error(
-                    "Failed to resend confirmation for reservation {}".format(
+                    "Failed to resend confirmation for berth reservation {}".format(
                         reservation.id
                     )
                 )
 
         self.message_user(
             request,
-            _("Resent confirmation for %d reservation(s)") % resent_count,
+            _("Resent confirmation for %d berth reservation(s)") % resent_count,
             messages.SUCCESS,
         )
 

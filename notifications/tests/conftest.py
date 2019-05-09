@@ -17,7 +17,7 @@ def notification_template(settings):
     settings.LANGUAGES = (("fi", "Finnish"), ("en", "English"))
 
     template = NotificationTemplate.objects.language("en").create(
-        type=NotificationType.RESERVATION_CREATED,
+        type=NotificationType.BERTH_RESERVATION_CREATED,
         subject="test subject, variable value: {{ subject_var }}!",
         html_body="<b>test html body</b>, variable value: {{ html_body_var }}!",
         text_body="test text body, variable value: {{ text_body_var }}!",
