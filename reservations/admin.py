@@ -302,25 +302,24 @@ class WinterStorageReservationAdmin(admin.ModelAdmin):
         resent_count = 0
         for reservation in queryset:
             try:
-                # TODO: create NotificationType for winter storage reservations
-                pass
-                # send_notification(
-                #     reservation.email,
-                #     NotificationType.RESERVATION_CREATED,
-                #     reservation.get_notification_context(),
-                #     reservation.language,
-                # )
-                # resent_count += 1
+                send_notification(
+                    reservation.email,
+                    NotificationType.WINTER_STORAGE_RESERVATION_CREATED,
+                    reservation.get_notification_context(),
+                    reservation.language,
+                )
+                resent_count += 1
             except (OSError, AnymailError):
                 logger.error(
-                    "Failed to resend confirmation for reservation {}".format(
+                    "Failed to resend confirmation for winter storage reservation {}".format(
                         reservation.id
                     )
                 )
 
         self.message_user(
             request,
-            _("Resent confirmation for %d reservation(s)") % resent_count,
+            _("Resent confirmation for %d winter storage reservation(s)")
+            % resent_count,
             messages.SUCCESS,
         )
 
