@@ -173,8 +173,10 @@ class CreateWinterStorageReservation(graphene.Mutation):
                 reservation=reservation,
             )
 
-        # TODO: send notifications
         # Send notifications when all m2m relations are saved
+        reservation_saved.send(
+            sender="CreateWinterStorageReservation", reservation=reservation
+        )
 
         ok = True
         return CreateWinterStorageReservation(
