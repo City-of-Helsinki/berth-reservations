@@ -1,7 +1,7 @@
 django-environ
 Django
 psycopg2-binary
-raven
+sentry-sdk
 django-filter
 django-cors-headers
 coreapi
