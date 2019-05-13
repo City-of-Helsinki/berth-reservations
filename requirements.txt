@@ -5,7 +5,7 @@
 #    pip-compile requirements.in
 #
 aniso8601==3.0.2          # via graphene
-certifi==2019.3.9         # via requests
+certifi==2019.3.9         # via requests, sentry-sdk
 chardet==3.0.4            # via requests
 coreapi==2.3.3
 coreschema==0.0.4         # via coreapi
@@ -37,13 +37,13 @@ promise==2.2.1            # via graphene, graphene-django, graphql-core, graphql
 psycopg2-binary==2.8.2
 pytz==2019.1              # via django
 pyyaml==5.1               # via django-munigeo
-raven==6.10.0
 requests-cache==0.5.0     # via django-munigeo
 requests==2.21.0          # via coreapi, django-anymail, django-munigeo, requests-cache
 rx==1.6.1                 # via graphql-core
+sentry-sdk==0.7.14
 singledispatch==3.4.0.3   # via graphene-django
 six==1.12.0               # via django-anymail, django-munigeo, graphene, graphene-django, graphql-core, graphql-relay, promise, singledispatch
 sqlparse==0.3.0           # via django
 uritemplate==3.0.0        # via coreapi
-urllib3==1.24.2           # via requests
+urllib3==1.24.2           # via requests, sentry-sdk
 xlsxwriter==1.1.7

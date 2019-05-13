@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from mailer.models import MessageLog, RESULT_FAILURE
-from raven import Client
+from sentry_sdk import capture_exception
 
 
 class MailerFailureException(Exception):
@@ -14,7 +14,4 @@ def mailer_message_failure_handler(sender, **kwargs):
     created = kwargs.get("created")
 
     if created and message_failure_log.result == RESULT_FAILURE:
-        raven_client = Client()
-        raven_client.captureException(
-            exc_info=MailerFailureException(message_failure_log.log_message)
-        )
+        capture_exception(MailerFailureException(message_failure_log.log_message))

@@ -1,7 +1,7 @@
 from anymail.exceptions import AnymailError
 from django.conf import settings
 from django.dispatch import Signal
-from raven import Client
+from sentry_sdk import capture_exception
 
 from notifications.enums import NotificationType
 from notifications.utils import send_notification
@@ -20,9 +20,8 @@ def reservation_notification_handler(sender, reservation, **kwargs):
             reservation.get_notification_context(),
             reservation.language,
         )
-    except (OSError, AnymailError):
-        raven_client = Client()
-        raven_client.captureException()
+    except (OSError, AnymailError) as e:
+        capture_exception(e)
 
 
 if settings.NOTIFICATIONS_ENABLED:

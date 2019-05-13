@@ -9,7 +9,6 @@ from mailer.models import (
     RESULT_FAILURE,
     RESULT_SUCCESS,
 )
-from raven import Client
 
 from ..utils import send_notification
 
@@ -35,8 +34,8 @@ def test_mailer_fired_automatically(notification_template, dummy_context):
 
 
 @mock.patch("notifications.signals.MailerFailureException")
-@mock.patch.object(Client, "captureException")
-def test_mailer_failure_gets_sent_to_sentry(raven_client, mailer_exception):
+@mock.patch("notifications.signals.capture_exception")
+def test_mailer_failure_gets_sent_to_sentry(sentry_sdk, mailer_exception):
     msg = ("Subject", "Body", "sender@example.com", ["receiver@example.com"])
     mail.send_mass_mail((msg,))
 
@@ -48,11 +47,11 @@ def test_mailer_failure_gets_sent_to_sentry(raven_client, mailer_exception):
         log_message="Houston, we have a problem",
     )
 
-    raven_client.assert_called_once_with(exc_info=mailer_exception(log.log_message))
+    sentry_sdk.assert_called_once_with(mailer_exception(log.log_message))
 
 
-@mock.patch.object(Client, "captureException")
-def test_mailer_success_not_sent_to_sentry(raven_client):
+@mock.patch("notifications.signals.capture_exception")
+def test_mailer_success_not_sent_to_sentry(sentry_sdk):
     msg = ("Subject", "Body", "sender@example.com", ["receiver@example.com"])
     mail.send_mass_mail((msg,))
 
@@ -64,4 +63,4 @@ def test_mailer_success_not_sent_to_sentry(raven_client):
         log_message="Houston, life is good",
     )
 
-    raven_client.assert_not_called()
+    sentry_sdk.assert_not_called()
