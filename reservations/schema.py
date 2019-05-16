@@ -40,8 +40,8 @@ class WinterStorageReservationType(DjangoObjectType):
 
 
 class HarborChoiceInput(graphene.InputObjectType):
-    harbor_id = graphene.ID()
-    priority = graphene.Int()
+    harbor_id = graphene.ID(required=True)
+    priority = graphene.Int(required=True)
 
 
 class WinterStorageAreaChoiceInput(graphene.InputObjectType):
@@ -93,13 +93,15 @@ class BerthReservationInput(BaseReservationInput):
     boat_is_inspected = graphene.Boolean()
     boat_is_insured = graphene.Boolean()
     agree_to_terms = graphene.Boolean()
-    choices = graphene.List(HarborChoiceInput)
+    choices = graphene.List(graphene.NonNull(HarborChoiceInput), required=True)
 
 
 class WinterStorageReservationInput(BaseReservationInput):
     storage_method = WinterStorageMethodEnum(required=True)
     trailer_registration_number = graphene.String()
-    chosen_areas = graphene.List(WinterStorageAreaChoiceInput, required=True)
+    chosen_areas = graphene.List(
+        graphene.NonNull(WinterStorageAreaChoiceInput), required=True
+    )
 
 
 class CreateBerthReservation(graphene.Mutation):
