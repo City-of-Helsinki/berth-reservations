@@ -49,21 +49,13 @@ class BaseReservation(models.Model):
     )
 
     # Applicant info
-    first_name = models.CharField(
-        verbose_name=_("first name"), max_length=40, blank=True
-    )
-    last_name = models.CharField(
-        verbose_name=_("last name"), max_length=150, blank=True
-    )
-    email = models.EmailField(verbose_name=_("email address"), blank=True)
-    phone_number = models.CharField(
-        verbose_name=_("phone number"), max_length=64, blank=True
-    )
-    address = models.CharField(verbose_name=_("address"), max_length=150, blank=True)
-    zip_code = models.CharField(verbose_name=_("zip code"), max_length=64, blank=True)
-    municipality = models.CharField(
-        verbose_name=_("municipality"), max_length=64, blank=True
-    )
+    first_name = models.CharField(verbose_name=_("first name"), max_length=40)
+    last_name = models.CharField(verbose_name=_("last name"), max_length=150)
+    email = models.EmailField(verbose_name=_("email address"))
+    phone_number = models.CharField(verbose_name=_("phone number"), max_length=64)
+    address = models.CharField(verbose_name=_("address"), max_length=150)
+    zip_code = models.CharField(verbose_name=_("zip code"), max_length=64)
+    municipality = models.CharField(verbose_name=_("municipality"), max_length=64)
 
     # Company info (if applicable)
     company_name = models.CharField(
@@ -90,18 +82,10 @@ class BaseReservation(models.Model):
         verbose_name=_("boat model"), max_length=64, blank=True
     )
     boat_length = models.DecimalField(
-        verbose_name=_("boat length"),
-        decimal_places=2,
-        max_digits=5,
-        null=True,
-        blank=True,
+        verbose_name=_("boat length"), decimal_places=2, max_digits=5
     )
     boat_width = models.DecimalField(
-        verbose_name=_("boat width"),
-        decimal_places=2,
-        max_digits=5,
-        null=True,
-        blank=True,
+        verbose_name=_("boat width"), decimal_places=2, max_digits=5
     )
 
     accept_boating_newsletter = models.BooleanField(
