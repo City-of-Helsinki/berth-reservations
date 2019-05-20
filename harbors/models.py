@@ -85,25 +85,17 @@ class AbstractArea(models.Model):
         null=True,
     )
 
-    zip_code = models.CharField(
-        verbose_name=_("Postal code"), max_length=10, null=True, blank=True
-    )
-    phone = models.CharField(
-        verbose_name=_("Phone number"), max_length=30, null=True, blank=True
-    )
-    email = models.EmailField(
-        verbose_name=_("Email"), max_length=100, null=True, blank=True
-    )
-    www_url = models.URLField(
-        verbose_name=_("WWW link"), max_length=400, null=True, blank=True
-    )
+    zip_code = models.CharField(verbose_name=_("Postal code"), max_length=10)
+    phone = models.CharField(verbose_name=_("Phone number"), max_length=30, blank=True)
+    email = models.EmailField(verbose_name=_("Email"), max_length=100, blank=True)
+    www_url = models.URLField(verbose_name=_("WWW link"), max_length=400, blank=True)
 
     location = models.PointField(
         verbose_name=_("Location"), blank=True, null=True, srid=settings.DEFAULT_SRID
     )
 
     image_link = models.URLField(
-        verbose_name=_("Image link"), max_length=400, null=True, blank=True
+        verbose_name=_("Image link"), max_length=400, blank=True
     )
 
     # Common services
