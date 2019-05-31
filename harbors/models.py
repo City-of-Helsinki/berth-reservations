@@ -116,7 +116,7 @@ class Harbor(AbstractArea, TranslatableModel):
         null=True,
         blank=True,
         verbose_name=_("Municipality"),
-        related_name="harbors",
+        related_name="+",
         on_delete=models.SET_NULL,
     )
 
@@ -194,7 +194,7 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
         null=True,
         blank=True,
         verbose_name=_("Municipality"),
-        related_name="winter_storage_areas",
+        related_name="+",
         on_delete=models.SET_NULL,
     )
 
