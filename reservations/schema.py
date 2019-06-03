@@ -125,7 +125,7 @@ class CreateBerthReservation(graphene.Mutation):
             old_harbor = Harbor.objects.get(id=harbor_id)
             berth_switch = BerthSwitch.objects.create(
                 harbor=old_harbor,
-                pier=switch_data.get("pier"),
+                pier=switch_data.get("pier", ""),
                 berth_number=switch_data.get("berth_number"),
             )
             reservation_data["berth_switch"] = berth_switch
