@@ -1,0 +1,578 @@
+[
+{
+    "model": "harbors.winterstoragearea",
+    "pk": 1,
+    "fields": {
+        "servicemap_id": null,
+        "zip_code": "00840",
+        "phone": null,
+        "email": null,
+        "www_url": null,
+        "location": "SRID=4326;POINT (25.05944966921156 60.16830790272025)",
+        "image_file": "",
+        "image_link": null,
+        "electricity": true,
+        "water": true,
+        "gate": false,
+        "municipality": "helsinki",
+        "repair_area": false,
+        "summer_storage_for_docking_equipment": true,
+        "summer_storage_for_trailers": true,
+        "summer_storage_for_boats": false,
+        "number_of_marked_places": 89,
+        "max_width": 450,
+        "max_length": 1200,
+        "number_of_section_spaces": null,
+        "max_length_of_section_spaces": null,
+        "number_of_unmarked_spaces": null
+    }
+},
+{
+    "model": "harbors.winterstoragearea",
+    "pk": 2,
+    "fields": {
+        "servicemap_id": null,
+        "zip_code": "00810",
+        "phone": null,
+        "email": null,
+        "www_url": null,
+        "location": "SRID=4326;POINT (25.02681254992266 60.18674774714384)",
+        "image_file": "",
+        "image_link": null,
+        "electricity": true,
+        "water": true,
+        "gate": false,
+        "municipality": "helsinki",
+        "repair_area": false,
+        "summer_storage_for_docking_equipment": true,
+        "summer_storage_for_trailers": false,
+        "summer_storage_for_boats": false,
+        "number_of_marked_places": 100,
+        "max_width": 450,
+        "max_length": 1200,
+        "number_of_section_spaces": null,
+        "max_length_of_section_spaces": null,
+        "number_of_unmarked_spaces": null
+    }
+},
+{
+    "model": "harbors.winterstoragearea",
+    "pk": 3,
+    "fields": {
+        "servicemap_id": null,
+        "zip_code": "00980",
+        "phone": null,
+        "email": null,
+        "www_url": null,
+        "location": "SRID=4326;POINT (25.17741322166875 60.20774673533648)",
+        "image_file": "",
+        "image_link": null,
+        "electricity": true,
+        "water": true,
+        "gate": false,
+        "municipality": "helsinki",
+        "repair_area": false,
+        "summer_storage_for_docking_equipment": true,
+        "summer_storage_for_trailers": false,
+        "summer_storage_for_boats": false,
+        "number_of_marked_places": 57,
+        "max_width": 300,
+        "max_length": 1000,
+        "number_of_section_spaces": null,
+        "max_length_of_section_spaces": null,
+        "number_of_unmarked_spaces": null
+    }
+},
+{
+    "model": "harbors.winterstoragearea",
+    "pk": 4,
+    "fields": {
+        "servicemap_id": null,
+        "zip_code": "00250",
+        "phone": null,
+        "email": null,
+        "www_url": null,
+        "location": "SRID=4326;POINT (24.90378498684718 60.18105042830676)",
+        "image_file": "",
+        "image_link": null,
+        "electricity": true,
+        "water": true,
+        "gate": false,
+        "municipality": "helsinki",
+        "repair_area": true,
+        "summer_storage_for_docking_equipment": true,
+        "summer_storage_for_trailers": true,
+        "summer_storage_for_boats": false,
+        "number_of_marked_places": 253,
+        "max_width": 400,
+        "max_length": 2000,
+        "number_of_section_spaces": null,
+        "max_length_of_section_spaces": null,
+        "number_of_unmarked_spaces": null
+    }
+},
+{
+    "model": "harbors.winterstoragearea",
+    "pk": 5,
+    "fields": {
+        "servicemap_id": null,
+        "zip_code": "00100",
+        "phone": null,
+        "email": null,
+        "www_url": null,
+        "location": "SRID=4326;POINT (24.94548797260213 60.17618451955499)",
+        "image_file": "",
+        "image_link": null,
+        "electricity": false,
+        "water": false,
+        "gate": false,
+        "municipality": "helsinki",
+        "repair_area": false,
+        "summer_storage_for_docking_equipment": false,
+        "summer_storage_for_trailers": false,
+        "summer_storage_for_boats": false,
+        "number_of_marked_places": null,
+        "max_width": null,
+        "max_length": null,
+        "number_of_section_spaces": null,
+        "max_length_of_section_spaces": null,
+        "number_of_unmarked_spaces": 100
+    }
+},
+{
+    "model": "harbors.winterstoragearea",
+    "pk": 6,
+    "fields": {
+        "servicemap_id": null,
+        "zip_code": "00980",
+        "phone": null,
+        "email": null,
+        "www_url": null,
+        "location": "SRID=4326;POINT (25.18298148758502 60.21087037289033)",
+        "image_file": "",
+        "image_link": null,
+        "electricity": true,
+        "water": true,
+        "gate": false,
+        "municipality": "helsinki",
+        "repair_area": false,
+        "summer_storage_for_docking_equipment": true,
+        "summer_storage_for_trailers": false,
+        "summer_storage_for_boats": false,
+        "number_of_marked_places": null,
+        "max_width": null,
+        "max_length": null,
+        "number_of_section_spaces": 100,
+        "max_length_of_section_spaces": 1000,
+        "number_of_unmarked_spaces": null
+    }
+},
+{
+    "model": "harbors.winterstoragearea",
+    "pk": 7,
+    "fields": {
+        "servicemap_id": null,
+        "zip_code": "00980",
+        "phone": null,
+        "email": null,
+        "www_url": null,
+        "location": "SRID=4326;POINT (25.1866507495147 60.21045461576973)",
+        "image_file": "",
+        "image_link": null,
+        "electricity": false,
+        "water": false,
+        "gate": false,
+        "municipality": "helsinki",
+        "repair_area": false,
+        "summer_storage_for_docking_equipment": true,
+        "summer_storage_for_trailers": true,
+        "summer_storage_for_boats": true,
+        "number_of_marked_places": null,
+        "max_width": null,
+        "max_length": null,
+        "number_of_section_spaces": null,
+        "max_length_of_section_spaces": null,
+        "number_of_unmarked_spaces": 50
+    }
+},
+{
+    "model": "harbors.winterstoragearea",
+    "pk": 8,
+    "fields": {
+        "servicemap_id": null,
+        "zip_code": "02480",
+        "phone": null,
+        "email": null,
+        "www_url": null,
+        "location": "SRID=4326;POINT (24.44123267787173 59.98406384717072)",
+        "image_file": "",
+        "image_link": null,
+        "electricity": false,
+        "water": false,
+        "gate": false,
+        "municipality": "kirkkonummi",
+        "repair_area": false,
+        "summer_storage_for_docking_equipment": true,
+        "summer_storage_for_trailers": true,
+        "summer_storage_for_boats": false,
+        "number_of_marked_places": null,
+        "max_width": null,
+        "max_length": null,
+        "number_of_section_spaces": null,
+        "max_length_of_section_spaces": null,
+        "number_of_unmarked_spaces": 20
+    }
+},
+{
+    "model": "harbors.winterstoragearea",
+    "pk": 9,
+    "fields": {
+        "servicemap_id": null,
+        "zip_code": "00930",
+        "phone": null,
+        "email": null,
+        "www_url": null,
+        "location": "SRID=4326;POINT (25.09523033746396 60.20531584911696)",
+        "image_file": "",
+        "image_link": null,
+        "electricity": true,
+        "water": true,
+        "gate": false,
+        "municipality": "helsinki",
+        "repair_area": false,
+        "summer_storage_for_docking_equipment": true,
+        "summer_storage_for_trailers": true,
+        "summer_storage_for_boats": false,
+        "number_of_marked_places": null,
+        "max_width": null,
+        "max_length": null,
+        "number_of_section_spaces": null,
+        "max_length_of_section_spaces": null,
+        "number_of_unmarked_spaces": 100
+    }
+},
+{
+    "model": "harbors.winterstoragearea",
+    "pk": 10,
+    "fields": {
+        "servicemap_id": null,
+        "zip_code": "00210",
+        "phone": null,
+        "email": null,
+        "www_url": null,
+        "location": "SRID=4326;POINT (24.88585710179059 60.15703401158551)",
+        "image_file": "",
+        "image_link": null,
+        "electricity": true,
+        "water": false,
+        "gate": false,
+        "municipality": "helsinki",
+        "repair_area": false,
+        "summer_storage_for_docking_equipment": false,
+        "summer_storage_for_trailers": true,
+        "summer_storage_for_boats": false,
+        "number_of_marked_places": null,
+        "max_width": null,
+        "max_length": null,
+        "number_of_section_spaces": null,
+        "max_length_of_section_spaces": null,
+        "number_of_unmarked_spaces": 125
+    }
+},
+{
+    "model": "harbors.winterstoragearea",
+    "pk": 11,
+    "fields": {
+        "servicemap_id": null,
+        "zip_code": "00910",
+        "phone": null,
+        "email": null,
+        "www_url": null,
+        "location": "SRID=4326;POINT (25.09989738114965 60.20733093862237)",
+        "image_file": "",
+        "image_link": null,
+        "electricity": true,
+        "water": true,
+        "gate": false,
+        "municipality": "helsinki",
+        "repair_area": true,
+        "summer_storage_for_docking_equipment": true,
+        "summer_storage_for_trailers": true,
+        "summer_storage_for_boats": false,
+        "number_of_marked_places": null,
+        "max_width": null,
+        "max_length": null,
+        "number_of_section_spaces": null,
+        "max_length_of_section_spaces": null,
+        "number_of_unmarked_spaces": 500
+    }
+},
+{
+    "model": "harbors.winterstoragearea",
+    "pk": 12,
+    "fields": {
+        "servicemap_id": null,
+        "zip_code": "00820",
+        "phone": null,
+        "email": null,
+        "www_url": null,
+        "location": "SRID=4326;POINT (25.06423473009268 60.19706228633245)",
+        "image_file": "",
+        "image_link": null,
+        "electricity": true,
+        "water": true,
+        "gate": false,
+        "municipality": "helsinki",
+        "repair_area": false,
+        "summer_storage_for_docking_equipment": true,
+        "summer_storage_for_trailers": false,
+        "summer_storage_for_boats": false,
+        "number_of_marked_places": null,
+        "max_width": null,
+        "max_length": null,
+        "number_of_section_spaces": null,
+        "max_length_of_section_spaces": null,
+        "number_of_unmarked_spaces": 40
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 1,
+    "fields": {
+        "language_code": "fi",
+        "name": "Iso-Sarvasto",
+        "street_address": "Isonsarvastontie 3",
+        "master": 1
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 2,
+    "fields": {
+        "language_code": "sv",
+        "name": "Storfladan",
+        "street_address": "Storfladav\u00e4gen 3",
+        "master": 1
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 3,
+    "fields": {
+        "language_code": "fi",
+        "name": "Laivalahti",
+        "street_address": "Simppukarinkatu 2",
+        "master": 2
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 4,
+    "fields": {
+        "language_code": "sv",
+        "name": "B\u00e5tsviken",
+        "street_address": "Simp\u00f6rsgatan 2",
+        "master": 2
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 5,
+    "fields": {
+        "language_code": "fi",
+        "name": "Porslahti",
+        "street_address": "Etel\u00e4reimarintie 8",
+        "master": 3
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 6,
+    "fields": {
+        "language_code": "sv",
+        "name": "Porslax",
+        "street_address": "Sydremmarv\u00e4gen 8",
+        "master": 3
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 7,
+    "fields": {
+        "language_code": "fi",
+        "name": "Rajasaari",
+        "street_address": "Rajasaarenpenger 11",
+        "master": 4
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 8,
+    "fields": {
+        "language_code": "sv",
+        "name": "R\u00e5holmen",
+        "street_address": "R\u00e5holmsbanken 11",
+        "master": 4
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 9,
+    "fields": {
+        "language_code": "fi",
+        "name": "Kaisaniemi",
+        "street_address": "Kaisaniemenranta 3-11",
+        "master": 5
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 10,
+    "fields": {
+        "language_code": "sv",
+        "name": "Kajsaniemi",
+        "street_address": "Kajsaniemistranden 3-11",
+        "master": 5
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 11,
+    "fields": {
+        "language_code": "fi",
+        "name": "Ruusuniemi I",
+        "street_address": "Merenkulkijankuja 1",
+        "master": 6
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 12,
+    "fields": {
+        "language_code": "sv",
+        "name": "Rosenudden I",
+        "street_address": "Sj\u00f6farargr\u00e4nden 1",
+        "master": 6
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 13,
+    "fields": {
+        "language_code": "fi",
+        "name": "Ruusuniemi II",
+        "street_address": "Merenkulkijankuja 6",
+        "master": 7
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 14,
+    "fields": {
+        "language_code": "sv",
+        "name": "Rosenudden II",
+        "street_address": "Sj\u00f6farargr\u00e4nden 6",
+        "master": 7
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 15,
+    "fields": {
+        "language_code": "fi",
+        "name": "L\u00e4hteel\u00e4",
+        "street_address": "L\u00e4ntinen K\u00e4llvikintie",
+        "master": 8
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 16,
+    "fields": {
+        "language_code": "sv",
+        "name": "K\u00e4llviken",
+        "street_address": "V\u00e4stra K\u00e4llviksv\u00e4gen",
+        "master": 8
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 17,
+    "fields": {
+        "language_code": "fi",
+        "name": "Marjaniemi",
+        "street_address": "Niittyranta 19",
+        "master": 9
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 18,
+    "fields": {
+        "language_code": "sv",
+        "name": "Marudd",
+        "street_address": "Maruddsstrand 19",
+        "master": 9
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 19,
+    "fields": {
+        "language_code": "fi",
+        "name": "Pajalahti",
+        "street_address": "Vattuniemenkatu 26",
+        "master": 10
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 20,
+    "fields": {
+        "language_code": "sv",
+        "name": "Smedjeviken",
+        "street_address": "Hallonn\u00e4sgatan 26",
+        "master": 10
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 21,
+    "fields": {
+        "language_code": "fi",
+        "name": "Puotila",
+        "street_address": "Meripellontie 11",
+        "master": 11
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 22,
+    "fields": {
+        "language_code": "sv",
+        "name": "Botby",
+        "street_address": "Sj\u00f6\u00e5kerv\u00e4gen 11",
+        "master": 11
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 23,
+    "fields": {
+        "language_code": "fi",
+        "name": "Str\u00f6msinlahti",
+        "street_address": "Abraham Wetterin tie 26",
+        "master": 12
+    }
+},
+{
+    "model": "harbors.winterstorageareatranslation",
+    "pk": 24,
+    "fields": {
+        "language_code": "sv",
+        "name": "Str\u00f6msviken",
+        "street_address": "Abraham Wetters v\u00e4g 26",
+        "master": 12
+    }
+}
+]

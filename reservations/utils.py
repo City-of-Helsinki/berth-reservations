@@ -3,14 +3,16 @@ import io
 from django.conf import settings
 from django.utils import dateformat, formats, timezone, translation
 from django.utils.translation import ugettext_lazy as _
+from enumfields import Enum
 from xlsxwriter import Workbook
 
 
-def export_reservations_as_xlsx(reservations):
+def export_berth_reservations_as_xlsx(reservations):
     fields = (
         # Common fields
         ("Reserved at", "created_at", 15),
         ("Chosen harbors", "chosen_harbors", 55),
+        ("Current berth", "berth_switch", 15),
         ("First name", "first_name", 15),
         ("Last name", "last_name", 15),
         ("Email", "email", 15),
@@ -62,13 +64,15 @@ def export_reservations_as_xlsx(reservations):
             ws.write(row_number, 0, timestamp)
 
             harbor_choices = reservation.harborchoice_set.order_by("priority")
-            choices_str = parse_harbor_choices_to_multiline_string(harbor_choices)
+            choices_str = parse_choices_to_multiline_string(harbor_choices)
             ws.write(row_number, 1, choices_str, wrapped_cell_format)
 
             for column_number, field in enumerate(fields[2:], 2):
                 attr_name = field[1]
                 if attr_name == "boat_type" and reservation.boat_type:
                     value = reservation.boat_type.name
+                elif attr_name == "berth_switch" and reservation.berth_switch:
+                    value = parse_berth_switch_str(reservation.berth_switch)
                 else:
                     value = getattr(reservation, attr_name)
                     if isinstance(value, bool):
@@ -81,10 +85,78 @@ def export_reservations_as_xlsx(reservations):
     return output.getvalue()
 
 
-def parse_harbor_choices_to_multiline_string(choices):
+def export_winter_storage_reservations_as_xlsx(reservations):
+    fields = (
+        ("Reserved at", "created_at", 15),
+        ("Chosen winter areas", "chosen_harbors", 55),
+        ("First name", "first_name", 15),
+        ("Last name", "last_name", 15),
+        ("Email", "email", 15),
+        ("Address", "address", 15),
+        ("Zip code", "zip_code", 15),
+        ("Municipality", "municipality", 15),
+        ("Phone number", "phone_number", 15),
+        ("Storage method", "storage_method", 15),
+        ("Trailer registration number", "trailer_registration_number", 15),
+        ("Boat type", "boat_type", 15),
+        ("Boat width", "boat_width", 15),
+        ("Boat length", "boat_length", 15),
+        ("Boat registration number", "boat_registration_number", 15),
+        ("Boat name", "boat_name", 15),
+        ("Boat model", "boat_model", 15),
+        ("Accept boating newsletter", "accept_boating_newsletter", 15),
+        ("Accept fitness news", "accept_fitness_news", 15),
+        ("Accept library news", "accept_library_news", 15),
+        ("Accept other culture news", "accept_other_culture_news", 15),
+        ("Application code", "application_code", 15),
+    )
+
+    output = io.BytesIO()
+
+    wb = Workbook(output)
+    ws = wb.add_worksheet(name="winter_storage_reservations")
+    wrapped_cell_format = wb.add_format()
+    wrapped_cell_format.set_text_wrap()
+
+    header_format = wb.add_format({"bold": True})
+    for column, field in enumerate(fields):
+        ws.write(0, column, str(_(field[0])), header_format)
+        ws.set_column(column, column, field[2])
+
+    with translation.override(settings.LANGUAGES[0][0]):
+
+        for row_number, reservation in enumerate(reservations, 1):
+            timestamp = reservation.created_at.astimezone().strftime("%Y-%m-%d %H:%M")
+            ws.write(row_number, 0, timestamp)
+
+            winter_area_choices = reservation.winterstorageareachoice_set.order_by(
+                "priority"
+            )
+            choices_str = parse_choices_to_multiline_string(winter_area_choices)
+            ws.write(row_number, 1, choices_str, wrapped_cell_format)
+
+            for column_number, field in enumerate(fields[2:], 2):
+                attr_name = field[1]
+                if attr_name == "boat_type" and reservation.boat_type:
+                    value = reservation.boat_type.name
+                else:
+                    value = getattr(reservation, attr_name)
+                    if isinstance(value, bool):
+                        value = "Yes" if value else ""
+                    elif isinstance(value, Enum):
+                        value = str(value)
+
+                ws.write(row_number, column_number, value)
+
+    wb.close()
+
+    return output.getvalue()
+
+
+def parse_choices_to_multiline_string(choices):
     """
-    Turns a Queryset of HarborChoice objects into a nice
-    user-friendly string.
+    Turns a Queryset of HarborChoice or WinterStorageAreaChoice
+    objects into a nice user-friendly string.
 
     Example of the returned string:
 
@@ -94,14 +166,49 @@ def parse_harbor_choices_to_multiline_string(choices):
     :type choices: django.db.models.query.QuerySet
     :rtype: str
     """
-    harbor_choices_str = ""
+    from .models import HarborChoice, WinterStorageAreaChoice
+
+    choices_str = ""
     for choice in choices:
-        single_choice_line = "{}: {}".format(choice.priority, choice.harbor.name)
-        if harbor_choices_str:
-            harbor_choices_str += "\n" + single_choice_line
+        if isinstance(choice, HarborChoice):
+            single_choice_line = "{}: {}".format(choice.priority, choice.harbor.name)
+        elif isinstance(choice, WinterStorageAreaChoice):
+            single_choice_line = "{}: {}".format(
+                choice.priority, choice.winter_storage_area.name
+            )
         else:
-            harbor_choices_str += single_choice_line
-    return harbor_choices_str
+            single_choice_line = ""
+
+        if choices_str:
+            choices_str += "\n" + single_choice_line
+        else:
+            choices_str += single_choice_line
+    return choices_str
+
+
+def parse_berth_switch_str(berth_switch):
+    """
+    Parse a string with berth switch information.
+
+    Examples:
+
+        'Aurinkosatama (B): 5'
+        'Mustikkamaan satama: 6'
+
+    :type berth_switch: reservations.models.BerthSwitch
+    :rtype: str
+    """
+
+    if berth_switch.pier:
+        berth_switch_str = "{} ({}): {}".format(
+            berth_switch.harbor.name, berth_switch.pier, berth_switch.berth_number
+        )
+    else:
+        berth_switch_str = "{}: {}".format(
+            berth_switch.harbor.name, berth_switch.berth_number
+        )
+
+    return berth_switch_str
 
 
 def localize_datetime(dt, language=settings.LANGUAGES[0][0]):

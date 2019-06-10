@@ -4,19 +4,18 @@ from django.contrib.auth.models import Permission
 from django.test.client import RequestFactory
 from freezegun import freeze_time
 
-from ..admin import ReservationAdmin
-from ..models import Reservation
+from ..admin import BerthReservationAdmin
+from ..models import BerthReservation
 
 site = admin.AdminSite(name="test_admin_site")
-site.register(Reservation)
+site.register(BerthReservation)
 
 
 @pytest.mark.parametrize("has_resend_permissions", [True, False])
 def test_admin_gets_resend_reservations_action_when(has_resend_permissions, admin_user):
     if has_resend_permissions:
         resend_permission = Permission.objects.filter(
-            content_type__app_label=Reservation._meta.app_label,
-            content_type__model=Reservation._meta.model_name,
+            content_type__app_label=BerthReservation._meta.app_label,
             codename="resend_reservation",
         ).first()
         admin_user.user_permissions.add(resend_permission)
@@ -24,7 +23,7 @@ def test_admin_gets_resend_reservations_action_when(has_resend_permissions, admi
     request = RequestFactory().get("/")
     request.user = admin_user
 
-    model_admin = ReservationAdmin(admin_site=site, model=Reservation)
+    model_admin = BerthReservationAdmin(admin_site=site, model=BerthReservation)
     actions = model_admin.get_actions(request)
     resend_action_name = "resend_reservation_confirmation"
 
@@ -35,7 +34,7 @@ def test_admin_gets_export_reservations_action(admin_user):
     request = RequestFactory().get("/")
     request.user = admin_user
 
-    model_admin = ReservationAdmin(admin_site=site, model=Reservation)
+    model_admin = BerthReservationAdmin(admin_site=site, model=BerthReservation)
     actions = model_admin.get_actions(request)
 
     assert "export_reservations" in actions
@@ -46,8 +45,8 @@ def test_export_reservations_action_responds_with_xlsx(admin_user):
     request = RequestFactory().get("/")
     request.user = admin_user
 
-    model_admin = ReservationAdmin(admin_site=site, model=Reservation)
-    queryset = Reservation.objects.all()
+    model_admin = BerthReservationAdmin(admin_site=site, model=BerthReservation)
+    queryset = BerthReservation.objects.all()
     action_response = model_admin.export_reservations(request, queryset)
 
     exp_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

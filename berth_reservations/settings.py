@@ -1,8 +1,10 @@
 import os
+import subprocess
 
 import environ
-import raven
+import sentry_sdk
 from django.utils.translation import ugettext_lazy as _
+from sentry_sdk.integrations.django import DjangoIntegration
 
 checkout_dir = environ.Path(__file__) - 2
 assert os.path.exists(checkout_dir("manage.py"))
@@ -44,11 +46,6 @@ env = environ.Env(
 if os.path.exists(env_file):
     env.read_env(env_file)
 
-try:
-    version = raven.fetch_git_sha(checkout_dir())
-except Exception:
-    version = None
-
 BASE_DIR = str(checkout_dir)
 
 DEBUG = env.bool("DEBUG")
@@ -77,11 +74,17 @@ if env("MAIL_MAILGUN_KEY"):
 EMAIL_BACKEND = "mailer.backend.DbBackend"
 MAILER_EMAIL_BACKEND = env.str("MAILER_EMAIL_BACKEND")
 
-RAVEN_CONFIG = {
-    "dsn": env.str("SENTRY_DSN"),
-    "release": version,
-    "environment": env("SENTRY_ENVIRONMENT"),
-}
+try:
+    version = subprocess.check_output(["git", "describe"]).strip()
+except Exception:
+    version = "n/a"
+
+sentry_sdk.init(
+    dsn=env.str("SENTRY_DSN"),
+    release=version,
+    environment=env("SENTRY_ENVIRONMENT"),
+    integrations=[DjangoIntegration()],
+)
 
 MEDIA_ROOT = env("MEDIA_ROOT")
 STATIC_ROOT = env("STATIC_ROOT")
@@ -108,16 +111,14 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.gis",
-    "raven.contrib.django.raven_compat",
-    "rest_framework",
     "django_filters",
     "corsheaders",
     "parler",
-    "parler_rest",
     "anymail",
     "mptt",
     "munigeo",
     "mailer",
+    "graphene_django",
     # Local apps
     "reservations",
     "notifications",
@@ -128,6 +129,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -162,14 +164,7 @@ PARLER_LANGUAGES = {SITE_ID: ({"code": "fi"}, {"code": "en"}, {"code": "sv"})}
 CORS_ORIGIN_WHITELIST = env.list("CORS_ORIGIN_WHITELIST")
 CORS_ORIGIN_ALLOW_ALL = env.bool("CORS_ORIGIN_ALLOW_ALL")
 
-REST_FRAMEWORK = {
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "PAGE_SIZE": 100,
-    "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
-    ),
-    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
-}
+GRAPHENE = {"SCHEMA": "berth_reservations.schema.schema"}
 
 LOGGING = {
     "version": 1,

@@ -16,10 +16,6 @@ class NotificationTemplateException(Exception):
 
 
 class NotificationTemplate(TranslatableModel):
-    NOTIFICATION_TYPE_CHOICES = (
-        (NotificationType.RESERVATION_CREATED, _("Reservation created")),
-    )
-
     type = EnumField(
         NotificationType, max_length=50, verbose_name=_("type"), unique=True
     )
@@ -73,7 +69,4 @@ class NotificationTemplate(TranslatableModel):
         verbose_name_plural = _("Notifications")
 
     def __str__(self):
-        for t in self.NOTIFICATION_TYPE_CHOICES:
-            if t[0] == self.type:
-                return str(t[1])
-        return "N/A"
+        return str(self.type)

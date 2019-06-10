@@ -1,8 +1,13 @@
 import factory
 
-from ..models import Reservation
+from ..models import BerthReservation, WinterStorageReservation
 
 
-class ReservationFactory(factory.django.DjangoModelFactory):
+class BerthReservationFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = Reservation
+        model = BerthReservation
+
+
+class WinterStorageReservationFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = WinterStorageReservation

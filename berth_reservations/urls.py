@@ -1,23 +1,13 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
-from rest_framework import routers
-from rest_framework.documentation import include_docs_urls
-
-from harbors.api import AvailabilityLevelViewSet, BoatTypeViewSet, HarborViewSet
-from reservations.api import ReservationViewSet
-
-router = routers.DefaultRouter()
-router.register("availability-levels", AvailabilityLevelViewSet)
-router.register("boat-types", BoatTypeViewSet)
-router.register("harbors", HarborViewSet)
-router.register("reservations", ReservationViewSet, basename="reservation")
+from django.urls import path
+from django.views.decorators.csrf import csrf_exempt
+from graphene_django.views import GraphQLView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("v1/", include(router.urls)),
-    path("docs/", include_docs_urls(title="Berth reservations")),
+    path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True))),
 ]
 
 if settings.DEBUG:
