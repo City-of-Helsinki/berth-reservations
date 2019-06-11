@@ -12,7 +12,7 @@ def export_berth_reservations_as_xlsx(reservations):
         # Common fields
         ("Reserved at", "created_at", 15),
         ("Chosen harbors", "chosen_harbors", 55),
-        ("Current berth", "berth_switch", 15),
+        ("Current berth", "berth_switch", 35),
         ("First name", "first_name", 15),
         ("Last name", "last_name", 15),
         ("Email", "email", 15),
