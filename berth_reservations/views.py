@@ -8,7 +8,7 @@ class SentryGraphQLView(GraphQLView):
         Extract any exceptions and send them to Sentry
         """
         result = super().execute_graphql_request(*args, **kwargs)
-        if result.errors:
+        if result and result.errors:
             for error in result.errors:
                 try:
                     raise error.original_error
