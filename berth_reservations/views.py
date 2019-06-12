@@ -11,7 +11,10 @@ class SentryGraphQLView(GraphQLView):
         if result and result.errors:
             for error in result.errors:
                 try:
-                    raise error.original_error
+                    # try to capture the error directly
+                    capture_exception(error)
                 except Exception as e:
+                    # or send this one if the previous
+                    # error variable was not the right type
                     capture_exception(e)
         return result
