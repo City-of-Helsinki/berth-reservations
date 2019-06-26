@@ -119,6 +119,7 @@ INSTALLED_APPS = [
     "munigeo",
     "mailer",
     "graphene_django",
+    "django_ilmoitin",
     # Local apps
     "reservations",
     "notifications",
