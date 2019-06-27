@@ -3,6 +3,7 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumField
+from parler.models import TranslatableModel, TranslatedFields
 
 from harbors.models import BoatType, Harbor, WinterStorageArea
 
@@ -30,10 +31,31 @@ class WinterStorageAreaChoice(models.Model):
         unique_together = ("reservation", "priority")
 
 
+class BerthSwitchReason(TranslatableModel):
+    translations = TranslatedFields(
+        title=models.CharField(
+            verbose_name=_("title"),
+            max_length=64,
+            blank=True,
+            help_text=_("Title of the berth switch reason"),
+        )
+    )
+
+    def __str__(self):
+        return self.safe_translation_getter("title", super().__str__())
+
+
 class BerthSwitch(models.Model):
     harbor = models.ForeignKey(Harbor, on_delete=models.CASCADE)
     pier = models.CharField(verbose_name=_("pier"), max_length=40, blank=True)
     berth_number = models.CharField(verbose_name=_("berth number"), max_length=20)
+    reason = models.ForeignKey(
+        BerthSwitchReason,
+        null=True,
+        blank=True,
+        verbose_name=_("Berth switch reason"),
+        on_delete=models.SET_NULL,
+    )
 
 
 class BaseReservation(models.Model):

@@ -7,6 +7,7 @@ from django.contrib import admin, messages
 from django.contrib.auth.models import Permission
 from django.http import HttpResponse
 from django.utils.translation import ugettext_lazy as _
+from parler.admin import TranslatableAdmin
 from pytz import timezone
 
 from notifications.enums import NotificationType
@@ -14,6 +15,7 @@ from notifications.utils import send_notification
 
 from .models import (
     BerthReservation,
+    BerthSwitchReason,
     HarborChoice,
     WinterStorageAreaChoice,
     WinterStorageReservation,
@@ -59,6 +61,7 @@ class BerthReservationAdmin(admin.ModelAdmin):
         "get_berth_switch_harbor",
         "get_berth_switch_pier",
         "get_berth_switch_berth_number",
+        "get_berth_switch_reason",
     ]
     fieldsets = [
         (None, {"fields": ["reservation_type", "created_at", "is_processed"]}),
@@ -117,6 +120,7 @@ class BerthReservationAdmin(admin.ModelAdmin):
                     "get_berth_switch_harbor",
                     "get_berth_switch_pier",
                     "get_berth_switch_berth_number",
+                    "get_berth_switch_reason",
                 ]
             },
         ),
@@ -156,6 +160,11 @@ class BerthReservationAdmin(admin.ModelAdmin):
         return obj.berth_switch.berth_number
 
     get_berth_switch_berth_number.short_description = _("Berth number")
+
+    def get_berth_switch_reason(self, obj):
+        return obj.berth_switch.reason.title
+
+    get_berth_switch_reason.short_description = _("Reason")
 
     def export_reservations(self, request, queryset):
         response = HttpResponse(
@@ -334,8 +343,13 @@ class WinterStorageReservationAdmin(admin.ModelAdmin):
         return request.user.has_perm("%s.%s" % (opts.app_label, codename))
 
 
+class BerthSwitchReasonAdmin(TranslatableAdmin):
+    pass
+
+
 admin.site.register(BerthReservation, BerthReservationAdmin)
 admin.site.register(WinterStorageReservation, WinterStorageReservationAdmin)
+admin.site.register(BerthSwitchReason, BerthSwitchReasonAdmin)
 
 # Register Permission model for GUI management of permissions
 admin.site.register(Permission)

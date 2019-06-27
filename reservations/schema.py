@@ -8,6 +8,7 @@ from .enums import WinterStorageMethod
 from .models import (
     BerthReservation,
     BerthSwitch,
+    BerthSwitchReason,
     BoatType,
     Harbor,
     HarborChoice,
@@ -34,6 +35,13 @@ class BerthSwitchType(DjangoObjectType):
         model = BerthSwitch
 
 
+class BerthSwitchReasonType(DjangoObjectType):
+    class Meta:
+        model = BerthSwitchReason
+
+    title = graphene.String()
+
+
 class WinterStorageReservationType(DjangoObjectType):
     class Meta:
         model = WinterStorageReservation
@@ -53,6 +61,7 @@ class BerthSwitchInput(graphene.InputObjectType):
     harbor_id = graphene.ID(required=True)
     pier = graphene.String()
     berth_number = graphene.String(required=True)
+    reason = graphene.ID()
 
 
 class BaseReservationInput(graphene.InputObjectType):
@@ -123,10 +132,12 @@ class CreateBerthReservation(graphene.Mutation):
         if switch_data:
             harbor_id = from_global_id(switch_data.get("harbor_id"))[1]
             old_harbor = Harbor.objects.get(id=harbor_id)
+            reason = BerthSwitchReason.objects.get(id=switch_data.get("reason"))
             berth_switch = BerthSwitch.objects.create(
                 harbor=old_harbor,
                 pier=switch_data.get("pier", ""),
                 berth_number=switch_data.get("berth_number"),
+                reason=reason,
             )
             reservation_data["berth_switch"] = berth_switch
 
@@ -189,3 +200,10 @@ class CreateWinterStorageReservation(graphene.Mutation):
 class Mutation(graphene.ObjectType):
     create_berth_reservation = CreateBerthReservation.Field()
     create_winter_storage_reservation = CreateWinterStorageReservation.Field()
+
+
+class Query:
+    berth_switch_reasons = graphene.List(BerthSwitchReasonType)
+
+    def resolve_berth_switch_reasons(self, info, **kwargs):
+        return BerthSwitchReason.objects.all()
