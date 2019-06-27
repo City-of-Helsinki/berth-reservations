@@ -4,7 +4,7 @@ from berth_reservations.tests.conftest import *  # noqa
 from harbors.models import Harbor
 from harbors.tests.conftest import *  # noqa
 
-from ..models import BerthSwitch
+from ..models import BerthSwitch, BerthSwitchReason
 
 
 @pytest.fixture
@@ -18,3 +18,11 @@ def berth_switch_info():
         harbor=harbor, pier="D", berth_number="11"
     )
     return berth_switch
+
+
+@pytest.fixture
+def berth_switch_reason():
+    berth_switch_reason = BerthSwitchReason.objects.language("en").create(
+        title="Good reason"
+    )
+    return berth_switch_reason
