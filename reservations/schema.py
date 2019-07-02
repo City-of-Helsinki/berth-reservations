@@ -132,7 +132,8 @@ class CreateBerthReservation(graphene.Mutation):
         if switch_data:
             harbor_id = from_global_id(switch_data.get("harbor_id"))[1]
             old_harbor = Harbor.objects.get(id=harbor_id)
-            reason = BerthSwitchReason.objects.get(id=switch_data.get("reason"))
+            reason_id = switch_data.get("reason")
+            reason = BerthSwitchReason.objects.get(id=reason_id) if reason_id else None
             berth_switch = BerthSwitch.objects.create(
                 harbor=old_harbor,
                 pier=switch_data.get("pier", ""),
