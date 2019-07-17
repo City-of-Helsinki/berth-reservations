@@ -124,6 +124,7 @@ INSTALLED_APPS = [
     "reservations",
     "notifications",
     "harbors",
+    "resources",
 ]
 
 MIDDLEWARE = [
