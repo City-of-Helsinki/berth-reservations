@@ -1,0 +1,386 @@
+[
+{
+    "model": "reservations.berthswitchreason",
+    "pk": 1,
+    "fields": {}
+},
+{
+    "model": "reservations.berthswitchreason",
+    "pk": 2,
+    "fields": {}
+},
+{
+    "model": "reservations.berthswitchreason",
+    "pk": 3,
+    "fields": {}
+},
+{
+    "model": "reservations.berthswitchreason",
+    "pk": 4,
+    "fields": {}
+},
+{
+    "model": "reservations.berthswitchreason",
+    "pk": 5,
+    "fields": {}
+},
+{
+    "model": "reservations.berthswitchreason",
+    "pk": 6,
+    "fields": {}
+},
+{
+    "model": "reservations.berthswitchreason",
+    "pk": 7,
+    "fields": {}
+},
+{
+    "model": "reservations.berthswitchreason",
+    "pk": 8,
+    "fields": {}
+},
+{
+    "model": "reservations.berthswitchreason",
+    "pk": 9,
+    "fields": {}
+},
+{
+    "model": "reservations.berthswitchreason",
+    "pk": 10,
+    "fields": {}
+},
+{
+    "model": "reservations.berthswitchreason",
+    "pk": 11,
+    "fields": {}
+},
+{
+    "model": "reservations.berthswitchreason",
+    "pk": 12,
+    "fields": {}
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 1,
+    "fields": {
+        "language_code": "fi",
+        "title": "aisapaikka",
+        "master": 1
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 2,
+    "fields": {
+        "language_code": "en",
+        "title": "Shaft berth",
+        "master": 1
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 3,
+    "fields": {
+        "language_code": "sv",
+        "title": "bomplats",
+        "master": 1
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 4,
+    "fields": {
+        "language_code": "fi",
+        "title": "k\u00e4velyasiapaikka",
+        "master": 2
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 5,
+    "fields": {
+        "language_code": "en",
+        "title": "Berth with walkable shaft",
+        "master": 2
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 6,
+    "fields": {
+        "language_code": "sv",
+        "title": "plats med g\u00e5ngbom",
+        "master": 2
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 7,
+    "fields": {
+        "language_code": "fi",
+        "title": "per\u00e4poijupaikka",
+        "master": 3
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 8,
+    "fields": {
+        "language_code": "en",
+        "title": "Stern buoy berth",
+        "master": 3
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 9,
+    "fields": {
+        "language_code": "sv",
+        "title": "plats med akterboj",
+        "master": 3
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 10,
+    "fields": {
+        "language_code": "fi",
+        "title": "per\u00e4paalupaikka",
+        "master": 4
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 11,
+    "fields": {
+        "language_code": "en",
+        "title": "Stern post berth",
+        "master": 4
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 12,
+    "fields": {
+        "language_code": "sv",
+        "title": "plats med akterstolpe",
+        "master": 4
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 13,
+    "fields": {
+        "language_code": "fi",
+        "title": "sivukiinnityspaikka",
+        "master": 5
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 14,
+    "fields": {
+        "language_code": "en",
+        "title": "Side attachment berth",
+        "master": 5
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 15,
+    "fields": {
+        "language_code": "sv",
+        "title": "sidof\u00f6rt\u00f6jningsplats",
+        "master": 5
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 16,
+    "fields": {
+        "language_code": "fi",
+        "title": "paikka kauemmaksi rannasta",
+        "master": 6
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 17,
+    "fields": {
+        "language_code": "en",
+        "title": "Berth further away from the shore",
+        "master": 6
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 18,
+    "fields": {
+        "language_code": "sv",
+        "title": "en plats l\u00e4ngre fr\u00e5n stranden",
+        "master": 6
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 19,
+    "fields": {
+        "language_code": "fi",
+        "title": "paikka l\u00e4hemm\u00e4ksi rantaa",
+        "master": 7
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 20,
+    "fields": {
+        "language_code": "en",
+        "title": "Berth closer to the shore",
+        "master": 7
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 21,
+    "fields": {
+        "language_code": "sv",
+        "title": "en plats n\u00e4rmare stranden",
+        "master": 7
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 22,
+    "fields": {
+        "language_code": "fi",
+        "title": "paikka laiturin p\u00e4\u00e4dyst\u00e4",
+        "master": 8
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 23,
+    "fields": {
+        "language_code": "en",
+        "title": "Berth at the end of the pier",
+        "master": 8
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 24,
+    "fields": {
+        "language_code": "sv",
+        "title": "plats vid \u00e4nden av brygga",
+        "master": 8
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 25,
+    "fields": {
+        "language_code": "fi",
+        "title": "laiturin parittomien numeroiden puoli",
+        "master": 9
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 26,
+    "fields": {
+        "language_code": "en",
+        "title": "Berth on the side of the uneven numbers on the pier",
+        "master": 9
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 27,
+    "fields": {
+        "language_code": "sv",
+        "title": "plats p\u00e5 bryggsidan med udda nummer",
+        "master": 9
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 28,
+    "fields": {
+        "language_code": "fi",
+        "title": "laiturin parillisten numeroiden puoli",
+        "master": 10
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 29,
+    "fields": {
+        "language_code": "en",
+        "title": "Berth on the side of the even numbers on the pier",
+        "master": 10
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 30,
+    "fields": {
+        "language_code": "sv",
+        "title": "plats p\u00e5 bryggsidan med j\u00e4mna nummer",
+        "master": 10
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 31,
+    "fields": {
+        "language_code": "fi",
+        "title": "paikka k\u00e4velyaisan vasemmalta puolelta",
+        "master": 11
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 32,
+    "fields": {
+        "language_code": "en",
+        "title": "Berth on the left side of the walkable shaft",
+        "master": 11
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 33,
+    "fields": {
+        "language_code": "sv",
+        "title": "plats p\u00e5 v\u00e4nster sida om en g\u00e5ngbom",
+        "master": 11
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 34,
+    "fields": {
+        "language_code": "fi",
+        "title": "paikka k\u00e4velyaisan oikealta puolelta",
+        "master": 12
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 35,
+    "fields": {
+        "language_code": "en",
+        "title": "Berth on the right side of the walkable shaft",
+        "master": 12
+    }
+},
+{
+    "model": "reservations.berthswitchreasontranslation",
+    "pk": 36,
+    "fields": {
+        "language_code": "sv",
+        "title": "plats p\u00e5 h\u00f6ger sida om en g\u00e5ngbom",
+        "master": 12
+    }
+}
+]
