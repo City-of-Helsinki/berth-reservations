@@ -38,6 +38,7 @@ class BerthSwitchType(DjangoObjectType):
 class BerthSwitchReasonType(DjangoObjectType):
     class Meta:
         model = BerthSwitchReason
+        exclude_fields = ("berthswitch_set",)
 
     title = graphene.String()
 
