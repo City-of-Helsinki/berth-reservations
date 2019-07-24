@@ -4,7 +4,7 @@ import harbors.schema
 import reservations.schema
 
 
-class Query(harbors.schema.Query, graphene.ObjectType):
+class Query(harbors.schema.Query, reservations.schema.Query, graphene.ObjectType):
     pass
 
 
