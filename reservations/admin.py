@@ -7,11 +7,9 @@ from django.contrib import admin, messages
 from django.contrib.auth.models import Permission
 from django.http import HttpResponse
 from django.utils.translation import ugettext_lazy as _
+from django_ilmoitin.utils import send_notification
 from parler.admin import TranslatableAdmin
 from pytz import timezone
-
-from notifications.enums import NotificationType
-from notifications.utils import send_notification
 
 from .models import (
     BerthReservation,
@@ -20,6 +18,7 @@ from .models import (
     WinterStorageAreaChoice,
     WinterStorageReservation,
 )
+from .notifications import NotificationType
 from .utils import (
     export_berth_reservations_as_xlsx,
     export_winter_storage_reservations_as_xlsx,

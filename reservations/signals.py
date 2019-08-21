@@ -1,10 +1,10 @@
 from anymail.exceptions import AnymailError
 from django.conf import settings
 from django.dispatch import Signal
+from django_ilmoitin.utils import send_notification
 from sentry_sdk import capture_exception
 
-from notifications.enums import NotificationType
-from notifications.utils import send_notification
+from .notifications import NotificationType
 
 reservation_saved = Signal(providing_args=["reservation"])
 

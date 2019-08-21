@@ -26,7 +26,6 @@ class NotificationTemplate(TranslatableModel):
 
     admins_to_notify = models.ManyToManyField(
         get_user_model(),
-        related_name="+",
         blank=True,
         verbose_name=_("Admins to notify"),
         help_text=_(
