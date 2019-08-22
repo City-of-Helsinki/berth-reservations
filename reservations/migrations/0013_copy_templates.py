@@ -21,7 +21,7 @@ def copy_templates_data(apps, schema_editor):
 
     for translation in OldNotificationTemplateTranslation.objects.all():
         NotificationTemplateTranslation.objects.create(
-            master_id=translation.pk,
+            master_id=translation.master_id,
             language_code=translation.language_code,
             subject=translation.subject,
             body_html=translation.html_body,
