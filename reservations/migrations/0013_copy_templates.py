@@ -4,6 +4,7 @@ from django.db import connection, migrations, models
 
 def copy_templates_data(apps, schema_editor):
     NotificationTemplate = apps.get_model("django_ilmoitin", "NotificationTemplate")
+    NotificationTemplate.__bases__ = (models.Model,)
     OldNotificationTemplate = apps.get_model("notifications", "NotificationTemplate")
     NotificationTemplateTranslation = apps.get_model(
         "django_ilmoitin", "NotificationTemplateTranslation"
@@ -12,21 +13,25 @@ def copy_templates_data(apps, schema_editor):
         "notifications", "NotificationTemplateTranslation"
     )
 
-    NotificationTemplate.objects.bulk_create(OldNotificationTemplate.objects.all())
-
     for template in OldNotificationTemplate.objects.all():
-        for admin in template.admins_to_notify.all():
-            nt = NotificationTemplate.objects.get(pk=template.pk)
-            nt.admins_to_notify.add(admin)
-
-    for translation in OldNotificationTemplateTranslation.objects.all():
-        NotificationTemplateTranslation.objects.create(
-            master_id=translation.master_id,
-            language_code=translation.language_code,
-            subject=translation.subject,
-            body_html=translation.html_body,
-            body_text=translation.text_body,
+        nt = NotificationTemplate.objects.create(
+            type=template.type,
+            from_email=template.from_email,
+            admin_notification_subject=template.admin_notification_subject,
+            admin_notification_text=template.admin_notification_text,
         )
+        for translation in OldNotificationTemplateTranslation.objects.filter(
+            master_id=template.pk
+        ):
+            NotificationTemplateTranslation.objects.create(
+                master_id=nt.pk,
+                language_code=translation.language_code,
+                subject=translation.subject,
+                body_html=translation.html_body,
+                body_text=translation.text_body,
+            )
+        for admin in template.admins_to_notify.all():
+            nt.admins_to_notify.add(admin)
 
 
 def delete_templates_data(apps, schema_editor):
