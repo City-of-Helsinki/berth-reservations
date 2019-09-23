@@ -40,6 +40,7 @@
 .scrapy
 .spyderproject
 .tox/
+.vscode/
 __pycache__/
 _build
 bower_components
