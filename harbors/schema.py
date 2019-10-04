@@ -95,7 +95,7 @@ class Query:
         return BoatType.objects.all()
 
     def resolve_harbors(self, info, **kwargs):
-        return Harbor.objects.all()
+        return Harbor.objects.filter(disabled=False)
 
     def resolve_winter_storage_areas(self, info, **kwargs):
-        return WinterStorageArea.objects.all()
+        return WinterStorageArea.objects.filter(disabled=False)

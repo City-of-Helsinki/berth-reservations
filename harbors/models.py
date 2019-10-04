@@ -85,6 +85,9 @@ class AbstractArea(models.Model):
         null=True,
     )
 
+    # Will hide them from the API
+    disabled = models.BooleanField(verbose_name=_("Disabled"), default=False)
+
     zip_code = models.CharField(verbose_name=_("Postal code"), max_length=10)
     phone = models.CharField(verbose_name=_("Phone number"), max_length=30, blank=True)
     email = models.EmailField(verbose_name=_("Email"), max_length=100, blank=True)
