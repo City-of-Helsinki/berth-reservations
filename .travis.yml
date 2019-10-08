@@ -15,7 +15,7 @@ addons:
 matrix:
   include:
     - name: Unit tests
-      env: DEBUG=1 DATABASE_URL=postgis:///berth_reservations
+      env: DEBUG=1 DATABASE_URL=postgis:///berth_reservations NOTIFICATIONS_ENABLED=1
       services: [postgresql]
       install: pip install -r requirements.txt -r requirements-dev.txt
       before_script:
