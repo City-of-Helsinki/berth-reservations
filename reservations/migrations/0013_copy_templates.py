@@ -1,5 +1,4 @@
-import django.contrib.gis.db.models.fields
-from django.db import connection, migrations, models
+from django.db import migrations, models
 
 
 def copy_templates_data(apps, schema_editor):
@@ -15,7 +14,7 @@ def copy_templates_data(apps, schema_editor):
 
     for template in OldNotificationTemplate.objects.all():
         nt = NotificationTemplate.objects.create(
-            type=template.type,
+            type=template.type.value,  # used to be EnumField, now just CharField
             from_email=template.from_email,
             admin_notification_subject=template.admin_notification_subject,
             admin_notification_text=template.admin_notification_text,

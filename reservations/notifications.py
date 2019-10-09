@@ -1,6 +1,12 @@
+from unittest.mock import MagicMock
+
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from django_ilmoitin.dummy_context import dummy_context
 from django_ilmoitin.registry import notifications
 from enumfields import Enum
+
+from .utils import localize_datetime
 
 
 class NotificationType(Enum):
@@ -19,4 +25,12 @@ notifications.register(
 notifications.register(
     NotificationType.WINTER_STORAGE_RESERVATION_CREATED.value,
     NotificationType.WINTER_STORAGE_RESERVATION_CREATED.label,
+)
+
+dummy_context.context.update(
+    {
+        "created_at": localize_datetime(timezone.now()),
+        # TODO: pass more appropriate in-memory objects
+        "reservation": MagicMock(),
+    }
 )

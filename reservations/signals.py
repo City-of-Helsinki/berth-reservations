@@ -10,9 +10,9 @@ reservation_saved = Signal(providing_args=["reservation"])
 
 
 def reservation_notification_handler(sender, reservation, **kwargs):
-    notification_type = NotificationType.BERTH_RESERVATION_CREATED
+    notification_type = NotificationType.BERTH_RESERVATION_CREATED.value
     if sender == "CreateWinterStorageReservation":
-        notification_type = NotificationType.WINTER_STORAGE_RESERVATION_CREATED
+        notification_type = NotificationType.WINTER_STORAGE_RESERVATION_CREATED.value
     try:
         send_notification(
             reservation.email,
@@ -25,4 +25,6 @@ def reservation_notification_handler(sender, reservation, **kwargs):
 
 
 if settings.NOTIFICATIONS_ENABLED:
-    reservation_saved.connect(reservation_notification_handler)
+    reservation_saved.connect(
+        reservation_notification_handler, dispatch_uid="reservation_saved"
+    )
