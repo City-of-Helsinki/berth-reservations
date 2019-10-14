@@ -3,19 +3,35 @@
 This script parses harbors' data from a CSV file, provided by the City Of Helsinki.
 As such it was designed with this specific CSV file's structure in mind.
 
-It calculates for each Harbor:
-- total number of berths
-- maximum berth width
-- maximum berth length
+It collects the data about single berth places
+and groups them by piers and harbors:
+- harbors are represented by their servicemap ids
+- piers are represented by their identifiers
+- dimensions are stored in cm
 
 It dumps resulting JSON into a file at the given output path.
 This JSON will have the following structure for its items:
 
-"AIRORANTA": {
-    "servicemap_id": "40393",
-    "berth_count": 11,
-    "max_length": 500,
-    "max_width": 200
+"40393": {
+    "piers": {
+        "A": {
+            "3": {
+                "width": "200",
+                "length": "400",
+                "type": "ILMAN PERÄKIINNITYSTÄ"
+            },
+            "4": {
+                "width": "200",
+                "length": "400",
+                "type": "AISAPAIKKA"
+            }
+            "5": {
+                "width": "200",
+                "length": "400",
+                "type": "PERÄPOIJUPAIKKA"
+            } ...
+        } ...
+    }
 }, ...
 
 """
@@ -65,7 +81,7 @@ HARBORS_TO_SERVICEMAP_IDS_MAP = {
     "TAMMASAARENALLAS": "41472",
     "TERVASAARI": "42136",
     "VASIKKASAARI": "41415",
-    "VUOSAARENLAHDEN VENESATAMA": "41637",
+    "VUOSAARI": "41637",
     "VÄHÄNIITTY": "42130",
 }
 
@@ -81,10 +97,10 @@ PIERS_TO_HARBOR_NAME_MAP = {  # some lines have actually pier names in "SATAMA" 
     "PAJALAHTI 10": "PAJALAHTI",
     "PAJALAHTI 11": "PAJALAHTI",
     "PAJALAHTI 19": "PAJALAHTI",
-    "VUOSAARENLAHDEN VENESATAMA": "VUOSAARENLAHDEN VENESATAMA",
-    "VUOSAARI A": "VUOSAARENLAHDEN VENESATAMA",
-    "VUOSAARI E": "VUOSAARENLAHDEN VENESATAMA",
-    "VUOSAARI F": "VUOSAARENLAHDEN VENESATAMA",
+    "VUOSAARENLAHDEN VENESATAMA": "VUOSAARI",
+    "VUOSAARI A": "VUOSAARI",
+    "VUOSAARI E": "VUOSAARI",
+    "VUOSAARI F": "VUOSAARI",
 }
 
 final_harbors_dict = {}
@@ -95,31 +111,51 @@ def m_to_cm(meters_string):
 
 
 def pull_data_from_row(row, target_dict):
-    if row["SATAMA"] not in target_dict:
+    # check that this row has a berth place number, i.e. is an actual berth
+    if not row["NRO"]:
+        return
+
+    # get servicemap id for the harbor
+    harbor_name = row["SATAMA"]
+    harbor_servicemap_id = HARBORS_TO_SERVICEMAP_IDS_MAP.get(harbor_name)
+
+    # parse pier identifier for the current row's pier
+    if row["LAITURI"] == harbor_name:
+        pier_identifier = "-"
+    else:
+        pier_identifier = row["LAITURI"].replace(harbor_name + " ", "")
+
+    if harbor_servicemap_id not in target_dict:
         target_dict.update(
             {
-                row["SATAMA"]: {
-                    "servicemap_id": HARBORS_TO_SERVICEMAP_IDS_MAP.get(row["SATAMA"]),
-                    "berth_count": 1,
-                    "max_length": m_to_cm(row["PITUUS"] or 0),
-                    "max_width": m_to_cm(row["LEVEYS"] or 0),
+                harbor_servicemap_id: {
+                    "piers": {
+                        pier_identifier: {
+                            row["NRO"]: {
+                                "length": m_to_cm(row["PITUUS"] or 0),
+                                "width": m_to_cm(row["LEVEYS"] or 0),
+                                "type": row["LAITURIPAIKAN_TYYPPI"],
+                            }
+                        }
+                    }
                 }
             }
         )
     else:
-        # check that this row has a berth place number, i.e. is an actual berth
-        if row["NRO"]:
-            target_dict[row["SATAMA"]]["berth_count"] += 1
-
-            if row["PITUUS"]:
-                target_dict[row["SATAMA"]]["max_length"] = max(
-                    target_dict[row["SATAMA"]]["max_length"], m_to_cm(row["PITUUS"])
-                )
-
-            if row["LEVEYS"]:
-                target_dict[row["SATAMA"]]["max_width"] = max(
-                    target_dict[row["SATAMA"]]["max_width"], m_to_cm(row["LEVEYS"])
-                )
+        if pier_identifier in target_dict[harbor_servicemap_id]["piers"]:
+            target_dict[harbor_servicemap_id]["piers"][pier_identifier][row["NRO"]] = {
+                "length": m_to_cm(row["PITUUS"] or 0),
+                "width": m_to_cm(row["LEVEYS"] or 0),
+                "type": row["LAITURIPAIKAN_TYYPPI"],
+            }
+        else:
+            target_dict[harbor_servicemap_id]["piers"][pier_identifier] = {
+                row["NRO"]: {
+                    "length": m_to_cm(row["PITUUS"] or 0),
+                    "width": m_to_cm(row["LEVEYS"] or 0),
+                    "type": row["LAITURIPAIKAN_TYYPPI"],
+                }
+            }
 
 
 parser = argparse.ArgumentParser(description=__doc__)

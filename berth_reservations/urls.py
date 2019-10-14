@@ -4,11 +4,16 @@ from django.contrib import admin
 from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 
+from .schema import new_schema
 from .views import SentryGraphQLView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("graphql/", csrf_exempt(SentryGraphQLView.as_view(graphiql=True))),
+    path(
+        "graphql_v2/",
+        csrf_exempt(SentryGraphQLView.as_view(schema=new_schema, graphiql=True)),
+    ),
 ]
 
 if settings.DEBUG:
