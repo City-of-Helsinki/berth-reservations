@@ -42,6 +42,11 @@ env = environ.Env(
     CORS_ORIGIN_WHITELIST=(list, []),
     CORS_ORIGIN_ALLOW_ALL=(bool, False),
     NOTIFICATIONS_ENABLED=(bool, False),
+    TOKEN_AUTH_ACCEPTED_AUDIENCE=(str, ""),
+    TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX=(str, ""),
+    TOKEN_AUTH_AUTHSERVER_URL=(str, ""),
+    TOKEN_AUTH_FIELD_FOR_CONSENTS=(str, ""),
+    TOKEN_AUTH_REQUIRE_SCOPE_PREFIX=(bool, True),
 )
 if os.path.exists(env_file):
     env.read_env(env_file)
@@ -159,6 +164,11 @@ TEMPLATES = [
     }
 ]
 
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "berth_reservations.oidc.GraphQLApiTokenAuthentication",
+]
+
 SITE_ID = 1
 
 DEFAULT_SRID = 4326
@@ -170,7 +180,20 @@ PARLER_LANGUAGES = {SITE_ID: ({"code": "fi"}, {"code": "en"}, {"code": "sv"})}
 CORS_ORIGIN_WHITELIST = env.list("CORS_ORIGIN_WHITELIST")
 CORS_ORIGIN_ALLOW_ALL = env.bool("CORS_ORIGIN_ALLOW_ALL")
 
-GRAPHENE = {"SCHEMA": "berth_reservations.schema.schema"}
+OIDC_API_TOKEN_AUTH = {
+    "AUDIENCE": env.str("TOKEN_AUTH_ACCEPTED_AUDIENCE"),
+    "API_SCOPE_PREFIX": env.str("TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX"),
+    "ISSUER": env.str("TOKEN_AUTH_AUTHSERVER_URL"),
+    "API_AUTHORIZATION_FIELD": env.str("TOKEN_AUTH_FIELD_FOR_CONSENTS"),
+    "REQUIRE_API_SCOPE_FOR_AUTHENTICATION": env.bool("TOKEN_AUTH_REQUIRE_SCOPE_PREFIX"),
+}
+
+GRAPHENE = {
+    "SCHEMA": "berth_reservations.schema.schema",
+    "MIDDLEWARE": ["graphql_jwt.middleware.JSONWebTokenMiddleware"],
+}
+
+GRAPHQL_JWT = {"JWT_AUTH_HEADER_PREFIX": "Bearer"}
 
 LOGGING = {
     "version": 1,
