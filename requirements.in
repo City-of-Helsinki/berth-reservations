@@ -6,6 +6,7 @@ django-enumfields
 django-environ
 django-filter
 django-graphql-geojson
+django-helusers
 django-mailer
 django-munigeo
 django-parler
