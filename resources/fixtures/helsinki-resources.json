@@ -435,7 +435,7 @@
   "pk": 1,
   "fields": {
     "language_code": "fi",
-    "name": "Airorannan venesatama A",
+    "name": "Airorannan venesatama",
     "street_address": "Airoranta 2",
     "master": "2e42adb3-0cdb-4823-868d-3b808cc55fe8"
   }
@@ -725,7 +725,7 @@
   "pk": 30,
   "fields": {
     "language_code": "fi",
-    "name": "Ramsaynrannan venesatama (A) (Ramsaynranta 4)",
+    "name": "Ramsaynrannan venesatama (Ramsaynranta 4)",
     "street_address": "Ramsaynranta 4",
     "master": "b7148154-dba9-4e3b-9d6e-c5636a25aa39"
   }
@@ -795,7 +795,7 @@
   "pk": 37,
   "fields": {
     "language_code": "fi",
-    "name": "Tammasaaren allas (paikat 1-31)",
+    "name": "Tammasaaren allas",
     "street_address": "Tammasaarenaukio 4",
     "master": "26ec853e-fa8e-484f-9b5d-ecac3ad3c51d"
   }
@@ -837,6 +837,826 @@
     "language_code": "fi",
     "name": "V\u00e4h\u00e4niityn venesatama",
     "street_address": "V\u00e4h\u00e4niityntie 3a",
+    "master": "3d05bb47-4fc1-468b-b326-70bcee5d0cb2"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 42,
+  "fields": {
+    "language_code": "en",
+    "name": "Airorannan venesatama",
+    "street_address": "Airoranta 2",
+    "master": "2e42adb3-0cdb-4823-868d-3b808cc55fe8"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 43,
+  "fields": {
+    "language_code": "sv",
+    "name": "\u00c5rstrands sm\u00e5b\u00e5tshamn",
+    "street_address": "\u00c5rstrand 2",
+    "master": "2e42adb3-0cdb-4823-868d-3b808cc55fe8"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 44,
+  "fields": {
+    "language_code": "en",
+    "name": "Aurinkolahden venesatama (Aurinkoranta)",
+    "street_address": "Aurinkoranta 1",
+    "master": "70481d5c-9264-4c81-87af-e5cf7fb4efa0"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 45,
+  "fields": {
+    "language_code": "sv",
+    "name": "Solvikens sm\u00e5b\u00e5tshamn (Solstranden)",
+    "street_address": "Solstranden 1",
+    "master": "70481d5c-9264-4c81-87af-e5cf7fb4efa0"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 46,
+  "fields": {
+    "language_code": "en",
+    "name": "Merisatama (Ehrenstr\u00f6mintie 21)",
+    "street_address": "Ehrenstr\u00f6mintie 21",
+    "master": "ed355574-2a94-45e8-8e2a-3bd149866302"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 47,
+  "fields": {
+    "language_code": "sv",
+    "name": "Havshamnen (Ehrenstr\u00f6msv\u00e4gen 21)",
+    "street_address": "Ehrenstr\u00f6msv\u00e4gen 21",
+    "master": "ed355574-2a94-45e8-8e2a-3bd149866302"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 48,
+  "fields": {
+    "language_code": "en",
+    "name": "El\u00e4intarhanlahden venesatama",
+    "street_address": "El\u00e4intarhantie 10",
+    "master": "2cf50e2f-e101-48bd-8dfd-cf0d7501b654"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 49,
+  "fields": {
+    "language_code": "sv",
+    "name": "Djurg\u00e5rdsvikens sm\u00e5b\u00e5tshamn",
+    "street_address": "Djurg\u00e5rdsv\u00e4gen 10",
+    "master": "2cf50e2f-e101-48bd-8dfd-cf0d7501b654"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 50,
+  "fields": {
+    "language_code": "en",
+    "name": "Hietalahdenallas / Venesatama",
+    "street_address": "Hietalahdenranta 10",
+    "master": "0885f502-d566-4832-a782-b3137572bba4"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 51,
+  "fields": {
+    "language_code": "sv",
+    "name": "Sandviksbass\u00e4ngen / Sm\u00e5b\u00e5tshamn",
+    "street_address": "Sandvikskajen 10",
+    "master": "0885f502-d566-4832-a782-b3137572bba4"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 52,
+  "fields": {
+    "language_code": "en",
+    "name": "Honkaluoto / Venesatama",
+    "street_address": "Mustikkamaantie 6",
+    "master": "13054f0b-8392-4d0f-8731-9af4093a5303"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 53,
+  "fields": {
+    "language_code": "sv",
+    "name": "Furusk\u00e4r / Sm\u00e5b\u00e5tshamn",
+    "street_address": "Bl\u00e5b\u00e4rslandsv\u00e4gen 6",
+    "master": "13054f0b-8392-4d0f-8731-9af4093a5303"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 54,
+  "fields": {
+    "language_code": "en",
+    "name": "Hopeasalmen venesatama",
+    "street_address": "Hopeasalmenranta 7",
+    "master": "f7c6ab86-84cb-40f0-9eb2-3f82124b648b"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 55,
+  "fields": {
+    "language_code": "sv",
+    "name": "Silversundets sm\u00e5b\u00e5tshamn",
+    "street_address": "Silversundsstranden 7",
+    "master": "f7c6ab86-84cb-40f0-9eb2-3f82124b648b"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 56,
+  "fields": {
+    "language_code": "en",
+    "name": "Sarvaston venesatama",
+    "street_address": "Isonsarvastontie 3",
+    "master": "4e700275-1e3d-43df-8407-b00d91195bf7"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 57,
+  "fields": {
+    "language_code": "sv",
+    "name": "Fladans sm\u00e5b\u00e5tshamn",
+    "street_address": "Storfladav\u00e4gen 3",
+    "master": "4e700275-1e3d-43df-8407-b00d91195bf7"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 58,
+  "fields": {
+    "language_code": "en",
+    "name": "Ruoholahden venesatama (Jaalaranta)",
+    "street_address": "Jaalaranta 7a",
+    "master": "3c35c79d-8169-4885-bdef-57e343bb43e9"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 59,
+  "fields": {
+    "language_code": "sv",
+    "name": "Gr\u00e4svikens sm\u00e5b\u00e5tshamn (Skutstranden)",
+    "street_address": "Skutstranden 7a",
+    "master": "3c35c79d-8169-4885-bdef-57e343bb43e9"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 60,
+  "fields": {
+    "language_code": "en",
+    "name": "Katajanokan venesatama",
+    "street_address": "Laivastokatu 1c",
+    "master": "7922e0bd-043a-4f21-b54d-9f594e5dcad6"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 61,
+  "fields": {
+    "language_code": "sv",
+    "name": "Skatuddens sm\u00e5b\u00e5tshamn",
+    "street_address": "Maringatan 1 C",
+    "master": "7922e0bd-043a-4f21-b54d-9f594e5dcad6"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 62,
+  "fields": {
+    "language_code": "en",
+    "name": "Ruoholahden venesatama (Kellosaarenranta)",
+    "street_address": "Kellosaarenranta 4",
+    "master": "95f0636e-f84e-48a6-bb6a-c716354c40f6"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 63,
+  "fields": {
+    "language_code": "sv",
+    "name": "Gr\u00e4svikens b\u00e5thamn (Sk\u00e4llarstranden)",
+    "street_address": "Sk\u00e4llarstranden 4",
+    "master": "95f0636e-f84e-48a6-bb6a-c716354c40f6"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 64,
+  "fields": {
+    "language_code": "en",
+    "name": "Kipparlahden venesatama",
+    "street_address": "Kipparlahdenkuja 3",
+    "master": "0092ae70-cc46-44df-857e-79ea34e573d5"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 65,
+  "fields": {
+    "language_code": "sv",
+    "name": "Skepparvikens sm\u00e5b\u00e5tshamn",
+    "street_address": "Skepparviksgr\u00e4nden 3",
+    "master": "0092ae70-cc46-44df-857e-79ea34e573d5"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 66,
+  "fields": {
+    "language_code": "en",
+    "name": "Koivuniemen venesatama",
+    "street_address": "Marjaniemenranta 1a",
+    "master": "5141e8c0-3491-46b2-898a-16523c54df48"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 67,
+  "fields": {
+    "language_code": "sv",
+    "name": "Bj\u00f6rkn\u00e4sets sm\u00e5b\u00e5tshamn",
+    "street_address": "Maruddsstrand 1a",
+    "master": "5141e8c0-3491-46b2-898a-16523c54df48"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 68,
+  "fields": {
+    "language_code": "en",
+    "name": "Laivalahden venesatama",
+    "street_address": "Simppukarinkatu 2",
+    "master": "816ca560-1c0f-4fca-b57e-c6cb27d0b4cc"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 69,
+  "fields": {
+    "language_code": "sv",
+    "name": "B\u00e5tsvikens sm\u00e5b\u00e5tshamn",
+    "street_address": "Simp\u00f6rsgatan 2",
+    "master": "816ca560-1c0f-4fca-b57e-c6cb27d0b4cc"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 70,
+  "fields": {
+    "language_code": "en",
+    "name": "L\u00e4hteel\u00e4 retkisatama",
+    "street_address": "L\u00e4ntinen K\u00e4llvikintie",
+    "master": "5299c27c-3cdb-4117-9f69-54bf3576927b"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 71,
+  "fields": {
+    "language_code": "sv",
+    "name": "K\u00e4llvik utflyktshamn",
+    "street_address": "V\u00e4stra K\u00e4llviksv\u00e4gen",
+    "master": "5299c27c-3cdb-4117-9f69-54bf3576927b"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 72,
+  "fields": {
+    "language_code": "en",
+    "name": "Merihaan venesatama (Hakaniemenranta 13)",
+    "street_address": "Hakaniemenranta 13",
+    "master": "9190743a-f883-4f92-8923-f572157bf6ab"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 73,
+  "fields": {
+    "language_code": "sv",
+    "name": "Havshagens sm\u00e5b\u00e5tshamn (Hagn\u00e4skajen 13)",
+    "street_address": "Hagn\u00e4skajen 13",
+    "master": "9190743a-f883-4f92-8923-f572157bf6ab"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 74,
+  "fields": {
+    "language_code": "en",
+    "name": "Meri-Rastilan venesatama",
+    "street_address": "M\u00e4rssykuja 7",
+    "master": "e01a17fc-1702-4a4e-99a7-60ea027b935d"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 75,
+  "fields": {
+    "language_code": "sv",
+    "name": "Havsrastb\u00f6le sm\u00e5b\u00e5tshamn",
+    "street_address": "M\u00e4rsgr\u00e4nden 7",
+    "master": "e01a17fc-1702-4a4e-99a7-60ea027b935d"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 76,
+  "fields": {
+    "language_code": "en",
+    "name": "Merisatama (Merisatama 28)",
+    "street_address": "Merisatama 28",
+    "master": "8f2296b1-86b7-4059-8a24-efdcd726207d"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 77,
+  "fields": {
+    "language_code": "sv",
+    "name": "Havshamn (Havshamnen 28)",
+    "street_address": "Havshamnen 28",
+    "master": "8f2296b1-86b7-4059-8a24-efdcd726207d"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 78,
+  "fields": {
+    "language_code": "en",
+    "name": "Merisatama (Merisatamanranta 20)",
+    "street_address": "Merisatamanranta 20",
+    "master": "a909810e-cff1-4360-8005-79c8d0269c6b"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 79,
+  "fields": {
+    "language_code": "sv",
+    "name": "Havshamn (Havsstranden 20)",
+    "street_address": "Havsstranden 20",
+    "master": "a909810e-cff1-4360-8005-79c8d0269c6b"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 80,
+  "fields": {
+    "language_code": "en",
+    "name": "Mustikkamaan venesatama",
+    "street_address": "Mustikkamaantie 1",
+    "master": "5a124b1b-010c-46e9-afc8-5d86045b155d"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 81,
+  "fields": {
+    "language_code": "sv",
+    "name": "Bl\u00e5b\u00e4rslandets sm\u00e5b\u00e5tshamn",
+    "street_address": "Bl\u00e5b\u00e4rslandsv\u00e4gen 1",
+    "master": "5a124b1b-010c-46e9-afc8-5d86045b155d"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 82,
+  "fields": {
+    "language_code": "en",
+    "name": "Nandelstadhin venesatama",
+    "street_address": "Lars Sonckin tie 8a",
+    "master": "97c033ad-5470-4225-a49b-03958ce910e1"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 83,
+  "fields": {
+    "language_code": "sv",
+    "name": "Nandelstadhs sm\u00e5b\u00e5tshamn",
+    "street_address": "Lars Soncks v\u00e4g 8a",
+    "master": "97c033ad-5470-4225-a49b-03958ce910e1"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 84,
+  "fields": {
+    "language_code": "en",
+    "name": "Naurissalmen venesatama (Kipparlahdensilmukka 9)",
+    "street_address": "Kipparlahdensilmukka 9",
+    "master": "a1c7888b-bfe4-49c8-a0f9-fd6ba67bb877"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 85,
+  "fields": {
+    "language_code": "sv",
+    "name": "Rovholmssundets sm\u00e5b\u00e5tshamn (Kipparlahdensilmukka 9)",
+    "street_address": "",
+    "master": "a1c7888b-bfe4-49c8-a0f9-fd6ba67bb877"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 86,
+  "fields": {
+    "language_code": "en",
+    "name": "Pajalahden venesatama (Meripuistotie) / Venesatama",
+    "street_address": "Meripuistotie 1a",
+    "master": "9a8d8313-eaa2-47d2-8f2d-2bb9893f9bc7"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 87,
+  "fields": {
+    "language_code": "sv",
+    "name": "Smedjevikens sm\u00e5b\u00e5tshamn (Meripuistotie) / B\u00e5thamn",
+    "street_address": "Hallonn\u00e4sstranden 5",
+    "master": "9a8d8313-eaa2-47d2-8f2d-2bb9893f9bc7"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 88,
+  "fields": {
+    "language_code": "en",
+    "name": "Pikku Kallahden venesatama",
+    "street_address": "Kalkkihiekantori 4",
+    "master": "657ee3c0-c787-4e9e-bd7c-64ea3a534835"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 89,
+  "fields": {
+    "language_code": "sv",
+    "name": "Lilla Kallviks sm\u00e5b\u00e5tshamn",
+    "street_address": "Kalksandstorget 4",
+    "master": "657ee3c0-c787-4e9e-bd7c-64ea3a534835"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 90,
+  "fields": {
+    "language_code": "en",
+    "name": "El\u00e4intarhanlahden venesatama (Pitk\u00e4nsillanranta)",
+    "street_address": "Pitk\u00e4nsillanranta",
+    "master": "5bf79d9b-b983-46b7-9b9f-2999827a0b0c"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 91,
+  "fields": {
+    "language_code": "sv",
+    "name": "Djurg\u00e5rdsvikens sm\u00e5b\u00e5tshamn (L\u00e5ngbrokajen)",
+    "street_address": "L\u00e5ngbrokajen",
+    "master": "5bf79d9b-b983-46b7-9b9f-2999827a0b0c"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 92,
+  "fields": {
+    "language_code": "en",
+    "name": "Pohjoisranta 3 / Venesatama",
+    "street_address": "Pohjoisranta 3",
+    "master": "0fbae9d8-039e-47e4-aec7-9aaa00306af2"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 93,
+  "fields": {
+    "language_code": "sv",
+    "name": "Norra kajen 3 / Sm\u00e5b\u00e5tshamn",
+    "street_address": "Norra kajen 3",
+    "master": "0fbae9d8-039e-47e4-aec7-9aaa00306af2"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 94,
+  "fields": {
+    "language_code": "en",
+    "name": "Porslahden venesatama",
+    "street_address": "Etel\u00e4reimarintie 8",
+    "master": "78ef4aa0-22db-4bc7-bc2d-92e44f67a0fe"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 95,
+  "fields": {
+    "language_code": "sv",
+    "name": "Porslax sm\u00e5b\u00e5tshamn",
+    "street_address": "Sydremmarv\u00e4gen 8",
+    "master": "78ef4aa0-22db-4bc7-bc2d-92e44f67a0fe"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 96,
+  "fields": {
+    "language_code": "en",
+    "name": "Puotilan venesatama",
+    "street_address": "Meripellontie 11",
+    "master": "368f0621-b856-48fa-8224-0046cfd923ad"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 97,
+  "fields": {
+    "language_code": "sv",
+    "name": "Botby g\u00e5rds sm\u00e5b\u00e5tshamn",
+    "street_address": "Sj\u00f6\u00e5kerv\u00e4gen 11",
+    "master": "368f0621-b856-48fa-8224-0046cfd923ad"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 98,
+  "fields": {
+    "language_code": "en",
+    "name": "Aurinkolahden venesatama (Pursilahdenranta)",
+    "street_address": "Pursilahdenranta 1",
+    "master": "01b75ef7-82d5-4b38-8aa1-b7bddb2b2019"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 99,
+  "fields": {
+    "language_code": "sv",
+    "name": "Solvikens sm\u00e5b\u00e5tshamn (Slupviksstranden)",
+    "street_address": "Slupviksstranden 1",
+    "master": "01b75ef7-82d5-4b38-8aa1-b7bddb2b2019"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 100,
+  "fields": {
+    "language_code": "en",
+    "name": "Ramsaynrannan venesatama (Ramsaynranta 4)",
+    "street_address": "Ramsaynranta 4",
+    "master": "b7148154-dba9-4e3b-9d6e-c5636a25aa39"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 101,
+  "fields": {
+    "language_code": "sv",
+    "name": "Ramsays strands sm\u00e5b\u00e5tshamn (Ramsays strand 4)",
+    "street_address": "Ramsays strand 4",
+    "master": "b7148154-dba9-4e3b-9d6e-c5636a25aa39"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 102,
+  "fields": {
+    "language_code": "en",
+    "name": "Ruoholahden venesatama (Ruoholahden kanava)",
+    "street_address": "Ruoholahdenkanava",
+    "master": "a4d2408c-ccd2-419a-9da8-676b0fd9e73b"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 103,
+  "fields": {
+    "language_code": "sv",
+    "name": "Gr\u00e4svikens sm\u00e5b\u00e5tshamn (Gr\u00e4svikskanalen)",
+    "street_address": "Gr\u00e4svikskanalen",
+    "master": "a4d2408c-ccd2-419a-9da8-676b0fd9e73b"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 104,
+  "fields": {
+    "language_code": "en",
+    "name": "Salmisaaren venesatama",
+    "street_address": "Salmisaarenranta",
+    "master": "63c03361-4530-47fe-9902-37c9d6429034"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 105,
+  "fields": {
+    "language_code": "sv",
+    "name": "Sundholmens sm\u00e5b\u00e5tshamn",
+    "street_address": "Sundholmsstranden",
+    "master": "63c03361-4530-47fe-9902-37c9d6429034"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 106,
+  "fields": {
+    "language_code": "en",
+    "name": "Saukonpaaden venesatama",
+    "street_address": "Saukonpaadenranta 7",
+    "master": "c1bf3e03-aa6d-408f-963e-d655bcbd47b2"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 107,
+  "fields": {
+    "language_code": "sv",
+    "name": "Utterh\u00e4llens sm\u00e5b\u00e5tshamn",
+    "street_address": "Utterh\u00e4llsstranden 7",
+    "master": "c1bf3e03-aa6d-408f-963e-d655bcbd47b2"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 108,
+  "fields": {
+    "language_code": "en",
+    "name": "Saunalahden venesatama (Ramsaynranta 6)",
+    "street_address": "Ramsaynranta 6",
+    "master": "e30e7a3e-3626-4beb-9d8e-8a0e86f115a4"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 109,
+  "fields": {
+    "language_code": "sv",
+    "name": "Bastuvikens sm\u00e5b\u00e5tshamn (Ramsays strand 6)",
+    "street_address": "Ramsays strand 6",
+    "master": "e30e7a3e-3626-4beb-9d8e-8a0e86f115a4"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 110,
+  "fields": {
+    "language_code": "en",
+    "name": "Siltavuoren venesatama",
+    "street_address": "Siltavuorenranta 3",
+    "master": "302ac304-9839-437a-811d-e53e074a999a"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 111,
+  "fields": {
+    "language_code": "sv",
+    "name": "Brobergets sm\u00e5b\u00e5tshamn",
+    "street_address": "Brobergskajen 3",
+    "master": "302ac304-9839-437a-811d-e53e074a999a"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 112,
+  "fields": {
+    "language_code": "en",
+    "name": "Str\u00f6msinlahden venesatama",
+    "street_address": "Abraham Wetterin tie 26",
+    "master": "bf5a852a-f79a-4afe-b5ad-5d01e52e7bc3"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 113,
+  "fields": {
+    "language_code": "sv",
+    "name": "Str\u00f6msvikens sm\u00e5b\u00e5tshamn",
+    "street_address": "Abraham Wetters v\u00e4g 26",
+    "master": "bf5a852a-f79a-4afe-b5ad-5d01e52e7bc3"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 114,
+  "fields": {
+    "language_code": "en",
+    "name": "Tammasaaren allas",
+    "street_address": "Tammasaarenaukio 4",
+    "master": "26ec853e-fa8e-484f-9b5d-ecac3ad3c51d"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 115,
+  "fields": {
+    "language_code": "sv",
+    "name": "M\u00e4raholmsbass\u00e4ngen",
+    "street_address": "M\u00e4raholmsplatsen 4",
+    "master": "26ec853e-fa8e-484f-9b5d-ecac3ad3c51d"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 116,
+  "fields": {
+    "language_code": "en",
+    "name": "Tervasaari (Tervasaarenkannas 1) / Venesatama",
+    "street_address": "Tervasaarenkannas 1",
+    "master": "ebc222e2-e7a4-4639-af35-de60075dd336"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 117,
+  "fields": {
+    "language_code": "sv",
+    "name": "Tj\u00e4rholmen (Tj\u00e4rholmn\u00e4set 1) / Sm\u00e5b\u00e5tshamn",
+    "street_address": "Tj\u00e4rholmsn\u00e4set 1",
+    "master": "ebc222e2-e7a4-4639-af35-de60075dd336"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 118,
+  "fields": {
+    "language_code": "en",
+    "name": "Vasikkasaaren venesatama",
+    "street_address": "Vasikkasaari",
+    "master": "4e982440-d032-4d9e-a827-e1c89e86da51"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 119,
+  "fields": {
+    "language_code": "sv",
+    "name": "Kalvholmens sm\u00e5b\u00e5tshamn",
+    "street_address": "Kalvholmen",
+    "master": "4e982440-d032-4d9e-a827-e1c89e86da51"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 120,
+  "fields": {
+    "language_code": "en",
+    "name": "Vuosaarenlahden venesatama",
+    "street_address": "Merenkulkijankuja 7",
+    "master": "deb09f00-4ec3-4b5e-95c9-af296acd071b"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 121,
+  "fields": {
+    "language_code": "sv",
+    "name": "Nordsj\u00f6vikens sm\u00e5b\u00e5tshamn",
+    "street_address": "Sj\u00f6farargr\u00e4nden 7",
+    "master": "deb09f00-4ec3-4b5e-95c9-af296acd071b"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 122,
+  "fields": {
+    "language_code": "en",
+    "name": "V\u00e4h\u00e4niityn venesatama",
+    "street_address": "V\u00e4h\u00e4niityntie 3a",
+    "master": "3d05bb47-4fc1-468b-b326-70bcee5d0cb2"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 123,
+  "fields": {
+    "language_code": "sv",
+    "name": "Lill\u00e4ngens sm\u00e5b\u00e5tshamn",
+    "street_address": "Lill\u00e4ngsv\u00e4gen 3a",
     "master": "3d05bb47-4fc1-468b-b326-70bcee5d0cb2"
   }
 },
