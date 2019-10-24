@@ -4,46 +4,58 @@
 #
 #    pip-compile requirements.in
 #
-aniso8601==6.0.0          # via graphene
-certifi==2019.6.16        # via requests, sentry-sdk
+aniso8601==7.0.0          # via graphene
+certifi==2019.9.11        # via requests, sentry-sdk
 chardet==3.0.4            # via requests
 coreapi==2.3.3
 coreschema==0.0.4         # via coreapi
-django-anymail==6.1.0
-django-cors-headers==3.0.2
+django-anymail==7.0.0
+django-cors-headers==3.1.1
 django-enumfields==1.0.0
 django-environ==0.4.5
 django-filter==2.2.0
 django-graphql-geojson==0.1.4
+django-graphql-jwt==0.2.2
+django-helusers==0.5.2
+django-ilmoitin==0.1.4
 django-js-asset==1.2.2    # via django-mptt
-django-mailer==1.2.6
+django-mailer==2.0
 django-mptt==0.10.0       # via django-munigeo
 django-munigeo==0.3.3
 django-parler-rest==2.0   # via django-munigeo
 django-parler==1.9.2
-django==2.2.3
-djangorestframework==3.10.1  # via django-parler-rest
-graphene-django==2.4.0
-graphene==2.1.7           # via graphene-django
-graphql-core==2.2.1       # via graphene, graphene-django, graphql-relay
+django==2.2.6
+djangorestframework==3.10.3  # via django-parler-rest, drf-oidc-auth
+drf-oidc-auth==0.9        # via django-helusers
+ecdsa==0.13.3             # via python-jose
+future==0.18.0            # via pyjwkest, python-jose
+graphene-django==2.6.0
+graphene==2.1.8           # via graphene-django
+graphql-core==2.2.1       # via django-graphql-jwt, graphene, graphene-django, graphql-relay
 graphql-relay==2.0.0      # via graphene
 idna==2.8                 # via requests
 itypes==1.1.0             # via coreapi
-jinja2==2.10.1            # via coreschema
+jinja2==2.10.3            # via coreschema, django-ilmoitin
 lockfile==0.12.2          # via django-mailer
 markupsafe==1.1.1         # via jinja2
-pillow==6.1.0
+pillow==6.2.0
 promise==2.2.1            # via graphene-django, graphql-core, graphql-relay
 psycopg2-binary==2.8.3
-pytz==2019.1              # via django
-pyyaml==5.1.1             # via django-munigeo
-requests-cache==0.5.0     # via django-munigeo
-requests==2.22.0          # via coreapi, django-anymail, django-munigeo, requests-cache
+pyasn1==0.4.7             # via rsa
+pycryptodomex==3.9.0      # via pyjwkest
+pyjwkest==1.4.2           # via drf-oidc-auth
+pyjwt==1.7.1              # via django-graphql-jwt
+python-jose==3.0.1        # via django-helusers
+pytz==2019.3              # via django
+pyyaml==5.1.2             # via django-munigeo
+requests-cache==0.5.2     # via django-munigeo
+requests==2.22.0          # via coreapi, django-anymail, django-helusers, django-munigeo, pyjwkest, requests-cache
+rsa==4.0                  # via python-jose
 rx==1.6.1                 # via graphql-core
-sentry-sdk==0.10.2
+sentry-sdk==0.12.3
 singledispatch==3.4.0.3   # via graphene-django
-six==1.12.0               # via django-anymail, django-munigeo, graphene, graphene-django, graphql-core, graphql-relay, promise, singledispatch
+six==1.12.0               # via django-anymail, django-mailer, django-munigeo, graphene, graphene-django, graphql-core, graphql-relay, promise, pyjwkest, python-jose, singledispatch
 sqlparse==0.3.0           # via django
 uritemplate==3.0.0        # via coreapi
-urllib3==1.25.3           # via requests, sentry-sdk
-xlsxwriter==1.1.8
+urllib3==1.25.6           # via requests, sentry-sdk
+xlsxwriter==1.2.1

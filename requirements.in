@@ -6,9 +6,12 @@ django-enumfields
 django-environ
 django-filter
 django-graphql-geojson
+django-graphql-jwt
+django-helusers
 django-mailer
 django-munigeo
 django-parler
+django-ilmoitin
 graphene-django
 pillow
 psycopg2-binary

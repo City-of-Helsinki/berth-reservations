@@ -9,7 +9,9 @@ class GraphQLTestClient(Client):
     Standard graphene.test.Client does not allow doing that.
     """
 
-    def execute(self, query="", op_name=None, variables=None, lang="en"):
+    def execute(
+        self, query="", op_name=None, variables=None, graphql_url="/graphql/", lang="en"
+    ):
         """
         Function that posts the passed query to our project's GraphQL endpoint.
 
@@ -37,7 +39,7 @@ class GraphQLTestClient(Client):
             body["variables"] = {"input": variables}
 
         resp = self.post(
-            "/graphql/",
+            graphql_url,
             json.dumps(body),
             content_type="application/json",
             HTTP_ACCEPT_LANGUAGE=lang,
