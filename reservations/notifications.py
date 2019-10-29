@@ -1,11 +1,15 @@
-from unittest.mock import MagicMock
-
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from django_ilmoitin.dummy_context import dummy_context
+from django_ilmoitin.dummy_context import COMMON_CONTEXT, dummy_context
 from django_ilmoitin.registry import notifications
 from enumfields import Enum
 
+from .tests.factories import (
+    BerthReservationFactory,
+    HarborChoiceFactory,
+    WinterAreaChoiceFactory,
+    WinterStorageReservationFactory,
+)
 from .utils import localize_datetime
 
 
@@ -27,10 +31,23 @@ notifications.register(
     NotificationType.WINTER_STORAGE_RESERVATION_CREATED.label,
 )
 
-dummy_context.context.update(
+berth_reservation = BerthReservationFactory.build()
+harbor_choices = HarborChoiceFactory.build_batch(size=3, reservation=berth_reservation)
+winter_storage_reservation = WinterStorageReservationFactory.build()
+winter_area_choices = WinterAreaChoiceFactory.build_batch(
+    size=3, reservation=winter_storage_reservation
+)
+
+dummy_context.update(
     {
-        "created_at": localize_datetime(timezone.now()),
-        # TODO: pass more appropriate in-memory objects
-        "reservation": MagicMock(),
+        COMMON_CONTEXT: {"created_at": localize_datetime(timezone.now())},
+        NotificationType.BERTH_RESERVATION_CREATED: {
+            "reservation": berth_reservation,
+            "harbor_choices": sorted(harbor_choices, key=lambda c: c.priority),
+        },
+        NotificationType.WINTER_STORAGE_RESERVATION_CREATED: {
+            "reservation": winter_storage_reservation,
+            "area_choices": sorted(winter_area_choices, key=lambda c: c.priority),
+        },
     }
 )
