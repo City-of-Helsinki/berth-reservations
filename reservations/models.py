@@ -53,7 +53,7 @@ class BerthSwitch(models.Model):
         BerthSwitchReason,
         null=True,
         blank=True,
-        verbose_name=_("Berth switch reason"),
+        verbose_name=_("berth switch reason"),
         on_delete=models.SET_NULL,
     )
 
@@ -216,7 +216,7 @@ class WinterStorageReservation(BaseReservation):
     )
 
     storage_method = EnumField(
-        WinterStorageMethod, verbose_name=_("Storage method"), max_length=60
+        WinterStorageMethod, verbose_name=_("storage method"), max_length=60
     )
 
     # If boat stored on a trailer, trailer's registration number is required
