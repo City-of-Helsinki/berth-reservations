@@ -28,7 +28,7 @@ def notification_template_winter_reservation_created():
 
 
 def test_berth_reservation_created_notification_is_sent(
-    notification_template_berth_reservation_created
+    notification_template_berth_reservation_created,
 ):
     reservation = BerthReservationFactory()
     reservation_saved.send(sender="CreateBerthReservation", reservation=reservation)
@@ -41,7 +41,7 @@ def test_berth_reservation_created_notification_is_sent(
 
 
 def test_winter_reservation_created_notification_is_sent(
-    notification_template_winter_reservation_created
+    notification_template_winter_reservation_created,
 ):
     reservation = WinterStorageReservationFactory()
     reservation_saved.send(
