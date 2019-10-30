@@ -129,7 +129,6 @@ INSTALLED_APPS = [
     # Local apps
     "users",
     "reservations",
-    "notifications",
     "harbors",
     "resources",
 ]
