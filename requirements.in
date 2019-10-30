@@ -12,6 +12,7 @@ django-mailer
 django-munigeo
 django-parler
 django-ilmoitin
+factory-boy
 graphene-django
 pillow
 psycopg2-binary
