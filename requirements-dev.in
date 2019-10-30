@@ -1,6 +1,5 @@
 autopep8
 black
-factory-boy
 flake8
 freezegun
 ipython
