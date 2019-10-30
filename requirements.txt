@@ -17,7 +17,7 @@ django-filter==2.2.0
 django-graphql-geojson==0.1.4
 django-graphql-jwt==0.2.2
 django-helusers==0.5.2
-django-ilmoitin==0.1.4
+django-ilmoitin==0.2.0
 django-js-asset==1.2.2    # via django-mptt
 django-mailer==2.0
 django-mptt==0.10.0       # via django-munigeo
@@ -28,7 +28,7 @@ django==2.2.6
 djangorestframework==3.10.3  # via django-parler-rest, drf-oidc-auth
 drf-oidc-auth==0.9        # via django-helusers
 ecdsa==0.13.3             # via python-jose
-future==0.18.0            # via pyjwkest, python-jose
+future==0.18.1            # via pyjwkest, python-jose
 graphene-django==2.6.0
 graphene==2.1.8           # via graphene-django
 graphql-core==2.2.1       # via django-graphql-jwt, graphene, graphene-django, graphql-relay
@@ -38,9 +38,9 @@ itypes==1.1.0             # via coreapi
 jinja2==2.10.3            # via coreschema, django-ilmoitin
 lockfile==0.12.2          # via django-mailer
 markupsafe==1.1.1         # via jinja2
-pillow==6.2.0
+pillow==6.2.1
 promise==2.2.1            # via graphene-django, graphql-core, graphql-relay
-psycopg2-binary==2.8.3
+psycopg2-binary==2.8.4
 pyasn1==0.4.7             # via rsa
 pycryptodomex==3.9.0      # via pyjwkest
 pyjwkest==1.4.2           # via drf-oidc-auth
@@ -52,10 +52,10 @@ requests-cache==0.5.2     # via django-munigeo
 requests==2.22.0          # via coreapi, django-anymail, django-helusers, django-munigeo, pyjwkest, requests-cache
 rsa==4.0                  # via python-jose
 rx==1.6.1                 # via graphql-core
-sentry-sdk==0.12.3
+sentry-sdk==0.13.1
 singledispatch==3.4.0.3   # via graphene-django
 six==1.12.0               # via django-anymail, django-mailer, django-munigeo, graphene, graphene-django, graphql-core, graphql-relay, promise, pyjwkest, python-jose, singledispatch
 sqlparse==0.3.0           # via django
 uritemplate==3.0.0        # via coreapi
 urllib3==1.25.6           # via requests, sentry-sdk
-xlsxwriter==1.2.1
+xlsxwriter==1.2.2
