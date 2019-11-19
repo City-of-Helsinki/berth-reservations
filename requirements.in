@@ -14,6 +14,7 @@ django-parler
 django-ilmoitin
 factory-boy
 graphene-django
+graphene-federation
 pillow
 psycopg2-binary
 sentry-sdk

@@ -1,5 +1,7 @@
 import graphene
+from graphene_federation import build_schema
 
+import customers.schema
 import harbors.schema
 import reservations.schema
 import resources.schema
@@ -24,8 +26,13 @@ schema = graphene.Schema(query=Query, mutation=Mutation)
 # =====================================================
 
 
-class NewQuery(resources.schema.Query, graphene.ObjectType):
+class Query(customers.schema.Query, resources.schema.Query, graphene.ObjectType):
     pass
 
 
-new_schema = graphene.Schema(query=NewQuery)
+# We need to list all the extended types separately,
+# otherwise graphene will not generate their schemas.
+extended_types = [customers.schema.ProfileNode]
+
+
+new_schema = build_schema(Query, types=extended_types)
