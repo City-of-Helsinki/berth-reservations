@@ -128,6 +128,7 @@ INSTALLED_APPS = [
     "django_ilmoitin",
     # Local apps
     "users",
+    "customers",
     "reservations",
     "harbors",
     "resources",

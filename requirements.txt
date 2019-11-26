@@ -32,7 +32,8 @@ factory-boy==2.12.0
 faker==2.0.3              # via factory-boy
 future==0.18.1            # via pyjwkest, python-jose
 graphene-django==2.6.0
-graphene==2.1.8           # via graphene-django
+graphene-federation==0.0.4
+graphene==2.1.8           # via graphene-django, graphene-federation
 graphql-core==2.2.1       # via django-graphql-jwt, graphene, graphene-django, graphql-relay
 graphql-relay==2.0.0      # via graphene
 idna==2.8                 # via requests

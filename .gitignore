@@ -79,3 +79,4 @@ var/
 venv/
 .pytest_cache/
 data/
+docker-compose.env.yaml

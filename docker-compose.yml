@@ -1,4 +1,4 @@
-version: '3'
+version: '3.7'
 services:
     postgres:
         build: ./docker/postgres/
@@ -33,3 +33,7 @@ services:
 volumes:
         berth-postgres-data-volume:
         berth-django-media-volume:
+
+networks:
+    default:
+        name: helsinki
