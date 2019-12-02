@@ -18,4 +18,9 @@ class CustomerProfile(TimeStampedModel, UUIDModel):
     comment = models.TextField(verbose_name=_("comment"), blank=True)
 
     def __str__(self):
-        return "{} {} ({})".format(self.user.first_name, self.user.last_name, self.id)
+        if self.user:
+            return "{} {} ({})".format(
+                self.user.first_name, self.user.last_name, self.id
+            )
+        else:
+            return self.id
