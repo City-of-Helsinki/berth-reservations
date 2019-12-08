@@ -42,10 +42,10 @@ env = environ.Env(
     CORS_ORIGIN_WHITELIST=(list, []),
     CORS_ORIGIN_ALLOW_ALL=(bool, False),
     NOTIFICATIONS_ENABLED=(bool, False),
-    TOKEN_AUTH_ACCEPTED_AUDIENCE=(str, ""),
-    TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX=(str, ""),
+    TOKEN_AUTH_ACCEPTED_AUDIENCE=(str, "https://api.hel.fi/auth/berths"),
+    TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX=(str, "berths"),
     TOKEN_AUTH_AUTHSERVER_URL=(str, ""),
-    TOKEN_AUTH_FIELD_FOR_CONSENTS=(str, ""),
+    TOKEN_AUTH_FIELD_FOR_CONSENTS=(str, "https://api.hel.fi/auth"),
     TOKEN_AUTH_REQUIRE_SCOPE_PREFIX=(bool, True),
 )
 if os.path.exists(env_file):
