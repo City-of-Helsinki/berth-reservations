@@ -5,6 +5,37 @@ from berth_reservations.tests.utils import GraphQLTestClient
 client = GraphQLTestClient()
 
 
+def test_berth_mooring_type_object_list_has_all_enums():
+    enum_query = """
+        {
+            __type(name: "BerthMooringType") {
+                enumValues {
+                    name
+                    description
+                }
+            }
+        }
+    """
+    executed_enum_query = client.execute(query=enum_query, graphql_url="/graphql_v2/")
+    list_of_enums = executed_enum_query["data"]["__type"]["enumValues"]
+
+    object_query = """
+        {
+            berthMooringTypes {
+                name
+                description
+            }
+        }
+    """
+    executed_object_query = client.execute(
+        query=object_query, graphql_url="/graphql_v2/"
+    )
+    list_of_objects = executed_object_query["data"]["berthMooringTypes"]
+
+    for enum_dict in list_of_enums:
+        assert enum_dict in list_of_objects
+
+
 def test_get_boat_type(boat_type):
     query = """
         {

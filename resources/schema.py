@@ -25,6 +25,23 @@ BerthMooringTypeEnum = graphene.Enum.from_enum(
 )
 
 
+class BerthMooringTypeEnumObject(graphene.ObjectType):
+    """
+    BerthMooringTypeEnum as an ObjectType
+
+    Used to expose both names/values and descriptions of the
+    enum members through the 'berthMooringTypes' query.
+    Needed because an introspection query ("__type") would
+    not come through the apollo-gateway to this project's API.
+    """
+
+    name = graphene.String()
+    description = graphene.String()
+
+    def resolve_description(self, info, **kwargs):
+        return self.label
+
+
 class AvailabilityLevelType(DjangoObjectType):
     class Meta:
         model = AvailabilityLevel
@@ -161,6 +178,7 @@ class Query:
     availability_levels = DjangoListField(AvailabilityLevelType)
     boat_types = DjangoListField(BoatTypeType)
 
+    berth_mooring_types = graphene.List(BerthMooringTypeEnumObject)
     berth_type = relay.Node.Field(BerthTypeNode)
     berth_types = DjangoConnectionField(BerthTypeNode)
 
@@ -190,6 +208,10 @@ class Query:
 
     def resolve_boat_types(self, info, **kwargs):
         return BoatType.objects.all()
+
+    def resolve_berth_mooring_types(self, info, **kwargs):
+        # return all enum members
+        return BerthMooringType
 
     def resolve_berths(self, info, **kwargs):
         return Berth.objects.prefetch_related(
