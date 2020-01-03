@@ -3,6 +3,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumField
 
+from resources.models import BoatType
 from utils.models import TimeStampedModel, UUIDModel
 
 from .enums import InvoicingType
@@ -24,3 +25,63 @@ class CustomerProfile(TimeStampedModel, UUIDModel):
             )
         else:
             return self.id
+
+
+class Boat(TimeStampedModel, UUIDModel):
+    owner = models.ForeignKey(
+        CustomerProfile,
+        verbose_name=_("owner"),
+        on_delete=models.CASCADE,
+        related_name="boats",
+    )
+    boat_type = models.ForeignKey(
+        BoatType,
+        verbose_name=_("boat type"),
+        on_delete=models.PROTECT,
+        related_name="boats",
+    )
+
+    # General boat info
+    registration_number = models.CharField(
+        verbose_name=_("registration number"), max_length=64, blank=True
+    )
+    name = models.CharField(verbose_name=_("boat name"), max_length=255, blank=True)
+    model = models.CharField(verbose_name=_("model"), max_length=64, blank=True)
+
+    # Dimensions
+    length = models.DecimalField(
+        verbose_name=_("length"), decimal_places=2, max_digits=5
+    )
+    width = models.DecimalField(verbose_name=_("width"), decimal_places=2, max_digits=5)
+    draught = models.DecimalField(
+        verbose_name=_("draught"),
+        decimal_places=2,
+        max_digits=5,
+        null=True,
+        blank=True,
+    )
+    weight = models.DecimalField(
+        verbose_name=_("weight"),
+        decimal_places=2,
+        max_digits=10,
+        null=True,
+        blank=True,
+    )
+
+    # Large vessel specific info (if applicable)
+    propulsion = models.CharField(
+        verbose_name=_("propulsion"), max_length=64, blank=True
+    )
+    hull_material = models.CharField(
+        verbose_name=_("hull material"), max_length=64, blank=True
+    )
+
+    boat_is_inspected = models.BooleanField(
+        verbose_name=_("boat is inspected"), null=True, blank=True
+    )
+    boat_is_insured = models.BooleanField(
+        verbose_name=_("boat is insured"), null=True, blank=True
+    )
+
+    def __str__(self):
+        return "{} ({})".format(self.registration_number, self.pk)
