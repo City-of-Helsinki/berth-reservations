@@ -37,7 +37,7 @@ class AvailabilityLevelType(DjangoObjectType):
 class BoatTypeType(DjangoObjectType):
     class Meta:
         model = BoatType
-        exclude = ("piers",)
+        exclude = ("piers", "boats")
 
     name = graphene.String()
 
