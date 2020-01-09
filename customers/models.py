@@ -1,4 +1,7 @@
+from decimal import Decimal
+
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumField
@@ -50,15 +53,24 @@ class Boat(TimeStampedModel, UUIDModel):
 
     # Dimensions
     length = models.DecimalField(
-        verbose_name=_("length"), decimal_places=2, max_digits=5
+        verbose_name=_("length (m)"),
+        decimal_places=2,
+        max_digits=5,
+        validators=[MinValueValidator(Decimal("0.01"))],
     )
-    width = models.DecimalField(verbose_name=_("width"), decimal_places=2, max_digits=5)
+    width = models.DecimalField(
+        verbose_name=_("width (m)"),
+        decimal_places=2,
+        max_digits=5,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
     draught = models.DecimalField(
-        verbose_name=_("draught"),
+        verbose_name=_("draught (m)"),
         decimal_places=2,
         max_digits=5,
         null=True,
         blank=True,
+        validators=[MinValueValidator(Decimal("0.01"))],
     )
     weight = models.DecimalField(
         verbose_name=_("weight"),
