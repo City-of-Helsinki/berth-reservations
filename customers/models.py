@@ -72,12 +72,8 @@ class Boat(TimeStampedModel, UUIDModel):
         blank=True,
         validators=[MinValueValidator(Decimal("0.01"))],
     )
-    weight = models.DecimalField(
-        verbose_name=_("weight"),
-        decimal_places=2,
-        max_digits=10,
-        null=True,
-        blank=True,
+    weight = models.PositiveIntegerField(
+        verbose_name=_("weight (kg)"), null=True, blank=True,
     )
 
     # Large vessel specific info (if applicable)
