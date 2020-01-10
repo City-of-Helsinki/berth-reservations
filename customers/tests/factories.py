@@ -1,9 +1,10 @@
 import factory
 
+from resources.tests.factories import BoatTypeFactory
 from users.tests.factories import UserFactory
 
 from ..enums import InvoicingType
-from ..models import CustomerProfile
+from ..models import Boat, CustomerProfile
 
 
 class CustomerProfileFactory(factory.django.DjangoModelFactory):
@@ -13,3 +14,16 @@ class CustomerProfileFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = CustomerProfile
+
+
+class BoatFactory(factory.django.DjangoModelFactory):
+    owner = factory.SubFactory(CustomerProfileFactory)
+    boat_type = factory.SubFactory(BoatTypeFactory)
+    registration_number = factory.Faker("bs")
+    name = factory.Faker("bs")
+    # even though these are decimals, Faker uses ints for generation ¯\_(ツ)_/¯
+    length = factory.Faker("pydecimal", min_value=0, max_value=999)
+    width = factory.Faker("pydecimal", min_value=0, max_value=999)
+
+    class Meta:
+        model = Boat
