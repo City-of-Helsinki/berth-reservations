@@ -30,6 +30,14 @@ BerthMooringTypeEnum = graphene.Enum.from_enum(
 )
 
 
+def update_object(obj, data):
+    if not data:
+        return
+    for k, v in data.items():
+        setattr(obj, k, v)
+    obj.save()
+
+
 class AvailabilityLevelType(DjangoObjectType):
     class Meta:
         model = AvailabilityLevel
@@ -185,6 +193,42 @@ class CreateBerthMutation(graphene.ClientIDMutation):
         return CreateBerthMutation(berth=berth)
 
 
+class UpdateBerthMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+        number = graphene.String()
+        comment = graphene.String()
+        pier_id = graphene.ID()
+        berth_type_id = graphene.ID()
+
+    berth = graphene.Field(BerthNode)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        # TODO: Should check if the user has permissions to
+        # modify the specific resource
+        # GQL IDs have to be translated to Django model UUIDs
+        id = from_global_id(kwargs.pop("id"))[1]
+
+        if kwargs.get("pier_id"):
+            kwargs["pier_id"] = from_global_id(kwargs.get("pier_id"))[1]
+
+        if kwargs.get("berth_type_id"):
+            kwargs["berth_type_id"] = from_global_id(kwargs.get("berth_type_id"))[1]
+
+        try:
+            berth = Berth.objects.get(pk=id)
+        except Berth.DoesNotExist as e:
+            raise VenepaikkaGraphQLError(e)
+
+        update_object(berth, kwargs)
+
+        return UpdateBerthMutation(berth=berth)
+
+
 class DeleteBerthMutation(graphene.ClientIDMutation):
     class Input:
         id = graphene.ID(required=True)
@@ -200,7 +244,6 @@ class DeleteBerthMutation(graphene.ClientIDMutation):
 
         try:
             berth = Berth.objects.get(pk=id)
-            print(berth)
         except Berth.DoesNotExist as e:
             raise VenepaikkaGraphQLError(e)
 
@@ -326,3 +369,4 @@ class Query:
 class Mutation:
     create_berth = CreateBerthMutation.Field()
     delete_berth = DeleteBerthMutation.Field()
+    update_berth = UpdateBerthMutation.Field()

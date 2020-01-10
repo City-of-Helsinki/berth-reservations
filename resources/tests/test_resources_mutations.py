@@ -187,3 +187,76 @@ def test_delete_berth_inexistent_berth(superuser):
     )
 
     assert_doesnt_exist("Berth", executed)
+
+
+UPDATE_BERTH_MUTATION = """
+    mutation UpdateBerth($input: UpdateBerthMutationInput!) {
+      updateBerth(input: $input) {
+        berth {
+          id
+          number
+          comment
+          pier {
+            id
+          }
+          berthType {
+            id
+          }
+        }
+      }
+    }
+"""
+
+
+def test_update_berth(berth, pier, berth_type, superuser):
+    global_id = to_global_id("BerthNode", str(berth.id))
+    pier_id = to_global_id("PierNode", str(pier.id))
+    berth_type_id = to_global_id("BerthTypeNode", str(berth_type.id))
+
+    variables = {
+        "id": global_id,
+        "number": "666",
+        "comment": "foobar",
+        "pierId": pier_id,
+        "berthTypeId": berth_type_id,
+    }
+
+    assert Berth.objects.count() == 1
+
+    executed = client.execute(
+        query=UPDATE_BERTH_MUTATION,
+        variables=variables,
+        graphql_url="/graphql_v2/",
+        user=superuser,
+    )
+
+    assert Berth.objects.count() == 1
+    assert executed["data"]["updateBerth"]["berth"]["id"] == global_id
+    assert executed["data"]["updateBerth"]["berth"]["comment"] == "foobar"
+    assert executed["data"]["updateBerth"]["berth"]["number"] == "666"
+    assert executed["data"]["updateBerth"]["berth"]["pier"]["id"] == pier_id
+    assert executed["data"]["updateBerth"]["berth"]["berthType"]["id"] == berth_type_id
+
+
+def test_update_berth_no_id(berth, pier, berth_type, superuser):
+    pier_id = to_global_id("PierNode", str(pier.id))
+    berth_type_id = to_global_id("BerthTypeNode", str(berth_type.id))
+
+    variables = {
+        "number": "666",
+        "comment": "foobar",
+        "pierId": pier_id,
+        "berthTypeId": berth_type_id,
+    }
+
+    assert Berth.objects.count() == 1
+
+    executed = client.execute(
+        query=UPDATE_BERTH_MUTATION,
+        variables=variables,
+        graphql_url="/graphql_v2/",
+        user=superuser,
+    )
+
+    assert Berth.objects.count() == 1
+    assert_field_missing("id", executed)
