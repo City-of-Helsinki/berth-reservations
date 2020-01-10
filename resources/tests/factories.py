@@ -1,4 +1,5 @@
 import factory
+from django.contrib.auth import get_user_model
 from django.contrib.gis.geos import Point
 from factory.random import randgen
 
@@ -110,3 +111,13 @@ class WinterStoragePlaceFactory(AbstractPlaceFactory):
 
     class Meta:
         model = WinterStoragePlace
+
+
+class UserFactory(factory.django.DjangoModelFactory):
+    first_name = factory.Faker("first_name")
+    last_name = factory.Faker("last_name")
+    username = factory.Faker("user_name")
+    email = factory.Faker("email")
+
+    class Meta:
+        model = get_user_model()

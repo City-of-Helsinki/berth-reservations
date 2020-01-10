@@ -1,10 +1,13 @@
 import graphene
 import graphql_geojson
+from django.db import transaction
 from django.db.models import Prefetch
 from graphene import relay
 from graphene_django.fields import DjangoConnectionField, DjangoListField
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
+from graphql_jwt.decorators import login_required, superuser_required
+from graphql_relay import from_global_id
 
 from .enums import BerthMooringType
 from .models import (
@@ -157,6 +160,29 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
             return None
 
 
+class CreateBerthMutation(graphene.ClientIDMutation):
+    class Input:
+        number = graphene.String(required=True)
+        comment = graphene.String()
+        pier_id = graphene.ID(required=True)
+        berth_type_id = graphene.ID(required=True)
+
+    berth = graphene.Field(BerthNode)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        berth = Berth.objects.create(
+            number=kwargs.get("number"),
+            comment=kwargs.get("comment", ""),
+            pier_id=from_global_id(kwargs.get("pier_id"))[1],
+            berth_type_id=from_global_id(kwargs.get("berth_type_id"))[1],
+        )
+        return CreateBerthMutation(berth=berth)
+
+
 class Query:
     availability_levels = DjangoListField(AvailabilityLevelType)
     boat_types = DjangoListField(BoatTypeType)
@@ -269,3 +295,7 @@ class Query:
                 ),
             ),
         ).select_related("availability_level", "municipality")
+
+
+class Mutation:
+    create_berth = CreateBerthMutation.Field()

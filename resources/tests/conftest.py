@@ -4,9 +4,11 @@ from berth_reservations.tests.conftest import *  # noqa
 
 from .factories import (
     BerthFactory,
+    BerthTypeFactory,
     BoatTypeFactory,
     HarborFactory,
     PierFactory,
+    UserFactory,
     WinterStorageAreaFactory,
     WinterStoragePlaceFactory,
     WinterStorageSectionFactory,
@@ -17,6 +19,12 @@ from .factories import (
 def boat_type():
     boat_type = BoatTypeFactory()
     return boat_type
+
+
+@pytest.fixture
+def berth_type():
+    berth_type = BerthTypeFactory()
+    return berth_type
 
 
 @pytest.fixture
@@ -53,3 +61,21 @@ def winter_storage_section():
 def winter_storage_place():
     winter_storage_place = WinterStoragePlaceFactory()
     return winter_storage_place
+
+
+@pytest.fixture
+def user():
+    user = UserFactory()
+    return user
+
+
+@pytest.fixture
+def staff_user():
+    user = UserFactory(is_staff=True)
+    return user
+
+
+@pytest.fixture
+def superuser():
+    user = UserFactory(is_superuser=True)
+    return user
