@@ -9,6 +9,8 @@ from graphene_django.types import DjangoObjectType
 from graphql_jwt.decorators import login_required, superuser_required
 from graphql_relay import from_global_id
 
+from berth_reservations.exceptions import VenepaikkaGraphQLError
+
 from .enums import BerthMooringType
 from .models import (
     AvailabilityLevel,
@@ -183,6 +185,30 @@ class CreateBerthMutation(graphene.ClientIDMutation):
         return CreateBerthMutation(berth=berth)
 
 
+class DeleteBerthMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        # TODO: Should check if the user has permissions to
+        # delete the specific resource
+        id = from_global_id(kwargs.get("id"))[1]
+
+        try:
+            berth = Berth.objects.get(pk=id)
+            print(berth)
+        except Berth.DoesNotExist as e:
+            raise VenepaikkaGraphQLError(e)
+
+        berth.delete()
+
+        return DeleteBerthMutation()
+
+
 class Query:
     availability_levels = DjangoListField(AvailabilityLevelType)
     boat_types = DjangoListField(BoatTypeType)
@@ -299,3 +325,4 @@ class Query:
 
 class Mutation:
     create_berth = CreateBerthMutation.Field()
+    delete_berth = DeleteBerthMutation.Field()
