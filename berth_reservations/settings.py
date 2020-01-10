@@ -132,6 +132,7 @@ INSTALLED_APPS = [
     "reservations",
     "harbors",
     "resources",
+    "leases",
 ]
 
 AUTH_USER_MODEL = "users.User"
