@@ -8,7 +8,6 @@ from .factories import (
     BoatTypeFactory,
     HarborFactory,
     PierFactory,
-    UserFactory,
     WinterStorageAreaFactory,
     WinterStoragePlaceFactory,
     WinterStorageSectionFactory,
@@ -61,21 +60,3 @@ def winter_storage_section():
 def winter_storage_place():
     winter_storage_place = WinterStoragePlaceFactory()
     return winter_storage_place
-
-
-@pytest.fixture
-def user():
-    user = UserFactory()
-    return user
-
-
-@pytest.fixture
-def staff_user():
-    user = UserFactory(is_staff=True)
-    return user
-
-
-@pytest.fixture
-def superuser():
-    user = UserFactory(is_superuser=True)
-    return user
