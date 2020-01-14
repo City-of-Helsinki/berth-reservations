@@ -252,6 +252,30 @@ class DeleteBerthMutation(graphene.ClientIDMutation):
         return DeleteBerthMutation()
 
 
+class CreateBerthTypeMutation(graphene.ClientIDMutation):
+    class Input:
+        mooring_type = BerthMooringTypeEnum(required=True)
+        width = graphene.Int(required=True)
+        length = graphene.Int(required=True)
+
+    berth_type = graphene.Field(BerthTypeNode)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        # TODO: Should check if the user has permissions to
+        # delete the specific resource
+
+        berth_type = BerthType.objects.create(
+            mooring_type=kwargs.get("mooring_type"),
+            width=kwargs.get("width"),
+            length=kwargs.get("length"),
+        )
+        return CreateBerthTypeMutation(berth_type=berth_type)
+
+
 class Query:
     availability_levels = DjangoListField(AvailabilityLevelType)
     boat_types = DjangoListField(BoatTypeType)
@@ -367,6 +391,10 @@ class Query:
 
 
 class Mutation:
+    # Berths
     create_berth = CreateBerthMutation.Field()
     delete_berth = DeleteBerthMutation.Field()
     update_berth = UpdateBerthMutation.Field()
+
+    # BerthType
+    create_berth_type = CreateBerthTypeMutation.Field()
