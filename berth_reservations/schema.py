@@ -30,9 +30,13 @@ class Query(customers.schema.Query, resources.schema.Query, graphene.ObjectType)
     pass
 
 
+class Mutation(resources.schema.Mutation, graphene.ObjectType):
+    pass
+
+
 # We need to list all the extended types separately,
 # otherwise graphene will not generate their schemas.
 extended_types = [customers.schema.ProfileNode]
 
 
-new_schema = build_schema(Query, types=extended_types)
+new_schema = build_schema(Query, Mutation, types=extended_types)

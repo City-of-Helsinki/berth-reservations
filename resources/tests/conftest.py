@@ -4,6 +4,7 @@ from berth_reservations.tests.conftest import *  # noqa
 
 from .factories import (
     BerthFactory,
+    BerthTypeFactory,
     BoatTypeFactory,
     HarborFactory,
     PierFactory,
@@ -17,6 +18,12 @@ from .factories import (
 def boat_type():
     boat_type = BoatTypeFactory()
     return boat_type
+
+
+@pytest.fixture
+def berth_type():
+    berth_type = BerthTypeFactory()
+    return berth_type
 
 
 @pytest.fixture

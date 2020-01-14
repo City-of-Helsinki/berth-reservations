@@ -1,10 +1,15 @@
 import graphene
 import graphql_geojson
+from django.db import transaction
 from django.db.models import Prefetch
 from graphene import relay
 from graphene_django.fields import DjangoConnectionField, DjangoListField
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
+from graphql_jwt.decorators import login_required, superuser_required
+from graphql_relay import from_global_id
+
+from berth_reservations.exceptions import VenepaikkaGraphQLError
 
 from .enums import BerthMooringType
 from .models import (
@@ -23,6 +28,14 @@ from .models import (
 BerthMooringTypeEnum = graphene.Enum.from_enum(
     BerthMooringType, description=lambda e: e.label if e else ""
 )
+
+
+def update_object(obj, data):
+    if not data:
+        return
+    for k, v in data.items():
+        setattr(obj, k, v)
+    obj.save()
 
 
 class AvailabilityLevelType(DjangoObjectType):
@@ -157,6 +170,88 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
             return None
 
 
+class CreateBerthMutation(graphene.ClientIDMutation):
+    class Input:
+        number = graphene.String(required=True)
+        comment = graphene.String()
+        pier_id = graphene.ID(required=True)
+        berth_type_id = graphene.ID(required=True)
+
+    berth = graphene.Field(BerthNode)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        berth = Berth.objects.create(
+            number=kwargs.get("number"),
+            comment=kwargs.get("comment", ""),
+            pier_id=from_global_id(kwargs.get("pier_id"))[1],
+            berth_type_id=from_global_id(kwargs.get("berth_type_id"))[1],
+        )
+        return CreateBerthMutation(berth=berth)
+
+
+class UpdateBerthMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+        number = graphene.String()
+        comment = graphene.String()
+        pier_id = graphene.ID()
+        berth_type_id = graphene.ID()
+
+    berth = graphene.Field(BerthNode)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        # TODO: Should check if the user has permissions to
+        # modify the specific resource
+        # GQL IDs have to be translated to Django model UUIDs
+        id = from_global_id(kwargs.pop("id"))[1]
+
+        if kwargs.get("pier_id"):
+            kwargs["pier_id"] = from_global_id(kwargs.get("pier_id"))[1]
+
+        if kwargs.get("berth_type_id"):
+            kwargs["berth_type_id"] = from_global_id(kwargs.get("berth_type_id"))[1]
+
+        try:
+            berth = Berth.objects.get(pk=id)
+        except Berth.DoesNotExist as e:
+            raise VenepaikkaGraphQLError(e)
+
+        update_object(berth, kwargs)
+
+        return UpdateBerthMutation(berth=berth)
+
+
+class DeleteBerthMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        # TODO: Should check if the user has permissions to
+        # delete the specific resource
+        id = from_global_id(kwargs.get("id"))[1]
+
+        try:
+            berth = Berth.objects.get(pk=id)
+        except Berth.DoesNotExist as e:
+            raise VenepaikkaGraphQLError(e)
+
+        berth.delete()
+
+        return DeleteBerthMutation()
+
+
 class Query:
     availability_levels = DjangoListField(AvailabilityLevelType)
     boat_types = DjangoListField(BoatTypeType)
@@ -269,3 +364,9 @@ class Query:
                 ),
             ),
         ).select_related("availability_level", "municipality")
+
+
+class Mutation:
+    create_berth = CreateBerthMutation.Field()
+    delete_berth = DeleteBerthMutation.Field()
+    update_berth = UpdateBerthMutation.Field()
