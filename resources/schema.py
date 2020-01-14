@@ -276,6 +276,35 @@ class CreateBerthTypeMutation(graphene.ClientIDMutation):
         return CreateBerthTypeMutation(berth_type=berth_type)
 
 
+class UpdateBerthTypeMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+        mooring_type = BerthMooringTypeEnum()
+        width = graphene.Int()
+        length = graphene.Int()
+
+    berth_type = graphene.Field(BerthTypeNode)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        # TODO: Should check if the user has permissions to
+        # modify the specific resource
+        # GQL IDs have to be translated to Django model UUIDs
+        id = from_global_id(kwargs.pop("id"))[1]
+
+        try:
+            berth_type = BerthType.objects.get(pk=id)
+        except BerthType.DoesNotExist as e:
+            raise VenepaikkaGraphQLError(e)
+
+        update_object(berth_type, kwargs)
+
+        return UpdateBerthTypeMutation(berth_type=berth_type)
+
+
 class DeleteBerthTypeMutation(graphene.ClientIDMutation):
     class Input:
         id = graphene.ID(required=True)
@@ -422,3 +451,4 @@ class Mutation:
     # BerthType
     create_berth_type = CreateBerthTypeMutation.Field()
     delete_berth_type = DeleteBerthTypeMutation.Field()
+    update_berth_type = UpdateBerthTypeMutation.Field()
