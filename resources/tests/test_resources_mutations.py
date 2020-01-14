@@ -324,3 +324,63 @@ def test_create_berth_type_invalid_mooring(superuser):
     assert BerthType.objects.count() == 0
 
     assert_invalid_enum("mooringType", "BerthMooringType", executed)
+
+
+DELETE_BERTH_TYPE_MUTATION = """
+    mutation DeleteBerthType($input: DeleteBerthTypeMutationInput!) {
+      deleteBerthType(input: $input) {
+        __typename
+      }
+    }
+"""
+
+
+def test_delete_berth_type(superuser, berth_type):
+    variables = {
+        "id": to_global_id("BerthTypeNode", str(berth_type.id)),
+    }
+
+    assert BerthType.objects.count() == 1
+
+    client.execute(
+        query=DELETE_BERTH_TYPE_MUTATION,
+        variables=variables,
+        graphql_url="/graphql_v2/",
+        user=superuser,
+    )
+
+    assert BerthType.objects.count() == 0
+
+
+@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
+def test_delete_berth_type_not_enough_permissions(user, berth_type):
+    variables = {
+        "id": to_global_id("BerthTypeNode", str(berth_type.id)),
+    }
+
+    assert BerthType.objects.count() == 1
+
+    executed = client.execute(
+        query=DELETE_BERTH_TYPE_MUTATION,
+        variables=variables,
+        graphql_url="/graphql_v2/",
+        user=user,
+    )
+
+    assert BerthType.objects.count() == 1
+    assert_not_enough_permissions(executed)
+
+
+def test_delete_berth_type_inexistent_berth(superuser):
+    variables = {
+        "id": to_global_id("BerthTypeNode", uuid.uuid4()),
+    }
+
+    executed = client.execute(
+        query=DELETE_BERTH_TYPE_MUTATION,
+        variables=variables,
+        graphql_url="/graphql_v2/",
+        user=superuser,
+    )
+
+    assert_doesnt_exist("BerthType", executed)
