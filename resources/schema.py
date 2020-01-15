@@ -252,6 +252,82 @@ class DeleteBerthMutation(graphene.ClientIDMutation):
         return DeleteBerthMutation()
 
 
+class CreateBerthTypeMutation(graphene.ClientIDMutation):
+    class Input:
+        mooring_type = BerthMooringTypeEnum(required=True)
+        width = graphene.Int(required=True)
+        length = graphene.Int(required=True)
+
+    berth_type = graphene.Field(BerthTypeNode)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        # TODO: Should check if the user has permissions to
+        # delete the specific resource
+
+        berth_type = BerthType.objects.create(
+            mooring_type=kwargs.get("mooring_type"),
+            width=kwargs.get("width"),
+            length=kwargs.get("length"),
+        )
+        return CreateBerthTypeMutation(berth_type=berth_type)
+
+
+class UpdateBerthTypeMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+        mooring_type = BerthMooringTypeEnum()
+        width = graphene.Int()
+        length = graphene.Int()
+
+    berth_type = graphene.Field(BerthTypeNode)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        # TODO: Should check if the user has permissions to
+        # modify the specific resource
+        # GQL IDs have to be translated to Django model UUIDs
+        id = from_global_id(kwargs.pop("id"))[1]
+
+        try:
+            berth_type = BerthType.objects.get(pk=id)
+        except BerthType.DoesNotExist as e:
+            raise VenepaikkaGraphQLError(e)
+
+        update_object(berth_type, kwargs)
+
+        return UpdateBerthTypeMutation(berth_type=berth_type)
+
+
+class DeleteBerthTypeMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        # TODO: Should check if the user has permissions to
+        # delete the specific resource
+        id = from_global_id(kwargs.get("id"))[1]
+
+        try:
+            berth_type = BerthType.objects.get(pk=id)
+        except BerthType.DoesNotExist as e:
+            raise VenepaikkaGraphQLError(e)
+
+        berth_type.delete()
+
+        return DeleteBerthTypeMutation()
+
+
 class Query:
     availability_levels = DjangoListField(AvailabilityLevelType)
     boat_types = DjangoListField(BoatTypeType)
@@ -367,6 +443,12 @@ class Query:
 
 
 class Mutation:
+    # Berths
     create_berth = CreateBerthMutation.Field()
     delete_berth = DeleteBerthMutation.Field()
     update_berth = UpdateBerthMutation.Field()
+
+    # BerthType
+    create_berth_type = CreateBerthTypeMutation.Field()
+    delete_berth_type = DeleteBerthTypeMutation.Field()
+    update_berth_type = UpdateBerthTypeMutation.Field()

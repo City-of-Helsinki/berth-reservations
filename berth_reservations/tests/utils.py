@@ -77,3 +77,10 @@ def assert_field_missing(field_name, executed):
     errors = str(executed["errors"])
     assert field_name in errors
     assert "found null" in errors
+
+
+def assert_invalid_enum(field_name, expected_value, executed):
+    errors = str(executed["errors"])
+    assert expected_value in errors
+    assert field_name in errors
+    assert f'Expected type "{expected_value}"' in errors
