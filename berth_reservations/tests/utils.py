@@ -70,7 +70,14 @@ def assert_not_enough_permissions(executed):
 
 
 def assert_doesnt_exist(model, executed):
-    assert executed["errors"][0]["message"] == f"{model} matching query does not exist."
+    errors = str(executed["errors"])
+    assert f"{model} matching query does not exist" in errors
+
+
+def assert_field_duplicated(field_name, executed):
+    errors = str(executed["errors"])
+    assert field_name in errors
+    assert "already exists" in errors
 
 
 def assert_field_missing(field_name, executed):

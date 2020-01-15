@@ -2,12 +2,14 @@ import graphene
 import graphql_geojson
 from django.db import transaction
 from django.db.models import Prefetch
+from django.utils.translation import get_language
 from graphene import relay
 from graphene_django.fields import DjangoConnectionField, DjangoListField
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
 from graphql_jwt.decorators import login_required, superuser_required
 from graphql_relay import from_global_id
+from munigeo.models import Municipality
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 
@@ -170,6 +172,16 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
             return None
 
 
+class AbstractAreaInput:
+    servicemap_id = graphene.String()
+    zip_code = graphene.String()
+    phone = graphene.String()
+    email = graphene.String()
+    www_url = graphene.String()
+    location = graphql_geojson.Geometry()
+    image_link = graphene.String()
+
+
 class CreateBerthMutation(graphene.ClientIDMutation):
     class Input:
         number = graphene.String(required=True)
@@ -328,6 +340,54 @@ class DeleteBerthTypeMutation(graphene.ClientIDMutation):
         return DeleteBerthTypeMutation()
 
 
+class HarborInput(AbstractAreaInput):
+    municipality_id = graphene.String()
+    image_file = graphene.String()
+    availability_level_id = graphene.ID()
+    number_of_places = graphene.Int()
+    maximum_width = graphene.Int()
+    maximum_length = graphene.Int()
+    maximum_depth = graphene.Int()
+    name = graphene.String()
+    street_address = graphene.String()
+
+
+class CreateHarborMutation(graphene.ClientIDMutation):
+    class Input(HarborInput):
+        pass
+
+    harbor = graphene.Field(HarborNode)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        # TODO: Should check if the user has permissions to
+        # delete the specific resource
+        lang = get_language()
+
+        availability_level_id = kwargs.pop("availability_level_id", None)
+        if availability_level_id:
+            try:
+                kwargs["availability_level"] = AvailabilityLevel.objects.get(
+                    pk=availability_level_id
+                )
+            except AvailabilityLevel.DoesNotExist as e:
+                raise VenepaikkaGraphQLError(e)
+
+        municipality_id = kwargs.pop("municipality_id", None)
+        if municipality_id:
+            try:
+                kwargs["municipality"] = Municipality.objects.get(id=municipality_id)
+            except Municipality.DoesNotExist as e:
+                raise VenepaikkaGraphQLError(e)
+
+        harbor = Harbor.objects.language(lang).create(**kwargs)
+
+        return CreateHarborMutation(harbor=harbor)
+
+
 class Query:
     availability_levels = DjangoListField(AvailabilityLevelType)
     boat_types = DjangoListField(BoatTypeType)
@@ -452,3 +512,6 @@ class Mutation:
     create_berth_type = CreateBerthTypeMutation.Field()
     delete_berth_type = DeleteBerthTypeMutation.Field()
     update_berth_type = UpdateBerthTypeMutation.Field()
+
+    # Harbors
+    create_harbor = CreateHarborMutation.Field()

@@ -1,6 +1,6 @@
 import pytest
 
-from .factories import UserFactory
+from .factories import MunicipalityFactory, UserFactory
 
 
 @pytest.fixture(autouse=True)
@@ -12,6 +12,7 @@ def autouse_django_db(db):
 def force_settings(settings):
     settings.MAILER_EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
     settings.DEFAULT_FROM_EMAIL = "noreply@foo.bar"
+    settings.LANGUAGE_CODE = "en"
 
 
 @pytest.fixture
@@ -35,3 +36,9 @@ def user(request):
 def superuser():
     user = UserFactory(is_superuser=True)
     return user
+
+
+@pytest.fixture
+def municipality():
+    municipality = MunicipalityFactory()
+    return municipality

@@ -4,6 +4,7 @@ from factory.random import randgen
 
 from ..enums import BerthMooringType
 from ..models import (
+    AvailabilityLevel,
     Berth,
     BerthType,
     BoatType,
@@ -14,6 +15,14 @@ from ..models import (
     WinterStoragePlaceType,
     WinterStorageSection,
 )
+
+
+class AvailabilityLevelFactory(factory.django.DjangoModelFactory):
+    title = factory.Faker("word")
+    description = factory.Faker("sentence")
+
+    class Meta:
+        model = AvailabilityLevel
 
 
 class BoatTypeFactory(factory.django.DjangoModelFactory):

@@ -3,6 +3,7 @@ import pytest
 from berth_reservations.tests.conftest import *  # noqa
 
 from .factories import (
+    AvailabilityLevelFactory,
     BerthFactory,
     BerthTypeFactory,
     BoatTypeFactory,
@@ -12,6 +13,12 @@ from .factories import (
     WinterStoragePlaceFactory,
     WinterStorageSectionFactory,
 )
+
+
+@pytest.fixture
+def availability_level():
+    availability_level = AvailabilityLevelFactory()
+    return availability_level
 
 
 @pytest.fixture
