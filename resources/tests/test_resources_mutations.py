@@ -618,3 +618,63 @@ def test_create_harbor_duplicated_servicemap_id(superuser, harbor):
 
     assert Harbor.objects.count() == 1
     assert_field_duplicated("servicemap_id", executed)
+
+
+DELETE_HARBOR_MUTATION = """
+    mutation DeleteHarbor($input: DeleteHarborMutationInput!) {
+      deleteHarbor(input: $input) {
+        __typename
+      }
+    }
+"""
+
+
+def test_delete_harbor(superuser, harbor):
+    variables = {
+        "id": to_global_id("HarborNode", str(harbor.id)),
+    }
+
+    assert Harbor.objects.count() == 1
+
+    client.execute(
+        query=DELETE_HARBOR_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        user=superuser,
+    )
+
+    assert Harbor.objects.count() == 0
+
+
+@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
+def test_delete_harbor_not_enough_permissions(user, harbor):
+    variables = {
+        "id": to_global_id("HarborNode", str(harbor.id)),
+    }
+
+    assert Harbor.objects.count() == 1
+
+    executed = client.execute(
+        query=DELETE_HARBOR_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        user=user,
+    )
+
+    assert Harbor.objects.count() == 1
+    assert_not_enough_permissions(executed)
+
+
+def test_delete_harbor_inexistent_harbor(superuser):
+    variables = {
+        "id": to_global_id("HarborNode", uuid.uuid4()),
+    }
+
+    executed = client.execute(
+        query=DELETE_HARBOR_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        user=superuser,
+    )
+
+    assert_doesnt_exist("Harbor", executed)

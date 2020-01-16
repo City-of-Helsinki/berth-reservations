@@ -388,6 +388,29 @@ class CreateHarborMutation(graphene.ClientIDMutation):
         return CreateHarborMutation(harbor=harbor)
 
 
+class DeleteHarborMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        # TODO: Should check if the user has permissions to
+        # delete the specific resource
+        id = from_global_id(kwargs.get("id"))[1]
+
+        try:
+            harbor = Harbor.objects.get(pk=id)
+        except Harbor.DoesNotExist as e:
+            raise VenepaikkaGraphQLError(e)
+
+        harbor.delete()
+
+        return DeleteHarborMutation()
+
+
 class Query:
     availability_levels = DjangoListField(AvailabilityLevelType)
     boat_types = DjangoListField(BoatTypeType)
@@ -515,3 +538,4 @@ class Mutation:
 
     # Harbors
     create_harbor = CreateHarborMutation.Field()
+    delete_harbor = DeleteHarborMutation.Field()
