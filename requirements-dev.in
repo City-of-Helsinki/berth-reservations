@@ -4,6 +4,7 @@ flake8
 freezegun
 ipython
 isort
+pre-commit
 pytest
 pytest-cov
 pytest-django

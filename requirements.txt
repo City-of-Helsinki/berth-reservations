@@ -51,7 +51,7 @@ pyjwt==1.7.1              # via django-graphql-jwt
 python-dateutil==2.8.0    # via faker
 python-jose==3.0.1        # via django-helusers
 pytz==2019.3              # via django
-pyyaml==5.1.2             # via django-munigeo
+pyyaml==5.3               # via django-munigeo
 requests-cache==0.5.2     # via django-munigeo
 requests==2.22.0          # via coreapi, django-anymail, django-helusers, django-munigeo, pyjwkest, requests-cache
 rsa==4.0                  # via python-jose
