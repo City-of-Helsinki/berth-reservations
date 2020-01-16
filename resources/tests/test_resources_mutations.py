@@ -678,3 +678,162 @@ def test_delete_harbor_inexistent_harbor(superuser):
     )
 
     assert_doesnt_exist("Harbor", executed)
+
+
+UPDATE_HARBOR_MUTATION = """
+mutation UpdateHarbor($input: UpdateHarborMutationInput!) {
+  updateHarbor(input: $input) {
+    harbor {
+      id
+      type
+      geometry {
+        type
+        coordinates
+      }
+      bbox
+      properties {
+        name
+        servicemapId
+        streetAddress
+        zipCode
+        availabilityLevel {
+          id
+        }
+        municipality
+        numberOfPlaces
+        maximumWidth
+        maximumLength
+        maximumDepth
+      }
+    }
+  }
+}
+"""
+
+
+def test_update_harbor(superuser, harbor, availability_level, municipality):
+    global_id = to_global_id("HarborNode", str(harbor.id))
+
+    variables = {
+        "id": global_id,
+        "imageFile": "image.png",
+        "availabilityLevelId": availability_level.id,
+        "municipalityId": municipality.id,
+        "numberOfPlaces": 175,
+        "maximumWidth": 400,
+        "maximumLength": 550,
+        "maximumDepth": 200,
+        "name": "Uusi Foobarsatama",
+        "streetAddress": "Uusifoobarstatmanrantatie 2345",
+        "servicemapId": "1",
+        "zipCode": "10101",
+        "location": {"type": "Point", "coordinates": [99.9, 66.6]},
+    }
+
+    assert Harbor.objects.count() == 1
+
+    executed = client.execute(
+        query=UPDATE_HARBOR_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        lang="en",
+        user=superuser,
+    )
+
+    assert Harbor.objects.count() == 1
+    assert executed["data"]["updateHarbor"]["harbor"]["id"] == global_id
+    assert executed["data"]["updateHarbor"]["harbor"]["geometry"] == {
+        "type": variables["location"]["type"],
+        "coordinates": variables["location"]["coordinates"],
+    }
+    assert executed["data"]["updateHarbor"]["harbor"]["bbox"] == [
+        variables["location"]["coordinates"][0],
+        variables["location"]["coordinates"][1],
+        variables["location"]["coordinates"][0],
+        variables["location"]["coordinates"][1],
+    ]
+    assert executed["data"]["updateHarbor"]["harbor"]["properties"] == {
+        "name": variables["name"],
+        "servicemapId": variables["servicemapId"],
+        "streetAddress": variables["streetAddress"],
+        "zipCode": variables["zipCode"],
+        "availabilityLevel": {"id": str(availability_level.id)},
+        "municipality": municipality.name,
+        "numberOfPlaces": variables["numberOfPlaces"],
+        "maximumWidth": variables["maximumWidth"],
+        "maximumLength": variables["maximumLength"],
+        "maximumDepth": variables["maximumDepth"],
+    }
+
+
+def test_update_harbor_no_id(superuser, harbor):
+    variables = {"name": "Uusi Foobarsatama"}
+
+    assert Harbor.objects.count() == 1
+
+    executed = client.execute(
+        query=UPDATE_HARBOR_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        user=superuser,
+    )
+
+    assert Harbor.objects.count() == 1
+    assert_field_missing("id", executed)
+
+
+@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
+def test_update_harbor_not_enough_permissions(user, harbor):
+    variables = {
+        "id": to_global_id("HarborNode", str(harbor.id)),
+    }
+    assert Harbor.objects.count() == 1
+
+    executed = client.execute(
+        query=UPDATE_HARBOR_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        user=user,
+    )
+
+    assert Harbor.objects.count() == 1
+    assert_not_enough_permissions(executed)
+
+
+def test_update_harbor_availability_level_doesnt_exist(harbor, superuser):
+    variables = {
+        "id": to_global_id("HarborNode", harbor.id),
+        "availabilityLevelId": "9999",
+    }
+
+    assert Harbor.objects.count() == 1
+
+    executed = client.execute(
+        query=UPDATE_HARBOR_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        user=superuser,
+    )
+    print(executed)
+
+    assert Harbor.objects.count() == 1
+    assert_doesnt_exist("AvailabilityLevel", executed)
+
+
+def test_update_harbor_municipality_doesnt_exist(harbor, superuser):
+    variables = {
+        "id": to_global_id("HarborNode", harbor.id),
+        "municipalityId": "foobarland",
+    }
+
+    assert Harbor.objects.count() == 1
+
+    executed = client.execute(
+        query=UPDATE_HARBOR_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        user=superuser,
+    )
+
+    assert Harbor.objects.count() == 1
+    assert_doesnt_exist("Municipality", executed)

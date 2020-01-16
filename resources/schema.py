@@ -388,6 +388,47 @@ class CreateHarborMutation(graphene.ClientIDMutation):
         return CreateHarborMutation(harbor=harbor)
 
 
+class UpdateHarborMutation(graphene.ClientIDMutation):
+    class Input(HarborInput):
+        id = graphene.ID(required=True)
+
+    harbor = graphene.Field(HarborNode)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        # TODO: Should check if the user has permissions to
+        # delete the specific resource
+        id = from_global_id(kwargs.pop("id"))[1]
+
+        lang = get_language()
+
+        try:
+            harbor = Harbor.objects.language(lang).get(pk=id)
+
+            availability_level_id = kwargs.pop("availability_level_id", None)
+            if availability_level_id:
+                kwargs["availability_level"] = AvailabilityLevel.objects.language(
+                    lang
+                ).get(pk=availability_level_id)
+
+            municipality_id = kwargs.pop("municipality_id", None)
+            if municipality_id:
+                kwargs["municipality"] = Municipality.objects.get(id=municipality_id)
+        except (
+            Harbor.DoesNotExist,
+            AvailabilityLevel.DoesNotExist,
+            Municipality.DoesNotExist,
+        ) as e:
+            raise VenepaikkaGraphQLError(e)
+
+        update_object(harbor, kwargs)
+
+        return UpdateHarborMutation(harbor=harbor)
+
+
 class DeleteHarborMutation(graphene.ClientIDMutation):
     class Input:
         id = graphene.ID(required=True)
@@ -539,3 +580,4 @@ class Mutation:
     # Harbors
     create_harbor = CreateHarborMutation.Field()
     delete_harbor = DeleteHarborMutation.Field()
+    update_harbor = UpdateHarborMutation.Field()
