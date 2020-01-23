@@ -952,3 +952,57 @@ def test_create_pier_no_harbor(superuser):
 
     assert Pier.objects.count() == 0
     assert_field_missing("harborId", executed)
+
+
+DELETE_PIER_MUTATION = """
+mutation DeletePier($input: DeletePierMutationInput!) {
+  deletePier(input: $input) {
+    __typename
+  }
+}
+"""
+
+
+def test_delete_pier(superuser, pier):
+    variables = {"id": to_global_id("PierNode", str(pier.id))}
+
+    assert Pier.objects.count() == 1
+
+    client.execute(
+        query=DELETE_PIER_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        user=superuser,
+    )
+
+    assert Pier.objects.count() == 0
+
+
+@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
+def test_delete_pier_not_enough_permissions(user, pier):
+    variables = {"id": to_global_id("PierNode", str(pier.id))}
+
+    assert Pier.objects.count() == 1
+
+    executed = client.execute(
+        query=DELETE_PIER_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        user=user,
+    )
+
+    assert Pier.objects.count() == 1
+    assert_not_enough_permissions(executed)
+
+
+def test_delete_pier_inexistent_pier(superuser):
+    variables = {"id": to_global_id("PierNode", uuid.uuid4())}
+
+    executed = client.execute(
+        query=DELETE_PIER_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        user=superuser,
+    )
+
+    assert_doesnt_exist("Pier", executed)

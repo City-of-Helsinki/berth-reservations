@@ -509,6 +509,29 @@ class CreatePierMutation(graphene.ClientIDMutation):
         return CreatePierMutation(pier=pier)
 
 
+class DeletePierMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        # TODO: Should check if the user has permissions to
+        # delete the specific resource
+        id = from_global_id(kwargs.get("id"))[1]
+
+        try:
+            pier = Pier.objects.get(pk=id)
+        except Pier.DoesNotExist as e:
+            raise VenepaikkaGraphQLError(e)
+
+        pier.delete()
+
+        return DeletePierMutation()
+
+
 class Query:
     availability_levels = DjangoListField(AvailabilityLevelType)
     boat_types = DjangoListField(BoatTypeType)
@@ -641,3 +664,4 @@ class Mutation:
 
     # Piers
     create_pier = CreatePierMutation.Field()
+    delete_pier = DeletePierMutation.Field()
