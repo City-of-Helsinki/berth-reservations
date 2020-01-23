@@ -11,7 +11,7 @@ from berth_reservations.tests.utils import (
     assert_not_enough_permissions,
     GraphQLTestClient,
 )
-from resources.models import Berth, BerthType, Harbor
+from resources.models import Berth, BerthType, Harbor, Pier
 
 client = GraphQLTestClient()
 
@@ -837,3 +837,118 @@ def test_update_harbor_municipality_doesnt_exist(harbor, superuser):
 
     assert Harbor.objects.count() == 1
     assert_doesnt_exist("Municipality", executed)
+
+
+CREATE_PIER_MUTATION = """
+mutation CreatePier($input: CreatePierMutationInput!) {
+  createPier(input: $input) {
+    pier {
+      id
+      properties {
+        harbor {
+          id
+        }
+        identifier
+        electricity
+        gate
+        lighting
+        mooring
+        water
+        wasteCollection
+        suitableBoatTypes {
+          id
+        }
+      }
+    }
+  }
+}
+"""
+
+
+def test_create_pier(superuser, harbor, boat_type):
+    harbor_id = to_global_id("HarborNode", harbor.id)
+    boat_types = [boat_type.id]
+
+    variables = {
+        "harborId": harbor_id,
+        "lighting": True,
+        "wasteCollection": True,
+        "mooring": True,
+        "suitableBoatTypes": boat_types,
+        "identifier": "foobar",
+        "location": {"type": "Point", "coordinates": [66.6, 99.9]},
+        "water": True,
+        "electricity": True,
+        "gate": True,
+    }
+    assert Pier.objects.count() == 0
+
+    executed = client.execute(
+        query=CREATE_PIER_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        user=superuser,
+    )
+
+    assert Pier.objects.count() == 1
+    assert executed["data"]["createPier"]["pier"]["id"] is not None
+    assert executed["data"]["createPier"]["pier"]["properties"] == {
+        "harbor": {"id": harbor_id},
+        "identifier": variables["identifier"],
+        "electricity": variables["electricity"],
+        "gate": variables["gate"],
+        "lighting": variables["lighting"],
+        "mooring": variables["mooring"],
+        "water": variables["water"],
+        "wasteCollection": variables["wasteCollection"],
+        "suitableBoatTypes": [{"id": str(boat_type.id)}],
+    }
+
+
+@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
+def test_create_pier_not_enough_permissions(user):
+    variables = {"harborId": ""}
+
+    assert Pier.objects.count() == 0
+
+    executed = client.execute(
+        query=CREATE_PIER_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        user=user,
+    )
+
+    assert Pier.objects.count() == 0
+    assert_not_enough_permissions(executed)
+
+
+def test_create_harbor_harbor_doesnt_exist(superuser):
+    variables = {"harborId": to_global_id("BerthNode", uuid.uuid4())}
+
+    assert Pier.objects.count() == 0
+
+    executed = client.execute(
+        query=CREATE_PIER_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        user=superuser,
+    )
+
+    assert Pier.objects.count() == 0
+    assert_doesnt_exist("Harbor", executed)
+
+
+def test_create_pier_no_harbor(superuser):
+    variables = {"identifier": "foo"}
+
+    assert Pier.objects.count() == 0
+
+    executed = client.execute(
+        query=CREATE_PIER_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        user=superuser,
+    )
+
+    assert Pier.objects.count() == 0
+    assert_field_missing("harborId", executed)
