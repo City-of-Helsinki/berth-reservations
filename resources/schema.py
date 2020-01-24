@@ -2,6 +2,7 @@ import graphene
 import graphql_geojson
 from django.db import transaction
 from django.db.models import Prefetch
+from django.db.utils import IntegrityError
 from django.utils.translation import get_language
 from graphene import relay
 from graphene_django.fields import DjangoConnectionField, DjangoListField
@@ -180,6 +181,14 @@ class AbstractAreaInput:
     www_url = graphene.String()
     location = graphql_geojson.Geometry()
     image_link = graphene.String()
+
+
+class AbstractAreaSectionInput:
+    identifier = graphene.String()
+    location = graphql_geojson.Geometry()
+    electricity = graphene.Boolean()
+    water = graphene.Boolean()
+    gate = graphene.Boolean()
 
 
 class CreateBerthMutation(graphene.ClientIDMutation):
@@ -452,6 +461,119 @@ class DeleteHarborMutation(graphene.ClientIDMutation):
         return DeleteHarborMutation()
 
 
+class PierInput(AbstractAreaSectionInput):
+    harbor_id = graphene.ID()
+    suitable_boat_types = graphene.List(graphene.ID)
+    mooring = graphene.Boolean()
+    waste_collection = graphene.Boolean()
+    lighting = graphene.Boolean()
+
+
+class CreatePierMutation(graphene.ClientIDMutation):
+    class Input(PierInput):
+        harbor_id = graphene.ID(required=True)
+
+    pier = graphene.Field(PierNode)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        # TODO: Should check if the user has permissions to
+        # delete the specific resource
+        suitable_boat_types = kwargs.pop("suitable_boat_types", [])
+
+        harbor_global_id = kwargs.pop("harbor_id", None)
+        if harbor_global_id:
+            harbor_id = from_global_id(harbor_global_id)[1]
+            try:
+                kwargs["harbor"] = Harbor.objects.get(pk=harbor_id)
+            except Harbor.DoesNotExist as e:
+                raise VenepaikkaGraphQLError(e)
+
+        boat_types = set()
+        for boat_type_id in suitable_boat_types:
+            try:
+                boat_type = BoatType.objects.get(pk=boat_type_id)
+            except BoatType.DoesNotExist as e:
+                raise VenepaikkaGraphQLError(e)
+            boat_types.add(boat_type)
+
+        try:
+            pier = Pier.objects.create(**kwargs)
+            pier.suitable_boat_types.set(boat_types)
+        except IntegrityError as e:
+            raise VenepaikkaGraphQLError(e)
+
+        return CreatePierMutation(pier=pier)
+
+
+class UpdatePierMutation(graphene.ClientIDMutation):
+    class Input(PierInput):
+        id = graphene.ID(required=True)
+
+    pier = graphene.Field(PierNode)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        # TODO: Should check if the user has permissions to
+        # delete the specific resource
+        id = from_global_id(kwargs.pop("id"))[1]
+
+        try:
+            harbor_global_id = kwargs.pop("harbor_id", None)
+            if harbor_global_id:
+                harbor_id = from_global_id(harbor_global_id)[1]
+                kwargs["harbor"] = Harbor.objects.get(pk=harbor_id)
+
+            pier = Pier.objects.get(pk=id)
+        except (Pier.DoesNotExist, Harbor.DoesNotExist,) as e:
+            raise VenepaikkaGraphQLError(e)
+
+        boat_types = set()
+        for boat_type_id in kwargs.pop("suitable_boat_types", []):
+            try:
+                boat_type = BoatType.objects.get(pk=boat_type_id)
+            except BoatType.DoesNotExist as e:
+                raise VenepaikkaGraphQLError(e)
+            boat_types.add(boat_type)
+
+        try:
+            update_object(pier, kwargs)
+            pier.suitable_boat_types.set(boat_types)
+        except IntegrityError as e:
+            raise VenepaikkaGraphQLError(e)
+
+        return UpdatePierMutation(pier=pier)
+
+
+class DeletePierMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        # TODO: Should check if the user has permissions to
+        # delete the specific resource
+        id = from_global_id(kwargs.get("id"))[1]
+
+        try:
+            pier = Pier.objects.get(pk=id)
+        except Pier.DoesNotExist as e:
+            raise VenepaikkaGraphQLError(e)
+
+        pier.delete()
+
+        return DeletePierMutation()
+
+
 class Query:
     availability_levels = DjangoListField(AvailabilityLevelType)
     boat_types = DjangoListField(BoatTypeType)
@@ -581,3 +703,8 @@ class Mutation:
     create_harbor = CreateHarborMutation.Field()
     delete_harbor = DeleteHarborMutation.Field()
     update_harbor = UpdateHarborMutation.Field()
+
+    # Piers
+    create_pier = CreatePierMutation.Field()
+    delete_pier = DeletePierMutation.Field()
+    update_pier = UpdatePierMutation.Field()
