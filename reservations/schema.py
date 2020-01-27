@@ -6,16 +6,16 @@ from harbors.models import WinterStorageArea
 
 from .enums import WinterStorageMethod
 from .models import (
-    BerthReservation,
+    BerthApplication,
     BerthSwitch,
     BerthSwitchReason,
     BoatType,
     Harbor,
     HarborChoice,
+    WinterStorageApplication,
     WinterStorageAreaChoice,
-    WinterStorageReservation,
 )
-from .signals import reservation_saved
+from .signals import application_saved
 
 WinterStorageMethodEnum = graphene.Enum.from_enum(WinterStorageMethod)
 
@@ -27,7 +27,7 @@ class HarborChoiceType(DjangoObjectType):
 
 class BerthReservationType(DjangoObjectType):
     class Meta:
-        model = BerthReservation
+        model = BerthApplication
 
 
 class BerthSwitchType(DjangoObjectType):
@@ -45,7 +45,7 @@ class BerthSwitchReasonType(DjangoObjectType):
 
 class WinterStorageReservationType(DjangoObjectType):
     class Meta:
-        model = WinterStorageReservation
+        model = WinterStorageApplication
 
 
 class HarborChoiceInput(graphene.InputObjectType):
@@ -145,17 +145,17 @@ class CreateBerthReservation(graphene.Mutation):
 
         choices = reservation_data.pop("choices", [])
 
-        reservation = BerthReservation.objects.create(**reservation_data)
+        reservation = BerthApplication.objects.create(**reservation_data)
 
         for choice in choices:
             harbor_id = from_global_id(choice.get("harbor_id"))[1]
             harbor = Harbor.objects.get(id=harbor_id)
             HarborChoice.objects.get_or_create(
-                harbor=harbor, priority=choice.get("priority"), reservation=reservation
+                harbor=harbor, priority=choice.get("priority"), application=reservation
             )
 
         # Send notifications when all m2m relations are saved
-        reservation_saved.send(sender="CreateBerthReservation", reservation=reservation)
+        application_saved.send(sender="CreateBerthReservation", application=reservation)
 
         ok = True
         return CreateBerthReservation(berth_reservation=reservation, ok=ok)
@@ -177,7 +177,7 @@ class CreateWinterStorageReservation(graphene.Mutation):
 
         chosen_areas = reservation_data.pop("chosen_areas", [])
 
-        reservation = WinterStorageReservation.objects.create(**reservation_data)
+        reservation = WinterStorageApplication.objects.create(**reservation_data)
 
         for choice in chosen_areas:
             winter_area_id = from_global_id(choice.get("winter_area_id"))[1]
@@ -185,12 +185,12 @@ class CreateWinterStorageReservation(graphene.Mutation):
             WinterStorageAreaChoice.objects.get_or_create(
                 winter_storage_area=winter_storage_area,
                 priority=choice.get("priority"),
-                reservation=reservation,
+                application=reservation,
             )
 
         # Send notifications when all m2m relations are saved
-        reservation_saved.send(
-            sender="CreateWinterStorageReservation", reservation=reservation
+        application_saved.send(
+            sender="CreateWinterStorageReservation", application=reservation
         )
 
         ok = True

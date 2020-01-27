@@ -12,28 +12,28 @@ from parler.admin import TranslatableAdmin
 from pytz import timezone
 
 from .models import (
-    BerthReservation,
+    BerthApplication,
     BerthSwitchReason,
     HarborChoice,
+    WinterStorageApplication,
     WinterStorageAreaChoice,
-    WinterStorageReservation,
 )
 from .notifications import NotificationType
 from .utils import (
-    export_berth_reservations_as_xlsx,
-    export_winter_storage_reservations_as_xlsx,
+    export_berth_applications_as_xlsx,
+    export_winter_storage_applications_as_xlsx,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class ReservationTypeFilter(admin.SimpleListFilter):
-    title = _("Reservation type")
+class ApplicationTypeFilter(admin.SimpleListFilter):
+    title = _("Application type")
 
     parameter_name = "berth_switch"
 
     def lookups(self, request, model_admin):
-        return (("0", _("Reservation")), ("1", _("Switch application")))
+        return (("0", _("Application")), ("1", _("Switch application")))
 
     def queryset(self, request, queryset):
         kwargs = {"{}".format(self.parameter_name): None}
@@ -52,10 +52,10 @@ class HarborChoiceInline(admin.TabularInline):
     max_num = 10
 
 
-class BerthReservationAdmin(admin.ModelAdmin):
+class BerthApplicationAdmin(admin.ModelAdmin):
     inlines = [HarborChoiceInline]
     readonly_fields = [
-        "reservation_type",
+        "application_type",
         "created_at",
         "get_berth_switch_harbor",
         "get_berth_switch_pier",
@@ -63,7 +63,7 @@ class BerthReservationAdmin(admin.ModelAdmin):
         "get_berth_switch_reason",
     ]
     fieldsets = [
-        (None, {"fields": ["reservation_type", "created_at", "is_processed"]}),
+        (None, {"fields": ["application_type", "created_at", "is_processed"]}),
         (
             _("Contact information"),
             {
@@ -138,12 +138,12 @@ class BerthReservationAdmin(admin.ModelAdmin):
             },
         ),
     ]
-    list_display = ("created_at", "first_name", "last_name", "reservation_type")
-    list_filter = (ReservationTypeFilter,)
-    actions = ["export_reservations", "resend_reservation_confirmation"]
+    list_display = ("created_at", "first_name", "last_name", "application_type")
+    list_filter = (ApplicationTypeFilter,)
+    actions = ["export_applications", "resend_application_confirmation"]
 
-    def reservation_type(self, obj):
-        return _("Reservation") if obj.berth_switch is None else _("Switch application")
+    def application_type(self, obj):
+        return _("Application") if obj.berth_switch is None else _("Switch application")
 
     def get_berth_switch_harbor(self, obj):
         return obj.berth_switch.harbor
@@ -165,7 +165,7 @@ class BerthReservationAdmin(admin.ModelAdmin):
 
     get_berth_switch_reason.short_description = _("Reason")
 
-    def export_reservations(self, request, queryset):
+    def export_applications(self, request, queryset):
         response = HttpResponse(
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
@@ -173,48 +173,48 @@ class BerthReservationAdmin(admin.ModelAdmin):
         local_datetime_now_as_str = datetime.datetime.now(
             timezone(settings.TIME_ZONE)
         ).strftime("%Y-%m-%d_%H-%M-%S")
-        filename = "berth_reservations_" + local_datetime_now_as_str
+        filename = "berth_applications_" + local_datetime_now_as_str
         response["Content-Disposition"] = "attachment; filename=%s.xlsx" % filename
 
-        response.content = export_berth_reservations_as_xlsx(queryset)
+        response.content = export_berth_applications_as_xlsx(queryset)
         return response
 
-    export_reservations.short_description = _(
-        "Download list of chosen reservations in Excel file"
+    export_applications.short_description = _(
+        "Download list of chosen applications in Excel file"
     )
 
-    def resend_reservation_confirmation(self, request, queryset):
+    def resend_application_confirmation(self, request, queryset):
         resent_count = 0
-        for reservation in queryset:
+        for application in queryset:
             try:
                 send_notification(
-                    reservation.email,
-                    NotificationType.BERTH_RESERVATION_CREATED,
-                    reservation.get_notification_context(),
-                    reservation.language,
+                    application.email,
+                    NotificationType.BERTH_APPLICATION_CREATED,
+                    application.get_notification_context(),
+                    application.language,
                 )
                 resent_count += 1
             except (OSError, AnymailError):
                 logger.error(
-                    "Failed to resend confirmation for berth reservation {}".format(
-                        reservation.id
+                    "Failed to resend confirmation for berth application {}".format(
+                        application.id
                     )
                 )
 
         self.message_user(
             request,
-            _("Resent confirmation for %d berth reservation(s)") % resent_count,
+            _("Resent confirmation for %d berth application(s)") % resent_count,
             messages.SUCCESS,
         )
 
-    resend_reservation_confirmation.short_description = _(
-        "Send confirmation again for chosen reservation"
+    resend_application_confirmation.short_description = _(
+        "Send confirmation again for chosen application"
     )
-    resend_reservation_confirmation.allowed_permissions = ("resend",)
+    resend_application_confirmation.allowed_permissions = ("resend",)
 
     def has_resend_permission(self, request):
         opts = self.opts
-        codename = "resend_reservation"
+        codename = "resend_application"
         return request.user.has_perm("%s.%s" % (opts.app_label, codename))
 
 
@@ -226,7 +226,7 @@ class WinterStorageAreaChoiceInline(admin.TabularInline):
     max_num = 5
 
 
-class WinterStorageReservationAdmin(admin.ModelAdmin):
+class WinterStorageApplicationAdmin(admin.ModelAdmin):
     inlines = [WinterStorageAreaChoiceInline]
     readonly_fields = ["created_at"]
     fieldsets = [
@@ -286,9 +286,9 @@ class WinterStorageReservationAdmin(admin.ModelAdmin):
         ),
     ]
     list_display = ("created_at", "first_name", "last_name")
-    actions = ["export_reservations", "resend_reservation_confirmation"]
+    actions = ["export_applications", "resend_application_confirmation"]
 
-    def export_reservations(self, request, queryset):
+    def export_applications(self, request, queryset):
         response = HttpResponse(
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
@@ -296,49 +296,49 @@ class WinterStorageReservationAdmin(admin.ModelAdmin):
         local_datetime_now_as_str = datetime.datetime.now(
             timezone(settings.TIME_ZONE)
         ).strftime("%Y-%m-%d_%H-%M-%S")
-        filename = "winter_storage_reservations_" + local_datetime_now_as_str
+        filename = "winter_storage_applications_" + local_datetime_now_as_str
         response["Content-Disposition"] = "attachment; filename=%s.xlsx" % filename
 
-        response.content = export_winter_storage_reservations_as_xlsx(queryset)
+        response.content = export_winter_storage_applications_as_xlsx(queryset)
         return response
 
-    export_reservations.short_description = _(
-        "Download list of chosen reservations in Excel file"
+    export_applications.short_description = _(
+        "Download list of chosen applications in Excel file"
     )
 
-    def resend_reservation_confirmation(self, request, queryset):
+    def resend_application_confirmation(self, request, queryset):
         resent_count = 0
-        for reservation in queryset:
+        for application in queryset:
             try:
                 send_notification(
-                    reservation.email,
-                    NotificationType.WINTER_STORAGE_RESERVATION_CREATED,
-                    reservation.get_notification_context(),
-                    reservation.language,
+                    application.email,
+                    NotificationType.WINTER_STORAGE_APPLICATION_CREATED,
+                    application.get_notification_context(),
+                    application.language,
                 )
                 resent_count += 1
             except (OSError, AnymailError):
                 logger.error(
-                    "Failed to resend confirmation for winter storage reservation {}".format(
-                        reservation.id
+                    "Failed to resend confirmation for winter storage application {}".format(
+                        application.id
                     )
                 )
 
         self.message_user(
             request,
-            _("Resent confirmation for %d winter storage reservation(s)")
+            _("Resent confirmation for %d winter storage application(s)")
             % resent_count,
             messages.SUCCESS,
         )
 
-    resend_reservation_confirmation.short_description = _(
-        "Send confirmation again for chosen reservation"
+    resend_application_confirmation.short_description = _(
+        "Send confirmation again for chosen application"
     )
-    resend_reservation_confirmation.allowed_permissions = ("resend",)
+    resend_application_confirmation.allowed_permissions = ("resend",)
 
     def has_resend_permission(self, request):
         opts = self.opts
-        codename = "resend_reservation"
+        codename = "resend_application"
         return request.user.has_perm("%s.%s" % (opts.app_label, codename))
 
 
@@ -346,8 +346,8 @@ class BerthSwitchReasonAdmin(TranslatableAdmin):
     pass
 
 
-admin.site.register(BerthReservation, BerthReservationAdmin)
-admin.site.register(WinterStorageReservation, WinterStorageReservationAdmin)
+admin.site.register(BerthApplication, BerthApplicationAdmin)
+admin.site.register(WinterStorageApplication, WinterStorageApplicationAdmin)
 admin.site.register(BerthSwitchReason, BerthSwitchReasonAdmin)
 
 # Register Permission model for GUI management of permissions

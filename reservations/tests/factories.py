@@ -8,14 +8,14 @@ from harbors.tests.factories import (
 
 from ..enums import WinterStorageMethod
 from ..models import (
-    BerthReservation,
+    BerthApplication,
     HarborChoice,
+    WinterStorageApplication,
     WinterStorageAreaChoice,
-    WinterStorageReservation,
 )
 
 
-class BaseReservationFactory(factory.django.DjangoModelFactory):
+class BaseApplicationFactory(factory.django.DjangoModelFactory):
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
     email = factory.Faker("email")
@@ -24,21 +24,21 @@ class BaseReservationFactory(factory.django.DjangoModelFactory):
     boat_width = factory.fuzzy.FuzzyDecimal(0.1, 100.00)
 
 
-class BerthReservationFactory(BaseReservationFactory):
+class BerthApplicationFactory(BaseApplicationFactory):
     class Meta:
-        model = BerthReservation
+        model = BerthApplication
 
 
-class WinterStorageReservationFactory(BaseReservationFactory):
+class WinterStorageApplicationFactory(BaseApplicationFactory):
     storage_method = WinterStorageMethod.ON_TRAILER
 
     class Meta:
-        model = WinterStorageReservation
+        model = WinterStorageApplication
 
 
 class HarborChoiceFactory(factory.django.DjangoModelFactory):
     harbor = factory.SubFactory(HarborFactory)
-    reservation = factory.SubFactory(BerthReservationFactory)
+    application = factory.SubFactory(BerthApplicationFactory)
     priority = factory.Faker("random_int", min=1, max=10)
 
     class Meta:
@@ -47,7 +47,7 @@ class HarborChoiceFactory(factory.django.DjangoModelFactory):
 
 class WinterAreaChoiceFactory(factory.django.DjangoModelFactory):
     winter_storage_area = factory.SubFactory(WinterStorageAreaFactory)
-    reservation = factory.SubFactory(WinterStorageReservationFactory)
+    application = factory.SubFactory(WinterStorageApplicationFactory)
     priority = factory.Faker("random_int", min=1, max=10)
 
     class Meta:

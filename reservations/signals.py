@@ -6,25 +6,25 @@ from sentry_sdk import capture_exception
 
 from .notifications import NotificationType
 
-reservation_saved = Signal(providing_args=["reservation"])
+application_saved = Signal(providing_args=["application"])
 
 
-def reservation_notification_handler(sender, reservation, **kwargs):
-    notification_type = NotificationType.BERTH_RESERVATION_CREATED.value
+def application_notification_handler(sender, application, **kwargs):
+    notification_type = NotificationType.BERTH_APPLICATION_CREATED.value
     if sender == "CreateWinterStorageReservation":
-        notification_type = NotificationType.WINTER_STORAGE_RESERVATION_CREATED.value
+        notification_type = NotificationType.WINTER_STORAGE_APPLICATION_CREATED.value
     try:
         send_notification(
-            reservation.email,
+            application.email,
             notification_type,
-            reservation.get_notification_context(),
-            reservation.language,
+            application.get_notification_context(),
+            application.language,
         )
     except (OSError, AnymailError) as e:
         capture_exception(e)
 
 
 if settings.NOTIFICATIONS_ENABLED:
-    reservation_saved.connect(
-        reservation_notification_handler, dispatch_uid="reservation_saved"
+    application_saved.connect(
+        application_notification_handler, dispatch_uid="application_saved"
     )

@@ -13,22 +13,22 @@ from .utils import localize_datetime
 
 class HarborChoice(models.Model):
     harbor = models.ForeignKey(Harbor, on_delete=models.CASCADE)
-    reservation = models.ForeignKey("BerthReservation", on_delete=models.CASCADE)
+    application = models.ForeignKey("BerthApplication", on_delete=models.CASCADE)
     priority = models.PositiveSmallIntegerField(verbose_name=_("priority"))
 
     class Meta:
-        unique_together = ("reservation", "priority")
+        unique_together = ("application", "priority")
 
 
 class WinterStorageAreaChoice(models.Model):
     winter_storage_area = models.ForeignKey(WinterStorageArea, on_delete=models.CASCADE)
-    reservation = models.ForeignKey(
-        "WinterStorageReservation", on_delete=models.CASCADE
+    application = models.ForeignKey(
+        "WinterStorageApplication", on_delete=models.CASCADE
     )
     priority = models.PositiveSmallIntegerField(verbose_name=_("priority"))
 
     class Meta:
-        unique_together = ("reservation", "priority")
+        unique_together = ("application", "priority")
 
 
 class BerthSwitchReason(TranslatableModel):
@@ -58,7 +58,7 @@ class BerthSwitch(models.Model):
     )
 
 
-class BaseReservation(models.Model):
+class BaseApplication(models.Model):
     created_at = models.DateTimeField(verbose_name=_("created at"), auto_now_add=True)
 
     is_processed = models.BooleanField(verbose_name=_("is processed"), default=False)
@@ -134,14 +134,14 @@ class BaseReservation(models.Model):
     class Meta:
         abstract = True
         permissions = (
-            ("resend_reservation", _("Can resend confirmation for reservations")),
+            ("resend_application", _("Can resend confirmation for applications")),
         )
 
     def __str__(self):
         return "{}: {} {}".format(self.pk, self.first_name, self.last_name)
 
 
-class BerthReservation(BaseReservation):
+class BerthApplication(BaseApplication):
     chosen_harbors = models.ManyToManyField(
         Harbor, through=HarborChoice, verbose_name=_("chosen harbors"), blank=True
     )
@@ -203,11 +203,11 @@ class BerthReservation(BaseReservation):
         return {
             "created_at": localize_datetime(self.created_at, self.language),
             "harbor_choices": self.harborchoice_set.order_by("priority"),
-            "reservation": self,
+            "application": self,
         }
 
 
-class WinterStorageReservation(BaseReservation):
+class WinterStorageApplication(BaseApplication):
     chosen_areas = models.ManyToManyField(
         WinterStorageArea,
         through=WinterStorageAreaChoice,
@@ -228,5 +228,5 @@ class WinterStorageReservation(BaseReservation):
         return {
             "created_at": localize_datetime(self.created_at, self.language),
             "area_choices": self.winterstorageareachoice_set.order_by("priority"),
-            "reservation": self,
+            "application": self,
         }
