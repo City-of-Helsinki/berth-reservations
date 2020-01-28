@@ -7,7 +7,7 @@ from enumfields import Enum
 from xlsxwriter import Workbook
 
 
-def export_berth_reservations_as_xlsx(reservations):
+def export_berth_applications_as_xlsx(applications):
     fields = (
         # Common fields
         ("Reserved at", "created_at", 15),
@@ -48,7 +48,7 @@ def export_berth_reservations_as_xlsx(reservations):
     output = io.BytesIO()
 
     wb = Workbook(output)
-    ws = wb.add_worksheet(name="berth_reservations")
+    ws = wb.add_worksheet(name="berth_applications")
     wrapped_cell_format = wb.add_format()
     wrapped_cell_format.set_text_wrap()
 
@@ -59,22 +59,22 @@ def export_berth_reservations_as_xlsx(reservations):
 
     with translation.override(settings.LANGUAGES[0][0]):
 
-        for row_number, reservation in enumerate(reservations, 1):
-            timestamp = reservation.created_at.astimezone().strftime("%Y-%m-%d %H:%M")
+        for row_number, application in enumerate(applications, 1):
+            timestamp = application.created_at.astimezone().strftime("%Y-%m-%d %H:%M")
             ws.write(row_number, 0, timestamp)
 
-            harbor_choices = reservation.harborchoice_set.order_by("priority")
+            harbor_choices = application.harborchoice_set.order_by("priority")
             choices_str = parse_choices_to_multiline_string(harbor_choices)
             ws.write(row_number, 1, choices_str, wrapped_cell_format)
 
             for column_number, field in enumerate(fields[2:], 2):
                 attr_name = field[1]
-                if attr_name == "boat_type" and reservation.boat_type:
-                    value = reservation.boat_type.name
-                elif attr_name == "berth_switch" and reservation.berth_switch:
-                    value = parse_berth_switch_str(reservation.berth_switch)
+                if attr_name == "boat_type" and application.boat_type:
+                    value = application.boat_type.name
+                elif attr_name == "berth_switch" and application.berth_switch:
+                    value = parse_berth_switch_str(application.berth_switch)
                 else:
-                    value = getattr(reservation, attr_name)
+                    value = getattr(application, attr_name)
                     if isinstance(value, bool):
                         value = "Yes" if value else ""
 
@@ -85,7 +85,7 @@ def export_berth_reservations_as_xlsx(reservations):
     return output.getvalue()
 
 
-def export_winter_storage_reservations_as_xlsx(reservations):
+def export_winter_storage_applications_as_xlsx(applications):
     fields = (
         ("Reserved at", "created_at", 15),
         ("Chosen winter areas", "chosen_harbors", 55),
@@ -114,7 +114,7 @@ def export_winter_storage_reservations_as_xlsx(reservations):
     output = io.BytesIO()
 
     wb = Workbook(output)
-    ws = wb.add_worksheet(name="winter_storage_reservations")
+    ws = wb.add_worksheet(name="winter_storage_applications")
     wrapped_cell_format = wb.add_format()
     wrapped_cell_format.set_text_wrap()
 
@@ -125,11 +125,11 @@ def export_winter_storage_reservations_as_xlsx(reservations):
 
     with translation.override(settings.LANGUAGES[0][0]):
 
-        for row_number, reservation in enumerate(reservations, 1):
-            timestamp = reservation.created_at.astimezone().strftime("%Y-%m-%d %H:%M")
+        for row_number, application in enumerate(applications, 1):
+            timestamp = application.created_at.astimezone().strftime("%Y-%m-%d %H:%M")
             ws.write(row_number, 0, timestamp)
 
-            winter_area_choices = reservation.winterstorageareachoice_set.order_by(
+            winter_area_choices = application.winterstorageareachoice_set.order_by(
                 "priority"
             )
             choices_str = parse_choices_to_multiline_string(winter_area_choices)
@@ -137,10 +137,10 @@ def export_winter_storage_reservations_as_xlsx(reservations):
 
             for column_number, field in enumerate(fields[2:], 2):
                 attr_name = field[1]
-                if attr_name == "boat_type" and reservation.boat_type:
-                    value = reservation.boat_type.name
+                if attr_name == "boat_type" and application.boat_type:
+                    value = application.boat_type.name
                 else:
-                    value = getattr(reservation, attr_name)
+                    value = getattr(application, attr_name)
                     if isinstance(value, bool):
                         value = "Yes" if value else ""
                     elif isinstance(value, Enum):
@@ -195,7 +195,7 @@ def parse_berth_switch_str(berth_switch):
         'Aurinkosatama (B): 5'
         'Mustikkamaan satama: 6'
 
-    :type berth_switch: reservations.models.BerthSwitch
+    :type berth_switch: applications.models.BerthSwitch
     :rtype: str
     """
 

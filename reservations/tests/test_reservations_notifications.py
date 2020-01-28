@@ -3,53 +3,53 @@ from django.core import mail
 from django_ilmoitin.models import NotificationTemplate
 
 from ..notifications import NotificationType
-from ..signals import reservation_saved
-from .factories import BerthReservationFactory, WinterStorageReservationFactory
+from ..signals import application_saved
+from .factories import BerthApplicationFactory, WinterStorageApplicationFactory
 
 
 @pytest.fixture
-def notification_template_berth_reservation_created():
+def notification_template_berth_application_created():
     return NotificationTemplate.objects.language("fi").create(
-        type=NotificationType.BERTH_RESERVATION_CREATED.value,
-        subject="test berth reservation created subject, event: {{ reservation.first_name }}!",
-        body_html="<b>test berth reservation created body HTML!</b>",
-        body_text="test berth reservation created body text!",
+        type=NotificationType.BERTH_APPLICATION_CREATED.value,
+        subject="test berth application created subject, event: {{ application.first_name }}!",
+        body_html="<b>test berth application created body HTML!</b>",
+        body_text="test berth application created body text!",
     )
 
 
 @pytest.fixture
-def notification_template_winter_reservation_created():
+def notification_template_winter_application_created():
     return NotificationTemplate.objects.language("fi").create(
-        type=NotificationType.WINTER_STORAGE_RESERVATION_CREATED.value,
-        subject="test winter reservation created subject, event: {{ reservation.first_name }}!",
-        body_html="<b>test winter reservation created body HTML!</b>",
-        body_text="test winter reservation created body text!",
+        type=NotificationType.WINTER_STORAGE_APPLICATION_CREATED.value,
+        subject="test winter application created subject, event: {{ application.first_name }}!",
+        body_html="<b>test winter application created body HTML!</b>",
+        body_text="test winter application created body text!",
     )
 
 
-def test_berth_reservation_created_notification_is_sent(
-    notification_template_berth_reservation_created,
+def test_berth_application_created_notification_is_sent(
+    notification_template_berth_application_created,
 ):
-    reservation = BerthReservationFactory()
-    reservation_saved.send(sender="CreateBerthReservation", reservation=reservation)
+    application = BerthApplicationFactory()
+    application_saved.send(sender="CreateBerthReservation", application=application)
 
     assert len(mail.outbox) == 1
     msg = mail.outbox[0]
-    assert msg.subject == "test berth reservation created subject, event: {}!".format(
-        reservation.first_name
+    assert msg.subject == "test berth application created subject, event: {}!".format(
+        application.first_name
     )
 
 
-def test_winter_reservation_created_notification_is_sent(
-    notification_template_winter_reservation_created,
+def test_winter_application_created_notification_is_sent(
+    notification_template_winter_application_created,
 ):
-    reservation = WinterStorageReservationFactory()
-    reservation_saved.send(
-        sender="CreateWinterStorageReservation", reservation=reservation
+    application = WinterStorageApplicationFactory()
+    application_saved.send(
+        sender="CreateWinterStorageReservation", application=application
     )
 
     assert len(mail.outbox) == 1
     msg = mail.outbox[0]
-    assert msg.subject == "test winter reservation created subject, event: {}!".format(
-        reservation.first_name
+    assert msg.subject == "test winter application created subject, event: {}!".format(
+        application.first_name
     )

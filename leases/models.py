@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumField
 
 from customers.models import Boat, CustomerProfile
-from reservations.models import BerthReservation, WinterStorageReservation
+from reservations.models import BerthApplication, WinterStorageApplication
 from resources.models import Berth, WinterStoragePlace
 from utils.models import TimeStampedModel, UUIDModel
 
@@ -58,7 +58,7 @@ class BerthLease(AbstractLease):
         Berth, verbose_name=_("berth"), on_delete=models.PROTECT, related_name="leases"
     )
     application = models.ForeignKey(
-        BerthReservation,
+        BerthApplication,
         verbose_name=_("application"),
         on_delete=models.SET_NULL,
         blank=True,
@@ -85,7 +85,7 @@ class WinterStorageLease(AbstractLease):
         related_name="leases",
     )
     application = models.ForeignKey(
-        WinterStorageReservation,
+        WinterStorageApplication,
         verbose_name=_("application"),
         on_delete=models.SET_NULL,
         blank=True,
