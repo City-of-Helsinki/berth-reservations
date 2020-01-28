@@ -3,6 +3,7 @@ import pytest
 from berth_reservations.tests.conftest import *  # noqa
 from harbors.models import Harbor
 from harbors.tests.conftest import *  # noqa
+from users.tests.conftest import *  # noqa
 
 from ..models import BerthSwitch, BerthSwitchReason
 

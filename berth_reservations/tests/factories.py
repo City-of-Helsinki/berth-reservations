@@ -1,7 +1,6 @@
 import factory
 from django.contrib.auth import get_user_model
-
-User = get_user_model()
+from munigeo.models import Municipality
 
 
 class UserFactory(factory.django.DjangoModelFactory):
@@ -11,4 +10,12 @@ class UserFactory(factory.django.DjangoModelFactory):
     email = factory.Faker("email")
 
     class Meta:
-        model = User
+        model = get_user_model()
+
+
+class MunicipalityFactory(factory.django.DjangoModelFactory):
+    id = factory.Faker("word")
+    name = factory.Faker("city")
+
+    class Meta:
+        model = Municipality

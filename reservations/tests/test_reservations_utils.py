@@ -4,24 +4,24 @@ from freezegun import freeze_time
 
 from ..enums import WinterStorageMethod
 from ..models import (
-    BerthReservation,
+    BerthApplication,
     HarborChoice,
+    WinterStorageApplication,
     WinterStorageAreaChoice,
-    WinterStorageReservation,
 )
 from ..utils import (
-    export_berth_reservations_as_xlsx,
-    export_winter_storage_reservations_as_xlsx,
+    export_berth_applications_as_xlsx,
+    export_winter_storage_applications_as_xlsx,
 )
-from .factories import BerthReservationFactory, WinterStorageReservationFactory
+from .factories import BerthApplicationFactory, WinterStorageApplicationFactory
 
 
 @freeze_time("2019-01-14T08:00:00Z")
 @pytest.mark.parametrize("berth_switch", [True, False])
-def test_exporting_berth_reservations_to_excel(
+def test_exporting_berth_applications_to_excel(
     berth_switch, boat_type, harbor, berth_switch_info
 ):
-    reservation_data = {
+    application_data = {
         "first_name": "Kyösti",
         "last_name": "Testaaja",
         "email": "kyosti.testaaja@example.com",
@@ -53,16 +53,16 @@ def test_exporting_berth_reservations_to_excel(
         "agree_to_terms": True,
         "application_code": "1234567890",
     }
-    reservation = BerthReservationFactory(**reservation_data)
-    HarborChoice.objects.create(reservation=reservation, priority=1, harbor=harbor)
+    application = BerthApplicationFactory(**application_data)
+    HarborChoice.objects.create(application=application, priority=1, harbor=harbor)
 
-    queryset = BerthReservation.objects.all()
-    xlsx_bytes = export_berth_reservations_as_xlsx(queryset)
+    queryset = BerthApplication.objects.all()
+    xlsx_bytes = export_berth_applications_as_xlsx(queryset)
     wb = xlrd.open_workbook(file_contents=xlsx_bytes)
 
-    assert "berth_reservations" in wb.sheet_names()
+    assert "berth_applications" in wb.sheet_names()
 
-    xl_sheet = wb.sheet_by_name("berth_reservations")
+    xl_sheet = wb.sheet_by_name("berth_applications")
     row = xl_sheet.row(1)
 
     boat_type.set_current_language("fi")
@@ -112,8 +112,8 @@ def test_exporting_berth_reservations_to_excel(
 
 
 @freeze_time("2019-01-14T08:00:00Z")
-def test_exporting_winter_storage_reservations_to_excel(boat_type, winter_area):
-    reservation_data = {
+def test_exporting_winter_storage_applications_to_excel(boat_type, winter_area):
+    application_data = {
         "first_name": "Kyösti",
         "last_name": "Testaaja",
         "email": "kyosti.testaaja@example.com",
@@ -135,18 +135,18 @@ def test_exporting_winter_storage_reservations_to_excel(boat_type, winter_area):
         "accept_other_culture_news": True,
         "application_code": "1234567890",
     }
-    reservation = WinterStorageReservationFactory(**reservation_data)
+    application = WinterStorageApplicationFactory(**application_data)
     WinterStorageAreaChoice.objects.create(
-        reservation=reservation, priority=1, winter_storage_area=winter_area
+        application=application, priority=1, winter_storage_area=winter_area
     )
 
-    queryset = WinterStorageReservation.objects.all()
-    xlsx_bytes = export_winter_storage_reservations_as_xlsx(queryset)
+    queryset = WinterStorageApplication.objects.all()
+    xlsx_bytes = export_winter_storage_applications_as_xlsx(queryset)
     wb = xlrd.open_workbook(file_contents=xlsx_bytes)
 
-    assert "winter_storage_reservations" in wb.sheet_names()
+    assert "winter_storage_applications" in wb.sheet_names()
 
-    xl_sheet = wb.sheet_by_name("winter_storage_reservations")
+    xl_sheet = wb.sheet_by_name("winter_storage_applications")
     row = xl_sheet.row(1)
 
     boat_type.set_current_language("fi")

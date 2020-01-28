@@ -1,0 +1,252 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-11-29 10:06+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "No stern-to mooring"
+msgstr "Ilman peräkiinnitystä"
+
+msgid "Single slip place"
+msgstr "Aisapaikka"
+
+msgid "Side slip place"
+msgstr "Kävelyaisapaikka"
+
+msgid "Stern buoy place"
+msgstr "Peräpoijupaikka"
+
+msgid "Stern pole mooring"
+msgstr "Paaluperäkiinnitys"
+
+msgid "Quayside mooring"
+msgstr "Sivukiinnitys"
+
+msgid "Dinghy place"
+msgstr "Jollapaikka"
+
+msgid "Sea buoy mooring"
+msgstr "Poiju (merellä)"
+
+msgid "Trawler place"
+msgstr "Traileripaikka"
+
+msgid "name"
+msgstr ""
+
+msgid "Name of the boat type"
+msgstr ""
+
+msgid "boat type"
+msgstr ""
+
+msgid "boat types"
+msgstr ""
+
+msgid "title"
+msgstr ""
+
+msgid "Title of the availability level"
+msgstr ""
+
+msgid "description"
+msgstr ""
+
+msgid "Description of the availability level"
+msgstr ""
+
+msgid "availability level"
+msgstr ""
+
+msgid "availability levels"
+msgstr ""
+
+msgid "servicemap ID"
+msgstr ""
+
+msgid "ID in the Servicemap system"
+msgstr ""
+
+msgid "postal code"
+msgstr ""
+
+msgid "phone number"
+msgstr ""
+
+msgid "email"
+msgstr ""
+
+msgid "WWW link"
+msgstr ""
+
+msgid "location"
+msgstr ""
+
+msgid "image link"
+msgstr ""
+
+msgid "municipality"
+msgstr ""
+
+msgid "image file"
+msgstr ""
+
+msgid "number of places"
+msgstr ""
+
+msgid "maximum berth width"
+msgstr ""
+
+msgid "maximum berth length"
+msgstr ""
+
+msgid "maximum berth depth"
+msgstr ""
+
+msgid "Name of the harbor"
+msgstr ""
+
+msgid "street address"
+msgstr ""
+
+msgid "Street address of the harbor"
+msgstr ""
+
+msgid "harbor"
+msgstr ""
+
+msgid "harbors"
+msgstr ""
+
+msgid "number of marked places"
+msgstr ""
+
+msgid "maximum place width"
+msgstr ""
+
+msgid "maximum place length"
+msgstr ""
+
+msgid "number of section places"
+msgstr ""
+
+msgid "xaximum length of section spaces"
+msgstr ""
+
+msgid "number of unmarked places"
+msgstr ""
+
+msgid "Name of the area"
+msgstr ""
+
+msgid "Street address of the area"
+msgstr ""
+
+msgid "winter storage area"
+msgstr ""
+
+msgid "winter storage areas"
+msgstr ""
+
+msgid "identifier"
+msgstr ""
+
+msgid "Identifier of the pier / section"
+msgstr ""
+
+msgid "electricity"
+msgstr ""
+
+msgid "water"
+msgstr ""
+
+msgid "gate"
+msgstr ""
+
+msgid "suitable boat types"
+msgstr ""
+
+msgid "mooring"
+msgstr ""
+
+msgid "waste collection"
+msgstr ""
+
+msgid "lighting"
+msgstr ""
+
+msgid "pier"
+msgstr ""
+
+msgid "piers"
+msgstr ""
+
+msgid "repair area"
+msgstr ""
+
+msgid "summer storage for docking equipment"
+msgstr ""
+
+msgid "summer storage for trailers"
+msgstr ""
+
+msgid "summer storage for boats"
+msgstr ""
+
+msgid "winter storage section"
+msgstr ""
+
+msgid "winter storage sections"
+msgstr ""
+
+msgid "width (cm)"
+msgstr ""
+
+msgid "length (cm)"
+msgstr ""
+
+msgid "mooring type"
+msgstr ""
+
+msgid "berth type"
+msgstr ""
+
+msgid "berth types"
+msgstr ""
+
+msgid "winter storage place type"
+msgstr ""
+
+msgid "winter storage place types"
+msgstr ""
+
+msgid "number"
+msgstr ""
+
+msgid "berth"
+msgstr ""
+
+msgid "berths"
+msgstr ""
+
+msgid "place type"
+msgstr ""
+
+msgid "winter storage place"
+msgstr ""
+
+msgid "winter storage places"
+msgstr ""

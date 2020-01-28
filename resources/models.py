@@ -406,6 +406,7 @@ class Berth(AbstractBoatPlace):
         related_name="berths",
         on_delete=models.PROTECT,
     )
+    comment = models.TextField(verbose_name=_("comment"), blank=True,)
 
     class Meta:
         verbose_name = _("berth")

@@ -1,10 +1,10 @@
 autopep8
 black
-factory-boy
 flake8
 freezegun
 ipython
 isort
+pre-commit
 pytest
 pytest-cov
 pytest-django
