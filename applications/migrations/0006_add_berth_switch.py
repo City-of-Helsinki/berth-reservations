@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("harbors", "0005_add_titles_for_avlblty_levels"),
-        ("reservations", "0005_add_custom_permissions"),
+        ("applications", "0005_add_custom_permissions"),
     ]
 
     operations = [
@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to="reservations.BerthSwitch",
+                to="applications.BerthSwitch",
                 verbose_name="berth switch",
             ),
         ),

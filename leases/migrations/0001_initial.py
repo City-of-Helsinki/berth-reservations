@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("customers", "0004_change_boat_weight_to_int"),
         ("resources", "0002_add_berth_comments"),
-        ("reservations", "0014_update_verbose_names"),
+        ("applications", "0014_update_verbose_names"),
     ]
 
     operations = [
@@ -59,7 +59,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="leases",
-                        to="reservations.BerthReservation",
+                        to="applications.BerthReservation",
                         verbose_name="application",
                     ),
                 ),
@@ -138,7 +138,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="leases",
-                        to="reservations.WinterStorageReservation",
+                        to="applications.WinterStorageReservation",
                         verbose_name="application",
                     ),
                 ),

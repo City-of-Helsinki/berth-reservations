@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("harbors", "0008_add_avlblty_lvl_to_winter_areas"),
-        ("reservations", "0007_merge_20190417_1242"),
+        ("applications", "0007_merge_20190417_1242"),
     ]
 
     operations = [

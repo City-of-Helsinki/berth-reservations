@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [("reservations", "0005_add_custom_permissions")]
+    dependencies = [("applications", "0005_add_custom_permissions")]
 
     operations = [
         migrations.AddField(
