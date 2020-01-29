@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("harbors", "0012_disable_reverse_from_municipality"),
         ("leases", "0001_initial"),
-        ("reservations", "0014_update_verbose_names"),
+        ("applications", "0014_update_verbose_names"),
     ]
 
     operations = [

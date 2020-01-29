@@ -5,9 +5,9 @@ from django.db import migrations
 
 
 def set_defaults_for_nullable_fields(apps, schema_editor):
-    BerthReservation = apps.get_model("reservations", "BerthReservation")
+    BerthReservation = apps.get_model("applications", "BerthReservation")
     WinterStorageReservation = apps.get_model(
-        "reservations", "WinterStorageReservation"
+        "applications", "WinterStorageReservation"
     )
 
     for r in BerthReservation.objects.filter(boat_length__isnull=True):
@@ -29,7 +29,7 @@ def set_defaults_for_nullable_fields(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [("reservations", "0009_add_winter_storage_reservations")]
+    dependencies = [("applications", "0009_add_winter_storage_reservations")]
 
     operations = [
         migrations.RunPython(

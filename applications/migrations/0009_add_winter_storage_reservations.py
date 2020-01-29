@@ -4,14 +4,14 @@ import django.contrib.postgres.fields.jsonb
 from django.db import migrations, models
 import django.db.models.deletion
 import enumfields.fields
-import reservations.enums
+import applications.enums
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
         ("harbors", "0008_add_avlblty_lvl_to_winter_areas"),
-        ("reservations", "0008_refactor_and_rename_reservations"),
+        ("applications", "0008_refactor_and_rename_reservations"),
     ]
 
     operations = [
@@ -212,7 +212,7 @@ class Migration(migrations.Migration):
                 (
                     "storage_method",
                     enumfields.fields.EnumField(
-                        enum=reservations.enums.WinterStorageMethod,
+                        enum=applications.enums.WinterStorageMethod,
                         max_length=60,
                         verbose_name="Storage setup",
                     ),
@@ -240,7 +240,7 @@ class Migration(migrations.Migration):
                     "chosen_areas",
                     models.ManyToManyField(
                         blank=True,
-                        through="reservations.WinterStorageAreaChoice",
+                        through="applications.WinterStorageAreaChoice",
                         to="harbors.WinterStorageArea",
                         verbose_name="chosen winter storage areas",
                     ),
@@ -253,7 +253,7 @@ class Migration(migrations.Migration):
             name="reservation",
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
-                to="reservations.WinterStorageReservation",
+                to="applications.WinterStorageReservation",
             ),
         ),
         migrations.AddField(

@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [("reservations", "0003_from_data_to_main_fields")]
+    dependencies = [("applications", "0003_from_data_to_main_fields")]
 
     operations = [
         migrations.AlterField(

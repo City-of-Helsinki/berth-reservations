@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("harbors", "0005_add_titles_for_avlblty_levels"),
-        ("reservations", "0001_initial"),
+        ("applications", "0001_initial"),
     ]
 
     operations = [
@@ -163,7 +163,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
-                related_name="reservations",
+                related_name="applications",
                 to="harbors.BoatType",
                 verbose_name="boat type",
             ),
@@ -263,7 +263,7 @@ class Migration(migrations.Migration):
             name="reservation",
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
-                to="reservations.Reservation",
+                to="applications.Reservation",
             ),
         ),
         migrations.AddField(
@@ -271,7 +271,7 @@ class Migration(migrations.Migration):
             name="chosen_harbors",
             field=models.ManyToManyField(
                 blank=True,
-                through="reservations.HarborChoice",
+                through="applications.HarborChoice",
                 to="harbors.Harbor",
                 verbose_name="chosen harbors",
             ),

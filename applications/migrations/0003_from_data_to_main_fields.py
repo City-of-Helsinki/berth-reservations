@@ -62,8 +62,8 @@ def deep_get(dictionary, keys, default=None):
 def from_data_to_main_fields(apps, schema_editor):
     Harbor = apps.get_model("harbors", "Harbor")
     BoatType = apps.get_model("harbors", "BoatType")
-    Reservation = apps.get_model("reservations", "Reservation")
-    HarborChoice = apps.get_model("reservations", "HarborChoice")
+    Reservation = apps.get_model("applications", "Reservation")
+    HarborChoice = apps.get_model("applications", "HarborChoice")
 
     for r in Reservation.objects.all():
         if r.data and r.data != {}:
@@ -139,7 +139,7 @@ def from_data_to_main_fields(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [("reservations", "0002_add_main_fields")]
+    dependencies = [("applications", "0002_add_main_fields")]
 
     operations = [
         migrations.RunPython(from_data_to_main_fields, migrations.RunPython.noop)

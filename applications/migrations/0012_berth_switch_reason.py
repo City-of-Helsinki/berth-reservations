@@ -7,7 +7,7 @@ import parler.models
 
 class Migration(migrations.Migration):
 
-    dependencies = [("reservations", "0011_update_required_fields")]
+    dependencies = [("applications", "0011_update_required_fields")]
 
     operations = [
         migrations.CreateModel(
@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
-                to="reservations.BerthSwitchReason",
+                to="applications.BerthSwitchReason",
                 verbose_name="Berth switch reason",
             ),
         ),
@@ -71,7 +71,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="translations",
-                        to="reservations.BerthSwitchReason",
+                        to="applications.BerthSwitchReason",
                     ),
                 ),
             ],
