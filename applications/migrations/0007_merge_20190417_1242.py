@@ -6,8 +6,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("reservations", "0006_reservation_application_code"),
-        ("reservations", "0006_add_berth_switch"),
+        ("applications", "0006_reservation_application_code"),
+        ("applications", "0006_add_berth_switch"),
     ]
 
     operations = []

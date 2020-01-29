@@ -3,12 +3,12 @@
 from django.db import migrations, models
 import django.db.models.deletion
 import enumfields.fields
-import reservations.enums
+import applications.enums
 
 
 class Migration(migrations.Migration):
 
-    dependencies = [("reservations", "0013_copy_templates")]
+    dependencies = [("applications", "0013_copy_templates")]
 
     operations = [
         migrations.AlterField(
@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
-                to="reservations.BerthSwitchReason",
+                to="applications.BerthSwitchReason",
                 verbose_name="berth switch reason",
             ),
         ),
@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
             model_name="winterstoragereservation",
             name="storage_method",
             field=enumfields.fields.EnumField(
-                enum=reservations.enums.WinterStorageMethod,
+                enum=applications.enums.WinterStorageMethod,
                 max_length=60,
                 verbose_name="storage method",
             ),

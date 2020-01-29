@@ -5,7 +5,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("django_ilmoitin", "0002_add_admin_notifications"),
-        ("reservations", "0012_berth_switch_reason"),
+        ("applications", "0012_berth_switch_reason"),
     ]
 
     # This migration was used to copy notifications templates from an inbuilt

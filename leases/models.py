@@ -3,8 +3,8 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumField
 
+from applications.models import BerthApplication, WinterStorageApplication
 from customers.models import Boat, CustomerProfile
-from reservations.models import BerthApplication, WinterStorageApplication
 from resources.models import Berth, WinterStoragePlace
 from utils.models import TimeStampedModel, UUIDModel
 

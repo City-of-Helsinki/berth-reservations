@@ -1,17 +1,17 @@
 import graphene
 from graphene_federation import build_schema
 
+import applications.schema
 import customers.schema
 import harbors.schema
-import reservations.schema
 import resources.schema
 
 
-class Query(harbors.schema.Query, reservations.schema.Query, graphene.ObjectType):
+class Query(harbors.schema.Query, applications.schema.Query, graphene.ObjectType):
     pass
 
 
-class Mutation(reservations.schema.Mutation, graphene.ObjectType):
+class Mutation(applications.schema.Mutation, graphene.ObjectType):
     pass
 
 

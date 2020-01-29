@@ -2,19 +2,19 @@
 
 from django.db import migrations, models
 import enumfields.fields
-import reservations.enums
+import applications.enums
 
 
 class Migration(migrations.Migration):
 
-    dependencies = [("reservations", "0010_set_defaults_for_required_fields")]
+    dependencies = [("applications", "0010_set_defaults_for_required_fields")]
 
     operations = [
         migrations.AlterModelOptions(
             name="winterstoragereservation",
             options={
                 "permissions": (
-                    ("resend_reservation", "Can resend confirmation for reservations"),
+                    ("resend_reservation", "Can resend confirmation for applications"),
                 )
             },
         ),
@@ -115,7 +115,7 @@ class Migration(migrations.Migration):
             model_name="winterstoragereservation",
             name="storage_method",
             field=enumfields.fields.EnumField(
-                enum=reservations.enums.WinterStorageMethod,
+                enum=applications.enums.WinterStorageMethod,
                 max_length=60,
                 verbose_name="Storage method",
             ),
