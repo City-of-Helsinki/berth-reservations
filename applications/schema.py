@@ -33,6 +33,7 @@ class BerthReservationType(DjangoObjectType):
 class BerthSwitchType(DjangoObjectType):
     class Meta:
         model = BerthSwitch
+        exclude = ("berthapplication_set",)
 
 
 class BerthSwitchReasonType(DjangoObjectType):
