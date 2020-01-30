@@ -38,6 +38,28 @@ class HarborType(graphql_geojson.GeoJSONType):
         ]
         geojson_field = "location"
         interfaces = (relay.Node,)
+        fields = (
+            "servicemap_id",
+            "zip_code",
+            "phone",
+            "email",
+            "www_url",
+            "image_link",
+            "zip_code",
+            "mooring",
+            "electricity",
+            "water",
+            "waste_collection",
+            "gate",
+            "lighting",
+            "suitable_boat_types",
+            "availability_level",
+            "maximum_width",
+            "maximum_length",
+            "maximum_depth",
+            "location",
+            "number_of_places",
+        )
 
     name = graphene.String()
     street_address = graphene.String()
