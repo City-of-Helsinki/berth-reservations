@@ -89,6 +89,30 @@ class WinterStorageAreaType(graphql_geojson.GeoJSONType):
         ]
         geojson_field = "location"
         interfaces = (relay.Node,)
+        fields = (
+            "servicemap_id",
+            "zip_code",
+            "phone",
+            "email",
+            "www_url",
+            "image_link",
+            "zip_code",
+            "repair_area",
+            "electricity",
+            "water",
+            "gate",
+            "summer_storage_for_docking_equipment",
+            "summer_storage_for_trailers",
+            "summer_storage_for_boats",
+            "availability_level",
+            "number_of_marked_places",
+            "max_width",
+            "max_length",
+            "number_of_section_spaces",
+            "max_length_of_section_spaces",
+            "number_of_unmarked_spaces",
+            "location",
+        )
 
     name = graphene.String()
     street_address = graphene.String()
