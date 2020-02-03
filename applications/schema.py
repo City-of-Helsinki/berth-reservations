@@ -200,7 +200,7 @@ class CreateWinterStorageReservation(graphene.Mutation):
         )
 
 
-class Mutation(graphene.ObjectType):
+class Mutation:
     create_berth_reservation = CreateBerthReservation.Field()
     create_winter_storage_reservation = CreateWinterStorageReservation.Field()
 
