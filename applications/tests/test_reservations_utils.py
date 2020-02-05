@@ -18,6 +18,8 @@ from .factories import BerthApplicationFactory, WinterStorageApplicationFactory
 
 @freeze_time("2019-01-14T08:00:00Z")
 @pytest.mark.parametrize("berth_switch", [True, False])
+# Parametrised berth_switch_reason inside berth_switch
+@pytest.mark.parametrize("berth_switch_info", [True, False], indirect=True)
 def test_exporting_berth_applications_to_excel(
     berth_switch, boat_type, harbor, berth_switch_info
 ):
@@ -67,6 +69,7 @@ def test_exporting_berth_applications_to_excel(
 
     boat_type.set_current_language("fi")
 
+    expected_berth_switch_reason = ""
     expected_berth_switch_str = ""
     if berth_switch:
         expected_berth_switch_str = "{} ({}): {}".format(
@@ -74,41 +77,45 @@ def test_exporting_berth_applications_to_excel(
             berth_switch_info.pier,
             berth_switch_info.berth_number,
         )
+        expected_berth_switch_reason = (
+            berth_switch_info.reason.title if berth_switch_info.reason else "---"
+        )
 
-    assert xl_sheet.ncols == 32
+    assert xl_sheet.ncols == 33
 
     assert row[0].value == "2019-01-14 10:00"
     assert row[1].value == "1: Aurinkoinen satama"
     assert row[2].value == expected_berth_switch_str
-    assert row[3].value == "Kyösti"
-    assert row[4].value == "Testaaja"
-    assert row[5].value == "kyosti.testaaja@example.com"
-    assert row[6].value == "Mariankatu 2"
-    assert row[7].value == "00170"
-    assert row[8].value == "Helsinki"
-    assert row[9].value == "0411234567"
-    assert row[10].value == boat_type.name
-    assert row[11].value == 2.0
-    assert row[12].value == 3.5
-    assert row[13].value == 1
-    assert row[14].value == 20000
-    assert row[15].value == "B0A7"
-    assert row[16].value == "Vene"
-    assert row[17].value == "BMW S 12"
-    assert row[18].value == "Yes"
-    assert row[19].value == ""
+    assert row[3].value == expected_berth_switch_reason
+    assert row[4].value == "Kyösti"
+    assert row[5].value == "Testaaja"
+    assert row[6].value == "kyosti.testaaja@example.com"
+    assert row[7].value == "Mariankatu 2"
+    assert row[8].value == "00170"
+    assert row[9].value == "Helsinki"
+    assert row[10].value == "0411234567"
+    assert row[11].value == boat_type.name
+    assert row[12].value == 2.0
+    assert row[13].value == 3.5
+    assert row[14].value == 1
+    assert row[15].value == 20000
+    assert row[16].value == "B0A7"
+    assert row[17].value == "Vene"
+    assert row[18].value == "BMW S 12"
+    assert row[19].value == "Yes"
     assert row[20].value == ""
     assert row[21].value == ""
-    assert row[22].value == "Yes"
-    assert row[23].value == "wood"
-    assert row[24].value == "cafe"
-    assert row[25].value == "a while"
-    assert row[26].value == "01.02.2019"
-    assert row[27].value == "01.03.2019"
-    assert row[28].value == "Yes"
+    assert row[22].value == ""
+    assert row[23].value == "Yes"
+    assert row[24].value == "wood"
+    assert row[25].value == "cafe"
+    assert row[26].value == "a while"
+    assert row[27].value == "01.02.2019"
+    assert row[28].value == "01.03.2019"
     assert row[29].value == "Yes"
     assert row[30].value == "Yes"
-    assert row[31].value == "1234567890"
+    assert row[31].value == "Yes"
+    assert row[32].value == "1234567890"
 
 
 @freeze_time("2019-01-14T08:00:00Z")

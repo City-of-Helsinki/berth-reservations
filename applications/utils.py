@@ -13,6 +13,7 @@ def export_berth_applications_as_xlsx(applications):
         ("Reserved at", "created_at", 15),
         ("Chosen harbors", "chosen_harbors", 55),
         ("Current berth", "berth_switch", 35),
+        ("Switch Reason", "berth_switch_reason", 55),
         ("First name", "first_name", 15),
         ("Last name", "last_name", 15),
         ("Email", "email", 15),
@@ -73,6 +74,14 @@ def export_berth_applications_as_xlsx(applications):
                     value = application.boat_type.name
                 elif attr_name == "berth_switch" and application.berth_switch:
                     value = parse_berth_switch_str(application.berth_switch)
+                elif attr_name == "berth_switch_reason":
+                    value = None
+                    if application.berth_switch:
+                        value = (
+                            application.berth_switch.reason.title
+                            if application.berth_switch.reason
+                            else "---"
+                        )
                 else:
                     value = getattr(application, attr_name)
                     if isinstance(value, bool):
