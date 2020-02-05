@@ -65,7 +65,7 @@ class BerthProfileNode(DjangoObjectType):
     comment = graphene.String()
 
 
-class Query(graphene.ObjectType):
+class Query:
     berth_profile = graphene.Field(BerthProfileNode)
     berth_profiles = DjangoFilterConnectionField(BerthProfileNode)
 

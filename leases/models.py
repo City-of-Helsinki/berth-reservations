@@ -57,13 +57,13 @@ class BerthLease(AbstractLease):
     berth = models.ForeignKey(
         Berth, verbose_name=_("berth"), on_delete=models.PROTECT, related_name="leases"
     )
-    application = models.ForeignKey(
+    application = models.OneToOneField(
         BerthApplication,
         verbose_name=_("application"),
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        related_name="leases",
+        related_name="lease",
     )
 
     class Meta:
@@ -84,13 +84,13 @@ class WinterStorageLease(AbstractLease):
         on_delete=models.PROTECT,
         related_name="leases",
     )
-    application = models.ForeignKey(
+    application = models.OneToOneField(
         WinterStorageApplication,
         verbose_name=_("application"),
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        related_name="leases",
+        related_name="lease",
     )
 
     class Meta:
