@@ -18,10 +18,11 @@ from .factories import BerthApplicationFactory, WinterStorageApplicationFactory
 
 @freeze_time("2019-01-14T08:00:00Z")
 @pytest.mark.parametrize("berth_switch", [True, False])
+@pytest.mark.parametrize("customer_private", [True, False])
 # Parametrised berth_switch_reason inside berth_switch
 @pytest.mark.parametrize("berth_switch_info", [True, False], indirect=True)
 def test_exporting_berth_applications_to_excel(
-    berth_switch, boat_type, harbor, berth_switch_info
+    berth_switch, boat_type, harbor, berth_switch_info, customer_private,
 ):
     application_data = {
         "first_name": "Kyösti",
@@ -55,6 +56,10 @@ def test_exporting_berth_applications_to_excel(
         "agree_to_terms": True,
         "application_code": "1234567890",
     }
+    if not customer_private:
+        application_data["company_name"] = "ACME Inc."
+        application_data["business_id"] = "123123-000"
+
     application = BerthApplicationFactory(**application_data)
     HarborChoice.objects.create(application=application, priority=1, harbor=harbor)
 
@@ -81,45 +86,50 @@ def test_exporting_berth_applications_to_excel(
             berth_switch_info.reason.title if berth_switch_info.reason else "---"
         )
 
-    assert xl_sheet.ncols == 33
+    assert xl_sheet.ncols == 35
 
     assert row[0].value == "2019-01-14 10:00"
     assert row[1].value == "1: Aurinkoinen satama"
     assert row[2].value == expected_berth_switch_str
     assert row[3].value == expected_berth_switch_reason
-    assert row[4].value == "Kyösti"
-    assert row[5].value == "Testaaja"
-    assert row[6].value == "kyosti.testaaja@example.com"
-    assert row[7].value == "Mariankatu 2"
-    assert row[8].value == "00170"
-    assert row[9].value == "Helsinki"
-    assert row[10].value == "0411234567"
-    assert row[11].value == boat_type.name
-    assert row[12].value == 2.0
-    assert row[13].value == 3.5
-    assert row[14].value == 1
-    assert row[15].value == 20000
-    assert row[16].value == "B0A7"
-    assert row[17].value == "Vene"
-    assert row[18].value == "BMW S 12"
-    assert row[19].value == "Yes"
-    assert row[20].value == ""
-    assert row[21].value == ""
+    assert row[4].value == ("" if customer_private else "ACME Inc.")
+    assert row[5].value == ("" if customer_private else "123123-000")
+    assert row[6].value == "Kyösti"
+    assert row[7].value == "Testaaja"
+    assert row[8].value == "kyosti.testaaja@example.com"
+    assert row[9].value == "Mariankatu 2"
+    assert row[10].value == "00170"
+    assert row[11].value == "Helsinki"
+    assert row[12].value == "0411234567"
+    assert row[13].value == boat_type.name
+    assert row[14].value == 2.0
+    assert row[15].value == 3.5
+    assert row[16].value == 1
+    assert row[17].value == 20000
+    assert row[18].value == "B0A7"
+    assert row[19].value == "Vene"
+    assert row[20].value == "BMW S 12"
+    assert row[21].value == "Yes"
     assert row[22].value == ""
-    assert row[23].value == "Yes"
-    assert row[24].value == "wood"
-    assert row[25].value == "cafe"
-    assert row[26].value == "a while"
-    assert row[27].value == "01.02.2019"
-    assert row[28].value == "01.03.2019"
-    assert row[29].value == "Yes"
-    assert row[30].value == "Yes"
+    assert row[23].value == ""
+    assert row[24].value == ""
+    assert row[25].value == "Yes"
+    assert row[26].value == "wood"
+    assert row[27].value == "cafe"
+    assert row[28].value == "a while"
+    assert row[29].value == "01.02.2019"
+    assert row[30].value == "01.03.2019"
     assert row[31].value == "Yes"
-    assert row[32].value == "1234567890"
+    assert row[32].value == "Yes"
+    assert row[33].value == "Yes"
+    assert row[34].value == "1234567890"
 
 
 @freeze_time("2019-01-14T08:00:00Z")
-def test_exporting_winter_storage_applications_to_excel(boat_type, winter_area):
+@pytest.mark.parametrize("customer_private", [True, False])
+def test_exporting_winter_storage_applications_to_excel(
+    boat_type, customer_private, winter_area
+):
     application_data = {
         "first_name": "Kyösti",
         "last_name": "Testaaja",
@@ -142,6 +152,10 @@ def test_exporting_winter_storage_applications_to_excel(boat_type, winter_area):
         "accept_other_culture_news": True,
         "application_code": "1234567890",
     }
+    if not customer_private:
+        application_data["company_name"] = "ACME Inc."
+        application_data["business_id"] = "123123-000"
+
     application = WinterStorageApplicationFactory(**application_data)
     WinterStorageAreaChoice.objects.create(
         application=application, priority=1, winter_storage_area=winter_area
@@ -158,27 +172,29 @@ def test_exporting_winter_storage_applications_to_excel(boat_type, winter_area):
 
     boat_type.set_current_language("fi")
 
-    assert xl_sheet.ncols == 22
+    assert xl_sheet.ncols == 24
 
     assert row[0].value == "2019-01-14 10:00"
     assert row[1].value == "1: {}".format(winter_area.name)
-    assert row[2].value == "Kyösti"
-    assert row[3].value == "Testaaja"
-    assert row[4].value == "kyosti.testaaja@example.com"
-    assert row[5].value == "Mariankatu 2"
-    assert row[6].value == "00170"
-    assert row[7].value == "Helsinki"
-    assert row[8].value == "0411234567"
-    assert row[9].value == WinterStorageMethod.ON_TRESTLES.label
-    assert row[10].value == "hel001"
-    assert row[11].value == boat_type.name
-    assert row[12].value == 2.0
-    assert row[13].value == 3.5
-    assert row[14].value == "B0A7"
-    assert row[15].value == "Vene"
-    assert row[16].value == "BMW S 12"
-    assert row[17].value == ""
-    assert row[18].value == ""
+    assert row[2].value == ("" if customer_private else "ACME Inc.")
+    assert row[3].value == ("" if customer_private else "123123-000")
+    assert row[4].value == "Kyösti"
+    assert row[5].value == "Testaaja"
+    assert row[6].value == "kyosti.testaaja@example.com"
+    assert row[7].value == "Mariankatu 2"
+    assert row[8].value == "00170"
+    assert row[9].value == "Helsinki"
+    assert row[10].value == "0411234567"
+    assert row[11].value == WinterStorageMethod.ON_TRESTLES.label
+    assert row[12].value == "hel001"
+    assert row[13].value == boat_type.name
+    assert row[14].value == 2.0
+    assert row[15].value == 3.5
+    assert row[16].value == "B0A7"
+    assert row[17].value == "Vene"
+    assert row[18].value == "BMW S 12"
     assert row[19].value == ""
-    assert row[20].value == "Yes"
-    assert row[21].value == "1234567890"
+    assert row[20].value == ""
+    assert row[21].value == ""
+    assert row[22].value == "Yes"
+    assert row[23].value == "1234567890"

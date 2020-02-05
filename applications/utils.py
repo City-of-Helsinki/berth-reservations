@@ -14,6 +14,8 @@ def export_berth_applications_as_xlsx(applications):
         ("Chosen harbors", "chosen_harbors", 55),
         ("Current berth", "berth_switch", 35),
         ("Switch Reason", "berth_switch_reason", 55),
+        ("Company name", "company_name", 35),
+        ("Business ID", "business_id", 15),
         ("First name", "first_name", 15),
         ("Last name", "last_name", 15),
         ("Email", "email", 15),
@@ -98,6 +100,8 @@ def export_winter_storage_applications_as_xlsx(applications):
     fields = (
         ("Reserved at", "created_at", 15),
         ("Chosen winter areas", "chosen_harbors", 55),
+        ("Company name", "company_name", 35),
+        ("Business ID", "business_id", 15),
         ("First name", "first_name", 15),
         ("Last name", "last_name", 15),
         ("Email", "email", 15),
