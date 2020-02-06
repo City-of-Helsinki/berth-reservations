@@ -5,6 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumField
 from parler.models import TranslatableModel, TranslatedFields
 
+from customers.models import CustomerProfile
 from harbors.models import BoatType, Harbor, WinterStorageArea
 
 from .enums import WinterStorageMethod
@@ -142,6 +143,13 @@ class BaseApplication(models.Model):
 
 
 class BerthApplication(BaseApplication):
+    customer = models.ForeignKey(
+        CustomerProfile,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="berth_applications",
+    )
+
     chosen_harbors = models.ManyToManyField(
         Harbor, through=HarborChoice, verbose_name=_("chosen harbors"), blank=True
     )

@@ -1,6 +1,6 @@
 import pytest
 
-from .factories import MunicipalityFactory, UserFactory
+from .factories import CustomerProfileFactory, MunicipalityFactory, UserFactory
 
 
 @pytest.fixture(autouse=True)
@@ -42,3 +42,8 @@ def superuser():
 def municipality():
     municipality = MunicipalityFactory()
     return municipality
+
+
+@pytest.fixture
+def customer_profile():
+    return CustomerProfileFactory()

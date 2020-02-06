@@ -1,8 +1,13 @@
 import django_filters
 import graphene
+from django.db import transaction
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
 from graphql_jwt.decorators import login_required, superuser_required
+from graphql_relay import from_global_id
+
+from berth_reservations.exceptions import VenepaikkaGraphQLError
+from customers.models import CustomerProfile
 
 from .models import BerthApplication, BerthSwitch, HarborChoice
 from .schema import BerthSwitchType as OldBerthSwitchType
@@ -71,6 +76,38 @@ class BerthApplicationNode(DjangoObjectType):
         return super().get_node(info, id)
 
 
+class BerthApplicationInput:
+    # TODO: the required has to be removed once more fields are added
+    customer_id = graphene.ID(required=True)
+
+
+class UpdateBerthApplication(graphene.ClientIDMutation):
+    class Input(BerthApplicationInput):
+        id = graphene.ID(required=True)
+
+    berth_application = graphene.Field(BerthApplicationNode)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        # TODO: Should check if the user has permissions to perform the following changes
+        berth_application_id = from_global_id(input.get("id"))[1]
+        customer_id = from_global_id(input.get("customer_id"))[1]
+
+        try:
+            application = BerthApplication.objects.get(pk=berth_application_id)
+            customer = CustomerProfile.objects.get(pk=customer_id)
+
+            application.customer = customer
+            application.save()
+        except (BerthApplication.DoesNotExist, CustomerProfile.DoesNotExist) as e:
+            raise VenepaikkaGraphQLError(e)
+
+        return UpdateBerthApplication(berth_application=application)
+
+
 class Query:
     berth_application = graphene.relay.Node.Field(BerthApplicationNode)
     berth_applications = DjangoFilterConnectionField(
@@ -88,3 +125,7 @@ class Query:
             "harborchoice_set",
             "harborchoice_set__harbor",
         )
+
+
+class Mutation:
+    update_berth_application = UpdateBerthApplication.Field()

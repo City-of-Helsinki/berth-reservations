@@ -2,6 +2,9 @@ import factory
 from django.contrib.auth import get_user_model
 from munigeo.models import Municipality
 
+from customers.enums import InvoicingType
+from customers.models import CustomerProfile
+
 
 class UserFactory(factory.django.DjangoModelFactory):
     first_name = factory.Faker("first_name")
@@ -19,3 +22,12 @@ class MunicipalityFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Municipality
+
+
+class CustomerProfileFactory(factory.django.DjangoModelFactory):
+    user = factory.SubFactory(UserFactory)
+    invoicing_type = factory.Faker("random_element", elements=list(InvoicingType))
+    comment = factory.Faker("text")
+
+    class Meta:
+        model = CustomerProfile

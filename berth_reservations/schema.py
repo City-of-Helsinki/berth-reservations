@@ -36,7 +36,9 @@ class Query(
     pass
 
 
-class Mutation(resources.schema.Mutation, graphene.ObjectType):
+class Mutation(
+    applications.new_schema.Mutation, resources.schema.Mutation, graphene.ObjectType
+):
     pass
 
 
