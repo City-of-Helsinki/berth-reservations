@@ -1,6 +1,7 @@
 import graphene
 from graphene_federation import build_schema
 
+import applications.new_schema
 import applications.schema
 import customers.schema
 import harbors.schema
@@ -26,7 +27,12 @@ schema = graphene.Schema(query=Query, mutation=Mutation)
 # =====================================================
 
 
-class Query(customers.schema.Query, resources.schema.Query, graphene.ObjectType):
+class Query(
+    applications.new_schema.Query,
+    customers.schema.Query,
+    resources.schema.Query,
+    graphene.ObjectType,
+):
     pass
 
 
@@ -39,4 +45,4 @@ class Mutation(resources.schema.Mutation, graphene.ObjectType):
 extended_types = [customers.schema.ProfileNode]
 
 
-new_schema = build_schema(Query, Mutation, types=extended_types)
+new_schema = build_schema(query=Query, mutation=Mutation, types=extended_types)
