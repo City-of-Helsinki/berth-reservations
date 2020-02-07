@@ -4,7 +4,6 @@ from graphene import relay
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
 from graphene_federation import extend, external
-from graphql import GraphQLError
 from graphql_jwt.decorators import login_required
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
@@ -50,7 +49,9 @@ class ProfileNode(DjangoObjectType):
         if user.is_superuser or user == profile.user:
             return profile
         else:
-            raise GraphQLError(_("You do not have permission to perform this action."))
+            raise VenepaikkaGraphQLError(
+                _("You do not have permission to perform this action.")
+            )
 
 
 class BerthProfileNode(DjangoObjectType):
@@ -92,4 +93,6 @@ class Query:
         # TODO: implement proper permissions
         if info.context.user.is_superuser:
             return CustomerProfile.objects.all()
-        raise GraphQLError(_("You do not have permission to perform this action."))
+        raise VenepaikkaGraphQLError(
+            _("You do not have permission to perform this action.")
+        )
