@@ -1,6 +1,8 @@
 import pytest
 from django.db.utils import IntegrityError
 
+from berth_reservations.tests.conftest import *  # noqa
+
 from ..models import CustomerProfile
 from .factories import CustomerProfileFactory
 

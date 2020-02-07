@@ -1,19 +1,9 @@
 import factory
 
+from berth_reservations.tests.factories import CustomerProfileFactory
 from resources.tests.factories import BoatTypeFactory
-from users.tests.factories import UserFactory
 
-from ..enums import InvoicingType
-from ..models import Boat, CustomerProfile
-
-
-class CustomerProfileFactory(factory.django.DjangoModelFactory):
-    user = factory.SubFactory(UserFactory)
-    invoicing_type = factory.Faker("random_element", elements=list(InvoicingType))
-    comment = factory.Faker("text")
-
-    class Meta:
-        model = CustomerProfile
+from ..models import Boat
 
 
 class BoatFactory(factory.django.DjangoModelFactory):
