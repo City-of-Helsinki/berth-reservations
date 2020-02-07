@@ -204,12 +204,12 @@ class CreateBerthMutation(graphene.ClientIDMutation):
     @login_required
     @superuser_required
     @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, **kwargs):
+    def mutate_and_get_payload(cls, root, info, **input):
         berth = Berth.objects.create(
-            number=kwargs.get("number"),
-            comment=kwargs.get("comment", ""),
-            pier_id=from_global_id(kwargs.get("pier_id"))[1],
-            berth_type_id=from_global_id(kwargs.get("berth_type_id"))[1],
+            number=input.get("number"),
+            comment=input.get("comment", ""),
+            pier_id=from_global_id(input.get("pier_id"))[1],
+            berth_type_id=from_global_id(input.get("berth_type_id"))[1],
         )
         return CreateBerthMutation(berth=berth)
 
@@ -228,24 +228,24 @@ class UpdateBerthMutation(graphene.ClientIDMutation):
     @login_required
     @superuser_required
     @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, **kwargs):
+    def mutate_and_get_payload(cls, root, info, **input):
         # TODO: Should check if the user has permissions to
         # modify the specific resource
         # GQL IDs have to be translated to Django model UUIDs
-        id = from_global_id(kwargs.pop("id"))[1]
+        id = from_global_id(input.pop("id"))[1]
 
-        if kwargs.get("pier_id"):
-            kwargs["pier_id"] = from_global_id(kwargs.get("pier_id"))[1]
+        if input.get("pier_id"):
+            input["pier_id"] = from_global_id(input.get("pier_id"))[1]
 
-        if kwargs.get("berth_type_id"):
-            kwargs["berth_type_id"] = from_global_id(kwargs.get("berth_type_id"))[1]
+        if input.get("berth_type_id"):
+            input["berth_type_id"] = from_global_id(input.get("berth_type_id"))[1]
 
         try:
             berth = Berth.objects.get(pk=id)
         except Berth.DoesNotExist as e:
             raise VenepaikkaGraphQLError(e)
 
-        update_object(berth, kwargs)
+        update_object(berth, input)
 
         return UpdateBerthMutation(berth=berth)
 
@@ -258,10 +258,10 @@ class DeleteBerthMutation(graphene.ClientIDMutation):
     @login_required
     @superuser_required
     @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, **kwargs):
+    def mutate_and_get_payload(cls, root, info, **input):
         # TODO: Should check if the user has permissions to
         # delete the specific resource
-        id = from_global_id(kwargs.get("id"))[1]
+        id = from_global_id(input.get("id"))[1]
 
         try:
             berth = Berth.objects.get(pk=id)
@@ -285,14 +285,14 @@ class CreateBerthTypeMutation(graphene.ClientIDMutation):
     @login_required
     @superuser_required
     @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, **kwargs):
+    def mutate_and_get_payload(cls, root, info, **input):
         # TODO: Should check if the user has permissions to
         # delete the specific resource
 
         berth_type = BerthType.objects.create(
-            mooring_type=kwargs.get("mooring_type"),
-            width=kwargs.get("width"),
-            length=kwargs.get("length"),
+            mooring_type=input.get("mooring_type"),
+            width=input.get("width"),
+            length=input.get("length"),
         )
         return CreateBerthTypeMutation(berth_type=berth_type)
 
@@ -310,18 +310,18 @@ class UpdateBerthTypeMutation(graphene.ClientIDMutation):
     @login_required
     @superuser_required
     @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, **kwargs):
+    def mutate_and_get_payload(cls, root, info, **input):
         # TODO: Should check if the user has permissions to
         # modify the specific resource
         # GQL IDs have to be translated to Django model UUIDs
-        id = from_global_id(kwargs.pop("id"))[1]
+        id = from_global_id(input.pop("id"))[1]
 
         try:
             berth_type = BerthType.objects.get(pk=id)
         except BerthType.DoesNotExist as e:
             raise VenepaikkaGraphQLError(e)
 
-        update_object(berth_type, kwargs)
+        update_object(berth_type, input)
 
         return UpdateBerthTypeMutation(berth_type=berth_type)
 
@@ -334,10 +334,10 @@ class DeleteBerthTypeMutation(graphene.ClientIDMutation):
     @login_required
     @superuser_required
     @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, **kwargs):
+    def mutate_and_get_payload(cls, root, info, **input):
         # TODO: Should check if the user has permissions to
         # delete the specific resource
-        id = from_global_id(kwargs.get("id"))[1]
+        id = from_global_id(input.get("id"))[1]
 
         try:
             berth_type = BerthType.objects.get(pk=id)
@@ -371,28 +371,28 @@ class CreateHarborMutation(graphene.ClientIDMutation):
     @login_required
     @superuser_required
     @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, **kwargs):
+    def mutate_and_get_payload(cls, root, info, **input):
         # TODO: Should check if the user has permissions to
         # delete the specific resource
         lang = get_language()
 
-        availability_level_id = kwargs.pop("availability_level_id", None)
+        availability_level_id = input.pop("availability_level_id", None)
         if availability_level_id:
             try:
-                kwargs["availability_level"] = AvailabilityLevel.objects.get(
+                input["availability_level"] = AvailabilityLevel.objects.get(
                     pk=availability_level_id
                 )
             except AvailabilityLevel.DoesNotExist as e:
                 raise VenepaikkaGraphQLError(e)
 
-        municipality_id = kwargs.pop("municipality_id", None)
+        municipality_id = input.pop("municipality_id", None)
         if municipality_id:
             try:
-                kwargs["municipality"] = Municipality.objects.get(id=municipality_id)
+                input["municipality"] = Municipality.objects.get(id=municipality_id)
             except Municipality.DoesNotExist as e:
                 raise VenepaikkaGraphQLError(e)
 
-        harbor = Harbor.objects.language(lang).create(**kwargs)
+        harbor = Harbor.objects.language(lang).create(**input)
 
         return CreateHarborMutation(harbor=harbor)
 
@@ -407,25 +407,25 @@ class UpdateHarborMutation(graphene.ClientIDMutation):
     @login_required
     @superuser_required
     @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, **kwargs):
+    def mutate_and_get_payload(cls, root, info, **input):
         # TODO: Should check if the user has permissions to
         # delete the specific resource
-        id = from_global_id(kwargs.pop("id"))[1]
+        id = from_global_id(input.pop("id"))[1]
 
         lang = get_language()
 
         try:
             harbor = Harbor.objects.language(lang).get(pk=id)
 
-            availability_level_id = kwargs.pop("availability_level_id", None)
+            availability_level_id = input.pop("availability_level_id", None)
             if availability_level_id:
-                kwargs["availability_level"] = AvailabilityLevel.objects.language(
+                input["availability_level"] = AvailabilityLevel.objects.language(
                     lang
                 ).get(pk=availability_level_id)
 
-            municipality_id = kwargs.pop("municipality_id", None)
+            municipality_id = input.pop("municipality_id", None)
             if municipality_id:
-                kwargs["municipality"] = Municipality.objects.get(id=municipality_id)
+                input["municipality"] = Municipality.objects.get(id=municipality_id)
         except (
             Harbor.DoesNotExist,
             AvailabilityLevel.DoesNotExist,
@@ -433,7 +433,7 @@ class UpdateHarborMutation(graphene.ClientIDMutation):
         ) as e:
             raise VenepaikkaGraphQLError(e)
 
-        update_object(harbor, kwargs)
+        update_object(harbor, input)
 
         return UpdateHarborMutation(harbor=harbor)
 
@@ -446,10 +446,10 @@ class DeleteHarborMutation(graphene.ClientIDMutation):
     @login_required
     @superuser_required
     @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, **kwargs):
+    def mutate_and_get_payload(cls, root, info, **input):
         # TODO: Should check if the user has permissions to
         # delete the specific resource
-        id = from_global_id(kwargs.get("id"))[1]
+        id = from_global_id(input.get("id"))[1]
 
         try:
             harbor = Harbor.objects.get(pk=id)
@@ -479,16 +479,16 @@ class CreatePierMutation(graphene.ClientIDMutation):
     @login_required
     @superuser_required
     @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, **kwargs):
+    def mutate_and_get_payload(cls, root, info, **input):
         # TODO: Should check if the user has permissions to
         # delete the specific resource
-        suitable_boat_types = kwargs.pop("suitable_boat_types", [])
+        suitable_boat_types = input.pop("suitable_boat_types", [])
 
-        harbor_global_id = kwargs.pop("harbor_id", None)
+        harbor_global_id = input.pop("harbor_id", None)
         if harbor_global_id:
             harbor_id = from_global_id(harbor_global_id)[1]
             try:
-                kwargs["harbor"] = Harbor.objects.get(pk=harbor_id)
+                input["harbor"] = Harbor.objects.get(pk=harbor_id)
             except Harbor.DoesNotExist as e:
                 raise VenepaikkaGraphQLError(e)
 
@@ -501,7 +501,7 @@ class CreatePierMutation(graphene.ClientIDMutation):
             boat_types.add(boat_type)
 
         try:
-            pier = Pier.objects.create(**kwargs)
+            pier = Pier.objects.create(**input)
             pier.suitable_boat_types.set(boat_types)
         except IntegrityError as e:
             raise VenepaikkaGraphQLError(e)
@@ -519,23 +519,23 @@ class UpdatePierMutation(graphene.ClientIDMutation):
     @login_required
     @superuser_required
     @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, **kwargs):
+    def mutate_and_get_payload(cls, root, info, **input):
         # TODO: Should check if the user has permissions to
         # delete the specific resource
-        id = from_global_id(kwargs.pop("id"))[1]
+        id = from_global_id(input.pop("id"))[1]
 
         try:
-            harbor_global_id = kwargs.pop("harbor_id", None)
+            harbor_global_id = input.pop("harbor_id", None)
             if harbor_global_id:
                 harbor_id = from_global_id(harbor_global_id)[1]
-                kwargs["harbor"] = Harbor.objects.get(pk=harbor_id)
+                input["harbor"] = Harbor.objects.get(pk=harbor_id)
 
             pier = Pier.objects.get(pk=id)
         except (Pier.DoesNotExist, Harbor.DoesNotExist,) as e:
             raise VenepaikkaGraphQLError(e)
 
         boat_types = set()
-        for boat_type_id in kwargs.pop("suitable_boat_types", []):
+        for boat_type_id in input.pop("suitable_boat_types", []):
             try:
                 boat_type = BoatType.objects.get(pk=boat_type_id)
             except BoatType.DoesNotExist as e:
@@ -543,7 +543,7 @@ class UpdatePierMutation(graphene.ClientIDMutation):
             boat_types.add(boat_type)
 
         try:
-            update_object(pier, kwargs)
+            update_object(pier, input)
             pier.suitable_boat_types.set(boat_types)
         except IntegrityError as e:
             raise VenepaikkaGraphQLError(e)
@@ -559,10 +559,10 @@ class DeletePierMutation(graphene.ClientIDMutation):
     @login_required
     @superuser_required
     @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, **kwargs):
+    def mutate_and_get_payload(cls, root, info, **input):
         # TODO: Should check if the user has permissions to
         # delete the specific resource
-        id = from_global_id(kwargs.get("id"))[1]
+        id = from_global_id(input.get("id"))[1]
 
         try:
             pier = Pier.objects.get(pk=id)
