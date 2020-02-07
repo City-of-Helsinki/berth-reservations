@@ -7,6 +7,8 @@ from graphene_federation import extend, external
 from graphql import GraphQLError
 from graphql_jwt.decorators import login_required
 
+from berth_reservations.exceptions import VenepaikkaGraphQLError
+
 from .enums import InvoicingType
 from .models import CustomerProfile
 
@@ -63,6 +65,22 @@ class BerthProfileNode(DjangoObjectType):
 
     invoicing_type = InvoicingTypeEnum()
     comment = graphene.String()
+
+    @classmethod
+    @login_required
+    def get_node(cls, info, id):
+        node = super().get_node(info, id)
+        if not node:
+            return None
+
+        user = info.context.user
+        # TODO: implement proper permissions
+        if node.user == user or user.is_superuser:
+            return node
+        else:
+            raise VenepaikkaGraphQLError(
+                _("You do not have permission to perform this action.")
+            )
 
 
 class Query:
