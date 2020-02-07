@@ -9,8 +9,11 @@ from graphql_relay import from_global_id
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.models import CustomerProfile
 
+from .enums import ApplicationStatus
 from .models import BerthApplication, BerthSwitch, HarborChoice
 from .schema import BerthSwitchType as OldBerthSwitchType
+
+ApplicationStatusEnum = graphene.Enum.from_enum(ApplicationStatus)
 
 
 class HarborChoiceType(DjangoObjectType):
@@ -52,6 +55,7 @@ class BerthApplicationFilter(django_filters.FilterSet):
 class BerthApplicationNode(DjangoObjectType):
     boat_type = graphene.String()
     harbor_choices = graphene.List(HarborChoiceType)
+    status = ApplicationStatusEnum()
 
     class Meta:
         model = BerthApplication
