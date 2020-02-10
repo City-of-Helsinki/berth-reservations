@@ -17,29 +17,25 @@ ApplicationStatusEnum = graphene.Enum.from_enum(ApplicationStatus)
 
 
 class HarborChoiceType(DjangoObjectType):
-    harbor = graphene.String()
+    harbor = graphene.String(required=True)
 
     class Meta:
         model = HarborChoice
         exclude = ("id", "application")
 
     def resolve_harbor(self, info, **kwargs):
-        if self.harbor:
-            return self.harbor.servicemap_id
-        return None
+        return self.harbor.servicemap_id
 
 
 class BerthSwitchType(OldBerthSwitchType):
-    harbor = graphene.String()
+    harbor = graphene.String(required=True)
 
     class Meta:
         model = BerthSwitch
         exclude = ("berthapplication_set",)
 
     def resolve_harbor(self, info, **kwargs):
-        if self.harbor:
-            return self.harbor.servicemap_id
-        return None
+        return self.harbor.servicemap_id
 
 
 class BerthApplicationFilter(django_filters.FilterSet):
