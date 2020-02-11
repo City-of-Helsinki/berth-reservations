@@ -1,5 +1,6 @@
 import pytest
 
+from applications.tests.conftest import *  # noqa
 from berth_reservations.tests.conftest import *  # noqa
 from customers.tests.factories import BoatFactory
 

@@ -63,10 +63,8 @@ class GraphQLTestClient(Client):
 
 
 def assert_not_enough_permissions(executed):
-    assert (
-        executed["errors"][0]["message"]
-        == "You do not have permission to perform this action"
-    )
+    errors = str(executed["errors"])
+    assert "You do not have permission to perform this action" in errors
 
 
 def assert_doesnt_exist(model, executed):
