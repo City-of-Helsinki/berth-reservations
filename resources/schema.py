@@ -590,7 +590,9 @@ class Query:
     piers = DjangoFilterConnectionField(PierNode)
 
     harbor = relay.Node.Field(HarborNode)
-    harbors = DjangoFilterConnectionField(HarborNode)
+    harbors = DjangoFilterConnectionField(
+        HarborNode, servicemap_ids=graphene.List(graphene.String)
+    )
 
     winter_storage_place_type = relay.Node.Field(WinterStoragePlaceTypeNode)
     winter_storage_place_types = DjangoConnectionField(WinterStoragePlaceTypeNode)
@@ -638,20 +640,22 @@ class Query:
         # although, django-graphene might introduce fixes for this
         # so, check the state of this against a newer version later
 
-        return (
-            Harbor.objects.all()
-            .prefetch_related(
-                "translations",
-                Prefetch(
-                    "piers",
-                    queryset=Pier.objects.prefetch_related(
-                        Prefetch("berths", queryset=Berth.objects.all())
-                    ),
-                ),
-                "piers__suitable_boat_types",
-            )
-            .select_related("availability_level", "municipality")
+        servicemap_ids = kwargs.get("servicemap_ids", None)
+        qs = (
+            Harbor.objects.filter(servicemap_id__in=servicemap_ids)
+            if servicemap_ids
+            else Harbor.objects.all()
         )
+        return qs.prefetch_related(
+            "translations",
+            Prefetch(
+                "piers",
+                queryset=Pier.objects.prefetch_related(
+                    Prefetch("berths", queryset=Berth.objects.all())
+                ),
+            ),
+            "piers__suitable_boat_types",
+        ).select_related("availability_level", "municipality")
 
     def resolve_winter_storage_places(self, info, **kwargs):
         return WinterStoragePlace.objects.prefetch_related(
