@@ -85,6 +85,7 @@ class BerthTypeNode(DjangoObjectType):
 class BerthNode(DjangoObjectType):
     class Meta:
         model = Berth
+        fields = ("id", "number", "pier", "berth_type", "comment")
         interfaces = (relay.Node,)
 
 
@@ -126,6 +127,7 @@ class WinterStoragePlaceTypeNode(DjangoObjectType):
 class WinterStoragePlaceNode(DjangoObjectType):
     class Meta:
         model = WinterStoragePlace
+        fields = ("id", "number", "winter_storage_section", "place_type")
         interfaces = (relay.Node,)
 
 
