@@ -590,6 +590,9 @@ class Query:
     piers = DjangoFilterConnectionField(PierNode)
 
     harbor = relay.Node.Field(HarborNode)
+    harbor_by_servicemap_id = graphene.Field(
+        HarborNode, servicemap_id=graphene.String(required=True)
+    )
     harbors = DjangoFilterConnectionField(
         HarborNode, servicemap_ids=graphene.List(graphene.String)
     )
@@ -633,6 +636,9 @@ class Query:
             "harbor__availability_level__translations",
             "harbor__municipality__translations",
         ).select_related("harbor", "harbor__availability_level", "harbor__municipality")
+
+    def resolve_harbor_by_servicemap_id(self, info, **kwargs):
+        return Harbor.objects.filter(servicemap_id=kwargs.get("servicemap_id")).first()
 
     def resolve_harbors(self, info, **kwargs):
         # TODO: optimize this further
