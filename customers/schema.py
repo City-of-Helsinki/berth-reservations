@@ -90,7 +90,7 @@ class BoatNode(DjangoObjectType):
 
 
 class Query:
-    berth_profile = graphene.Field(BerthProfileNode)
+    berth_profile = graphene.relay.Node.Field(BerthProfileNode)
     berth_profiles = DjangoFilterConnectionField(BerthProfileNode)
 
     @login_required
