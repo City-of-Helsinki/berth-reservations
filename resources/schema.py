@@ -3,7 +3,7 @@ import graphql_geojson
 from django.db import transaction
 from django.db.models import Prefetch
 from django.db.utils import IntegrityError
-from django.utils.translation import get_language
+from django.utils.translation import get_language, ugettext_lazy as _
 from graphene import relay
 from graphene_django.fields import DjangoConnectionField, DjangoListField
 from graphene_django.filter import DjangoFilterConnectionField
@@ -75,6 +75,9 @@ class PierNode(graphql_geojson.GeoJSONType):
 
 
 class BerthTypeNode(DjangoObjectType):
+    width = graphene.Float(description=_("width (m)"))
+    length = graphene.Float(description=_("length (m)"))
+
     class Meta:
         model = BerthType
         interfaces = (relay.Node,)
@@ -119,6 +122,9 @@ class HarborNode(graphql_geojson.GeoJSONType):
 
 
 class WinterStoragePlaceTypeNode(DjangoObjectType):
+    width = graphene.Float(description=_("width (m)"))
+    length = graphene.Float(description=_("length (m)"))
+
     class Meta:
         model = WinterStoragePlaceType
         interfaces = (relay.Node,)
