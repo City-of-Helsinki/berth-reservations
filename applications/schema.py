@@ -28,6 +28,10 @@ class HarborChoiceType(DjangoObjectType):
 class BerthReservationType(DjangoObjectType):
     class Meta:
         model = BerthApplication
+        exclude = (
+            "customer",
+            "lease",
+        )
 
 
 class BerthSwitchType(DjangoObjectType):

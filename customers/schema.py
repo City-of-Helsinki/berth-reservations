@@ -9,7 +9,7 @@ from graphql_jwt.decorators import login_required
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 
 from .enums import InvoicingType
-from .models import CustomerProfile
+from .models import Boat, CustomerProfile
 
 InvoicingTypeEnum = graphene.Enum.from_enum(InvoicingType)
 
@@ -82,6 +82,11 @@ class BerthProfileNode(DjangoObjectType):
             raise VenepaikkaGraphQLError(
                 _("You do not have permission to perform this action.")
             )
+
+
+class BoatNode(DjangoObjectType):
+    class Meta:
+        model = Boat
 
 
 class Query:
