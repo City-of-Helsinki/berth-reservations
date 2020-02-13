@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             model_name="berthtype",
             name="length",
             field=models.DecimalField(
-                decimal_places=2, max_digits=5, verbose_name="length (m)"
+                decimal_places=2, max_digits=10, verbose_name="length (m)"
             ),
         ),
         migrations.RunSQL(
@@ -23,9 +23,16 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name="berthtype",
+            name="length",
+            field=models.DecimalField(
+                decimal_places=2, max_digits=5, verbose_name="length (m)"
+            ),
+        ),
+        migrations.AlterField(
+            model_name="berthtype",
             name="width",
             field=models.DecimalField(
-                decimal_places=2, max_digits=5, verbose_name="width (m)"
+                decimal_places=2, max_digits=10, verbose_name="width (m)"
             ),
         ),
         migrations.RunSQL(
@@ -33,10 +40,17 @@ class Migration(migrations.Migration):
             reverse_sql="UPDATE resources_berthtype SET width = width*100;",
         ),
         migrations.AlterField(
+            model_name="berthtype",
+            name="width",
+            field=models.DecimalField(
+                decimal_places=2, max_digits=5, verbose_name="width (m)"
+            ),
+        ),
+        migrations.AlterField(
             model_name="winterstorageplacetype",
             name="length",
             field=models.DecimalField(
-                decimal_places=2, max_digits=5, verbose_name="length (m)"
+                decimal_places=2, max_digits=10, verbose_name="length (m)"
             ),
         ),
         migrations.RunSQL(
@@ -45,13 +59,27 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name="winterstorageplacetype",
+            name="length",
+            field=models.DecimalField(
+                decimal_places=2, max_digits=5, verbose_name="length (m)"
+            ),
+        ),
+        migrations.AlterField(
+            model_name="winterstorageplacetype",
             name="width",
             field=models.DecimalField(
-                decimal_places=2, max_digits=5, verbose_name="width (m)"
+                decimal_places=2, max_digits=10, verbose_name="width (m)"
             ),
         ),
         migrations.RunSQL(
             sql="UPDATE resources_winterstorageplacetype SET width = width/100;",
             reverse_sql="UPDATE resources_winterstorageplacetype SET width = width*100;",
+        ),
+        migrations.AlterField(
+            model_name="winterstorageplacetype",
+            name="width",
+            field=models.DecimalField(
+                decimal_places=2, max_digits=5, verbose_name="width (m)"
+            ),
         ),
     ]
