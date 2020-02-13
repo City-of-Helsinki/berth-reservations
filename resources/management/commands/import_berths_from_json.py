@@ -94,6 +94,10 @@ PROPER_HARBOR_NAMES = {
 
 class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
+        raise DeprecationWarning(
+            "This command imports berth dimensions in centimeters / integers, "
+            "when the model uses now meters / decimals. Update it before using."
+        )
         super().__init__(*args, **kwargs)
         self.number_of_created_berths = 0
         self.number_of_modified_berths = 0

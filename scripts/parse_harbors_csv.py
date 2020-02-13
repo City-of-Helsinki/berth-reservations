@@ -105,6 +105,11 @@ PIERS_TO_HARBOR_NAME_MAP = {  # some lines have actually pier names in "SATAMA" 
 
 final_harbors_dict = {}
 
+raise DeprecationWarning(
+    "This command imports berth dimensions in centimeters / integers, "
+    "when the model uses now meters / decimals. Update it before using."
+)
+
 
 def m_to_cm(meters_string):
     return int(float(meters_string) * 100)
