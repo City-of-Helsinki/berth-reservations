@@ -75,13 +75,12 @@ class PierNode(graphql_geojson.GeoJSONType):
 
 
 class BerthTypeNode(DjangoObjectType):
-    width = graphene.Float(description=_("width (m)"))
-    length = graphene.Float(description=_("length (m)"))
-
     class Meta:
         model = BerthType
         interfaces = (relay.Node,)
 
+    width = graphene.Float(description=_("width (m)"), required=True)
+    length = graphene.Float(description=_("length (m)"), required=True)
     mooring_type = BerthMooringTypeEnum(required=True)
 
 
@@ -122,12 +121,12 @@ class HarborNode(graphql_geojson.GeoJSONType):
 
 
 class WinterStoragePlaceTypeNode(DjangoObjectType):
-    width = graphene.Float(description=_("width (m)"))
-    length = graphene.Float(description=_("length (m)"))
-
     class Meta:
         model = WinterStoragePlaceType
         interfaces = (relay.Node,)
+
+    width = graphene.Float(description=_("width (m)"), required=True)
+    length = graphene.Float(description=_("length (m)"), required=True)
 
 
 class WinterStoragePlaceNode(DjangoObjectType):
