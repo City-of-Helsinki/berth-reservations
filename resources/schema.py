@@ -1,3 +1,4 @@
+import django_filters
 import graphene
 import graphql_geojson
 from django.db import transaction
@@ -122,11 +123,25 @@ class BerthTypeNode(DjangoObjectType):
     mooring_type = BerthMooringTypeEnum(required=True)
 
 
+class BerthNodeFilterSet(django_filters.FilterSet):
+    min_width = django_filters.NumberFilter(
+        field_name="berth_type__width", lookup_expr="gte"
+    )
+    min_length = django_filters.NumberFilter(
+        field_name="berth_type__length", lookup_expr="gte"
+    )
+
+    class Meta:
+        model = Berth
+        fields = ["min_width", "min_length"]
+
+
 class BerthNode(DjangoObjectType):
     class Meta:
         model = Berth
         fields = ("id", "number", "pier", "berth_type", "comment")
         interfaces = (relay.Node,)
+        filterset_class = BerthNodeFilterSet
 
 
 class HarborNode(graphql_geojson.GeoJSONType):
@@ -633,7 +648,7 @@ class Query:
     berth_types = DjangoConnectionField(BerthTypeNode)
 
     berth = relay.Node.Field(BerthNode)
-    berths = DjangoConnectionField(BerthNode)
+    berths = DjangoFilterConnectionField(BerthNode)
 
     pier = relay.Node.Field(PierNode)
     piers = DjangoFilterConnectionField(
