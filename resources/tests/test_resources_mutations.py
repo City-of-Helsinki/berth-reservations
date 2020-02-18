@@ -259,6 +259,7 @@ mutation CreateBerthTypeMutation($input: CreateBerthTypeMutationInput!) {
       id
       width
       length
+      depth
       mooringType
     }
   }
@@ -267,7 +268,7 @@ mutation CreateBerthTypeMutation($input: CreateBerthTypeMutationInput!) {
 
 
 def test_create_berth_type(superuser):
-    variables = {"mooringType": "DINGHY_PLACE", "width": 666, "length": 333}
+    variables = {"mooringType": "DINGHY_PLACE", "width": 66.6, "length": 33.3}
 
     assert BerthType.objects.count() == 0
 
@@ -291,11 +292,12 @@ def test_create_berth_type(superuser):
         executed["data"]["createBerthType"]["berthType"]["length"]
         == variables["length"]
     )
+    assert executed["data"]["createBerthType"]["berthType"]["depth"] is None
 
 
 @pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
 def test_create_berth_type_not_enough_permissions(user):
-    variables = {"mooringType": "DINGHY_PLACE", "width": 666, "length": 333}
+    variables = {"mooringType": "DINGHY_PLACE", "width": 66.6, "length": 33.3}
 
     assert BerthType.objects.count() == 0
 
@@ -394,6 +396,7 @@ UPDATE_BERTH_TYPE_MUTATION = """
         id
         width
         length
+        depth
         mooringType
       }
     }
@@ -406,8 +409,9 @@ def test_update_berth_type(berth_type, superuser):
 
     variables = {
         "id": global_id,
-        "width": 999,
-        "length": 999,
+        "width": 99.9,
+        "length": 99.9,
+        "depth": 99.9,
         "mooringType": "QUAYSIDE_MOORING",
     }
 
@@ -428,6 +432,9 @@ def test_update_berth_type(berth_type, superuser):
     assert (
         executed["data"]["updateBerthType"]["berthType"]["length"]
         == variables["length"]
+    )
+    assert (
+        executed["data"]["updateBerthType"]["berthType"]["depth"] == variables["depth"]
     )
     assert (
         executed["data"]["updateBerthType"]["berthType"]["mooringType"]

@@ -120,6 +120,7 @@ class BerthTypeNode(DjangoObjectType):
 
     width = graphene.Float(description=_("width (m)"), required=True)
     length = graphene.Float(description=_("length (m)"), required=True)
+    depth = graphene.Float(description=_("depth (m)"))
     mooring_type = BerthMooringTypeEnum(required=True)
 
 
@@ -344,6 +345,7 @@ class CreateBerthTypeMutation(graphene.ClientIDMutation):
         mooring_type = BerthMooringTypeEnum(required=True)
         width = graphene.Float(required=True)
         length = graphene.Float(required=True)
+        depth = graphene.Float()
 
     berth_type = graphene.Field(BerthTypeNode)
 
@@ -369,6 +371,7 @@ class UpdateBerthTypeMutation(graphene.ClientIDMutation):
         mooring_type = BerthMooringTypeEnum()
         width = graphene.Float()
         length = graphene.Float()
+        depth = graphene.Float()
 
     berth_type = graphene.Field(BerthTypeNode)
 
