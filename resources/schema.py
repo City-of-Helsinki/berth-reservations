@@ -652,7 +652,15 @@ class Query:
 
     pier = relay.Node.Field(PierNode)
     piers = DjangoFilterConnectionField(
-        PierNode, min_berth_width=graphene.Float(), min_berth_length=graphene.Float(),
+        PierNode,
+        min_berth_width=graphene.Float(),
+        min_berth_length=graphene.Float(),
+        description="`Piers` allows to filter, among other fields, by `minBerthWidth` and `minBerthLength`.\n\n"
+        "This filter is recommended over the filter in `berths`, because it yields better results. "
+        "It will only return the `pier`s which contain `berth`s matching the filter, when the other will "
+        "return all the available `pier`s with an empty list of `berth`s in case there's no matches.\n\n"
+        "If you use both filters in the same query, you might get some empty `berth` results where both "
+        "queries overlap.",
     )
 
     harbor = relay.Node.Field(HarborNode)
