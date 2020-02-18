@@ -342,8 +342,8 @@ class DeleteBerthMutation(graphene.ClientIDMutation):
 class CreateBerthTypeMutation(graphene.ClientIDMutation):
     class Input:
         mooring_type = BerthMooringTypeEnum(required=True)
-        width = graphene.Int(required=True)
-        length = graphene.Int(required=True)
+        width = graphene.Float(required=True)
+        length = graphene.Float(required=True)
 
     berth_type = graphene.Field(BerthTypeNode)
 
@@ -367,8 +367,8 @@ class UpdateBerthTypeMutation(graphene.ClientIDMutation):
     class Input:
         id = graphene.ID(required=True)
         mooring_type = BerthMooringTypeEnum()
-        width = graphene.Int()
-        length = graphene.Int()
+        width = graphene.Float()
+        length = graphene.Float()
 
     berth_type = graphene.Field(BerthTypeNode)
 
