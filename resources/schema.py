@@ -1,7 +1,8 @@
+import django_filters
 import graphene
 import graphql_geojson
 from django.db import transaction
-from django.db.models import Prefetch
+from django.db.models import Count, Prefetch, Q
 from django.db.utils import IntegrityError
 from django.utils.translation import get_language, ugettext_lazy as _
 from graphene import relay
@@ -39,6 +40,44 @@ def update_object(obj, data):
     for k, v in data.items():
         setattr(obj, k, v)
     obj.save()
+
+
+def _resolve_piers(**kwargs):
+    min_width = kwargs.get("min_berth_width", 0)
+    min_length = kwargs.get("min_berth_length", 0)
+
+    # Filter out piers with no berths that fit the
+    # passed dimensions only if the dimensions were given.
+    # Otherwise, return the whole list of piers.
+    filter_empty_berths = any(
+        ["min_berth_width" in kwargs, "min_berth_length" in kwargs]
+    )
+
+    suitable_berth_types = BerthType.objects.filter(
+        width__gte=min_width, length__gte=min_length
+    )
+    berth_queryset = Berth.objects.select_related("berth_type").filter(
+        berth_type__in=suitable_berth_types
+    )
+
+    query = Pier.objects.prefetch_related(
+        Prefetch("berths", queryset=berth_queryset),
+        "suitable_boat_types",
+        "harbor__translations",
+        "harbor__availability_level__translations",
+        "harbor__municipality__translations",
+    ).select_related("harbor", "harbor__availability_level", "harbor__municipality")
+
+    if filter_empty_berths:
+        query = query.annotate(
+            berth_count=Count(
+                "berths",
+                filter=Q(berths__berth_type__width__gte=min_width)
+                & Q(berths__berth_type__length__gte=min_length),
+            )
+        ).filter(berth_count__gt=0)
+
+    return query
 
 
 class AvailabilityLevelType(DjangoObjectType):
@@ -84,11 +123,25 @@ class BerthTypeNode(DjangoObjectType):
     mooring_type = BerthMooringTypeEnum(required=True)
 
 
+class BerthNodeFilterSet(django_filters.FilterSet):
+    min_width = django_filters.NumberFilter(
+        field_name="berth_type__width", lookup_expr="gte"
+    )
+    min_length = django_filters.NumberFilter(
+        field_name="berth_type__length", lookup_expr="gte"
+    )
+
+    class Meta:
+        model = Berth
+        fields = ["min_width", "min_length"]
+
+
 class BerthNode(DjangoObjectType):
     class Meta:
         model = Berth
         fields = ("id", "number", "pier", "berth_type", "comment")
         interfaces = (relay.Node,)
+        filterset_class = BerthNodeFilterSet
 
 
 class HarborNode(graphql_geojson.GeoJSONType):
@@ -112,12 +165,18 @@ class HarborNode(graphql_geojson.GeoJSONType):
     street_address = graphene.String()
     municipality = graphene.String()
     image_file = graphene.String()
+    piers = DjangoFilterConnectionField(
+        PierNode, min_berth_width=graphene.Float(), min_berth_length=graphene.Float()
+    )
 
     def resolve_image_file(self, info, **kwargs):
         if self.image_file:
             return info.context.build_absolute_uri(self.image_file.url)
         else:
             return None
+
+    def resolve_piers(self, info, **kwargs):
+        return _resolve_piers(**kwargs).filter(harbor_id=self.id)
 
 
 class WinterStoragePlaceTypeNode(DjangoObjectType):
@@ -589,10 +648,20 @@ class Query:
     berth_types = DjangoConnectionField(BerthTypeNode)
 
     berth = relay.Node.Field(BerthNode)
-    berths = DjangoConnectionField(BerthNode)
+    berths = DjangoFilterConnectionField(BerthNode)
 
     pier = relay.Node.Field(PierNode)
-    piers = DjangoFilterConnectionField(PierNode)
+    piers = DjangoFilterConnectionField(
+        PierNode,
+        min_berth_width=graphene.Float(),
+        min_berth_length=graphene.Float(),
+        description="`Piers` allows to filter, among other fields, by `minBerthWidth` and `minBerthLength`.\n\n"
+        "This filter is recommended over the filter in `berths`, because it yields better results. "
+        "It will only return the `pier`s which contain `berth`s matching the filter, when the other will "
+        "return all the available `pier`s with an empty list of `berth`s in case there's no matches.\n\n"
+        "If you use both filters in the same query, you might get some empty `berth` results where both "
+        "queries overlap.",
+    )
 
     harbor = relay.Node.Field(HarborNode)
     harbor_by_servicemap_id = graphene.Field(
@@ -634,13 +703,7 @@ class Query:
         )
 
     def resolve_piers(self, info, **kwargs):
-        return Pier.objects.prefetch_related(
-            "berths",
-            "suitable_boat_types",
-            "harbor__translations",
-            "harbor__availability_level__translations",
-            "harbor__municipality__translations",
-        ).select_related("harbor", "harbor__availability_level", "harbor__municipality")
+        return _resolve_piers(**kwargs)
 
     def resolve_harbor_by_servicemap_id(self, info, **kwargs):
         return Harbor.objects.filter(servicemap_id=kwargs.get("servicemap_id")).first()
