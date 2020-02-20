@@ -23,7 +23,7 @@ class AbstractLease(TimeStampedModel, UUIDModel):
         LeaseStatus,
         verbose_name=_("lease status"),
         max_length=30,
-        default=LeaseStatus.OFFERED,
+        default=LeaseStatus.DRAFTED,
     )
 
     start_date = models.DateField(verbose_name=_("start date"))

@@ -67,7 +67,7 @@ def test_query_berth_leases(superuser, berth_lease, berth_application):
 
     assert executed["data"]["berthLeases"]["edges"][0]["node"] == {
         "id": berth_lease_id,
-        "status": "OFFERED",
+        "status": "DRAFTED",
         "startDate": str(berth_lease.start_date),
         "endDate": str(berth_lease.end_date),
         "comment": berth_lease.comment,
@@ -144,7 +144,7 @@ def test_query_berth_lease(superuser, berth_lease, berth_application):
 
     assert executed["data"]["berthLease"] == {
         "id": berth_lease_id,
-        "status": "OFFERED",
+        "status": "DRAFTED",
         "startDate": str(berth_lease.start_date),
         "endDate": str(berth_lease.end_date),
         "comment": berth_lease.comment,
