@@ -85,8 +85,12 @@ class WinterStorageSectionFactory(AbstractAreaSectionFactory):
 
 
 class AbstractPlaceTypeFactory(factory.django.DjangoModelFactory):
-    length = factory.Faker("pydecimal", min_value=0, max_value=999)
-    width = factory.Faker("pydecimal", min_value=0, max_value=999)
+    length = factory.Faker(
+        "pydecimal", min_value=0, max_value=999, right_digits=2, positive=True
+    )
+    width = factory.Faker(
+        "pydecimal", min_value=0, max_value=999, right_digits=2, positive=True
+    )
 
 
 class BerthTypeFactory(AbstractPlaceTypeFactory):

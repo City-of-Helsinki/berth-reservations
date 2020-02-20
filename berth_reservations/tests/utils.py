@@ -89,3 +89,8 @@ def assert_invalid_enum(field_name, expected_value, executed):
     assert expected_value in errors
     assert field_name in errors
     assert f'Expected type "{expected_value}"' in errors
+
+
+def assert_in_errors(message, executed):
+    errors = str(executed["errors"])
+    assert message in errors
