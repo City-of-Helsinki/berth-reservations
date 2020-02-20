@@ -21,6 +21,11 @@ class CustomerProfile(TimeStampedModel, UUIDModel):
     )
     comment = models.TextField(verbose_name=_("comment"), blank=True)
 
+    class Meta:
+        verbose_name = _("customer profile")
+        verbose_name_plural = _("customer profiles")
+        ordering = ("id",)
+
     def __str__(self):
         if self.user:
             return "{} {} ({})".format(
@@ -90,6 +95,11 @@ class Boat(TimeStampedModel, UUIDModel):
     boat_is_insured = models.BooleanField(
         verbose_name=_("boat is insured"), null=True, blank=True
     )
+
+    class Meta:
+        verbose_name = _("boat")
+        verbose_name_plural = _("boats")
+        ordering = ("owner",)
 
     def __str__(self):
         return "{} ({})".format(self.registration_number, self.pk)
