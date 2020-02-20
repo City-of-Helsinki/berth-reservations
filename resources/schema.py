@@ -13,6 +13,7 @@ from graphql_jwt.decorators import login_required, superuser_required
 from graphql_relay import from_global_id
 from munigeo.models import Municipality
 
+from applications.models import BerthApplication
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 
 from .enums import BerthMooringType
@@ -42,16 +43,36 @@ def update_object(obj, data):
     obj.save()
 
 
-def _resolve_piers(**kwargs):
+def _resolve_piers(info, **kwargs):
     min_width = kwargs.get("min_berth_width", 0)
     min_length = kwargs.get("min_berth_length", 0)
+    application_global_id = kwargs.get("for_application")
 
     # Filter out piers with no berths that fit the
     # passed dimensions only if the dimensions were given.
     # Otherwise, return the whole list of piers.
-    filter_empty_berths = any(
+    has_dimensions_filter = any(
         ["min_berth_width" in kwargs, "min_berth_length" in kwargs]
     )
+
+    if has_dimensions_filter and application_global_id:
+        raise VenepaikkaGraphQLError(
+            _(
+                "You cannot filter by dimension (width, length) and application a the same time."
+            )
+        )
+
+    if application_global_id:
+        user = info.context.user
+        if user.is_authenticated and user.is_superuser:
+            application_id = from_global_id(application_global_id)[1]
+            try:
+                application = BerthApplication.objects.get(pk=application_id)
+            except BerthApplication.DoesNotExist as e:
+                raise VenepaikkaGraphQLError(e)
+
+            min_width = application.boat_width
+            min_length = application.boat_length
 
     suitable_berth_types = BerthType.objects.filter(
         width__gte=min_width, length__gte=min_length
@@ -68,7 +89,7 @@ def _resolve_piers(**kwargs):
         "harbor__municipality__translations",
     ).select_related("harbor", "harbor__availability_level", "harbor__municipality")
 
-    if filter_empty_berths:
+    if has_dimensions_filter:
         query = query.annotate(
             berth_count=Count(
                 "berths",
@@ -167,7 +188,14 @@ class HarborNode(graphql_geojson.GeoJSONType):
     municipality = graphene.String()
     image_file = graphene.String()
     piers = DjangoFilterConnectionField(
-        PierNode, min_berth_width=graphene.Float(), min_berth_length=graphene.Float()
+        PierNode,
+        min_berth_width=graphene.Float(),
+        min_berth_length=graphene.Float(),
+        for_application=graphene.ID(),
+        description="To filter the piers suitable for an application, you can use the `forApplication` argument. "
+        "For this, you must have a user with permissions to access applications. "
+        "You cannot use the `Application` filter combined with the dimensions (width, length) one. "
+        "If you do, you will get a `VenepaikkaGraphQLError`.",
     )
 
     def resolve_image_file(self, info, **kwargs):
@@ -177,7 +205,7 @@ class HarborNode(graphql_geojson.GeoJSONType):
             return None
 
     def resolve_piers(self, info, **kwargs):
-        return _resolve_piers(**kwargs).filter(harbor_id=self.id)
+        return _resolve_piers(info, **kwargs).filter(harbor_id=self.id)
 
 
 class WinterStoragePlaceTypeNode(DjangoObjectType):
@@ -658,12 +686,17 @@ class Query:
         PierNode,
         min_berth_width=graphene.Float(),
         min_berth_length=graphene.Float(),
+        for_application=graphene.ID(),
         description="`Piers` allows to filter, among other fields, by `minBerthWidth` and `minBerthLength`.\n\n"
         "This filter is recommended over the filter in `berths`, because it yields better results. "
         "It will only return the `pier`s which contain `berth`s matching the filter, when the other will "
         "return all the available `pier`s with an empty list of `berth`s in case there's no matches.\n\n"
         "If you use both filters in the same query, you might get some empty `berth` results where both "
-        "queries overlap.",
+        "queries overlap.\n\n"
+        "To filter the piers suitable for an application, you can use the `forApplication` argument. "
+        "For this, you must have a user with permissions to access applications. "
+        "You cannot use the `Application` filter combined with the dimensions (width, length) one. "
+        "If you do, you will get a `VenepaikkaGraphQLError`.",
     )
 
     harbor = relay.Node.Field(HarborNode)
@@ -706,7 +739,7 @@ class Query:
         )
 
     def resolve_piers(self, info, **kwargs):
-        return _resolve_piers(**kwargs)
+        return _resolve_piers(info, **kwargs)
 
     def resolve_harbor_by_servicemap_id(self, info, **kwargs):
         return Harbor.objects.filter(servicemap_id=kwargs.get("servicemap_id")).first()
