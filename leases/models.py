@@ -50,7 +50,11 @@ class AbstractLease(TimeStampedModel, UUIDModel):
         CustomerProfile, verbose_name=_("customer"), on_delete=models.PROTECT
     )
     boat = models.ForeignKey(
-        Boat, verbose_name=_("customer's boat"), on_delete=models.PROTECT
+        Boat,
+        verbose_name=_("customer's boat"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
 
     status = EnumField(
@@ -69,7 +73,7 @@ class AbstractLease(TimeStampedModel, UUIDModel):
         abstract = True
 
     def clean(self):
-        if not self.boat.owner == self.customer:
+        if self.boat and not self.boat.owner == self.customer:
             raise ValidationError(
                 _("The boat should belong to the customer who is creating the lease")
             )
