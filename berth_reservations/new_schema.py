@@ -25,7 +25,10 @@ class Query(
 
 
 class Mutation(
-    applications.new_schema.Mutation, resources.schema.Mutation, graphene.ObjectType
+    applications.new_schema.Mutation,
+    leases.schema.Mutation,
+    resources.schema.Mutation,
+    graphene.ObjectType,
 ):
     pass
 
