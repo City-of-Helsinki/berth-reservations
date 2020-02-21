@@ -19,15 +19,15 @@ GRAPHQL_URL = "/graphql_v2/"
 
 
 CREATE_BERTH_MUTATION = """
-    mutation CreateBerth($input: CreateBerthMutationInput!) {
-      createBerth(input: $input) {
+mutation CreateBerth($input: CreateBerthMutationInput!) {
+    createBerth(input: $input) {
         berth {
-          id
-          number
-          comment
+            id
+            number
+            comment
         }
-      }
     }
+}
 """
 
 
@@ -96,11 +96,11 @@ def test_create_berth_no_number(pier, berth_type, superuser):
 
 
 DELETE_BERTH_MUTATION = """
-    mutation DeleteBerth($input: DeleteBerthMutationInput!) {
-      deleteBerth(input: $input) {
+mutation DeleteBerth($input: DeleteBerthMutationInput!) {
+    deleteBerth(input: $input) {
         __typename
-      }
     }
+}
 """
 
 
@@ -156,21 +156,21 @@ def test_delete_berth_inexistent_berth(superuser):
 
 
 UPDATE_BERTH_MUTATION = """
-    mutation UpdateBerth($input: UpdateBerthMutationInput!) {
-      updateBerth(input: $input) {
+mutation UpdateBerth($input: UpdateBerthMutationInput!) {
+    updateBerth(input: $input) {
         berth {
-          id
-          number
-          comment
-          pier {
             id
-          }
-          berthType {
-            id
-          }
+            number
+            comment
+            pier {
+                id
+            }
+            berthType {
+                id
+            }
         }
-      }
     }
+}
 """
 
 
@@ -254,15 +254,15 @@ def test_update_berth_not_enough_permissions(berth, pier, berth_type, user):
 
 CREATE_BERTH_TYPE_MUTATION = """
 mutation CreateBerthTypeMutation($input: CreateBerthTypeMutationInput!) {
-  createBerthType(input: $input) {
-    berthType {
-      id
-      width
-      length
-      depth
-      mooringType
+    createBerthType(input: $input) {
+        berthType {
+            id
+            width
+            length
+            depth
+            mooringType
+        }
     }
-  }
 }
 """
 
@@ -330,11 +330,11 @@ def test_create_berth_type_invalid_mooring(superuser):
 
 
 DELETE_BERTH_TYPE_MUTATION = """
-    mutation DeleteBerthType($input: DeleteBerthTypeMutationInput!) {
-      deleteBerthType(input: $input) {
+mutation DeleteBerthType($input: DeleteBerthTypeMutationInput!) {
+    deleteBerthType(input: $input) {
         __typename
-      }
     }
+}
 """
 
 
@@ -390,17 +390,17 @@ def test_delete_berth_type_inexistent_berth(superuser):
 
 
 UPDATE_BERTH_TYPE_MUTATION = """
-  mutation UpdateBerthTypeMutation($input: UpdateBerthTypeMutationInput!){
+mutation UpdateBerthTypeMutation($input: UpdateBerthTypeMutationInput!){
     updateBerthType(input: $input) {
-      berthType {
-        id
-        width
-        length
-        depth
-        mooringType
-      }
+        berthType {
+            id
+            width
+            length
+            depth
+            mooringType
+        }
     }
-  }
+}
 """
 
 
@@ -481,31 +481,31 @@ def test_update_berth_type_not_enough_permissions(user, berth_type):
 
 CREATE_HARBOR_MUTATION = """
 mutation CreateHarbor($input: CreateHarborMutationInput!) {
-  createHarbor(input: $input) {
-    harbor {
-      id
-      type
-      geometry {
-        type
-        coordinates
-      }
-      bbox
-      properties {
-        name
-        servicemapId
-        streetAddress
-        zipCode
-        availabilityLevel {
-          id
+    createHarbor(input: $input) {
+        harbor {
+            id
+            type
+            geometry {
+                type
+                coordinates
+            }
+            bbox
+            properties {
+                name
+                servicemapId
+                streetAddress
+                zipCode
+                availabilityLevel {
+                    id
+                }
+                municipality
+                numberOfPlaces
+                maximumWidth
+                maximumLength
+                maximumDepth
+            }
         }
-        municipality
-        numberOfPlaces
-        maximumWidth
-        maximumLength
-        maximumDepth
-      }
     }
-  }
 }
 """
 
@@ -628,11 +628,11 @@ def test_create_harbor_duplicated_servicemap_id(superuser, harbor):
 
 
 DELETE_HARBOR_MUTATION = """
-    mutation DeleteHarbor($input: DeleteHarborMutationInput!) {
-      deleteHarbor(input: $input) {
+mutation DeleteHarbor($input: DeleteHarborMutationInput!) {
+    deleteHarbor(input: $input) {
         __typename
-      }
     }
+}
 """
 
 
@@ -689,31 +689,31 @@ def test_delete_harbor_inexistent_harbor(superuser):
 
 UPDATE_HARBOR_MUTATION = """
 mutation UpdateHarbor($input: UpdateHarborMutationInput!) {
-  updateHarbor(input: $input) {
-    harbor {
-      id
-      type
-      geometry {
-        type
-        coordinates
-      }
-      bbox
-      properties {
-        name
-        servicemapId
-        streetAddress
-        zipCode
-        availabilityLevel {
-          id
+    updateHarbor(input: $input) {
+        harbor {
+            id
+            type
+            geometry {
+                type
+                coordinates
+            }
+            bbox
+            properties {
+                name
+                servicemapId
+                streetAddress
+                zipCode
+                availabilityLevel {
+                    id
+                }
+                municipality
+                numberOfPlaces
+                maximumWidth
+                maximumLength
+                maximumDepth
+            }
         }
-        municipality
-        numberOfPlaces
-        maximumWidth
-        maximumLength
-        maximumDepth
-      }
     }
-  }
 }
 """
 
@@ -847,26 +847,26 @@ def test_update_harbor_municipality_doesnt_exist(harbor, superuser):
 
 CREATE_PIER_MUTATION = """
 mutation CreatePier($input: CreatePierMutationInput!) {
-  createPier(input: $input) {
-    pier {
-      id
-      properties {
-        harbor {
-          id
+    createPier(input: $input) {
+        pier {
+            id
+            properties {
+                harbor {
+                    id
+                }
+                identifier
+                electricity
+                gate
+                lighting
+                mooring
+                water
+                wasteCollection
+                suitableBoatTypes {
+                    id
+                }
+            }
         }
-        identifier
-        electricity
-        gate
-        lighting
-        mooring
-        water
-        wasteCollection
-        suitableBoatTypes {
-          id
-        }
-      }
     }
-  }
 }
 """
 
@@ -962,9 +962,9 @@ def test_create_pier_no_harbor(superuser):
 
 DELETE_PIER_MUTATION = """
 mutation DeletePier($input: DeletePierMutationInput!) {
-  deletePier(input: $input) {
-    __typename
-  }
+    deletePier(input: $input) {
+        __typename
+    }
 }
 """
 
@@ -1016,31 +1016,31 @@ def test_delete_pier_inexistent_pier(superuser):
 
 UPDATE_PIER_MUTATION = """
 mutation UpdatePier($input: UpdatePierMutationInput!) {
-  updatePier(input: $input) {
-    pier {
-      id
-      geometry {
-        type
-        coordinates
-      }
-      bbox
-      properties {
-        harbor {
-          id
+    updatePier(input: $input) {
+        pier {
+            id
+            geometry {
+                type
+                coordinates
+            }
+            bbox
+            properties {
+                harbor {
+                    id
+                }
+                identifier
+                electricity
+                gate
+                lighting
+                mooring
+                water
+                wasteCollection
+                suitableBoatTypes {
+                    id
+                }
+            }
         }
-        identifier
-        electricity
-        gate
-        lighting
-        mooring
-        water
-        wasteCollection
-        suitableBoatTypes {
-          id
-        }
-      }
     }
-  }
 }
 """
 
