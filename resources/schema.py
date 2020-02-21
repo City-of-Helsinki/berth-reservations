@@ -73,6 +73,10 @@ def _resolve_piers(info, **kwargs):
 
             min_width = application.boat_width
             min_length = application.boat_length
+        else:
+            raise VenepaikkaGraphQLError(
+                _("You do not have permission to perform this action")
+            )
 
     suitable_berth_types = BerthType.objects.filter(
         width__gte=min_width, length__gte=min_length
@@ -193,9 +197,10 @@ class HarborNode(graphql_geojson.GeoJSONType):
         min_berth_length=graphene.Float(),
         for_application=graphene.ID(),
         description="To filter the piers suitable for an application, you can use the `forApplication` argument. "
-        "For this, you must have a user with permissions to access applications. "
-        "You cannot use the `Application` filter combined with the dimensions (width, length) one. "
-        "If you do, you will get a `VenepaikkaGraphQLError`.",
+        "\n\n**Requires permissions** to access applications."
+        "\n\nErrors:"
+        "\n* Filter `forApplication` with a user without enough permissions"
+        "\n * Filter `forApplication` combined with either dimension (width, length) filter",
     )
 
     def resolve_image_file(self, info, **kwargs):
@@ -694,9 +699,10 @@ class Query:
         "If you use both filters in the same query, you might get some empty `berth` results where both "
         "queries overlap.\n\n"
         "To filter the piers suitable for an application, you can use the `forApplication` argument. "
-        "For this, you must have a user with permissions to access applications. "
-        "You cannot use the `Application` filter combined with the dimensions (width, length) one. "
-        "If you do, you will get a `VenepaikkaGraphQLError`.",
+        "**Requires permissions** to access applications."
+        "\n\nErrors:"
+        "\n* Filter `forApplication` with a user without enough permissions"
+        "\n * Filter `forApplication` combined with either dimension (width, length) filter",
     )
 
     harbor = relay.Node.Field(HarborNode)
