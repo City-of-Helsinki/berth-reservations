@@ -12,39 +12,39 @@ GRAPHQL_URL = "/graphql_v2/"
 
 QUERY_BERTH_LEASES = """
 query GetBerthLeases {
-  berthLeases {
-    edges {
-      node {
-        id
-        status
-        startDate
-        endDate
-        comment
-        boat {
-          id
+    berthLeases {
+        edges {
+            node {
+                id
+                status
+                startDate
+                endDate
+                comment
+                boat {
+                    id
+                }
+                customer {
+                    id
+                    boats {
+                        id
+                    }
+                }
+                application {
+                    id
+                    customer {
+                        id
+                    }
+                }
+                berth {
+                    id
+                    number
+                    berthType {
+                        id
+                    }
+                }
+            }
         }
-        customer {
-          id
-          boats {
-            id
-          }
-        }
-        application {
-          id
-          customer {
-            id
-          }
-        }
-        berth {
-          id
-          number
-          berthType {
-            id
-          }
-        }
-      }
     }
-  }
 }
 """
 
@@ -93,35 +93,35 @@ def test_query_berth_leases_not_enough_permissions(user):
 
 QUERY_BERTH_LEASE = """
 query GetBerthLease {
-  berthLease(id: "%s") {
-    id
-    status
-    startDate
-    endDate
-    comment
-    boat {
-      id
-    }
-    customer {
-      id
-      boats {
+    berthLease(id: "%s") {
         id
-      }
+        status
+        startDate
+        endDate
+        comment
+        boat {
+            id
+        }
+        customer {
+            id
+            boats {
+                id
+            }
+        }
+        application {
+            id
+            customer {
+                id
+            }
+        }
+        berth {
+            id
+            number
+            berthType {
+                id
+            }
+        }
     }
-    application {
-      id
-      customer {
-        id
-      }
-    }
-    berth {
-      id
-      number
-      berthType {
-        id
-      }
-    }
-  }
 }
 """
 
