@@ -21,6 +21,11 @@ class CustomerProfile(TimeStampedModel, UUIDModel):
     )
     comment = models.TextField(verbose_name=_("comment"), blank=True)
 
+    class Meta:
+        verbose_name = _("customer profile")
+        verbose_name_plural = _("customer profiles")
+        ordering = ("id",)
+
     def __str__(self):
         if self.user:
             return "{} {} ({})".format(
@@ -28,6 +33,30 @@ class CustomerProfile(TimeStampedModel, UUIDModel):
             )
         else:
             return self.id
+
+
+class Company(TimeStampedModel, UUIDModel):
+    customer = models.OneToOneField(
+        CustomerProfile,
+        verbose_name=_("customer"),
+        related_name="company",
+        on_delete=models.CASCADE,
+    )
+    business_id = models.CharField(verbose_name=_("business id"), max_length=32)
+    name = models.CharField(verbose_name=_("name"), max_length=128, blank=True)
+    address = models.CharField(verbose_name=_("address"), max_length=128, blank=True)
+    postal_code = models.CharField(
+        verbose_name=_("postal code"), max_length=5, blank=True
+    )
+    city = models.CharField(verbose_name=_("city"), max_length=64, blank=True)
+
+    class Meta:
+        verbose_name = _("company")
+        verbose_name_plural = _("companies")
+        ordering = ("id",)
+
+    def __str__(self):
+        return self.business_id
 
 
 class Boat(TimeStampedModel, UUIDModel):
@@ -90,6 +119,11 @@ class Boat(TimeStampedModel, UUIDModel):
     boat_is_insured = models.BooleanField(
         verbose_name=_("boat is insured"), null=True, blank=True
     )
+
+    class Meta:
+        verbose_name = _("boat")
+        verbose_name_plural = _("boats")
+        ordering = ("owner",)
 
     def __str__(self):
         return "{} ({})".format(self.registration_number, self.pk)
