@@ -93,6 +93,34 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
         return CreateBerthLeaseMutation(berth_lease=lease)
 
 
+class DeleteBerthLeaseMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+
+    @classmethod
+    @login_required
+    @superuser_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        # TODO: Should check if the user has permissions to
+        # delete the specific resource
+        id = from_global_id(input.get("id"))[1]
+
+        try:
+            lease = BerthLease.objects.get(pk=id)
+        except BerthLease.DoesNotExist as e:
+            raise VenepaikkaGraphQLError(e)
+
+        if lease.status != LeaseStatus.DRAFTED:
+            raise VenepaikkaGraphQLError(
+                _(f"Lease object is not DRAFTED anymore: {lease.status}")
+            )
+
+        lease.delete()
+
+        return DeleteBerthLeaseMutation()
+
+
 class Query:
     berth_lease = graphene.relay.Node.Field(BerthLeaseNode)
     berth_leases = DjangoConnectionField(BerthLeaseNode)
@@ -122,4 +150,14 @@ class Mutation:
         "\n\nErrors:"
         "\n* An application without a customer associated is passed"
         "\n* A boat is passed and the owner of the boat differs from the owner of the application"
+    )
+
+    delete_berth_lease = DeleteBerthLeaseMutation.Field(
+        description="Deletes a `BerthLease` object."
+        "\n\nIt **only** works for leases that haven't been assigned, i.e., leases that have "
+        '\n`berth_lease.status == "DRAFTED"`.'
+        "\n\n**Requires permissions** to access leases."
+        "\n\nErrors:"
+        "\n* A berth lease that is not `DRAFTED` anymore is passed"
+        "\n* The passed lease ID doesn't exist"
     )

@@ -12,6 +12,7 @@ from berth_reservations.tests.utils import (
     assert_not_enough_permissions,
     GraphQLTestClient,
 )
+from leases.enums import LeaseStatus
 from leases.models import BerthLease
 
 client = GraphQLTestClient()
@@ -225,3 +226,82 @@ def test_create_berth_lease_application_without_customer(
     assert_in_errors(
         "Application must be connected to an existing customer first", executed
     )
+
+
+DELETE_BERTH_LEASE_MUTATION = """
+mutation DELETE_DRAFTED_LEASE($input: DeleteBerthLeaseMutationInput!) {
+    deleteBerthLease(input: $input) {
+        __typename
+    }
+}
+"""
+
+
+def test_delete_berth_lease_drafted(berth_lease, superuser):
+    variables = {"id": to_global_id("BerthLeaseNode", berth_lease.id)}
+
+    assert BerthLease.objects.count() == 1
+
+    client.execute(
+        query=DELETE_BERTH_LEASE_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        user=superuser,
+    )
+
+    assert BerthLease.objects.count() == 0
+
+
+def test_delete_berth_lease_not_drafted(berth_lease, superuser):
+    berth_lease.status = LeaseStatus.OFFERED
+    berth_lease.save()
+
+    variables = {"id": to_global_id("BerthLeaseNode", berth_lease.id)}
+
+    assert BerthLease.objects.count() == 1
+
+    executed = client.execute(
+        query=DELETE_BERTH_LEASE_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        user=superuser,
+    )
+
+    assert BerthLease.objects.count() == 1
+    assert_in_errors(
+        f"Lease object is not DRAFTED anymore: {LeaseStatus.OFFERED}", executed
+    )
+
+
+@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
+def test_delete_berth_lease_not_enough_permissions(user, berth_lease):
+    variables = {
+        "id": to_global_id("BerthLeaseNode", berth_lease.id),
+    }
+
+    assert BerthLease.objects.count() == 1
+
+    executed = client.execute(
+        query=DELETE_BERTH_LEASE_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        user=user,
+    )
+
+    assert BerthLease.objects.count() == 1
+    assert_not_enough_permissions(executed)
+
+
+def test_delete_berth_lease_inexistent_lease(superuser):
+    variables = {
+        "id": to_global_id("BerthLeaseNode", uuid.uuid4()),
+    }
+
+    executed = client.execute(
+        query=DELETE_BERTH_LEASE_MUTATION,
+        variables=variables,
+        graphql_url=GRAPHQL_URL,
+        user=superuser,
+    )
+
+    assert_doesnt_exist("BerthLease", executed)
