@@ -50,6 +50,9 @@ class BerthApplicationFilter(django_filters.FilterSet):
     switch_applications = django_filters.BooleanFilter(
         field_name="berth_switch", method="filter_berth_switch"
     )
+    no_customer = django_filters.BooleanFilter(
+        field_name="customer", lookup_expr="isnull"
+    )
 
     def filter_berth_switch(self, queryset, name, value):
         lookup = "__".join([name, "isnull"])
