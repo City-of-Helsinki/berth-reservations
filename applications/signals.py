@@ -11,7 +11,7 @@ application_saved = Signal(providing_args=["application"])
 
 def application_notification_handler(sender, application, **kwargs):
     notification_type = NotificationType.BERTH_APPLICATION_CREATED.value
-    if sender == "CreateWinterStorageReservation":
+    if sender == "CreateWinterStorageApplication":
         notification_type = NotificationType.WINTER_STORAGE_APPLICATION_CREATED.value
     try:
         send_notification(
