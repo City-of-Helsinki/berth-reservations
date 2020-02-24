@@ -13,6 +13,15 @@ from .models import Boat, CustomerProfile
 
 InvoicingTypeEnum = graphene.Enum.from_enum(InvoicingType)
 
+PROFILE_NODE_FIELDS = (
+    "id",
+    "invoicing_type",
+    "comment",
+    "boats",
+    "berth_applications",
+    "berth_leases",
+)
+
 
 @extend(fields="id")
 class ProfileNode(DjangoObjectType):
@@ -22,11 +31,7 @@ class ProfileNode(DjangoObjectType):
 
     class Meta:
         model = CustomerProfile
-        fields = (
-            "id",
-            "invoicing_type",
-            "comment",
-        )
+        fields = PROFILE_NODE_FIELDS
         interfaces = (relay.Node,)
 
     # explicitly mark shadowed ID field as external
@@ -62,6 +67,7 @@ class BerthProfileNode(DjangoObjectType):
     class Meta:
         model = CustomerProfile
         filter_fields = ("invoicing_type",)
+        fields = PROFILE_NODE_FIELDS
         interfaces = (relay.Node,)
 
     invoicing_type = InvoicingTypeEnum()
