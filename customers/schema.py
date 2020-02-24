@@ -50,6 +50,9 @@ class ProfileNode(DjangoObjectType):
     def __resolve_reference(self, info, **kwargs):
         user = info.context.user
         profile = relay.Node.get_node_from_global_id(info, self.id)
+        if not profile:
+            return None
+
         # TODO: implement proper permissions
         if user.is_superuser or user == profile.user:
             return profile
