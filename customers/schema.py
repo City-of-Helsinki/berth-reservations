@@ -9,7 +9,7 @@ from graphql_jwt.decorators import login_required
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 
 from .enums import InvoicingType
-from .models import Boat, CustomerProfile
+from .models import Boat, Company, CustomerProfile
 
 InvoicingTypeEnum = graphene.Enum.from_enum(InvoicingType)
 
@@ -17,6 +17,7 @@ PROFILE_NODE_FIELDS = (
     "id",
     "invoicing_type",
     "comment",
+    "company",
     "boats",
     "berth_applications",
     "berth_leases",
@@ -96,6 +97,12 @@ class BerthProfileNode(DjangoObjectType):
 class BoatNode(DjangoObjectType):
     class Meta:
         model = Boat
+
+
+class CompanyType(DjangoObjectType):
+    class Meta:
+        model = Company
+        fields = ("business_id", "name", "address", "postal_code", "city")
 
 
 class Query:
