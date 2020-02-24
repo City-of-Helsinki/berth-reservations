@@ -3,6 +3,9 @@
 ## Issues :bug:
 
 ## Testing :alembic:
+**Automated tests ⚙️**
+
+**Manual testing 👷** 
 
 ## Screenshots :camera_flash:
 
