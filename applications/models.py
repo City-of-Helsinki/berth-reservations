@@ -62,8 +62,6 @@ class BerthSwitch(models.Model):
 class BaseApplication(models.Model):
     created_at = models.DateTimeField(verbose_name=_("created at"), auto_now_add=True)
 
-    is_processed = models.BooleanField(verbose_name=_("is processed"), default=False)
-
     status = EnumField(
         ApplicationStatus,
         verbose_name=_("handling status"),
@@ -153,6 +151,7 @@ class BerthApplication(BaseApplication):
     customer = models.ForeignKey(
         CustomerProfile,
         null=True,
+        blank=True,
         on_delete=models.SET_NULL,
         related_name="berth_applications",
     )
