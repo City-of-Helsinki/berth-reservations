@@ -38,6 +38,13 @@ class WinterStorageLeaseChangeInline(admin.StackedInline):
         return False
 
 
+class BerthLeaseInline(admin.StackedInline):
+    model = BerthLease
+    fk_name = "customer"
+    raw_id_fields = ("berth", "application")
+    extra = 0
+
+
 class BerthLeaseAdmin(admin.ModelAdmin):
     inlines = (BerthLeaseChangeInline,)
     raw_id_fields = ("berth", "application")

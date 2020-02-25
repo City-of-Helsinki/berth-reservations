@@ -52,6 +52,11 @@ class HarborChoiceInline(admin.TabularInline):
     max_num = 10
 
 
+class BerthApplicationInline(admin.StackedInline):
+    model = BerthApplication
+    extra = 0
+
+
 class BerthApplicationAdmin(admin.ModelAdmin):
     inlines = [HarborChoiceInline]
     readonly_fields = [
