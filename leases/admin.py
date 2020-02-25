@@ -40,10 +40,12 @@ class WinterStorageLeaseChangeInline(admin.StackedInline):
 
 class BerthLeaseAdmin(admin.ModelAdmin):
     inlines = (BerthLeaseChangeInline,)
+    raw_id_fields = ("berth", "application")
 
 
 class WinterStorageLeaseAdmin(admin.ModelAdmin):
     inlines = (WinterStorageLeaseChangeInline,)
+    raw_id_fields = ("place", "application")
 
 
 admin.site.register(BerthLease, BerthLeaseAdmin)
