@@ -153,6 +153,7 @@ class BerthApplication(BaseApplication):
     customer = models.ForeignKey(
         CustomerProfile,
         null=True,
+        blank=True,
         on_delete=models.SET_NULL,
         related_name="berth_applications",
     )
