@@ -63,7 +63,10 @@ class BerthApplicationAdmin(admin.ModelAdmin):
         "get_berth_switch_reason",
     ]
     fieldsets = [
-        (None, {"fields": ["application_type", "created_at", "is_processed"]}),
+        (
+            None,
+            {"fields": ["application_type", "created_at", "is_processed", "customer"]},
+        ),
         (
             _("Contact information"),
             {
