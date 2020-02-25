@@ -6,19 +6,19 @@ from berth_reservations.tests.utils import GraphQLTestClient
 from harbors.schema import HarborType, WinterStorageAreaType
 
 
-def test_create_berth_reservation(boat_type, harbor, berth_switch_reason):
+def test_create_berth_application(boat_type, harbor, berth_switch_reason):
     client = GraphQLTestClient()
     t = Template(
         """
-        mutation createBerthReservation {
-            createBerthReservation(
+        mutation createBerthApplication {
+            createBerthApplication(
                 berthSwitch: {
                     harborId: \"${current_harbor}\",
                     pier: "dinkkypier",
                     berthNumber: "D33",
                     reason: ${berth_switch_reason_id}
                 },
-                berthReservation: {
+                berthApplication: {
                     language: "en",
                     firstName: "John",
                     lastName: "Doe",
@@ -43,7 +43,7 @@ def test_create_berth_reservation(boat_type, harbor, berth_switch_reason):
                     ]
                 }
             ) {
-                berthReservation {
+                berthApplication {
                     berthSwitch {
                         berthNumber,
                         reason {
@@ -74,8 +74,8 @@ def test_create_berth_reservation(boat_type, harbor, berth_switch_reason):
     executed = client.execute(mutation)
     assert executed == {
         "data": {
-            "createBerthReservation": {
-                "berthReservation": {
+            "createBerthApplication": {
+                "berthApplication": {
                     "berthSwitch": {
                         "berthNumber": "D33",
                         "reason": {"id": str(berth_switch_reason.id)},
@@ -89,18 +89,18 @@ def test_create_berth_reservation(boat_type, harbor, berth_switch_reason):
     }
 
 
-def test_create_berth_reservation_wo_reason(boat_type, harbor):
+def test_create_berth_application_wo_reason(boat_type, harbor):
     client = GraphQLTestClient()
     t = Template(
         """
-        mutation createBerthReservation {
-            createBerthReservation(
+        mutation createBerthApplication {
+            createBerthApplication(
                 berthSwitch: {
                     harborId: \"${current_harbor}\",
                     pier: "dinkkypier",
                     berthNumber: "D33",
                 },
-                berthReservation: {
+                berthApplication: {
                     language: "en",
                     firstName: "John",
                     lastName: "Doe",
@@ -125,7 +125,7 @@ def test_create_berth_reservation_wo_reason(boat_type, harbor):
                     ]
                 }
             ) {
-                berthReservation {
+                berthApplication {
                     berthSwitch {
                         berthNumber,
                         reason {
@@ -155,8 +155,8 @@ def test_create_berth_reservation_wo_reason(boat_type, harbor):
     executed = client.execute(mutation)
     assert executed == {
         "data": {
-            "createBerthReservation": {
-                "berthReservation": {
+            "createBerthApplication": {
+                "berthApplication": {
                     "berthSwitch": {"berthNumber": "D33", "reason": None},
                     "chosenHarbors": {
                         "edges": [{"node": {"properties": {"zipCode": "00100"}}}]
@@ -167,13 +167,13 @@ def test_create_berth_reservation_wo_reason(boat_type, harbor):
     }
 
 
-def test_create_winter_storage_reservation(boat_type, winter_area):
+def test_create_winter_storage_application(boat_type, winter_area):
     client = GraphQLTestClient()
     t = Template(
         """
-        mutation createWinterStorageReservation {
-            createWinterStorageReservation(
-                winterStorageReservation: {
+        mutation createWinterStorageApplication {
+            createWinterStorageApplication(
+                winterStorageApplication: {
                     language: "en",
                     firstName: "John",
                     lastName: "Doe",
@@ -199,7 +199,7 @@ def test_create_winter_storage_reservation(boat_type, winter_area):
                     ]
                 }
             ) {
-                winterStorageReservation {
+                winterStorageApplication {
                     chosenAreas {
                         edges {
                             node {
@@ -219,8 +219,8 @@ def test_create_winter_storage_reservation(boat_type, winter_area):
     executed = client.execute(mutation)
     assert executed == {
         "data": {
-            "createWinterStorageReservation": {
-                "winterStorageReservation": {
+            "createWinterStorageApplication": {
+                "winterStorageApplication": {
                     "chosenAreas": {
                         "edges": [{"node": {"properties": {"zipCode": "00200"}}}]
                     }
