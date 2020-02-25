@@ -62,7 +62,7 @@ class BerthApplicationFilter(django_filters.FilterSet):
 class BerthApplicationNode(DjangoObjectType):
     boat_type = graphene.String()
     harbor_choices = graphene.List(HarborChoiceType)
-    status = ApplicationStatusEnum()
+    status = ApplicationStatusEnum(required=True)
 
     class Meta:
         model = BerthApplication
