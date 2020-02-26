@@ -5,9 +5,10 @@ from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumField
 from parler.models import TranslatableModel, TranslatedFields
 
+from customers.models import CustomerProfile
 from harbors.models import BoatType, Harbor, WinterStorageArea
 
-from .enums import WinterStorageMethod
+from .enums import ApplicationStatus, WinterStorageMethod
 from .utils import localize_datetime
 
 
@@ -61,7 +62,12 @@ class BerthSwitch(models.Model):
 class BaseApplication(models.Model):
     created_at = models.DateTimeField(verbose_name=_("created at"), auto_now_add=True)
 
-    is_processed = models.BooleanField(verbose_name=_("is processed"), default=False)
+    status = EnumField(
+        ApplicationStatus,
+        verbose_name=_("handling status"),
+        max_length=32,
+        default=ApplicationStatus.PENDING,
+    )
 
     language = models.CharField(
         verbose_name=_("language"),
@@ -142,6 +148,14 @@ class BaseApplication(models.Model):
 
 
 class BerthApplication(BaseApplication):
+    customer = models.ForeignKey(
+        CustomerProfile,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="berth_applications",
+    )
+
     chosen_harbors = models.ManyToManyField(
         Harbor, through=HarborChoice, verbose_name=_("chosen harbors"), blank=True
     )

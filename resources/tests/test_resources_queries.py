@@ -1,6 +1,13 @@
 import json
 
-from berth_reservations.tests.utils import GraphQLTestClient
+import pytest
+from graphql_relay import to_global_id
+
+from berth_reservations.tests.utils import (
+    assert_in_errors,
+    assert_not_enough_permissions,
+    GraphQLTestClient,
+)
 
 client = GraphQLTestClient()
 
@@ -199,3 +206,125 @@ def test_get_winter_storage_places(winter_storage_place):
             "edges": [{"node": {"number": winter_storage_place.number}}]
         }
     }
+
+
+def test_get_piers_filter_by_application(superuser, berth_application, berth):
+    query = """
+        {
+            piers(forApplication: "%s") {
+                edges {
+                    node {
+                        id
+                        properties {
+                            berths {
+                                edges {
+                                    node {
+                                        berthType {
+                                            width
+                                            length
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    """ % to_global_id(
+        "BerthApplicationNode", berth_application.id
+    )
+
+    executed = client.execute(query=query, graphql_url="/graphql_v2/", user=superuser)
+
+    expected_berths = []
+    if (
+        berth.berth_type.length >= berth_application.boat_length
+        and berth.berth_type.width >= berth_application.boat_width
+    ):
+        expected_berths = [
+            {
+                "node": {
+                    "berthType": {
+                        "width": float(berth.berth_type.width),
+                        "length": float(berth.berth_type.length),
+                    }
+                }
+            }
+        ]
+
+    assert executed["data"] == {
+        "piers": {
+            "edges": [
+                {
+                    "node": {
+                        "id": to_global_id("PierNode", berth.pier.id),
+                        "properties": {"berths": {"edges": expected_berths}},
+                    }
+                }
+            ]
+        }
+    }
+
+
+def test_get_piers_filter_error_both_filters(superuser, berth_application, berth):
+    query = """
+        {
+            piers(forApplication: "%s", minBerthWidth: 1.0, minBerthLength: 1.0) {
+                edges {
+                    node {
+                        id
+                        properties {
+                            berths {
+                                edges {
+                                    node {
+                                        id
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    """ % to_global_id(
+        "BerthApplicationNode", berth_application.id
+    )
+
+    executed = client.execute(query=query, graphql_url="/graphql_v2/", user=superuser)
+    assert_in_errors(
+        "You cannot filter by dimension (width, length) and application a the same time",
+        executed,
+    )
+
+
+@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
+def test_get_piers_filter_by_application_not_enough_permissions(
+    user, berth_application
+):
+    query = """
+        {
+            piers(forApplication: "%s") {
+                edges {
+                    node {
+                        id
+                        properties {
+                            berths {
+                                edges {
+                                    node {
+                                        id
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    """ % to_global_id(
+        "BerthApplicationNode", berth_application.id
+    )
+
+    executed = client.execute(query=query, graphql_url="/graphql_v2/", user=user)
+
+    assert_not_enough_permissions(executed)

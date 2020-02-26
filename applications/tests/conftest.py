@@ -6,6 +6,7 @@ from harbors.tests.conftest import *  # noqa
 from users.tests.conftest import *  # noqa
 
 from ..models import BerthSwitch, BerthSwitchReason
+from .factories import BerthApplicationFactory
 
 
 @pytest.fixture
@@ -35,3 +36,9 @@ def berth_switch_reason():
         title="Good reason"
     )
     return berth_switch_reason
+
+
+@pytest.fixture
+def berth_application():
+    berth_application = BerthApplicationFactory()
+    return berth_application

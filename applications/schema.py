@@ -25,9 +25,13 @@ class HarborChoiceType(DjangoObjectType):
         model = HarborChoice
 
 
-class BerthReservationType(DjangoObjectType):
+class BerthApplicationType(DjangoObjectType):
     class Meta:
         model = BerthApplication
+        exclude = (
+            "customer",
+            "lease",
+        )
 
 
 class BerthSwitchType(DjangoObjectType):
@@ -44,7 +48,7 @@ class BerthSwitchReasonType(DjangoObjectType):
     title = graphene.String()
 
 
-class WinterStorageReservationType(DjangoObjectType):
+class WinterStorageApplicationType(DjangoObjectType):
     class Meta:
         model = WinterStorageApplication
 
@@ -66,7 +70,7 @@ class BerthSwitchInput(graphene.InputObjectType):
     reason = graphene.ID()
 
 
-class BaseReservationInput(graphene.InputObjectType):
+class BaseApplicationInput(graphene.InputObjectType):
     language = graphene.String(required=True)
     first_name = graphene.String(required=True)
     last_name = graphene.String(required=True)
@@ -91,7 +95,7 @@ class BaseReservationInput(graphene.InputObjectType):
     information_accuracy_confirmed = graphene.Boolean(required=True)
 
 
-class BerthReservationInput(BaseReservationInput):
+class BerthApplicationInput(BaseApplicationInput):
     boat_draught = graphene.Float()
     boat_weight = graphene.Float()
     accessibility_required = graphene.Boolean()
@@ -107,7 +111,7 @@ class BerthReservationInput(BaseReservationInput):
     choices = graphene.List(graphene.NonNull(HarborChoiceInput), required=True)
 
 
-class WinterStorageReservationInput(BaseReservationInput):
+class WinterStorageApplicationInput(BaseApplicationInput):
     storage_method = WinterStorageMethodEnum(required=True)
     trailer_registration_number = graphene.String()
     chosen_areas = graphene.List(
@@ -115,20 +119,20 @@ class WinterStorageReservationInput(BaseReservationInput):
     )
 
 
-class CreateBerthReservation(graphene.Mutation):
+class CreateBerthApplication(graphene.Mutation):
     class Arguments:
-        berth_reservation = BerthReservationInput(required=True)
+        berth_application = BerthApplicationInput(required=True)
         berth_switch = BerthSwitchInput()
 
     ok = graphene.Boolean()
-    berth_reservation = graphene.Field(BerthReservationType)
+    berth_application = graphene.Field(BerthApplicationType)
 
     def mutate(self, info, **kwargs):
-        reservation_data = kwargs.pop("berth_reservation")
+        application_data = kwargs.pop("berth_application")
 
-        boat_type_id = reservation_data.pop("boat_type", None)
+        boat_type_id = application_data.pop("boat_type", None)
         if boat_type_id:
-            reservation_data["boat_type"] = BoatType.objects.get(id=int(boat_type_id))
+            application_data["boat_type"] = BoatType.objects.get(id=int(boat_type_id))
 
         switch_data = kwargs.pop("berth_switch", None)
         if switch_data:
@@ -142,43 +146,43 @@ class CreateBerthReservation(graphene.Mutation):
                 berth_number=switch_data.get("berth_number"),
                 reason=reason,
             )
-            reservation_data["berth_switch"] = berth_switch
+            application_data["berth_switch"] = berth_switch
 
-        choices = reservation_data.pop("choices", [])
+        choices = application_data.pop("choices", [])
 
-        reservation = BerthApplication.objects.create(**reservation_data)
+        application = BerthApplication.objects.create(**application_data)
 
         for choice in choices:
             harbor_id = from_global_id(choice.get("harbor_id"))[1]
             harbor = Harbor.objects.get(id=harbor_id)
             HarborChoice.objects.get_or_create(
-                harbor=harbor, priority=choice.get("priority"), application=reservation
+                harbor=harbor, priority=choice.get("priority"), application=application
             )
 
         # Send notifications when all m2m relations are saved
-        application_saved.send(sender="CreateBerthReservation", application=reservation)
+        application_saved.send(sender="CreateBerthApplication", application=application)
 
         ok = True
-        return CreateBerthReservation(berth_reservation=reservation, ok=ok)
+        return CreateBerthApplication(berth_application=application, ok=ok)
 
 
-class CreateWinterStorageReservation(graphene.Mutation):
+class CreateWinterStorageApplication(graphene.Mutation):
     class Arguments:
-        winter_storage_reservation = WinterStorageReservationInput(required=True)
+        winter_storage_application = WinterStorageApplicationInput(required=True)
 
     ok = graphene.Boolean()
-    winter_storage_reservation = graphene.Field(WinterStorageReservationType)
+    winter_storage_application = graphene.Field(WinterStorageApplicationType)
 
     def mutate(self, info, **kwargs):
-        reservation_data = kwargs.pop("winter_storage_reservation")
+        application_data = kwargs.pop("winter_storage_application")
 
-        boat_type_id = reservation_data.pop("boat_type", None)
+        boat_type_id = application_data.pop("boat_type", None)
         if boat_type_id:
-            reservation_data["boat_type"] = BoatType.objects.get(id=int(boat_type_id))
+            application_data["boat_type"] = BoatType.objects.get(id=int(boat_type_id))
 
-        chosen_areas = reservation_data.pop("chosen_areas", [])
+        chosen_areas = application_data.pop("chosen_areas", [])
 
-        reservation = WinterStorageApplication.objects.create(**reservation_data)
+        application = WinterStorageApplication.objects.create(**application_data)
 
         for choice in chosen_areas:
             winter_area_id = from_global_id(choice.get("winter_area_id"))[1]
@@ -186,23 +190,23 @@ class CreateWinterStorageReservation(graphene.Mutation):
             WinterStorageAreaChoice.objects.get_or_create(
                 winter_storage_area=winter_storage_area,
                 priority=choice.get("priority"),
-                application=reservation,
+                application=application,
             )
 
         # Send notifications when all m2m relations are saved
         application_saved.send(
-            sender="CreateWinterStorageReservation", application=reservation
+            sender="CreateWinterStorageApplication", application=application
         )
 
         ok = True
-        return CreateWinterStorageReservation(
-            winter_storage_reservation=reservation, ok=ok
+        return CreateWinterStorageApplication(
+            winter_storage_application=application, ok=ok
         )
 
 
 class Mutation:
-    create_berth_reservation = CreateBerthReservation.Field()
-    create_winter_storage_reservation = CreateWinterStorageReservation.Field()
+    create_berth_application = CreateBerthApplication.Field()
+    create_winter_storage_application = CreateWinterStorageApplication.Field()
 
 
 class Query:

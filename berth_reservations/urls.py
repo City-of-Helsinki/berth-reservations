@@ -4,7 +4,7 @@ from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 from helusers.admin_site import admin
 
-from .schema import new_schema
+from .new_schema import new_schema
 from .views import SentryGraphQLView
 
 urlpatterns = [

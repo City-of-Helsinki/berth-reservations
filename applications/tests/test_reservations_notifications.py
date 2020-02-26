@@ -31,7 +31,7 @@ def test_berth_application_created_notification_is_sent(
     notification_template_berth_application_created,
 ):
     application = BerthApplicationFactory()
-    application_saved.send(sender="CreateBerthReservation", application=application)
+    application_saved.send(sender="CreateBerthApplication", application=application)
 
     assert len(mail.outbox) == 1
     msg = mail.outbox[0]
@@ -45,7 +45,7 @@ def test_winter_application_created_notification_is_sent(
 ):
     application = WinterStorageApplicationFactory()
     application_saved.send(
-        sender="CreateWinterStorageReservation", application=application
+        sender="CreateWinterStorageApplication", application=application
     )
 
     assert len(mail.outbox) == 1

@@ -63,10 +63,8 @@ class GraphQLTestClient(Client):
 
 
 def assert_not_enough_permissions(executed):
-    assert (
-        executed["errors"][0]["message"]
-        == "You do not have permission to perform this action"
-    )
+    errors = str(executed["errors"])
+    assert "You do not have permission to perform this action" in errors
 
 
 def assert_doesnt_exist(model, executed):
@@ -91,3 +89,8 @@ def assert_invalid_enum(field_name, expected_value, executed):
     assert expected_value in errors
     assert field_name in errors
     assert f'Expected type "{expected_value}"' in errors
+
+
+def assert_in_errors(message, executed):
+    errors = str(executed["errors"])
+    assert message in errors

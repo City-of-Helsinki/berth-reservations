@@ -52,6 +52,11 @@ class HarborChoiceInline(admin.TabularInline):
     max_num = 10
 
 
+class BerthApplicationInline(admin.StackedInline):
+    model = BerthApplication
+    extra = 0
+
+
 class BerthApplicationAdmin(admin.ModelAdmin):
     inlines = [HarborChoiceInline]
     readonly_fields = [
@@ -63,7 +68,7 @@ class BerthApplicationAdmin(admin.ModelAdmin):
         "get_berth_switch_reason",
     ]
     fieldsets = [
-        (None, {"fields": ["application_type", "created_at", "is_processed"]}),
+        (None, {"fields": ["application_type", "created_at", "status", "customer"]},),
         (
             _("Contact information"),
             {
@@ -235,7 +240,7 @@ class WinterStorageApplicationAdmin(admin.ModelAdmin):
             {
                 "fields": [
                     "created_at",
-                    "is_processed",
+                    "status",
                     "storage_method",
                     "trailer_registration_number",
                 ]

@@ -358,8 +358,12 @@ class AbstractPlaceType(UUIDModel):
         (e.g. for admins to see how many suitable places are there for a boat)
     """
 
-    width = models.PositiveSmallIntegerField(verbose_name=_("width (cm)"))
-    length = models.PositiveSmallIntegerField(verbose_name=_("length (cm)"))
+    width = models.DecimalField(
+        max_digits=5, decimal_places=2, verbose_name=_("width (m)")
+    )
+    length = models.DecimalField(
+        max_digits=5, decimal_places=2, verbose_name=_("length (m)")
+    )
 
     class Meta:
         abstract = True
@@ -367,11 +371,18 @@ class AbstractPlaceType(UUIDModel):
 
 class BerthType(AbstractPlaceType):
     mooring_type = EnumIntegerField(BerthMooringType, verbose_name=_("mooring type"))
+    depth = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        verbose_name=_("depth (m)"),
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         verbose_name = _("berth type")
         verbose_name_plural = _("berth types")
-        ordering = ("width", "length")
+        ordering = ("width", "length", "depth")
         unique_together = (("width", "length", "mooring_type"),)
 
     def __str__(self):

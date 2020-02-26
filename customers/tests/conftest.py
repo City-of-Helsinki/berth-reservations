@@ -2,9 +2,10 @@ import pytest
 
 from berth_reservations.tests.conftest import *  # noqa
 
-from .factories import CustomerProfileFactory
+from .factories import BoatFactory
 
 
 @pytest.fixture
-def customer_profile():
-    return CustomerProfileFactory()
+def boat():
+    boat = BoatFactory()
+    return boat

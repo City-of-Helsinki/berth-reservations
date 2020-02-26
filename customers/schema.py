@@ -4,13 +4,24 @@ from graphene import relay
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
 from graphene_federation import extend, external
-from graphql import GraphQLError
 from graphql_jwt.decorators import login_required
 
+from berth_reservations.exceptions import VenepaikkaGraphQLError
+
 from .enums import InvoicingType
-from .models import CustomerProfile
+from .models import Boat, Company, CustomerProfile
 
 InvoicingTypeEnum = graphene.Enum.from_enum(InvoicingType)
+
+PROFILE_NODE_FIELDS = (
+    "id",
+    "invoicing_type",
+    "comment",
+    "company",
+    "boats",
+    "berth_applications",
+    "berth_leases",
+)
 
 
 @extend(fields="id")
@@ -21,11 +32,7 @@ class ProfileNode(DjangoObjectType):
 
     class Meta:
         model = CustomerProfile
-        fields = (
-            "id",
-            "invoicing_type",
-            "comment",
-        )
+        fields = PROFILE_NODE_FIELDS
         interfaces = (relay.Node,)
 
     # explicitly mark shadowed ID field as external
@@ -44,11 +51,16 @@ class ProfileNode(DjangoObjectType):
     def __resolve_reference(self, info, **kwargs):
         user = info.context.user
         profile = relay.Node.get_node_from_global_id(info, self.id)
+        if not profile:
+            return None
+
         # TODO: implement proper permissions
         if user.is_superuser or user == profile.user:
             return profile
         else:
-            raise GraphQLError(_("You do not have permission to perform this action."))
+            raise VenepaikkaGraphQLError(
+                _("You do not have permission to perform this action.")
+            )
 
 
 class BerthProfileNode(DjangoObjectType):
@@ -59,14 +71,42 @@ class BerthProfileNode(DjangoObjectType):
     class Meta:
         model = CustomerProfile
         filter_fields = ("invoicing_type",)
+        fields = PROFILE_NODE_FIELDS
         interfaces = (relay.Node,)
 
     invoicing_type = InvoicingTypeEnum()
     comment = graphene.String()
 
+    @classmethod
+    @login_required
+    def get_node(cls, info, id):
+        node = super().get_node(info, id)
+        if not node:
+            return None
+
+        user = info.context.user
+        # TODO: implement proper permissions
+        if node.user == user or user.is_superuser:
+            return node
+        else:
+            raise VenepaikkaGraphQLError(
+                _("You do not have permission to perform this action.")
+            )
+
+
+class BoatNode(DjangoObjectType):
+    class Meta:
+        model = Boat
+
+
+class CompanyType(DjangoObjectType):
+    class Meta:
+        model = Company
+        fields = ("business_id", "name", "address", "postal_code", "city")
+
 
 class Query:
-    berth_profile = graphene.Field(BerthProfileNode)
+    berth_profile = graphene.relay.Node.Field(BerthProfileNode)
     berth_profiles = DjangoFilterConnectionField(BerthProfileNode)
 
     @login_required
@@ -74,4 +114,6 @@ class Query:
         # TODO: implement proper permissions
         if info.context.user.is_superuser:
             return CustomerProfile.objects.all()
-        raise GraphQLError(_("You do not have permission to perform this action."))
+        raise VenepaikkaGraphQLError(
+            _("You do not have permission to perform this action.")
+        )
