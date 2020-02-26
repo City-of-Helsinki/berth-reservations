@@ -35,6 +35,12 @@ class CompanyAdmin(admin.ModelAdmin):
 class CustomerProfileAdmin(admin.ModelAdmin):
     inlines = (BoatInline, CompanyInline, BerthApplicationInline, BerthLeaseInline)
 
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            # Mark id field as readonly for existing objects
+            return self.readonly_fields + ("id",)
+        return self.readonly_fields
+
 
 admin.site.register(Boat, BoatAdmin)
 admin.site.register(Company, CompanyAdmin)
