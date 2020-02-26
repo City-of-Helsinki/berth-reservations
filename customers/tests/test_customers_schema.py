@@ -44,7 +44,11 @@ query GetBerthProfiles {
                     name
                 }
                 boats {
-                    id
+                    edges {
+                        node {
+                            id
+                        }
+                    }
                 }
                 berthApplications {
                     edges {
@@ -78,6 +82,7 @@ def test_query_berth_profiles(superuser, customer_profile):
     )
 
     customer_id = to_global_id("BerthProfileNode", customer_profile.id)
+    boat_id = to_global_id("BoatNode", boat.id)
     berth_application_id = to_global_id("BerthApplicationNode", berth_application.id)
     berth_lease_id = to_global_id("BerthLeaseNode", berth_lease.id)
 
@@ -86,7 +91,7 @@ def test_query_berth_profiles(superuser, customer_profile):
         "invoicingType": customer_profile.invoicing_type.name,
         "comment": customer_profile.comment,
         "company": {"businessId": company.business_id, "name": company.name},
-        "boats": [{"id": str(boat.id)}],
+        "boats": {"edges": [{"node": {"id": boat_id}}]},
         "berthApplications": {"edges": [{"node": {"id": berth_application_id}}]},
         "berthLeases": {"edges": [{"node": {"id": berth_lease_id}}]},
     }
@@ -112,7 +117,11 @@ query GetBerthProfile {
             name
         }
         boats {
-            id
+            edges {
+                node {
+                    id
+                }
+            }
         }
         berthApplications {
             edges {
@@ -149,6 +158,7 @@ def test_query_berth_profile(is_superuser, superuser, customer_profile):
 
     executed = client.execute(query=query, graphql_url=GRAPHQL_URL, user=gql_user)
 
+    boat_id = to_global_id("BoatNode", boat.id)
     berth_application_id = to_global_id("BerthApplicationNode", berth_application.id)
     berth_lease_id = to_global_id("BerthLeaseNode", berth_lease.id)
 
@@ -157,7 +167,7 @@ def test_query_berth_profile(is_superuser, superuser, customer_profile):
         "invoicingType": customer_profile.invoicing_type.name,
         "comment": customer_profile.comment,
         "company": {"businessId": company.business_id, "name": company.name},
-        "boats": [{"id": str(boat.id)}],
+        "boats": {"edges": [{"node": {"id": boat_id}}]},
         "berthApplications": {"edges": [{"node": {"id": berth_application_id}}]},
         "berthLeases": {"edges": [{"node": {"id": berth_lease_id}}]},
     }

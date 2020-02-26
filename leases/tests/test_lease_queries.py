@@ -26,7 +26,11 @@ query GetBerthLeases {
                 customer {
                     id
                     boats {
-                        id
+                        edges {
+                            node {
+                                id
+                            }
+                        }
                     }
                 }
                 application {
@@ -63,7 +67,7 @@ def test_query_berth_leases(superuser, berth_lease, berth_application):
     berth_lease_id = to_global_id("BerthLeaseNode", berth_lease.id)
     berth_application_id = to_global_id("BerthApplicationNode", berth_application.id)
     customer_id = to_global_id("BerthProfileNode", berth_lease.customer.id)
-    boat_id = str(berth_lease.boat.id)
+    boat_id = to_global_id("BoatNode", berth_lease.boat.id)
 
     assert executed["data"]["berthLeases"]["edges"][0]["node"] == {
         "id": berth_lease_id,
@@ -72,7 +76,10 @@ def test_query_berth_leases(superuser, berth_lease, berth_application):
         "endDate": str(berth_lease.end_date),
         "comment": berth_lease.comment,
         "boat": {"id": boat_id},
-        "customer": {"id": customer_id, "boats": [{"id": boat_id}]},
+        "customer": {
+            "id": customer_id,
+            "boats": {"edges": [{"node": {"id": boat_id}}]},
+        },
         "application": {"id": berth_application_id, "customer": {"id": customer_id}},
         "berth": {
             "id": to_global_id("BerthNode", berth_lease.berth.id),
@@ -105,7 +112,11 @@ query GetBerthLease {
         customer {
             id
             boats {
-                id
+                edges {
+                    node {
+                        id
+                    }
+                }
             }
         }
         application {
@@ -140,7 +151,7 @@ def test_query_berth_lease(superuser, berth_lease, berth_application):
     berth_type_id = to_global_id("BerthTypeNode", berth_lease.berth.berth_type.id)
     berth_application_id = to_global_id("BerthApplicationNode", berth_application.id)
     customer_id = to_global_id("BerthProfileNode", berth_lease.customer.id)
-    boat_id = str(berth_lease.boat.id)
+    boat_id = to_global_id("BoatNode", berth_lease.boat.id)
 
     assert executed["data"]["berthLease"] == {
         "id": berth_lease_id,
@@ -149,7 +160,10 @@ def test_query_berth_lease(superuser, berth_lease, berth_application):
         "endDate": str(berth_lease.end_date),
         "comment": berth_lease.comment,
         "boat": {"id": boat_id},
-        "customer": {"id": customer_id, "boats": [{"id": boat_id}]},
+        "customer": {
+            "id": customer_id,
+            "boats": {"edges": [{"node": {"id": boat_id}}]},
+        },
         "application": {"id": berth_application_id, "customer": {"id": customer_id}},
         "berth": {
             "id": to_global_id("BerthNode", berth_lease.berth.id),
