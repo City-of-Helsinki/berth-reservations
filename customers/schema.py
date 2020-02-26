@@ -24,8 +24,18 @@ PROFILE_NODE_FIELDS = (
 )
 
 
+class BaseProfileFieldsMixin:
+    """
+    Mixin that stores the attributes that are exactly
+    the same between ProfileNode and BerthProfileNode
+    """
+
+    invoicing_type = InvoicingTypeEnum(required=True)
+    comment = graphene.String(required=True)
+
+
 @extend(fields="id")
-class ProfileNode(DjangoObjectType):
+class ProfileNode(BaseProfileFieldsMixin, DjangoObjectType):
     """
     ProfileNode extended from the open-city-profile's ProfileNode.
     """
@@ -44,9 +54,6 @@ class ProfileNode(DjangoObjectType):
     # graphene will also mark ID fields as "@external" on some
     # other random Node types (e.g. WinterStorageAreaNode)
 
-    invoicing_type = InvoicingTypeEnum()
-    comment = graphene.String()
-
     @login_required
     def __resolve_reference(self, info, **kwargs):
         user = info.context.user
@@ -63,7 +70,7 @@ class ProfileNode(DjangoObjectType):
             )
 
 
-class BerthProfileNode(DjangoObjectType):
+class BerthProfileNode(BaseProfileFieldsMixin, DjangoObjectType):
     """
     ProfileNode that only contains profile info stored in this service.
     """
@@ -73,9 +80,6 @@ class BerthProfileNode(DjangoObjectType):
         filter_fields = ("invoicing_type",)
         fields = PROFILE_NODE_FIELDS
         interfaces = (relay.Node,)
-
-    invoicing_type = InvoicingTypeEnum()
-    comment = graphene.String()
 
     @classmethod
     @login_required

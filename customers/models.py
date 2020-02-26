@@ -1,3 +1,4 @@
+import uuid
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
@@ -14,10 +15,14 @@ from .enums import InvoicingType
 User = get_user_model()
 
 
-class CustomerProfile(TimeStampedModel, UUIDModel):
+class CustomerProfile(TimeStampedModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
     invoicing_type = EnumField(
-        InvoicingType, verbose_name=_("invoicing type"), max_length=30
+        InvoicingType,
+        verbose_name=_("invoicing type"),
+        max_length=30,
+        default=InvoicingType.ONLINE_PAYMENT,
     )
     comment = models.TextField(verbose_name=_("comment"), blank=True)
 
