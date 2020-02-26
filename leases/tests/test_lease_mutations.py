@@ -94,7 +94,7 @@ def test_create_berth_lease_all_arguments(
     variables = {
         "applicationId": to_global_id("BerthApplicationNode", berth_application.id),
         "berthId": to_global_id("BerthNode", berth.id),
-        "boatId": str(boat.id),
+        "boatId": to_global_id("BoatNode", boat.id),
         "startDate": "2020-03-01",
         "endDate": "2020-12-31",
         "comment": "Very wow, such comment",

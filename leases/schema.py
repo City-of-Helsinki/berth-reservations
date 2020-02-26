@@ -79,7 +79,11 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
         input["customer"] = application.customer
 
         if input.get("boat_id", False):
-            boat = Boat.objects.filter(pk=input.pop("boat_id")).first()
+            boat_id = from_global_id(input.pop("boat_id"))[1]
+            try:
+                boat = Boat.objects.get(pk=boat_id)
+            except Boat.DoesNotExist:
+                raise VenepaikkaGraphQLError(_("There is no boat with the given id."))
 
             if boat.owner.id != input["customer"].id:
                 raise VenepaikkaGraphQLError(
