@@ -37,7 +37,7 @@ class CustomerProfile(TimeStampedModel):
                 self.user.first_name, self.user.last_name, self.id
             )
         else:
-            return self.id
+            return str(self.id)
 
 
 class Company(TimeStampedModel, UUIDModel):
