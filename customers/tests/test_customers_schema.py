@@ -1,13 +1,17 @@
 import pytest
 from graphql_relay import to_global_id
 
+from applications.new_schema import BerthApplicationNode
 from applications.tests.factories import BerthApplicationFactory
 from berth_reservations.tests.utils import (
     assert_not_enough_permissions,
     create_api_client,
 )
-from customers.tests.factories import BoatFactory, CompanyFactory
+from leases.schema import BerthLeaseNode
 from leases.tests.factories import BerthLeaseFactory
+
+from ..schema import BerthProfileNode, BoatNode
+from ..tests.factories import BoatFactory, CompanyFactory
 
 FEDERATED_SCHEMA_QUERY = """
     {
@@ -76,10 +80,12 @@ def test_query_berth_profiles(superuser_api_client, customer_profile):
 
     executed = superuser_api_client.execute(QUERY_BERTH_PROFILES)
 
-    customer_id = to_global_id("BerthProfileNode", customer_profile.id)
-    boat_id = to_global_id("BoatNode", boat.id)
-    berth_application_id = to_global_id("BerthApplicationNode", berth_application.id)
-    berth_lease_id = to_global_id("BerthLeaseNode", berth_lease.id)
+    customer_id = to_global_id(BerthProfileNode._meta.name, customer_profile.id)
+    boat_id = to_global_id(BoatNode._meta.name, boat.id)
+    berth_application_id = to_global_id(
+        BerthApplicationNode._meta.name, berth_application.id
+    )
+    berth_lease_id = to_global_id(BerthLeaseNode._meta.name, berth_lease.id)
 
     assert executed["data"]["berthProfiles"]["edges"][0]["node"] == {
         "id": customer_id,
@@ -139,7 +145,7 @@ query GetBerthProfile {
 
 @pytest.mark.parametrize("is_superuser", [True, False])
 def test_query_berth_profile(is_superuser, superuser_api_client, customer_profile):
-    berth_profile_id = to_global_id("BerthProfileNode", customer_profile.id)
+    berth_profile_id = to_global_id(BerthProfileNode._meta.name, customer_profile.id)
 
     berth_application = BerthApplicationFactory(customer=customer_profile)
     berth_lease = BerthLeaseFactory(customer=customer_profile)
@@ -157,9 +163,11 @@ def test_query_berth_profile(is_superuser, superuser_api_client, customer_profil
 
     executed = api_client.execute(query)
 
-    boat_id = to_global_id("BoatNode", boat.id)
-    berth_application_id = to_global_id("BerthApplicationNode", berth_application.id)
-    berth_lease_id = to_global_id("BerthLeaseNode", berth_lease.id)
+    boat_id = to_global_id(BoatNode._meta.name, boat.id)
+    berth_application_id = to_global_id(
+        BerthApplicationNode._meta.name, berth_application.id
+    )
+    berth_lease_id = to_global_id(BerthLeaseNode._meta.name, berth_lease.id)
 
     assert executed["data"]["berthProfile"] == {
         "id": berth_profile_id,
@@ -178,7 +186,7 @@ def test_query_berth_profile(is_superuser, superuser_api_client, customer_profil
 def test_query_berth_profile_not_enough_permissions_valid_id(
     api_client, customer_profile
 ):
-    berth_profile_id = to_global_id("BerthProfileNode", customer_profile.id)
+    berth_profile_id = to_global_id(BerthProfileNode._meta.name, customer_profile.id)
 
     query = QUERY_BERTH_PROFILE % berth_profile_id
 
