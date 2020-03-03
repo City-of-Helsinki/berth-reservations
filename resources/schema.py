@@ -9,6 +9,7 @@ from graphene import relay
 from graphene_django.fields import DjangoConnectionField, DjangoListField
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
+from graphene_file_upload.scalars import Upload
 from graphql_jwt.decorators import login_required, superuser_required
 from graphql_relay import from_global_id
 from munigeo.models import Municipality
@@ -453,7 +454,7 @@ class DeleteBerthTypeMutation(graphene.ClientIDMutation):
 
 class HarborInput(AbstractAreaInput):
     municipality_id = graphene.String()
-    image_file = graphene.String()
+    image_file = Upload()
     availability_level_id = graphene.ID()
     number_of_places = graphene.Int()
     maximum_width = graphene.Int()
@@ -822,9 +823,19 @@ class Mutation:
     update_berth_type = UpdateBerthTypeMutation.Field()
 
     # Harbors
-    create_harbor = CreateHarborMutation.Field()
+    create_harbor = CreateHarborMutation.Field(
+        description="The `imageFile` field takes an image as input. "
+        "To provide the file, you have to perform the request with a client "
+        "that conforms to the [GraphQL Multipart Request Spec]"
+        "(https://github.com/jaydenseric/graphql-multipart-request-spec)."
+    )
     delete_harbor = DeleteHarborMutation.Field()
-    update_harbor = UpdateHarborMutation.Field()
+    update_harbor = UpdateHarborMutation.Field(
+        description="The `imageFile` field takes an image as input. "
+        "To provide the file, you have to perform the request with a client "
+        "that conforms to the [GraphQL Multipart Request Spec]"
+        "(https://github.com/jaydenseric/graphql-multipart-request-spec)."
+    )
 
     # Piers
     create_pier = CreatePierMutation.Field()
