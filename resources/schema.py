@@ -9,6 +9,7 @@ from graphene import relay
 from graphene_django.fields import DjangoConnectionField, DjangoListField
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
+from graphene_file_upload.scalars import Upload
 from graphql_jwt.decorators import login_required, superuser_required
 from graphql_relay import from_global_id
 from munigeo.models import Municipality
@@ -453,7 +454,7 @@ class DeleteBerthTypeMutation(graphene.ClientIDMutation):
 
 class HarborInput(AbstractAreaInput):
     municipality_id = graphene.String()
-    image_file = graphene.String()
+    image_file = Upload()
     availability_level_id = graphene.ID()
     number_of_places = graphene.Int()
     maximum_width = graphene.Int()
