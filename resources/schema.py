@@ -823,9 +823,19 @@ class Mutation:
     update_berth_type = UpdateBerthTypeMutation.Field()
 
     # Harbors
-    create_harbor = CreateHarborMutation.Field()
+    create_harbor = CreateHarborMutation.Field(
+        description="The `imageFile` field takes an image as input. "
+        "To provide the file, you have to perform the request with a client "
+        "that conforms to the [GraphQL Multipart Request Spec]"
+        "(https://github.com/jaydenseric/graphql-multipart-request-spec)."
+    )
     delete_harbor = DeleteHarborMutation.Field()
-    update_harbor = UpdateHarborMutation.Field()
+    update_harbor = UpdateHarborMutation.Field(
+        description="The `imageFile` field takes an image as input. "
+        "To provide the file, you have to perform the request with a client "
+        "that conforms to the [GraphQL Multipart Request Spec]"
+        "(https://github.com/jaydenseric/graphql-multipart-request-spec)."
+    )
 
     # Piers
     create_pier = CreatePierMutation.Field()
