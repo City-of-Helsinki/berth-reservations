@@ -4,6 +4,8 @@ import shutil
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.files.storage import FileSystemStorage
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumIntegerField
 from munigeo.models import Municipality
@@ -40,6 +42,14 @@ def get_winter_area_media_folder(instance, filename):
     return "winter_areas/{area_id}/{filename}".format(
         area_id=instance.id, filename=filename
     )
+
+
+def get_map_resource_media_folder(instance, filename):
+    if isinstance(instance, HarborMap):
+        return get_harbor_media_folder(instance, filename)
+    elif isinstance(instance, WinterStorageAreaMap):
+        return get_winter_area_media_folder(instance, filename)
+    return None
 
 
 class OverwriteStorage(FileSystemStorage):
@@ -250,6 +260,41 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
 
     def __str__(self):
         return self.safe_translation_getter("name", super().__str__())
+
+
+class AbstractAreaMap(UUIDModel):
+    map_file = models.FileField(
+        upload_to=get_map_resource_media_folder,
+        storage=FileSystemStorage(),
+        verbose_name=_("map file"),
+        null=False,
+        blank=False,
+    )
+
+    class Meta:
+        abstract = True
+
+
+class HarborMap(AbstractAreaMap):
+    harbor = models.ForeignKey(
+        Harbor, verbose_name=_("harbor"), related_name="maps", on_delete=models.CASCADE,
+    )
+
+
+class WinterStorageAreaMap(AbstractAreaMap):
+    winter_storage_area = models.ForeignKey(
+        WinterStorageArea,
+        verbose_name=_("winter storage area"),
+        related_name="maps",
+        on_delete=models.CASCADE,
+    )
+
+
+@receiver(post_delete, sender=HarborMap)
+@receiver(post_delete, sender=WinterStorageAreaMap)
+def delete_map_file_handler(sender, instance, **kwargs):
+    if instance.map_file:
+        os.unlink(instance.map_file.path)
 
 
 class AbstractAreaSection(UUIDModel):
