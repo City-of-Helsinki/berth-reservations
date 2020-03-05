@@ -490,6 +490,10 @@ class DeleteBerthTypeMutation(graphene.ClientIDMutation):
 class HarborInput(AbstractAreaInput):
     municipality_id = graphene.String()
     image_file = Upload()
+    add_map_files = graphene.List(
+        Upload,
+        description="List of map files that will be added to the existing ones belonging to the Harbor.",
+    )
     availability_level_id = graphene.ID()
     number_of_places = graphene.Int()
     maximum_width = graphene.Int()
@@ -497,6 +501,22 @@ class HarborInput(AbstractAreaInput):
     maximum_depth = graphene.Int()
     name = graphene.String()
     street_address = graphene.String()
+
+
+def add_map_files(model, map_files, instance):
+    try:
+        for map_file in map_files:
+            model.objects.create(map_file, instance)
+    except IntegrityError as e:
+        raise VenepaikkaGraphQLError(e)
+
+
+def remove_map_files(model, map_files):
+    try:
+        for file_id in map_files:
+            model.objects.get(pk=file_id).delete()
+    except model.DoesNotExist as e:
+        raise VenepaikkaGraphQLError(e)
 
 
 class CreateHarborMutation(graphene.ClientIDMutation):
@@ -531,6 +551,7 @@ class CreateHarborMutation(graphene.ClientIDMutation):
                 raise VenepaikkaGraphQLError(e)
 
         harbor = Harbor.objects.language(lang).create(**input)
+        add_map_files(HarborMap, input.pop("add_map_files", []), harbor)
 
         return CreateHarborMutation(harbor=harbor)
 
@@ -538,6 +559,9 @@ class CreateHarborMutation(graphene.ClientIDMutation):
 class UpdateHarborMutation(graphene.ClientIDMutation):
     class Input(HarborInput):
         id = graphene.ID(required=True)
+        remove_map_files = graphene.List(
+            graphene.ID, description="List of IDs of the maps to be removed."
+        )
 
     harbor = graphene.Field(HarborNode)
 
@@ -571,6 +595,8 @@ class UpdateHarborMutation(graphene.ClientIDMutation):
         ) as e:
             raise VenepaikkaGraphQLError(e)
 
+        add_map_files(HarborMap, input.pop("add_map_files", []), harbor)
+        remove_map_files(HarborMap, input.pop("remove_map_files", []))
         update_object(harbor, input)
 
         return UpdateHarborMutation(harbor=harbor)
