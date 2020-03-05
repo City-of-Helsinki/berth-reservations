@@ -24,8 +24,10 @@ from .models import (
     BerthType,
     BoatType,
     Harbor,
+    HarborMap,
     Pier,
     WinterStorageArea,
+    WinterStorageAreaMap,
     WinterStoragePlace,
     WinterStoragePlaceType,
     WinterStorageSection,
@@ -171,6 +173,31 @@ class BerthNode(DjangoObjectType):
         filterset_class = BerthNodeFilterSet
 
 
+class AbstractMapType:
+    url = graphene.String(required=True)
+
+    def resolve_url(self, info, **kwargs):
+        return info.context.build_absolute_uri(self.map_file.url)
+
+
+class HarborMapType(DjangoObjectType, AbstractMapType):
+    class Meta:
+        model = HarborMap
+        fields = (
+            "id",
+            "url",
+        )
+
+
+class WinterStorageAreaMapType(DjangoObjectType, AbstractMapType):
+    class Meta:
+        model = WinterStorageAreaMap
+        fields = (
+            "id",
+            "url",
+        )
+
+
 class HarborNode(graphql_geojson.GeoJSONType):
     class Meta:
         model = Harbor
@@ -192,6 +219,7 @@ class HarborNode(graphql_geojson.GeoJSONType):
     street_address = graphene.String()
     municipality = graphene.String()
     image_file = graphene.String()
+    maps = graphene.List(HarborMapType, required=True)
     piers = DjangoFilterConnectionField(
         PierNode,
         min_berth_width=graphene.Float(),
@@ -209,6 +237,9 @@ class HarborNode(graphql_geojson.GeoJSONType):
             return info.context.build_absolute_uri(self.image_file.url)
         else:
             return None
+
+    def resolve_maps(self, info, **kwargs):
+        return self.maps.all()
 
     def resolve_piers(self, info, **kwargs):
         return _resolve_piers(info, **kwargs).filter(harbor_id=self.id)
@@ -266,12 +297,16 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
     street_address = graphene.String()
     municipality = graphene.String()
     image_file = graphene.String()
+    maps = graphene.List(WinterStorageAreaMapType, required=True)
 
     def resolve_image_file(self, info, **kwargs):
         if self.image_file:
             return info.context.build_absolute_uri(self.image_file.url)
         else:
             return None
+
+    def resolve_maps(self, info, **kwargs):
+        return self.maps.all()
 
 
 class AbstractAreaInput:

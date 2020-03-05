@@ -16,6 +16,7 @@ def test_harbor_map_file_path(harbor):
     )
     harbor_map = HarborMap.objects.create(map_file=file, harbor=harbor)
     assert get_harbor_media_folder(harbor_map, file) in harbor_map.map_file.path
+    assert HarborMap.objects.count() == 1
 
 
 def test_winter_storage_area_map_file_path(winter_storage_area):
@@ -30,3 +31,4 @@ def test_winter_storage_area_map_file_path(winter_storage_area):
         get_winter_area_media_folder(winter_storage_area_map, file)
         in winter_storage_area_map.map_file.path
     )
+    assert WinterStorageAreaMap.objects.count() == 1
