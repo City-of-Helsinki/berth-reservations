@@ -115,7 +115,7 @@ def test_get_berths(api_client, berth):
     }
 
 
-def test_get_winter_storage_areas(api_client, winter_storage_area):
+def test_get_winter_storage_areas(winter_storage_area, api_client):
     query = """
         {
             winterStorageAreas {

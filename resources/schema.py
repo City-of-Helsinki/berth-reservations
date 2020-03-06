@@ -168,9 +168,14 @@ class BerthNodeFilterSet(django_filters.FilterSet):
 class BerthNode(DjangoObjectType):
     class Meta:
         model = Berth
-        fields = ("id", "number", "pier", "berth_type", "comment")
+        fields = ("id", "number", "pier", "berth_type", "comment", "leases")
         interfaces = (relay.Node,)
         filterset_class = BerthNodeFilterSet
+
+    @login_required
+    @superuser_required
+    def resolve_leases(self, info, **kwargs):
+        return self.leases.all()
 
 
 class AbstractMapType:
