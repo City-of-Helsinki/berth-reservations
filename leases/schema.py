@@ -5,6 +5,7 @@ from graphene_django import DjangoConnectionField, DjangoObjectType
 from graphql_jwt.decorators import login_required, superuser_required
 from graphql_relay import from_global_id
 
+from applications.enums import ApplicationStatus
 from applications.models import BerthApplication
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.models import Boat
@@ -94,6 +95,9 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
 
         lease = BerthLease.objects.create(**input)
 
+        application.status = ApplicationStatus.OFFER_GENERATED
+        application.save()
+
         return CreateBerthLeaseMutation(berth_lease=lease)
 
 
@@ -119,6 +123,10 @@ class DeleteBerthLeaseMutation(graphene.ClientIDMutation):
             raise VenepaikkaGraphQLError(
                 _(f"Lease object is not DRAFTED anymore: {lease.status}")
             )
+
+        if lease.application:
+            lease.application.status = ApplicationStatus.PENDING
+            lease.application.save()
 
         lease.delete()
 

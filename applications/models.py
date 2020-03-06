@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumField
@@ -219,6 +220,38 @@ class BerthApplication(BaseApplication):
             "harbor_choices": self.harborchoice_set.order_by("priority"),
             "application": self,
         }
+
+    def _validate_status(self):
+        """
+        If the BerthApplication does not have a BerthLease related to it,
+        it can only have PENDING or EXPIRED statuses.
+
+        With a lease, it can have any of the other statuses.
+        """
+        allowed_statuses_without_lease = [
+            ApplicationStatus.PENDING,
+            ApplicationStatus.EXPIRED,
+        ]
+
+        if (
+            not hasattr(self, "lease")
+            and self.status not in allowed_statuses_without_lease
+        ):
+            raise ValidationError(
+                _(
+                    "BerthApplication with no lease can only be "
+                    f"{', '.join([status.name for status in allowed_statuses_without_lease])}; "
+                    f"has {self.status.name}"
+                )
+            )
+
+    def save(self, *args, **kwargs):
+        # Ensure clean is always ran
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        self._validate_status()
 
 
 class WinterStorageApplication(BaseApplication):

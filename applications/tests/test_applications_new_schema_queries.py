@@ -2,6 +2,7 @@ from graphql_relay.node.node import to_global_id
 
 from applications.enums import ApplicationStatus
 from berth_reservations.tests.utils import assert_in_errors
+from leases.tests.factories import BerthLeaseFactory
 
 BERTH_APPLICATIONS_WITH_NO_CUSTOMER_FILTER_QUERY = """
     query APPLICATIONS {
@@ -73,6 +74,7 @@ BERTH_APPLICATIONS_WITH_STATUSES_FILTER_QUERY = """
 
 
 def test_berth_applications_statuses_filter(berth_application, superuser_api_client):
+    berth_application.lease = BerthLeaseFactory()
     berth_application.status = ApplicationStatus.HANDLED
     berth_application.save()
 
@@ -101,6 +103,7 @@ def test_berth_applications_statuses_filter(berth_application, superuser_api_cli
 def test_berth_applications_statuses_filter_empty(
     berth_application, superuser_api_client
 ):
+    berth_application.lease = BerthLeaseFactory()
     berth_application.status = ApplicationStatus.HANDLED
     berth_application.save()
 
@@ -116,6 +119,7 @@ def test_berth_applications_statuses_filter_empty(
 def test_berth_applications_statuses_filter_invalid_enum(
     berth_application, superuser_api_client
 ):
+    berth_application.lease = BerthLeaseFactory()
     berth_application.status = ApplicationStatus.HANDLED
     berth_application.save()
 
@@ -133,6 +137,7 @@ def test_berth_applications_statuses_filter_invalid_enum(
 def test_berth_applications_statuses_filter_empty_list(
     berth_application, superuser_api_client
 ):
+    berth_application.lease = BerthLeaseFactory()
     berth_application.status = ApplicationStatus.HANDLED
     berth_application.save()
 
