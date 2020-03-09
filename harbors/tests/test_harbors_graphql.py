@@ -1,8 +1,4 @@
-from berth_reservations.tests.utils import GraphQLTestClient
-
-
-def test_get_boat_type(boat_type):
-    client = GraphQLTestClient()
+def test_get_boat_type(boat_type, old_schema_api_client):
     query = """
         {
             boatTypes {
@@ -10,12 +6,11 @@ def test_get_boat_type(boat_type):
             }
         }
     """
-    executed = client.execute(query)
-    assert executed == {"data": {"boatTypes": [{"name": "Dinghy"}]}}
+    executed = old_schema_api_client.execute(query)
+    assert executed["data"]["boatTypes"] == [{"name": "Dinghy"}]
 
 
-def test_get_harbors(harbor):
-    client = GraphQLTestClient()
+def test_get_harbors(harbor, old_schema_api_client):
     query = """
         {
             harbors {
@@ -30,17 +25,7 @@ def test_get_harbors(harbor):
             }
         }
     """
-    executed = client.execute(query)
-    assert executed == {
-        "data": {
-            "harbors": {
-                "edges": [
-                    {
-                        "node": {
-                            "properties": {"name": "Sunny Harbor", "zipCode": "00100"}
-                        }
-                    }
-                ]
-            }
-        }
-    }
+    executed = old_schema_api_client.execute(query)
+    assert executed["data"]["harbors"]["edges"] == [
+        {"node": {"properties": {"name": "Sunny Harbor", "zipCode": "00100"}}}
+    ]
