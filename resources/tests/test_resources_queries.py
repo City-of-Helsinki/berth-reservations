@@ -7,6 +7,7 @@ from berth_reservations.tests.utils import (
     assert_in_errors,
     assert_not_enough_permissions,
 )
+from leases.tests.factories import BerthLeaseFactory
 
 
 def test_get_boat_type(api_client, boat_type):
@@ -115,7 +116,59 @@ def test_get_berths(api_client, berth):
     }
 
 
-def test_get_winter_storage_areas(winter_storage_area, api_client):
+def test_get_berth_with_leases(superuser_api_client, berth):
+    berth_lease = BerthLeaseFactory(berth=berth)
+
+    query = """
+        {
+            berth(id: "%s") {
+                leases {
+                    edges {
+                        node {
+                            id
+                        }
+                    }
+                }
+            }
+        }
+    """ % to_global_id(
+        "BerthNode", berth.id
+    )
+    executed = superuser_api_client.execute(query)
+
+    assert executed["data"]["berth"] == {
+        "leases": {
+            "edges": [{"node": {"id": to_global_id("BerthLeaseNode", berth_lease.id)}}]
+        }
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
+def test_get_berth_with_leases_not_enough_permissions(api_client, berth):
+    BerthLeaseFactory(berth=berth)
+
+    query = """
+        {
+            berth(id: "%s") {
+                leases {
+                    edges {
+                        node {
+                            id
+                        }
+                    }
+                }
+            }
+        }
+    """ % to_global_id(
+        "BerthNode", berth.id
+    )
+    executed = api_client.execute(query)
+    assert_not_enough_permissions(executed)
+
+
+def test_get_winter_storage_areas(api_client, winter_storage_area):
     query = """
         {
             winterStorageAreas {
