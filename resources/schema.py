@@ -67,7 +67,7 @@ def _resolve_piers(info, **kwargs):
 
     if application_global_id:
         user = info.context.user
-        if user.is_authenticated and user.is_superuser:
+        if user and user.is_authenticated and user.is_superuser:
             application_id = from_global_id(application_global_id)[1]
             try:
                 application = BerthApplication.objects.get(pk=application_id)
