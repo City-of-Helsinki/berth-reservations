@@ -9,14 +9,8 @@ from berth_reservations.tests.utils import (
     assert_field_missing,
     assert_invalid_enum,
     assert_not_enough_permissions,
-    GraphQLTestClient,
 )
 from resources.models import Berth, BerthType, Harbor, Pier
-
-client = GraphQLTestClient()
-
-GRAPHQL_URL = "/graphql_v2/"
-
 
 CREATE_BERTH_MUTATION = """
 mutation CreateBerth($input: CreateBerthMutationInput!) {
@@ -31,7 +25,7 @@ mutation CreateBerth($input: CreateBerthMutationInput!) {
 """
 
 
-def test_create_berth(pier, berth_type, superuser):
+def test_create_berth(pier, berth_type, superuser_api_client):
     variables = {
         "number": "9999",
         "comment": "foobar",
@@ -41,12 +35,7 @@ def test_create_berth(pier, berth_type, superuser):
 
     assert Berth.objects.count() == 0
 
-    executed = client.execute(
-        query=CREATE_BERTH_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(CREATE_BERTH_MUTATION, input=variables)
 
     assert Berth.objects.count() == 1
     assert executed["data"]["createBerth"]["berth"]["id"] is not None
@@ -54,8 +43,10 @@ def test_create_berth(pier, berth_type, superuser):
     assert executed["data"]["createBerth"]["berth"]["number"] == "9999"
 
 
-@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
-def test_create_berth_not_enough_permissions(user, pier, berth_type):
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
+def test_create_berth_not_enough_permissions(api_client, pier, berth_type):
     variables = {
         "number": "9999",
         "comment": "foobar",
@@ -65,18 +56,13 @@ def test_create_berth_not_enough_permissions(user, pier, berth_type):
 
     assert Berth.objects.count() == 0
 
-    executed = client.execute(
-        query=CREATE_BERTH_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=user,
-    )
+    executed = api_client.execute(CREATE_BERTH_MUTATION, input=variables)
 
     assert Berth.objects.count() == 0
     assert_not_enough_permissions(executed)
 
 
-def test_create_berth_no_number(pier, berth_type, superuser):
+def test_create_berth_no_number(pier, berth_type, superuser_api_client):
     variables = {
         "pierId": to_global_id("PierNode", str(pier.id)),
         "berthTypeId": to_global_id("BerthTypeNode", str(berth_type.id)),
@@ -84,12 +70,7 @@ def test_create_berth_no_number(pier, berth_type, superuser):
 
     assert Berth.objects.count() == 0
 
-    executed = client.execute(
-        query=CREATE_BERTH_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(CREATE_BERTH_MUTATION, input=variables)
 
     assert Berth.objects.count() == 0
     assert_field_missing("number", executed)
@@ -104,53 +85,40 @@ mutation DeleteBerth($input: DeleteBerthMutationInput!) {
 """
 
 
-def test_delete_berth(superuser, berth):
+def test_delete_berth(superuser_api_client, berth):
     variables = {
         "id": to_global_id("BerthNode", str(berth.id)),
     }
 
     assert Berth.objects.count() == 1
 
-    client.execute(
-        query=DELETE_BERTH_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    superuser_api_client.execute(DELETE_BERTH_MUTATION, input=variables)
 
     assert Berth.objects.count() == 0
 
 
-@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
-def test_delete_berth_not_enough_permissions(user, berth):
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
+def test_delete_berth_not_enough_permissions(api_client, berth):
     variables = {
         "id": to_global_id("BerthNode", str(berth.id)),
     }
 
     assert Berth.objects.count() == 1
 
-    executed = client.execute(
-        query=DELETE_BERTH_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=user,
-    )
+    executed = api_client.execute(DELETE_BERTH_MUTATION, input=variables)
 
     assert Berth.objects.count() == 1
     assert_not_enough_permissions(executed)
 
 
-def test_delete_berth_inexistent_berth(superuser):
+def test_delete_berth_inexistent_berth(superuser_api_client):
     variables = {
         "id": to_global_id("BerthNode", uuid.uuid4()),
     }
 
-    executed = client.execute(
-        query=DELETE_BERTH_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(DELETE_BERTH_MUTATION, input=variables)
 
     assert_doesnt_exist("Berth", executed)
 
@@ -174,7 +142,7 @@ mutation UpdateBerth($input: UpdateBerthMutationInput!) {
 """
 
 
-def test_update_berth(berth, pier, berth_type, superuser):
+def test_update_berth(berth, pier, berth_type, superuser_api_client):
     global_id = to_global_id("BerthNode", str(berth.id))
     pier_id = to_global_id("PierNode", str(pier.id))
     berth_type_id = to_global_id("BerthTypeNode", str(berth_type.id))
@@ -189,12 +157,7 @@ def test_update_berth(berth, pier, berth_type, superuser):
 
     assert Berth.objects.count() == 1
 
-    executed = client.execute(
-        query=UPDATE_BERTH_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(UPDATE_BERTH_MUTATION, input=variables)
 
     assert Berth.objects.count() == 1
     assert executed["data"]["updateBerth"]["berth"]["id"] == global_id
@@ -204,7 +167,7 @@ def test_update_berth(berth, pier, berth_type, superuser):
     assert executed["data"]["updateBerth"]["berth"]["berthType"]["id"] == berth_type_id
 
 
-def test_update_berth_no_id(berth, pier, berth_type, superuser):
+def test_update_berth_no_id(berth, pier, berth_type, superuser_api_client):
     pier_id = to_global_id("PierNode", str(pier.id))
     berth_type_id = to_global_id("BerthTypeNode", str(berth_type.id))
 
@@ -217,19 +180,16 @@ def test_update_berth_no_id(berth, pier, berth_type, superuser):
 
     assert Berth.objects.count() == 1
 
-    executed = client.execute(
-        query=UPDATE_BERTH_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(UPDATE_BERTH_MUTATION, input=variables)
 
     assert Berth.objects.count() == 1
     assert_field_missing("id", executed)
 
 
-@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
-def test_update_berth_not_enough_permissions(berth, pier, berth_type, user):
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
+def test_update_berth_not_enough_permissions(api_client, berth, pier, berth_type):
     pier_id = to_global_id("PierNode", str(pier.id))
     berth_type_id = to_global_id("BerthTypeNode", str(berth_type.id))
 
@@ -241,12 +201,7 @@ def test_update_berth_not_enough_permissions(berth, pier, berth_type, user):
     }
     assert Berth.objects.count() == 1
 
-    executed = client.execute(
-        query=CREATE_BERTH_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=user,
-    )
+    executed = api_client.execute(CREATE_BERTH_MUTATION, input=variables)
 
     assert Berth.objects.count() == 1
     assert_not_enough_permissions(executed)
@@ -267,17 +222,12 @@ mutation CreateBerthTypeMutation($input: CreateBerthTypeMutationInput!) {
 """
 
 
-def test_create_berth_type(superuser):
+def test_create_berth_type(superuser_api_client):
     variables = {"mooringType": "DINGHY_PLACE", "width": 66.6, "length": 33.3}
 
     assert BerthType.objects.count() == 0
 
-    executed = client.execute(
-        query=CREATE_BERTH_TYPE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(CREATE_BERTH_TYPE_MUTATION, input=variables)
 
     assert BerthType.objects.count() == 1
     assert executed["data"]["createBerthType"]["berthType"]["id"] is not None
@@ -295,34 +245,26 @@ def test_create_berth_type(superuser):
     assert executed["data"]["createBerthType"]["berthType"]["depth"] is None
 
 
-@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
-def test_create_berth_type_not_enough_permissions(user):
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
+def test_create_berth_type_not_enough_permissions(api_client):
     variables = {"mooringType": "DINGHY_PLACE", "width": 66.6, "length": 33.3}
 
     assert BerthType.objects.count() == 0
 
-    executed = client.execute(
-        query=CREATE_BERTH_TYPE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=user,
-    )
+    executed = api_client.execute(CREATE_BERTH_TYPE_MUTATION, input=variables)
 
     assert BerthType.objects.count() == 0
     assert_not_enough_permissions(executed)
 
 
-def test_create_berth_type_invalid_mooring(superuser):
+def test_create_berth_type_invalid_mooring(superuser_api_client):
     variables = {"mooringType": "INVALID_VALUE", "width": 666, "length": 333}
 
     assert BerthType.objects.count() == 0
 
-    executed = client.execute(
-        query=CREATE_BERTH_TYPE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(CREATE_BERTH_TYPE_MUTATION, input=variables)
 
     assert BerthType.objects.count() == 0
 
@@ -338,53 +280,40 @@ mutation DeleteBerthType($input: DeleteBerthTypeMutationInput!) {
 """
 
 
-def test_delete_berth_type(superuser, berth_type):
+def test_delete_berth_type(superuser_api_client, berth_type):
     variables = {
         "id": to_global_id("BerthTypeNode", str(berth_type.id)),
     }
 
     assert BerthType.objects.count() == 1
 
-    client.execute(
-        query=DELETE_BERTH_TYPE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    superuser_api_client.execute(DELETE_BERTH_TYPE_MUTATION, input=variables)
 
     assert BerthType.objects.count() == 0
 
 
-@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
-def test_delete_berth_type_not_enough_permissions(user, berth_type):
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
+def test_delete_berth_type_not_enough_permissions(api_client, berth_type):
     variables = {
         "id": to_global_id("BerthTypeNode", str(berth_type.id)),
     }
 
     assert BerthType.objects.count() == 1
 
-    executed = client.execute(
-        query=DELETE_BERTH_TYPE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=user,
-    )
+    executed = api_client.execute(DELETE_BERTH_TYPE_MUTATION, input=variables)
 
     assert BerthType.objects.count() == 1
     assert_not_enough_permissions(executed)
 
 
-def test_delete_berth_type_inexistent_berth(superuser):
+def test_delete_berth_type_inexistent_berth(superuser_api_client):
     variables = {
         "id": to_global_id("BerthTypeNode", uuid.uuid4()),
     }
 
-    executed = client.execute(
-        query=DELETE_BERTH_TYPE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(DELETE_BERTH_TYPE_MUTATION, input=variables)
 
     assert_doesnt_exist("BerthType", executed)
 
@@ -404,7 +333,7 @@ mutation UpdateBerthTypeMutation($input: UpdateBerthTypeMutationInput!){
 """
 
 
-def test_update_berth_type(berth_type, superuser):
+def test_update_berth_type(berth_type, superuser_api_client):
     global_id = to_global_id("BerthTypeNode", str(berth_type.id))
 
     variables = {
@@ -417,12 +346,7 @@ def test_update_berth_type(berth_type, superuser):
 
     assert BerthType.objects.count() == 1
 
-    executed = client.execute(
-        query=UPDATE_BERTH_TYPE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(UPDATE_BERTH_TYPE_MUTATION, input=variables)
 
     assert BerthType.objects.count() == 1
     assert executed["data"]["updateBerthType"]["berthType"]["id"] == global_id
@@ -442,7 +366,7 @@ def test_update_berth_type(berth_type, superuser):
     )
 
 
-def test_update_berth_type_no_id(superuser, berth_type):
+def test_update_berth_type_no_id(superuser_api_client, berth_type):
     variables = {
         "width": 999,
         "length": 999,
@@ -450,30 +374,22 @@ def test_update_berth_type_no_id(superuser, berth_type):
 
     assert BerthType.objects.count() == 1
 
-    executed = client.execute(
-        query=UPDATE_BERTH_TYPE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(UPDATE_BERTH_TYPE_MUTATION, input=variables)
 
     assert BerthType.objects.count() == 1
     assert_field_missing("id", executed)
 
 
-@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
-def test_update_berth_type_not_enough_permissions(user, berth_type):
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
+def test_update_berth_type_not_enough_permissions(api_client, berth_type):
     variables = {
         "id": to_global_id("BerthTypeNode", str(berth_type.id)),
     }
     assert BerthType.objects.count() == 1
 
-    executed = client.execute(
-        query=UPDATE_BERTH_TYPE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=user,
-    )
+    executed = api_client.execute(UPDATE_BERTH_TYPE_MUTATION, input=variables)
 
     assert BerthType.objects.count() == 1
     assert_not_enough_permissions(executed)
@@ -510,7 +426,7 @@ mutation CreateHarbor($input: CreateHarborMutationInput!) {
 """
 
 
-def test_create_harbor(superuser, availability_level, municipality):
+def test_create_harbor(superuser_api_client, availability_level, municipality):
     variables = {
         "imageFile": "image.png",
         "availabilityLevelId": availability_level.id,
@@ -528,13 +444,7 @@ def test_create_harbor(superuser, availability_level, municipality):
 
     assert Harbor.objects.count() == 0
 
-    executed = client.execute(
-        query=CREATE_HARBOR_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        lang="en",
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(CREATE_HARBOR_MUTATION, input=variables)
 
     assert Harbor.objects.count() == 1
     assert executed["data"]["createHarbor"]["harbor"]["id"] is not None
@@ -542,12 +452,12 @@ def test_create_harbor(superuser, availability_level, municipality):
         "type": variables["location"]["type"],
         "coordinates": variables["location"]["coordinates"],
     }
-    assert executed["data"]["createHarbor"]["harbor"]["bbox"] == [
+    assert executed["data"]["createHarbor"]["harbor"]["bbox"] == (
         variables["location"]["coordinates"][0],
         variables["location"]["coordinates"][1],
         variables["location"]["coordinates"][0],
         variables["location"]["coordinates"][1],
-    ]
+    )
     assert executed["data"]["createHarbor"]["harbor"]["properties"] == {
         "name": variables["name"],
         "servicemapId": variables["servicemapId"],
@@ -562,66 +472,48 @@ def test_create_harbor(superuser, availability_level, municipality):
     }
 
 
-@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
-def test_create_harbor_not_enough_permissions(user):
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
+def test_create_harbor_not_enough_permissions(api_client):
     variables = {"name": "Foobarsatama"}
 
     assert Harbor.objects.count() == 0
 
-    executed = client.execute(
-        query=CREATE_HARBOR_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=user,
-    )
+    executed = api_client.execute(CREATE_HARBOR_MUTATION, input=variables)
 
     assert Harbor.objects.count() == 0
     assert_not_enough_permissions(executed)
 
 
-def test_create_harbor_availability_level_doesnt_exist(superuser):
+def test_create_harbor_availability_level_doesnt_exist(superuser_api_client):
     variables = {"availabilityLevelId": "9999"}
 
     assert Harbor.objects.count() == 0
 
-    executed = client.execute(
-        query=CREATE_HARBOR_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(CREATE_HARBOR_MUTATION, input=variables)
 
     assert Harbor.objects.count() == 0
     assert_doesnt_exist("AvailabilityLevel", executed)
 
 
-def test_create_harbor_municipality_doesnt_exist(superuser):
+def test_create_harbor_municipality_doesnt_exist(superuser_api_client):
     variables = {"municipalityId": "foobarland"}
 
     assert Harbor.objects.count() == 0
 
-    executed = client.execute(
-        query=CREATE_HARBOR_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(CREATE_HARBOR_MUTATION, input=variables)
 
     assert Harbor.objects.count() == 0
     assert_doesnt_exist("Municipality", executed)
 
 
-def test_create_harbor_duplicated_servicemap_id(superuser, harbor):
+def test_create_harbor_duplicated_servicemap_id(superuser_api_client, harbor):
     variables = {"servicemapId": str(harbor.servicemap_id)}
 
     assert Harbor.objects.count() == 1
 
-    executed = client.execute(
-        query=CREATE_HARBOR_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(CREATE_HARBOR_MUTATION, input=variables)
 
     assert Harbor.objects.count() == 1
     assert_field_duplicated("servicemap_id", executed)
@@ -636,53 +528,40 @@ mutation DeleteHarbor($input: DeleteHarborMutationInput!) {
 """
 
 
-def test_delete_harbor(superuser, harbor):
+def test_delete_harbor(superuser_api_client, harbor):
     variables = {
         "id": to_global_id("HarborNode", str(harbor.id)),
     }
 
     assert Harbor.objects.count() == 1
 
-    client.execute(
-        query=DELETE_HARBOR_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    superuser_api_client.execute(DELETE_HARBOR_MUTATION, input=variables)
 
     assert Harbor.objects.count() == 0
 
 
-@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
-def test_delete_harbor_not_enough_permissions(user, harbor):
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
+def test_delete_harbor_not_enough_permissions(api_client, harbor):
     variables = {
         "id": to_global_id("HarborNode", str(harbor.id)),
     }
 
     assert Harbor.objects.count() == 1
 
-    executed = client.execute(
-        query=DELETE_HARBOR_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=user,
-    )
+    executed = api_client.execute(DELETE_HARBOR_MUTATION, input=variables)
 
     assert Harbor.objects.count() == 1
     assert_not_enough_permissions(executed)
 
 
-def test_delete_harbor_inexistent_harbor(superuser):
+def test_delete_harbor_inexistent_harbor(superuser_api_client):
     variables = {
         "id": to_global_id("HarborNode", uuid.uuid4()),
     }
 
-    executed = client.execute(
-        query=DELETE_HARBOR_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(DELETE_HARBOR_MUTATION, input=variables)
 
     assert_doesnt_exist("Harbor", executed)
 
@@ -718,7 +597,7 @@ mutation UpdateHarbor($input: UpdateHarborMutationInput!) {
 """
 
 
-def test_update_harbor(superuser, harbor, availability_level, municipality):
+def test_update_harbor(superuser_api_client, harbor, availability_level, municipality):
     global_id = to_global_id("HarborNode", str(harbor.id))
 
     variables = {
@@ -739,13 +618,7 @@ def test_update_harbor(superuser, harbor, availability_level, municipality):
 
     assert Harbor.objects.count() == 1
 
-    executed = client.execute(
-        query=UPDATE_HARBOR_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        lang="en",
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(UPDATE_HARBOR_MUTATION, input=variables,)
 
     assert Harbor.objects.count() == 1
     assert executed["data"]["updateHarbor"]["harbor"]["id"] == global_id
@@ -753,12 +626,12 @@ def test_update_harbor(superuser, harbor, availability_level, municipality):
         "type": variables["location"]["type"],
         "coordinates": variables["location"]["coordinates"],
     }
-    assert executed["data"]["updateHarbor"]["harbor"]["bbox"] == [
+    assert executed["data"]["updateHarbor"]["harbor"]["bbox"] == (
         variables["location"]["coordinates"][0],
         variables["location"]["coordinates"][1],
         variables["location"]["coordinates"][0],
         variables["location"]["coordinates"][1],
-    ]
+    )
     assert executed["data"]["updateHarbor"]["harbor"]["properties"] == {
         "name": variables["name"],
         "servicemapId": variables["servicemapId"],
@@ -773,41 +646,33 @@ def test_update_harbor(superuser, harbor, availability_level, municipality):
     }
 
 
-def test_update_harbor_no_id(superuser, harbor):
+def test_update_harbor_no_id(superuser_api_client, harbor):
     variables = {"name": "Uusi Foobarsatama"}
 
     assert Harbor.objects.count() == 1
 
-    executed = client.execute(
-        query=UPDATE_HARBOR_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(UPDATE_HARBOR_MUTATION, input=variables,)
 
     assert Harbor.objects.count() == 1
     assert_field_missing("id", executed)
 
 
-@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
-def test_update_harbor_not_enough_permissions(user, harbor):
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
+def test_update_harbor_not_enough_permissions(api_client, harbor):
     variables = {
         "id": to_global_id("HarborNode", str(harbor.id)),
     }
     assert Harbor.objects.count() == 1
 
-    executed = client.execute(
-        query=UPDATE_HARBOR_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=user,
-    )
+    executed = api_client.execute(UPDATE_HARBOR_MUTATION, input=variables)
 
     assert Harbor.objects.count() == 1
     assert_not_enough_permissions(executed)
 
 
-def test_update_harbor_availability_level_doesnt_exist(harbor, superuser):
+def test_update_harbor_availability_level_doesnt_exist(harbor, superuser_api_client):
     variables = {
         "id": to_global_id("HarborNode", harbor.id),
         "availabilityLevelId": "9999",
@@ -815,18 +680,13 @@ def test_update_harbor_availability_level_doesnt_exist(harbor, superuser):
 
     assert Harbor.objects.count() == 1
 
-    executed = client.execute(
-        query=UPDATE_HARBOR_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(UPDATE_HARBOR_MUTATION, input=variables)
 
     assert Harbor.objects.count() == 1
     assert_doesnt_exist("AvailabilityLevel", executed)
 
 
-def test_update_harbor_municipality_doesnt_exist(harbor, superuser):
+def test_update_harbor_municipality_doesnt_exist(harbor, superuser_api_client):
     variables = {
         "id": to_global_id("HarborNode", harbor.id),
         "municipalityId": "foobarland",
@@ -834,12 +694,7 @@ def test_update_harbor_municipality_doesnt_exist(harbor, superuser):
 
     assert Harbor.objects.count() == 1
 
-    executed = client.execute(
-        query=UPDATE_HARBOR_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(UPDATE_HARBOR_MUTATION, input=variables)
 
     assert Harbor.objects.count() == 1
     assert_doesnt_exist("Municipality", executed)
@@ -871,7 +726,7 @@ mutation CreatePier($input: CreatePierMutationInput!) {
 """
 
 
-def test_create_pier(superuser, harbor, boat_type):
+def test_create_pier(superuser_api_client, harbor, boat_type):
     harbor_id = to_global_id("HarborNode", harbor.id)
     boat_types = [boat_type.id]
 
@@ -889,12 +744,7 @@ def test_create_pier(superuser, harbor, boat_type):
     }
     assert Pier.objects.count() == 0
 
-    executed = client.execute(
-        query=CREATE_PIER_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(CREATE_PIER_MUTATION, input=variables)
 
     assert Pier.objects.count() == 1
     assert executed["data"]["createPier"]["pier"]["id"] is not None
@@ -911,50 +761,37 @@ def test_create_pier(superuser, harbor, boat_type):
     }
 
 
-@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
-def test_create_pier_not_enough_permissions(user):
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
+def test_create_pier_not_enough_permissions(api_client):
     variables = {"harborId": ""}
 
     assert Pier.objects.count() == 0
 
-    executed = client.execute(
-        query=CREATE_PIER_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=user,
-    )
+    executed = api_client.execute(CREATE_PIER_MUTATION, input=variables)
 
     assert Pier.objects.count() == 0
     assert_not_enough_permissions(executed)
 
 
-def test_create_harbor_harbor_doesnt_exist(superuser):
+def test_create_harbor_harbor_doesnt_exist(superuser_api_client):
     variables = {"harborId": to_global_id("BerthNode", uuid.uuid4())}
 
     assert Pier.objects.count() == 0
 
-    executed = client.execute(
-        query=CREATE_PIER_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(CREATE_PIER_MUTATION, input=variables)
 
     assert Pier.objects.count() == 0
     assert_doesnt_exist("Harbor", executed)
 
 
-def test_create_pier_no_harbor(superuser):
+def test_create_pier_no_harbor(superuser_api_client):
     variables = {"identifier": "foo"}
 
     assert Pier.objects.count() == 0
 
-    executed = client.execute(
-        query=CREATE_PIER_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(CREATE_PIER_MUTATION, input=variables)
 
     assert Pier.objects.count() == 0
     assert_field_missing("harborId", executed)
@@ -969,47 +806,36 @@ mutation DeletePier($input: DeletePierMutationInput!) {
 """
 
 
-def test_delete_pier(superuser, pier):
+def test_delete_pier(superuser_api_client, pier):
     variables = {"id": to_global_id("PierNode", str(pier.id))}
 
     assert Pier.objects.count() == 1
 
-    client.execute(
-        query=DELETE_PIER_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
+    superuser_api_client.execute(
+        DELETE_PIER_MUTATION, input=variables,
     )
 
     assert Pier.objects.count() == 0
 
 
-@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
-def test_delete_pier_not_enough_permissions(user, pier):
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
+def test_delete_pier_not_enough_permissions(api_client, pier):
     variables = {"id": to_global_id("PierNode", str(pier.id))}
 
     assert Pier.objects.count() == 1
 
-    executed = client.execute(
-        query=DELETE_PIER_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=user,
-    )
+    executed = api_client.execute(DELETE_PIER_MUTATION, input=variables)
 
     assert Pier.objects.count() == 1
     assert_not_enough_permissions(executed)
 
 
-def test_delete_pier_inexistent_pier(superuser):
+def test_delete_pier_inexistent_pier(superuser_api_client):
     variables = {"id": to_global_id("PierNode", uuid.uuid4())}
 
-    executed = client.execute(
-        query=DELETE_PIER_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(DELETE_PIER_MUTATION, input=variables)
 
     assert_doesnt_exist("Pier", executed)
 
@@ -1045,7 +871,7 @@ mutation UpdatePier($input: UpdatePierMutationInput!) {
 """
 
 
-def test_update_pier(superuser, pier, harbor, boat_type):
+def test_update_pier(superuser_api_client, pier, harbor, boat_type):
     global_id = to_global_id("PierNode", str(pier.id))
     harbor_id = to_global_id("HarborNode", str(harbor.id))
     boat_types = [boat_type.id]
@@ -1066,12 +892,7 @@ def test_update_pier(superuser, pier, harbor, boat_type):
 
     assert Pier.objects.count() == 1
 
-    executed = client.execute(
-        query=UPDATE_PIER_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(UPDATE_PIER_MUTATION, input=variables)
 
     assert Pier.objects.count() == 1
     assert executed["data"]["updatePier"]["pier"]["id"] == global_id
@@ -1079,12 +900,12 @@ def test_update_pier(superuser, pier, harbor, boat_type):
         "type": variables["location"]["type"],
         "coordinates": variables["location"]["coordinates"],
     }
-    assert executed["data"]["updatePier"]["pier"]["bbox"] == [
+    assert executed["data"]["updatePier"]["pier"]["bbox"] == (
         variables["location"]["coordinates"][0],
         variables["location"]["coordinates"][1],
         variables["location"]["coordinates"][0],
         variables["location"]["coordinates"][1],
-    ]
+    )
     assert executed["data"]["updatePier"]["pier"]["properties"] == {
         "harbor": {"id": harbor_id},
         "identifier": variables["identifier"],
@@ -1098,50 +919,37 @@ def test_update_pier(superuser, pier, harbor, boat_type):
     }
 
 
-def test_update_pier_no_id(superuser, pier):
+def test_update_pier_no_id(superuser_api_client, pier):
     variables = {"water": False}
 
     assert Pier.objects.count() == 1
 
-    executed = client.execute(
-        query=UPDATE_PIER_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(UPDATE_PIER_MUTATION, input=variables)
 
     assert Pier.objects.count() == 1
     assert_field_missing("id", executed)
 
 
-@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
-def test_update_pier_not_enough_permissions(user, pier):
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
+def test_update_pier_not_enough_permissions(api_client, pier):
     variables = {"id": to_global_id("PierNode", str(pier.id))}
     assert Pier.objects.count() == 1
 
-    executed = client.execute(
-        query=UPDATE_PIER_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=user,
-    )
+    executed = api_client.execute(UPDATE_PIER_MUTATION, input=variables)
 
     assert Pier.objects.count() == 1
     assert_not_enough_permissions(executed)
 
 
-def test_update_pier_empty_boat_type_list(superuser, pier):
+def test_update_pier_empty_boat_type_list(superuser_api_client, pier):
     global_id = to_global_id("PierNode", pier.id)
     variables = {"id": global_id, "suitableBoatTypes": []}
 
     assert Pier.objects.count() == 1
 
-    executed = client.execute(
-        query=UPDATE_PIER_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(UPDATE_PIER_MUTATION, input=variables)
 
     assert Pier.objects.count() == 1
     assert executed["data"]["updatePier"]["pier"]["id"] == global_id
@@ -1151,7 +959,7 @@ def test_update_pier_empty_boat_type_list(superuser, pier):
     )
 
 
-def test_update_pier_harbor_doesnt_exist(superuser, pier):
+def test_update_pier_harbor_doesnt_exist(superuser_api_client, pier):
     variables = {
         "id": to_global_id("PierNode", pier.id),
         "harborId": to_global_id("HarborNode", uuid.uuid4()),
@@ -1159,12 +967,7 @@ def test_update_pier_harbor_doesnt_exist(superuser, pier):
 
     assert Pier.objects.count() == 1
 
-    executed = client.execute(
-        query=UPDATE_PIER_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
-    )
+    executed = superuser_api_client.execute(UPDATE_PIER_MUTATION, input=variables)
 
     assert Pier.objects.count() == 1
     assert_doesnt_exist("Harbor", executed)

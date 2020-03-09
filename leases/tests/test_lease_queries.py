@@ -1,14 +1,7 @@
 import pytest
 from graphql_relay import to_global_id
 
-from berth_reservations.tests.utils import (
-    assert_not_enough_permissions,
-    GraphQLTestClient,
-)
-
-client = GraphQLTestClient()
-
-GRAPHQL_URL = "/graphql_v2/"
+from berth_reservations.tests.utils import assert_not_enough_permissions
 
 QUERY_BERTH_LEASES = """
 query GetBerthLeases {
@@ -53,15 +46,13 @@ query GetBerthLeases {
 """
 
 
-def test_query_berth_leases(superuser, berth_lease, berth_application):
+def test_query_berth_leases(superuser_api_client, berth_lease, berth_application):
     berth_application.customer = berth_lease.customer
     berth_application.save()
     berth_lease.application = berth_application
     berth_lease.save()
 
-    executed = client.execute(
-        query=QUERY_BERTH_LEASES, graphql_url=GRAPHQL_URL, user=superuser,
-    )
+    executed = superuser_api_client.execute(QUERY_BERTH_LEASES)
 
     berth_type_id = to_global_id("BerthTypeNode", berth_lease.berth.berth_type.id)
     berth_lease_id = to_global_id("BerthLeaseNode", berth_lease.id)
@@ -89,11 +80,11 @@ def test_query_berth_leases(superuser, berth_lease, berth_application):
     }
 
 
-@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
-def test_query_berth_leases_not_enough_permissions(user):
-    executed = client.execute(
-        query=QUERY_BERTH_LEASES, graphql_url=GRAPHQL_URL, user=user,
-    )
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
+def test_query_berth_leases_not_enough_permissions(api_client):
+    executed = api_client.execute(QUERY_BERTH_LEASES)
 
     assert_not_enough_permissions(executed)
 
@@ -137,7 +128,7 @@ query GetBerthLease {
 """
 
 
-def test_query_berth_lease(superuser, berth_lease, berth_application):
+def test_query_berth_lease(superuser_api_client, berth_lease, berth_application):
     berth_lease_id = to_global_id("BerthLeaseNode", berth_lease.id)
 
     berth_application.customer = berth_lease.customer
@@ -146,7 +137,7 @@ def test_query_berth_lease(superuser, berth_lease, berth_application):
     berth_lease.save()
 
     query = QUERY_BERTH_LEASE % berth_lease_id
-    executed = client.execute(query=query, graphql_url=GRAPHQL_URL, user=superuser,)
+    executed = superuser_api_client.execute(query)
 
     berth_type_id = to_global_id("BerthTypeNode", berth_lease.berth.berth_type.id)
     berth_application_id = to_global_id("BerthApplicationNode", berth_application.id)
@@ -173,19 +164,20 @@ def test_query_berth_lease(superuser, berth_lease, berth_application):
     }
 
 
-@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
-def test_query_berth_lease_not_enough_permissions_valid_id(user, berth_lease):
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
+def test_query_berth_lease_not_enough_permissions_valid_id(api_client, berth_lease):
     berth_lease_id = to_global_id("BerthLeaseNode", berth_lease.id)
 
     query = QUERY_BERTH_LEASE % berth_lease_id
-    executed = client.execute(query=query, graphql_url=GRAPHQL_URL, user=user,)
+
+    executed = api_client.execute(query)
 
     assert_not_enough_permissions(executed)
 
 
-def test_query_berth_lease_invalid_id(user):
-    executed = client.execute(
-        query=QUERY_BERTH_LEASE, graphql_url=GRAPHQL_URL, user=user,
-    )
+def test_query_berth_lease_invalid_id(user_api_client):
+    executed = user_api_client.execute(QUERY_BERTH_LEASE)
 
     assert executed["data"]["berthLease"] is None

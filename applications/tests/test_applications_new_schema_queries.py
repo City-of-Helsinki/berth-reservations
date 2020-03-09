@@ -1,31 +1,33 @@
 from graphql_relay.node.node import to_global_id
 
 from applications.enums import ApplicationStatus
-from berth_reservations.tests.utils import assert_in_errors, GraphQLTestClient
+from berth_reservations.tests.utils import assert_in_errors
 
-GRAPHQL_URL = "/graphql_v2/"
-
-
-def test_berth_applications_no_customer_filter_true(berth_application, superuser):
-    berth_application.customer = None
-    berth_application.save()
-
-    client = GraphQLTestClient()
-    query = """
-        query APPLICATIONS {
-            berthApplications(noCustomer: true) {
-                edges {
-                    node {
+BERTH_APPLICATIONS_WITH_NO_CUSTOMER_FILTER_QUERY = """
+    query APPLICATIONS {
+        berthApplications(noCustomer: %s) {
+            edges {
+                node {
+                    id
+                    customer {
                         id
-                        customer {
-                            id
-                        }
                     }
                 }
             }
         }
-    """
-    executed = client.execute(query=query, graphql_url=GRAPHQL_URL, user=superuser)
+    }
+"""
+
+
+def test_berth_applications_no_customer_filter_true(
+    berth_application, superuser_api_client
+):
+    berth_application.customer = None
+    berth_application.save()
+
+    query = BERTH_APPLICATIONS_WITH_NO_CUSTOMER_FILTER_QUERY % "true"
+
+    executed = superuser_api_client.execute(query)
 
     assert executed["data"] == {
         "berthApplications": {
@@ -43,48 +45,42 @@ def test_berth_applications_no_customer_filter_true(berth_application, superuser
     }
 
 
-def test_berth_applications_no_customer_filter_false(berth_application, superuser):
+def test_berth_applications_no_customer_filter_false(
+    berth_application, superuser_api_client
+):
     berth_application.customer = None
     berth_application.save()
 
-    client = GraphQLTestClient()
-    query = """
-        query APPLICATIONS {
-            berthApplications(noCustomer: false) {
-                edges {
-                    node {
-                        id
-                        customer {
-                            id
-                        }
-                    }
-                }
-            }
-        }
-    """
-    executed = client.execute(query=query, graphql_url=GRAPHQL_URL, user=superuser)
+    query = BERTH_APPLICATIONS_WITH_NO_CUSTOMER_FILTER_QUERY % "false"
+
+    executed = superuser_api_client.execute(query)
 
     assert executed["data"] == {"berthApplications": {"edges": []}}
 
 
-def test_berth_applications_statuses_filter(berth_application, superuser):
-    berth_application.status = ApplicationStatus.HANDLED
-    berth_application.save()
-
-    client = GraphQLTestClient()
-    query = """
-        query APPLICATIONS {
-            berthApplications(statuses: [HANDLED]) {
-                edges {
-                    node {
-                        id
-                        status
-                    }
+BERTH_APPLICATIONS_WITH_STATUSES_FILTER_QUERY = """
+    query APPLICATIONS {
+        berthApplications(statuses: [%s]) {
+            edges {
+                node {
+                    id
+                    status
                 }
             }
         }
-    """
-    executed = client.execute(query=query, graphql_url=GRAPHQL_URL, user=superuser)
+    }
+"""
+
+
+def test_berth_applications_statuses_filter(berth_application, superuser_api_client):
+    berth_application.status = ApplicationStatus.HANDLED
+    berth_application.save()
+
+    status_enum_str = ApplicationStatus.HANDLED.name
+
+    query = BERTH_APPLICATIONS_WITH_STATUSES_FILTER_QUERY % status_enum_str
+
+    executed = superuser_api_client.execute(query)
 
     assert executed["data"] == {
         "berthApplications": {
@@ -94,7 +90,7 @@ def test_berth_applications_statuses_filter(berth_application, superuser):
                         "id": to_global_id(
                             "BerthApplicationNode", berth_application.id
                         ),
-                        "status": ApplicationStatus.HANDLED.name,
+                        "status": status_enum_str,
                     }
                 }
             ]
@@ -102,69 +98,49 @@ def test_berth_applications_statuses_filter(berth_application, superuser):
     }
 
 
-def test_berth_applications_statuses_filter_empty(berth_application, superuser):
+def test_berth_applications_statuses_filter_empty(
+    berth_application, superuser_api_client
+):
     berth_application.status = ApplicationStatus.HANDLED
     berth_application.save()
 
-    client = GraphQLTestClient()
-    query = """
-        query APPLICATIONS {
-            berthApplications(statuses: [PENDING]) {
-                edges {
-                    node {
-                        id
-                        status
-                    }
-                }
-            }
-        }
-    """
-    executed = client.execute(query=query, graphql_url=GRAPHQL_URL, user=superuser)
+    status_enum_str = ApplicationStatus.PENDING.name
+
+    query = BERTH_APPLICATIONS_WITH_STATUSES_FILTER_QUERY % status_enum_str
+
+    executed = superuser_api_client.execute(query)
 
     assert executed["data"] == {"berthApplications": {"edges": []}}
 
 
-def test_berth_applications_statuses_filter_invalid_enum(berth_application, superuser):
+def test_berth_applications_statuses_filter_invalid_enum(
+    berth_application, superuser_api_client
+):
     berth_application.status = ApplicationStatus.HANDLED
     berth_application.save()
 
-    client = GraphQLTestClient()
-    query = """
-        query APPLICATIONS {
-            berthApplications(statuses: [FOOBAR]) {
-                edges {
-                    node {
-                        id
-                        status
-                    }
-                }
-            }
-        }
-    """
-    executed = client.execute(query=query, graphql_url=GRAPHQL_URL, user=superuser)
+    nonexistent_enum_str = "FOOBAR"
+
+    query = BERTH_APPLICATIONS_WITH_STATUSES_FILTER_QUERY % nonexistent_enum_str
+
+    executed = superuser_api_client.execute(query)
+
     assert_in_errors(
-        "invalid value [FOOBAR].", executed,
+        "invalid value [%s]." % nonexistent_enum_str, executed,
     )
 
 
-def test_berth_applications_statuses_filter_empty_list(berth_application, superuser):
+def test_berth_applications_statuses_filter_empty_list(
+    berth_application, superuser_api_client
+):
     berth_application.status = ApplicationStatus.HANDLED
     berth_application.save()
 
-    client = GraphQLTestClient()
-    query = """
-        query APPLICATIONS {
-            berthApplications(statuses: []) {
-                edges {
-                    node {
-                        id
-                        status
-                    }
-                }
-            }
-        }
-    """
-    executed = client.execute(query=query, graphql_url=GRAPHQL_URL, user=superuser)
+    empty_filter_str = ""
+
+    query = BERTH_APPLICATIONS_WITH_STATUSES_FILTER_QUERY % empty_filter_str
+
+    executed = superuser_api_client.execute(query)
 
     assert executed["data"] == {
         "berthApplications": {

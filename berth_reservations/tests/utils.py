@@ -1,9 +1,53 @@
 import json
 
-from django.test import Client
+from django.contrib.auth.models import AnonymousUser
+from django.test import Client, RequestFactory
+from graphene.test import Client as GrapheneClient
+
+from berth_reservations.new_schema import new_schema
+from berth_reservations.schema import schema
 
 
-class GraphQLTestClient(Client):
+class ApiClient(GrapheneClient):
+    def execute(self, *args, **kwargs):
+        """
+        Custom wrapper on the execute method, that allows passing
+        "input" as a keyword argument, which get passed to
+        kwargs["variables"]["input"] to comply with the relay
+        spec for mutations.
+        """
+
+        input = kwargs.pop("input", {})
+        if input:
+            assert (
+                "variables" not in kwargs
+            ), 'Do not pass both "variables" and "input" at the same time'
+            kwargs["variables"] = {"input": input}
+        return super().execute(*args, **kwargs)
+
+
+def create_api_client(user=None, graphql_v2=True):
+    if not user:
+        # Django's AuthenticationMiddleware inserts AnonymousUser
+        # for all requests, where user is not authenticated.
+        user = AnonymousUser()
+
+    if graphql_v2:
+        request = RequestFactory().post("/graphql_v2")
+        request.user = user
+        client = ApiClient(new_schema, context=request)
+
+    else:
+        request = RequestFactory().post("/graphql")
+        request.user = user
+        client = ApiClient(schema, context=request)
+
+    client.user = user
+
+    return client
+
+
+class GraphQLDjangoTestClient(Client):
     """
     Custom test client to allow configuring language header.
     Standard graphene.test.Client does not allow doing that.
