@@ -19,8 +19,8 @@ LeaseStatusEnum = graphene.Enum.from_enum(LeaseStatus)
 
 
 class BerthLeaseNode(DjangoObjectType):
-    berth = graphene.Field(BerthNode)
-    status = LeaseStatusEnum()
+    berth = graphene.Field(BerthNode, required=True)
+    status = LeaseStatusEnum(required=True)
 
     class Meta:
         model = BerthLease

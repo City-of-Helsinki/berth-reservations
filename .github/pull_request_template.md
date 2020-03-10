@@ -1,11 +1,14 @@
 ## Description :sparkles:
 
 ## Issues :bug:
+**Closes :no_good_woman:**
+
+**Related :handshake:**
 
 ## Testing :alembic:
-**Automated tests ⚙️**
+**Automated tests :gear:️**
 
-**Manual testing 👷** 
+**Manual testing :construction_worker_man:** 
 
 ## Screenshots :camera_flash:
 

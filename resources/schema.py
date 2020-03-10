@@ -166,11 +166,21 @@ class BerthNodeFilterSet(django_filters.FilterSet):
 
 
 class BerthNode(DjangoObjectType):
+    leases = DjangoConnectionField(
+        "leases.schema.BerthLeaseNode",
+        description="**Requires permissions** to query this field.",
+    )
+
     class Meta:
         model = Berth
         fields = ("id", "number", "pier", "berth_type", "comment")
         interfaces = (relay.Node,)
         filterset_class = BerthNodeFilterSet
+
+    @login_required
+    @superuser_required
+    def resolve_leases(self, info, **kwargs):
+        return self.leases.all()
 
 
 class AbstractMapType:
@@ -746,7 +756,11 @@ class Query:
     berth_types = DjangoConnectionField(BerthTypeNode)
 
     berth = relay.Node.Field(BerthNode)
-    berths = DjangoFilterConnectionField(BerthNode)
+    berths = DjangoFilterConnectionField(
+        BerthNode,
+        description="**Requires permissions** to query `leases` field. "
+        "Otherwise, everything is available",
+    )
 
     pier = relay.Node.Field(PierNode)
     piers = DjangoFilterConnectionField(
