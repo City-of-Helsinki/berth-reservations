@@ -5,6 +5,7 @@ import pytest
 from freezegun import freeze_time
 from graphql_relay import to_global_id
 
+from applications.enums import ApplicationStatus
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
     assert_field_missing,
@@ -34,6 +35,7 @@ mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
             }
             application {
                 id
+                status
             }
         }
     }
@@ -71,7 +73,10 @@ def test_create_berth_lease(
         "customer": {
             "id": to_global_id("BerthProfileNode", berth_application.customer.id)
         },
-        "application": {"id": variables.get("applicationId")},
+        "application": {
+            "id": variables.get("applicationId"),
+            "status": ApplicationStatus.OFFER_GENERATED.name,
+        },
         "berth": {"id": variables.get("berthId")},
     }
 
@@ -112,7 +117,10 @@ def test_create_berth_lease_all_arguments(
         "customer": {
             "id": to_global_id("BerthProfileNode", berth_application.customer.id)
         },
-        "application": {"id": variables.get("applicationId")},
+        "application": {
+            "id": variables.get("applicationId"),
+            "status": ApplicationStatus.OFFER_GENERATED.name,
+        },
         "berth": {"id": variables.get("berthId")},
     }
 
@@ -212,8 +220,12 @@ mutation DELETE_DRAFTED_LEASE($input: DeleteBerthLeaseMutationInput!) {
 """
 
 
-def test_delete_berth_lease_drafted(berth_lease, superuser_api_client):
+def test_delete_berth_lease_drafted(
+    berth_lease, berth_application, superuser_api_client
+):
     variables = {"id": to_global_id("BerthLeaseNode", berth_lease.id)}
+    berth_lease.application = berth_application
+    berth_lease.save()
 
     assert BerthLease.objects.count() == 1
 
@@ -222,6 +234,7 @@ def test_delete_berth_lease_drafted(berth_lease, superuser_api_client):
     )
 
     assert BerthLease.objects.count() == 0
+    assert berth_application.status == ApplicationStatus.PENDING
 
 
 def test_delete_berth_lease_not_drafted(berth_lease, superuser_api_client):
