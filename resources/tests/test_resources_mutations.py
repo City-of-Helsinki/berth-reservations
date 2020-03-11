@@ -1,7 +1,8 @@
 import uuid
 
 import pytest
-from graphql_relay import to_global_id
+from django.core.files.uploadedfile import SimpleUploadedFile
+from graphql_relay import from_global_id, to_global_id
 
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
@@ -10,7 +11,7 @@ from berth_reservations.tests.utils import (
     assert_invalid_enum,
     assert_not_enough_permissions,
 )
-from resources.models import Berth, BerthType, Harbor, Pier
+from resources.models import Berth, BerthType, get_harbor_media_folder, Harbor, Pier
 
 CREATE_BERTH_MUTATION = """
 mutation CreateBerth($input: CreateBerthMutationInput!) {
@@ -409,6 +410,7 @@ mutation CreateHarbor($input: CreateHarborMutationInput!) {
             properties {
                 name
                 servicemapId
+                imageFile
                 streetAddress
                 zipCode
                 availabilityLevel {
@@ -427,8 +429,12 @@ mutation CreateHarbor($input: CreateHarborMutationInput!) {
 
 
 def test_create_harbor(superuser_api_client, availability_level, municipality):
+    image_file_name = "image.png"
+
     variables = {
-        "imageFile": "image.png",
+        "imageFile": SimpleUploadedFile(
+            name=image_file_name, content=None, content_type="image/png"
+        ),
         "availabilityLevelId": availability_level.id,
         "municipalityId": municipality.id,
         "numberOfPlaces": 150,
@@ -447,7 +453,13 @@ def test_create_harbor(superuser_api_client, availability_level, municipality):
     executed = superuser_api_client.execute(CREATE_HARBOR_MUTATION, input=variables)
 
     assert Harbor.objects.count() == 1
-    assert executed["data"]["createHarbor"]["harbor"]["id"] is not None
+
+    harbor_id = from_global_id(executed["data"]["createHarbor"]["harbor"].pop("id"))[1]
+    image_file = executed["data"]["createHarbor"]["harbor"]["properties"].pop(
+        "imageFile"
+    )
+
+    assert harbor_id is not None
     assert executed["data"]["createHarbor"]["harbor"]["geometry"] == {
         "type": variables["location"]["type"],
         "coordinates": variables["location"]["coordinates"],
@@ -457,6 +469,10 @@ def test_create_harbor(superuser_api_client, availability_level, municipality):
         variables["location"]["coordinates"][1],
         variables["location"]["coordinates"][0],
         variables["location"]["coordinates"][1],
+    )
+    assert (
+        get_harbor_media_folder(Harbor.objects.get(pk=harbor_id), image_file_name)
+        in image_file
     )
     assert executed["data"]["createHarbor"]["harbor"]["properties"] == {
         "name": variables["name"],
@@ -580,6 +596,7 @@ mutation UpdateHarbor($input: UpdateHarborMutationInput!) {
             properties {
                 name
                 servicemapId
+                imageFile
                 streetAddress
                 zipCode
                 availabilityLevel {
@@ -599,10 +616,13 @@ mutation UpdateHarbor($input: UpdateHarborMutationInput!) {
 
 def test_update_harbor(superuser_api_client, harbor, availability_level, municipality):
     global_id = to_global_id("HarborNode", str(harbor.id))
+    image_file_name = "image.png"
 
     variables = {
         "id": global_id,
-        "imageFile": "image.png",
+        "imageFile": SimpleUploadedFile(
+            name=image_file_name, content=None, content_type="image/png"
+        ),
         "availabilityLevelId": availability_level.id,
         "municipalityId": municipality.id,
         "numberOfPlaces": 175,
@@ -620,6 +640,10 @@ def test_update_harbor(superuser_api_client, harbor, availability_level, municip
 
     executed = superuser_api_client.execute(UPDATE_HARBOR_MUTATION, input=variables,)
 
+    image_file = executed["data"]["updateHarbor"]["harbor"]["properties"].pop(
+        "imageFile"
+    )
+
     assert Harbor.objects.count() == 1
     assert executed["data"]["updateHarbor"]["harbor"]["id"] == global_id
     assert executed["data"]["updateHarbor"]["harbor"]["geometry"] == {
@@ -632,6 +656,7 @@ def test_update_harbor(superuser_api_client, harbor, availability_level, municip
         variables["location"]["coordinates"][0],
         variables["location"]["coordinates"][1],
     )
+    assert get_harbor_media_folder(harbor, image_file_name) in image_file
     assert executed["data"]["updateHarbor"]["harbor"]["properties"] == {
         "name": variables["name"],
         "servicemapId": variables["servicemapId"],
