@@ -1,8 +1,8 @@
 import pytest
 
 from berth_reservations.tests.conftest import *  # noqa
-from harbors.models import Harbor
 from harbors.tests.conftest import *  # noqa
+from harbors.tests.factories import HarborFactory
 from users.tests.conftest import *  # noqa
 
 from ..models import BerthSwitch, BerthSwitchReason
@@ -13,10 +13,8 @@ from .factories import BerthApplicationFactory
 def berth_switch_info(request):
     has_reason = request.param if hasattr(request, "param") else None
 
-    harbor = Harbor.objects.language("en").create(name="Current harbor")
-    harbor.set_current_language("fi")
-    harbor.name = "Nykyinen satama"
-    harbor.save()
+    harbor = HarborFactory()
+    harbor.create_translation("fi", name="Nykyinen satama")
 
     berth_switch_reason = (
         BerthSwitchReason.objects.language("fi").create(title="Good reason")

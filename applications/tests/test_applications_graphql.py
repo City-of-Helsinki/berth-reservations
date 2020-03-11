@@ -81,7 +81,9 @@ def test_create_berth_application(
                         "reason": {"id": str(berth_switch_reason.id)},
                     },
                     "chosenHarbors": {
-                        "edges": [{"node": {"properties": {"zipCode": "00100"}}}]
+                        "edges": [
+                            {"node": {"properties": {"zipCode": harbor.zip_code}}}
+                        ]
                     },
                 }
             }
@@ -158,7 +160,9 @@ def test_create_berth_application_wo_reason(old_schema_api_client, boat_type, ha
                 "berthApplication": {
                     "berthSwitch": {"berthNumber": "D33", "reason": None},
                     "chosenHarbors": {
-                        "edges": [{"node": {"properties": {"zipCode": "00100"}}}]
+                        "edges": [
+                            {"node": {"properties": {"zipCode": harbor.zip_code}}}
+                        ]
                     },
                 }
             }
@@ -222,7 +226,9 @@ def test_create_winter_storage_application(
             "createWinterStorageApplication": {
                 "winterStorageApplication": {
                     "chosenAreas": {
-                        "edges": [{"node": {"properties": {"zipCode": "00200"}}}]
+                        "edges": [
+                            {"node": {"properties": {"zipCode": winter_area.zip_code}}}
+                        ]
                     }
                 }
             }
