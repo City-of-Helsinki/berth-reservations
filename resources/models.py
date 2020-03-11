@@ -4,8 +4,6 @@ import shutil
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.files.storage import FileSystemStorage
-from django.db.models.signals import post_delete
-from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumIntegerField
 from munigeo.models import Municipality
@@ -288,13 +286,6 @@ class WinterStorageAreaMap(AbstractAreaMap):
         related_name="maps",
         on_delete=models.CASCADE,
     )
-
-
-@receiver(post_delete, sender=HarborMap)
-@receiver(post_delete, sender=WinterStorageAreaMap)
-def delete_map_file_handler(sender, instance, **kwargs):
-    if instance.map_file:
-        os.unlink(instance.map_file.path)
 
 
 class AbstractAreaSection(UUIDModel):
