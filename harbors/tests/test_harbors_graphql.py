@@ -7,7 +7,7 @@ def test_get_boat_type(boat_type, old_schema_api_client):
         }
     """
     executed = old_schema_api_client.execute(query)
-    assert executed["data"]["boatTypes"] == [{"name": "Dinghy"}]
+    assert executed["data"]["boatTypes"] == [{"name": boat_type.name}]
 
 
 def test_get_harbors(harbor, old_schema_api_client):
@@ -27,5 +27,5 @@ def test_get_harbors(harbor, old_schema_api_client):
     """
     executed = old_schema_api_client.execute(query)
     assert executed["data"]["harbors"]["edges"] == [
-        {"node": {"properties": {"name": "Sunny Harbor", "zipCode": "00100"}}}
+        {"node": {"properties": {"name": harbor.name, "zipCode": harbor.zip_code}}}
     ]
