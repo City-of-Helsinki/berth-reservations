@@ -1,10 +1,10 @@
 import sentry_sdk
-from graphene_django.views import GraphQLView
+from graphene_file_upload.django import FileUploadGraphQLView
 
 from .exceptions import VenepaikkaGraphQLError
 
 
-class SentryGraphQLView(GraphQLView):
+class SentryGraphQLView(FileUploadGraphQLView):
     def execute_graphql_request(self, request, data, query, *args, **kwargs):
         """
         Extract any exceptions and send some of them to Sentry.

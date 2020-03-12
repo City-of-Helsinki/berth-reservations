@@ -6,13 +6,11 @@ from graphql_relay import to_global_id
 from berth_reservations.tests.utils import (
     assert_in_errors,
     assert_not_enough_permissions,
-    GraphQLTestClient,
 )
+from leases.tests.factories import BerthLeaseFactory
 
-client = GraphQLTestClient()
 
-
-def test_get_boat_type(boat_type):
+def test_get_boat_type(api_client, boat_type):
     query = """
         {
             boatTypes {
@@ -20,11 +18,11 @@ def test_get_boat_type(boat_type):
             }
         }
     """
-    executed = client.execute(query=query, graphql_url="/graphql_v2/")
+    executed = api_client.execute(query)
     assert executed["data"] == {"boatTypes": [{"name": boat_type.name}]}
 
 
-def test_get_harbors(harbor):
+def test_get_harbors(api_client, harbor):
     query = """
         {
             harbors {
@@ -43,7 +41,7 @@ def test_get_harbors(harbor):
             }
         }
     """
-    executed = client.execute(query=query, graphql_url="/graphql_v2/")
+    executed = api_client.execute(query)
     assert executed["data"] == {
         "harbors": {
             "edges": [
@@ -58,7 +56,7 @@ def test_get_harbors(harbor):
     }
 
 
-def test_get_piers(pier):
+def test_get_piers(api_client, pier):
     query = """
         {
             piers {
@@ -79,7 +77,7 @@ def test_get_piers(pier):
             }
         }
     """
-    executed = client.execute(query=query, graphql_url="/graphql_v2/")
+    executed = api_client.execute(query)
     expected_suitables_boat_types = [
         {"name": bt.name} for bt in pier.suitable_boat_types.all()
     ]
@@ -100,7 +98,7 @@ def test_get_piers(pier):
     }
 
 
-def test_get_berths(berth):
+def test_get_berths(api_client, berth):
     query = """
         {
             berths {
@@ -112,13 +110,65 @@ def test_get_berths(berth):
             }
         }
     """
-    executed = client.execute(query=query, graphql_url="/graphql_v2/")
+    executed = api_client.execute(query)
     assert executed["data"] == {
         "berths": {"edges": [{"node": {"number": berth.number}}]}
     }
 
 
-def test_get_winter_storage_areas(winter_storage_area):
+def test_get_berth_with_leases(superuser_api_client, berth):
+    berth_lease = BerthLeaseFactory(berth=berth)
+
+    query = """
+        {
+            berth(id: "%s") {
+                leases {
+                    edges {
+                        node {
+                            id
+                        }
+                    }
+                }
+            }
+        }
+    """ % to_global_id(
+        "BerthNode", berth.id
+    )
+    executed = superuser_api_client.execute(query)
+
+    assert executed["data"]["berth"] == {
+        "leases": {
+            "edges": [{"node": {"id": to_global_id("BerthLeaseNode", berth_lease.id)}}]
+        }
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
+def test_get_berth_with_leases_not_enough_permissions(api_client, berth):
+    BerthLeaseFactory(berth=berth)
+
+    query = """
+        {
+            berth(id: "%s") {
+                leases {
+                    edges {
+                        node {
+                            id
+                        }
+                    }
+                }
+            }
+        }
+    """ % to_global_id(
+        "BerthNode", berth.id
+    )
+    executed = api_client.execute(query)
+    assert_not_enough_permissions(executed)
+
+
+def test_get_winter_storage_areas(api_client, winter_storage_area):
     query = """
         {
             winterStorageAreas {
@@ -137,7 +187,7 @@ def test_get_winter_storage_areas(winter_storage_area):
             }
         }
     """
-    executed = client.execute(query=query, graphql_url="/graphql_v2/")
+    executed = api_client.execute(query)
     assert executed["data"] == {
         "winterStorageAreas": {
             "edges": [
@@ -155,7 +205,7 @@ def test_get_winter_storage_areas(winter_storage_area):
     }
 
 
-def test_get_winter_storage_sections(winter_storage_section):
+def test_get_winter_storage_sections(api_client, winter_storage_section):
     query = """
         {
             winterStorageSections {
@@ -173,7 +223,7 @@ def test_get_winter_storage_sections(winter_storage_section):
             }
         }
     """
-    executed = client.execute(query=query, graphql_url="/graphql_v2/")
+    executed = api_client.execute(query)
     assert executed["data"] == {
         "winterStorageSections": {
             "edges": [
@@ -188,7 +238,7 @@ def test_get_winter_storage_sections(winter_storage_section):
     }
 
 
-def test_get_winter_storage_places(winter_storage_place):
+def test_get_winter_storage_places(api_client, winter_storage_place):
     query = """
         {
             winterStoragePlaces {
@@ -200,7 +250,7 @@ def test_get_winter_storage_places(winter_storage_place):
             }
         }
     """
-    executed = client.execute(query=query, graphql_url="/graphql_v2/")
+    executed = api_client.execute(query)
     assert executed["data"] == {
         "winterStoragePlaces": {
             "edges": [{"node": {"number": winter_storage_place.number}}]
@@ -208,7 +258,9 @@ def test_get_winter_storage_places(winter_storage_place):
     }
 
 
-def test_get_piers_filter_by_application(superuser, berth_application, berth):
+def test_get_piers_filter_by_application(
+    superuser_api_client, berth_application, berth
+):
     query = """
         {
             piers(forApplication: "%s") {
@@ -235,7 +287,7 @@ def test_get_piers_filter_by_application(superuser, berth_application, berth):
         "BerthApplicationNode", berth_application.id
     )
 
-    executed = client.execute(query=query, graphql_url="/graphql_v2/", user=superuser)
+    executed = superuser_api_client.execute(query)
 
     expected_berths = []
     if (
@@ -267,7 +319,9 @@ def test_get_piers_filter_by_application(superuser, berth_application, berth):
     }
 
 
-def test_get_piers_filter_error_both_filters(superuser, berth_application, berth):
+def test_get_piers_filter_error_both_filters(
+    superuser_api_client, berth_application, berth
+):
     query = """
         {
             piers(forApplication: "%s", minBerthWidth: 1.0, minBerthLength: 1.0) {
@@ -291,16 +345,19 @@ def test_get_piers_filter_error_both_filters(superuser, berth_application, berth
         "BerthApplicationNode", berth_application.id
     )
 
-    executed = client.execute(query=query, graphql_url="/graphql_v2/", user=superuser)
+    executed = superuser_api_client.execute(query)
+
     assert_in_errors(
         "You cannot filter by dimension (width, length) and application a the same time",
         executed,
     )
 
 
-@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
 def test_get_piers_filter_by_application_not_enough_permissions(
-    user, berth_application
+    api_client, berth_application
 ):
     query = """
         {
@@ -325,6 +382,6 @@ def test_get_piers_filter_by_application_not_enough_permissions(
         "BerthApplicationNode", berth_application.id
     )
 
-    executed = client.execute(query=query, graphql_url="/graphql_v2/", user=user)
+    executed = api_client.execute(query)
 
     assert_not_enough_permissions(executed)

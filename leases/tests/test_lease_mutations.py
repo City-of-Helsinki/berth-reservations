@@ -5,19 +5,15 @@ import pytest
 from freezegun import freeze_time
 from graphql_relay import to_global_id
 
+from applications.enums import ApplicationStatus
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
     assert_field_missing,
     assert_in_errors,
     assert_not_enough_permissions,
-    GraphQLTestClient,
 )
 from leases.enums import LeaseStatus
 from leases.models import BerthLease
-
-client = GraphQLTestClient()
-
-GRAPHQL_URL = "/graphql_v2/"
 
 CREATE_BERTH_LEASE_MUTATION = """
 mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
@@ -39,6 +35,7 @@ mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
             }
             application {
                 id
+                status
             }
         }
     }
@@ -47,7 +44,9 @@ mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
 
 
 @freeze_time("2020-01-01T08:00:00Z")
-def test_create_berth_lease(superuser, berth_application, berth, customer_profile):
+def test_create_berth_lease(
+    superuser_api_client, berth_application, berth, customer_profile
+):
     berth_application.customer = customer_profile
     berth_application.save()
 
@@ -58,11 +57,8 @@ def test_create_berth_lease(superuser, berth_application, berth, customer_profil
 
     assert BerthLease.objects.count() == 0
 
-    executed = client.execute(
-        query=CREATE_BERTH_LEASE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
+    executed = superuser_api_client.execute(
+        CREATE_BERTH_LEASE_MUTATION, input=variables,
     )
 
     assert BerthLease.objects.count() == 1
@@ -77,14 +73,17 @@ def test_create_berth_lease(superuser, berth_application, berth, customer_profil
         "customer": {
             "id": to_global_id("BerthProfileNode", berth_application.customer.id)
         },
-        "application": {"id": variables.get("applicationId")},
+        "application": {
+            "id": variables.get("applicationId"),
+            "status": ApplicationStatus.OFFER_GENERATED.name,
+        },
         "berth": {"id": variables.get("berthId")},
     }
 
 
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_lease_all_arguments(
-    superuser, berth_application, berth, boat, customer_profile
+    superuser_api_client, berth_application, berth, boat, customer_profile
 ):
     berth_application.customer = customer_profile
     berth_application.save()
@@ -94,7 +93,7 @@ def test_create_berth_lease_all_arguments(
     variables = {
         "applicationId": to_global_id("BerthApplicationNode", berth_application.id),
         "berthId": to_global_id("BerthNode", berth.id),
-        "boatId": str(boat.id),
+        "boatId": to_global_id("BoatNode", boat.id),
         "startDate": "2020-03-01",
         "endDate": "2020-12-31",
         "comment": "Very wow, such comment",
@@ -102,11 +101,8 @@ def test_create_berth_lease_all_arguments(
 
     assert BerthLease.objects.count() == 0
 
-    executed = client.execute(
-        query=CREATE_BERTH_LEASE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
+    executed = superuser_api_client.execute(
+        CREATE_BERTH_LEASE_MUTATION, input=variables,
     )
 
     assert BerthLease.objects.count() == 1
@@ -121,92 +117,82 @@ def test_create_berth_lease_all_arguments(
         "customer": {
             "id": to_global_id("BerthProfileNode", berth_application.customer.id)
         },
-        "application": {"id": variables.get("applicationId")},
+        "application": {
+            "id": variables.get("applicationId"),
+            "status": ApplicationStatus.OFFER_GENERATED.name,
+        },
         "berth": {"id": variables.get("berthId")},
     }
 
 
-@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
-def test_create_berth_lease_not_enough_permissions(user, berth_application, berth):
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
+def test_create_berth_lease_not_enough_permissions(
+    api_client, berth_application, berth
+):
     variables = {
         "applicationId": to_global_id("BerthApplicationNode", berth_application.id),
         "berthId": to_global_id("BerthNode", berth.id),
     }
 
-    executed = client.execute(
-        query=CREATE_BERTH_LEASE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=user,
-    )
+    executed = api_client.execute(CREATE_BERTH_LEASE_MUTATION, input=variables)
 
     assert_not_enough_permissions(executed)
 
 
-def test_create_berth_lease_application_doesnt_exist(superuser, berth):
+def test_create_berth_lease_application_doesnt_exist(superuser_api_client, berth):
     variables = {
         "applicationId": to_global_id("BerthApplicationNode", randint(0, 999)),
         "berthId": to_global_id("BerthNode", berth.id),
     }
 
-    executed = client.execute(
-        query=CREATE_BERTH_LEASE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
+    executed = superuser_api_client.execute(
+        CREATE_BERTH_LEASE_MUTATION, input=variables,
     )
 
     assert_doesnt_exist("BerthApplication", executed)
 
 
-def test_create_berth_lease_berth_doesnt_exist(superuser, berth_application):
+def test_create_berth_lease_berth_doesnt_exist(superuser_api_client, berth_application):
     variables = {
         "applicationId": to_global_id("BerthApplicationNode", berth_application.id),
         "berthId": to_global_id("BerthNode", uuid.uuid4()),
     }
 
-    executed = client.execute(
-        query=CREATE_BERTH_LEASE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
+    executed = superuser_api_client.execute(
+        CREATE_BERTH_LEASE_MUTATION, input=variables,
     )
 
     assert_doesnt_exist("Berth", executed)
 
 
-def test_create_berth_lease_application_id_missing(superuser):
+def test_create_berth_lease_application_id_missing(superuser_api_client):
     variables = {
         "berthId": to_global_id("BerthNode", uuid.uuid4()),
     }
 
-    executed = client.execute(
-        query=CREATE_BERTH_LEASE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
+    executed = superuser_api_client.execute(
+        CREATE_BERTH_LEASE_MUTATION, input=variables,
     )
 
     assert_field_missing("applicationId", executed)
 
 
-def test_create_berth_lease_berth_id_missing(superuser):
+def test_create_berth_lease_berth_id_missing(superuser_api_client):
     variables = {
         "berthId": to_global_id("BerthApplicationNode", randint(0, 999)),
     }
 
-    executed = client.execute(
-        query=CREATE_BERTH_LEASE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
+    executed = superuser_api_client.execute(
+        CREATE_BERTH_LEASE_MUTATION, input=variables,
     )
 
     assert_field_missing("berthId", executed)
 
 
 def test_create_berth_lease_application_without_customer(
-    superuser, berth_application, berth
+    superuser_api_client, berth_application, berth
 ):
     berth_application.customer = None
     berth_application.save()
@@ -216,11 +202,8 @@ def test_create_berth_lease_application_without_customer(
         "berthId": to_global_id("BerthNode", berth.id),
     }
 
-    executed = client.execute(
-        query=CREATE_BERTH_LEASE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
+    executed = superuser_api_client.execute(
+        CREATE_BERTH_LEASE_MUTATION, input=variables,
     )
 
     assert_in_errors(
@@ -237,22 +220,24 @@ mutation DELETE_DRAFTED_LEASE($input: DeleteBerthLeaseMutationInput!) {
 """
 
 
-def test_delete_berth_lease_drafted(berth_lease, superuser):
+def test_delete_berth_lease_drafted(
+    berth_lease, berth_application, superuser_api_client
+):
     variables = {"id": to_global_id("BerthLeaseNode", berth_lease.id)}
+    berth_lease.application = berth_application
+    berth_lease.save()
 
     assert BerthLease.objects.count() == 1
 
-    client.execute(
-        query=DELETE_BERTH_LEASE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
+    superuser_api_client.execute(
+        DELETE_BERTH_LEASE_MUTATION, input=variables,
     )
 
     assert BerthLease.objects.count() == 0
+    assert berth_application.status == ApplicationStatus.PENDING
 
 
-def test_delete_berth_lease_not_drafted(berth_lease, superuser):
+def test_delete_berth_lease_not_drafted(berth_lease, superuser_api_client):
     berth_lease.status = LeaseStatus.OFFERED
     berth_lease.save()
 
@@ -260,11 +245,8 @@ def test_delete_berth_lease_not_drafted(berth_lease, superuser):
 
     assert BerthLease.objects.count() == 1
 
-    executed = client.execute(
-        query=DELETE_BERTH_LEASE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
+    executed = superuser_api_client.execute(
+        DELETE_BERTH_LEASE_MUTATION, input=variables,
     )
 
     assert BerthLease.objects.count() == 1
@@ -273,35 +255,29 @@ def test_delete_berth_lease_not_drafted(berth_lease, superuser):
     )
 
 
-@pytest.mark.parametrize("user", ["none", "base", "staff"], indirect=True)
-def test_delete_berth_lease_not_enough_permissions(user, berth_lease):
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+)
+def test_delete_berth_lease_not_enough_permissions(api_client, berth_lease):
     variables = {
         "id": to_global_id("BerthLeaseNode", berth_lease.id),
     }
 
     assert BerthLease.objects.count() == 1
 
-    executed = client.execute(
-        query=DELETE_BERTH_LEASE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=user,
-    )
+    executed = api_client.execute(DELETE_BERTH_LEASE_MUTATION, input=variables,)
 
     assert BerthLease.objects.count() == 1
     assert_not_enough_permissions(executed)
 
 
-def test_delete_berth_lease_inexistent_lease(superuser):
+def test_delete_berth_lease_inexistent_lease(superuser_api_client):
     variables = {
         "id": to_global_id("BerthLeaseNode", uuid.uuid4()),
     }
 
-    executed = client.execute(
-        query=DELETE_BERTH_LEASE_MUTATION,
-        variables=variables,
-        graphql_url=GRAPHQL_URL,
-        user=superuser,
+    executed = superuser_api_client.execute(
+        DELETE_BERTH_LEASE_MUTATION, input=variables,
     )
 
     assert_doesnt_exist("BerthLease", executed)

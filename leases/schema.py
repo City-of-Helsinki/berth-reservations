@@ -5,6 +5,7 @@ from graphene_django import DjangoConnectionField, DjangoObjectType
 from graphql_jwt.decorators import login_required, superuser_required
 from graphql_relay import from_global_id
 
+from applications.enums import ApplicationStatus
 from applications.models import BerthApplication
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.models import Boat
@@ -18,8 +19,8 @@ LeaseStatusEnum = graphene.Enum.from_enum(LeaseStatus)
 
 
 class BerthLeaseNode(DjangoObjectType):
-    berth = graphene.Field(BerthNode)
-    status = LeaseStatusEnum()
+    berth = graphene.Field(BerthNode, required=True)
+    status = LeaseStatusEnum(required=True)
 
     class Meta:
         model = BerthLease
@@ -79,7 +80,11 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
         input["customer"] = application.customer
 
         if input.get("boat_id", False):
-            boat = Boat.objects.filter(pk=input.pop("boat_id")).first()
+            boat_id = from_global_id(input.pop("boat_id"))[1]
+            try:
+                boat = Boat.objects.get(pk=boat_id)
+            except Boat.DoesNotExist:
+                raise VenepaikkaGraphQLError(_("There is no boat with the given id."))
 
             if boat.owner.id != input["customer"].id:
                 raise VenepaikkaGraphQLError(
@@ -89,6 +94,9 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
             input["boat"] = boat
 
         lease = BerthLease.objects.create(**input)
+
+        application.status = ApplicationStatus.OFFER_GENERATED
+        application.save()
 
         return CreateBerthLeaseMutation(berth_lease=lease)
 
@@ -115,6 +123,10 @@ class DeleteBerthLeaseMutation(graphene.ClientIDMutation):
             raise VenepaikkaGraphQLError(
                 _(f"Lease object is not DRAFTED anymore: {lease.status}")
             )
+
+        if lease.application:
+            lease.application.status = ApplicationStatus.PENDING
+            lease.application.save()
 
         lease.delete()
 

@@ -194,7 +194,7 @@ class BerthApplicationAdmin(admin.ModelAdmin):
             try:
                 send_notification(
                     application.email,
-                    NotificationType.BERTH_APPLICATION_CREATED,
+                    NotificationType.BERTH_APPLICATION_CREATED.value,
                     application.get_notification_context(),
                     application.language,
                 )
@@ -317,7 +317,7 @@ class WinterStorageApplicationAdmin(admin.ModelAdmin):
             try:
                 send_notification(
                     application.email,
-                    NotificationType.WINTER_STORAGE_APPLICATION_CREATED,
+                    NotificationType.WINTER_STORAGE_APPLICATION_CREATED.value,
                     application.get_notification_context(),
                     application.language,
                 )

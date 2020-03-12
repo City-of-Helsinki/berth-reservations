@@ -9,6 +9,7 @@ from graphene import relay
 from graphene_django.fields import DjangoConnectionField, DjangoListField
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
+from graphene_file_upload.scalars import Upload
 from graphql_jwt.decorators import login_required, superuser_required
 from graphql_relay import from_global_id
 from munigeo.models import Municipality
@@ -23,8 +24,10 @@ from .models import (
     BerthType,
     BoatType,
     Harbor,
+    HarborMap,
     Pier,
     WinterStorageArea,
+    WinterStorageAreaMap,
     WinterStoragePlace,
     WinterStoragePlaceType,
     WinterStorageSection,
@@ -64,7 +67,7 @@ def _resolve_piers(info, **kwargs):
 
     if application_global_id:
         user = info.context.user
-        if user.is_authenticated and user.is_superuser:
+        if user and user.is_authenticated and user.is_superuser:
             application_id = from_global_id(application_global_id)[1]
             try:
                 application = BerthApplication.objects.get(pk=application_id)
@@ -163,11 +166,46 @@ class BerthNodeFilterSet(django_filters.FilterSet):
 
 
 class BerthNode(DjangoObjectType):
+    leases = DjangoConnectionField(
+        "leases.schema.BerthLeaseNode",
+        description="**Requires permissions** to query this field.",
+    )
+
     class Meta:
         model = Berth
         fields = ("id", "number", "pier", "berth_type", "comment")
         interfaces = (relay.Node,)
         filterset_class = BerthNodeFilterSet
+
+    @login_required
+    @superuser_required
+    def resolve_leases(self, info, **kwargs):
+        return self.leases.all()
+
+
+class AbstractMapType:
+    url = graphene.String(required=True)
+
+    def resolve_url(self, info, **kwargs):
+        return info.context.build_absolute_uri(self.map_file.url)
+
+
+class HarborMapType(DjangoObjectType, AbstractMapType):
+    class Meta:
+        model = HarborMap
+        fields = (
+            "id",
+            "url",
+        )
+
+
+class WinterStorageAreaMapType(DjangoObjectType, AbstractMapType):
+    class Meta:
+        model = WinterStorageAreaMap
+        fields = (
+            "id",
+            "url",
+        )
 
 
 class HarborNode(graphql_geojson.GeoJSONType):
@@ -191,6 +229,7 @@ class HarborNode(graphql_geojson.GeoJSONType):
     street_address = graphene.String()
     municipality = graphene.String()
     image_file = graphene.String()
+    maps = graphene.List(HarborMapType, required=True)
     piers = DjangoFilterConnectionField(
         PierNode,
         min_berth_width=graphene.Float(),
@@ -208,6 +247,9 @@ class HarborNode(graphql_geojson.GeoJSONType):
             return info.context.build_absolute_uri(self.image_file.url)
         else:
             return None
+
+    def resolve_maps(self, info, **kwargs):
+        return self.maps.all()
 
     def resolve_piers(self, info, **kwargs):
         return _resolve_piers(info, **kwargs).filter(harbor_id=self.id)
@@ -265,12 +307,16 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
     street_address = graphene.String()
     municipality = graphene.String()
     image_file = graphene.String()
+    maps = graphene.List(WinterStorageAreaMapType, required=True)
 
     def resolve_image_file(self, info, **kwargs):
         if self.image_file:
             return info.context.build_absolute_uri(self.image_file.url)
         else:
             return None
+
+    def resolve_maps(self, info, **kwargs):
+        return self.maps.all()
 
 
 class AbstractAreaInput:
@@ -453,7 +499,11 @@ class DeleteBerthTypeMutation(graphene.ClientIDMutation):
 
 class HarborInput(AbstractAreaInput):
     municipality_id = graphene.String()
-    image_file = graphene.String()
+    image_file = Upload()
+    add_map_files = graphene.List(
+        Upload,
+        description="List of map files that will be added to the existing ones belonging to the Harbor.",
+    )
     availability_level_id = graphene.ID()
     number_of_places = graphene.Int()
     maximum_width = graphene.Int()
@@ -461,6 +511,22 @@ class HarborInput(AbstractAreaInput):
     maximum_depth = graphene.Int()
     name = graphene.String()
     street_address = graphene.String()
+
+
+def add_map_files(model, map_files, instance):
+    try:
+        for map_file in map_files:
+            model.objects.create(map_file, instance)
+    except IntegrityError as e:
+        raise VenepaikkaGraphQLError(e)
+
+
+def remove_map_files(model, map_files):
+    try:
+        for file_id in map_files:
+            model.objects.get(pk=file_id).delete()
+    except model.DoesNotExist as e:
+        raise VenepaikkaGraphQLError(e)
 
 
 class CreateHarborMutation(graphene.ClientIDMutation):
@@ -495,6 +561,7 @@ class CreateHarborMutation(graphene.ClientIDMutation):
                 raise VenepaikkaGraphQLError(e)
 
         harbor = Harbor.objects.language(lang).create(**input)
+        add_map_files(HarborMap, input.pop("add_map_files", []), harbor)
 
         return CreateHarborMutation(harbor=harbor)
 
@@ -502,6 +569,9 @@ class CreateHarborMutation(graphene.ClientIDMutation):
 class UpdateHarborMutation(graphene.ClientIDMutation):
     class Input(HarborInput):
         id = graphene.ID(required=True)
+        remove_map_files = graphene.List(
+            graphene.ID, description="List of IDs of the maps to be removed."
+        )
 
     harbor = graphene.Field(HarborNode)
 
@@ -535,6 +605,8 @@ class UpdateHarborMutation(graphene.ClientIDMutation):
         ) as e:
             raise VenepaikkaGraphQLError(e)
 
+        add_map_files(HarborMap, input.pop("add_map_files", []), harbor)
+        remove_map_files(HarborMap, input.pop("remove_map_files", []))
         update_object(harbor, input)
 
         return UpdateHarborMutation(harbor=harbor)
@@ -684,7 +756,11 @@ class Query:
     berth_types = DjangoConnectionField(BerthTypeNode)
 
     berth = relay.Node.Field(BerthNode)
-    berths = DjangoFilterConnectionField(BerthNode)
+    berths = DjangoFilterConnectionField(
+        BerthNode,
+        description="**Requires permissions** to query `leases` field. "
+        "Otherwise, everything is available",
+    )
 
     pier = relay.Node.Field(PierNode)
     piers = DjangoFilterConnectionField(
@@ -822,9 +898,19 @@ class Mutation:
     update_berth_type = UpdateBerthTypeMutation.Field()
 
     # Harbors
-    create_harbor = CreateHarborMutation.Field()
+    create_harbor = CreateHarborMutation.Field(
+        description="The `imageFile` field takes an image as input. "
+        "To provide the file, you have to perform the request with a client "
+        "that conforms to the [GraphQL Multipart Request Spec]"
+        "(https://github.com/jaydenseric/graphql-multipart-request-spec)."
+    )
     delete_harbor = DeleteHarborMutation.Field()
-    update_harbor = UpdateHarborMutation.Field()
+    update_harbor = UpdateHarborMutation.Field(
+        description="The `imageFile` field takes an image as input. "
+        "To provide the file, you have to perform the request with a client "
+        "that conforms to the [GraphQL Multipart Request Spec]"
+        "(https://github.com/jaydenseric/graphql-multipart-request-spec)."
+    )
 
     # Piers
     create_pier = CreatePierMutation.Field()

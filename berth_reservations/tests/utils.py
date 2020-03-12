@@ -1,65 +1,48 @@
-import json
+from django.contrib.auth.models import AnonymousUser
+from django.test import RequestFactory
+from graphene.test import Client as GrapheneClient
 
-from django.test import Client
+from berth_reservations.new_schema import new_schema
+from berth_reservations.schema import schema
 
 
-class GraphQLTestClient(Client):
-    """
-    Custom test client to allow configuring language header.
-    Standard graphene.test.Client does not allow doing that.
-    """
-
-    def execute(
-        self,
-        query="",
-        op_name=None,
-        variables=None,
-        graphql_url="/graphql/",
-        lang="en",
-        user=None,
-    ):
+class ApiClient(GrapheneClient):
+    def execute(self, *args, **kwargs):
         """
-        Function that posts the passed query to our project's GraphQL endpoint.
-
-        :param query: GraphQL query to run
-        :type query: str
-        :param op_name: If the query is a mutation or named query, you must
-                        supply the op_name.  For annon queries ("{ ... }"),
-                        should be None (default).
-        :type op_name: str
-        :param variables: If provided, the $input variable in GraphQL will be set
-                          to this value
-        :type variables: None | dict
-        :param lang: Language to be set in the "Accept-Language" header.
-        :type lang: str
-        :param user: In case the query requires authentication, a "user" with the
-                     desired permissions can be passed. It will only attempt to
-                     login if a user is passed.
-        :type user: users.models.User
-
-        :return: response from graphql endpoint.  The response has the "data" key.
-                 It will have the "error" key if any error happened.
-        :rtype: dict
+        Custom wrapper on the execute method, that allows passing
+        "input" as a keyword argument, which get passed to
+        kwargs["variables"]["input"] to comply with the relay
+        spec for mutations.
         """
 
-        body = {"query": query}
-        if op_name:
-            body["operation_name"] = op_name
-        if variables:
-            body["variables"] = {"input": variables}
+        input = kwargs.pop("input", {})
+        if input:
+            assert (
+                "variables" not in kwargs
+            ), 'Do not pass both "variables" and "input" at the same time'
+            kwargs["variables"] = {"input": input}
+        return super().execute(*args, **kwargs)
 
-        if user:
-            self.force_login(user)
 
-        resp = self.post(
-            graphql_url,
-            json.dumps(body),
-            content_type="application/json",
-            HTTP_ACCEPT_LANGUAGE=lang,
-        )
+def create_api_client(user=None, graphql_v2=True):
+    if not user:
+        # Django's AuthenticationMiddleware inserts AnonymousUser
+        # for all requests, where user is not authenticated.
+        user = AnonymousUser()
 
-        response_json = json.loads(resp.content.decode())
-        return response_json
+    if graphql_v2:
+        request = RequestFactory().post("/graphql_v2")
+        request.user = user
+        client = ApiClient(new_schema, context=request)
+
+    else:
+        request = RequestFactory().post("/graphql")
+        request.user = user
+        client = ApiClient(schema, context=request)
+
+    client.user = user
+
+    return client
 
 
 def assert_not_enough_permissions(executed):

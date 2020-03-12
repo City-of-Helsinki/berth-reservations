@@ -1,5 +1,6 @@
 import pytest
 import xlrd
+from django.conf import settings
 from freezegun import freeze_time
 
 from ..enums import WinterStorageMethod
@@ -14,6 +15,8 @@ from ..utils import (
     export_winter_storage_applications_as_xlsx,
 )
 from .factories import BerthApplicationFactory, WinterStorageApplicationFactory
+
+EXCEL_FILE_LANG = settings.LANGUAGES[0][0]
 
 
 @freeze_time("2019-01-14T08:00:00Z")
@@ -72,24 +75,28 @@ def test_exporting_berth_applications_to_excel(
     xl_sheet = wb.sheet_by_name("berth_applications")
     row = xl_sheet.row(1)
 
-    boat_type.set_current_language("fi")
-
     expected_berth_switch_reason = ""
     expected_berth_switch_str = ""
     if berth_switch:
+        switch_harbor_name = berth_switch_info.harbor.safe_translation_getter(
+            "name", language_code=EXCEL_FILE_LANG
+        )
         expected_berth_switch_str = "{} ({}): {}".format(
-            berth_switch_info.harbor.name,
-            berth_switch_info.pier,
-            berth_switch_info.berth_number,
+            switch_harbor_name, berth_switch_info.pier, berth_switch_info.berth_number,
         )
         expected_berth_switch_reason = (
             berth_switch_info.reason.title if berth_switch_info.reason else "---"
         )
 
+    harbor_name = harbor.safe_translation_getter("name", language_code=EXCEL_FILE_LANG)
+    boat_type_name = boat_type.safe_translation_getter(
+        "name", language_code=EXCEL_FILE_LANG
+    )
+
     assert xl_sheet.ncols == 35
 
     assert row[0].value == "2019-01-14 10:00"
-    assert row[1].value == "1: Aurinkoinen satama"
+    assert row[1].value == "1: {}".format(harbor_name)
     assert row[2].value == expected_berth_switch_str
     assert row[3].value == expected_berth_switch_reason
     assert row[4].value == ("" if customer_private else "ACME Inc.")
@@ -101,7 +108,7 @@ def test_exporting_berth_applications_to_excel(
     assert row[10].value == "00170"
     assert row[11].value == "Helsinki"
     assert row[12].value == "0411234567"
-    assert row[13].value == boat_type.name
+    assert row[13].value == boat_type_name
     assert row[14].value == 2.0
     assert row[15].value == 3.5
     assert row[16].value == 1
@@ -170,12 +177,17 @@ def test_exporting_winter_storage_applications_to_excel(
     xl_sheet = wb.sheet_by_name("winter_storage_applications")
     row = xl_sheet.row(1)
 
-    boat_type.set_current_language("fi")
+    winter_area_name = winter_area.safe_translation_getter(
+        "name", language_code=EXCEL_FILE_LANG
+    )
+    boat_type_name = boat_type.safe_translation_getter(
+        "name", language_code=EXCEL_FILE_LANG
+    )
 
     assert xl_sheet.ncols == 24
 
     assert row[0].value == "2019-01-14 10:00"
-    assert row[1].value == "1: {}".format(winter_area.name)
+    assert row[1].value == "1: {}".format(winter_area_name)
     assert row[2].value == ("" if customer_private else "ACME Inc.")
     assert row[3].value == ("" if customer_private else "123123-000")
     assert row[4].value == "Kyösti"
@@ -187,7 +199,7 @@ def test_exporting_winter_storage_applications_to_excel(
     assert row[10].value == "0411234567"
     assert row[11].value == WinterStorageMethod.ON_TRESTLES.label
     assert row[12].value == "hel001"
-    assert row[13].value == boat_type.name
+    assert row[13].value == boat_type_name
     assert row[14].value == 2.0
     assert row[15].value == 3.5
     assert row[16].value == "B0A7"

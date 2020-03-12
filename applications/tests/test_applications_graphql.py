@@ -2,12 +2,12 @@ from string import Template
 
 from graphql_relay.node.node import to_global_id
 
-from berth_reservations.tests.utils import GraphQLTestClient
 from harbors.schema import HarborType, WinterStorageAreaType
 
 
-def test_create_berth_application(boat_type, harbor, berth_switch_reason):
-    client = GraphQLTestClient()
+def test_create_berth_application(
+    old_schema_api_client, boat_type, harbor, berth_switch_reason
+):
     t = Template(
         """
         mutation createBerthApplication {
@@ -71,7 +71,7 @@ def test_create_berth_application(boat_type, harbor, berth_switch_reason):
         desired_harbor=harbor_node_id,
         berth_switch_reason_id=berth_switch_reason.id,
     )
-    executed = client.execute(mutation)
+    executed = old_schema_api_client.execute(mutation)
     assert executed == {
         "data": {
             "createBerthApplication": {
@@ -81,7 +81,9 @@ def test_create_berth_application(boat_type, harbor, berth_switch_reason):
                         "reason": {"id": str(berth_switch_reason.id)},
                     },
                     "chosenHarbors": {
-                        "edges": [{"node": {"properties": {"zipCode": "00100"}}}]
+                        "edges": [
+                            {"node": {"properties": {"zipCode": harbor.zip_code}}}
+                        ]
                     },
                 }
             }
@@ -89,8 +91,7 @@ def test_create_berth_application(boat_type, harbor, berth_switch_reason):
     }
 
 
-def test_create_berth_application_wo_reason(boat_type, harbor):
-    client = GraphQLTestClient()
+def test_create_berth_application_wo_reason(old_schema_api_client, boat_type, harbor):
     t = Template(
         """
         mutation createBerthApplication {
@@ -152,14 +153,16 @@ def test_create_berth_application_wo_reason(boat_type, harbor):
         boat_type_id=boat_type.id,
         desired_harbor=harbor_node_id,
     )
-    executed = client.execute(mutation)
+    executed = old_schema_api_client.execute(mutation)
     assert executed == {
         "data": {
             "createBerthApplication": {
                 "berthApplication": {
                     "berthSwitch": {"berthNumber": "D33", "reason": None},
                     "chosenHarbors": {
-                        "edges": [{"node": {"properties": {"zipCode": "00100"}}}]
+                        "edges": [
+                            {"node": {"properties": {"zipCode": harbor.zip_code}}}
+                        ]
                     },
                 }
             }
@@ -167,8 +170,9 @@ def test_create_berth_application_wo_reason(boat_type, harbor):
     }
 
 
-def test_create_winter_storage_application(boat_type, winter_area):
-    client = GraphQLTestClient()
+def test_create_winter_storage_application(
+    old_schema_api_client, boat_type, winter_area
+):
     t = Template(
         """
         mutation createWinterStorageApplication {
@@ -216,13 +220,15 @@ def test_create_winter_storage_application(boat_type, winter_area):
     )
     winter_area_node_id = to_global_id(WinterStorageAreaType._meta.name, winter_area.id)
     mutation = t.substitute(boat_type_id=boat_type.id, desired_area=winter_area_node_id)
-    executed = client.execute(mutation)
+    executed = old_schema_api_client.execute(mutation)
     assert executed == {
         "data": {
             "createWinterStorageApplication": {
                 "winterStorageApplication": {
                     "chosenAreas": {
-                        "edges": [{"node": {"properties": {"zipCode": "00200"}}}]
+                        "edges": [
+                            {"node": {"properties": {"zipCode": winter_area.zip_code}}}
+                        ]
                     }
                 }
             }
@@ -230,8 +236,7 @@ def test_create_winter_storage_application(boat_type, winter_area):
     }
 
 
-def test_get_berth_switch_reasons(berth_switch_reason):
-    client = GraphQLTestClient()
+def test_get_berth_switch_reasons(old_schema_api_client, berth_switch_reason):
     query = """
         {
             berthSwitchReasons {
@@ -240,7 +245,7 @@ def test_get_berth_switch_reasons(berth_switch_reason):
             }
         }
     """
-    executed = client.execute(query)
+    executed = old_schema_api_client.execute(query)
     assert executed == {
         "data": {
             "berthSwitchReasons": [

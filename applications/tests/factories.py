@@ -1,5 +1,6 @@
 import factory.fuzzy
 
+from berth_reservations.tests.factories import MunicipalityFactory
 from harbors.tests.factories import (
     BoatTypeFactory,
     HarborFactory,
@@ -22,6 +23,10 @@ class BaseApplicationFactory(factory.django.DjangoModelFactory):
     boat_type = factory.SubFactory(BoatTypeFactory)
     boat_length = factory.fuzzy.FuzzyDecimal(0.1, 100.00)
     boat_width = factory.fuzzy.FuzzyDecimal(0.1, 100.00)
+    phone_number = factory.Faker("phone_number")
+    address = factory.Faker("address")
+    zip_code = factory.Faker("zipcode")
+    municipality = factory.SubFactory(MunicipalityFactory)
 
 
 class BerthApplicationFactory(BaseApplicationFactory):

@@ -1,17 +1,33 @@
 import graphene
 from django.utils.translation import ugettext_lazy as _
 from graphene import relay
+from graphene_django import DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
 from graphene_federation import extend, external
 from graphql_jwt.decorators import login_required
 
+from applications.new_schema import BerthApplicationNode
 from berth_reservations.exceptions import VenepaikkaGraphQLError
+from leases.schema import BerthLeaseNode
 
 from .enums import InvoicingType
 from .models import Boat, Company, CustomerProfile
 
 InvoicingTypeEnum = graphene.Enum.from_enum(InvoicingType)
+
+
+class BoatNode(DjangoObjectType):
+    class Meta:
+        model = Boat
+        interfaces = (relay.Node,)
+
+
+class CompanyType(DjangoObjectType):
+    class Meta:
+        model = Company
+        fields = ("business_id", "name", "address", "postal_code", "city")
+
 
 PROFILE_NODE_FIELDS = (
     "id",
@@ -24,8 +40,28 @@ PROFILE_NODE_FIELDS = (
 )
 
 
+class BaseProfileFieldsMixin:
+    """
+    Mixin that stores the attributes that are exactly
+    the same between ProfileNode and BerthProfileNode
+
+    BEWARE: since ProfileNode is extended, none of its
+    fields could be non-nullable (i.e. required=True),
+    because then the entire ProfileNode will be null at
+    the federation level, if the profile object has no
+    object in our database.
+    """
+
+    invoicing_type = InvoicingTypeEnum()
+    comment = graphene.String()
+    company = graphene.Field(CompanyType)
+    boats = DjangoConnectionField(BoatNode)
+    berth_applications = DjangoConnectionField(BerthApplicationNode)
+    berth_leases = DjangoConnectionField(BerthLeaseNode)
+
+
 @extend(fields="id")
-class ProfileNode(DjangoObjectType):
+class ProfileNode(BaseProfileFieldsMixin, DjangoObjectType):
     """
     ProfileNode extended from the open-city-profile's ProfileNode.
     """
@@ -44,9 +80,6 @@ class ProfileNode(DjangoObjectType):
     # graphene will also mark ID fields as "@external" on some
     # other random Node types (e.g. WinterStorageAreaNode)
 
-    invoicing_type = InvoicingTypeEnum()
-    comment = graphene.String()
-
     @login_required
     def __resolve_reference(self, info, **kwargs):
         user = info.context.user
@@ -63,7 +96,7 @@ class ProfileNode(DjangoObjectType):
             )
 
 
-class BerthProfileNode(DjangoObjectType):
+class BerthProfileNode(BaseProfileFieldsMixin, DjangoObjectType):
     """
     ProfileNode that only contains profile info stored in this service.
     """
@@ -73,9 +106,6 @@ class BerthProfileNode(DjangoObjectType):
         filter_fields = ("invoicing_type",)
         fields = PROFILE_NODE_FIELDS
         interfaces = (relay.Node,)
-
-    invoicing_type = InvoicingTypeEnum()
-    comment = graphene.String()
 
     @classmethod
     @login_required
@@ -92,17 +122,6 @@ class BerthProfileNode(DjangoObjectType):
             raise VenepaikkaGraphQLError(
                 _("You do not have permission to perform this action.")
             )
-
-
-class BoatNode(DjangoObjectType):
-    class Meta:
-        model = Boat
-
-
-class CompanyType(DjangoObjectType):
-    class Meta:
-        model = Company
-        fields = ("business_id", "name", "address", "postal_code", "city")
 
 
 class Query:

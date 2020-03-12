@@ -1,6 +1,3 @@
-import os
-import shutil
-
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.files.storage import FileSystemStorage
@@ -42,17 +39,12 @@ def get_winter_area_media_folder(instance, filename):
     )
 
 
-class OverwriteStorage(FileSystemStorage):
-    """
-    Custom storage that deletes previous harbor images
-    by deleting the /harbors/{harbor_id}/ folder
-    """
-
-    def get_available_name(self, name, max_length=None):
-        dir_name, file_name = os.path.split(name)
-        if self.exists(dir_name):
-            shutil.rmtree(os.path.join(settings.MEDIA_ROOT, dir_name))
-        return name
+def get_map_resource_media_folder(instance, filename):
+    if isinstance(instance, HarborMap):
+        return get_harbor_media_folder(instance.harbor, filename)
+    elif isinstance(instance, WinterStorageAreaMap):
+        return get_winter_area_media_folder(instance.winter_storage_area, filename)
+    return None
 
 
 class AvailabilityLevel(TranslatableModel):
@@ -120,7 +112,7 @@ class Harbor(AbstractArea, TranslatableModel):
 
     image_file = models.ImageField(
         upload_to=get_harbor_media_folder,
-        storage=OverwriteStorage(),
+        storage=FileSystemStorage(),
         verbose_name=_("image file"),
         null=True,
         blank=True,
@@ -183,7 +175,7 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
 
     image_file = models.ImageField(
         upload_to=get_winter_area_media_folder,
-        storage=OverwriteStorage(),
+        storage=FileSystemStorage(),
         verbose_name=_("image file"),
         null=True,
         blank=True,
@@ -250,6 +242,34 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
 
     def __str__(self):
         return self.safe_translation_getter("name", super().__str__())
+
+
+class AbstractAreaMap(UUIDModel):
+    map_file = models.FileField(
+        upload_to=get_map_resource_media_folder,
+        storage=FileSystemStorage(),
+        verbose_name=_("map file"),
+        null=False,
+        blank=False,
+    )
+
+    class Meta:
+        abstract = True
+
+
+class HarborMap(AbstractAreaMap):
+    harbor = models.ForeignKey(
+        Harbor, verbose_name=_("harbor"), related_name="maps", on_delete=models.CASCADE,
+    )
+
+
+class WinterStorageAreaMap(AbstractAreaMap):
+    winter_storage_area = models.ForeignKey(
+        WinterStorageArea,
+        verbose_name=_("winter storage area"),
+        related_name="maps",
+        on_delete=models.CASCADE,
+    )
 
 
 class AbstractAreaSection(UUIDModel):
