@@ -1,11 +1,6 @@
-import os
-import shutil
-
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.files.storage import FileSystemStorage
-from django.db.models.signals import post_delete
-from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumIntegerField
 from munigeo.models import Municipality
@@ -46,23 +41,10 @@ def get_winter_area_media_folder(instance, filename):
 
 def get_map_resource_media_folder(instance, filename):
     if isinstance(instance, HarborMap):
-        return get_harbor_media_folder(instance, filename)
+        return get_harbor_media_folder(instance.harbor, filename)
     elif isinstance(instance, WinterStorageAreaMap):
-        return get_winter_area_media_folder(instance, filename)
+        return get_winter_area_media_folder(instance.winter_storage_area, filename)
     return None
-
-
-class OverwriteStorage(FileSystemStorage):
-    """
-    Custom storage that deletes previous harbor images
-    by deleting the /harbors/{harbor_id}/ folder
-    """
-
-    def get_available_name(self, name, max_length=None):
-        dir_name, file_name = os.path.split(name)
-        if self.exists(dir_name):
-            shutil.rmtree(os.path.join(settings.MEDIA_ROOT, dir_name))
-        return name
 
 
 class AvailabilityLevel(TranslatableModel):
@@ -130,7 +112,7 @@ class Harbor(AbstractArea, TranslatableModel):
 
     image_file = models.ImageField(
         upload_to=get_harbor_media_folder,
-        storage=OverwriteStorage(),
+        storage=FileSystemStorage(),
         verbose_name=_("image file"),
         null=True,
         blank=True,
@@ -193,7 +175,7 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
 
     image_file = models.ImageField(
         upload_to=get_winter_area_media_folder,
-        storage=OverwriteStorage(),
+        storage=FileSystemStorage(),
         verbose_name=_("image file"),
         null=True,
         blank=True,
@@ -288,13 +270,6 @@ class WinterStorageAreaMap(AbstractAreaMap):
         related_name="maps",
         on_delete=models.CASCADE,
     )
-
-
-@receiver(post_delete, sender=HarborMap)
-@receiver(post_delete, sender=WinterStorageAreaMap)
-def delete_map_file_handler(sender, instance, **kwargs):
-    if instance.map_file:
-        os.unlink(instance.map_file.path)
 
 
 class AbstractAreaSection(UUIDModel):
