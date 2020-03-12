@@ -516,7 +516,8 @@ class HarborInput(AbstractAreaInput):
 def add_map_files(model, map_files, instance):
     try:
         for map_file in map_files:
-            model.objects.create(map_file, instance)
+            map_instance = model(map_file=map_file)
+            instance.maps.add(map_instance, bulk=False)
     except IntegrityError as e:
         raise VenepaikkaGraphQLError(e)
 
