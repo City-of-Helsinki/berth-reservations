@@ -27,6 +27,7 @@ mutation CreateBerth($input: CreateBerthMutationInput!) {
             id
             number
             comment
+            isAccessible
         }
     }
 }
@@ -46,9 +47,13 @@ def test_create_berth(pier, berth_type, superuser_api_client):
     executed = superuser_api_client.execute(CREATE_BERTH_MUTATION, input=variables)
 
     assert Berth.objects.count() == 1
-    assert executed["data"]["createBerth"]["berth"]["id"] is not None
-    assert executed["data"]["createBerth"]["berth"]["comment"] == "foobar"
-    assert executed["data"]["createBerth"]["berth"]["number"] == "9999"
+    assert executed["data"]["createBerth"]["berth"].pop("id") is not None
+
+    assert executed["data"]["createBerth"]["berth"] == {
+        "comment": "foobar",
+        "number": "9999",
+        "isAccessible": None,
+    }
 
 
 @pytest.mark.parametrize(
@@ -138,6 +143,7 @@ mutation UpdateBerth($input: UpdateBerthMutationInput!) {
             id
             number
             comment
+            isAccessible
             pier {
                 id
             }
@@ -159,6 +165,7 @@ def test_update_berth(berth, pier, berth_type, superuser_api_client):
         "id": global_id,
         "number": "666",
         "comment": "foobar",
+        "isAccessible": True,
         "pierId": pier_id,
         "berthTypeId": berth_type_id,
     }
@@ -168,11 +175,14 @@ def test_update_berth(berth, pier, berth_type, superuser_api_client):
     executed = superuser_api_client.execute(UPDATE_BERTH_MUTATION, input=variables)
 
     assert Berth.objects.count() == 1
-    assert executed["data"]["updateBerth"]["berth"]["id"] == global_id
-    assert executed["data"]["updateBerth"]["berth"]["comment"] == "foobar"
-    assert executed["data"]["updateBerth"]["berth"]["number"] == "666"
-    assert executed["data"]["updateBerth"]["berth"]["pier"]["id"] == pier_id
-    assert executed["data"]["updateBerth"]["berth"]["berthType"]["id"] == berth_type_id
+    assert executed["data"]["updateBerth"]["berth"] == {
+        "id": global_id,
+        "comment": variables["comment"],
+        "number": "666",
+        "isAccessible": variables["isAccessible"],
+        "pier": {"id": variables["pierId"]},
+        "berthType": {"id": variables["berthTypeId"]},
+    }
 
 
 def test_update_berth_no_id(berth, pier, berth_type, superuser_api_client):
