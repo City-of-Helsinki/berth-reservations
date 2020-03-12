@@ -11,7 +11,14 @@ from berth_reservations.tests.utils import (
     assert_invalid_enum,
     assert_not_enough_permissions,
 )
-from resources.models import Berth, BerthType, get_harbor_media_folder, Harbor, Pier
+from resources.models import (
+    Berth,
+    BerthType,
+    get_harbor_media_folder,
+    Harbor,
+    HarborMap,
+    Pier,
+)
 
 CREATE_BERTH_MUTATION = """
 mutation CreateBerth($input: CreateBerthMutationInput!) {
@@ -597,6 +604,9 @@ mutation UpdateHarbor($input: UpdateHarborMutationInput!) {
                 name
                 servicemapId
                 imageFile
+                maps {
+                    url
+                }
                 streetAddress
                 zipCode
                 availabilityLevel {
@@ -617,12 +627,19 @@ mutation UpdateHarbor($input: UpdateHarborMutationInput!) {
 def test_update_harbor(superuser_api_client, harbor, availability_level, municipality):
     global_id = to_global_id("HarborNode", str(harbor.id))
     image_file_name = "image.png"
+    map_file_names = ["map1.pdf", "map2.pdf", "map3.pdf"]
 
     variables = {
         "id": global_id,
         "imageFile": SimpleUploadedFile(
             name=image_file_name, content=None, content_type="image/png"
         ),
+        "addMapFiles": [
+            SimpleUploadedFile(
+                name=file_name, content=None, content_type="application/pdf"
+            )
+            for file_name in map_file_names
+        ],
         "availabilityLevelId": availability_level.id,
         "municipalityId": municipality.id,
         "numberOfPlaces": 175,
@@ -643,6 +660,7 @@ def test_update_harbor(superuser_api_client, harbor, availability_level, municip
     image_file = executed["data"]["updateHarbor"]["harbor"]["properties"].pop(
         "imageFile"
     )
+    map_files = executed["data"]["updateHarbor"]["harbor"]["properties"].pop("maps")
 
     assert Harbor.objects.count() == 1
     assert executed["data"]["updateHarbor"]["harbor"]["id"] == global_id
@@ -657,6 +675,16 @@ def test_update_harbor(superuser_api_client, harbor, availability_level, municip
         variables["location"]["coordinates"][1],
     )
     assert get_harbor_media_folder(harbor, image_file_name) in image_file
+
+    assert len(map_files) == 3
+
+    expected_urls = [
+        get_harbor_media_folder(harbor, file_name) for file_name in map_file_names
+    ]
+    # Test that all the expected files are in the instance map files
+    for file in map_files:
+        assert any([expected_url in file["url"] for expected_url in expected_urls])
+
     assert executed["data"]["updateHarbor"]["harbor"]["properties"] == {
         "name": variables["name"],
         "servicemapId": variables["servicemapId"],
@@ -669,6 +697,30 @@ def test_update_harbor(superuser_api_client, harbor, availability_level, municip
         "maximumLength": variables["maximumLength"],
         "maximumDepth": variables["maximumDepth"],
     }
+
+
+def test_update_harbor_remove_map(superuser_api_client, harbor):
+    global_id = to_global_id("HarborNode", str(harbor.id))
+    map_file_names = ["map1.pdf", "map2.pdf", "map3.pdf"]
+
+    # Create map objects and get only the IDs
+    map_files = [
+        HarborMap.objects.create(
+            map_file=SimpleUploadedFile(
+                name=file_name, content=None, content_type="application/pdf"
+            ),
+            harbor=harbor,
+        ).id
+        for file_name in map_file_names
+    ]
+
+    assert harbor.maps.count() == 3
+
+    variables = {"id": global_id, "removeMapFiles": map_files}
+
+    executed = superuser_api_client.execute(UPDATE_HARBOR_MUTATION, input=variables,)
+
+    assert len(executed["data"]["updateHarbor"]["harbor"]["properties"]["maps"]) == 0
 
 
 def test_update_harbor_no_id(superuser_api_client, harbor):
