@@ -53,6 +53,10 @@ class BerthApplicationFilter(django_filters.FilterSet):
     no_customer = django_filters.BooleanFilter(
         field_name="customer", lookup_expr="isnull"
     )
+    order_by = django_filters.OrderingFilter(
+        fields=(("created_at", "createdAt"),),
+        label="Supports only `createdAt` and `-createdAt`.",
+    )
 
     def filter_berth_switch(self, queryset, name, value):
         lookup = "__".join([name, "isnull"])
