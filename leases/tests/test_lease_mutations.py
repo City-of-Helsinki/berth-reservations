@@ -14,6 +14,7 @@ from berth_reservations.tests.utils import (
 )
 from leases.enums import LeaseStatus
 from leases.models import BerthLease
+from leases.tests.factories import BerthLeaseFactory
 
 CREATE_BERTH_LEASE_MUTATION = """
 mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
@@ -209,6 +210,25 @@ def test_create_berth_lease_application_without_customer(
     assert_in_errors(
         "Application must be connected to an existing customer first", executed
     )
+
+
+def test_create_berth_lease_application_already_has_lease(
+    superuser_api_client, berth_application, berth, customer_profile,
+):
+    BerthLeaseFactory(application=berth_application)
+    berth_application.customer = customer_profile
+    berth_application.save()
+
+    variables = {
+        "applicationId": to_global_id("BerthApplicationNode", berth_application.id),
+        "berthId": to_global_id("BerthNode", berth.id),
+    }
+
+    executed = superuser_api_client.execute(
+        CREATE_BERTH_LEASE_MUTATION, input=variables,
+    )
+
+    assert_in_errors("Berth lease with this Application already exists", executed)
 
 
 DELETE_BERTH_LEASE_MUTATION = """

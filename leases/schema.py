@@ -1,4 +1,5 @@
 import graphene
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 from graphene_django import DjangoConnectionField, DjangoObjectType
@@ -93,7 +94,10 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
 
             input["boat"] = boat
 
-        lease = BerthLease.objects.create(**input)
+        try:
+            lease = BerthLease.objects.create(**input)
+        except ValidationError as e:
+            raise VenepaikkaGraphQLError(e)
 
         application.status = ApplicationStatus.OFFER_GENERATED
         application.save()
