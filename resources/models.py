@@ -438,6 +438,9 @@ class Berth(AbstractBoatPlace):
         on_delete=models.PROTECT,
     )
     comment = models.TextField(verbose_name=_("comment"), blank=True,)
+    is_accessible = models.BooleanField(
+        verbose_name=_("is accessible"), blank=True, null=True,
+    )
 
     class Meta:
         verbose_name = _("berth")
