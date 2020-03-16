@@ -1,8 +1,10 @@
+import django_filters
 import graphene
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
-from graphene_django import DjangoConnectionField, DjangoObjectType
+from graphene_django import DjangoObjectType
+from graphene_django.filter import DjangoFilterConnectionField
 from graphql_jwt.decorators import login_required, superuser_required
 from graphql_relay import from_global_id
 
@@ -17,6 +19,13 @@ from .enums import LeaseStatus
 from .models import BerthLease
 
 LeaseStatusEnum = graphene.Enum.from_enum(LeaseStatus)
+
+
+class BerthLeaseNodeFilter(django_filters.FilterSet):
+    order_by = django_filters.OrderingFilter(
+        fields=(("created_at", "createdAt"),),
+        label="Supports only `createdAt` and `-createdAt`.",
+    )
 
 
 class BerthLeaseNode(DjangoObjectType):
@@ -139,7 +148,9 @@ class DeleteBerthLeaseMutation(graphene.ClientIDMutation):
 
 class Query:
     berth_lease = graphene.relay.Node.Field(BerthLeaseNode)
-    berth_leases = DjangoConnectionField(BerthLeaseNode)
+    berth_leases = DjangoFilterConnectionField(
+        BerthLeaseNode, filterset_class=BerthLeaseNodeFilter
+    )
 
     @login_required
     @superuser_required
