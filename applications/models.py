@@ -247,7 +247,9 @@ class BerthApplication(BaseApplication):
 
     def save(self, *args, **kwargs):
         # Ensure clean is always ran
-        self.full_clean()
+        # FIXME: exclude decimal fields for now, as GQL API uses floats for those
+        #  which does not work well with Django's validation for DecimalField
+        self.full_clean(exclude=["boat_length", "boat_width", "boat_draught"])
         super().save(*args, **kwargs)
 
     def clean(self):
