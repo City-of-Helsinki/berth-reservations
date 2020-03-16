@@ -1,66 +1,66 @@
 [
 {
-    "model": "reservations.berthswitchreason",
+    "model": "applications.berthswitchreason",
     "pk": 1,
     "fields": {}
 },
 {
-    "model": "reservations.berthswitchreason",
+    "model": "applications.berthswitchreason",
     "pk": 2,
     "fields": {}
 },
 {
-    "model": "reservations.berthswitchreason",
+    "model": "applications.berthswitchreason",
     "pk": 3,
     "fields": {}
 },
 {
-    "model": "reservations.berthswitchreason",
+    "model": "applications.berthswitchreason",
     "pk": 4,
     "fields": {}
 },
 {
-    "model": "reservations.berthswitchreason",
+    "model": "applications.berthswitchreason",
     "pk": 5,
     "fields": {}
 },
 {
-    "model": "reservations.berthswitchreason",
+    "model": "applications.berthswitchreason",
     "pk": 6,
     "fields": {}
 },
 {
-    "model": "reservations.berthswitchreason",
+    "model": "applications.berthswitchreason",
     "pk": 7,
     "fields": {}
 },
 {
-    "model": "reservations.berthswitchreason",
+    "model": "applications.berthswitchreason",
     "pk": 8,
     "fields": {}
 },
 {
-    "model": "reservations.berthswitchreason",
+    "model": "applications.berthswitchreason",
     "pk": 9,
     "fields": {}
 },
 {
-    "model": "reservations.berthswitchreason",
+    "model": "applications.berthswitchreason",
     "pk": 10,
     "fields": {}
 },
 {
-    "model": "reservations.berthswitchreason",
+    "model": "applications.berthswitchreason",
     "pk": 11,
     "fields": {}
 },
 {
-    "model": "reservations.berthswitchreason",
+    "model": "applications.berthswitchreason",
     "pk": 12,
     "fields": {}
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 1,
     "fields": {
         "language_code": "fi",
@@ -69,7 +69,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 2,
     "fields": {
         "language_code": "en",
@@ -78,7 +78,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 3,
     "fields": {
         "language_code": "sv",
@@ -87,7 +87,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 4,
     "fields": {
         "language_code": "fi",
@@ -96,7 +96,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 5,
     "fields": {
         "language_code": "en",
@@ -105,7 +105,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 6,
     "fields": {
         "language_code": "sv",
@@ -114,7 +114,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 7,
     "fields": {
         "language_code": "fi",
@@ -123,7 +123,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 8,
     "fields": {
         "language_code": "en",
@@ -132,7 +132,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 9,
     "fields": {
         "language_code": "sv",
@@ -141,7 +141,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 10,
     "fields": {
         "language_code": "fi",
@@ -150,7 +150,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 11,
     "fields": {
         "language_code": "en",
@@ -159,7 +159,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 12,
     "fields": {
         "language_code": "sv",
@@ -168,7 +168,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 13,
     "fields": {
         "language_code": "fi",
@@ -177,7 +177,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 14,
     "fields": {
         "language_code": "en",
@@ -186,7 +186,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 15,
     "fields": {
         "language_code": "sv",
@@ -195,7 +195,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 16,
     "fields": {
         "language_code": "fi",
@@ -204,7 +204,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 17,
     "fields": {
         "language_code": "en",
@@ -213,7 +213,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 18,
     "fields": {
         "language_code": "sv",
@@ -222,7 +222,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 19,
     "fields": {
         "language_code": "fi",
@@ -231,7 +231,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 20,
     "fields": {
         "language_code": "en",
@@ -240,7 +240,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 21,
     "fields": {
         "language_code": "sv",
@@ -249,7 +249,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 22,
     "fields": {
         "language_code": "fi",
@@ -258,7 +258,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 23,
     "fields": {
         "language_code": "en",
@@ -267,7 +267,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 24,
     "fields": {
         "language_code": "sv",
@@ -276,7 +276,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 25,
     "fields": {
         "language_code": "fi",
@@ -285,7 +285,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 26,
     "fields": {
         "language_code": "en",
@@ -294,7 +294,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 27,
     "fields": {
         "language_code": "sv",
@@ -303,7 +303,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 28,
     "fields": {
         "language_code": "fi",
@@ -312,7 +312,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 29,
     "fields": {
         "language_code": "en",
@@ -321,7 +321,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 30,
     "fields": {
         "language_code": "sv",
@@ -330,7 +330,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 31,
     "fields": {
         "language_code": "fi",
@@ -339,7 +339,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 32,
     "fields": {
         "language_code": "en",
@@ -348,7 +348,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 33,
     "fields": {
         "language_code": "sv",
@@ -357,7 +357,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 34,
     "fields": {
         "language_code": "fi",
@@ -366,7 +366,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 35,
     "fields": {
         "language_code": "en",
@@ -375,7 +375,7 @@
     }
 },
 {
-    "model": "reservations.berthswitchreasontranslation",
+    "model": "applications.berthswitchreasontranslation",
     "pk": 36,
     "fields": {
         "language_code": "sv",

@@ -170,6 +170,7 @@ class BerthNode(DjangoObjectType):
         "leases.schema.BerthLeaseNode",
         description="**Requires permissions** to query this field.",
     )
+    is_accessible = graphene.Boolean()
 
     class Meta:
         model = Berth
@@ -337,10 +338,14 @@ class AbstractAreaSectionInput:
     gate = graphene.Boolean()
 
 
+class BerthInput:
+    comment = graphene.String()
+    is_accessible = graphene.Boolean()
+
+
 class CreateBerthMutation(graphene.ClientIDMutation):
-    class Input:
+    class Input(BerthInput):
         number = graphene.String(required=True)
-        comment = graphene.String()
         pier_id = graphene.ID(required=True)
         berth_type_id = graphene.ID(required=True)
 
@@ -351,20 +356,17 @@ class CreateBerthMutation(graphene.ClientIDMutation):
     @superuser_required
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        berth = Berth.objects.create(
-            number=input.get("number"),
-            comment=input.get("comment", ""),
-            pier_id=from_global_id(input.get("pier_id"))[1],
-            berth_type_id=from_global_id(input.get("berth_type_id"))[1],
-        )
+        input["pier_id"] = from_global_id(input.pop("pier_id"))[1]
+        input["berth_type_id"] = from_global_id(input.pop("berth_type_id"))[1]
+
+        berth = Berth.objects.create(**input)
         return CreateBerthMutation(berth=berth)
 
 
 class UpdateBerthMutation(graphene.ClientIDMutation):
-    class Input:
+    class Input(BerthInput):
         id = graphene.ID(required=True)
         number = graphene.String()
-        comment = graphene.String()
         pier_id = graphene.ID()
         berth_type_id = graphene.ID()
 
@@ -516,7 +518,8 @@ class HarborInput(AbstractAreaInput):
 def add_map_files(model, map_files, instance):
     try:
         for map_file in map_files:
-            model.objects.create(map_file, instance)
+            map_instance = model(map_file=map_file)
+            instance.maps.add(map_instance, bulk=False)
     except IntegrityError as e:
         raise VenepaikkaGraphQLError(e)
 
