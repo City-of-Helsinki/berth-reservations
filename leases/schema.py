@@ -149,20 +149,26 @@ class DeleteBerthLeaseMutation(graphene.ClientIDMutation):
 class Query:
     berth_lease = graphene.relay.Node.Field(BerthLeaseNode)
     berth_leases = DjangoFilterConnectionField(
-        BerthLeaseNode, filterset_class=BerthLeaseNodeFilter
+        BerthLeaseNode,
+        filterset_class=BerthLeaseNodeFilter,
+        description="`BerthLeases` are ordered by `createdAt` in ascending order by default.",
     )
 
     @login_required
     @superuser_required
     # TODO: Should check if the user has permissions to access these objects
     def resolve_berth_leases(self, info, **kwargs):
-        return BerthLease.objects.select_related(
-            "application",
-            "application__customer",
-            "berth",
-            "berth__pier",
-            "berth__pier__harbor",
-        ).prefetch_related("application__customer__boats")
+        return (
+            BerthLease.objects.select_related(
+                "application",
+                "application__customer",
+                "berth",
+                "berth__pier",
+                "berth__pier__harbor",
+            )
+            .prefetch_related("application__customer__boats")
+            .order_by("created_at")
+        )
 
 
 class Mutation:

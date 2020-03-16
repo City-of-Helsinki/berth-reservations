@@ -206,3 +206,35 @@ def test_berth_applications_order_by_created(order_by, ascending, superuser_api_
     )
 
     assert first_date < second_date
+
+
+BERTH_APPLICATIONS_QUERY = """
+query APPLICATIONS {
+    berthApplications {
+        edges {
+            node {
+                createdAt
+            }
+        }
+    }
+}
+"""
+
+
+def test_berth_applications_order_by_created_at_default(superuser_api_client):
+    with freeze_time("2020-02-01"):
+        BerthApplicationFactory()
+
+    with freeze_time("2020-01-01"):
+        BerthApplicationFactory()
+
+    executed = superuser_api_client.execute(BERTH_APPLICATIONS_QUERY)
+
+    first_date = isoparse(
+        executed["data"]["berthApplications"]["edges"][0]["node"]["createdAt"]
+    )
+    second_date = isoparse(
+        executed["data"]["berthApplications"]["edges"][1]["node"]["createdAt"]
+    )
+
+    assert first_date < second_date

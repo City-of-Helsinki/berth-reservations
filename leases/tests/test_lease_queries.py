@@ -227,3 +227,35 @@ def test_query_berth_leases_order_by_created_at(
     )
 
     assert first_date < second_date
+
+
+QUERY_BERTH_LEASE_CREATED_AT = """
+query BerthLeaseCreatedAt {
+    berthLeases {
+        edges {
+            node {
+                createdAt
+            }
+        }
+    }
+}
+"""
+
+
+def test_query_berth_leases_order_by_created_at_default(superuser_api_client):
+    with freeze_time("2020-02-01"):
+        BerthLeaseFactory()
+
+    with freeze_time("2020-01-01"):
+        BerthLeaseFactory()
+
+    executed = superuser_api_client.execute(QUERY_BERTH_LEASE_CREATED_AT)
+
+    first_date = isoparse(
+        executed["data"]["berthLeases"]["edges"][0]["node"]["createdAt"]
+    )
+    second_date = isoparse(
+        executed["data"]["berthLeases"]["edges"][1]["node"]["createdAt"]
+    )
+
+    assert first_date < second_date
