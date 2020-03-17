@@ -53,6 +53,10 @@ class BerthApplicationFilter(django_filters.FilterSet):
     no_customer = django_filters.BooleanFilter(
         field_name="customer", lookup_expr="isnull"
     )
+    order_by = django_filters.OrderingFilter(
+        fields=(("created_at", "createdAt"),),
+        label="Supports only `createdAt` and `-createdAt`.",
+    )
 
     def filter_berth_switch(self, queryset, name, value):
         lookup = "__".join([name, "isnull"])
@@ -128,6 +132,7 @@ class Query:
         description="The `statuses` filter takes a list of `ApplicationStatus` values "
         "representing the desired statuses. If an empty list is passed, no filter will be applied "
         "and all the results will be returned."
+        "\n\n`BerthApplications` are ordered by `createdAt` in ascending order by default."
         "\n\n**Requires permissions** to access applications."
         "\n\nErrors:"
         "\n* A value passed is not a valid status",
@@ -144,12 +149,19 @@ class Query:
         if statuses:
             qs = qs.filter(status__in=statuses)
 
-        return qs.select_related(
-            "boat_type", "berth_switch", "berth_switch__harbor", "berth_switch__reason",
-        ).prefetch_related(
-            "berth_switch__reason__translations",
-            "harborchoice_set",
-            "harborchoice_set__harbor",
+        return (
+            qs.select_related(
+                "boat_type",
+                "berth_switch",
+                "berth_switch__harbor",
+                "berth_switch__reason",
+            )
+            .prefetch_related(
+                "berth_switch__reason__translations",
+                "harborchoice_set",
+                "harborchoice_set__harbor",
+            )
+            .order_by("created_at")
         )
 
 

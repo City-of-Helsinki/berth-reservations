@@ -1,7 +1,10 @@
 import pytest
+from dateutil.parser import isoparse
+from freezegun import freeze_time
 from graphql_relay import to_global_id
 
 from berth_reservations.tests.utils import assert_not_enough_permissions
+from leases.tests.factories import BerthLeaseFactory
 
 QUERY_BERTH_LEASES = """
 query GetBerthLeases {
@@ -181,3 +184,78 @@ def test_query_berth_lease_invalid_id(user_api_client):
     executed = user_api_client.execute(QUERY_BERTH_LEASE)
 
     assert executed["data"]["berthLease"] is None
+
+
+BERTH_LEASES_WITH_ORDER_BY = """
+query LEASES {
+    berthLeases(orderBy: "%s") {
+        edges {
+            node {
+                createdAt
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "order_by,ascending", [("createdAt", True), ("-createdAt", False)]
+)
+def test_query_berth_leases_order_by_created_at(
+    order_by, ascending, superuser_api_client
+):
+    with freeze_time("2020-02-01"):
+        BerthLeaseFactory()
+
+    with freeze_time("2020-01-01"):
+        BerthLeaseFactory()
+
+    query = BERTH_LEASES_WITH_ORDER_BY % order_by
+
+    executed = superuser_api_client.execute(query)
+
+    first_date = isoparse(
+        executed["data"]["berthLeases"]["edges"][0 if ascending else 1]["node"][
+            "createdAt"
+        ]
+    )
+    second_date = isoparse(
+        executed["data"]["berthLeases"]["edges"][1 if ascending else 0]["node"][
+            "createdAt"
+        ]
+    )
+
+    assert first_date < second_date
+
+
+QUERY_BERTH_LEASE_CREATED_AT = """
+query BerthLeaseCreatedAt {
+    berthLeases {
+        edges {
+            node {
+                createdAt
+            }
+        }
+    }
+}
+"""
+
+
+def test_query_berth_leases_order_by_created_at_default(superuser_api_client):
+    with freeze_time("2020-02-01"):
+        BerthLeaseFactory()
+
+    with freeze_time("2020-01-01"):
+        BerthLeaseFactory()
+
+    executed = superuser_api_client.execute(QUERY_BERTH_LEASE_CREATED_AT)
+
+    first_date = isoparse(
+        executed["data"]["berthLeases"]["edges"][0]["node"]["createdAt"]
+    )
+    second_date = isoparse(
+        executed["data"]["berthLeases"]["edges"][1]["node"]["createdAt"]
+    )
+
+    assert first_date < second_date
