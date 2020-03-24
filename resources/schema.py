@@ -10,12 +10,20 @@ from graphene_django.fields import DjangoConnectionField, DjangoListField
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
 from graphene_file_upload.scalars import Upload
-from graphql_jwt.decorators import login_required, superuser_required
 from graphql_relay import from_global_id
 from munigeo.models import Municipality
 
 from applications.models import BerthApplication
 from berth_reservations.exceptions import VenepaikkaGraphQLError
+from customers.models import CustomerProfile
+from leases.models import BerthLease
+from users.decorators import (
+    add_permission_required,
+    change_permission_required,
+    delete_permission_required,
+    view_permission_required,
+)
+from users.utils import user_has_view_permission
 
 from .enums import BerthMooringType
 from .models import (
@@ -67,7 +75,11 @@ def _resolve_piers(info, **kwargs):
 
     if application_global_id:
         user = info.context.user
-        if user and user.is_authenticated and user.is_superuser:
+        if (
+            user
+            and user.is_authenticated
+            and user_has_view_permission(user, BerthApplication)
+        ):
             application_id = from_global_id(application_global_id)[1]
             try:
                 application = BerthApplication.objects.get(pk=application_id)
@@ -178,8 +190,7 @@ class BerthNode(DjangoObjectType):
         interfaces = (relay.Node,)
         filterset_class = BerthNodeFilterSet
 
-    @login_required
-    @superuser_required
+    @view_permission_required(BerthLease, BerthApplication, CustomerProfile)
     def resolve_leases(self, info, **kwargs):
         return self.leases.all()
 
@@ -352,8 +363,7 @@ class CreateBerthMutation(graphene.ClientIDMutation):
     berth = graphene.Field(BerthNode)
 
     @classmethod
-    @login_required
-    @superuser_required
+    @add_permission_required(Berth)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         input["pier_id"] = from_global_id(input.pop("pier_id"))[1]
@@ -373,12 +383,9 @@ class UpdateBerthMutation(graphene.ClientIDMutation):
     berth = graphene.Field(BerthNode)
 
     @classmethod
-    @login_required
-    @superuser_required
+    @change_permission_required(Berth)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # TODO: Should check if the user has permissions to
-        # modify the specific resource
         # GQL IDs have to be translated to Django model UUIDs
         id = from_global_id(input.pop("id"))[1]
 
@@ -403,12 +410,9 @@ class DeleteBerthMutation(graphene.ClientIDMutation):
         id = graphene.ID(required=True)
 
     @classmethod
-    @login_required
-    @superuser_required
+    @delete_permission_required(Berth)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # TODO: Should check if the user has permissions to
-        # delete the specific resource
         id = from_global_id(input.get("id"))[1]
 
         try:
@@ -431,13 +435,9 @@ class CreateBerthTypeMutation(graphene.ClientIDMutation):
     berth_type = graphene.Field(BerthTypeNode)
 
     @classmethod
-    @login_required
-    @superuser_required
+    @add_permission_required(BerthType)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # TODO: Should check if the user has permissions to
-        # delete the specific resource
-
         berth_type = BerthType.objects.create(
             mooring_type=input.get("mooring_type"),
             width=input.get("width"),
@@ -457,12 +457,9 @@ class UpdateBerthTypeMutation(graphene.ClientIDMutation):
     berth_type = graphene.Field(BerthTypeNode)
 
     @classmethod
-    @login_required
-    @superuser_required
+    @change_permission_required(BerthType)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # TODO: Should check if the user has permissions to
-        # modify the specific resource
         # GQL IDs have to be translated to Django model UUIDs
         id = from_global_id(input.pop("id"))[1]
 
@@ -481,12 +478,9 @@ class DeleteBerthTypeMutation(graphene.ClientIDMutation):
         id = graphene.ID(required=True)
 
     @classmethod
-    @login_required
-    @superuser_required
+    @delete_permission_required(BerthType)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # TODO: Should check if the user has permissions to
-        # delete the specific resource
         id = from_global_id(input.get("id"))[1]
 
         try:
@@ -539,12 +533,9 @@ class CreateHarborMutation(graphene.ClientIDMutation):
     harbor = graphene.Field(HarborNode)
 
     @classmethod
-    @login_required
-    @superuser_required
+    @add_permission_required(Harbor)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # TODO: Should check if the user has permissions to
-        # delete the specific resource
         lang = get_language()
 
         availability_level_id = input.pop("availability_level_id", None)
@@ -579,12 +570,9 @@ class UpdateHarborMutation(graphene.ClientIDMutation):
     harbor = graphene.Field(HarborNode)
 
     @classmethod
-    @login_required
-    @superuser_required
+    @change_permission_required(Harbor)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # TODO: Should check if the user has permissions to
-        # delete the specific resource
         id = from_global_id(input.pop("id"))[1]
 
         lang = get_language()
@@ -620,12 +608,9 @@ class DeleteHarborMutation(graphene.ClientIDMutation):
         id = graphene.ID(required=True)
 
     @classmethod
-    @login_required
-    @superuser_required
+    @delete_permission_required(Harbor)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # TODO: Should check if the user has permissions to
-        # delete the specific resource
         id = from_global_id(input.get("id"))[1]
 
         try:
@@ -653,12 +638,9 @@ class CreatePierMutation(graphene.ClientIDMutation):
     pier = graphene.Field(PierNode)
 
     @classmethod
-    @login_required
-    @superuser_required
+    @add_permission_required(Pier)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # TODO: Should check if the user has permissions to
-        # delete the specific resource
         suitable_boat_types = input.pop("suitable_boat_types", [])
 
         harbor_global_id = input.pop("harbor_id", None)
@@ -693,12 +675,9 @@ class UpdatePierMutation(graphene.ClientIDMutation):
     pier = graphene.Field(PierNode)
 
     @classmethod
-    @login_required
-    @superuser_required
+    @change_permission_required(Pier)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # TODO: Should check if the user has permissions to
-        # delete the specific resource
         id = from_global_id(input.pop("id"))[1]
 
         try:
@@ -733,12 +712,9 @@ class DeletePierMutation(graphene.ClientIDMutation):
         id = graphene.ID(required=True)
 
     @classmethod
-    @login_required
-    @superuser_required
+    @delete_permission_required(Pier)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # TODO: Should check if the user has permissions to
-        # delete the specific resource
         id = from_global_id(input.get("id"))[1]
 
         try:

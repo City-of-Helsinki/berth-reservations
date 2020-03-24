@@ -7,9 +7,13 @@ from graphene_django.types import DjangoObjectType
 from graphene_federation import extend, external
 from graphql_jwt.decorators import login_required
 
+from applications.models import BerthApplication
 from applications.new_schema import BerthApplicationNode
 from berth_reservations.exceptions import VenepaikkaGraphQLError
+from leases.models import BerthLease
 from leases.schema import BerthLeaseNode
+from users.decorators import view_permission_required
+from users.utils import user_has_view_permission
 
 from .enums import InvoicingType
 from .models import Boat, Company, CustomerProfile
@@ -87,8 +91,9 @@ class ProfileNode(BaseProfileFieldsMixin, DjangoObjectType):
         if not profile:
             return None
 
-        # TODO: implement proper permissions
-        if user.is_superuser or user == profile.user:
+        if profile.user == user or user_has_view_permission(
+            user, CustomerProfile, BerthApplication, BerthLease
+        ):
             return profile
         else:
             raise VenepaikkaGraphQLError(
@@ -115,8 +120,9 @@ class BerthProfileNode(BaseProfileFieldsMixin, DjangoObjectType):
             return None
 
         user = info.context.user
-        # TODO: implement proper permissions
-        if node.user == user or user.is_superuser:
+        if node.user == user or user_has_view_permission(
+            user, CustomerProfile, BerthApplication, BerthLease
+        ):
             return node
         else:
             raise VenepaikkaGraphQLError(
@@ -128,11 +134,6 @@ class Query:
     berth_profile = graphene.relay.Node.Field(BerthProfileNode)
     berth_profiles = DjangoFilterConnectionField(BerthProfileNode)
 
-    @login_required
+    @view_permission_required(CustomerProfile, BerthApplication, BerthLease)
     def resolve_berth_profiles(self, info, **kwargs):
-        # TODO: implement proper permissions
-        if info.context.user.is_superuser:
-            return CustomerProfile.objects.all()
-        raise VenepaikkaGraphQLError(
-            _("You do not have permission to perform this action.")
-        )
+        return CustomerProfile.objects.all()

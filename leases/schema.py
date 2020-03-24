@@ -5,15 +5,21 @@ from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-from graphql_jwt.decorators import login_required, superuser_required
+from graphql_jwt.decorators import login_required
 from graphql_relay import from_global_id
 
 from applications.enums import ApplicationStatus
 from applications.models import BerthApplication
 from berth_reservations.exceptions import VenepaikkaGraphQLError
-from customers.models import Boat
+from customers.models import Boat, CustomerProfile
 from resources.models import Berth
 from resources.schema import BerthNode
+from users.decorators import (
+    add_permission_required,
+    delete_permission_required,
+    view_permission_required,
+)
+from users.utils import user_has_view_permission
 
 from .enums import LeaseStatus
 from .models import BerthLease
@@ -44,8 +50,9 @@ class BerthLeaseNode(DjangoObjectType):
             return None
 
         user = info.context.user
-        # TODO: implement proper permissions
-        if (node.customer and node.customer.user == user) or user.is_superuser:
+        if (node.customer and node.customer.user == user) or user_has_view_permission(
+            user, BerthLease, BerthApplication, CustomerProfile
+        ):
             return node
         else:
             raise VenepaikkaGraphQLError(
@@ -65,12 +72,10 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
     berth_lease = graphene.Field(BerthLeaseNode)
 
     @classmethod
-    @login_required
-    @superuser_required
+    @view_permission_required(BerthApplication, CustomerProfile)
+    @add_permission_required(BerthLease)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # TODO: Should check if the user has permissions to
-        # delete the specific resource
         application_id = from_global_id(input.pop("application_id"))[1]
         berth_id = from_global_id(input.pop("berth_id"))[1]
 
@@ -119,12 +124,9 @@ class DeleteBerthLeaseMutation(graphene.ClientIDMutation):
         id = graphene.ID(required=True)
 
     @classmethod
-    @login_required
-    @superuser_required
+    @delete_permission_required(BerthLease)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # TODO: Should check if the user has permissions to
-        # delete the specific resource
         id = from_global_id(input.get("id"))[1]
 
         try:
@@ -154,9 +156,7 @@ class Query:
         description="`BerthLeases` are ordered by `createdAt` in ascending order by default.",
     )
 
-    @login_required
-    @superuser_required
-    # TODO: Should check if the user has permissions to access these objects
+    @view_permission_required(BerthLease, BerthApplication, CustomerProfile)
     def resolve_berth_leases(self, info, **kwargs):
         return (
             BerthLease.objects.select_related(

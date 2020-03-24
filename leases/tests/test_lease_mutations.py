@@ -44,10 +44,11 @@ mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
 """
 
 
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
 @freeze_time("2020-01-01T08:00:00Z")
-def test_create_berth_lease(
-    superuser_api_client, berth_application, berth, customer_profile
-):
+def test_create_berth_lease(api_client, berth_application, berth, customer_profile):
     berth_application.customer = customer_profile
     berth_application.save()
 
@@ -58,9 +59,7 @@ def test_create_berth_lease(
 
     assert BerthLease.objects.count() == 0
 
-    executed = superuser_api_client.execute(
-        CREATE_BERTH_LEASE_MUTATION, input=variables,
-    )
+    executed = api_client.execute(CREATE_BERTH_LEASE_MUTATION, input=variables)
 
     assert BerthLease.objects.count() == 1
 
@@ -82,9 +81,12 @@ def test_create_berth_lease(
     }
 
 
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_lease_all_arguments(
-    superuser_api_client, berth_application, berth, boat, customer_profile
+    api_client, berth_application, berth, boat, customer_profile
 ):
     berth_application.customer = customer_profile
     berth_application.save()
@@ -102,9 +104,7 @@ def test_create_berth_lease_all_arguments(
 
     assert BerthLease.objects.count() == 0
 
-    executed = superuser_api_client.execute(
-        CREATE_BERTH_LEASE_MUTATION, input=variables,
-    )
+    executed = api_client.execute(CREATE_BERTH_LEASE_MUTATION, input=variables)
 
     assert BerthLease.objects.count() == 1
 
@@ -127,7 +127,9 @@ def test_create_berth_lease_all_arguments(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client",
+    ["api_client", "user", "harbor_services", "berth_supervisor"],
+    indirect=True,
 )
 def test_create_berth_lease_not_enough_permissions(
     api_client, berth_application, berth
@@ -240,16 +242,17 @@ mutation DELETE_DRAFTED_LEASE($input: DeleteBerthLeaseMutationInput!) {
 """
 
 
-def test_delete_berth_lease_drafted(
-    berth_lease, berth_application, superuser_api_client
-):
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_delete_berth_lease_drafted(berth_lease, berth_application, api_client):
     variables = {"id": to_global_id("BerthLeaseNode", berth_lease.id)}
     berth_lease.application = berth_application
     berth_lease.save()
 
     assert BerthLease.objects.count() == 1
 
-    superuser_api_client.execute(
+    api_client.execute(
         DELETE_BERTH_LEASE_MUTATION, input=variables,
     )
 
@@ -276,7 +279,9 @@ def test_delete_berth_lease_not_drafted(berth_lease, superuser_api_client):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client",
+    ["api_client", "user", "harbor_services", "berth_supervisor"],
+    indirect=True,
 )
 def test_delete_berth_lease_not_enough_permissions(api_client, berth_lease):
     variables = {
@@ -285,7 +290,7 @@ def test_delete_berth_lease_not_enough_permissions(api_client, berth_lease):
 
     assert BerthLease.objects.count() == 1
 
-    executed = api_client.execute(DELETE_BERTH_LEASE_MUTATION, input=variables,)
+    executed = api_client.execute(DELETE_BERTH_LEASE_MUTATION, input=variables)
 
     assert BerthLease.objects.count() == 1
     assert_not_enough_permissions(executed)
