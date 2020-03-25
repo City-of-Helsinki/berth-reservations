@@ -3,11 +3,14 @@ import json
 import pytest
 from graphql_relay import to_global_id
 
+from applications.new_schema import BerthApplicationNode
 from berth_reservations.tests.utils import (
     assert_in_errors,
     assert_not_enough_permissions,
 )
+from leases.schema import BerthLeaseNode
 from leases.tests.factories import BerthLeaseFactory
+from resources.schema import BerthNode, PierNode
 
 
 def test_get_boat_type(api_client, boat_type):
@@ -137,13 +140,19 @@ def test_get_berth_with_leases(api_client, berth):
             }
         }
     """ % to_global_id(
-        "BerthNode", berth.id
+        BerthNode._meta.name, berth.id
     )
     executed = api_client.execute(query)
 
     assert executed["data"]["berth"] == {
         "leases": {
-            "edges": [{"node": {"id": to_global_id("BerthLeaseNode", berth_lease.id)}}]
+            "edges": [
+                {
+                    "node": {
+                        "id": to_global_id(BerthLeaseNode._meta.name, berth_lease.id)
+                    }
+                }
+            ]
         }
     }
 
@@ -167,7 +176,7 @@ def test_get_berth_with_leases_not_enough_permissions(api_client, berth):
             }
         }
     """ % to_global_id(
-        "BerthNode", berth.id
+        BerthNode._meta.name, berth.id
     )
     executed = api_client.execute(query)
     assert_not_enough_permissions(executed)
@@ -292,7 +301,7 @@ def test_get_piers_filter_by_application(api_client, berth_application, berth):
             }
         }
     """ % to_global_id(
-        "BerthApplicationNode", berth_application.id
+        BerthApplicationNode._meta.name, berth_application.id
     )
 
     executed = api_client.execute(query)
@@ -318,7 +327,7 @@ def test_get_piers_filter_by_application(api_client, berth_application, berth):
             "edges": [
                 {
                     "node": {
-                        "id": to_global_id("PierNode", berth.pier.id),
+                        "id": to_global_id(PierNode._meta.name, berth.pier.id),
                         "properties": {"berths": {"edges": expected_berths}},
                     }
                 }
@@ -353,7 +362,7 @@ def test_get_piers_filter_error_both_filters(api_client, berth_application, bert
             }
         }
     """ % to_global_id(
-        "BerthApplicationNode", berth_application.id
+        BerthApplicationNode._meta.name, berth_application.id
     )
 
     executed = api_client.execute(query)
@@ -390,7 +399,7 @@ def test_get_piers_filter_by_application_not_enough_permissions(
             }
         }
     """ % to_global_id(
-        "BerthApplicationNode", berth_application.id
+        BerthApplicationNode._meta.name, berth_application.id
     )
 
     executed = api_client.execute(query)

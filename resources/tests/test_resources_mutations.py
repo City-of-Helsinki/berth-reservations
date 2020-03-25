@@ -19,6 +19,7 @@ from resources.models import (
     HarborMap,
     Pier,
 )
+from resources.schema import BerthNode, BerthTypeNode, HarborNode, PierNode
 
 CREATE_BERTH_MUTATION = """
 mutation CreateBerth($input: CreateBerthMutationInput!) {
@@ -41,8 +42,8 @@ def test_create_berth(pier, berth_type, api_client):
     variables = {
         "number": "9999",
         "comment": "foobar",
-        "pierId": to_global_id("PierNode", str(pier.id)),
-        "berthTypeId": to_global_id("BerthTypeNode", str(berth_type.id)),
+        "pierId": to_global_id(PierNode._meta.name, str(pier.id)),
+        "berthTypeId": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
     }
 
     assert Berth.objects.count() == 0
@@ -68,8 +69,8 @@ def test_create_berth_not_enough_permissions(api_client, pier, berth_type):
     variables = {
         "number": "9999",
         "comment": "foobar",
-        "pierId": to_global_id("PierNode", str(pier.id)),
-        "berthTypeId": to_global_id("BerthTypeNode", str(berth_type.id)),
+        "pierId": to_global_id(PierNode._meta.name, str(pier.id)),
+        "berthTypeId": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
     }
 
     assert Berth.objects.count() == 0
@@ -82,8 +83,8 @@ def test_create_berth_not_enough_permissions(api_client, pier, berth_type):
 
 def test_create_berth_no_number(pier, berth_type, superuser_api_client):
     variables = {
-        "pierId": to_global_id("PierNode", str(pier.id)),
-        "berthTypeId": to_global_id("BerthTypeNode", str(berth_type.id)),
+        "pierId": to_global_id(PierNode._meta.name, str(pier.id)),
+        "berthTypeId": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
     }
 
     assert Berth.objects.count() == 0
@@ -108,7 +109,7 @@ mutation DeleteBerth($input: DeleteBerthMutationInput!) {
 )
 def test_delete_berth(api_client, berth):
     variables = {
-        "id": to_global_id("BerthNode", str(berth.id)),
+        "id": to_global_id(BerthNode._meta.name, str(berth.id)),
     }
 
     assert Berth.objects.count() == 1
@@ -125,7 +126,7 @@ def test_delete_berth(api_client, berth):
 )
 def test_delete_berth_not_enough_permissions(api_client, berth):
     variables = {
-        "id": to_global_id("BerthNode", str(berth.id)),
+        "id": to_global_id(BerthNode._meta.name, str(berth.id)),
     }
 
     assert Berth.objects.count() == 1
@@ -138,7 +139,7 @@ def test_delete_berth_not_enough_permissions(api_client, berth):
 
 def test_delete_berth_inexistent_berth(superuser_api_client):
     variables = {
-        "id": to_global_id("BerthNode", uuid.uuid4()),
+        "id": to_global_id(BerthNode._meta.name, uuid.uuid4()),
     }
 
     executed = superuser_api_client.execute(DELETE_BERTH_MUTATION, input=variables)
@@ -170,9 +171,9 @@ mutation UpdateBerth($input: UpdateBerthMutationInput!) {
     "api_client", ["harbor_services", "berth_services"], indirect=True,
 )
 def test_update_berth(berth, pier, berth_type, api_client):
-    global_id = to_global_id("BerthNode", str(berth.id))
-    pier_id = to_global_id("PierNode", str(pier.id))
-    berth_type_id = to_global_id("BerthTypeNode", str(berth_type.id))
+    global_id = to_global_id(BerthNode._meta.name, str(berth.id))
+    pier_id = to_global_id(PierNode._meta.name, str(pier.id))
+    berth_type_id = to_global_id(BerthTypeNode._meta.name, str(berth_type.id))
 
     variables = {
         "id": global_id,
@@ -199,8 +200,8 @@ def test_update_berth(berth, pier, berth_type, api_client):
 
 
 def test_update_berth_no_id(berth, pier, berth_type, superuser_api_client):
-    pier_id = to_global_id("PierNode", str(pier.id))
-    berth_type_id = to_global_id("BerthTypeNode", str(berth_type.id))
+    pier_id = to_global_id(PierNode._meta.name, str(pier.id))
+    berth_type_id = to_global_id(BerthTypeNode._meta.name, str(berth_type.id))
 
     variables = {
         "number": "666",
@@ -223,8 +224,8 @@ def test_update_berth_no_id(berth, pier, berth_type, superuser_api_client):
     indirect=True,
 )
 def test_update_berth_not_enough_permissions(api_client, berth, pier, berth_type):
-    pier_id = to_global_id("PierNode", str(pier.id))
-    berth_type_id = to_global_id("BerthTypeNode", str(berth_type.id))
+    pier_id = to_global_id(PierNode._meta.name, str(pier.id))
+    berth_type_id = to_global_id(BerthTypeNode._meta.name, str(berth_type.id))
 
     variables = {
         "number": "666",
@@ -323,7 +324,7 @@ mutation DeleteBerthType($input: DeleteBerthTypeMutationInput!) {
 )
 def test_delete_berth_type(api_client, berth_type):
     variables = {
-        "id": to_global_id("BerthTypeNode", str(berth_type.id)),
+        "id": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
     }
 
     assert BerthType.objects.count() == 1
@@ -340,7 +341,7 @@ def test_delete_berth_type(api_client, berth_type):
 )
 def test_delete_berth_type_not_enough_permissions(api_client, berth_type):
     variables = {
-        "id": to_global_id("BerthTypeNode", str(berth_type.id)),
+        "id": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
     }
 
     assert BerthType.objects.count() == 1
@@ -353,7 +354,7 @@ def test_delete_berth_type_not_enough_permissions(api_client, berth_type):
 
 def test_delete_berth_type_inexistent_berth(superuser_api_client):
     variables = {
-        "id": to_global_id("BerthTypeNode", uuid.uuid4()),
+        "id": to_global_id(BerthTypeNode._meta.name, uuid.uuid4()),
     }
 
     executed = superuser_api_client.execute(DELETE_BERTH_TYPE_MUTATION, input=variables)
@@ -380,7 +381,7 @@ mutation UpdateBerthTypeMutation($input: UpdateBerthTypeMutationInput!){
     "api_client", ["harbor_services", "berth_services"], indirect=True,
 )
 def test_update_berth_type(berth_type, api_client):
-    global_id = to_global_id("BerthTypeNode", str(berth_type.id))
+    global_id = to_global_id(BerthTypeNode._meta.name, str(berth_type.id))
 
     variables = {
         "id": global_id,
@@ -433,7 +434,7 @@ def test_update_berth_type_no_id(superuser_api_client, berth_type):
 )
 def test_update_berth_type_not_enough_permissions(api_client, berth_type):
     variables = {
-        "id": to_global_id("BerthTypeNode", str(berth_type.id)),
+        "id": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
     }
     assert BerthType.objects.count() == 1
 
@@ -601,7 +602,7 @@ mutation DeleteHarbor($input: DeleteHarborMutationInput!) {
 )
 def test_delete_harbor(api_client, harbor):
     variables = {
-        "id": to_global_id("HarborNode", str(harbor.id)),
+        "id": to_global_id(HarborNode._meta.name, str(harbor.id)),
     }
 
     assert Harbor.objects.count() == 1
@@ -618,7 +619,7 @@ def test_delete_harbor(api_client, harbor):
 )
 def test_delete_harbor_not_enough_permissions(api_client, harbor):
     variables = {
-        "id": to_global_id("HarborNode", str(harbor.id)),
+        "id": to_global_id(HarborNode._meta.name, str(harbor.id)),
     }
 
     assert Harbor.objects.count() == 1
@@ -631,7 +632,7 @@ def test_delete_harbor_not_enough_permissions(api_client, harbor):
 
 def test_delete_harbor_inexistent_harbor(superuser_api_client):
     variables = {
-        "id": to_global_id("HarborNode", uuid.uuid4()),
+        "id": to_global_id(HarborNode._meta.name, uuid.uuid4()),
     }
 
     executed = superuser_api_client.execute(DELETE_HARBOR_MUTATION, input=variables)
@@ -678,7 +679,7 @@ mutation UpdateHarbor($input: UpdateHarborMutationInput!) {
     "api_client", ["harbor_services", "berth_services"], indirect=True,
 )
 def test_update_harbor(api_client, harbor, availability_level, municipality):
-    global_id = to_global_id("HarborNode", str(harbor.id))
+    global_id = to_global_id(HarborNode._meta.name, str(harbor.id))
     image_file_name = "image.png"
     map_file_names = ["map1.pdf", "map2.pdf", "map3.pdf"]
 
@@ -756,7 +757,7 @@ def test_update_harbor(api_client, harbor, availability_level, municipality):
     "api_client", ["harbor_services", "berth_services"], indirect=True,
 )
 def test_update_harbor_remove_map(api_client, harbor):
-    global_id = to_global_id("HarborNode", str(harbor.id))
+    global_id = to_global_id(HarborNode._meta.name, str(harbor.id))
     map_file_names = ["map1.pdf", "map2.pdf", "map3.pdf"]
 
     # Create map objects and get only the IDs
@@ -797,7 +798,7 @@ def test_update_harbor_no_id(superuser_api_client, harbor):
 )
 def test_update_harbor_not_enough_permissions(api_client, harbor):
     variables = {
-        "id": to_global_id("HarborNode", str(harbor.id)),
+        "id": to_global_id(HarborNode._meta.name, str(harbor.id)),
     }
     assert Harbor.objects.count() == 1
 
@@ -809,7 +810,7 @@ def test_update_harbor_not_enough_permissions(api_client, harbor):
 
 def test_update_harbor_availability_level_doesnt_exist(harbor, superuser_api_client):
     variables = {
-        "id": to_global_id("HarborNode", harbor.id),
+        "id": to_global_id(HarborNode._meta.name, harbor.id),
         "availabilityLevelId": "9999",
     }
 
@@ -823,7 +824,7 @@ def test_update_harbor_availability_level_doesnt_exist(harbor, superuser_api_cli
 
 def test_update_harbor_municipality_doesnt_exist(harbor, superuser_api_client):
     variables = {
-        "id": to_global_id("HarborNode", harbor.id),
+        "id": to_global_id(HarborNode._meta.name, harbor.id),
         "municipalityId": "foobarland",
     }
 
@@ -865,7 +866,7 @@ mutation CreatePier($input: CreatePierMutationInput!) {
     "api_client", ["harbor_services", "berth_services"], indirect=True,
 )
 def test_create_pier(api_client, harbor, boat_type):
-    harbor_id = to_global_id("HarborNode", harbor.id)
+    harbor_id = to_global_id(HarborNode._meta.name, harbor.id)
     boat_types = [boat_type.id]
 
     variables = {
@@ -916,7 +917,7 @@ def test_create_pier_not_enough_permissions(api_client):
 
 
 def test_create_harbor_harbor_doesnt_exist(superuser_api_client):
-    variables = {"harborId": to_global_id("BerthNode", uuid.uuid4())}
+    variables = {"harborId": to_global_id(BerthNode._meta.name, uuid.uuid4())}
 
     assert Pier.objects.count() == 0
 
@@ -950,7 +951,7 @@ mutation DeletePier($input: DeletePierMutationInput!) {
     "api_client", ["harbor_services", "berth_services"], indirect=True,
 )
 def test_delete_pier(api_client, pier):
-    variables = {"id": to_global_id("PierNode", str(pier.id))}
+    variables = {"id": to_global_id(PierNode._meta.name, str(pier.id))}
 
     assert Pier.objects.count() == 1
 
@@ -967,7 +968,7 @@ def test_delete_pier(api_client, pier):
     indirect=True,
 )
 def test_delete_pier_not_enough_permissions(api_client, pier):
-    variables = {"id": to_global_id("PierNode", str(pier.id))}
+    variables = {"id": to_global_id(PierNode._meta.name, str(pier.id))}
 
     assert Pier.objects.count() == 1
 
@@ -978,7 +979,7 @@ def test_delete_pier_not_enough_permissions(api_client, pier):
 
 
 def test_delete_pier_inexistent_pier(superuser_api_client):
-    variables = {"id": to_global_id("PierNode", uuid.uuid4())}
+    variables = {"id": to_global_id(PierNode._meta.name, uuid.uuid4())}
 
     executed = superuser_api_client.execute(DELETE_PIER_MUTATION, input=variables)
 
@@ -1020,8 +1021,8 @@ mutation UpdatePier($input: UpdatePierMutationInput!) {
     "api_client", ["harbor_services", "berth_services"], indirect=True,
 )
 def test_update_pier(api_client, pier, harbor, boat_type):
-    global_id = to_global_id("PierNode", str(pier.id))
-    harbor_id = to_global_id("HarborNode", str(harbor.id))
+    global_id = to_global_id(PierNode._meta.name, str(pier.id))
+    harbor_id = to_global_id(HarborNode._meta.name, str(harbor.id))
     boat_types = [boat_type.id]
 
     variables = {
@@ -1084,7 +1085,7 @@ def test_update_pier_no_id(superuser_api_client, pier):
     indirect=True,
 )
 def test_update_pier_not_enough_permissions(api_client, pier):
-    variables = {"id": to_global_id("PierNode", str(pier.id))}
+    variables = {"id": to_global_id(PierNode._meta.name, str(pier.id))}
     assert Pier.objects.count() == 1
 
     executed = api_client.execute(UPDATE_PIER_MUTATION, input=variables)
@@ -1094,7 +1095,7 @@ def test_update_pier_not_enough_permissions(api_client, pier):
 
 
 def test_update_pier_empty_boat_type_list(superuser_api_client, pier):
-    global_id = to_global_id("PierNode", pier.id)
+    global_id = to_global_id(PierNode._meta.name, pier.id)
     variables = {"id": global_id, "suitableBoatTypes": []}
 
     assert Pier.objects.count() == 1
@@ -1111,8 +1112,8 @@ def test_update_pier_empty_boat_type_list(superuser_api_client, pier):
 
 def test_update_pier_harbor_doesnt_exist(superuser_api_client, pier):
     variables = {
-        "id": to_global_id("PierNode", pier.id),
-        "harborId": to_global_id("HarborNode", uuid.uuid4()),
+        "id": to_global_id(PierNode._meta.name, pier.id),
+        "harborId": to_global_id(HarborNode._meta.name, uuid.uuid4()),
     }
 
     assert Pier.objects.count() == 1

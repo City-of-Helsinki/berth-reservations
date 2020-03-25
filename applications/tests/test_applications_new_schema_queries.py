@@ -4,6 +4,7 @@ from freezegun import freeze_time
 from graphql_relay.node.node import to_global_id
 
 from applications.enums import ApplicationStatus
+from applications.new_schema import BerthApplicationNode
 from applications.tests.factories import BerthApplicationFactory
 from berth_reservations.tests.utils import assert_in_errors
 from leases.tests.factories import BerthLeaseFactory
@@ -43,7 +44,7 @@ def test_berth_applications_no_customer_filter_true(berth_application, api_clien
                 {
                     "node": {
                         "id": to_global_id(
-                            "BerthApplicationNode", berth_application.id
+                            BerthApplicationNode._meta.name, berth_application.id
                         ),
                         "customer": None,
                     }
@@ -105,7 +106,7 @@ def test_berth_applications_statuses_filter(berth_application, api_client):
                 {
                     "node": {
                         "id": to_global_id(
-                            "BerthApplicationNode", berth_application.id
+                            BerthApplicationNode._meta.name, berth_application.id
                         ),
                         "status": status_enum_str,
                     }
@@ -177,7 +178,7 @@ def test_berth_applications_statuses_filter_empty_list(berth_application, api_cl
                 {
                     "node": {
                         "id": to_global_id(
-                            "BerthApplicationNode", berth_application.id
+                            BerthApplicationNode._meta.name, berth_application.id
                         ),
                         "status": ApplicationStatus.HANDLED.name,
                     }
