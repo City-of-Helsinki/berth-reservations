@@ -116,7 +116,12 @@ def test_get_berths(api_client, berth):
     }
 
 
-def test_get_berth_with_leases(superuser_api_client, berth):
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_berth_with_leases(api_client, berth):
     berth_lease = BerthLeaseFactory(berth=berth)
 
     query = """
@@ -134,7 +139,7 @@ def test_get_berth_with_leases(superuser_api_client, berth):
     """ % to_global_id(
         "BerthNode", berth.id
     )
-    executed = superuser_api_client.execute(query)
+    executed = api_client.execute(query)
 
     assert executed["data"]["berth"] == {
         "leases": {
@@ -144,7 +149,7 @@ def test_get_berth_with_leases(superuser_api_client, berth):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
 )
 def test_get_berth_with_leases_not_enough_permissions(api_client, berth):
     BerthLeaseFactory(berth=berth)
@@ -258,9 +263,12 @@ def test_get_winter_storage_places(api_client, winter_storage_place):
     }
 
 
-def test_get_piers_filter_by_application(
-    superuser_api_client, berth_application, berth
-):
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_piers_filter_by_application(api_client, berth_application, berth):
     query = """
         {
             piers(forApplication: "%s") {
@@ -287,7 +295,7 @@ def test_get_piers_filter_by_application(
         "BerthApplicationNode", berth_application.id
     )
 
-    executed = superuser_api_client.execute(query)
+    executed = api_client.execute(query)
 
     expected_berths = []
     if (
@@ -319,9 +327,12 @@ def test_get_piers_filter_by_application(
     }
 
 
-def test_get_piers_filter_error_both_filters(
-    superuser_api_client, berth_application, berth
-):
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_piers_filter_error_both_filters(api_client, berth_application, berth):
     query = """
         {
             piers(forApplication: "%s", minBerthWidth: 1.0, minBerthLength: 1.0) {
@@ -345,7 +356,7 @@ def test_get_piers_filter_error_both_filters(
         "BerthApplicationNode", berth_application.id
     )
 
-    executed = superuser_api_client.execute(query)
+    executed = api_client.execute(query)
 
     assert_in_errors(
         "You cannot filter by dimension (width, length) and application a the same time",
@@ -354,7 +365,7 @@ def test_get_piers_filter_error_both_filters(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
 )
 def test_get_piers_filter_by_application_not_enough_permissions(
     api_client, berth_application

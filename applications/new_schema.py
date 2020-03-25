@@ -3,11 +3,12 @@ import graphene
 from django.db import transaction
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
-from graphql_jwt.decorators import login_required, superuser_required
 from graphql_relay import from_global_id
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.models import CustomerProfile
+from leases.models import BerthLease
+from users.decorators import change_permission_required, view_permission_required
 
 from .enums import ApplicationStatus
 from .models import BerthApplication, BerthSwitch, HarborChoice
@@ -84,9 +85,7 @@ class BerthApplicationNode(DjangoObjectType):
         return None
 
     @classmethod
-    @login_required
-    @superuser_required
-    # TODO: Should check if the user has permissions to access this specific object
+    @view_permission_required(BerthApplication, BerthLease, CustomerProfile)
     def get_node(cls, info, id):
         return super().get_node(info, id)
 
@@ -103,11 +102,10 @@ class UpdateBerthApplication(graphene.ClientIDMutation):
     berth_application = graphene.Field(BerthApplicationNode)
 
     @classmethod
-    @login_required
-    @superuser_required
+    @view_permission_required(CustomerProfile, BerthLease)
+    @change_permission_required(BerthApplication)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # TODO: Should check if the user has permissions to perform the following changes
         berth_application_id = from_global_id(input.get("id"))[1]
         customer_id = from_global_id(input.get("customer_id"))[1]
 
@@ -138,9 +136,7 @@ class Query:
         "\n* A value passed is not a valid status",
     )
 
-    @login_required
-    @superuser_required
-    # TODO: Should check if the user has permissions to access these objects
+    @view_permission_required(BerthApplication, BerthLease, CustomerProfile)
     def resolve_berth_applications(self, info, **kwargs):
         statuses = kwargs.pop("statuses", [])
 

@@ -21,9 +21,10 @@ mutation UpdateApplication($input: UpdateBerthApplicationInput!) {
 """
 
 
-def test_update_berth_application(
-    superuser_api_client, berth_application, customer_profile
-):
+@pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+def test_update_berth_application(api_client, berth_application, customer_profile):
     berth_application_id = to_global_id(
         "BerthApplicationNode", str(berth_application.id)
     )
@@ -36,9 +37,7 @@ def test_update_berth_application(
 
     assert berth_application.customer is None
 
-    executed = superuser_api_client.execute(
-        UPDATE_BERTH_APPLICATION_MUTATION, input=variables,
-    )
+    executed = api_client.execute(UPDATE_BERTH_APPLICATION_MUTATION, input=variables)
 
     assert executed == {
         "data": {
@@ -55,36 +54,36 @@ def test_update_berth_application(
     }
 
 
-def test_update_berth_application_no_application_id(
-    superuser_api_client, customer_profile
-):
+@pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+def test_update_berth_application_no_application_id(api_client, customer_profile):
     variables = {
         "customerId": to_global_id("BerthProfileNode", str(customer_profile.id)),
     }
 
-    executed = superuser_api_client.execute(
-        UPDATE_BERTH_APPLICATION_MUTATION, input=variables,
-    )
+    executed = api_client.execute(UPDATE_BERTH_APPLICATION_MUTATION, input=variables)
 
     assert_field_missing("id", executed)
 
 
-def test_update_berth_application_no_customer_id(
-    superuser_api_client, berth_application
-):
+@pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+def test_update_berth_application_no_customer_id(api_client, berth_application):
     variables = {
         "id": to_global_id("BerthApplicationNode", str(berth_application.id)),
     }
 
-    executed = superuser_api_client.execute(
-        UPDATE_BERTH_APPLICATION_MUTATION, input=variables,
-    )
+    executed = api_client.execute(UPDATE_BERTH_APPLICATION_MUTATION, input=variables)
 
     assert_field_missing("customerId", executed)
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client",
+    ["api_client", "berth_handler", "berth_supervisor", "harbor_services", "user"],
+    indirect=True,
 )
 def test_update_berth_application_not_enough_permissions(
     api_client, berth_application, customer_profile
