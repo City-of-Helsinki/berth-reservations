@@ -90,6 +90,7 @@ sentry_sdk.init(
     environment=env("SENTRY_ENVIRONMENT"),
     integrations=[DjangoIntegration()],
 )
+sentry_sdk.integrations.logging.ignore_logger("graphql.execution.utils")
 
 MEDIA_ROOT = env("MEDIA_ROOT")
 STATIC_ROOT = env("STATIC_ROOT")
