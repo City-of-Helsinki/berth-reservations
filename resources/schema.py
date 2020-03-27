@@ -16,6 +16,7 @@ from munigeo.models import Municipality
 from applications.models import BerthApplication
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.models import CustomerProfile
+from leases.enums import LeaseStatus
 from leases.models import BerthLease
 from users.decorators import (
     add_permission_required,
@@ -118,6 +119,19 @@ def _resolve_piers(info, **kwargs):
         ).filter(berth_count__gt=0)
 
     return query
+
+
+def delete_inactive_leases(lookup, model_name):
+    # Get all the leases related to the resource
+    leases = BerthLease.objects.filter(lookup)
+    # If there's any active lease, raise an error
+    if leases.filter(status=LeaseStatus.PAID).count() > 0:
+        raise VenepaikkaGraphQLError(
+            _(f"Cannot delete {model_name} because it has some related leases")
+        )
+
+    # Delete all the leases associated to the Harbor
+    leases.delete()
 
 
 class AvailabilityLevelType(DjangoObjectType):
@@ -420,6 +434,8 @@ class DeleteBerthMutation(graphene.ClientIDMutation):
         except Berth.DoesNotExist as e:
             raise VenepaikkaGraphQLError(e)
 
+        delete_inactive_leases(Q(berth=berth), "Berth")
+
         berth.delete()
 
         return DeleteBerthMutation()
@@ -618,6 +634,8 @@ class DeleteHarborMutation(graphene.ClientIDMutation):
         except Harbor.DoesNotExist as e:
             raise VenepaikkaGraphQLError(e)
 
+        delete_inactive_leases(Q(berth__pier__harbor=harbor), "Harbor")
+
         harbor.delete()
 
         return DeleteHarborMutation()
@@ -721,6 +739,8 @@ class DeletePierMutation(graphene.ClientIDMutation):
             pier = Pier.objects.get(pk=id)
         except Pier.DoesNotExist as e:
             raise VenepaikkaGraphQLError(e)
+
+        delete_inactive_leases(Q(berth__pier=pier), "Pier")
 
         pier.delete()
 

@@ -8,9 +8,12 @@ from berth_reservations.tests.utils import (
     assert_doesnt_exist,
     assert_field_duplicated,
     assert_field_missing,
+    assert_in_errors,
     assert_invalid_enum,
     assert_not_enough_permissions,
 )
+from leases.enums import LeaseStatus
+from leases.tests.factories import BerthLeaseFactory
 from resources.models import (
     Berth,
     BerthType,
@@ -145,6 +148,32 @@ def test_delete_berth_inexistent_berth(superuser_api_client):
     executed = superuser_api_client.execute(DELETE_BERTH_MUTATION, input=variables)
 
     assert_doesnt_exist("Berth", executed)
+
+
+def test_delete_berth_with_lease(superuser_api_client, berth):
+    berth_lease = BerthLeaseFactory(berth=berth, status=LeaseStatus.DRAFTED)
+    variables = {
+        "id": to_global_id(BerthNode._meta.name, berth_lease.berth.id),
+    }
+
+    assert Berth.objects.count() == 1
+
+    superuser_api_client.execute(DELETE_BERTH_MUTATION, input=variables)
+
+    assert Berth.objects.count() == 0
+
+
+def test_delete_berth_protected_with_lease(superuser_api_client, berth):
+    berth_lease = BerthLeaseFactory(berth=berth, status=LeaseStatus.PAID)
+    variables = {
+        "id": to_global_id(BerthNode._meta.name, berth_lease.berth.id),
+    }
+
+    executed = superuser_api_client.execute(DELETE_BERTH_MUTATION, input=variables)
+
+    assert_in_errors(
+        "Cannot delete Berth because it has some related leases", executed,
+    )
 
 
 UPDATE_BERTH_MUTATION = """
@@ -640,6 +669,32 @@ def test_delete_harbor_inexistent_harbor(superuser_api_client):
     assert_doesnt_exist("Harbor", executed)
 
 
+def test_delete_harbor_with_lease(superuser_api_client, berth):
+    berth_lease = BerthLeaseFactory(berth=berth, status=LeaseStatus.DRAFTED)
+    variables = {
+        "id": to_global_id(HarborNode._meta.name, berth_lease.berth.pier.harbor.id),
+    }
+
+    assert Harbor.objects.count() == 1
+
+    superuser_api_client.execute(DELETE_HARBOR_MUTATION, input=variables)
+
+    assert Harbor.objects.count() == 0
+
+
+def test_delete_harbor_protected_with_lease(superuser_api_client, berth):
+    berth_lease = BerthLeaseFactory(berth=berth, status=LeaseStatus.PAID)
+    variables = {
+        "id": to_global_id(HarborNode._meta.name, berth_lease.berth.pier.harbor.id),
+    }
+
+    executed = superuser_api_client.execute(DELETE_HARBOR_MUTATION, input=variables)
+
+    assert_in_errors(
+        "Cannot delete Harbor because it has some related leases", executed,
+    )
+
+
 UPDATE_HARBOR_MUTATION = """
 mutation UpdateHarbor($input: UpdateHarborMutationInput!) {
     updateHarbor(input: $input) {
@@ -984,6 +1039,32 @@ def test_delete_pier_inexistent_pier(superuser_api_client):
     executed = superuser_api_client.execute(DELETE_PIER_MUTATION, input=variables)
 
     assert_doesnt_exist("Pier", executed)
+
+
+def test_delete_pier_with_lease(superuser_api_client, berth):
+    berth_lease = BerthLeaseFactory(berth=berth, status=LeaseStatus.DRAFTED)
+    variables = {
+        "id": to_global_id(PierNode._meta.name, berth_lease.berth.pier.id),
+    }
+
+    assert Pier.objects.count() == 1
+
+    superuser_api_client.execute(DELETE_PIER_MUTATION, input=variables)
+
+    assert Pier.objects.count() == 0
+
+
+def test_delete_pier_protected_with_lease(superuser_api_client, berth):
+    berth_lease = BerthLeaseFactory(berth=berth, status=LeaseStatus.PAID)
+    variables = {
+        "id": to_global_id(PierNode._meta.name, berth_lease.berth.pier.id),
+    }
+
+    executed = superuser_api_client.execute(DELETE_PIER_MUTATION, input=variables)
+
+    assert_in_errors(
+        "Cannot delete Pier because it has some related leases", executed,
+    )
 
 
 UPDATE_PIER_MUTATION = """
