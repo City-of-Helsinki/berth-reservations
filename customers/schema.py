@@ -14,6 +14,7 @@ from leases.models import BerthLease
 from leases.schema import BerthLeaseNode
 from users.decorators import view_permission_required
 from users.utils import user_has_view_permission
+from utils.relay import get_node_from_global_id
 
 from .enums import InvoicingType
 from .models import Boat, Company, CustomerProfile
@@ -87,7 +88,7 @@ class ProfileNode(BaseProfileFieldsMixin, DjangoObjectType):
     @login_required
     def __resolve_reference(self, info, **kwargs):
         user = info.context.user
-        profile = relay.Node.get_node_from_global_id(info, self.id)
+        profile = get_node_from_global_id(info, self.id, only_type=ProfileNode)
         if not profile:
             return None
 

@@ -1,8 +1,8 @@
 import graphene
 from graphene_django.types import DjangoObjectType
-from graphql_relay.node.node import from_global_id
 
-from harbors.models import WinterStorageArea
+from harbors.schema import HarborType, WinterStorageAreaType
+from utils.relay import get_node_from_global_id
 
 from .enums import WinterStorageMethod
 from .models import (
@@ -10,7 +10,6 @@ from .models import (
     BerthSwitch,
     BerthSwitchReason,
     BoatType,
-    Harbor,
     HarborChoice,
     WinterStorageApplication,
     WinterStorageAreaChoice,
@@ -136,8 +135,9 @@ class CreateBerthApplication(graphene.Mutation):
 
         switch_data = kwargs.pop("berth_switch", None)
         if switch_data:
-            harbor_id = from_global_id(switch_data.get("harbor_id"))[1]
-            old_harbor = Harbor.objects.get(id=harbor_id)
+            old_harbor = get_node_from_global_id(
+                info, switch_data.get("harbor_id"), only_type=HarborType
+            )
             reason_id = switch_data.get("reason")
             reason = BerthSwitchReason.objects.get(id=reason_id) if reason_id else None
             berth_switch = BerthSwitch.objects.create(
@@ -153,8 +153,9 @@ class CreateBerthApplication(graphene.Mutation):
         application = BerthApplication.objects.create(**application_data)
 
         for choice in choices:
-            harbor_id = from_global_id(choice.get("harbor_id"))[1]
-            harbor = Harbor.objects.get(id=harbor_id)
+            harbor = get_node_from_global_id(
+                info, choice.get("harbor_id"), only_type=HarborType
+            )
             HarborChoice.objects.get_or_create(
                 harbor=harbor, priority=choice.get("priority"), application=application
             )
@@ -185,8 +186,9 @@ class CreateWinterStorageApplication(graphene.Mutation):
         application = WinterStorageApplication.objects.create(**application_data)
 
         for choice in chosen_areas:
-            winter_area_id = from_global_id(choice.get("winter_area_id"))[1]
-            winter_storage_area = WinterStorageArea.objects.get(id=winter_area_id)
+            winter_storage_area = get_node_from_global_id(
+                info, choice.get("winter_area_id"), only_type=WinterStorageAreaType
+            )
             WinterStorageAreaChoice.objects.get_or_create(
                 winter_storage_area=winter_storage_area,
                 priority=choice.get("priority"),

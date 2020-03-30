@@ -3,12 +3,11 @@ import graphene
 from django.db import transaction
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
-from graphql_relay import from_global_id
 
-from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.models import CustomerProfile
 from leases.models import BerthLease
 from users.decorators import change_permission_required, view_permission_required
+from utils.relay import get_node_from_global_id
 
 from .enums import ApplicationStatus
 from .models import BerthApplication, BerthSwitch, HarborChoice
@@ -106,17 +105,17 @@ class UpdateBerthApplication(graphene.ClientIDMutation):
     @change_permission_required(BerthApplication)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        berth_application_id = from_global_id(input.get("id"))[1]
-        customer_id = from_global_id(input.get("customer_id"))[1]
+        from customers.schema import BerthProfileNode
 
-        try:
-            application = BerthApplication.objects.get(pk=berth_application_id)
-            customer = CustomerProfile.objects.get(pk=customer_id)
+        application = get_node_from_global_id(
+            info, input.pop("id"), only_type=BerthApplicationNode
+        )
+        customer = get_node_from_global_id(
+            info, input.pop("customer_id"), only_type=BerthProfileNode
+        )
 
-            application.customer = customer
-            application.save()
-        except (BerthApplication.DoesNotExist, CustomerProfile.DoesNotExist) as e:
-            raise VenepaikkaGraphQLError(e)
+        application.customer = customer
+        application.save()
 
         return UpdateBerthApplication(berth_application=application)
 

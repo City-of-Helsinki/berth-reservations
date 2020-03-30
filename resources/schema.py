@@ -4,16 +4,16 @@ import graphql_geojson
 from django.db import transaction
 from django.db.models import Count, Prefetch, Q
 from django.db.utils import IntegrityError
-from django.utils.translation import get_language, ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 from graphene import relay
 from graphene_django.fields import DjangoConnectionField, DjangoListField
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
 from graphene_file_upload.scalars import Upload
-from graphql_relay import from_global_id
 from munigeo.models import Municipality
 
 from applications.models import BerthApplication
+from applications.new_schema import BerthApplicationNode
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.models import CustomerProfile
 from leases.enums import LeaseStatus
@@ -25,6 +25,7 @@ from users.decorators import (
     view_permission_required,
 )
 from users.utils import user_has_view_permission
+from utils.relay import get_node_from_global_id
 
 from .enums import BerthMooringType
 from .models import (
@@ -81,11 +82,9 @@ def _resolve_piers(info, **kwargs):
             and user.is_authenticated
             and user_has_view_permission(user, BerthApplication)
         ):
-            application_id = from_global_id(application_global_id)[1]
-            try:
-                application = BerthApplication.objects.get(pk=application_id)
-            except BerthApplication.DoesNotExist as e:
-                raise VenepaikkaGraphQLError(e)
+            application = get_node_from_global_id(
+                info, application_global_id, only_type=BerthApplicationNode
+            )
 
             min_width = application.boat_width
             min_length = application.boat_length
@@ -380,8 +379,12 @@ class CreateBerthMutation(graphene.ClientIDMutation):
     @add_permission_required(Berth)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        input["pier_id"] = from_global_id(input.pop("pier_id"))[1]
-        input["berth_type_id"] = from_global_id(input.pop("berth_type_id"))[1]
+        input["pier"] = get_node_from_global_id(
+            info, input.pop("pier_id"), only_type=PierNode
+        )
+        input["berth_type"] = get_node_from_global_id(
+            info, input.pop("berth_type_id"), only_type=BerthTypeNode
+        )
 
         berth = Berth.objects.create(**input)
         return CreateBerthMutation(berth=berth)
@@ -400,19 +403,17 @@ class UpdateBerthMutation(graphene.ClientIDMutation):
     @change_permission_required(Berth)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # GQL IDs have to be translated to Django model UUIDs
-        id = from_global_id(input.pop("id"))[1]
+        berth = get_node_from_global_id(info, input.pop("id"), only_type=BerthNode)
 
         if input.get("pier_id"):
-            input["pier_id"] = from_global_id(input.get("pier_id"))[1]
+            input["pier"] = get_node_from_global_id(
+                info, input.pop("pier_id"), only_type=PierNode
+            )
 
         if input.get("berth_type_id"):
-            input["berth_type_id"] = from_global_id(input.get("berth_type_id"))[1]
-
-        try:
-            berth = Berth.objects.get(pk=id)
-        except Berth.DoesNotExist as e:
-            raise VenepaikkaGraphQLError(e)
+            input["berth_type"] = get_node_from_global_id(
+                info, input.pop("berth_type_id"), only_type=BerthTypeNode
+            )
 
         update_object(berth, input)
 
@@ -427,12 +428,7 @@ class DeleteBerthMutation(graphene.ClientIDMutation):
     @delete_permission_required(Berth)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        id = from_global_id(input.get("id"))[1]
-
-        try:
-            berth = Berth.objects.get(pk=id)
-        except Berth.DoesNotExist as e:
-            raise VenepaikkaGraphQLError(e)
+        berth = get_node_from_global_id(info, input.get("id"), only_type=BerthNode)
 
         delete_inactive_leases(Q(berth=berth), "Berth")
 
@@ -454,11 +450,7 @@ class CreateBerthTypeMutation(graphene.ClientIDMutation):
     @add_permission_required(BerthType)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        berth_type = BerthType.objects.create(
-            mooring_type=input.get("mooring_type"),
-            width=input.get("width"),
-            length=input.get("length"),
-        )
+        berth_type = BerthType.objects.create(**input)
         return CreateBerthTypeMutation(berth_type=berth_type)
 
 
@@ -476,13 +468,9 @@ class UpdateBerthTypeMutation(graphene.ClientIDMutation):
     @change_permission_required(BerthType)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # GQL IDs have to be translated to Django model UUIDs
-        id = from_global_id(input.pop("id"))[1]
-
-        try:
-            berth_type = BerthType.objects.get(pk=id)
-        except BerthType.DoesNotExist as e:
-            raise VenepaikkaGraphQLError(e)
+        berth_type = get_node_from_global_id(
+            info, input.pop("id"), only_type=BerthTypeNode
+        )
 
         update_object(berth_type, input)
 
@@ -497,12 +485,9 @@ class DeleteBerthTypeMutation(graphene.ClientIDMutation):
     @delete_permission_required(BerthType)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        id = from_global_id(input.get("id"))[1]
-
-        try:
-            berth_type = BerthType.objects.get(pk=id)
-        except BerthType.DoesNotExist as e:
-            raise VenepaikkaGraphQLError(e)
+        berth_type = get_node_from_global_id(
+            info, input.pop("id"), only_type=BerthTypeNode
+        )
 
         berth_type.delete()
 
@@ -552,8 +537,6 @@ class CreateHarborMutation(graphene.ClientIDMutation):
     @add_permission_required(Harbor)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        lang = get_language()
-
         availability_level_id = input.pop("availability_level_id", None)
         if availability_level_id:
             try:
@@ -570,7 +553,7 @@ class CreateHarborMutation(graphene.ClientIDMutation):
             except Municipality.DoesNotExist as e:
                 raise VenepaikkaGraphQLError(e)
 
-        harbor = Harbor.objects.language(lang).create(**input)
+        harbor = Harbor.objects.create(**input)
         add_map_files(HarborMap, input.pop("add_map_files", []), harbor)
 
         return CreateHarborMutation(harbor=harbor)
@@ -589,27 +572,19 @@ class UpdateHarborMutation(graphene.ClientIDMutation):
     @change_permission_required(Harbor)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        id = from_global_id(input.pop("id"))[1]
-
-        lang = get_language()
+        harbor = get_node_from_global_id(info, input.pop("id"), only_type=HarborNode)
 
         try:
-            harbor = Harbor.objects.language(lang).get(pk=id)
-
             availability_level_id = input.pop("availability_level_id", None)
             if availability_level_id:
-                input["availability_level"] = AvailabilityLevel.objects.language(
-                    lang
-                ).get(pk=availability_level_id)
+                input["availability_level"] = AvailabilityLevel.objects.get(
+                    pk=availability_level_id
+                )
 
             municipality_id = input.pop("municipality_id", None)
             if municipality_id:
                 input["municipality"] = Municipality.objects.get(id=municipality_id)
-        except (
-            Harbor.DoesNotExist,
-            AvailabilityLevel.DoesNotExist,
-            Municipality.DoesNotExist,
-        ) as e:
+        except (AvailabilityLevel.DoesNotExist, Municipality.DoesNotExist,) as e:
             raise VenepaikkaGraphQLError(e)
 
         add_map_files(HarborMap, input.pop("add_map_files", []), harbor)
@@ -627,12 +602,7 @@ class DeleteHarborMutation(graphene.ClientIDMutation):
     @delete_permission_required(Harbor)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        id = from_global_id(input.get("id"))[1]
-
-        try:
-            harbor = Harbor.objects.get(pk=id)
-        except Harbor.DoesNotExist as e:
-            raise VenepaikkaGraphQLError(e)
+        harbor = get_node_from_global_id(info, input.pop("id"), only_type=HarborNode)
 
         delete_inactive_leases(Q(berth__pier__harbor=harbor), "Harbor")
 
@@ -661,13 +631,11 @@ class CreatePierMutation(graphene.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         suitable_boat_types = input.pop("suitable_boat_types", [])
 
-        harbor_global_id = input.pop("harbor_id", None)
-        if harbor_global_id:
-            harbor_id = from_global_id(harbor_global_id)[1]
-            try:
-                input["harbor"] = Harbor.objects.get(pk=harbor_id)
-            except Harbor.DoesNotExist as e:
-                raise VenepaikkaGraphQLError(e)
+        if input.get("harbor_id"):
+            harbor = get_node_from_global_id(
+                info, input.pop("harbor_id"), only_type=HarborNode
+            )
+            input["harbor"] = harbor
 
         boat_types = set()
         for boat_type_id in suitable_boat_types:
@@ -696,17 +664,13 @@ class UpdatePierMutation(graphene.ClientIDMutation):
     @change_permission_required(Pier)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        id = from_global_id(input.pop("id"))[1]
+        pier = get_node_from_global_id(info, input.pop("id"), only_type=PierNode)
 
-        try:
-            harbor_global_id = input.pop("harbor_id", None)
-            if harbor_global_id:
-                harbor_id = from_global_id(harbor_global_id)[1]
-                input["harbor"] = Harbor.objects.get(pk=harbor_id)
-
-            pier = Pier.objects.get(pk=id)
-        except (Pier.DoesNotExist, Harbor.DoesNotExist,) as e:
-            raise VenepaikkaGraphQLError(e)
+        if input.get("harbor_id"):
+            harbor = get_node_from_global_id(
+                info, input.pop("harbor_id"), only_type=HarborNode
+            )
+            input["harbor"] = harbor
 
         boat_types = set()
         for boat_type_id in input.pop("suitable_boat_types", []):
@@ -733,12 +697,7 @@ class DeletePierMutation(graphene.ClientIDMutation):
     @delete_permission_required(Pier)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        id = from_global_id(input.get("id"))[1]
-
-        try:
-            pier = Pier.objects.get(pk=id)
-        except Pier.DoesNotExist as e:
-            raise VenepaikkaGraphQLError(e)
+        pier = get_node_from_global_id(info, input.pop("id"), only_type=PierNode)
 
         delete_inactive_leases(Q(berth__pier=pier), "Pier")
 
