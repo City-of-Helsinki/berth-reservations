@@ -971,8 +971,8 @@ def test_create_pier_not_enough_permissions(api_client):
     assert_not_enough_permissions(executed)
 
 
-def test_create_harbor_harbor_doesnt_exist(superuser_api_client):
-    variables = {"harborId": to_global_id(BerthNode._meta.name, uuid.uuid4())}
+def test_create_pier_harbor_doesnt_exist(superuser_api_client):
+    variables = {"harborId": to_global_id(HarborNode._meta.name, uuid.uuid4())}
 
     assert Pier.objects.count() == 0
 
