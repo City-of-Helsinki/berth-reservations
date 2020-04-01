@@ -1,9 +1,11 @@
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.files.storage import FileSystemStorage
+from django.db.models import Max
 from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumIntegerField
 from munigeo.models import Municipality
+from parler.managers import TranslatableManager
 from parler.models import TranslatableModel, TranslatedFields
 
 from utils.models import UUIDModel
@@ -72,6 +74,32 @@ class AvailabilityLevel(TranslatableModel):
         return self.safe_translation_getter("title", super().__str__())
 
 
+class AbstractAreaManager(TranslatableManager):
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                max_width=Max(self.max_width_lookup),
+                max_length=Max(self.max_length_lookup),
+            )
+        )
+
+
+class HarborManager(AbstractAreaManager):
+    max_width_lookup = "piers__berths__berth_type__width"
+    max_length_lookup = "piers__berths__berth_type__length"
+    max_depth_lookup = "piers__berths__berth_type__depth"
+
+    def get_queryset(self):
+        return super().get_queryset().annotate(max_depth=Max(self.max_depth_lookup))
+
+
+class WinterStorageAreaManager(AbstractAreaManager):
+    max_width_lookup = "sections__places__place_type__width"
+    max_length_lookup = "sections__places__place_type__length"
+
+
 class AbstractArea(UUIDModel):
     # For importing coordinates and address from servicemap.hel.fi
     servicemap_id = models.CharField(
@@ -130,15 +158,6 @@ class Harbor(AbstractArea, TranslatableModel):
     number_of_places = models.PositiveSmallIntegerField(
         verbose_name=_("number of places"), null=True, blank=True
     )
-    maximum_width = models.PositiveSmallIntegerField(
-        verbose_name=_("maximum berth width"), null=True, blank=True
-    )
-    maximum_length = models.PositiveSmallIntegerField(
-        verbose_name=_("maximum berth length"), null=True, blank=True
-    )
-    maximum_depth = models.PositiveSmallIntegerField(
-        verbose_name=_("maximum berth depth"), null=True, blank=True
-    )
 
     translations = TranslatedFields(
         name=models.CharField(
@@ -154,6 +173,8 @@ class Harbor(AbstractArea, TranslatableModel):
             blank=True,
         ),
     )
+
+    objects = HarborManager()
 
     class Meta:
         verbose_name = _("harbor")
@@ -196,12 +217,6 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
     number_of_marked_places = models.PositiveSmallIntegerField(
         verbose_name=_("number of marked places"), null=True, blank=True
     )
-    max_width = models.PositiveSmallIntegerField(
-        verbose_name=_("maximum place width"), null=True, blank=True
-    )
-    max_length = models.PositiveSmallIntegerField(
-        verbose_name=_("maximum place length"), null=True, blank=True
-    )
 
     # Lohkopaikat (~ section places)
     # People just queue for these, then as long as there s still space
@@ -235,6 +250,8 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
             blank=True,
         ),
     )
+
+    objects = WinterStorageAreaManager()
 
     class Meta:
         verbose_name = _("winter storage area")

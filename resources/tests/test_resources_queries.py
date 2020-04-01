@@ -25,7 +25,9 @@ def test_get_boat_type(api_client, boat_type):
     assert executed["data"] == {"boatTypes": [{"name": boat_type.name}]}
 
 
-def test_get_harbors(api_client, harbor):
+def test_get_harbors(api_client, berth):
+    harbor = berth.pier.harbor
+
     query = """
         {
             harbors {
@@ -38,6 +40,9 @@ def test_get_harbors(api_client, harbor):
                         properties {
                             name
                             zipCode
+                            maxWidth
+                            maxLength
+                            maxDepth
                         }
                     }
                 }
@@ -51,7 +56,13 @@ def test_get_harbors(api_client, harbor):
                 {
                     "node": {
                         "geometry": json.loads(harbor.location.json),
-                        "properties": {"name": harbor.name, "zipCode": harbor.zip_code},
+                        "properties": {
+                            "name": harbor.name,
+                            "zipCode": harbor.zip_code,
+                            "maxWidth": float(berth.berth_type.width),
+                            "maxLength": float(berth.berth_type.length),
+                            "maxDepth": float(berth.berth_type.depth),
+                        },
                     }
                 }
             ]

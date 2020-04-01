@@ -495,9 +495,6 @@ mutation CreateHarbor($input: CreateHarborMutationInput!) {
                 }
                 municipality
                 numberOfPlaces
-                maximumWidth
-                maximumLength
-                maximumDepth
             }
         }
     }
@@ -518,9 +515,6 @@ def test_create_harbor(api_client, availability_level, municipality):
         "availabilityLevelId": availability_level.id,
         "municipalityId": municipality.id,
         "numberOfPlaces": 150,
-        "maximumWidth": 350,
-        "maximumLength": 400,
-        "maximumDepth": 100,
         "name": "Foobarsatama",
         "streetAddress": "Foobarstatmanrantatie 1234",
         "servicemapId": "1",
@@ -562,9 +556,6 @@ def test_create_harbor(api_client, availability_level, municipality):
         "availabilityLevel": {"id": str(availability_level.id)},
         "municipality": municipality.name,
         "numberOfPlaces": variables["numberOfPlaces"],
-        "maximumWidth": variables["maximumWidth"],
-        "maximumLength": variables["maximumLength"],
-        "maximumDepth": variables["maximumDepth"],
     }
 
 
@@ -720,9 +711,6 @@ mutation UpdateHarbor($input: UpdateHarborMutationInput!) {
                 }
                 municipality
                 numberOfPlaces
-                maximumWidth
-                maximumLength
-                maximumDepth
             }
         }
     }
@@ -752,9 +740,6 @@ def test_update_harbor(api_client, harbor, availability_level, municipality):
         "availabilityLevelId": availability_level.id,
         "municipalityId": municipality.id,
         "numberOfPlaces": 175,
-        "maximumWidth": 400,
-        "maximumLength": 550,
-        "maximumDepth": 200,
         "name": "Uusi Foobarsatama",
         "streetAddress": "Uusifoobarstatmanrantatie 2345",
         "servicemapId": "1",
@@ -802,9 +787,6 @@ def test_update_harbor(api_client, harbor, availability_level, municipality):
         "availabilityLevel": {"id": str(availability_level.id)},
         "municipality": municipality.name,
         "numberOfPlaces": variables["numberOfPlaces"],
-        "maximumWidth": variables["maximumWidth"],
-        "maximumLength": variables["maximumLength"],
-        "maximumDepth": variables["maximumDepth"],
     }
 
 

@@ -233,10 +233,10 @@ class WinterStorageAreaMapType(DjangoObjectType, AbstractMapType):
         )
 
 
-class HarborNode(graphql_geojson.GeoJSONType):
+class HarborFilter(django_filters.FilterSet):
     class Meta:
         model = Harbor
-        filter_fields = [
+        fields = (
             "piers__mooring",
             "piers__electricity",
             "piers__water",
@@ -244,17 +244,27 @@ class HarborNode(graphql_geojson.GeoJSONType):
             "piers__gate",
             "piers__lighting",
             "piers__suitable_boat_types",
-            "maximum_width",
-            "maximum_length",
-        ]
+        )
+
+    max_width = django_filters.NumberFilter()
+    max_length = django_filters.NumberFilter()
+
+
+class HarborNode(graphql_geojson.GeoJSONType):
+    class Meta:
+        model = Harbor
         geojson_field = "location"
         interfaces = (relay.Node,)
+        filterset_class = HarborFilter
 
     name = graphene.String()
     street_address = graphene.String()
     municipality = graphene.String()
     image_file = graphene.String()
     maps = graphene.List(HarborMapType, required=True)
+    max_width = graphene.Float()
+    max_length = graphene.Float()
+    max_depth = graphene.Float()
     piers = DjangoFilterConnectionField(
         PierNode,
         min_berth_width=graphene.Float(),
@@ -311,28 +321,37 @@ class WinterStorageSectionNode(graphql_geojson.GeoJSONType):
         interfaces = (relay.Node,)
 
 
-class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
+class WinterStorageAreaFilter(django_filters.FilterSet):
     class Meta:
         model = WinterStorageArea
-        filter_fields = [
+        fields = (
             "sections__repair_area",
             "sections__electricity",
             "sections__water",
             "sections__summer_storage_for_docking_equipment",
             "sections__summer_storage_for_trailers",
             "sections__summer_storage_for_boats",
-            "max_width",
-            "max_length",
             "max_length_of_section_spaces",
-        ]
+        )
+
+    max_width = django_filters.NumberFilter()
+    max_length = django_filters.NumberFilter()
+
+
+class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
+    class Meta:
+        model = WinterStorageArea
         geojson_field = "location"
         interfaces = (relay.Node,)
+        filterset_class = WinterStorageAreaFilter
 
     name = graphene.String()
     street_address = graphene.String()
     municipality = graphene.String()
     image_file = graphene.String()
     maps = graphene.List(WinterStorageAreaMapType, required=True)
+    max_width = graphene.Float()
+    max_length = graphene.Float()
 
     def resolve_image_file(self, info, **kwargs):
         if self.image_file:
@@ -503,9 +522,6 @@ class HarborInput(AbstractAreaInput):
     )
     availability_level_id = graphene.ID()
     number_of_places = graphene.Int()
-    maximum_width = graphene.Int()
-    maximum_length = graphene.Int()
-    maximum_depth = graphene.Int()
     name = graphene.String()
     street_address = graphene.String()
 
