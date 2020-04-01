@@ -225,8 +225,12 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
     number_of_section_spaces = models.PositiveSmallIntegerField(
         verbose_name=_("number of section places"), null=True, blank=True
     )
-    max_length_of_section_spaces = models.PositiveSmallIntegerField(
-        verbose_name=_("xaximum length of section spaces"), null=True, blank=True
+    max_length_of_section_spaces = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        verbose_name=_("maximum length of section spaces"),
+        null=True,
+        blank=True,
     )
 
     # Nostojärjestyspaikat (~ unmarked places)
