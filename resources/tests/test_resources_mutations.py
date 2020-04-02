@@ -494,7 +494,6 @@ mutation CreateHarbor($input: CreateHarborMutationInput!) {
                     id
                 }
                 municipality
-                numberOfPlaces
             }
         }
     }
@@ -514,7 +513,6 @@ def test_create_harbor(api_client, availability_level, municipality):
         ),
         "availabilityLevelId": availability_level.id,
         "municipalityId": municipality.id,
-        "numberOfPlaces": 150,
         "name": "Foobarsatama",
         "streetAddress": "Foobarstatmanrantatie 1234",
         "servicemapId": "1",
@@ -555,7 +553,6 @@ def test_create_harbor(api_client, availability_level, municipality):
         "zipCode": variables["zipCode"],
         "availabilityLevel": {"id": str(availability_level.id)},
         "municipality": municipality.name,
-        "numberOfPlaces": variables["numberOfPlaces"],
     }
 
 
@@ -710,7 +707,6 @@ mutation UpdateHarbor($input: UpdateHarborMutationInput!) {
                     id
                 }
                 municipality
-                numberOfPlaces
             }
         }
     }
@@ -739,7 +735,6 @@ def test_update_harbor(api_client, harbor, availability_level, municipality):
         ],
         "availabilityLevelId": availability_level.id,
         "municipalityId": municipality.id,
-        "numberOfPlaces": 175,
         "name": "Uusi Foobarsatama",
         "streetAddress": "Uusifoobarstatmanrantatie 2345",
         "servicemapId": "1",
@@ -786,7 +781,6 @@ def test_update_harbor(api_client, harbor, availability_level, municipality):
         "zipCode": variables["zipCode"],
         "availabilityLevel": {"id": str(availability_level.id)},
         "municipality": municipality.name,
-        "numberOfPlaces": variables["numberOfPlaces"],
     }
 
 

@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.files.storage import FileSystemStorage
-from django.db.models import Max
+from django.db.models import Count, Max
 from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumIntegerField
 from munigeo.models import Municipality
@@ -92,12 +92,26 @@ class HarborManager(AbstractAreaManager):
     max_depth_lookup = "piers__berths__berth_type__depth"
 
     def get_queryset(self):
-        return super().get_queryset().annotate(max_depth=Max(self.max_depth_lookup))
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                max_depth=Max(self.max_depth_lookup),
+                number_of_places=Count("piers__berths"),
+            )
+        )
 
 
 class WinterStorageAreaManager(AbstractAreaManager):
     max_width_lookup = "sections__places__place_type__width"
     max_length_lookup = "sections__places__place_type__length"
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(number_of_marked_places=Count("sections__places"))
+        )
 
 
 class AbstractArea(UUIDModel):
@@ -155,10 +169,6 @@ class Harbor(AbstractArea, TranslatableModel):
         on_delete=models.SET_NULL,
     )
 
-    number_of_places = models.PositiveSmallIntegerField(
-        verbose_name=_("number of places"), null=True, blank=True
-    )
-
     translations = TranslatedFields(
         name=models.CharField(
             verbose_name=_("name"),
@@ -209,13 +219,6 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
         verbose_name=_("availability level"),
         related_name="winter_storage_areas",
         on_delete=models.SET_NULL,
-    )
-
-    # Ruutupaikat (~ appointed marked places)
-    # We can see in advance who gets a place and who does not.
-    # We know their lengths and widths.
-    number_of_marked_places = models.PositiveSmallIntegerField(
-        verbose_name=_("number of marked places"), null=True, blank=True
     )
 
     # Lohkopaikat (~ section places)

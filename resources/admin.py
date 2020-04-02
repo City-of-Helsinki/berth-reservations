@@ -39,10 +39,17 @@ class BoatTypeAdmin(TranslatableAdmin):
 class HarborAdmin(CustomTranslatableAdmin, admin.OSMGeoAdmin):
     ordering = ("translations__name",)
     readonly_fields = (
+        "number_of_places",
         "max_width",
         "max_length",
         "max_depth",
     )
+
+    def number_of_places(self, obj):
+        return obj.number_of_places
+
+    number_of_places.short_description = _("Number of places")
+    number_of_places.admin_order_field = "number_of_places"
 
     def max_width(self, obj):
         return obj.max_width
@@ -70,9 +77,16 @@ class PierAdmin(admin.OSMGeoAdmin):
 class WinterStorageAreaAdmin(CustomTranslatableAdmin, admin.OSMGeoAdmin):
     ordering = ("translations__name",)
     readonly_fields = (
+        "number_of_marked_places",
         "max_width",
         "max_length",
     )
+
+    def number_of_marked_places(self, obj):
+        return obj.number_of_marked_places
+
+    number_of_marked_places.short_description = _("Number of marked places")
+    number_of_marked_places.admin_order_field = "number_of_marked_places"
 
     def max_width(self, obj):
         return obj.max_width

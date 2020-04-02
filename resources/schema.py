@@ -265,6 +265,7 @@ class HarborNode(graphql_geojson.GeoJSONType):
     max_width = graphene.Float()
     max_length = graphene.Float()
     max_depth = graphene.Float()
+    number_of_places = graphene.Int(required=True)
     piers = DjangoFilterConnectionField(
         PierNode,
         min_berth_width=graphene.Float(),
@@ -352,6 +353,7 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
     maps = graphene.List(WinterStorageAreaMapType, required=True)
     max_width = graphene.Float()
     max_length = graphene.Float()
+    number_of_marked_places = graphene.Int(required=True)
 
     def resolve_image_file(self, info, **kwargs):
         if self.image_file:
@@ -521,7 +523,6 @@ class HarborInput(AbstractAreaInput):
         description="List of map files that will be added to the existing ones belonging to the Harbor.",
     )
     availability_level_id = graphene.ID()
-    number_of_places = graphene.Int()
     name = graphene.String()
     street_address = graphene.String()
 

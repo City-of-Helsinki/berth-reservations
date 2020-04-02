@@ -43,6 +43,7 @@ def test_get_harbors(api_client, berth):
                             maxWidth
                             maxLength
                             maxDepth
+                            numberOfPlaces
                         }
                     }
                 }
@@ -62,6 +63,7 @@ def test_get_harbors(api_client, berth):
                             "maxWidth": float(berth.berth_type.width),
                             "maxLength": float(berth.berth_type.length),
                             "maxDepth": float(berth.berth_type.depth),
+                            "numberOfPlaces": 1,
                         },
                     }
                 }
