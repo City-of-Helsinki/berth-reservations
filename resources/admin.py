@@ -1,4 +1,5 @@
 from django.contrib.gis import admin
+from django.utils.translation import ugettext_lazy as _
 from parler.admin import TranslatableAdmin
 
 from .models import (
@@ -36,8 +37,37 @@ class BoatTypeAdmin(TranslatableAdmin):
 
 
 class HarborAdmin(CustomTranslatableAdmin, admin.OSMGeoAdmin):
-    list_display = ("name",)
     ordering = ("translations__name",)
+    readonly_fields = (
+        "number_of_places",
+        "max_width",
+        "max_length",
+        "max_depth",
+    )
+
+    def number_of_places(self, obj):
+        return obj.number_of_places
+
+    number_of_places.short_description = _("Number of places")
+    number_of_places.admin_order_field = "number_of_places"
+
+    def max_width(self, obj):
+        return obj.max_width
+
+    max_width.short_description = _("Maximum allowed width")
+    max_width.admin_order_field = "max_width"
+
+    def max_length(self, obj):
+        return obj.max_length
+
+    max_length.short_description = _("Maximum allowed length")
+    max_length.admin_order_field = "max_length"
+
+    def max_depth(self, obj):
+        return obj.max_depth
+
+    max_depth.short_description = _("Maximum allowed depth")
+    max_depth.admin_order_field = "max_depth"
 
 
 class PierAdmin(admin.OSMGeoAdmin):
@@ -46,6 +76,29 @@ class PierAdmin(admin.OSMGeoAdmin):
 
 class WinterStorageAreaAdmin(CustomTranslatableAdmin, admin.OSMGeoAdmin):
     ordering = ("translations__name",)
+    readonly_fields = (
+        "number_of_marked_places",
+        "max_width",
+        "max_length",
+    )
+
+    def number_of_marked_places(self, obj):
+        return obj.number_of_marked_places
+
+    number_of_marked_places.short_description = _("Number of marked places")
+    number_of_marked_places.admin_order_field = "number_of_marked_places"
+
+    def max_width(self, obj):
+        return obj.max_width
+
+    max_width.short_description = _("Maximum allowed width")
+    max_width.admin_order_field = "max_width"
+
+    def max_length(self, obj):
+        return obj.max_length
+
+    max_length.short_description = _("Maximum allowed length")
+    max_length.admin_order_field = "max_length"
 
 
 class WinterStorageSectionAdmin(admin.OSMGeoAdmin):
