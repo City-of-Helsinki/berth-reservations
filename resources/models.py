@@ -97,7 +97,7 @@ class HarborManager(AbstractAreaManager):
             .get_queryset()
             .annotate(
                 max_depth=Max(self.max_depth_lookup),
-                number_of_places=Count("piers__berths"),
+                number_of_places=Count("piers__berths", distinct=True),
             )
         )
 
@@ -110,7 +110,7 @@ class WinterStorageAreaManager(AbstractAreaManager):
         return (
             super()
             .get_queryset()
-            .annotate(number_of_marked_places=Count("sections__places"))
+            .annotate(number_of_marked_places=Count("sections__places", distinct=True))
         )
 
 
