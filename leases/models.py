@@ -109,6 +109,9 @@ class BerthLease(AbstractLease):
     end_date = models.DateField(
         verbose_name=_("end date"), default=calculate_berth_lease_end_date
     )
+    renew_automatically = models.BooleanField(
+        verbose_name=_("renew automatically"), default=True
+    )
 
     class Meta:
         verbose_name = _("berth lease")

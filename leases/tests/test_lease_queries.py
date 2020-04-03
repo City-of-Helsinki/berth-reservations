@@ -20,6 +20,7 @@ query GetBerthLeases {
                 startDate
                 endDate
                 comment
+                renewAutomatically
                 boat {
                     id
                 }
@@ -82,6 +83,7 @@ def test_query_berth_leases(api_client, berth_lease, berth_application):
         "startDate": str(berth_lease.start_date),
         "endDate": str(berth_lease.end_date),
         "comment": berth_lease.comment,
+        "renewAutomatically": True,
         "boat": {"id": boat_id},
         "customer": {
             "id": customer_id,
