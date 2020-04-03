@@ -44,6 +44,8 @@ def test_get_harbors(api_client, berth):
                             maxLength
                             maxDepth
                             numberOfPlaces
+                            createdAt
+                            modifiedAt
                         }
                     }
                 }
@@ -63,7 +65,9 @@ def test_get_harbors(api_client, berth):
                             "maxWidth": float(berth.berth_type.width),
                             "maxLength": float(berth.berth_type.length),
                             "maxDepth": float(berth.berth_type.depth),
-                            "numberOfPlaces": 1,
+                            "numberOfPlaces": harbor.piers.count(),
+                            "createdAt": harbor.created_at.isoformat(),
+                            "modifiedAt": harbor.modified_at.isoformat(),
                         },
                     }
                 }
@@ -87,6 +91,8 @@ def test_get_piers(api_client, pier):
                             suitableBoatTypes {
                                 name
                             }
+                            createdAt
+                            modifiedAt
                         }
                     }
                 }
@@ -106,6 +112,8 @@ def test_get_piers(api_client, pier):
                         "properties": {
                             "identifier": pier.identifier,
                             "suitableBoatTypes": expected_suitables_boat_types,
+                            "createdAt": pier.created_at.isoformat(),
+                            "modifiedAt": pier.modified_at.isoformat(),
                         },
                     }
                 }
@@ -121,6 +129,8 @@ def test_get_berths(api_client, berth):
                 edges {
                     node {
                         number
+                        createdAt
+                        modifiedAt
                     }
                 }
             }
@@ -128,7 +138,17 @@ def test_get_berths(api_client, berth):
     """
     executed = api_client.execute(query)
     assert executed["data"] == {
-        "berths": {"edges": [{"node": {"number": berth.number}}]}
+        "berths": {
+            "edges": [
+                {
+                    "node": {
+                        "number": berth.number,
+                        "createdAt": berth.created_at.isoformat(),
+                        "modifiedAt": berth.modified_at.isoformat(),
+                    }
+                }
+            ]
+        }
     }
 
 
@@ -208,6 +228,8 @@ def test_get_winter_storage_areas(api_client, winter_storage_area):
                         properties {
                             name
                             zipCode
+                            createdAt
+                            modifiedAt
                         }
                     }
                 }
@@ -224,6 +246,8 @@ def test_get_winter_storage_areas(api_client, winter_storage_area):
                         "properties": {
                             "name": winter_storage_area.name,
                             "zipCode": winter_storage_area.zip_code,
+                            "createdAt": winter_storage_area.created_at.isoformat(),
+                            "modifiedAt": winter_storage_area.modified_at.isoformat(),
                         },
                     }
                 }
@@ -244,6 +268,8 @@ def test_get_winter_storage_sections(api_client, winter_storage_section):
                         }
                         properties {
                             identifier
+                            createdAt
+                            modifiedAt
                         }
                     }
                 }
@@ -257,7 +283,11 @@ def test_get_winter_storage_sections(api_client, winter_storage_section):
                 {
                     "node": {
                         "geometry": json.loads(winter_storage_section.location.json),
-                        "properties": {"identifier": winter_storage_section.identifier},
+                        "properties": {
+                            "identifier": winter_storage_section.identifier,
+                            "createdAt": winter_storage_section.created_at.isoformat(),
+                            "modifiedAt": winter_storage_section.modified_at.isoformat(),
+                        },
                     }
                 }
             ]
@@ -272,6 +302,8 @@ def test_get_winter_storage_places(api_client, winter_storage_place):
                 edges {
                     node {
                         number
+                        createdAt
+                        modifiedAt
                     }
                 }
             }
@@ -280,7 +312,15 @@ def test_get_winter_storage_places(api_client, winter_storage_place):
     executed = api_client.execute(query)
     assert executed["data"] == {
         "winterStoragePlaces": {
-            "edges": [{"node": {"number": winter_storage_place.number}}]
+            "edges": [
+                {
+                    "node": {
+                        "number": winter_storage_place.number,
+                        "createdAt": winter_storage_place.created_at.isoformat(),
+                        "modifiedAt": winter_storage_place.modified_at.isoformat(),
+                    }
+                }
+            ]
         }
     }
 

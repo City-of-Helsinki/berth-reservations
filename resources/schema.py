@@ -199,7 +199,15 @@ class BerthNode(DjangoObjectType):
 
     class Meta:
         model = Berth
-        fields = ("id", "number", "pier", "berth_type", "comment")
+        fields = (
+            "id",
+            "number",
+            "pier",
+            "berth_type",
+            "comment",
+            "created_at",
+            "modified_at",
+        )
         interfaces = (relay.Node,)
         filterset_class = BerthNodeFilterSet
 
@@ -303,7 +311,14 @@ class WinterStoragePlaceTypeNode(DjangoObjectType):
 class WinterStoragePlaceNode(DjangoObjectType):
     class Meta:
         model = WinterStoragePlace
-        fields = ("id", "number", "winter_storage_section", "place_type")
+        fields = (
+            "id",
+            "number",
+            "winter_storage_section",
+            "place_type",
+            "created_at",
+            "modified_at",
+        )
         interfaces = (relay.Node,)
 
 

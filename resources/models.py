@@ -8,7 +8,7 @@ from munigeo.models import Municipality
 from parler.managers import TranslatableManager
 from parler.models import TranslatableModel, TranslatedFields
 
-from utils.models import UUIDModel
+from utils.models import TimeStampedModel, UUIDModel
 
 from .enums import BerthMooringType
 
@@ -114,7 +114,7 @@ class WinterStorageAreaManager(AbstractAreaManager):
         )
 
 
-class AbstractArea(UUIDModel):
+class AbstractArea(TimeStampedModel, UUIDModel):
     # For importing coordinates and address from servicemap.hel.fi
     servicemap_id = models.CharField(
         verbose_name=_("servicemap ID"),
@@ -296,7 +296,7 @@ class WinterStorageAreaMap(AbstractAreaMap):
     )
 
 
-class AbstractAreaSection(UUIDModel):
+class AbstractAreaSection(TimeStampedModel, UUIDModel):
     """
     AreaSection models keep the information about the services
     available at this pier or winter storage section.
@@ -390,7 +390,7 @@ class WinterStorageSection(AbstractAreaSection):
         return self.area
 
 
-class AbstractPlaceType(UUIDModel):
+class AbstractPlaceType(TimeStampedModel, UUIDModel):
     """
     This model stores a combination of place's dimensions
        (and - for berths - its mooring type).
@@ -444,7 +444,7 @@ class WinterStoragePlaceType(AbstractPlaceType):
         return "{} x {}".format(self.width, self.length)
 
 
-class AbstractBoatPlace(UUIDModel):
+class AbstractBoatPlace(TimeStampedModel, UUIDModel):
     number = models.CharField(verbose_name=_("number"), max_length=10)
 
     class Meta:
