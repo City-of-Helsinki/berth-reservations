@@ -13,7 +13,7 @@ from berth_reservations.tests.utils import (
     assert_in_errors,
     assert_not_enough_permissions,
 )
-from customers.schema import BerthProfileNode, BoatNode
+from customers.schema import BoatNode, ProfileNode
 from leases.enums import LeaseStatus
 from leases.models import BerthLease
 from leases.schema import BerthLeaseNode
@@ -77,9 +77,7 @@ def test_create_berth_lease(api_client, berth_application, berth, customer_profi
         "comment": "",
         "boat": None,
         "customer": {
-            "id": to_global_id(
-                BerthProfileNode._meta.name, berth_application.customer.id
-            )
+            "id": to_global_id(ProfileNode._meta.name, berth_application.customer.id)
         },
         "application": {
             "id": variables.get("applicationId"),
@@ -126,9 +124,7 @@ def test_create_berth_lease_all_arguments(
         "comment": variables.get("comment"),
         "boat": {"id": variables.get("boatId")},
         "customer": {
-            "id": to_global_id(
-                BerthProfileNode._meta.name, berth_application.customer.id
-            )
+            "id": to_global_id(ProfileNode._meta.name, berth_application.customer.id)
         },
         "application": {
             "id": variables.get("applicationId"),

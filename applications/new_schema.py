@@ -67,6 +67,7 @@ class BerthApplicationNode(DjangoObjectType):
     boat_type = graphene.String()
     harbor_choices = graphene.List(HarborChoiceType)
     status = ApplicationStatusEnum(required=True)
+    customer = graphene.Field("customers.schema.ProfileNode")
 
     class Meta:
         model = BerthApplication
@@ -105,13 +106,13 @@ class UpdateBerthApplication(graphene.ClientIDMutation):
     @change_permission_required(BerthApplication)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        from customers.schema import BerthProfileNode
+        from customers.schema import ProfileNode
 
         application = get_node_from_global_id(
             info, input.pop("id"), only_type=BerthApplicationNode
         )
         customer = get_node_from_global_id(
-            info, input.pop("customer_id"), only_type=BerthProfileNode
+            info, input.pop("customer_id"), only_type=ProfileNode
         )
 
         application.customer = customer

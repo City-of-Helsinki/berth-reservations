@@ -23,12 +23,16 @@ InvoicingTypeEnum = graphene.Enum.from_enum(InvoicingType)
 
 
 class BoatNode(DjangoObjectType):
+    owner = graphene.Field("customers.schema.ProfileNode", required=True)
+
     class Meta:
         model = Boat
         interfaces = (relay.Node,)
 
 
 class CompanyType(DjangoObjectType):
+    customer = graphene.Field("customers.schema.ProfileNode", required=True)
+
     class Meta:
         model = Company
         fields = ("business_id", "name", "address", "postal_code", "city")

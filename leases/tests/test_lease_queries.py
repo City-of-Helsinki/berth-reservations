@@ -5,7 +5,7 @@ from graphql_relay import to_global_id
 
 from applications.new_schema import BerthApplicationNode
 from berth_reservations.tests.utils import assert_not_enough_permissions
-from customers.schema import BerthProfileNode, BoatNode
+from customers.schema import BoatNode, ProfileNode
 from leases.schema import BerthLeaseNode
 from leases.tests.factories import BerthLeaseFactory
 from resources.schema import BerthNode, BerthTypeNode
@@ -73,7 +73,7 @@ def test_query_berth_leases(api_client, berth_lease, berth_application):
     berth_application_id = to_global_id(
         BerthApplicationNode._meta.name, berth_application.id
     )
-    customer_id = to_global_id(BerthProfileNode._meta.name, berth_lease.customer.id)
+    customer_id = to_global_id(ProfileNode._meta.name, berth_lease.customer.id)
     boat_id = to_global_id(BoatNode._meta.name, berth_lease.boat.id)
 
     assert executed["data"]["berthLeases"]["edges"][0]["node"] == {
@@ -166,7 +166,7 @@ def test_query_berth_lease(api_client, berth_lease, berth_application):
     berth_application_id = to_global_id(
         BerthApplicationNode._meta.name, berth_application.id
     )
-    customer_id = to_global_id(BerthProfileNode._meta.name, berth_lease.customer.id)
+    customer_id = to_global_id(ProfileNode._meta.name, berth_lease.customer.id)
     boat_id = to_global_id(BoatNode._meta.name, berth_lease.boat.id)
 
     assert executed["data"]["berthLease"] == {
