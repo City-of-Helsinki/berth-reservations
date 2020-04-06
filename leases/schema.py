@@ -37,6 +37,7 @@ class BerthLeaseNodeFilter(django_filters.FilterSet):
 class BerthLeaseNode(DjangoObjectType):
     berth = graphene.Field(BerthNode, required=True)
     status = LeaseStatusEnum(required=True)
+    customer = graphene.Field("customers.schema.ProfileNode", required=True)
 
     class Meta:
         model = BerthLease
