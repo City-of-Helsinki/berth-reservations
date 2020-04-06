@@ -1,13 +1,15 @@
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.files.storage import FileSystemStorage
-from django.db.models import Count, Max
+from django.db.models import Count, Exists, Max, OuterRef, Q
 from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumIntegerField
 from munigeo.models import Municipality
 from parler.managers import TranslatableManager
 from parler.models import TranslatableModel, TranslatedFields
 
+from leases.enums import LeaseStatus
+from leases.utils import calculate_berth_lease_end_date
 from utils.models import TimeStampedModel, UUIDModel
 
 from .enums import BerthMooringType
@@ -451,6 +453,45 @@ class AbstractBoatPlace(TimeStampedModel, UUIDModel):
         abstract = True
 
 
+class BerthManager(models.Manager):
+    def get_queryset(self):
+        """
+        The QuerySet annotates whether a berth is available or not. For this,
+        it considers the following criteria:
+            - If there are leases associated to the berth
+            - If any lease ends during the current or the last season (previous year)
+                + If a lease ends during the current season:
+                    * It needs to have a "valid" status (DRAFTED, OFFERED, PAID)
+                + If a lease ended during the last season:
+                    * It needs to have a "valid" status (PAID)
+                    * It needs to have renew automatically set
+        """
+        from leases.models import BerthLease
+
+        current_season_end = calculate_berth_lease_end_date()
+
+        in_current_season = Q(end_date=current_season_end)
+        in_last_season = Q(
+            end_date=current_season_end.replace(current_season_end.year - 1)
+        )
+        active_current_status = Q(
+            status__in=(LeaseStatus.DRAFTED, LeaseStatus.OFFERED, LeaseStatus.PAID)
+        )
+        paid_status = Q(status=LeaseStatus.PAID)
+        auto_renew = Q(renew_automatically=True)
+
+        active_leases = (
+            BerthLease.objects.filter(berth=OuterRef("pk"))
+            .filter(
+                Q(in_current_season & active_current_status)
+                | Q(in_last_season & auto_renew & paid_status)
+            )
+            .values("id")
+        )
+
+        return super().get_queryset().annotate(is_available=~Exists(active_leases))
+
+
 class Berth(AbstractBoatPlace):
     pier = models.ForeignKey(
         Pier, verbose_name=_("pier"), related_name="berths", on_delete=models.CASCADE
@@ -465,6 +506,8 @@ class Berth(AbstractBoatPlace):
     is_accessible = models.BooleanField(
         verbose_name=_("is accessible"), blank=True, null=True,
     )
+
+    objects = BerthManager()
 
     class Meta:
         verbose_name = _("berth")
