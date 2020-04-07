@@ -78,10 +78,13 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         application = get_node_from_global_id(
-            info, input.pop("application_id"), only_type=BerthApplicationNode
+            info,
+            input.pop("application_id"),
+            only_type=BerthApplicationNode,
+            nullable=False,
         )
         berth = get_node_from_global_id(
-            info, input.pop("berth_id"), only_type=BerthNode
+            info, input.pop("berth_id"), only_type=BerthNode, nullable=False,
         )
 
         if not application.customer:
@@ -97,7 +100,7 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
             from customers.schema import BoatNode
 
             boat = get_node_from_global_id(
-                info, input.pop("boat_id"), only_type=BoatNode
+                info, input.pop("boat_id"), only_type=BoatNode, nullable=False,
             )
 
             if boat.owner.id != input["customer"].id:
@@ -126,7 +129,9 @@ class DeleteBerthLeaseMutation(graphene.ClientIDMutation):
     @delete_permission_required(BerthLease)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        lease = get_node_from_global_id(info, input.pop("id"), only_type=BerthLeaseNode)
+        lease = get_node_from_global_id(
+            info, input.pop("id"), only_type=BerthLeaseNode, nullable=False,
+        )
 
         if lease.status != LeaseStatus.DRAFTED:
             raise VenepaikkaGraphQLError(
