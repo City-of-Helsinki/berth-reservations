@@ -416,10 +416,10 @@ class CreateBerthMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         input["pier"] = get_node_from_global_id(
-            info, input.pop("pier_id"), only_type=PierNode
+            info, input.pop("pier_id"), only_type=PierNode, nullable=False,
         )
         input["berth_type"] = get_node_from_global_id(
-            info, input.pop("berth_type_id"), only_type=BerthTypeNode
+            info, input.pop("berth_type_id"), only_type=BerthTypeNode, nullable=False,
         )
 
         berth = Berth.objects.create(**input)
@@ -439,16 +439,21 @@ class UpdateBerthMutation(graphene.ClientIDMutation):
     @change_permission_required(Berth)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        berth = get_node_from_global_id(info, input.pop("id"), only_type=BerthNode)
+        berth = get_node_from_global_id(
+            info, input.pop("id"), only_type=BerthNode, nullable=False,
+        )
 
         if input.get("pier_id"):
             input["pier"] = get_node_from_global_id(
-                info, input.pop("pier_id"), only_type=PierNode
+                info, input.pop("pier_id"), only_type=PierNode, nullable=False,
             )
 
         if input.get("berth_type_id"):
             input["berth_type"] = get_node_from_global_id(
-                info, input.pop("berth_type_id"), only_type=BerthTypeNode
+                info,
+                input.pop("berth_type_id"),
+                only_type=BerthTypeNode,
+                nullable=False,
             )
 
         update_object(berth, input)
@@ -464,7 +469,9 @@ class DeleteBerthMutation(graphene.ClientIDMutation):
     @delete_permission_required(Berth)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        berth = get_node_from_global_id(info, input.get("id"), only_type=BerthNode)
+        berth = get_node_from_global_id(
+            info, input.get("id"), only_type=BerthNode, nullable=False,
+        )
 
         delete_inactive_leases(Q(berth=berth), "Berth")
 
@@ -505,7 +512,7 @@ class UpdateBerthTypeMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         berth_type = get_node_from_global_id(
-            info, input.pop("id"), only_type=BerthTypeNode
+            info, input.pop("id"), only_type=BerthTypeNode, nullable=False,
         )
 
         update_object(berth_type, input)
@@ -522,7 +529,7 @@ class DeleteBerthTypeMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         berth_type = get_node_from_global_id(
-            info, input.pop("id"), only_type=BerthTypeNode
+            info, input.pop("id"), only_type=BerthTypeNode, nullable=False,
         )
 
         berth_type.delete()
@@ -604,7 +611,9 @@ class UpdateHarborMutation(graphene.ClientIDMutation):
     @change_permission_required(Harbor)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        harbor = get_node_from_global_id(info, input.pop("id"), only_type=HarborNode)
+        harbor = get_node_from_global_id(
+            info, input.pop("id"), only_type=HarborNode, nullable=False,
+        )
 
         try:
             availability_level_id = input.pop("availability_level_id", None)
@@ -634,7 +643,9 @@ class DeleteHarborMutation(graphene.ClientIDMutation):
     @delete_permission_required(Harbor)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        harbor = get_node_from_global_id(info, input.pop("id"), only_type=HarborNode)
+        harbor = get_node_from_global_id(
+            info, input.pop("id"), only_type=HarborNode, nullable=False,
+        )
 
         delete_inactive_leases(Q(berth__pier__harbor=harbor), "Harbor")
 
@@ -665,7 +676,7 @@ class CreatePierMutation(graphene.ClientIDMutation):
 
         if input.get("harbor_id"):
             harbor = get_node_from_global_id(
-                info, input.pop("harbor_id"), only_type=HarborNode
+                info, input.pop("harbor_id"), only_type=HarborNode, nullable=False,
             )
             input["harbor"] = harbor
 
@@ -696,11 +707,13 @@ class UpdatePierMutation(graphene.ClientIDMutation):
     @change_permission_required(Pier)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        pier = get_node_from_global_id(info, input.pop("id"), only_type=PierNode)
+        pier = get_node_from_global_id(
+            info, input.pop("id"), only_type=PierNode, nullable=False,
+        )
 
         if input.get("harbor_id"):
             harbor = get_node_from_global_id(
-                info, input.pop("harbor_id"), only_type=HarborNode
+                info, input.pop("harbor_id"), only_type=HarborNode, nullable=False,
             )
             input["harbor"] = harbor
 
@@ -729,7 +742,9 @@ class DeletePierMutation(graphene.ClientIDMutation):
     @delete_permission_required(Pier)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        pier = get_node_from_global_id(info, input.pop("id"), only_type=PierNode)
+        pier = get_node_from_global_id(
+            info, input.pop("id"), only_type=PierNode, nullable=False,
+        )
 
         delete_inactive_leases(Q(berth__pier=pier), "Pier")
 
