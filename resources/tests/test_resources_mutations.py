@@ -8,9 +8,12 @@ from berth_reservations.tests.utils import (
     assert_doesnt_exist,
     assert_field_duplicated,
     assert_field_missing,
+    assert_in_errors,
     assert_invalid_enum,
     assert_not_enough_permissions,
 )
+from leases.enums import LeaseStatus
+from leases.tests.factories import BerthLeaseFactory
 from resources.models import (
     Berth,
     BerthType,
@@ -19,6 +22,7 @@ from resources.models import (
     HarborMap,
     Pier,
 )
+from resources.schema import BerthNode, BerthTypeNode, HarborNode, PierNode
 
 CREATE_BERTH_MUTATION = """
 mutation CreateBerth($input: CreateBerthMutationInput!) {
@@ -34,17 +38,20 @@ mutation CreateBerth($input: CreateBerthMutationInput!) {
 """
 
 
-def test_create_berth(pier, berth_type, superuser_api_client):
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_create_berth(pier, berth_type, api_client):
     variables = {
         "number": "9999",
         "comment": "foobar",
-        "pierId": to_global_id("PierNode", str(pier.id)),
-        "berthTypeId": to_global_id("BerthTypeNode", str(berth_type.id)),
+        "pierId": to_global_id(PierNode._meta.name, str(pier.id)),
+        "berthTypeId": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
     }
 
     assert Berth.objects.count() == 0
 
-    executed = superuser_api_client.execute(CREATE_BERTH_MUTATION, input=variables)
+    executed = api_client.execute(CREATE_BERTH_MUTATION, input=variables)
 
     assert Berth.objects.count() == 1
     assert executed["data"]["createBerth"]["berth"].pop("id") is not None
@@ -57,14 +64,16 @@ def test_create_berth(pier, berth_type, superuser_api_client):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
 )
 def test_create_berth_not_enough_permissions(api_client, pier, berth_type):
     variables = {
         "number": "9999",
         "comment": "foobar",
-        "pierId": to_global_id("PierNode", str(pier.id)),
-        "berthTypeId": to_global_id("BerthTypeNode", str(berth_type.id)),
+        "pierId": to_global_id(PierNode._meta.name, str(pier.id)),
+        "berthTypeId": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
     }
 
     assert Berth.objects.count() == 0
@@ -77,8 +86,8 @@ def test_create_berth_not_enough_permissions(api_client, pier, berth_type):
 
 def test_create_berth_no_number(pier, berth_type, superuser_api_client):
     variables = {
-        "pierId": to_global_id("PierNode", str(pier.id)),
-        "berthTypeId": to_global_id("BerthTypeNode", str(berth_type.id)),
+        "pierId": to_global_id(PierNode._meta.name, str(pier.id)),
+        "berthTypeId": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
     }
 
     assert Berth.objects.count() == 0
@@ -98,24 +107,29 @@ mutation DeleteBerth($input: DeleteBerthMutationInput!) {
 """
 
 
-def test_delete_berth(superuser_api_client, berth):
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_delete_berth(api_client, berth):
     variables = {
-        "id": to_global_id("BerthNode", str(berth.id)),
+        "id": to_global_id(BerthNode._meta.name, str(berth.id)),
     }
 
     assert Berth.objects.count() == 1
 
-    superuser_api_client.execute(DELETE_BERTH_MUTATION, input=variables)
+    api_client.execute(DELETE_BERTH_MUTATION, input=variables)
 
     assert Berth.objects.count() == 0
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
 )
 def test_delete_berth_not_enough_permissions(api_client, berth):
     variables = {
-        "id": to_global_id("BerthNode", str(berth.id)),
+        "id": to_global_id(BerthNode._meta.name, str(berth.id)),
     }
 
     assert Berth.objects.count() == 1
@@ -128,12 +142,38 @@ def test_delete_berth_not_enough_permissions(api_client, berth):
 
 def test_delete_berth_inexistent_berth(superuser_api_client):
     variables = {
-        "id": to_global_id("BerthNode", uuid.uuid4()),
+        "id": to_global_id(BerthNode._meta.name, uuid.uuid4()),
     }
 
     executed = superuser_api_client.execute(DELETE_BERTH_MUTATION, input=variables)
 
     assert_doesnt_exist("Berth", executed)
+
+
+def test_delete_berth_with_lease(superuser_api_client, berth):
+    berth_lease = BerthLeaseFactory(berth=berth, status=LeaseStatus.DRAFTED)
+    variables = {
+        "id": to_global_id(BerthNode._meta.name, berth_lease.berth.id),
+    }
+
+    assert Berth.objects.count() == 1
+
+    superuser_api_client.execute(DELETE_BERTH_MUTATION, input=variables)
+
+    assert Berth.objects.count() == 0
+
+
+def test_delete_berth_protected_with_lease(superuser_api_client, berth):
+    berth_lease = BerthLeaseFactory(berth=berth, status=LeaseStatus.PAID)
+    variables = {
+        "id": to_global_id(BerthNode._meta.name, berth_lease.berth.id),
+    }
+
+    executed = superuser_api_client.execute(DELETE_BERTH_MUTATION, input=variables)
+
+    assert_in_errors(
+        "Cannot delete Berth because it has some related leases", executed,
+    )
 
 
 UPDATE_BERTH_MUTATION = """
@@ -156,10 +196,13 @@ mutation UpdateBerth($input: UpdateBerthMutationInput!) {
 """
 
 
-def test_update_berth(berth, pier, berth_type, superuser_api_client):
-    global_id = to_global_id("BerthNode", str(berth.id))
-    pier_id = to_global_id("PierNode", str(pier.id))
-    berth_type_id = to_global_id("BerthTypeNode", str(berth_type.id))
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_update_berth(berth, pier, berth_type, api_client):
+    global_id = to_global_id(BerthNode._meta.name, str(berth.id))
+    pier_id = to_global_id(PierNode._meta.name, str(pier.id))
+    berth_type_id = to_global_id(BerthTypeNode._meta.name, str(berth_type.id))
 
     variables = {
         "id": global_id,
@@ -172,7 +215,7 @@ def test_update_berth(berth, pier, berth_type, superuser_api_client):
 
     assert Berth.objects.count() == 1
 
-    executed = superuser_api_client.execute(UPDATE_BERTH_MUTATION, input=variables)
+    executed = api_client.execute(UPDATE_BERTH_MUTATION, input=variables)
 
     assert Berth.objects.count() == 1
     assert executed["data"]["updateBerth"]["berth"] == {
@@ -186,8 +229,8 @@ def test_update_berth(berth, pier, berth_type, superuser_api_client):
 
 
 def test_update_berth_no_id(berth, pier, berth_type, superuser_api_client):
-    pier_id = to_global_id("PierNode", str(pier.id))
-    berth_type_id = to_global_id("BerthTypeNode", str(berth_type.id))
+    pier_id = to_global_id(PierNode._meta.name, str(pier.id))
+    berth_type_id = to_global_id(BerthTypeNode._meta.name, str(berth_type.id))
 
     variables = {
         "number": "666",
@@ -205,11 +248,13 @@ def test_update_berth_no_id(berth, pier, berth_type, superuser_api_client):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
 )
 def test_update_berth_not_enough_permissions(api_client, berth, pier, berth_type):
-    pier_id = to_global_id("PierNode", str(pier.id))
-    berth_type_id = to_global_id("BerthTypeNode", str(berth_type.id))
+    pier_id = to_global_id(PierNode._meta.name, str(pier.id))
+    berth_type_id = to_global_id(BerthTypeNode._meta.name, str(berth_type.id))
 
     variables = {
         "number": "666",
@@ -240,12 +285,15 @@ mutation CreateBerthTypeMutation($input: CreateBerthTypeMutationInput!) {
 """
 
 
-def test_create_berth_type(superuser_api_client):
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_create_berth_type(api_client):
     variables = {"mooringType": "DINGHY_PLACE", "width": 66.6, "length": 33.3}
 
     assert BerthType.objects.count() == 0
 
-    executed = superuser_api_client.execute(CREATE_BERTH_TYPE_MUTATION, input=variables)
+    executed = api_client.execute(CREATE_BERTH_TYPE_MUTATION, input=variables)
 
     assert BerthType.objects.count() == 1
     assert executed["data"]["createBerthType"]["berthType"]["id"] is not None
@@ -264,7 +312,9 @@ def test_create_berth_type(superuser_api_client):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
 )
 def test_create_berth_type_not_enough_permissions(api_client):
     variables = {"mooringType": "DINGHY_PLACE", "width": 66.6, "length": 33.3}
@@ -298,24 +348,29 @@ mutation DeleteBerthType($input: DeleteBerthTypeMutationInput!) {
 """
 
 
-def test_delete_berth_type(superuser_api_client, berth_type):
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_delete_berth_type(api_client, berth_type):
     variables = {
-        "id": to_global_id("BerthTypeNode", str(berth_type.id)),
+        "id": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
     }
 
     assert BerthType.objects.count() == 1
 
-    superuser_api_client.execute(DELETE_BERTH_TYPE_MUTATION, input=variables)
+    api_client.execute(DELETE_BERTH_TYPE_MUTATION, input=variables)
 
     assert BerthType.objects.count() == 0
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
 )
 def test_delete_berth_type_not_enough_permissions(api_client, berth_type):
     variables = {
-        "id": to_global_id("BerthTypeNode", str(berth_type.id)),
+        "id": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
     }
 
     assert BerthType.objects.count() == 1
@@ -328,7 +383,7 @@ def test_delete_berth_type_not_enough_permissions(api_client, berth_type):
 
 def test_delete_berth_type_inexistent_berth(superuser_api_client):
     variables = {
-        "id": to_global_id("BerthTypeNode", uuid.uuid4()),
+        "id": to_global_id(BerthTypeNode._meta.name, uuid.uuid4()),
     }
 
     executed = superuser_api_client.execute(DELETE_BERTH_TYPE_MUTATION, input=variables)
@@ -351,8 +406,11 @@ mutation UpdateBerthTypeMutation($input: UpdateBerthTypeMutationInput!){
 """
 
 
-def test_update_berth_type(berth_type, superuser_api_client):
-    global_id = to_global_id("BerthTypeNode", str(berth_type.id))
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_update_berth_type(berth_type, api_client):
+    global_id = to_global_id(BerthTypeNode._meta.name, str(berth_type.id))
 
     variables = {
         "id": global_id,
@@ -364,7 +422,7 @@ def test_update_berth_type(berth_type, superuser_api_client):
 
     assert BerthType.objects.count() == 1
 
-    executed = superuser_api_client.execute(UPDATE_BERTH_TYPE_MUTATION, input=variables)
+    executed = api_client.execute(UPDATE_BERTH_TYPE_MUTATION, input=variables)
 
     assert BerthType.objects.count() == 1
     assert executed["data"]["updateBerthType"]["berthType"]["id"] == global_id
@@ -399,11 +457,13 @@ def test_update_berth_type_no_id(superuser_api_client, berth_type):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
 )
 def test_update_berth_type_not_enough_permissions(api_client, berth_type):
     variables = {
-        "id": to_global_id("BerthTypeNode", str(berth_type.id)),
+        "id": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
     }
     assert BerthType.objects.count() == 1
 
@@ -434,10 +494,6 @@ mutation CreateHarbor($input: CreateHarborMutationInput!) {
                     id
                 }
                 municipality
-                numberOfPlaces
-                maximumWidth
-                maximumLength
-                maximumDepth
             }
         }
     }
@@ -445,7 +501,10 @@ mutation CreateHarbor($input: CreateHarborMutationInput!) {
 """
 
 
-def test_create_harbor(superuser_api_client, availability_level, municipality):
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_create_harbor(api_client, availability_level, municipality):
     image_file_name = "image.png"
 
     variables = {
@@ -454,10 +513,6 @@ def test_create_harbor(superuser_api_client, availability_level, municipality):
         ),
         "availabilityLevelId": availability_level.id,
         "municipalityId": municipality.id,
-        "numberOfPlaces": 150,
-        "maximumWidth": 350,
-        "maximumLength": 400,
-        "maximumDepth": 100,
         "name": "Foobarsatama",
         "streetAddress": "Foobarstatmanrantatie 1234",
         "servicemapId": "1",
@@ -467,7 +522,7 @@ def test_create_harbor(superuser_api_client, availability_level, municipality):
 
     assert Harbor.objects.count() == 0
 
-    executed = superuser_api_client.execute(CREATE_HARBOR_MUTATION, input=variables)
+    executed = api_client.execute(CREATE_HARBOR_MUTATION, input=variables)
 
     assert Harbor.objects.count() == 1
 
@@ -498,15 +553,13 @@ def test_create_harbor(superuser_api_client, availability_level, municipality):
         "zipCode": variables["zipCode"],
         "availabilityLevel": {"id": str(availability_level.id)},
         "municipality": municipality.name,
-        "numberOfPlaces": variables["numberOfPlaces"],
-        "maximumWidth": variables["maximumWidth"],
-        "maximumLength": variables["maximumLength"],
-        "maximumDepth": variables["maximumDepth"],
     }
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
 )
 def test_create_harbor_not_enough_permissions(api_client):
     variables = {"name": "Foobarsatama"}
@@ -561,24 +614,29 @@ mutation DeleteHarbor($input: DeleteHarborMutationInput!) {
 """
 
 
-def test_delete_harbor(superuser_api_client, harbor):
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_delete_harbor(api_client, harbor):
     variables = {
-        "id": to_global_id("HarborNode", str(harbor.id)),
+        "id": to_global_id(HarborNode._meta.name, str(harbor.id)),
     }
 
     assert Harbor.objects.count() == 1
 
-    superuser_api_client.execute(DELETE_HARBOR_MUTATION, input=variables)
+    api_client.execute(DELETE_HARBOR_MUTATION, input=variables)
 
     assert Harbor.objects.count() == 0
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
 )
 def test_delete_harbor_not_enough_permissions(api_client, harbor):
     variables = {
-        "id": to_global_id("HarborNode", str(harbor.id)),
+        "id": to_global_id(HarborNode._meta.name, str(harbor.id)),
     }
 
     assert Harbor.objects.count() == 1
@@ -591,12 +649,38 @@ def test_delete_harbor_not_enough_permissions(api_client, harbor):
 
 def test_delete_harbor_inexistent_harbor(superuser_api_client):
     variables = {
-        "id": to_global_id("HarborNode", uuid.uuid4()),
+        "id": to_global_id(HarborNode._meta.name, uuid.uuid4()),
     }
 
     executed = superuser_api_client.execute(DELETE_HARBOR_MUTATION, input=variables)
 
     assert_doesnt_exist("Harbor", executed)
+
+
+def test_delete_harbor_with_lease(superuser_api_client, berth):
+    berth_lease = BerthLeaseFactory(berth=berth, status=LeaseStatus.DRAFTED)
+    variables = {
+        "id": to_global_id(HarborNode._meta.name, berth_lease.berth.pier.harbor.id),
+    }
+
+    assert Harbor.objects.count() == 1
+
+    superuser_api_client.execute(DELETE_HARBOR_MUTATION, input=variables)
+
+    assert Harbor.objects.count() == 0
+
+
+def test_delete_harbor_protected_with_lease(superuser_api_client, berth):
+    berth_lease = BerthLeaseFactory(berth=berth, status=LeaseStatus.PAID)
+    variables = {
+        "id": to_global_id(HarborNode._meta.name, berth_lease.berth.pier.harbor.id),
+    }
+
+    executed = superuser_api_client.execute(DELETE_HARBOR_MUTATION, input=variables)
+
+    assert_in_errors(
+        "Cannot delete Harbor because it has some related leases", executed,
+    )
 
 
 UPDATE_HARBOR_MUTATION = """
@@ -623,10 +707,6 @@ mutation UpdateHarbor($input: UpdateHarborMutationInput!) {
                     id
                 }
                 municipality
-                numberOfPlaces
-                maximumWidth
-                maximumLength
-                maximumDepth
             }
         }
     }
@@ -634,8 +714,11 @@ mutation UpdateHarbor($input: UpdateHarborMutationInput!) {
 """
 
 
-def test_update_harbor(superuser_api_client, harbor, availability_level, municipality):
-    global_id = to_global_id("HarborNode", str(harbor.id))
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_update_harbor(api_client, harbor, availability_level, municipality):
+    global_id = to_global_id(HarborNode._meta.name, str(harbor.id))
     image_file_name = "image.png"
     map_file_names = ["map1.pdf", "map2.pdf", "map3.pdf"]
 
@@ -652,10 +735,6 @@ def test_update_harbor(superuser_api_client, harbor, availability_level, municip
         ],
         "availabilityLevelId": availability_level.id,
         "municipalityId": municipality.id,
-        "numberOfPlaces": 175,
-        "maximumWidth": 400,
-        "maximumLength": 550,
-        "maximumDepth": 200,
         "name": "Uusi Foobarsatama",
         "streetAddress": "Uusifoobarstatmanrantatie 2345",
         "servicemapId": "1",
@@ -665,7 +744,7 @@ def test_update_harbor(superuser_api_client, harbor, availability_level, municip
 
     assert Harbor.objects.count() == 1
 
-    executed = superuser_api_client.execute(UPDATE_HARBOR_MUTATION, input=variables,)
+    executed = api_client.execute(UPDATE_HARBOR_MUTATION, input=variables)
 
     image_file = executed["data"]["updateHarbor"]["harbor"]["properties"].pop(
         "imageFile"
@@ -702,15 +781,14 @@ def test_update_harbor(superuser_api_client, harbor, availability_level, municip
         "zipCode": variables["zipCode"],
         "availabilityLevel": {"id": str(availability_level.id)},
         "municipality": municipality.name,
-        "numberOfPlaces": variables["numberOfPlaces"],
-        "maximumWidth": variables["maximumWidth"],
-        "maximumLength": variables["maximumLength"],
-        "maximumDepth": variables["maximumDepth"],
     }
 
 
-def test_update_harbor_remove_map(superuser_api_client, harbor):
-    global_id = to_global_id("HarborNode", str(harbor.id))
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_update_harbor_remove_map(api_client, harbor):
+    global_id = to_global_id(HarborNode._meta.name, str(harbor.id))
     map_file_names = ["map1.pdf", "map2.pdf", "map3.pdf"]
 
     # Create map objects and get only the IDs
@@ -728,7 +806,7 @@ def test_update_harbor_remove_map(superuser_api_client, harbor):
 
     variables = {"id": global_id, "removeMapFiles": map_files}
 
-    executed = superuser_api_client.execute(UPDATE_HARBOR_MUTATION, input=variables,)
+    executed = api_client.execute(UPDATE_HARBOR_MUTATION, input=variables)
 
     assert len(executed["data"]["updateHarbor"]["harbor"]["properties"]["maps"]) == 0
 
@@ -738,18 +816,20 @@ def test_update_harbor_no_id(superuser_api_client, harbor):
 
     assert Harbor.objects.count() == 1
 
-    executed = superuser_api_client.execute(UPDATE_HARBOR_MUTATION, input=variables,)
+    executed = superuser_api_client.execute(UPDATE_HARBOR_MUTATION, input=variables)
 
     assert Harbor.objects.count() == 1
     assert_field_missing("id", executed)
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
 )
 def test_update_harbor_not_enough_permissions(api_client, harbor):
     variables = {
-        "id": to_global_id("HarborNode", str(harbor.id)),
+        "id": to_global_id(HarborNode._meta.name, str(harbor.id)),
     }
     assert Harbor.objects.count() == 1
 
@@ -761,7 +841,7 @@ def test_update_harbor_not_enough_permissions(api_client, harbor):
 
 def test_update_harbor_availability_level_doesnt_exist(harbor, superuser_api_client):
     variables = {
-        "id": to_global_id("HarborNode", harbor.id),
+        "id": to_global_id(HarborNode._meta.name, harbor.id),
         "availabilityLevelId": "9999",
     }
 
@@ -775,7 +855,7 @@ def test_update_harbor_availability_level_doesnt_exist(harbor, superuser_api_cli
 
 def test_update_harbor_municipality_doesnt_exist(harbor, superuser_api_client):
     variables = {
-        "id": to_global_id("HarborNode", harbor.id),
+        "id": to_global_id(HarborNode._meta.name, harbor.id),
         "municipalityId": "foobarland",
     }
 
@@ -813,8 +893,11 @@ mutation CreatePier($input: CreatePierMutationInput!) {
 """
 
 
-def test_create_pier(superuser_api_client, harbor, boat_type):
-    harbor_id = to_global_id("HarborNode", harbor.id)
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_create_pier(api_client, harbor, boat_type):
+    harbor_id = to_global_id(HarborNode._meta.name, harbor.id)
     boat_types = [boat_type.id]
 
     variables = {
@@ -831,7 +914,7 @@ def test_create_pier(superuser_api_client, harbor, boat_type):
     }
     assert Pier.objects.count() == 0
 
-    executed = superuser_api_client.execute(CREATE_PIER_MUTATION, input=variables)
+    executed = api_client.execute(CREATE_PIER_MUTATION, input=variables)
 
     assert Pier.objects.count() == 1
     assert executed["data"]["createPier"]["pier"]["id"] is not None
@@ -849,7 +932,9 @@ def test_create_pier(superuser_api_client, harbor, boat_type):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
 )
 def test_create_pier_not_enough_permissions(api_client):
     variables = {"harborId": ""}
@@ -862,8 +947,8 @@ def test_create_pier_not_enough_permissions(api_client):
     assert_not_enough_permissions(executed)
 
 
-def test_create_harbor_harbor_doesnt_exist(superuser_api_client):
-    variables = {"harborId": to_global_id("BerthNode", uuid.uuid4())}
+def test_create_pier_harbor_doesnt_exist(superuser_api_client):
+    variables = {"harborId": to_global_id(HarborNode._meta.name, uuid.uuid4())}
 
     assert Pier.objects.count() == 0
 
@@ -893,12 +978,15 @@ mutation DeletePier($input: DeletePierMutationInput!) {
 """
 
 
-def test_delete_pier(superuser_api_client, pier):
-    variables = {"id": to_global_id("PierNode", str(pier.id))}
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_delete_pier(api_client, pier):
+    variables = {"id": to_global_id(PierNode._meta.name, str(pier.id))}
 
     assert Pier.objects.count() == 1
 
-    superuser_api_client.execute(
+    api_client.execute(
         DELETE_PIER_MUTATION, input=variables,
     )
 
@@ -906,10 +994,12 @@ def test_delete_pier(superuser_api_client, pier):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
 )
 def test_delete_pier_not_enough_permissions(api_client, pier):
-    variables = {"id": to_global_id("PierNode", str(pier.id))}
+    variables = {"id": to_global_id(PierNode._meta.name, str(pier.id))}
 
     assert Pier.objects.count() == 1
 
@@ -920,11 +1010,37 @@ def test_delete_pier_not_enough_permissions(api_client, pier):
 
 
 def test_delete_pier_inexistent_pier(superuser_api_client):
-    variables = {"id": to_global_id("PierNode", uuid.uuid4())}
+    variables = {"id": to_global_id(PierNode._meta.name, uuid.uuid4())}
 
     executed = superuser_api_client.execute(DELETE_PIER_MUTATION, input=variables)
 
     assert_doesnt_exist("Pier", executed)
+
+
+def test_delete_pier_with_lease(superuser_api_client, berth):
+    berth_lease = BerthLeaseFactory(berth=berth, status=LeaseStatus.DRAFTED)
+    variables = {
+        "id": to_global_id(PierNode._meta.name, berth_lease.berth.pier.id),
+    }
+
+    assert Pier.objects.count() == 1
+
+    superuser_api_client.execute(DELETE_PIER_MUTATION, input=variables)
+
+    assert Pier.objects.count() == 0
+
+
+def test_delete_pier_protected_with_lease(superuser_api_client, berth):
+    berth_lease = BerthLeaseFactory(berth=berth, status=LeaseStatus.PAID)
+    variables = {
+        "id": to_global_id(PierNode._meta.name, berth_lease.berth.pier.id),
+    }
+
+    executed = superuser_api_client.execute(DELETE_PIER_MUTATION, input=variables)
+
+    assert_in_errors(
+        "Cannot delete Pier because it has some related leases", executed,
+    )
 
 
 UPDATE_PIER_MUTATION = """
@@ -958,9 +1074,12 @@ mutation UpdatePier($input: UpdatePierMutationInput!) {
 """
 
 
-def test_update_pier(superuser_api_client, pier, harbor, boat_type):
-    global_id = to_global_id("PierNode", str(pier.id))
-    harbor_id = to_global_id("HarborNode", str(harbor.id))
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_update_pier(api_client, pier, harbor, boat_type):
+    global_id = to_global_id(PierNode._meta.name, str(pier.id))
+    harbor_id = to_global_id(HarborNode._meta.name, str(harbor.id))
     boat_types = [boat_type.id]
 
     variables = {
@@ -979,7 +1098,7 @@ def test_update_pier(superuser_api_client, pier, harbor, boat_type):
 
     assert Pier.objects.count() == 1
 
-    executed = superuser_api_client.execute(UPDATE_PIER_MUTATION, input=variables)
+    executed = api_client.execute(UPDATE_PIER_MUTATION, input=variables)
 
     assert Pier.objects.count() == 1
     assert executed["data"]["updatePier"]["pier"]["id"] == global_id
@@ -1018,10 +1137,12 @@ def test_update_pier_no_id(superuser_api_client, pier):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
 )
 def test_update_pier_not_enough_permissions(api_client, pier):
-    variables = {"id": to_global_id("PierNode", str(pier.id))}
+    variables = {"id": to_global_id(PierNode._meta.name, str(pier.id))}
     assert Pier.objects.count() == 1
 
     executed = api_client.execute(UPDATE_PIER_MUTATION, input=variables)
@@ -1031,7 +1152,7 @@ def test_update_pier_not_enough_permissions(api_client, pier):
 
 
 def test_update_pier_empty_boat_type_list(superuser_api_client, pier):
-    global_id = to_global_id("PierNode", pier.id)
+    global_id = to_global_id(PierNode._meta.name, pier.id)
     variables = {"id": global_id, "suitableBoatTypes": []}
 
     assert Pier.objects.count() == 1
@@ -1048,8 +1169,8 @@ def test_update_pier_empty_boat_type_list(superuser_api_client, pier):
 
 def test_update_pier_harbor_doesnt_exist(superuser_api_client, pier):
     variables = {
-        "id": to_global_id("PierNode", pier.id),
-        "harborId": to_global_id("HarborNode", uuid.uuid4()),
+        "id": to_global_id(PierNode._meta.name, pier.id),
+        "harborId": to_global_id(HarborNode._meta.name, uuid.uuid4()),
     }
 
     assert Pier.objects.count() == 1

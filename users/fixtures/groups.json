@@ -1,0 +1,34 @@
+[
+  {
+    "model": "auth.group",
+    "pk": 0,
+    "fields": {
+      "name": "Berth services",
+      "permissions": []
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 1,
+    "fields": {
+      "name": "Berth handler",
+      "permissions": []
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 2,
+    "fields": {
+      "name": "Berth supervisor",
+      "permissions": []
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 3,
+    "fields": {
+      "name": "Harbour services",
+      "permissions": []
+    }
+  }
+]

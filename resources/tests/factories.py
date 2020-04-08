@@ -95,6 +95,9 @@ class AbstractPlaceTypeFactory(factory.django.DjangoModelFactory):
 
 class BerthTypeFactory(AbstractPlaceTypeFactory):
     mooring_type = factory.Faker("random_element", elements=list(BerthMooringType))
+    depth = factory.Faker(
+        "pydecimal", min_value=0, max_value=999, right_digits=2, positive=True
+    )
 
     class Meta:
         model = BerthType

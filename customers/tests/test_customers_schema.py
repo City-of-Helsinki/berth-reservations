@@ -70,7 +70,12 @@ query($_representations: [_Any!]!) {
 """
 
 
-def test_query_extended_profile_nodes(superuser_api_client, customer_profile):
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_services", "berth_handler", "berth_supervisor"],
+    indirect=True,
+)
+def test_query_extended_profile_nodes(api_client, customer_profile):
     customer_profile_id = to_global_id(ProfileNode._meta.name, customer_profile.id)
 
     berth_application = BerthApplicationFactory(customer=customer_profile)
@@ -84,9 +89,7 @@ def test_query_extended_profile_nodes(superuser_api_client, customer_profile):
         ]
     }
 
-    executed = superuser_api_client.execute(
-        FEDERATED_PROFILES_QUERY, variables=variables
-    )
+    executed = api_client.execute(FEDERATED_PROFILES_QUERY, variables=variables)
 
     boat_id = to_global_id(BoatNode._meta.name, boat.id)
     berth_application_id = to_global_id(
@@ -106,7 +109,7 @@ def test_query_extended_profile_nodes(superuser_api_client, customer_profile):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client", ["api_client", "user", "harbor_services"], indirect=True
 )
 def test_query_query_extended_profile_nodes_not_enough_permissions(
     api_client, customer_profile
@@ -163,13 +166,18 @@ query GetBerthProfiles {
 """
 
 
-def test_query_berth_profiles(superuser_api_client, customer_profile):
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_services", "berth_handler", "berth_supervisor"],
+    indirect=True,
+)
+def test_query_berth_profiles(api_client, customer_profile):
     berth_application = BerthApplicationFactory(customer=customer_profile)
     berth_lease = BerthLeaseFactory(customer=customer_profile)
     company = CompanyFactory(customer=customer_profile)
     boat = BoatFactory(owner=customer_profile)
 
-    executed = superuser_api_client.execute(QUERY_BERTH_PROFILES)
+    executed = api_client.execute(QUERY_BERTH_PROFILES)
 
     customer_id = to_global_id(BerthProfileNode._meta.name, customer_profile.id)
     boat_id = to_global_id(BoatNode._meta.name, boat.id)
@@ -190,7 +198,7 @@ def test_query_berth_profiles(superuser_api_client, customer_profile):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client", ["api_client", "user", "harbor_services"], indirect=True
 )
 def test_query_berth_profiles_not_enough_permissions(api_client):
     executed = api_client.execute(QUERY_BERTH_PROFILES)
@@ -234,8 +242,12 @@ query GetBerthProfile {
 """
 
 
-@pytest.mark.parametrize("is_superuser", [True, False])
-def test_query_berth_profile(is_superuser, superuser_api_client, customer_profile):
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_services", "berth_handler", "berth_supervisor"],
+    indirect=True,
+)
+def test_query_berth_profile(api_client, customer_profile):
     berth_profile_id = to_global_id(BerthProfileNode._meta.name, customer_profile.id)
 
     berth_application = BerthApplicationFactory(customer=customer_profile)
@@ -244,13 +256,6 @@ def test_query_berth_profile(is_superuser, superuser_api_client, customer_profil
     boat = BoatFactory(owner=customer_profile)
 
     query = QUERY_BERTH_PROFILE % berth_profile_id
-
-    # only superusers and profile owners can see profile node info
-    api_client = (
-        superuser_api_client
-        if is_superuser
-        else create_api_client(customer_profile.user)
-    )
 
     executed = api_client.execute(query)
 
@@ -271,8 +276,38 @@ def test_query_berth_profile(is_superuser, superuser_api_client, customer_profil
     }
 
 
+def test_query_berth_profile_self_user(customer_profile):
+    berth_profile_id = to_global_id(BerthProfileNode._meta.name, customer_profile.id)
+
+    berth_application = BerthApplicationFactory(customer=customer_profile)
+    berth_lease = BerthLeaseFactory(customer=customer_profile)
+    company = CompanyFactory(customer=customer_profile)
+    boat = BoatFactory(owner=customer_profile)
+
+    query = QUERY_BERTH_PROFILE % berth_profile_id
+
+    api_client = create_api_client(user=customer_profile.user)
+    executed = api_client.execute(query)
+
+    boat_id = to_global_id(BoatNode._meta.name, boat.id)
+    berth_application_id = to_global_id(
+        BerthApplicationNode._meta.name, berth_application.id
+    )
+    berth_lease_id = to_global_id(BerthLeaseNode._meta.name, berth_lease.id)
+
+    assert executed["data"]["berthProfile"] == {
+        "id": berth_profile_id,
+        "invoicingType": customer_profile.invoicing_type.name,
+        "comment": customer_profile.comment,
+        "company": {"businessId": company.business_id, "name": company.name},
+        "boats": {"edges": [{"node": {"id": boat_id}}]},
+        "berthApplications": {"edges": [{"node": {"id": berth_application_id}}]},
+        "berthLeases": {"edges": [{"node": {"id": berth_lease_id}}]},
+    }
+
+
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client", ["user", "harbor_services"], indirect=True,
 )
 def test_query_berth_profile_not_enough_permissions_valid_id(
     api_client, customer_profile

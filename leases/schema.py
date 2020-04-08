@@ -1,17 +1,25 @@
+import django_filters
 import graphene
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
-from graphene_django import DjangoConnectionField, DjangoObjectType
-from graphql_jwt.decorators import login_required, superuser_required
-from graphql_relay import from_global_id
+from graphene_django import DjangoObjectType
+from graphene_django.filter import DjangoFilterConnectionField
+from graphql_jwt.decorators import login_required
 
 from applications.enums import ApplicationStatus
 from applications.models import BerthApplication
+from applications.new_schema import BerthApplicationNode
 from berth_reservations.exceptions import VenepaikkaGraphQLError
-from customers.models import Boat
-from resources.models import Berth
+from customers.models import CustomerProfile
 from resources.schema import BerthNode
+from users.decorators import (
+    add_permission_required,
+    delete_permission_required,
+    view_permission_required,
+)
+from users.utils import user_has_view_permission
+from utils.relay import get_node_from_global_id
 
 from .enums import LeaseStatus
 from .models import BerthLease
@@ -19,9 +27,17 @@ from .models import BerthLease
 LeaseStatusEnum = graphene.Enum.from_enum(LeaseStatus)
 
 
+class BerthLeaseNodeFilter(django_filters.FilterSet):
+    order_by = django_filters.OrderingFilter(
+        fields=(("created_at", "createdAt"),),
+        label="Supports only `createdAt` and `-createdAt`.",
+    )
+
+
 class BerthLeaseNode(DjangoObjectType):
     berth = graphene.Field(BerthNode, required=True)
     status = LeaseStatusEnum(required=True)
+    customer = graphene.Field("customers.schema.ProfileNode", required=True)
 
     class Meta:
         model = BerthLease
@@ -35,8 +51,9 @@ class BerthLeaseNode(DjangoObjectType):
             return None
 
         user = info.context.user
-        # TODO: implement proper permissions
-        if (node.customer and node.customer.user == user) or user.is_superuser:
+        if (node.customer and node.customer.user == user) or user_has_view_permission(
+            user, BerthLease, BerthApplication, CustomerProfile
+        ):
             return node
         else:
             raise VenepaikkaGraphQLError(
@@ -56,20 +73,19 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
     berth_lease = graphene.Field(BerthLeaseNode)
 
     @classmethod
-    @login_required
-    @superuser_required
+    @view_permission_required(BerthApplication, CustomerProfile)
+    @add_permission_required(BerthLease)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # TODO: Should check if the user has permissions to
-        # delete the specific resource
-        application_id = from_global_id(input.pop("application_id"))[1]
-        berth_id = from_global_id(input.pop("berth_id"))[1]
-
-        try:
-            application = BerthApplication.objects.get(pk=application_id)
-            berth = Berth.objects.get(pk=berth_id)
-        except (BerthApplication.DoesNotExist, Berth.DoesNotExist) as e:
-            raise VenepaikkaGraphQLError(e)
+        application = get_node_from_global_id(
+            info,
+            input.pop("application_id"),
+            only_type=BerthApplicationNode,
+            nullable=False,
+        )
+        berth = get_node_from_global_id(
+            info, input.pop("berth_id"), only_type=BerthNode, nullable=False,
+        )
 
         if not application.customer:
             raise VenepaikkaGraphQLError(
@@ -81,11 +97,11 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
         input["customer"] = application.customer
 
         if input.get("boat_id", False):
-            boat_id = from_global_id(input.pop("boat_id"))[1]
-            try:
-                boat = Boat.objects.get(pk=boat_id)
-            except Boat.DoesNotExist:
-                raise VenepaikkaGraphQLError(_("There is no boat with the given id."))
+            from customers.schema import BoatNode
+
+            boat = get_node_from_global_id(
+                info, input.pop("boat_id"), only_type=BoatNode, nullable=False,
+            )
 
             if boat.owner.id != input["customer"].id:
                 raise VenepaikkaGraphQLError(
@@ -110,18 +126,12 @@ class DeleteBerthLeaseMutation(graphene.ClientIDMutation):
         id = graphene.ID(required=True)
 
     @classmethod
-    @login_required
-    @superuser_required
+    @delete_permission_required(BerthLease)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # TODO: Should check if the user has permissions to
-        # delete the specific resource
-        id = from_global_id(input.get("id"))[1]
-
-        try:
-            lease = BerthLease.objects.get(pk=id)
-        except BerthLease.DoesNotExist as e:
-            raise VenepaikkaGraphQLError(e)
+        lease = get_node_from_global_id(
+            info, input.pop("id"), only_type=BerthLeaseNode, nullable=False,
+        )
 
         if lease.status != LeaseStatus.DRAFTED:
             raise VenepaikkaGraphQLError(
@@ -139,19 +149,25 @@ class DeleteBerthLeaseMutation(graphene.ClientIDMutation):
 
 class Query:
     berth_lease = graphene.relay.Node.Field(BerthLeaseNode)
-    berth_leases = DjangoConnectionField(BerthLeaseNode)
+    berth_leases = DjangoFilterConnectionField(
+        BerthLeaseNode,
+        filterset_class=BerthLeaseNodeFilter,
+        description="`BerthLeases` are ordered by `createdAt` in ascending order by default.",
+    )
 
-    @login_required
-    @superuser_required
-    # TODO: Should check if the user has permissions to access these objects
+    @view_permission_required(BerthLease, BerthApplication, CustomerProfile)
     def resolve_berth_leases(self, info, **kwargs):
-        return BerthLease.objects.select_related(
-            "application",
-            "application__customer",
-            "berth",
-            "berth__pier",
-            "berth__pier__harbor",
-        ).prefetch_related("application__customer__boats")
+        return (
+            BerthLease.objects.select_related(
+                "application",
+                "application__customer",
+                "berth",
+                "berth__pier",
+                "berth__pier__harbor",
+            )
+            .prefetch_related("application__customer__boats")
+            .order_by("created_at")
+        )
 
 
 class Mutation:

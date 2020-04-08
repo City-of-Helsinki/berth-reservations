@@ -96,6 +96,7 @@ Then you can load the fixtures with the following commands:
 
     ./manage.py loaddata helsinki-harbors.json
     ./manage.py loaddata helsinki-winter-areas.json
+    ./manage.py loaddata helsinki-resources.json
     
 You can also import default images for Helsinki harbors / winter storage areas:
 
@@ -106,3 +107,11 @@ You can also import default images for Helsinki harbors / winter storage areas:
 You can load the fixtures with reasons for berth switch with this command:
 
     ./manage.py loaddata switch-reasons.json
+
+Lastly, you can load the User Groups:
+
+    ./manage.py loaddata groups.json
+
+And install the model permissions:
+
+    ./manage.py set_group_model_permissions

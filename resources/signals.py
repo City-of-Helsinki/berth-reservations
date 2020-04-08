@@ -1,9 +1,11 @@
+import logging
 import os
 import shutil
 
 from django.conf import settings
 from django.db.models.signals import post_delete, pre_save
 from django.dispatch import receiver
+from sentry_sdk import capture_exception
 
 from resources.models import (
     get_harbor_media_folder,
@@ -14,11 +16,17 @@ from resources.models import (
     WinterStorageAreaMap,
 )
 
+logger = logging.getLogger(__name__)
+
 
 def remove_file(instance, field_name):
     file = getattr(instance, field_name, None)
     if file:
-        os.unlink(file.path)
+        try:
+            os.unlink(file.path)
+        except FileNotFoundError as e:
+            logger.error(e, exc_info=True)
+            capture_exception(e)
 
 
 @receiver(post_delete, sender=HarborMap)

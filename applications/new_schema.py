@@ -3,11 +3,11 @@ import graphene
 from django.db import transaction
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
-from graphql_jwt.decorators import login_required, superuser_required
-from graphql_relay import from_global_id
 
-from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.models import CustomerProfile
+from leases.models import BerthLease
+from users.decorators import change_permission_required, view_permission_required
+from utils.relay import get_node_from_global_id
 
 from .enums import ApplicationStatus
 from .models import BerthApplication, BerthSwitch, HarborChoice
@@ -53,6 +53,10 @@ class BerthApplicationFilter(django_filters.FilterSet):
     no_customer = django_filters.BooleanFilter(
         field_name="customer", lookup_expr="isnull"
     )
+    order_by = django_filters.OrderingFilter(
+        fields=(("created_at", "createdAt"),),
+        label="Supports only `createdAt` and `-createdAt`.",
+    )
 
     def filter_berth_switch(self, queryset, name, value):
         lookup = "__".join([name, "isnull"])
@@ -63,6 +67,7 @@ class BerthApplicationNode(DjangoObjectType):
     boat_type = graphene.String()
     harbor_choices = graphene.List(HarborChoiceType)
     status = ApplicationStatusEnum(required=True)
+    customer = graphene.Field("customers.schema.ProfileNode")
 
     class Meta:
         model = BerthApplication
@@ -80,9 +85,7 @@ class BerthApplicationNode(DjangoObjectType):
         return None
 
     @classmethod
-    @login_required
-    @superuser_required
-    # TODO: Should check if the user has permissions to access this specific object
+    @view_permission_required(BerthApplication, BerthLease, CustomerProfile)
     def get_node(cls, info, id):
         return super().get_node(info, id)
 
@@ -99,22 +102,21 @@ class UpdateBerthApplication(graphene.ClientIDMutation):
     berth_application = graphene.Field(BerthApplicationNode)
 
     @classmethod
-    @login_required
-    @superuser_required
+    @view_permission_required(CustomerProfile, BerthLease)
+    @change_permission_required(BerthApplication)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # TODO: Should check if the user has permissions to perform the following changes
-        berth_application_id = from_global_id(input.get("id"))[1]
-        customer_id = from_global_id(input.get("customer_id"))[1]
+        from customers.schema import ProfileNode
 
-        try:
-            application = BerthApplication.objects.get(pk=berth_application_id)
-            customer = CustomerProfile.objects.get(pk=customer_id)
+        application = get_node_from_global_id(
+            info, input.pop("id"), only_type=BerthApplicationNode
+        )
+        customer = get_node_from_global_id(
+            info, input.pop("customer_id"), only_type=ProfileNode
+        )
 
-            application.customer = customer
-            application.save()
-        except (BerthApplication.DoesNotExist, CustomerProfile.DoesNotExist) as e:
-            raise VenepaikkaGraphQLError(e)
+        application.customer = customer
+        application.save()
 
         return UpdateBerthApplication(berth_application=application)
 
@@ -128,14 +130,13 @@ class Query:
         description="The `statuses` filter takes a list of `ApplicationStatus` values "
         "representing the desired statuses. If an empty list is passed, no filter will be applied "
         "and all the results will be returned."
+        "\n\n`BerthApplications` are ordered by `createdAt` in ascending order by default."
         "\n\n**Requires permissions** to access applications."
         "\n\nErrors:"
         "\n* A value passed is not a valid status",
     )
 
-    @login_required
-    @superuser_required
-    # TODO: Should check if the user has permissions to access these objects
+    @view_permission_required(BerthApplication, BerthLease, CustomerProfile)
     def resolve_berth_applications(self, info, **kwargs):
         statuses = kwargs.pop("statuses", [])
 
@@ -144,12 +145,19 @@ class Query:
         if statuses:
             qs = qs.filter(status__in=statuses)
 
-        return qs.select_related(
-            "boat_type", "berth_switch", "berth_switch__harbor", "berth_switch__reason",
-        ).prefetch_related(
-            "berth_switch__reason__translations",
-            "harborchoice_set",
-            "harborchoice_set__harbor",
+        return (
+            qs.select_related(
+                "boat_type",
+                "berth_switch",
+                "berth_switch__harbor",
+                "berth_switch__reason",
+            )
+            .prefetch_related(
+                "berth_switch__reason__translations",
+                "harborchoice_set",
+                "harborchoice_set__harbor",
+            )
+            .order_by("created_at")
         )
 
 

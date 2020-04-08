@@ -1,7 +1,16 @@
 import sentry_sdk
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from graphene_file_upload.django import FileUploadGraphQLView
+from graphql_jwt.exceptions import PermissionDenied as JwtPermissionDenied
 
 from .exceptions import VenepaikkaGraphQLError
+
+sentry_ignored_errors = (
+    VenepaikkaGraphQLError,
+    ObjectDoesNotExist,
+    JwtPermissionDenied,
+    PermissionDenied,
+)
 
 
 class SentryGraphQLView(FileUploadGraphQLView):
@@ -17,7 +26,7 @@ class SentryGraphQLView(FileUploadGraphQLView):
                 e
                 for e in result.errors
                 if not isinstance(
-                    getattr(e, "original_error", None), VenepaikkaGraphQLError
+                    getattr(e, "original_error", None), sentry_ignored_errors
                 )
             ]
             if errors:

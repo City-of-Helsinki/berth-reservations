@@ -2,6 +2,7 @@
 
 ## Issues :bug:
 ### Closes :no_good_woman:
+**[VEN-XXX](https://helsinkisolutionoffice.atlassian.net/browse/VEN-XXX):** 
 
 ### Related :handshake:
 

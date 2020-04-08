@@ -6,15 +6,19 @@ from freezegun import freeze_time
 from graphql_relay import to_global_id
 
 from applications.enums import ApplicationStatus
+from applications.new_schema import BerthApplicationNode
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
     assert_field_missing,
     assert_in_errors,
     assert_not_enough_permissions,
 )
+from customers.schema import BoatNode, ProfileNode
 from leases.enums import LeaseStatus
 from leases.models import BerthLease
+from leases.schema import BerthLeaseNode
 from leases.tests.factories import BerthLeaseFactory
+from resources.schema import BerthNode
 
 CREATE_BERTH_LEASE_MUTATION = """
 mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
@@ -44,23 +48,24 @@ mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
 """
 
 
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
 @freeze_time("2020-01-01T08:00:00Z")
-def test_create_berth_lease(
-    superuser_api_client, berth_application, berth, customer_profile
-):
+def test_create_berth_lease(api_client, berth_application, berth, customer_profile):
     berth_application.customer = customer_profile
     berth_application.save()
 
     variables = {
-        "applicationId": to_global_id("BerthApplicationNode", berth_application.id),
-        "berthId": to_global_id("BerthNode", berth.id),
+        "applicationId": to_global_id(
+            BerthApplicationNode._meta.name, berth_application.id
+        ),
+        "berthId": to_global_id(BerthNode._meta.name, berth.id),
     }
 
     assert BerthLease.objects.count() == 0
 
-    executed = superuser_api_client.execute(
-        CREATE_BERTH_LEASE_MUTATION, input=variables,
-    )
+    executed = api_client.execute(CREATE_BERTH_LEASE_MUTATION, input=variables)
 
     assert BerthLease.objects.count() == 1
 
@@ -72,7 +77,7 @@ def test_create_berth_lease(
         "comment": "",
         "boat": None,
         "customer": {
-            "id": to_global_id("BerthProfileNode", berth_application.customer.id)
+            "id": to_global_id(ProfileNode._meta.name, berth_application.customer.id)
         },
         "application": {
             "id": variables.get("applicationId"),
@@ -82,9 +87,12 @@ def test_create_berth_lease(
     }
 
 
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_lease_all_arguments(
-    superuser_api_client, berth_application, berth, boat, customer_profile
+    api_client, berth_application, berth, boat, customer_profile
 ):
     berth_application.customer = customer_profile
     berth_application.save()
@@ -92,9 +100,11 @@ def test_create_berth_lease_all_arguments(
     boat.save()
 
     variables = {
-        "applicationId": to_global_id("BerthApplicationNode", berth_application.id),
-        "berthId": to_global_id("BerthNode", berth.id),
-        "boatId": to_global_id("BoatNode", boat.id),
+        "applicationId": to_global_id(
+            BerthApplicationNode._meta.name, berth_application.id
+        ),
+        "berthId": to_global_id(BerthNode._meta.name, berth.id),
+        "boatId": to_global_id(BoatNode._meta.name, boat.id),
         "startDate": "2020-03-01",
         "endDate": "2020-12-31",
         "comment": "Very wow, such comment",
@@ -102,9 +112,7 @@ def test_create_berth_lease_all_arguments(
 
     assert BerthLease.objects.count() == 0
 
-    executed = superuser_api_client.execute(
-        CREATE_BERTH_LEASE_MUTATION, input=variables,
-    )
+    executed = api_client.execute(CREATE_BERTH_LEASE_MUTATION, input=variables)
 
     assert BerthLease.objects.count() == 1
 
@@ -116,7 +124,7 @@ def test_create_berth_lease_all_arguments(
         "comment": variables.get("comment"),
         "boat": {"id": variables.get("boatId")},
         "customer": {
-            "id": to_global_id("BerthProfileNode", berth_application.customer.id)
+            "id": to_global_id(ProfileNode._meta.name, berth_application.customer.id)
         },
         "application": {
             "id": variables.get("applicationId"),
@@ -127,14 +135,18 @@ def test_create_berth_lease_all_arguments(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client",
+    ["api_client", "user", "harbor_services", "berth_supervisor"],
+    indirect=True,
 )
 def test_create_berth_lease_not_enough_permissions(
     api_client, berth_application, berth
 ):
     variables = {
-        "applicationId": to_global_id("BerthApplicationNode", berth_application.id),
-        "berthId": to_global_id("BerthNode", berth.id),
+        "applicationId": to_global_id(
+            BerthApplicationNode._meta.name, berth_application.id
+        ),
+        "berthId": to_global_id(BerthNode._meta.name, berth.id),
     }
 
     executed = api_client.execute(CREATE_BERTH_LEASE_MUTATION, input=variables)
@@ -144,8 +156,8 @@ def test_create_berth_lease_not_enough_permissions(
 
 def test_create_berth_lease_application_doesnt_exist(superuser_api_client, berth):
     variables = {
-        "applicationId": to_global_id("BerthApplicationNode", randint(0, 999)),
-        "berthId": to_global_id("BerthNode", berth.id),
+        "applicationId": to_global_id(BerthApplicationNode._meta.name, randint(0, 999)),
+        "berthId": to_global_id(BerthNode._meta.name, berth.id),
     }
 
     executed = superuser_api_client.execute(
@@ -157,8 +169,10 @@ def test_create_berth_lease_application_doesnt_exist(superuser_api_client, berth
 
 def test_create_berth_lease_berth_doesnt_exist(superuser_api_client, berth_application):
     variables = {
-        "applicationId": to_global_id("BerthApplicationNode", berth_application.id),
-        "berthId": to_global_id("BerthNode", uuid.uuid4()),
+        "applicationId": to_global_id(
+            BerthApplicationNode._meta.name, berth_application.id
+        ),
+        "berthId": to_global_id(BerthNode._meta.name, uuid.uuid4()),
     }
 
     executed = superuser_api_client.execute(
@@ -170,7 +184,7 @@ def test_create_berth_lease_berth_doesnt_exist(superuser_api_client, berth_appli
 
 def test_create_berth_lease_application_id_missing(superuser_api_client):
     variables = {
-        "berthId": to_global_id("BerthNode", uuid.uuid4()),
+        "berthId": to_global_id(BerthNode._meta.name, uuid.uuid4()),
     }
 
     executed = superuser_api_client.execute(
@@ -182,7 +196,7 @@ def test_create_berth_lease_application_id_missing(superuser_api_client):
 
 def test_create_berth_lease_berth_id_missing(superuser_api_client):
     variables = {
-        "berthId": to_global_id("BerthApplicationNode", randint(0, 999)),
+        "berthId": to_global_id(BerthApplicationNode._meta.name, randint(0, 999)),
     }
 
     executed = superuser_api_client.execute(
@@ -199,8 +213,10 @@ def test_create_berth_lease_application_without_customer(
     berth_application.save()
 
     variables = {
-        "applicationId": to_global_id("BerthApplicationNode", berth_application.id),
-        "berthId": to_global_id("BerthNode", berth.id),
+        "applicationId": to_global_id(
+            BerthApplicationNode._meta.name, berth_application.id
+        ),
+        "berthId": to_global_id(BerthNode._meta.name, berth.id),
     }
 
     executed = superuser_api_client.execute(
@@ -220,8 +236,10 @@ def test_create_berth_lease_application_already_has_lease(
     berth_application.save()
 
     variables = {
-        "applicationId": to_global_id("BerthApplicationNode", berth_application.id),
-        "berthId": to_global_id("BerthNode", berth.id),
+        "applicationId": to_global_id(
+            BerthApplicationNode._meta.name, berth_application.id
+        ),
+        "berthId": to_global_id(BerthNode._meta.name, berth.id),
     }
 
     executed = superuser_api_client.execute(
@@ -240,16 +258,17 @@ mutation DELETE_DRAFTED_LEASE($input: DeleteBerthLeaseMutationInput!) {
 """
 
 
-def test_delete_berth_lease_drafted(
-    berth_lease, berth_application, superuser_api_client
-):
-    variables = {"id": to_global_id("BerthLeaseNode", berth_lease.id)}
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_delete_berth_lease_drafted(berth_lease, berth_application, api_client):
+    variables = {"id": to_global_id(BerthLeaseNode._meta.name, berth_lease.id)}
     berth_lease.application = berth_application
     berth_lease.save()
 
     assert BerthLease.objects.count() == 1
 
-    superuser_api_client.execute(
+    api_client.execute(
         DELETE_BERTH_LEASE_MUTATION, input=variables,
     )
 
@@ -261,7 +280,7 @@ def test_delete_berth_lease_not_drafted(berth_lease, superuser_api_client):
     berth_lease.status = LeaseStatus.OFFERED
     berth_lease.save()
 
-    variables = {"id": to_global_id("BerthLeaseNode", berth_lease.id)}
+    variables = {"id": to_global_id(BerthLeaseNode._meta.name, berth_lease.id)}
 
     assert BerthLease.objects.count() == 1
 
@@ -276,16 +295,18 @@ def test_delete_berth_lease_not_drafted(berth_lease, superuser_api_client):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client",
+    ["api_client", "user", "harbor_services", "berth_supervisor"],
+    indirect=True,
 )
 def test_delete_berth_lease_not_enough_permissions(api_client, berth_lease):
     variables = {
-        "id": to_global_id("BerthLeaseNode", berth_lease.id),
+        "id": to_global_id(BerthLeaseNode._meta.name, berth_lease.id),
     }
 
     assert BerthLease.objects.count() == 1
 
-    executed = api_client.execute(DELETE_BERTH_LEASE_MUTATION, input=variables,)
+    executed = api_client.execute(DELETE_BERTH_LEASE_MUTATION, input=variables)
 
     assert BerthLease.objects.count() == 1
     assert_not_enough_permissions(executed)
@@ -293,7 +314,7 @@ def test_delete_berth_lease_not_enough_permissions(api_client, berth_lease):
 
 def test_delete_berth_lease_inexistent_lease(superuser_api_client):
     variables = {
-        "id": to_global_id("BerthLeaseNode", uuid.uuid4()),
+        "id": to_global_id(BerthLeaseNode._meta.name, uuid.uuid4()),
     }
 
     executed = superuser_api_client.execute(

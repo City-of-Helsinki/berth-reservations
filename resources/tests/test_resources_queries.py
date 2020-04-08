@@ -3,11 +3,14 @@ import json
 import pytest
 from graphql_relay import to_global_id
 
+from applications.new_schema import BerthApplicationNode
 from berth_reservations.tests.utils import (
     assert_in_errors,
     assert_not_enough_permissions,
 )
+from leases.schema import BerthLeaseNode
 from leases.tests.factories import BerthLeaseFactory
+from resources.schema import BerthNode, PierNode
 
 
 def test_get_boat_type(api_client, boat_type):
@@ -22,7 +25,9 @@ def test_get_boat_type(api_client, boat_type):
     assert executed["data"] == {"boatTypes": [{"name": boat_type.name}]}
 
 
-def test_get_harbors(api_client, harbor):
+def test_get_harbors(api_client, berth):
+    harbor = berth.pier.harbor
+
     query = """
         {
             harbors {
@@ -35,6 +40,12 @@ def test_get_harbors(api_client, harbor):
                         properties {
                             name
                             zipCode
+                            maxWidth
+                            maxLength
+                            maxDepth
+                            numberOfPlaces
+                            createdAt
+                            modifiedAt
                         }
                     }
                 }
@@ -48,7 +59,16 @@ def test_get_harbors(api_client, harbor):
                 {
                     "node": {
                         "geometry": json.loads(harbor.location.json),
-                        "properties": {"name": harbor.name, "zipCode": harbor.zip_code},
+                        "properties": {
+                            "name": harbor.name,
+                            "zipCode": harbor.zip_code,
+                            "maxWidth": float(berth.berth_type.width),
+                            "maxLength": float(berth.berth_type.length),
+                            "maxDepth": float(berth.berth_type.depth),
+                            "numberOfPlaces": harbor.piers.count(),
+                            "createdAt": harbor.created_at.isoformat(),
+                            "modifiedAt": harbor.modified_at.isoformat(),
+                        },
                     }
                 }
             ]
@@ -71,6 +91,8 @@ def test_get_piers(api_client, pier):
                             suitableBoatTypes {
                                 name
                             }
+                            createdAt
+                            modifiedAt
                         }
                     }
                 }
@@ -90,6 +112,8 @@ def test_get_piers(api_client, pier):
                         "properties": {
                             "identifier": pier.identifier,
                             "suitableBoatTypes": expected_suitables_boat_types,
+                            "createdAt": pier.created_at.isoformat(),
+                            "modifiedAt": pier.modified_at.isoformat(),
                         },
                     }
                 }
@@ -105,6 +129,8 @@ def test_get_berths(api_client, berth):
                 edges {
                     node {
                         number
+                        createdAt
+                        modifiedAt
                     }
                 }
             }
@@ -112,11 +138,26 @@ def test_get_berths(api_client, berth):
     """
     executed = api_client.execute(query)
     assert executed["data"] == {
-        "berths": {"edges": [{"node": {"number": berth.number}}]}
+        "berths": {
+            "edges": [
+                {
+                    "node": {
+                        "number": berth.number,
+                        "createdAt": berth.created_at.isoformat(),
+                        "modifiedAt": berth.modified_at.isoformat(),
+                    }
+                }
+            ]
+        }
     }
 
 
-def test_get_berth_with_leases(superuser_api_client, berth):
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_berth_with_leases(api_client, berth):
     berth_lease = BerthLeaseFactory(berth=berth)
 
     query = """
@@ -132,19 +173,25 @@ def test_get_berth_with_leases(superuser_api_client, berth):
             }
         }
     """ % to_global_id(
-        "BerthNode", berth.id
+        BerthNode._meta.name, berth.id
     )
-    executed = superuser_api_client.execute(query)
+    executed = api_client.execute(query)
 
     assert executed["data"]["berth"] == {
         "leases": {
-            "edges": [{"node": {"id": to_global_id("BerthLeaseNode", berth_lease.id)}}]
+            "edges": [
+                {
+                    "node": {
+                        "id": to_global_id(BerthLeaseNode._meta.name, berth_lease.id)
+                    }
+                }
+            ]
         }
     }
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
 )
 def test_get_berth_with_leases_not_enough_permissions(api_client, berth):
     BerthLeaseFactory(berth=berth)
@@ -162,7 +209,7 @@ def test_get_berth_with_leases_not_enough_permissions(api_client, berth):
             }
         }
     """ % to_global_id(
-        "BerthNode", berth.id
+        BerthNode._meta.name, berth.id
     )
     executed = api_client.execute(query)
     assert_not_enough_permissions(executed)
@@ -181,6 +228,8 @@ def test_get_winter_storage_areas(api_client, winter_storage_area):
                         properties {
                             name
                             zipCode
+                            createdAt
+                            modifiedAt
                         }
                     }
                 }
@@ -197,6 +246,8 @@ def test_get_winter_storage_areas(api_client, winter_storage_area):
                         "properties": {
                             "name": winter_storage_area.name,
                             "zipCode": winter_storage_area.zip_code,
+                            "createdAt": winter_storage_area.created_at.isoformat(),
+                            "modifiedAt": winter_storage_area.modified_at.isoformat(),
                         },
                     }
                 }
@@ -217,6 +268,8 @@ def test_get_winter_storage_sections(api_client, winter_storage_section):
                         }
                         properties {
                             identifier
+                            createdAt
+                            modifiedAt
                         }
                     }
                 }
@@ -230,7 +283,11 @@ def test_get_winter_storage_sections(api_client, winter_storage_section):
                 {
                     "node": {
                         "geometry": json.loads(winter_storage_section.location.json),
-                        "properties": {"identifier": winter_storage_section.identifier},
+                        "properties": {
+                            "identifier": winter_storage_section.identifier,
+                            "createdAt": winter_storage_section.created_at.isoformat(),
+                            "modifiedAt": winter_storage_section.modified_at.isoformat(),
+                        },
                     }
                 }
             ]
@@ -245,6 +302,8 @@ def test_get_winter_storage_places(api_client, winter_storage_place):
                 edges {
                     node {
                         number
+                        createdAt
+                        modifiedAt
                     }
                 }
             }
@@ -253,14 +312,25 @@ def test_get_winter_storage_places(api_client, winter_storage_place):
     executed = api_client.execute(query)
     assert executed["data"] == {
         "winterStoragePlaces": {
-            "edges": [{"node": {"number": winter_storage_place.number}}]
+            "edges": [
+                {
+                    "node": {
+                        "number": winter_storage_place.number,
+                        "createdAt": winter_storage_place.created_at.isoformat(),
+                        "modifiedAt": winter_storage_place.modified_at.isoformat(),
+                    }
+                }
+            ]
         }
     }
 
 
-def test_get_piers_filter_by_application(
-    superuser_api_client, berth_application, berth
-):
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_piers_filter_by_application(api_client, berth_application, berth):
     query = """
         {
             piers(forApplication: "%s") {
@@ -284,10 +354,10 @@ def test_get_piers_filter_by_application(
             }
         }
     """ % to_global_id(
-        "BerthApplicationNode", berth_application.id
+        BerthApplicationNode._meta.name, berth_application.id
     )
 
-    executed = superuser_api_client.execute(query)
+    executed = api_client.execute(query)
 
     expected_berths = []
     if (
@@ -310,7 +380,7 @@ def test_get_piers_filter_by_application(
             "edges": [
                 {
                     "node": {
-                        "id": to_global_id("PierNode", berth.pier.id),
+                        "id": to_global_id(PierNode._meta.name, berth.pier.id),
                         "properties": {"berths": {"edges": expected_berths}},
                     }
                 }
@@ -319,9 +389,12 @@ def test_get_piers_filter_by_application(
     }
 
 
-def test_get_piers_filter_error_both_filters(
-    superuser_api_client, berth_application, berth
-):
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_piers_filter_error_both_filters(api_client, berth_application, berth):
     query = """
         {
             piers(forApplication: "%s", minBerthWidth: 1.0, minBerthLength: 1.0) {
@@ -342,10 +415,10 @@ def test_get_piers_filter_error_both_filters(
             }
         }
     """ % to_global_id(
-        "BerthApplicationNode", berth_application.id
+        BerthApplicationNode._meta.name, berth_application.id
     )
 
-    executed = superuser_api_client.execute(query)
+    executed = api_client.execute(query)
 
     assert_in_errors(
         "You cannot filter by dimension (width, length) and application a the same time",
@@ -354,7 +427,7 @@ def test_get_piers_filter_error_both_filters(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
 )
 def test_get_piers_filter_by_application_not_enough_permissions(
     api_client, berth_application
@@ -379,7 +452,7 @@ def test_get_piers_filter_by_application_not_enough_permissions(
             }
         }
     """ % to_global_id(
-        "BerthApplicationNode", berth_application.id
+        BerthApplicationNode._meta.name, berth_application.id
     )
 
     executed = api_client.execute(query)

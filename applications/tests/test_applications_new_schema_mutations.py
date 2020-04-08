@@ -1,10 +1,12 @@
 import pytest
 from graphql_relay import to_global_id
 
+from applications.new_schema import BerthApplicationNode
 from berth_reservations.tests.utils import (
     assert_field_missing,
     assert_not_enough_permissions,
 )
+from customers.schema import ProfileNode
 
 UPDATE_BERTH_APPLICATION_MUTATION = """
 mutation UpdateApplication($input: UpdateBerthApplicationInput!) {
@@ -21,13 +23,14 @@ mutation UpdateApplication($input: UpdateBerthApplicationInput!) {
 """
 
 
-def test_update_berth_application(
-    superuser_api_client, berth_application, customer_profile
-):
+@pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+def test_update_berth_application(api_client, berth_application, customer_profile):
     berth_application_id = to_global_id(
-        "BerthApplicationNode", str(berth_application.id)
+        BerthApplicationNode._meta.name, str(berth_application.id)
     )
-    customer_id = to_global_id("BerthProfileNode", str(customer_profile.id))
+    customer_id = to_global_id(ProfileNode._meta.name, str(customer_profile.id))
 
     variables = {
         "id": berth_application_id,
@@ -36,9 +39,7 @@ def test_update_berth_application(
 
     assert berth_application.customer is None
 
-    executed = superuser_api_client.execute(
-        UPDATE_BERTH_APPLICATION_MUTATION, input=variables,
-    )
+    executed = api_client.execute(UPDATE_BERTH_APPLICATION_MUTATION, input=variables)
 
     assert executed == {
         "data": {
@@ -55,44 +56,44 @@ def test_update_berth_application(
     }
 
 
-def test_update_berth_application_no_application_id(
-    superuser_api_client, customer_profile
-):
+@pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+def test_update_berth_application_no_application_id(api_client, customer_profile):
     variables = {
-        "customerId": to_global_id("BerthProfileNode", str(customer_profile.id)),
+        "customerId": to_global_id(ProfileNode._meta.name, str(customer_profile.id)),
     }
 
-    executed = superuser_api_client.execute(
-        UPDATE_BERTH_APPLICATION_MUTATION, input=variables,
-    )
+    executed = api_client.execute(UPDATE_BERTH_APPLICATION_MUTATION, input=variables)
 
     assert_field_missing("id", executed)
 
 
-def test_update_berth_application_no_customer_id(
-    superuser_api_client, berth_application
-):
+@pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+def test_update_berth_application_no_customer_id(api_client, berth_application):
     variables = {
-        "id": to_global_id("BerthApplicationNode", str(berth_application.id)),
+        "id": to_global_id(BerthApplicationNode._meta.name, str(berth_application.id)),
     }
 
-    executed = superuser_api_client.execute(
-        UPDATE_BERTH_APPLICATION_MUTATION, input=variables,
-    )
+    executed = api_client.execute(UPDATE_BERTH_APPLICATION_MUTATION, input=variables)
 
     assert_field_missing("customerId", executed)
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user_api_client", "staff_api_client"], indirect=True
+    "api_client",
+    ["api_client", "berth_handler", "berth_supervisor", "harbor_services", "user"],
+    indirect=True,
 )
 def test_update_berth_application_not_enough_permissions(
     api_client, berth_application, customer_profile
 ):
     berth_application_id = to_global_id(
-        "BerthApplicationNode", str(berth_application.id)
+        BerthApplicationNode._meta.name, str(berth_application.id)
     )
-    customer_id = to_global_id("BerthProfileNode", str(customer_profile.id))
+    customer_id = to_global_id(ProfileNode._meta.name, str(customer_profile.id))
 
     variables = {
         "id": berth_application_id,

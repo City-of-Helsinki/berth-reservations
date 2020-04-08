@@ -90,6 +90,7 @@ sentry_sdk.init(
     environment=env("SENTRY_ENVIRONMENT"),
     integrations=[DjangoIntegration()],
 )
+sentry_sdk.integrations.logging.ignore_logger("graphql.execution.utils")
 
 MEDIA_ROOT = env("MEDIA_ROOT")
 STATIC_ROOT = env("STATIC_ROOT")
@@ -177,6 +178,7 @@ DEFAULT_SRID = 4326
 NOTIFICATIONS_ENABLED = env("NOTIFICATIONS_ENABLED")
 
 PARLER_LANGUAGES = {SITE_ID: ({"code": "fi"}, {"code": "en"}, {"code": "sv"})}
+PARLER_DEFAULT_ACTIVATE = True
 
 CORS_ORIGIN_WHITELIST = env.list("CORS_ORIGIN_WHITELIST")
 CORS_ORIGIN_ALLOW_ALL = env.bool("CORS_ORIGIN_ALLOW_ALL")
@@ -188,6 +190,8 @@ OIDC_API_TOKEN_AUTH = {
     "API_AUTHORIZATION_FIELD": env.str("TOKEN_AUTH_FIELD_FOR_CONSENTS"),
     "REQUIRE_API_SCOPE_FOR_AUTHENTICATION": env.bool("TOKEN_AUTH_REQUIRE_SCOPE_PREFIX"),
 }
+
+OIDC_AUTH = {"OIDC_LEEWAY": 60 * 60}
 
 GRAPHENE = {
     "SCHEMA": "berth_reservations.schema.schema",
