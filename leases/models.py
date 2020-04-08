@@ -115,6 +115,13 @@ class BerthLease(AbstractLease):
         verbose_name_plural = _("berth leases")
         default_related_name = "berth_leases"
 
+    def clean(self):
+        if self.start_date.year != self.end_date.year:
+            raise ValidationError(
+                _("BerthLease start and end year have to be the same")
+            )
+        super().clean()
+
     def __str__(self):
         return " {} > {} - {} ({})".format(
             self.berth, self.start_date, self.end_date, self.status

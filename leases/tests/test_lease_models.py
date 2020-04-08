@@ -102,3 +102,15 @@ def test_lease_should_have_boat_owner_as_customer():
     another_customers_boat = BoatFactory()
     with pytest.raises(ValidationError):
         BerthLeaseFactory(boat=another_customers_boat)
+
+
+@freeze_time("2020-11-11T08:00:00Z")
+def test_lease_should_be_the_same_year():
+    start_date = calculate_berth_lease_start_date()
+    start_date = start_date.replace(year=start_date.year - 1)
+    end_date = calculate_berth_lease_end_date()
+
+    with pytest.raises(ValidationError) as exception:
+        BerthLeaseFactory(start_date=start_date, end_date=end_date)
+
+    assert "BerthLease start and end year have to be the same" in str(exception.value)
