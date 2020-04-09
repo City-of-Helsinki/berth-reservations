@@ -1,3 +1,5 @@
+from functools import reduce
+
 import django_filters
 import graphene
 from django.core.exceptions import ValidationError
@@ -113,7 +115,9 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
         try:
             lease = BerthLease.objects.create(**input)
         except ValidationError as e:
-            raise VenepaikkaGraphQLError(e)
+            # Flatten all the error messages on a single list
+            errors = reduce(sum, e.message_dict.values(), [])
+            raise VenepaikkaGraphQLError(errors)
 
         application.status = ApplicationStatus.OFFER_GENERATED
         application.save()
