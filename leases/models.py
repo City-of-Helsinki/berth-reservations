@@ -8,6 +8,7 @@ from customers.models import Boat, CustomerProfile
 from resources.models import Berth, WinterStoragePlace
 from utils.models import TimeStampedModel, UUIDModel
 
+from .consts import ACTIVE_LEASE_STATUSES
 from .enums import LeaseStatus
 from .utils import calculate_berth_lease_end_date, calculate_berth_lease_start_date
 
@@ -44,6 +45,8 @@ class AbstractLease(TimeStampedModel, UUIDModel):
             raise ValidationError(
                 _("The boat should belong to the customer who is creating the lease")
             )
+        if self.start_date > self.end_date:
+            raise ValidationError(_("Lease start date cannot be after end date"))
 
     def save(self, *args, **kwargs):
         # ensure full_clean is always ran
@@ -90,6 +93,15 @@ class BerthLease(AbstractLease):
             raise ValidationError(
                 _("BerthLease start and end year have to be the same")
             )
+        leases_for_given_period = BerthLease.objects.filter(
+            berth=self.berth,
+            end_date__gte=self.start_date,
+            status__in=ACTIVE_LEASE_STATUSES,
+        )
+        if not self._state.adding:
+            leases_for_given_period = leases_for_given_period.exclude(pk=self.pk)
+        if leases_for_given_period.exists():
+            raise ValidationError(_("Berth already has a lease"))
         super().clean()
 
     def __str__(self):
@@ -118,6 +130,18 @@ class WinterStorageLease(AbstractLease):
         verbose_name = _("winter storage lease")
         verbose_name_plural = _("winter storage leases")
         default_related_name = "winter_storage_leases"
+
+    def clean(self):
+        existing_leases = WinterStorageLease.objects.filter(
+            place=self.place,
+            end_date__gte=self.start_date,
+            status__in=ACTIVE_LEASE_STATUSES,
+        )
+        if not self._state.adding:
+            existing_leases = existing_leases.exclude(pk=self.pk)
+        if existing_leases.exists():
+            raise ValidationError(_("WinterStoragePlace already has a lease"))
+        super().clean()
 
     def __str__(self):
         return " {} > {} - {} ({})".format(
