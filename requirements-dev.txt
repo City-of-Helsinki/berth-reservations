@@ -17,6 +17,7 @@ click==7.0                # via black
 coverage==4.5.4           # via pytest-cov
 decorator==4.4.1          # via ipython, traitlets
 entrypoints==0.3          # via flake8
+flake8-print==3.1.4
 flake8==3.7.9
 freezegun==0.3.12
 identify==1.4.10          # via pre-commit
@@ -39,7 +40,7 @@ pre-commit==1.21.0
 prompt-toolkit==2.0.10    # via ipython
 ptyprocess==0.6.0         # via pexpect
 py==1.8.0                 # via pytest
-pycodestyle==2.5.0        # via autopep8, flake8
+pycodestyle==2.5.0        # via autopep8, flake8, flake8-print
 pyflakes==2.1.1           # via flake8
 pygments==2.4.2           # via ipython
 pyparsing==2.4.2          # via packaging
@@ -49,7 +50,7 @@ pytest==5.2.2
 python-dateutil==2.8.0    # via freezegun
 pyyaml==5.3               # via aspy.yaml, pre-commit
 regex==2019.8.19          # via black
-six==1.12.0               # via cfgv, freezegun, packaging, pre-commit, prompt-toolkit, python-dateutil, traitlets
+six==1.12.0               # via cfgv, flake8-print, freezegun, packaging, pre-commit, prompt-toolkit, python-dateutil, traitlets
 toml==0.10.0              # via black, pre-commit
 traitlets==4.3.3          # via ipython
 typed-ast==1.4.0          # via black
