@@ -3,8 +3,16 @@ from pathlib import Path
 
 import pytest  # noqa
 from django.core.files.uploadedfile import SimpleUploadedFile
+from freezegun import freeze_time
 
+from leases.enums import LeaseStatus
+from leases.tests.factories import BerthLeaseFactory
+from leases.utils import (
+    calculate_berth_lease_end_date,
+    calculate_berth_lease_start_date,
+)
 from resources.models import (
+    Berth,
     get_harbor_media_folder,
     get_winter_area_media_folder,
     Harbor,
@@ -332,3 +340,100 @@ def test_all_winter_storage_area_files_removed():
 
     # Test that all the directory have been removed
     assert not directory.exists()
+
+
+def test_berth_is_available_no_leases(superuser_api_client, berth):
+    assert Berth.objects.get(id=berth.id).is_available
+
+
+@pytest.mark.parametrize("status", ["expired", "refused"])
+@pytest.mark.parametrize("renew_automatically", [True, False])
+def test_berth_is_available_lease_status(
+    superuser_api_client, berth, status, renew_automatically
+):
+    BerthLeaseFactory(
+        berth=berth, renew_automatically=renew_automatically, status=LeaseStatus(status)
+    )
+    assert Berth.objects.get(id=berth.id).is_available
+
+
+def test_berth_is_available_last_season_dont_renew_automatically(
+    superuser_api_client, berth
+):
+    start_date = calculate_berth_lease_start_date()
+    end_date = calculate_berth_lease_end_date()
+
+    start_date = start_date.replace(year=start_date.year - 1)
+    end_date = end_date.replace(year=end_date.year - 1)
+
+    BerthLeaseFactory(
+        berth=berth, start_date=start_date, end_date=end_date, renew_automatically=False
+    )
+    assert Berth.objects.get(id=berth.id).is_available
+
+
+@pytest.mark.parametrize("status", ["drafted", "offered", "expired", "refused"])
+def test_berth_is_available_last_season_renew_automatically_invalid_status(
+    superuser_api_client, berth, status
+):
+    start_date = calculate_berth_lease_start_date()
+    end_date = calculate_berth_lease_end_date()
+
+    start_date = start_date.replace(year=start_date.year - 1)
+    end_date = end_date.replace(year=end_date.year - 1)
+
+    BerthLeaseFactory(
+        berth=berth,
+        start_date=start_date,
+        end_date=end_date,
+        renew_automatically=False,
+        status=LeaseStatus(status),
+    )
+    assert Berth.objects.get(id=berth.id).is_available
+
+
+@freeze_time("2020-01-01T08:00:00Z")
+@pytest.mark.parametrize("status", ["drafted", "offered", "paid", "expired", "refused"])
+@pytest.mark.parametrize("renew_automatically", [True, False])
+def test_berth_is_available_ends_during_season(
+    superuser_api_client, berth, status, renew_automatically
+):
+    end_date = calculate_berth_lease_end_date()
+    end_date = end_date.replace(month=end_date.month - 1)
+
+    BerthLeaseFactory(
+        berth=berth,
+        end_date=end_date,
+        renew_automatically=renew_automatically,
+        status=LeaseStatus(status),
+    )
+    assert Berth.objects.get(id=berth.id).is_available
+
+
+@freeze_time("2020-01-01T08:00:00Z")
+@pytest.mark.parametrize("status", ["drafted", "offered", "paid"])
+@pytest.mark.parametrize("renew_automatically", [True, False])
+def test_berth_is_not_available_valid_through_whole_season(
+    superuser_api_client, berth, status, renew_automatically
+):
+    BerthLeaseFactory(
+        berth=berth, status=status, renew_automatically=renew_automatically
+    )
+    assert not Berth.objects.get(id=berth.id).is_available
+
+
+@freeze_time("2020-01-01T08:00:00Z")
+def test_berth_is_not_available_auto_renew_last_season(superuser_api_client, berth):
+    start_date = calculate_berth_lease_start_date()
+    end_date = calculate_berth_lease_end_date()
+
+    start_date = start_date.replace(year=start_date.year - 1)
+    end_date = end_date.replace(year=end_date.year - 1)
+    BerthLeaseFactory(
+        berth=berth,
+        start_date=start_date,
+        end_date=end_date,
+        status=LeaseStatus.PAID,
+        renew_automatically=True,
+    )
+    assert not Berth.objects.get(id=berth.id).is_available

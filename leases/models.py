@@ -1,5 +1,3 @@
-from datetime import date
-
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -10,39 +8,9 @@ from customers.models import Boat, CustomerProfile
 from resources.models import Berth, WinterStoragePlace
 from utils.models import TimeStampedModel, UUIDModel
 
+from .consts import ACTIVE_LEASE_STATUSES
 from .enums import LeaseStatus
-
-
-# If a lease object is being created before 10.6, then the dates are in the same year.
-# If the object is being created between those dates, then the start date is
-# the date of creation and end date is 14.9 of the same year.
-# If the object is being created after 14.9, then the dates are from next year.
-def calculate_berth_lease_start_date():
-    # Leases always start on 10.6 the earliest
-    today = date.today()
-    default = date(day=10, month=6, year=today.year)
-
-    # If today is gte than the date when all the leases end,
-    # return the default start date for the next year
-    if today >= date(day=14, month=9, year=today.year):
-        return default.replace(year=today.year + 1)
-
-    # Otherwise, return the latest date between the default start date or today
-    return max(default, today)
-
-
-def calculate_berth_lease_end_date():
-    # Leases always end on 14.9
-    today = date.today()
-    default = date(day=14, month=9, year=today.year)
-
-    # If today is gte than the day when all leases end,
-    # return the default end date for the next year
-    if today >= default:
-        return default.replace(year=today.year + 1)
-
-    # Otherwise, return the default end date for the current year
-    return default
+from .utils import calculate_berth_lease_end_date, calculate_berth_lease_start_date
 
 
 class AbstractLease(TimeStampedModel, UUIDModel):
@@ -77,6 +45,8 @@ class AbstractLease(TimeStampedModel, UUIDModel):
             raise ValidationError(
                 _("The boat should belong to the customer who is creating the lease")
             )
+        if self.start_date > self.end_date:
+            raise ValidationError(_("Lease start date cannot be after end date"))
 
     def save(self, *args, **kwargs):
         # ensure full_clean is always ran
@@ -109,6 +79,9 @@ class BerthLease(AbstractLease):
     end_date = models.DateField(
         verbose_name=_("end date"), default=calculate_berth_lease_end_date
     )
+    renew_automatically = models.BooleanField(
+        verbose_name=_("renew automatically"), default=True
+    )
 
     class Meta:
         verbose_name = _("berth lease")
@@ -120,6 +93,15 @@ class BerthLease(AbstractLease):
             raise ValidationError(
                 _("BerthLease start and end year have to be the same")
             )
+        leases_for_given_period = BerthLease.objects.filter(
+            berth=self.berth,
+            end_date__gte=self.start_date,
+            status__in=ACTIVE_LEASE_STATUSES,
+        )
+        if not self._state.adding:
+            leases_for_given_period = leases_for_given_period.exclude(pk=self.pk)
+        if leases_for_given_period.exists():
+            raise ValidationError(_("Berth already has a lease"))
         super().clean()
 
     def __str__(self):
@@ -148,6 +130,18 @@ class WinterStorageLease(AbstractLease):
         verbose_name = _("winter storage lease")
         verbose_name_plural = _("winter storage leases")
         default_related_name = "winter_storage_leases"
+
+    def clean(self):
+        existing_leases = WinterStorageLease.objects.filter(
+            place=self.place,
+            end_date__gte=self.start_date,
+            status__in=ACTIVE_LEASE_STATUSES,
+        )
+        if not self._state.adding:
+            existing_leases = existing_leases.exclude(pk=self.pk)
+        if existing_leases.exists():
+            raise ValidationError(_("WinterStoragePlace already has a lease"))
+        super().clean()
 
     def __str__(self):
         return " {} > {} - {} ({})".format(

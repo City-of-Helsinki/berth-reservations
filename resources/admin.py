@@ -32,6 +32,16 @@ class AvailabilityLevelAdmin(TranslatableAdmin):
     pass
 
 
+class BerthAdmin(admin.ModelAdmin):
+    readonly_fields = ("is_available",)
+
+    def is_available(self, obj):
+        return obj.is_available
+
+    is_available.short_description = _("Berth available")
+    is_available.admin_order_field = "is_available"
+
+
 class BoatTypeAdmin(TranslatableAdmin):
     pass
 
@@ -107,7 +117,7 @@ class WinterStorageSectionAdmin(admin.OSMGeoAdmin):
 
 admin.site.register(AvailabilityLevel, AvailabilityLevelAdmin)
 admin.site.register(BoatType, BoatTypeAdmin)
-admin.site.register(Berth)
+admin.site.register(Berth, BerthAdmin)
 admin.site.register(BerthType)
 admin.site.register(Harbor, HarborAdmin)
 admin.site.register(HarborMap)

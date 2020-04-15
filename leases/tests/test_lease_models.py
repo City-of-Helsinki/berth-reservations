@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 
 import pytest
+from dateutil.utils import today
 from django.core.exceptions import ValidationError
 from freezegun import freeze_time
 
@@ -15,7 +16,7 @@ from ..models import (
     WinterStorageLease,
     WinterStorageLeaseChange,
 )
-from .factories import BerthLeaseFactory
+from .factories import BerthLeaseFactory, WinterStorageLeaseFactory
 
 
 def test_berth_lease_model(berth_lease):
@@ -114,3 +115,63 @@ def test_lease_should_be_the_same_year():
         BerthLeaseFactory(start_date=start_date, end_date=end_date)
 
     assert "BerthLease start and end year have to be the same" in str(exception.value)
+
+
+@freeze_time("2020-11-11T08:00:00Z")
+def test_berth_lease_start_should_be_before_end():
+    start_date = calculate_berth_lease_end_date()
+    end_date = calculate_berth_lease_start_date()
+
+    with pytest.raises(ValidationError) as exception:
+        BerthLeaseFactory(start_date=start_date, end_date=end_date)
+
+    assert "Lease start date cannot be after end date" in str(exception.value)
+
+
+@freeze_time("2020-11-11T08:00:00Z")
+def test_winter_storage_lease_start_should_be_before_end():
+    start_date = calculate_berth_lease_end_date()
+    end_date = calculate_berth_lease_start_date()
+
+    with pytest.raises(ValidationError) as exception:
+        WinterStorageLeaseFactory(start_date=start_date, end_date=end_date)
+
+    assert "Lease start date cannot be after end date" in str(exception.value)
+
+
+@freeze_time("2020-01-01T08:00:00Z")
+def test_berth_leases_should_not_overlap(berth):
+    start_date = calculate_berth_lease_start_date()
+    end_date = calculate_berth_lease_end_date()
+
+    # Lease valid for a month starting at the beginning of the season
+    BerthLeaseFactory(
+        berth=berth,
+        start_date=start_date,
+        end_date=start_date.replace(month=start_date.month + 1),
+    )
+
+    with pytest.raises(ValidationError) as exception:
+        BerthLeaseFactory(berth=berth, start_date=start_date, end_date=end_date)
+
+    assert "Berth already has a lease" in str(exception.value)
+
+
+@freeze_time("2020-01-01T08:00:00Z")
+def test_winter_storage_leases_should_not_overlap(winter_storage_place):
+    start_date = today()
+    end_date = start_date.replace(month=start_date.month + 2)
+
+    # Lease valid for a month starting at the beginning of the season
+    WinterStorageLeaseFactory(
+        place=winter_storage_place,
+        start_date=start_date,
+        end_date=start_date.replace(month=start_date.month + 1),
+    )
+
+    with pytest.raises(ValidationError) as exception:
+        WinterStorageLeaseFactory(
+            place=winter_storage_place, start_date=start_date, end_date=end_date
+        )
+
+    assert "WinterStoragePlace already has a lease" in str(exception.value)

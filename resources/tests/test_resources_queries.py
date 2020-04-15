@@ -10,7 +10,8 @@ from berth_reservations.tests.utils import (
 )
 from leases.schema import BerthLeaseNode
 from leases.tests.factories import BerthLeaseFactory
-from resources.schema import BerthNode, PierNode
+from resources.schema import BerthNode, HarborNode, PierNode
+from resources.tests.factories import BerthFactory
 
 
 def test_get_boat_type(api_client, boat_type):
@@ -44,6 +45,7 @@ def test_get_harbors(api_client, berth):
                             maxLength
                             maxDepth
                             numberOfPlaces
+                            numberOfFreePlaces
                             createdAt
                             modifiedAt
                         }
@@ -65,7 +67,8 @@ def test_get_harbors(api_client, berth):
                             "maxWidth": float(berth.berth_type.width),
                             "maxLength": float(berth.berth_type.length),
                             "maxDepth": float(berth.berth_type.depth),
-                            "numberOfPlaces": harbor.piers.count(),
+                            "numberOfPlaces": 1,
+                            "numberOfFreePlaces": 1,
                             "createdAt": harbor.created_at.isoformat(),
                             "modifiedAt": harbor.modified_at.isoformat(),
                         },
@@ -76,7 +79,9 @@ def test_get_harbors(api_client, berth):
     }
 
 
-def test_get_piers(api_client, pier):
+def test_get_piers(api_client, berth):
+    pier = berth.pier
+
     query = """
         {
             piers {
@@ -91,6 +96,9 @@ def test_get_piers(api_client, pier):
                             suitableBoatTypes {
                                 name
                             }
+                            maxWidth
+                            maxLength
+                            maxDepth
                             createdAt
                             modifiedAt
                         }
@@ -112,6 +120,9 @@ def test_get_piers(api_client, pier):
                         "properties": {
                             "identifier": pier.identifier,
                             "suitableBoatTypes": expected_suitables_boat_types,
+                            "maxWidth": float(berth.berth_type.width),
+                            "maxLength": float(berth.berth_type.length),
+                            "maxDepth": float(berth.berth_type.depth),
                             "createdAt": pier.created_at.isoformat(),
                             "modifiedAt": pier.modified_at.isoformat(),
                         },
@@ -458,3 +469,65 @@ def test_get_piers_filter_by_application_not_enough_permissions(
     executed = api_client.execute(query)
 
     assert_not_enough_permissions(executed)
+
+
+@pytest.mark.parametrize("available", [True, False])
+def test_get_harbor_available_berths(api_client, pier, available):
+    harbor = pier.harbor
+    # Add an available berth
+    BerthFactory(pier=pier)
+    # Add a berth and assign it to a lease
+    unavailable_berth = BerthFactory(pier=pier)
+    BerthLeaseFactory(berth=unavailable_berth)
+
+    query = """
+        {
+            harbor(id: "%s") {
+                properties {
+                    numberOfPlaces
+                    numberOfFreePlaces
+                    piers {
+                        edges {
+                            node {
+                                properties {
+                                    berths(isAvailable: %s) {
+                                        edges {
+                                            node {
+                                                isAvailable
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    """ % (
+        to_global_id(HarborNode._meta.name, harbor.id),
+        "true" if available else "false",
+    )
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {
+        "harbor": {
+            "properties": {
+                "numberOfPlaces": 2,
+                "numberOfFreePlaces": 1,
+                "piers": {
+                    "edges": [
+                        {
+                            "node": {
+                                "properties": {
+                                    "berths": {
+                                        "edges": [{"node": {"isAvailable": available}}]
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                },
+            },
+        }
+    }
