@@ -314,7 +314,7 @@ class PierManager(models.Manager):
         )
 
         available_berths = (
-            berth_qs.filter(is_available=True)
+            berth_qs.filter(is_available=True, is_active=True)
             .order_by()
             .values("pier")
             .annotate(count=Count("*"))
@@ -492,6 +492,7 @@ class WinterStoragePlaceType(AbstractPlaceType):
 
 class AbstractBoatPlace(TimeStampedModel, UUIDModel):
     number = models.CharField(verbose_name=_("number"), max_length=10)
+    is_active = models.BooleanField(verbose_name=_("is active"), default=True)
 
     class Meta:
         abstract = True

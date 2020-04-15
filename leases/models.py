@@ -98,10 +98,13 @@ class BerthLease(AbstractLease):
             end_date__gte=self.start_date,
             status__in=ACTIVE_LEASE_STATUSES,
         )
-        if not self._state.adding:
+        creating = self._state.adding
+        if not creating:
             leases_for_given_period = leases_for_given_period.exclude(pk=self.pk)
         if leases_for_given_period.exists():
             raise ValidationError(_("Berth already has a lease"))
+        if not self.berth.is_active and creating:
+            raise ValidationError(_("Selected berth is not active"))
         super().clean()
 
     def __str__(self):
@@ -137,10 +140,13 @@ class WinterStorageLease(AbstractLease):
             end_date__gte=self.start_date,
             status__in=ACTIVE_LEASE_STATUSES,
         )
-        if not self._state.adding:
+        creating = self._state.adding
+        if not creating:
             existing_leases = existing_leases.exclude(pk=self.pk)
         if existing_leases.exists():
             raise ValidationError(_("WinterStoragePlace already has a lease"))
+        if not self.place.is_active and creating:
+            raise ValidationError(_("Selected place is not active"))
         super().clean()
 
     def __str__(self):

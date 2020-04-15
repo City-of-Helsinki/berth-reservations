@@ -213,6 +213,7 @@ class BerthNode(DjangoObjectType):
             "pier",
             "berth_type",
             "comment",
+            "is_active",
             "created_at",
             "modified_at",
         )
@@ -428,7 +429,12 @@ class AbstractAreaSectionInput:
     gate = graphene.Boolean()
 
 
-class BerthInput:
+class AbstractBoatPlaceInput:
+    number = graphene.String()
+    is_active = graphene.Boolean()
+
+
+class BerthInput(AbstractBoatPlaceInput):
     comment = graphene.String()
     is_accessible = graphene.Boolean()
 
@@ -459,7 +465,6 @@ class CreateBerthMutation(graphene.ClientIDMutation):
 class UpdateBerthMutation(graphene.ClientIDMutation):
     class Input(BerthInput):
         id = graphene.ID(required=True)
-        number = graphene.String()
         pier_id = graphene.ID()
         berth_type_id = graphene.ID()
 
