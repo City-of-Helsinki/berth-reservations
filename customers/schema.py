@@ -17,7 +17,7 @@ from users.utils import user_has_view_permission
 from utils.relay import get_node_from_global_id
 
 from .enums import InvoicingType
-from .models import Boat, Company, CustomerProfile
+from .models import Boat, CustomerProfile, Organization
 
 InvoicingTypeEnum = graphene.Enum.from_enum(InvoicingType)
 
@@ -30,19 +30,26 @@ class BoatNode(DjangoObjectType):
         interfaces = (relay.Node,)
 
 
-class CompanyType(DjangoObjectType):
+class OrganizationNode(DjangoObjectType):
     customer = graphene.Field("customers.schema.ProfileNode", required=True)
 
     class Meta:
-        model = Company
-        fields = ("business_id", "name", "address", "postal_code", "city")
+        model = Organization
+        interfaces = (relay.Node,)
+        fields = (
+            "business_id",
+            "name",
+            "address",
+            "postal_code",
+            "city",
+        )
 
 
 PROFILE_NODE_FIELDS = (
     "id",
     "invoicing_type",
     "comment",
-    "company",
+    "organization",
     "boats",
     "berth_applications",
     "berth_leases",
@@ -63,7 +70,7 @@ class BaseProfileFieldsMixin:
 
     invoicing_type = InvoicingTypeEnum()
     comment = graphene.String()
-    company = graphene.Field(CompanyType)
+    organization = graphene.Field(OrganizationNode)
     boats = DjangoConnectionField(BoatNode)
     berth_applications = DjangoConnectionField(BerthApplicationNode)
     berth_leases = DjangoConnectionField(BerthLeaseNode)

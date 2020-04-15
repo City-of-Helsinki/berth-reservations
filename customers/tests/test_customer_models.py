@@ -4,8 +4,8 @@ from django.db.utils import IntegrityError
 from berth_reservations.tests.conftest import *  # noqa
 from berth_reservations.tests.factories import CustomerProfileFactory
 
-from ..models import Company, CustomerProfile
-from .factories import CompanyFactory
+from ..models import CustomerProfile, Organization
+from .factories import OrganizationFactory
 
 
 def test_customer_profile_model(customer_profile):
@@ -17,13 +17,13 @@ def test_user_can_have_only_one_profile(customer_profile):
         CustomerProfileFactory(user=customer_profile.user)
 
 
-def test_customer_can_have_company_info(customer_profile):
-    assert Company.objects.count() == 0
-    CompanyFactory(customer=customer_profile)
-    assert Company.objects.count() == 1
+def test_customer_can_have_organization_info(customer_profile):
+    assert Organization.objects.count() == 0
+    OrganizationFactory(customer=customer_profile)
+    assert Organization.objects.count() == 1
 
 
-def test_customer_can_have_only_one_company():
-    company = CompanyFactory()
+def test_customer_can_have_only_one_organization():
+    organization = OrganizationFactory()
     with pytest.raises(IntegrityError):
-        CompanyFactory(customer=company.customer)
+        OrganizationFactory(customer=organization.customer)

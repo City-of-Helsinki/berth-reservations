@@ -40,14 +40,16 @@ class CustomerProfile(TimeStampedModel):
             return str(self.id)
 
 
-class Company(TimeStampedModel, UUIDModel):
+class Organization(TimeStampedModel, UUIDModel):
     customer = models.OneToOneField(
         CustomerProfile,
         verbose_name=_("customer"),
-        related_name="company",
+        related_name="organization",
         on_delete=models.CASCADE,
     )
-    business_id = models.CharField(verbose_name=_("business id"), max_length=32)
+    business_id = models.CharField(
+        verbose_name=_("business id"), max_length=32, blank=True
+    )
     name = models.CharField(verbose_name=_("name"), max_length=128, blank=True)
     address = models.CharField(verbose_name=_("address"), max_length=128, blank=True)
     postal_code = models.CharField(
@@ -56,12 +58,14 @@ class Company(TimeStampedModel, UUIDModel):
     city = models.CharField(verbose_name=_("city"), max_length=64, blank=True)
 
     class Meta:
-        verbose_name = _("company")
-        verbose_name_plural = _("companies")
+        verbose_name = _("organization")
+        verbose_name_plural = _("organizations")
         ordering = ("id",)
 
     def __str__(self):
-        return self.business_id
+        return (
+            f"[{self.organization_type}]: {self.name} [{self.business_id}] ({self.id})"
+        )
 
 
 class Boat(TimeStampedModel, UUIDModel):
