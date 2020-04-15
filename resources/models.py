@@ -314,7 +314,7 @@ class PierManager(models.Manager):
         )
 
         available_berths = (
-            berth_qs.filter(is_available=True)
+            berth_qs.filter(is_available=True, is_active=True)
             .order_by()
             .values("pier")
             .annotate(count=Count("*"))

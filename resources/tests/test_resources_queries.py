@@ -533,3 +533,30 @@ def test_get_harbor_available_berths(api_client, pier, available):
             },
         }
     }
+
+
+@pytest.mark.parametrize("available", [True, False])
+def test_get_harbor_available_active_berths(api_client, pier, available):
+    harbor = pier.harbor
+    # Add an unavailable berth
+    BerthFactory(pier=pier, is_active=False)
+    # Add a berth and assign it to a lease
+    BerthLeaseFactory(berth=BerthFactory(pier=pier))
+
+    query = """
+        {
+            harbor(id: "%s") {
+                properties {
+                    numberOfPlaces
+                    numberOfFreePlaces
+                }
+            }
+        }
+    """ % (
+        to_global_id(HarborNode._meta.name, harbor.id),
+    )
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {
+        "harbor": {"properties": {"numberOfPlaces": 2, "numberOfFreePlaces": 0}}
+    }
