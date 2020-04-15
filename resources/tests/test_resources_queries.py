@@ -140,6 +140,7 @@ def test_get_berths(api_client, berth):
                 edges {
                     node {
                         number
+                        isActive
                         createdAt
                         modifiedAt
                     }
@@ -154,6 +155,7 @@ def test_get_berths(api_client, berth):
                 {
                     "node": {
                         "number": berth.number,
+                        "isActive": berth.is_active,
                         "createdAt": berth.created_at.isoformat(),
                         "modifiedAt": berth.modified_at.isoformat(),
                     }

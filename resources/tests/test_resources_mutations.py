@@ -32,6 +32,7 @@ mutation CreateBerth($input: CreateBerthMutationInput!) {
             number
             comment
             isAccessible
+            isActive
         }
     }
 }
@@ -47,6 +48,7 @@ def test_create_berth(pier, berth_type, api_client):
         "comment": "foobar",
         "pierId": to_global_id(PierNode._meta.name, str(pier.id)),
         "berthTypeId": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
+        "isActive": False,
     }
 
     assert Berth.objects.count() == 0
@@ -60,6 +62,7 @@ def test_create_berth(pier, berth_type, api_client):
         "comment": "foobar",
         "number": "9999",
         "isAccessible": None,
+        "isActive": False,
     }
 
 
@@ -184,6 +187,7 @@ mutation UpdateBerth($input: UpdateBerthMutationInput!) {
             number
             comment
             isAccessible
+            isActive
             pier {
                 id
             }
@@ -211,6 +215,7 @@ def test_update_berth(berth, pier, berth_type, api_client):
         "isAccessible": True,
         "pierId": pier_id,
         "berthTypeId": berth_type_id,
+        "isActive": False,
     }
 
     assert Berth.objects.count() == 1
@@ -225,6 +230,7 @@ def test_update_berth(berth, pier, berth_type, api_client):
         "isAccessible": variables["isAccessible"],
         "pier": {"id": variables["pierId"]},
         "berthType": {"id": variables["berthTypeId"]},
+        "isActive": variables["isActive"],
     }
 
 
