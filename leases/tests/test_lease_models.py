@@ -175,3 +175,57 @@ def test_winter_storage_leases_should_not_overlap(winter_storage_place):
         )
 
     assert "WinterStoragePlace already has a lease" in str(exception.value)
+
+
+def test_berth_lease_inactive_berth_raises_error(berth):
+    berth.is_active = False
+    berth.save()
+
+    with pytest.raises(ValidationError) as exception:
+        BerthLeaseFactory(berth=berth)
+
+    assert "Selected berth is not active" in str(exception.value)
+
+
+def test_berth_lease_inactive_berth_updating(berth_lease, berth):
+    berth.is_active = False
+    berth.save()
+
+    assert BerthLease.objects.get(id=berth_lease.id).berth != berth
+
+    berth_lease.berth = berth
+    berth_lease.save()
+
+    assert BerthLease.objects.get(id=berth_lease.id).berth == berth
+
+
+def test_winter_storage_lease_inactive_winter_storage_raises_error(
+    winter_storage_place,
+):
+    winter_storage_place.is_active = False
+    winter_storage_place.save()
+
+    with pytest.raises(ValidationError) as exception:
+        WinterStorageLeaseFactory(place=winter_storage_place)
+
+    assert "Selected place is not active" in str(exception.value)
+
+
+def test_winter_storage_lease_inactive_winter_storage_updating(
+    winter_storage_lease, winter_storage_place
+):
+    winter_storage_place.is_active = False
+    winter_storage_place.save()
+
+    assert (
+        WinterStorageLease.objects.get(id=winter_storage_lease.id).place
+        != winter_storage_place
+    )
+
+    winter_storage_lease.place = winter_storage_place
+    winter_storage_lease.save()
+
+    assert (
+        WinterStorageLease.objects.get(id=winter_storage_lease.id).place
+        == winter_storage_place
+    )
