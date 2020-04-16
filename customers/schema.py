@@ -16,10 +16,11 @@ from users.decorators import view_permission_required
 from users.utils import user_has_view_permission
 from utils.relay import get_node_from_global_id
 
-from .enums import InvoicingType
+from .enums import InvoicingType, OrganizationType
 from .models import Boat, CustomerProfile, Organization
 
 InvoicingTypeEnum = graphene.Enum.from_enum(InvoicingType)
+OrganizationTypeEnum = graphene.Enum.from_enum(OrganizationType)
 
 
 class BoatNode(DjangoObjectType):
@@ -32,6 +33,7 @@ class BoatNode(DjangoObjectType):
 
 class OrganizationNode(DjangoObjectType):
     customer = graphene.Field("customers.schema.ProfileNode", required=True)
+    organization_type = OrganizationTypeEnum(required=True)
 
     class Meta:
         model = Organization

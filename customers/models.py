@@ -2,6 +2,7 @@ import uuid
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -10,7 +11,7 @@ from enumfields import EnumField
 from resources.models import BoatType
 from utils.models import TimeStampedModel, UUIDModel
 
-from .enums import InvoicingType
+from .enums import InvoicingType, OrganizationType
 
 User = get_user_model()
 
@@ -47,6 +48,9 @@ class Organization(TimeStampedModel, UUIDModel):
         related_name="organization",
         on_delete=models.CASCADE,
     )
+    organization_type = EnumField(
+        OrganizationType, verbose_name=_("organization type"), max_length=16,
+    )
     business_id = models.CharField(
         verbose_name=_("business id"), max_length=32, blank=True
     )
@@ -61,6 +65,15 @@ class Organization(TimeStampedModel, UUIDModel):
         verbose_name = _("organization")
         verbose_name_plural = _("organizations")
         ordering = ("id",)
+
+    def save(self, *args, **kwargs):
+        # ensure full_clean is always ran
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        if self.organization_type == OrganizationType.COMPANY and not self.business_id:
+            raise ValidationError(_("A company must have a business id"))
 
     def __str__(self):
         return (

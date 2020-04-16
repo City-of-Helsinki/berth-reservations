@@ -3,6 +3,7 @@ import factory
 from berth_reservations.tests.factories import CustomerProfileFactory
 from resources.tests.factories import BoatTypeFactory
 
+from ..enums import OrganizationType
 from ..models import Boat, Organization
 
 
@@ -22,6 +23,7 @@ class BoatFactory(factory.django.DjangoModelFactory):
 class OrganizationFactory(factory.django.DjangoModelFactory):
     customer = factory.SubFactory(CustomerProfileFactory)
     business_id = factory.Faker("company_business_id", locale="fi_FI")
+    organization_type = factory.Faker("random_element", elements=list(OrganizationType))
     name = factory.Faker("company")
     address = factory.Faker("street_address")
     postal_code = factory.Faker("postcode")
