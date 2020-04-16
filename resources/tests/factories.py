@@ -65,6 +65,7 @@ class AbstractAreaSectionFactory(factory.django.DjangoModelFactory):
 
 class PierFactory(AbstractAreaSectionFactory):
     harbor = factory.SubFactory(HarborFactory)
+    personal_electricity = factory.Faker("boolean")
 
     class Meta:
         model = Pier

@@ -695,6 +695,7 @@ class PierInput(AbstractAreaSectionInput):
     mooring = graphene.Boolean()
     waste_collection = graphene.Boolean()
     lighting = graphene.Boolean()
+    personal_electricity = graphene.Boolean()
 
 
 class CreatePierMutation(graphene.ClientIDMutation):

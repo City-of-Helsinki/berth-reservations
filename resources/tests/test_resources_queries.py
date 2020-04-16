@@ -96,6 +96,7 @@ def test_get_piers(api_client, berth):
                             suitableBoatTypes {
                                 name
                             }
+                            personalElectricity
                             maxWidth
                             maxLength
                             maxDepth
@@ -120,6 +121,7 @@ def test_get_piers(api_client, berth):
                         "properties": {
                             "identifier": pier.identifier,
                             "suitableBoatTypes": expected_suitables_boat_types,
+                            "personalElectricity": pier.personal_electricity,
                             "maxWidth": float(berth.berth_type.width),
                             "maxLength": float(berth.berth_type.length),
                             "maxDepth": float(berth.berth_type.depth),

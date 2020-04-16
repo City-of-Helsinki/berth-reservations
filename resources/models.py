@@ -387,6 +387,9 @@ class Pier(AbstractAreaSection):
         verbose_name=_("waste collection"), default=False
     )
     lighting = models.BooleanField(verbose_name=_("lighting"), default=False)
+    personal_electricity = models.BooleanField(
+        verbose_name=_("personal electricity contract"), default=False
+    )
 
     objects = PierManager()
 
