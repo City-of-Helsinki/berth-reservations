@@ -100,6 +100,11 @@ class BerthLease(AbstractLease):
         )
         creating = self._state.adding
         if not creating:
+            # If the berth is being changed
+            if not BerthLease.objects.filter(id=self.id, berth=self.berth).exists():
+                raise ValidationError(
+                    _("Cannot change the berth assigned to this lease")
+                )
             leases_for_given_period = leases_for_given_period.exclude(pk=self.pk)
         if leases_for_given_period.exists():
             raise ValidationError(_("Berth already has a lease"))
@@ -142,6 +147,13 @@ class WinterStorageLease(AbstractLease):
         )
         creating = self._state.adding
         if not creating:
+            # If the place is being changed
+            if not WinterStorageLease.objects.filter(
+                id=self.id, place=self.place
+            ).exists():
+                raise ValidationError(
+                    _("Cannot change the place assigned to this lease")
+                )
             existing_leases = existing_leases.exclude(pk=self.pk)
         if existing_leases.exists():
             raise ValidationError(_("WinterStoragePlace already has a lease"))
