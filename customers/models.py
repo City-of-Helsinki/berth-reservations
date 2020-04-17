@@ -2,6 +2,7 @@ import uuid
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -10,7 +11,7 @@ from enumfields import EnumField
 from resources.models import BoatType
 from utils.models import TimeStampedModel, UUIDModel
 
-from .enums import InvoicingType
+from .enums import InvoicingType, OrganizationType
 
 User = get_user_model()
 
@@ -40,14 +41,19 @@ class CustomerProfile(TimeStampedModel):
             return str(self.id)
 
 
-class Company(TimeStampedModel, UUIDModel):
+class Organization(TimeStampedModel, UUIDModel):
     customer = models.OneToOneField(
         CustomerProfile,
         verbose_name=_("customer"),
-        related_name="company",
+        related_name="organization",
         on_delete=models.CASCADE,
     )
-    business_id = models.CharField(verbose_name=_("business id"), max_length=32)
+    organization_type = EnumField(
+        OrganizationType, verbose_name=_("organization type"), max_length=16,
+    )
+    business_id = models.CharField(
+        verbose_name=_("business id"), max_length=32, blank=True
+    )
     name = models.CharField(verbose_name=_("name"), max_length=128, blank=True)
     address = models.CharField(verbose_name=_("address"), max_length=128, blank=True)
     postal_code = models.CharField(
@@ -56,12 +62,23 @@ class Company(TimeStampedModel, UUIDModel):
     city = models.CharField(verbose_name=_("city"), max_length=64, blank=True)
 
     class Meta:
-        verbose_name = _("company")
-        verbose_name_plural = _("companies")
+        verbose_name = _("organization")
+        verbose_name_plural = _("organizations")
         ordering = ("id",)
 
+    def save(self, *args, **kwargs):
+        # ensure full_clean is always ran
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        if self.organization_type == OrganizationType.COMPANY and not self.business_id:
+            raise ValidationError(_("A company must have a business id"))
+
     def __str__(self):
-        return self.business_id
+        return (
+            f"[{self.organization_type}]: {self.name} [{self.business_id}] ({self.id})"
+        )
 
 
 class Boat(TimeStampedModel, UUIDModel):

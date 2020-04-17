@@ -3,7 +3,7 @@ from django.contrib import admin
 from applications.admin import BerthApplicationInline
 from leases.admin import BerthLeaseInline
 
-from .models import Boat, Company, CustomerProfile
+from .models import Boat, CustomerProfile, Organization
 
 
 class CustomerProfileInline(admin.StackedInline):
@@ -18,8 +18,8 @@ class BoatInline(admin.StackedInline):
     extra = 0
 
 
-class CompanyInline(admin.StackedInline):
-    model = Company
+class OrganizationInline(admin.StackedInline):
+    model = Organization
     fk_name = "customer"
     extra = 0
 
@@ -28,12 +28,12 @@ class BoatAdmin(admin.ModelAdmin):
     pass
 
 
-class CompanyAdmin(admin.ModelAdmin):
+class OrganizationAdmin(admin.ModelAdmin):
     pass
 
 
 class CustomerProfileAdmin(admin.ModelAdmin):
-    inlines = (BoatInline, CompanyInline, BerthApplicationInline, BerthLeaseInline)
+    inlines = (BoatInline, OrganizationInline, BerthApplicationInline, BerthLeaseInline)
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
@@ -43,5 +43,5 @@ class CustomerProfileAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Boat, BoatAdmin)
-admin.site.register(Company, CompanyAdmin)
+admin.site.register(Organization, OrganizationAdmin)
 admin.site.register(CustomerProfile, CustomerProfileAdmin)

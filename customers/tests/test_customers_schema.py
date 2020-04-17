@@ -11,7 +11,7 @@ from leases.schema import BerthLeaseNode
 from leases.tests.factories import BerthLeaseFactory
 
 from ..schema import BerthProfileNode, BoatNode, ProfileNode
-from ..tests.factories import BoatFactory, CompanyFactory
+from ..tests.factories import BoatFactory, OrganizationFactory
 
 FEDERATED_SCHEMA_QUERY = """
     {
@@ -39,7 +39,7 @@ query($_representations: [_Any!]!) {
             id
             invoicingType
             comment
-            company {
+            organization {
                 businessId
                 name
             }
@@ -80,7 +80,7 @@ def test_query_extended_profile_nodes(api_client, customer_profile):
 
     berth_application = BerthApplicationFactory(customer=customer_profile)
     berth_lease = BerthLeaseFactory(customer=customer_profile)
-    company = CompanyFactory(customer=customer_profile)
+    organization = OrganizationFactory(customer=customer_profile)
     boat = BoatFactory(owner=customer_profile)
 
     variables = {
@@ -101,7 +101,10 @@ def test_query_extended_profile_nodes(api_client, customer_profile):
         "id": customer_profile_id,
         "invoicingType": customer_profile.invoicing_type.name,
         "comment": customer_profile.comment,
-        "company": {"businessId": company.business_id, "name": company.name},
+        "organization": {
+            "businessId": organization.business_id,
+            "name": organization.name,
+        },
         "boats": {"edges": [{"node": {"id": boat_id}}]},
         "berthApplications": {"edges": [{"node": {"id": berth_application_id}}]},
         "berthLeases": {"edges": [{"node": {"id": berth_lease_id}}]},
@@ -134,7 +137,7 @@ query GetBerthProfiles {
                 id
                 invoicingType
                 comment
-                company {
+                organization {
                     businessId
                     name
                 }
@@ -174,7 +177,7 @@ query GetBerthProfiles {
 def test_query_berth_profiles(api_client, customer_profile):
     berth_application = BerthApplicationFactory(customer=customer_profile)
     berth_lease = BerthLeaseFactory(customer=customer_profile)
-    company = CompanyFactory(customer=customer_profile)
+    organization = OrganizationFactory(customer=customer_profile)
     boat = BoatFactory(owner=customer_profile)
 
     executed = api_client.execute(QUERY_BERTH_PROFILES)
@@ -190,7 +193,10 @@ def test_query_berth_profiles(api_client, customer_profile):
         "id": customer_id,
         "invoicingType": customer_profile.invoicing_type.name,
         "comment": customer_profile.comment,
-        "company": {"businessId": company.business_id, "name": company.name},
+        "organization": {
+            "businessId": organization.business_id,
+            "name": organization.name,
+        },
         "boats": {"edges": [{"node": {"id": boat_id}}]},
         "berthApplications": {"edges": [{"node": {"id": berth_application_id}}]},
         "berthLeases": {"edges": [{"node": {"id": berth_lease_id}}]},
@@ -212,7 +218,7 @@ query GetBerthProfile {
         id
         invoicingType
         comment
-        company {
+        organization {
             businessId
             name
         }
@@ -252,7 +258,7 @@ def test_query_berth_profile(api_client, customer_profile):
 
     berth_application = BerthApplicationFactory(customer=customer_profile)
     berth_lease = BerthLeaseFactory(customer=customer_profile)
-    company = CompanyFactory(customer=customer_profile)
+    organization = OrganizationFactory(customer=customer_profile)
     boat = BoatFactory(owner=customer_profile)
 
     query = QUERY_BERTH_PROFILE % berth_profile_id
@@ -269,7 +275,10 @@ def test_query_berth_profile(api_client, customer_profile):
         "id": berth_profile_id,
         "invoicingType": customer_profile.invoicing_type.name,
         "comment": customer_profile.comment,
-        "company": {"businessId": company.business_id, "name": company.name},
+        "organization": {
+            "businessId": organization.business_id,
+            "name": organization.name,
+        },
         "boats": {"edges": [{"node": {"id": boat_id}}]},
         "berthApplications": {"edges": [{"node": {"id": berth_application_id}}]},
         "berthLeases": {"edges": [{"node": {"id": berth_lease_id}}]},
@@ -281,7 +290,7 @@ def test_query_berth_profile_self_user(customer_profile):
 
     berth_application = BerthApplicationFactory(customer=customer_profile)
     berth_lease = BerthLeaseFactory(customer=customer_profile)
-    company = CompanyFactory(customer=customer_profile)
+    organization = OrganizationFactory(customer=customer_profile)
     boat = BoatFactory(owner=customer_profile)
 
     query = QUERY_BERTH_PROFILE % berth_profile_id
@@ -299,7 +308,10 @@ def test_query_berth_profile_self_user(customer_profile):
         "id": berth_profile_id,
         "invoicingType": customer_profile.invoicing_type.name,
         "comment": customer_profile.comment,
-        "company": {"businessId": company.business_id, "name": company.name},
+        "organization": {
+            "businessId": organization.business_id,
+            "name": organization.name,
+        },
         "boats": {"edges": [{"node": {"id": boat_id}}]},
         "berthApplications": {"edges": [{"node": {"id": berth_application_id}}]},
         "berthLeases": {"edges": [{"node": {"id": berth_lease_id}}]},
