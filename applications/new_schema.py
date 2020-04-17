@@ -6,7 +6,11 @@ from graphene_django.types import DjangoObjectType
 
 from customers.models import CustomerProfile
 from leases.models import BerthLease
-from users.decorators import change_permission_required, view_permission_required
+from users.decorators import (
+    change_permission_required,
+    delete_permission_required,
+    view_permission_required,
+)
 from utils.relay import get_node_from_global_id
 
 from .enums import ApplicationStatus
@@ -121,6 +125,23 @@ class UpdateBerthApplication(graphene.ClientIDMutation):
         return UpdateBerthApplication(berth_application=application)
 
 
+class DeleteBerthApplicationMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+
+    @classmethod
+    @delete_permission_required(BerthApplication)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        application = get_node_from_global_id(
+            info, input.get("id"), only_type=BerthApplicationNode, nullable=False
+        )
+
+        application.delete()
+
+        return DeleteBerthApplicationMutation()
+
+
 class Query:
     berth_application = graphene.relay.Node.Field(BerthApplicationNode)
     berth_applications = DjangoFilterConnectionField(
@@ -163,3 +184,6 @@ class Query:
 
 class Mutation:
     update_berth_application = UpdateBerthApplication.Field()
+    delete_berth_application = DeleteBerthApplicationMutation.Field(
+        description="**Requires permissions** to delete applications."
+    )
