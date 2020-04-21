@@ -110,7 +110,7 @@ class WinterStoragePlaceTypeFactory(AbstractPlaceTypeFactory):
 
 
 class AbstractPlaceFactory(factory.django.DjangoModelFactory):
-    number = factory.LazyFunction(lambda: str(randgen.randint(1, 999)).zfill(2))
+    number = factory.Faker("random_int")
 
 
 class BerthFactory(AbstractPlaceFactory):

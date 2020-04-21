@@ -92,7 +92,7 @@ def test_query_berth_leases(api_client, berth_lease, berth_application):
         "application": {"id": berth_application_id, "customer": {"id": customer_id}},
         "berth": {
             "id": to_global_id(BerthNode._meta.name, berth_lease.berth.id),
-            "number": str(berth_lease.berth.number),
+            "number": berth_lease.berth.number,
             "berthType": {"id": berth_type_id},
         },
     }
@@ -185,7 +185,7 @@ def test_query_berth_lease(api_client, berth_lease, berth_application):
         "application": {"id": berth_application_id, "customer": {"id": customer_id}},
         "berth": {
             "id": to_global_id(BerthNode._meta.name, berth_lease.berth.id),
-            "number": str(berth_lease.berth.number),
+            "number": berth_lease.berth.number,
             "berthType": {"id": berth_type_id},
         },
     }
