@@ -100,10 +100,22 @@ class BerthLease(AbstractLease):
         )
         creating = self._state.adding
         if not creating:
+            old_instance = BerthLease.objects.get(id=self.id)
             # If the berth is being changed
-            if not BerthLease.objects.filter(id=self.id, berth=self.berth).exists():
+            if old_instance.berth != self.berth:
                 raise ValidationError(
                     _("Cannot change the berth assigned to this lease")
+                )
+            # If the application is being changed, it has to belong to the same customer
+            if (
+                self.application
+                and old_instance.application
+                and old_instance.application.customer != self.application.customer
+            ):
+                raise ValidationError(
+                    _(
+                        "Cannot change the application to one which belongs to another customer"
+                    )
                 )
             leases_for_given_period = leases_for_given_period.exclude(pk=self.pk)
         if leases_for_given_period.exists():

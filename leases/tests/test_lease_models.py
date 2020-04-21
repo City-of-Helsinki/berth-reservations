@@ -5,6 +5,8 @@ from dateutil.utils import today
 from django.core.exceptions import ValidationError
 from freezegun import freeze_time
 
+from applications.tests.factories import BerthApplicationFactory
+from berth_reservations.tests.factories import CustomerProfileFactory
 from customers.tests.factories import BoatFactory
 
 from ..enums import LeaseStatus
@@ -207,6 +209,52 @@ def test_berth_lease_cannot_update_berth(berth_lease, berth):
         berth_lease.save()
 
     assert "Cannot change the berth assigned to this lease" in str(exception.value)
+
+
+def test_berth_lease_update_application(berth_lease, customer_profile):
+    first_application = BerthApplicationFactory(customer=customer_profile)
+    second_application = BerthApplicationFactory(customer=customer_profile)
+
+    berth_lease.application = first_application
+    berth_lease.save()
+
+    assert BerthLease.objects.get(id=berth_lease.id).application == first_application
+
+    berth_lease.application = second_application
+    berth_lease.save()
+
+    assert BerthLease.objects.get(id=berth_lease.id).application == second_application
+
+
+def test_berth_lease_remove_application(berth_lease, berth_application):
+    berth_lease.application = berth_application
+    berth_lease.save()
+
+    assert BerthLease.objects.get(id=berth_lease.id).application == berth_application
+
+    berth_lease.application = None
+    berth_lease.save()
+
+    assert BerthLease.objects.get(id=berth_lease.id).application is None
+
+
+def test_berth_lease_update_application_different_customer(berth_lease):
+    first_application = BerthApplicationFactory(customer=CustomerProfileFactory())
+    second_application = BerthApplicationFactory(customer=CustomerProfileFactory())
+
+    berth_lease.application = first_application
+    berth_lease.save()
+
+    assert BerthLease.objects.get(id=berth_lease.id).application == first_application
+
+    with pytest.raises(ValidationError) as exception:
+        berth_lease.application = second_application
+        berth_lease.save()
+
+    assert (
+        "Cannot change the application to one which belongs to another customer"
+        in str(exception.value)
+    )
 
 
 def test_winter_storage_lease_cannot_update_place(

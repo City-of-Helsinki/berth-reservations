@@ -2,6 +2,7 @@ import uuid
 from random import randint
 
 import pytest
+from dateutil.utils import today
 from freezegun import freeze_time
 from graphql_relay import to_global_id
 
@@ -167,7 +168,11 @@ def test_create_berth_lease_application_doesnt_exist(superuser_api_client, berth
     assert_doesnt_exist("BerthApplication", executed)
 
 
-def test_create_berth_lease_berth_doesnt_exist(superuser_api_client, berth_application):
+def test_create_berth_lease_berth_doesnt_exist(
+    superuser_api_client, berth_application, customer_profile
+):
+    berth_application.customer = customer_profile
+    berth_application.save()
     variables = {
         "applicationId": to_global_id(
             BerthApplicationNode._meta.name, berth_application.id
@@ -322,3 +327,156 @@ def test_delete_berth_lease_inexistent_lease(superuser_api_client):
     )
 
     assert_doesnt_exist("BerthLease", executed)
+
+
+UPDATE_BERTH_LEASE_MUTATION = """
+mutation UpdateBerthLease($input: UpdateBerthLeaseMutationInput!) {
+    updateBerthLease(input:$input){
+        berthLease {
+            id
+            startDate
+            endDate
+            comment
+            boat {
+                id
+            }
+            application {
+                id
+                customer {
+                    id
+                }
+            }
+        }
+    }
+}
+"""
+
+
+@freeze_time("2020-01-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_update_berth_lease_all_fields(
+    api_client, berth_lease, berth_application, boat, customer_profile
+):
+    berth_lease_id = to_global_id(BerthLeaseNode._meta.name, berth_lease.id)
+    application_id = to_global_id(BerthApplicationNode._meta.name, berth_application.id)
+    boat_id = to_global_id(BoatNode._meta.name, boat.id)
+
+    berth_application.customer = customer_profile
+    berth_application.save()
+    boat.owner = customer_profile
+    boat.save()
+
+    start_date = today()
+    end_date = start_date.replace(month=start_date.month + 3)
+
+    variables = {
+        "id": berth_lease_id,
+        "startDate": start_date,
+        "endDate": end_date,
+        "comment": "",
+        "boatId": boat_id,
+        "applicationId": application_id,
+    }
+
+    executed = api_client.execute(UPDATE_BERTH_LEASE_MUTATION, input=variables)
+    assert executed["data"]["updateBerthLease"]["berthLease"] == {
+        "id": berth_lease_id,
+        "startDate": str(variables["startDate"].date()),
+        "endDate": str(variables["endDate"].date()),
+        "comment": variables["comment"],
+        "boat": {"id": boat_id},
+        "application": {
+            "id": application_id,
+            "customer": {
+                "id": to_global_id(
+                    ProfileNode._meta.name, berth_application.customer.id
+                ),
+            },
+        },
+    }
+
+
+@freeze_time("2020-01-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_update_berth_lease_remove_application(
+    api_client, berth_lease, berth_application
+):
+    berth_lease_id = to_global_id(BerthLeaseNode._meta.name, berth_lease.id)
+    boat_id = to_global_id(BoatNode._meta.name, berth_lease.boat.id)
+    berth_lease.application = berth_application
+    berth_lease.save()
+
+    variables = {
+        "id": berth_lease_id,
+        "applicationId": None,
+    }
+
+    executed = api_client.execute(UPDATE_BERTH_LEASE_MUTATION, input=variables)
+    assert executed["data"]["updateBerthLease"]["berthLease"] == {
+        "id": berth_lease_id,
+        "startDate": str(berth_lease.start_date),
+        "endDate": str(berth_lease.end_date),
+        "comment": berth_lease.comment,
+        "boat": {"id": boat_id},
+        "application": None,
+    }
+
+
+def test_update_berth_lease_application_doesnt_exist(superuser_api_client, berth_lease):
+    variables = {
+        "id": to_global_id(BerthLeaseNode._meta.name, berth_lease.id),
+        "applicationId": to_global_id(BerthApplicationNode._meta.name, randint(0, 999)),
+    }
+
+    executed = superuser_api_client.execute(
+        UPDATE_BERTH_LEASE_MUTATION, input=variables,
+    )
+
+    assert_doesnt_exist("BerthApplication", executed)
+
+
+def test_update_berth_lease_application_without_customer(
+    superuser_api_client, berth_lease, berth_application
+):
+    berth_application.customer = None
+    berth_application.save()
+
+    variables = {
+        "id": to_global_id(BerthLeaseNode._meta.name, berth_lease.id),
+        "applicationId": to_global_id(
+            BerthApplicationNode._meta.name, berth_application.id
+        ),
+    }
+
+    executed = superuser_api_client.execute(
+        UPDATE_BERTH_LEASE_MUTATION, input=variables,
+    )
+
+    assert_in_errors(
+        "Application must be connected to an existing customer first", executed
+    )
+
+
+def test_update_berth_lease_application_already_has_lease(
+    superuser_api_client, berth_application, berth_lease, customer_profile,
+):
+    BerthLeaseFactory(application=berth_application)
+    berth_application.customer = customer_profile
+    berth_application.save()
+
+    variables = {
+        "id": to_global_id(BerthLeaseNode._meta.name, berth_lease.id),
+        "applicationId": to_global_id(
+            BerthApplicationNode._meta.name, berth_application.id
+        ),
+    }
+
+    executed = superuser_api_client.execute(
+        UPDATE_BERTH_LEASE_MUTATION, input=variables,
+    )
+
+    assert_in_errors("Berth lease with this Application already exists", executed)
