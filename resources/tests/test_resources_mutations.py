@@ -44,7 +44,7 @@ mutation CreateBerth($input: CreateBerthMutationInput!) {
 )
 def test_create_berth(pier, berth_type, api_client):
     variables = {
-        "number": "9999",
+        "number": 9999,
         "comment": "foobar",
         "pierId": to_global_id(PierNode._meta.name, str(pier.id)),
         "berthTypeId": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
@@ -60,7 +60,7 @@ def test_create_berth(pier, berth_type, api_client):
 
     assert executed["data"]["createBerth"]["berth"] == {
         "comment": "foobar",
-        "number": "9999",
+        "number": 9999,
         "isAccessible": None,
         "isActive": False,
     }
@@ -73,7 +73,7 @@ def test_create_berth(pier, berth_type, api_client):
 )
 def test_create_berth_not_enough_permissions(api_client, pier, berth_type):
     variables = {
-        "number": "9999",
+        "number": 9999,
         "comment": "foobar",
         "pierId": to_global_id(PierNode._meta.name, str(pier.id)),
         "berthTypeId": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
@@ -210,7 +210,7 @@ def test_update_berth(berth, pier, berth_type, api_client):
 
     variables = {
         "id": global_id,
-        "number": "666",
+        "number": 666,
         "comment": "foobar",
         "isAccessible": True,
         "pierId": pier_id,
@@ -226,7 +226,7 @@ def test_update_berth(berth, pier, berth_type, api_client):
     assert executed["data"]["updateBerth"]["berth"] == {
         "id": global_id,
         "comment": variables["comment"],
-        "number": "666",
+        "number": 666,
         "isAccessible": variables["isAccessible"],
         "pier": {"id": variables["pierId"]},
         "berthType": {"id": variables["berthTypeId"]},
@@ -239,7 +239,7 @@ def test_update_berth_no_id(berth, pier, berth_type, superuser_api_client):
     berth_type_id = to_global_id(BerthTypeNode._meta.name, str(berth_type.id))
 
     variables = {
-        "number": "666",
+        "number": 666,
         "comment": "foobar",
         "pierId": pier_id,
         "berthTypeId": berth_type_id,
@@ -263,7 +263,7 @@ def test_update_berth_not_enough_permissions(api_client, berth, pier, berth_type
     berth_type_id = to_global_id(BerthTypeNode._meta.name, str(berth_type.id))
 
     variables = {
-        "number": "666",
+        "number": 666,
         "comment": "foobar",
         "pierId": pier_id,
         "berthTypeId": berth_type_id,
