@@ -1,3 +1,4 @@
+import random
 import uuid
 
 import pytest
@@ -14,6 +15,7 @@ from berth_reservations.tests.utils import (
 )
 from leases.enums import LeaseStatus
 from leases.tests.factories import BerthLeaseFactory
+from resources.enums import BerthMooringType
 from resources.models import (
     Berth,
     BerthType,
@@ -33,6 +35,12 @@ mutation CreateBerth($input: CreateBerthMutationInput!) {
             comment
             isAccessible
             isActive
+            berthType {
+                 id
+                 width
+                 length
+                 mooringType
+            }
         }
     }
 }
@@ -43,11 +51,12 @@ mutation CreateBerth($input: CreateBerthMutationInput!) {
     "api_client", ["harbor_services", "berth_services"], indirect=True,
 )
 def test_create_berth(pier, berth_type, api_client):
+    berth_type_id = to_global_id(BerthTypeNode._meta.name, str(berth_type.id))
     variables = {
         "number": 9999,
         "comment": "foobar",
         "pierId": to_global_id(PierNode._meta.name, str(pier.id)),
-        "berthTypeId": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
+        "berthTypeId": berth_type_id,
         "isActive": False,
     }
 
@@ -63,6 +72,85 @@ def test_create_berth(pier, berth_type, api_client):
         "number": 9999,
         "isAccessible": None,
         "isActive": False,
+        "berthType": {
+            "id": berth_type_id,
+            "width": float(berth_type.width),
+            "length": float(berth_type.length),
+            "mooringType": berth_type.mooring_type.name,
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_create_berth_new_berth_type(pier, api_client):
+    variables = {
+        "number": 9999,
+        "comment": "foobar",
+        "pierId": to_global_id(PierNode._meta.name, str(pier.id)),
+        "isActive": False,
+        "width": round(random.uniform(1.5, 99.0), 2),
+        "length": round(random.uniform(1.5, 99.0), 2),
+        "mooringType": random.choice(list(BerthMooringType)).name,
+    }
+
+    assert Berth.objects.count() == 0
+
+    executed = api_client.execute(CREATE_BERTH_MUTATION, input=variables)
+
+    assert Berth.objects.count() == 1
+    assert executed["data"]["createBerth"]["berth"].pop("id") is not None
+    assert executed["data"]["createBerth"]["berth"]["berthType"].pop("id") is not None
+
+    assert executed["data"]["createBerth"]["berth"] == {
+        "comment": "foobar",
+        "number": 9999,
+        "isAccessible": None,
+        "isActive": False,
+        "berthType": {
+            "width": variables["width"],
+            "length": variables["length"],
+            "mooringType": variables["mooringType"],
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_create_berth_existing_berth_type(pier, api_client, berth_type):
+    variables = {
+        "number": 9999,
+        "comment": "foobar",
+        "pierId": to_global_id(PierNode._meta.name, str(pier.id)),
+        "isActive": False,
+        "width": float(berth_type.width),
+        "length": float(berth_type.length),
+        "mooringType": berth_type.mooring_type.name,
+    }
+
+    assert Berth.objects.count() == 0
+    assert BerthType.objects.count() == 1
+
+    executed = api_client.execute(CREATE_BERTH_MUTATION, input=variables)
+
+    # Check that no more BerthTypes were created
+    assert BerthType.objects.count() == 1
+    assert Berth.objects.count() == 1
+    assert executed["data"]["createBerth"]["berth"].pop("id") is not None
+
+    assert executed["data"]["createBerth"]["berth"] == {
+        "comment": "foobar",
+        "number": 9999,
+        "isAccessible": None,
+        "isActive": False,
+        "berthType": {
+            "id": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
+            "width": variables["width"],
+            "length": variables["length"],
+            "mooringType": variables["mooringType"],
+        },
     }
 
 
@@ -99,6 +187,46 @@ def test_create_berth_no_number(pier, berth_type, superuser_api_client):
 
     assert Berth.objects.count() == 0
     assert_field_missing("number", executed)
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_create_berth_berth_type_id_and_params(api_client, pier, berth_type):
+    variables = {
+        "number": 9999,
+        "pierId": to_global_id(PierNode._meta.name, str(pier.id)),
+        "berthTypeId": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
+        "width": round(random.uniform(1.5, 99.0), 2),
+        "length": round(random.uniform(1.5, 99.0), 2),
+        "mooringType": random.choice(list(BerthMooringType)).name,
+    }
+
+    assert Berth.objects.count() == 0
+
+    executed = api_client.execute(CREATE_BERTH_MUTATION, input=variables)
+
+    assert Berth.objects.count() == 0
+    assert_in_errors("Cannot receive BerthType and dimensions", executed)
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_create_berth_missing_berth_type_params(api_client, pier, berth_type):
+    variables = {
+        "number": 9999,
+        "pierId": to_global_id(PierNode._meta.name, str(pier.id)),
+        "width": float(berth_type.width),
+        "length": float(berth_type.length),
+    }
+
+    assert Berth.objects.count() == 0
+
+    executed = api_client.execute(CREATE_BERTH_MUTATION, input=variables)
+
+    assert Berth.objects.count() == 0
+    assert_in_errors("Missing fields to associate a BerthType", executed)
 
 
 DELETE_BERTH_MUTATION = """
@@ -193,6 +321,9 @@ mutation UpdateBerth($input: UpdateBerthMutationInput!) {
             }
             berthType {
                 id
+                 width
+                 length
+                 mooringType
             }
         }
     }
@@ -203,10 +334,9 @@ mutation UpdateBerth($input: UpdateBerthMutationInput!) {
 @pytest.mark.parametrize(
     "api_client", ["harbor_services", "berth_services"], indirect=True,
 )
-def test_update_berth(berth, pier, berth_type, api_client):
+def test_update_berth(berth, pier, api_client):
     global_id = to_global_id(BerthNode._meta.name, str(berth.id))
     pier_id = to_global_id(PierNode._meta.name, str(pier.id))
-    berth_type_id = to_global_id(BerthTypeNode._meta.name, str(berth_type.id))
 
     variables = {
         "id": global_id,
@@ -214,7 +344,6 @@ def test_update_berth(berth, pier, berth_type, api_client):
         "comment": "foobar",
         "isAccessible": True,
         "pierId": pier_id,
-        "berthTypeId": berth_type_id,
         "isActive": False,
     }
 
@@ -229,8 +358,92 @@ def test_update_berth(berth, pier, berth_type, api_client):
         "number": 666,
         "isAccessible": variables["isAccessible"],
         "pier": {"id": variables["pierId"]},
-        "berthType": {"id": variables["berthTypeId"]},
         "isActive": variables["isActive"],
+        "berthType": {
+            "id": to_global_id(BerthTypeNode._meta.name, berth.berth_type.id),
+            "width": float(berth.berth_type.width),
+            "length": float(berth.berth_type.length),
+            "mooringType": berth.berth_type.mooring_type.name,
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_update_berth_existing_berth_type(berth, pier, berth_type, api_client):
+    global_id = to_global_id(BerthNode._meta.name, str(berth.id))
+    berth_type_id = to_global_id(BerthTypeNode._meta.name, str(berth_type.id))
+
+    variables = {
+        "id": global_id,
+        "berthTypeId": berth_type_id,
+    }
+
+    assert berth.berth_type != berth_type
+    assert Berth.objects.count() == 1
+    assert BerthType.objects.count() == 2
+
+    executed = api_client.execute(UPDATE_BERTH_MUTATION, input=variables)
+
+    assert Berth.objects.count() == 1
+    assert BerthType.objects.count() == 2
+
+    assert executed["data"]["updateBerth"]["berth"] == {
+        "id": global_id,
+        "comment": berth.comment,
+        "number": berth.number,
+        "isAccessible": berth.is_accessible,
+        "pier": {"id": to_global_id(PierNode._meta.name, berth.pier.id)},
+        "isActive": berth.is_active,
+        "berthType": {
+            "id": variables["berthTypeId"],
+            "width": float(berth_type.width),
+            "length": float(berth_type.length),
+            "mooringType": berth_type.mooring_type.name,
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_update_berth_new_berth_type(berth, pier, api_client):
+    global_id = to_global_id(BerthNode._meta.name, str(berth.id))
+
+    variables = {
+        "id": global_id,
+        "width": round(random.uniform(1.5, 99.0), 2),
+        "length": round(random.uniform(1.5, 99.0), 2),
+        "mooringType": random.choice(list(BerthMooringType)).name,
+    }
+
+    assert Berth.objects.count() == 1
+    assert BerthType.objects.count() == 1
+
+    executed = api_client.execute(UPDATE_BERTH_MUTATION, input=variables)
+
+    assert Berth.objects.count() == 1
+    assert BerthType.objects.count() == 2
+
+    berth_type_id = executed["data"]["updateBerth"]["berth"]["berthType"].pop("id")
+    assert berth_type_id is not None
+    assert berth_type_id != to_global_id(
+        BerthTypeNode._meta.name, str(berth.berth_type.id)
+    )
+
+    assert executed["data"]["updateBerth"]["berth"] == {
+        "id": global_id,
+        "comment": berth.comment,
+        "number": berth.number,
+        "isAccessible": berth.is_accessible,
+        "pier": {"id": to_global_id(PierNode._meta.name, berth.pier.id)},
+        "isActive": berth.is_active,
+        "berthType": {
+            "width": variables["width"],
+            "length": variables["length"],
+            "mooringType": variables["mooringType"],
+        },
     }
 
 
@@ -274,6 +487,48 @@ def test_update_berth_not_enough_permissions(api_client, berth, pier, berth_type
 
     assert Berth.objects.count() == 1
     assert_not_enough_permissions(executed)
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_update_berth_berth_type_id_and_params(api_client, berth, berth_type):
+    variables = {
+        "id": to_global_id(BerthNode._meta.name, str(berth.id)),
+        "berthTypeId": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
+        "width": round(random.uniform(1.5, 99.0), 2),
+        "length": round(random.uniform(1.5, 99.0), 2),
+        "mooringType": random.choice(list(BerthMooringType)).name,
+    }
+
+    assert Berth.objects.count() == 1
+    assert BerthType.objects.count() == 2
+
+    executed = api_client.execute(UPDATE_BERTH_MUTATION, input=variables)
+
+    assert Berth.objects.count() == 1
+    assert BerthType.objects.count() == 2
+    assert_in_errors("Cannot receive BerthType and dimensions", executed)
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_update_berth_missing_berth_type_params(api_client, berth):
+    variables = {
+        "id": to_global_id(BerthNode._meta.name, str(berth.id)),
+        "width": round(random.uniform(1, 9.99), 2),
+        "length": round(random.uniform(1, 9.99), 2),
+    }
+
+    assert Berth.objects.count() == 1
+    assert BerthType.objects.count() == 1
+
+    executed = api_client.execute(UPDATE_BERTH_MUTATION, input=variables)
+
+    assert Berth.objects.count() == 1
+    assert BerthType.objects.count() == 1
+    assert_in_errors("Missing fields to associate a BerthType", executed)
 
 
 CREATE_BERTH_TYPE_MUTATION = """
