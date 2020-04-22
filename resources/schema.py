@@ -435,15 +435,46 @@ class AbstractBoatPlaceInput:
 
 
 class BerthInput(AbstractBoatPlaceInput):
+    pier_id = graphene.ID()
     comment = graphene.String()
     is_accessible = graphene.Boolean()
+    berth_type_id = graphene.ID()
+    width = graphene.Float()
+    length = graphene.Float()
+    mooring_type = BerthMooringTypeEnum()
+
+
+def get_berth_type(info, input):
+    berth_type = None
+    berth_type_id = input.pop("berth_type_id", None)
+    width = input.pop("width", None)
+    length = input.pop("length", None)
+    mooring_type = input.pop("mooring_type", None)
+    berth_type_params = [width, length, mooring_type]
+
+    # Cannot have both fields at the same time
+    if berth_type_id and any(berth_type_params):
+        raise VenepaikkaGraphQLError(_("Cannot receive BerthType and dimensions"))
+
+    if berth_type_id:
+        berth_type = get_node_from_global_id(
+            info, berth_type_id, only_type=BerthTypeNode, nullable=False,
+        )
+    elif any(berth_type_params):
+        if all(berth_type_params):
+            berth_type, created = BerthType.objects.get_or_create(
+                width=width, length=length, mooring_type=mooring_type
+            )
+        else:
+            raise VenepaikkaGraphQLError(_("Missing fields to associate a BerthType"))
+
+    return berth_type
 
 
 class CreateBerthMutation(graphene.ClientIDMutation):
     class Input(BerthInput):
         number = graphene.String(required=True)
         pier_id = graphene.ID(required=True)
-        berth_type_id = graphene.ID(required=True)
 
     berth = graphene.Field(BerthNode)
 
@@ -451,13 +482,10 @@ class CreateBerthMutation(graphene.ClientIDMutation):
     @add_permission_required(Berth)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
+        input["berth_type"] = get_berth_type(info, input)
         input["pier"] = get_node_from_global_id(
             info, input.pop("pier_id"), only_type=PierNode, nullable=False,
         )
-        input["berth_type"] = get_node_from_global_id(
-            info, input.pop("berth_type_id"), only_type=BerthTypeNode, nullable=False,
-        )
-
         berth = Berth.objects.create(**input)
         return CreateBerthMutation(berth=berth)
 
@@ -465,8 +493,6 @@ class CreateBerthMutation(graphene.ClientIDMutation):
 class UpdateBerthMutation(graphene.ClientIDMutation):
     class Input(BerthInput):
         id = graphene.ID(required=True)
-        pier_id = graphene.ID()
-        berth_type_id = graphene.ID()
 
     berth = graphene.Field(BerthNode)
 
@@ -474,6 +500,12 @@ class UpdateBerthMutation(graphene.ClientIDMutation):
     @change_permission_required(Berth)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
+        # Check if the field should be updated
+        if input.get("berth_type_id") or any(
+            [input.get("width"), input.get("depth"), input.get("mooring_type")]
+        ):
+            input["berth_type"] = get_berth_type(info, input)
+
         berth = get_node_from_global_id(
             info, input.pop("id"), only_type=BerthNode, nullable=False,
         )
@@ -481,14 +513,6 @@ class UpdateBerthMutation(graphene.ClientIDMutation):
         if input.get("pier_id"):
             input["pier"] = get_node_from_global_id(
                 info, input.pop("pier_id"), only_type=PierNode, nullable=False,
-            )
-
-        if input.get("berth_type_id"):
-            input["berth_type"] = get_node_from_global_id(
-                info,
-                input.pop("berth_type_id"),
-                only_type=BerthTypeNode,
-                nullable=False,
             )
 
         update_object(berth, input)
@@ -929,9 +953,30 @@ class Query:
 
 class Mutation:
     # Berths
-    create_berth = CreateBerthMutation.Field()
-    delete_berth = DeleteBerthMutation.Field()
-    update_berth = UpdateBerthMutation.Field()
+    create_berth = CreateBerthMutation.Field(
+        description="Creates a `Berth` object."
+        "\n\n**Requires permissions** to create resources."
+        "\n\nIt can receive either a `BerthType` ID or dimensions and `BerthMooringType`. "
+        "If dimensions are passed, it will try to find an existing `BerthType` that fits. "
+        "Otherwise, it will create a new `BerthType`."
+        "\n\nErrors:"
+        "\n* Both BerthType ID and BerthType dimensions are passed"
+        "\n* BerthType dimensions or BerthMooringType are missing"
+    )
+    delete_berth = DeleteBerthMutation.Field(
+        description="Deletes a `Berth` object."
+        "\n\n**Requires permissions** to remove resources."
+    )
+    update_berth = UpdateBerthMutation.Field(
+        description="Updates a `Berth` object."
+        "\n\n**Requires permissions** to edit resources."
+        "\n\nIt can receive either a `BerthType` ID or dimensions and `BerthMooringType`. "
+        "If dimensions are passed, it will try to find an existing `BerthType` that fits. "
+        "Otherwise, it will create a new `BerthType`."
+        "\n\nErrors:"
+        "\n* Both BerthType ID and BerthType dimensions are passed"
+        "\n* BerthType dimensions or BerthMooringType are missing"
+    )
 
     # BerthType
     create_berth_type = CreateBerthTypeMutation.Field()
