@@ -134,6 +134,7 @@ class Boat(TimeStampedModel, UUIDModel):
     hull_material = models.CharField(
         verbose_name=_("hull material"), max_length=64, blank=True
     )
+    intended_use = models.TextField(verbose_name=_("intended use"), blank=True)
 
     boat_is_inspected = models.BooleanField(
         verbose_name=_("boat is inspected"), null=True, blank=True
