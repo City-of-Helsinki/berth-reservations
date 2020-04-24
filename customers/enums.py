@@ -24,3 +24,12 @@ class OrganizationType(Enum):
         INTERNAL = _("Internal")
         NON_BILLABLE = _("Non-billable")
         OTHER = _("Other")
+
+
+class BoatCertificateType(Enum):
+    INSPECTION = "inspection"
+    INSURANCE = "insurance"
+
+    class Labels:
+        INSPECTION = _("Inspection")
+        INSURANCE = _("Insurance")

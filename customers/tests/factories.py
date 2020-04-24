@@ -3,8 +3,8 @@ import factory
 from berth_reservations.tests.factories import CustomerProfileFactory
 from resources.tests.factories import BoatTypeFactory
 
-from ..enums import OrganizationType
-from ..models import Boat, Organization
+from ..enums import BoatCertificateType, OrganizationType
+from ..models import Boat, BoatCertificate, Organization
 
 
 class BoatFactory(factory.django.DjangoModelFactory):
@@ -18,6 +18,16 @@ class BoatFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Boat
+
+
+class BoatCertificateFactory(factory.django.DjangoModelFactory):
+    boat = factory.SubFactory(BoatFactory)
+    certificate_type = factory.Faker(
+        "random_element", elements=list(BoatCertificateType)
+    )
+
+    class Meta:
+        model = BoatCertificate
 
 
 class OrganizationFactory(factory.django.DjangoModelFactory):
