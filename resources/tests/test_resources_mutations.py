@@ -39,6 +39,7 @@ mutation CreateBerth($input: CreateBerthMutationInput!) {
                  id
                  width
                  length
+                 depth
                  mooringType
             }
         }
@@ -76,6 +77,7 @@ def test_create_berth(pier, berth_type, api_client):
             "id": berth_type_id,
             "width": float(berth_type.width),
             "length": float(berth_type.length),
+            "depth": float(berth_type.depth),
             "mooringType": berth_type.mooring_type.name,
         },
     }
@@ -92,6 +94,7 @@ def test_create_berth_new_berth_type(pier, api_client):
         "isActive": False,
         "width": round(random.uniform(1.5, 99.0), 2),
         "length": round(random.uniform(1.5, 99.0), 2),
+        "depth": round(random.uniform(1.5, 99.0), 2),
         "mooringType": random.choice(list(BerthMooringType)).name,
     }
 
@@ -111,6 +114,7 @@ def test_create_berth_new_berth_type(pier, api_client):
         "berthType": {
             "width": variables["width"],
             "length": variables["length"],
+            "depth": variables["depth"],
             "mooringType": variables["mooringType"],
         },
     }
@@ -127,6 +131,7 @@ def test_create_berth_existing_berth_type(pier, api_client, berth_type):
         "isActive": False,
         "width": float(berth_type.width),
         "length": float(berth_type.length),
+        "depth": float(berth_type.depth),
         "mooringType": berth_type.mooring_type.name,
     }
 
@@ -149,6 +154,7 @@ def test_create_berth_existing_berth_type(pier, api_client, berth_type):
             "id": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
             "width": variables["width"],
             "length": variables["length"],
+            "depth": variables["depth"],
             "mooringType": variables["mooringType"],
         },
     }
@@ -199,6 +205,7 @@ def test_create_berth_berth_type_id_and_params(api_client, pier, berth_type):
         "berthTypeId": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
         "width": round(random.uniform(1.5, 99.0), 2),
         "length": round(random.uniform(1.5, 99.0), 2),
+        "depth": round(random.uniform(1.5, 99.0), 2),
         "mooringType": random.choice(list(BerthMooringType)).name,
     }
 
@@ -323,6 +330,7 @@ mutation UpdateBerth($input: UpdateBerthMutationInput!) {
                 id
                  width
                  length
+                 depth
                  mooringType
             }
         }
@@ -363,6 +371,7 @@ def test_update_berth(berth, pier, api_client):
             "id": to_global_id(BerthTypeNode._meta.name, berth.berth_type.id),
             "width": float(berth.berth_type.width),
             "length": float(berth.berth_type.length),
+            "depth": float(berth.berth_type.depth),
             "mooringType": berth.berth_type.mooring_type.name,
         },
     }
@@ -400,6 +409,7 @@ def test_update_berth_existing_berth_type(berth, pier, berth_type, api_client):
             "id": variables["berthTypeId"],
             "width": float(berth_type.width),
             "length": float(berth_type.length),
+            "depth": float(berth_type.depth),
             "mooringType": berth_type.mooring_type.name,
         },
     }
@@ -415,6 +425,7 @@ def test_update_berth_new_berth_type(berth, pier, api_client):
         "id": global_id,
         "width": round(random.uniform(1.5, 99.0), 2),
         "length": round(random.uniform(1.5, 99.0), 2),
+        "depth": round(random.uniform(1.5, 99.0), 2),
         "mooringType": random.choice(list(BerthMooringType)).name,
     }
 
@@ -442,6 +453,7 @@ def test_update_berth_new_berth_type(berth, pier, api_client):
         "berthType": {
             "width": variables["width"],
             "length": variables["length"],
+            "depth": variables["depth"],
             "mooringType": variables["mooringType"],
         },
     }
@@ -498,6 +510,7 @@ def test_update_berth_berth_type_id_and_params(api_client, berth, berth_type):
         "berthTypeId": to_global_id(BerthTypeNode._meta.name, str(berth_type.id)),
         "width": round(random.uniform(1.5, 99.0), 2),
         "length": round(random.uniform(1.5, 99.0), 2),
+        "depth": round(random.uniform(1.5, 99.0), 2),
         "mooringType": random.choice(list(BerthMooringType)).name,
     }
 
@@ -519,6 +532,7 @@ def test_update_berth_missing_berth_type_params(api_client, berth):
         "id": to_global_id(BerthNode._meta.name, str(berth.id)),
         "width": round(random.uniform(1, 9.99), 2),
         "length": round(random.uniform(1, 9.99), 2),
+        "depth": round(random.uniform(1, 9.99), 2),
     }
 
     assert Berth.objects.count() == 1
@@ -550,26 +564,25 @@ mutation CreateBerthTypeMutation($input: CreateBerthTypeMutationInput!) {
     "api_client", ["harbor_services", "berth_services"], indirect=True,
 )
 def test_create_berth_type(api_client):
-    variables = {"mooringType": "DINGHY_PLACE", "width": 66.6, "length": 33.3}
+    variables = {
+        "mooringType": "DINGHY_PLACE",
+        "width": round(random.uniform(1.5, 99.0), 2),
+        "length": round(random.uniform(1.5, 99.0), 2),
+        "depth": round(random.uniform(1.5, 99.0), 2),
+    }
 
     assert BerthType.objects.count() == 0
 
     executed = api_client.execute(CREATE_BERTH_TYPE_MUTATION, input=variables)
 
     assert BerthType.objects.count() == 1
-    assert executed["data"]["createBerthType"]["berthType"]["id"] is not None
-    assert (
-        executed["data"]["createBerthType"]["berthType"]["mooringType"]
-        == variables["mooringType"]
-    )
-    assert (
-        executed["data"]["createBerthType"]["berthType"]["width"] == variables["width"]
-    )
-    assert (
-        executed["data"]["createBerthType"]["berthType"]["length"]
-        == variables["length"]
-    )
-    assert executed["data"]["createBerthType"]["berthType"]["depth"] is None
+    assert executed["data"]["createBerthType"]["berthType"].pop("id") is not None
+    assert executed["data"]["createBerthType"]["berthType"] == {
+        "mooringType": variables["mooringType"],
+        "width": variables["width"],
+        "length": variables["length"],
+        "depth": variables["depth"],
+    }
 
 
 @pytest.mark.parametrize(
@@ -578,7 +591,12 @@ def test_create_berth_type(api_client):
     indirect=True,
 )
 def test_create_berth_type_not_enough_permissions(api_client):
-    variables = {"mooringType": "DINGHY_PLACE", "width": 66.6, "length": 33.3}
+    variables = {
+        "mooringType": "DINGHY_PLACE",
+        "width": round(random.uniform(1.5, 99.0), 2),
+        "length": round(random.uniform(1.5, 99.0), 2),
+        "depth": round(random.uniform(1.5, 99.0), 2),
+    }
 
     assert BerthType.objects.count() == 0
 
@@ -589,7 +607,12 @@ def test_create_berth_type_not_enough_permissions(api_client):
 
 
 def test_create_berth_type_invalid_mooring(superuser_api_client):
-    variables = {"mooringType": "INVALID_VALUE", "width": 666, "length": 333}
+    variables = {
+        "mooringType": "INVALID_VALUE",
+        "width": round(random.uniform(1.5, 99.0), 2),
+        "length": round(random.uniform(1.5, 99.0), 2),
+        "depth": round(random.uniform(1.5, 99.0), 2),
+    }
 
     assert BerthType.objects.count() == 0
 
@@ -675,9 +698,9 @@ def test_update_berth_type(berth_type, api_client):
 
     variables = {
         "id": global_id,
-        "width": 99.9,
-        "length": 99.9,
-        "depth": 99.9,
+        "width": round(random.uniform(1.5, 99.0), 2),
+        "length": round(random.uniform(1.5, 99.0), 2),
+        "depth": round(random.uniform(1.5, 99.0), 2),
         "mooringType": "QUAYSIDE_MOORING",
     }
 
@@ -705,8 +728,9 @@ def test_update_berth_type(berth_type, api_client):
 
 def test_update_berth_type_no_id(superuser_api_client, berth_type):
     variables = {
-        "width": 999,
-        "length": 999,
+        "width": round(random.uniform(1.5, 99.0), 2),
+        "length": round(random.uniform(1.5, 99.0), 2),
+        "depth": round(random.uniform(1.5, 99.0), 2),
     }
 
     assert BerthType.objects.count() == 1

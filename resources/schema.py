@@ -439,8 +439,9 @@ class BerthInput(AbstractBoatPlaceInput):
     comment = graphene.String()
     is_accessible = graphene.Boolean()
     berth_type_id = graphene.ID()
-    width = graphene.Float()
-    length = graphene.Float()
+    width = graphene.Float(description=_("width (m)"))
+    length = graphene.Float(description=_("length (m)"))
+    depth = graphene.Float(description=_("depth (m)"))
     mooring_type = BerthMooringTypeEnum()
 
 
@@ -449,8 +450,9 @@ def get_berth_type(info, input):
     berth_type_id = input.pop("berth_type_id", None)
     width = input.pop("width", None)
     length = input.pop("length", None)
+    depth = input.pop("depth", None)
     mooring_type = input.pop("mooring_type", None)
-    berth_type_params = [width, length, mooring_type]
+    berth_type_params = [width, length, depth, mooring_type]
 
     # Cannot have both fields at the same time
     if berth_type_id and any(berth_type_params):
@@ -463,7 +465,7 @@ def get_berth_type(info, input):
     elif any(berth_type_params):
         if all(berth_type_params):
             berth_type, created = BerthType.objects.get_or_create(
-                width=width, length=length, mooring_type=mooring_type
+                width=width, length=length, depth=depth, mooring_type=mooring_type
             )
         else:
             raise VenepaikkaGraphQLError(_("Missing fields to associate a BerthType"))
@@ -502,7 +504,12 @@ class UpdateBerthMutation(graphene.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         # Check if the field should be updated
         if input.get("berth_type_id") or any(
-            [input.get("width"), input.get("depth"), input.get("mooring_type")]
+            [
+                input.get("width"),
+                input.get("length"),
+                input.get("depth"),
+                input.get("mooring_type"),
+            ]
         ):
             input["berth_type"] = get_berth_type(info, input)
 
