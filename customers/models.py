@@ -3,15 +3,18 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.core.files.storage import FileSystemStorage
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import UniqueConstraint
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumField
 
 from resources.models import BoatType
 from utils.models import TimeStampedModel, UUIDModel
 
-from .enums import InvoicingType, OrganizationType
+from .enums import BoatCertificateType, InvoicingType, OrganizationType
 
 User = get_user_model()
 
@@ -134,13 +137,7 @@ class Boat(TimeStampedModel, UUIDModel):
     hull_material = models.CharField(
         verbose_name=_("hull material"), max_length=64, blank=True
     )
-
-    boat_is_inspected = models.BooleanField(
-        verbose_name=_("boat is inspected"), null=True, blank=True
-    )
-    boat_is_insured = models.BooleanField(
-        verbose_name=_("boat is insured"), null=True, blank=True
-    )
+    intended_use = models.TextField(verbose_name=_("intended use"), blank=True)
 
     class Meta:
         verbose_name = _("boat")
@@ -149,3 +146,55 @@ class Boat(TimeStampedModel, UUIDModel):
 
     def __str__(self):
         return "{} ({})".format(self.registration_number, self.pk)
+
+
+def get_boat_media_folder(instance, filename):
+    return "boats/{boat_id}/{filename}".format(
+        boat_id=instance.boat.id, filename=filename
+    )
+
+
+class BoatCertificate(UUIDModel):
+    boat = models.ForeignKey(
+        Boat,
+        verbose_name=_("boat"),
+        related_name="certificates",
+        on_delete=models.CASCADE,
+    )
+    file = models.FileField(
+        verbose_name="certificate file",
+        upload_to=get_boat_media_folder,
+        storage=FileSystemStorage(),
+        blank=True,
+        null=True,
+    )
+    certificate_type = EnumField(
+        BoatCertificateType, verbose_name=_("certificate type"), max_length=16,
+    )
+    valid_until = models.DateField(verbose_name=_("valid until"), blank=True, null=True)
+    checked_at = models.DateField(verbose_name=_("checked at"), default=timezone.now)
+    checked_by = models.CharField(
+        verbose_name=_("checked by"), max_length=100, blank=True, null=True
+    )
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["boat_id", "certificate_type"], name="unique_boat_certificate"
+            )
+        ]
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        creating = self._state.adding
+        if not creating:
+            old_instance = BoatCertificate.objects.get(id=self.id)
+            # If the certificate is being changed
+            if old_instance.boat != self.boat:
+                raise ValidationError(
+                    _("Cannot change the boat assigned to this certificate")
+                )
+        super().clean()

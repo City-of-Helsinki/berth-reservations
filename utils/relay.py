@@ -1,4 +1,8 @@
 from graphene import relay
+from graphql_relay import (
+    from_global_id as relay_from_global_id,
+    to_global_id as relay_to_global_id,
+)
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 
@@ -22,3 +26,30 @@ def get_node_from_global_id(info, global_id, only_type, nullable=True):
         )
 
     return instance
+
+
+def to_global_id(node_type, id):
+    """
+    Wrapper around the graphql_relay to_global_id.
+
+    Takes a graphql type and an ID specific to that type name, and returns a
+    "global ID" that is unique among all types.
+
+    Instead of expecting the type name, it takes the full type and tries to
+    get the name to reduce code repetition.
+    """
+    return relay_to_global_id(node_type._meta.name, str(id))
+
+
+def from_global_id(global_id, node_type=None):
+    """
+    Wrapper around the graphql_relay from_global_id.
+
+    Takes the "global ID" created by toGlobalID and optionally the expected NodeType.
+    If no NodeType is passed, it will only return the decoded id.
+    If NodeType is passed, it will assert that the decoded id belongs to that NodeType.
+    """
+    _type, _id = relay_from_global_id(global_id)
+    if node_type:
+        assert _type == node_type, f"Must receive a {node_type._meta.name} id."
+    return _id

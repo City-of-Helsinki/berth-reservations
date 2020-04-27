@@ -26,6 +26,7 @@ class Query(
 
 class Mutation(
     applications.new_schema.Mutation,
+    customers.schema.Mutation,
     leases.schema.Mutation,
     resources.schema.Mutation,
     graphene.ObjectType,
