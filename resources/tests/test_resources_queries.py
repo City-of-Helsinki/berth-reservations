@@ -1,4 +1,5 @@
 import json
+import random
 
 import pytest
 from graphql_relay import to_global_id
@@ -11,7 +12,15 @@ from berth_reservations.tests.utils import (
 from leases.schema import BerthLeaseNode
 from leases.tests.factories import BerthLeaseFactory
 from resources.schema import BerthNode, HarborNode, PierNode
-from resources.tests.factories import BerthFactory
+from resources.tests.factories import (
+    BerthFactory,
+    BerthTypeFactory,
+    HarborFactory,
+    PierFactory,
+    WinterStorageAreaFactory,
+    WinterStoragePlaceFactory,
+    WinterStorageSectionFactory,
+)
 
 
 def test_get_boat_type(api_client, boat_type):
@@ -561,4 +570,283 @@ def test_get_harbor_available_active_berths(api_client, pier, available):
     executed = api_client.execute(query)
     assert executed["data"] == {
         "harbor": {"properties": {"numberOfPlaces": 2, "numberOfFreePlaces": 0}}
+    }
+
+
+def test_get_harbor_count(api_client):
+    count = random.randint(1, 10)
+    for _i in range(count):
+        HarborFactory()
+
+    query = """
+        {
+            harbors {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {"harbors": {"count": count, "totalCount": count}}
+
+
+def test_get_harbor_count_filtered(api_client):
+    electricity_count = random.randint(1, 10)
+    no_electricity_count = random.randint(1, 10)
+    total_count = electricity_count + no_electricity_count
+
+    for _i in range(electricity_count):
+        harbor = HarborFactory()
+        PierFactory(harbor=harbor, electricity=True)
+    for _i in range(no_electricity_count):
+        harbor = HarborFactory()
+        PierFactory(harbor=harbor, electricity=False)
+
+    query = """
+        {
+            harbors(piers_Electricity: %s) {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query % "true")
+    assert executed["data"] == {
+        "harbors": {"count": electricity_count, "totalCount": total_count}
+    }
+
+    executed = api_client.execute(query % "false")
+    assert executed["data"] == {
+        "harbors": {"count": no_electricity_count, "totalCount": total_count}
+    }
+
+
+def test_get_pier_count(api_client):
+    count = random.randint(1, 10)
+    for _i in range(count):
+        PierFactory()
+
+    query = """
+        {
+            piers {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {"piers": {"count": count, "totalCount": count}}
+
+
+def test_get_pier_count_filtered(api_client):
+    electricity_count = random.randint(1, 10)
+    no_electricity_count = random.randint(1, 10)
+    total_count = electricity_count + no_electricity_count
+
+    for _i in range(electricity_count):
+        PierFactory(electricity=True)
+    for _i in range(no_electricity_count):
+        PierFactory(electricity=False)
+
+    query = """
+        {
+            piers(electricity: %s) {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query % "true")
+    assert executed["data"] == {
+        "piers": {"count": electricity_count, "totalCount": total_count}
+    }
+
+    executed = api_client.execute(query % "false")
+    assert executed["data"] == {
+        "piers": {"count": no_electricity_count, "totalCount": total_count}
+    }
+
+
+def test_get_berth_count(api_client):
+    count = random.randint(1, 10)
+    for _i in range(count):
+        BerthFactory()
+
+    query = """
+        {
+            berths {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {"berths": {"count": count, "totalCount": count}}
+
+
+def test_get_berth_count_filtered(api_client):
+    smaller_width_count = random.randint(1, 10)
+    larger_width_count = random.randint(1, 10)
+    total_count = smaller_width_count + larger_width_count
+
+    smaller_bt = BerthTypeFactory(width=round(random.uniform(0.1, 4.99), 2))
+    larger_bt = BerthTypeFactory(width=round(random.uniform(5, 9.99), 2))
+    for _i in range(smaller_width_count):
+        BerthFactory(berth_type=smaller_bt)
+    for _i in range(larger_width_count):
+        BerthFactory(berth_type=larger_bt)
+
+    query = """
+        {
+            berths(minWidth: %d) {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query % 5)
+    assert executed["data"] == {
+        "berths": {"count": larger_width_count, "totalCount": total_count}
+    }
+
+    executed = api_client.execute(query % 0)
+    assert executed["data"] == {
+        "berths": {
+            "count": smaller_width_count + larger_width_count,
+            "totalCount": total_count,
+        }
+    }
+
+
+def test_get_winter_storage_area_count(api_client):
+    count = random.randint(1, 10)
+    for _i in range(count):
+        WinterStorageAreaFactory()
+
+    query = """
+        {
+            winterStorageAreas {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {
+        "winterStorageAreas": {"count": count, "totalCount": count}
+    }
+
+
+def test_get_winter_storage_area_count_filtered(api_client):
+    electricity_count = random.randint(1, 10)
+    no_electricity_count = random.randint(1, 10)
+    total_count = electricity_count + no_electricity_count
+
+    for _i in range(electricity_count):
+        area = WinterStorageAreaFactory()
+        WinterStorageSectionFactory(area=area, electricity=True)
+    for _i in range(no_electricity_count):
+        area = WinterStorageAreaFactory()
+        WinterStorageSectionFactory(area=area, electricity=False)
+
+    query = """
+        {
+            winterStorageAreas(sections_Electricity: %s) {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query % "true")
+    assert executed["data"] == {
+        "winterStorageAreas": {"count": electricity_count, "totalCount": total_count}
+    }
+
+    executed = api_client.execute(query % "false")
+    assert executed["data"] == {
+        "winterStorageAreas": {"count": no_electricity_count, "totalCount": total_count}
+    }
+
+
+def test_get_winter_storage_section_count(api_client):
+    count = random.randint(1, 10)
+    for _i in range(count):
+        WinterStorageSectionFactory()
+
+    query = """
+        {
+            winterStorageSections {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {
+        "winterStorageSections": {"count": count, "totalCount": count}
+    }
+
+
+def test_get_winter_storage_section_count_filtered(api_client):
+    electricity_count = random.randint(1, 10)
+    no_electricity_count = random.randint(1, 10)
+    total_count = electricity_count + no_electricity_count
+
+    for _i in range(electricity_count):
+        WinterStorageSectionFactory(electricity=True)
+    for _i in range(no_electricity_count):
+        WinterStorageSectionFactory(electricity=False)
+
+    query = """
+        {
+            winterStorageSections(electricity: %s) {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query % "true")
+    assert executed["data"] == {
+        "winterStorageSections": {
+            "count": electricity_count,
+            "totalCount": total_count,
+        }
+    }
+
+    executed = api_client.execute(query % "false")
+    assert executed["data"] == {
+        "winterStorageSections": {
+            "count": no_electricity_count,
+            "totalCount": total_count,
+        }
+    }
+
+
+def test_get_winter_storage_place_count(api_client):
+    count = random.randint(1, 10)
+    for _i in range(count):
+        WinterStoragePlaceFactory()
+
+    query = """
+        {
+            winterStoragePlaces {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {
+        "winterStoragePlaces": {"count": count, "totalCount": count}
     }

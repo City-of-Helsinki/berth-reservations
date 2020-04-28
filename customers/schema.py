@@ -24,6 +24,7 @@ from users.decorators import (
 )
 from users.utils import user_has_view_permission
 from utils.relay import get_node_from_global_id
+from utils.schema import CountConnection
 
 from .enums import BoatCertificateType, InvoicingType, OrganizationType
 from .models import Boat, BoatCertificate, CustomerProfile, Organization
@@ -39,6 +40,7 @@ class BoatCertificateNode(DjangoObjectType):
     class Meta:
         model = BoatCertificate
         interfaces = (relay.Node,)
+        connection_class = CountConnection
 
     def resolve_file(self, info, **kwargs):
         return info.context.build_absolute_uri(self.file.url) if self.file else None
@@ -51,6 +53,7 @@ class BoatNode(DjangoObjectType):
     class Meta:
         model = Boat
         interfaces = (relay.Node,)
+        connection_class = CountConnection
 
     def resolve_certificates(self, info):
         return self.certificates.all()
@@ -70,6 +73,7 @@ class OrganizationNode(DjangoObjectType):
             "postal_code",
             "city",
         )
+        connection_class = CountConnection
 
 
 PROFILE_NODE_FIELDS = (
@@ -150,6 +154,7 @@ class BerthProfileNode(BaseProfileFieldsMixin, DjangoObjectType):
         filter_fields = ("invoicing_type",)
         fields = PROFILE_NODE_FIELDS
         interfaces = (relay.Node,)
+        connection_class = CountConnection
 
     @classmethod
     @login_required

@@ -1,3 +1,5 @@
+import random
+
 import pytest
 from dateutil.parser import isoparse
 from freezegun import freeze_time
@@ -291,3 +293,21 @@ def test_query_berth_leases_order_by_created_at_default(api_client):
     )
 
     assert first_date < second_date
+
+
+def test_query_berth_lease_count(superuser_api_client):
+    count = random.randint(1, 10)
+    for _i in range(count):
+        BerthLeaseFactory()
+
+    query = """
+        {
+            berthLeases {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = superuser_api_client.execute(query)
+    assert executed["data"] == {"berthLeases": {"count": count, "totalCount": count}}

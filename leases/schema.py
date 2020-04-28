@@ -21,6 +21,7 @@ from users.decorators import (
 )
 from users.utils import user_has_view_permission
 from utils.relay import get_node_from_global_id
+from utils.schema import CountConnection
 
 from .enums import LeaseStatus
 from .models import BerthLease
@@ -43,6 +44,7 @@ class BerthLeaseNode(DjangoObjectType):
     class Meta:
         model = BerthLease
         interfaces = (graphene.relay.Node,)
+        connection_class = CountConnection
 
     @classmethod
     @login_required

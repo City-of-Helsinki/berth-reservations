@@ -1,7 +1,10 @@
+import random
+
 import pytest
 
 from applications.new_schema import BerthApplicationNode
 from applications.tests.factories import BerthApplicationFactory
+from berth_reservations.tests.factories import CustomerProfileFactory
 from berth_reservations.tests.utils import (
     assert_not_enough_permissions,
     create_api_client,
@@ -359,3 +362,45 @@ def test_query_boat_certificates(superuser_api_client, boat_certificate):
             ]
         },
     }
+
+
+def test_query_customer_boat_count(superuser_api_client, customer_profile):
+    count = random.randint(1, 10)
+    for _i in range(count):
+        BoatFactory(owner=customer_profile)
+
+    query = """
+        {
+            berthProfile(id: "%s") {
+                boats {
+                    count
+                    totalCount
+                }
+            }
+        }
+    """ % to_global_id(
+        BerthProfileNode, customer_profile.id
+    )
+
+    executed = superuser_api_client.execute(query)
+    assert executed["data"] == {
+        "berthProfile": {"boats": {"count": count, "totalCount": count}}
+    }
+
+
+def test_query_berth_profile_count(superuser_api_client):
+    count = random.randint(1, 10)
+    for _i in range(count):
+        CustomerProfileFactory()
+
+    query = """
+        {
+            berthProfiles {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = superuser_api_client.execute(query)
+    assert executed["data"] == {"berthProfiles": {"count": count, "totalCount": count}}
