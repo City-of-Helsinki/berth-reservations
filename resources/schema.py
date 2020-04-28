@@ -26,6 +26,7 @@ from users.decorators import (
 )
 from users.utils import user_has_view_permission
 from utils.relay import get_node_from_global_id
+from utils.schema import CountConnection
 
 from .enums import BerthMooringType
 from .models import (
@@ -170,6 +171,7 @@ class PierNode(graphql_geojson.GeoJSONType):
         ]
         geojson_field = "location"
         interfaces = (relay.Node,)
+        connection_class = CountConnection
 
 
 class BerthTypeNode(DjangoObjectType):
@@ -219,6 +221,7 @@ class BerthNode(DjangoObjectType):
         )
         interfaces = (relay.Node,)
         filterset_class = BerthNodeFilterSet
+        connection_class = CountConnection
 
     @view_permission_required(BerthLease, BerthApplication, CustomerProfile)
     def resolve_leases(self, info, **kwargs):
@@ -273,6 +276,7 @@ class HarborNode(graphql_geojson.GeoJSONType):
         geojson_field = "location"
         interfaces = (relay.Node,)
         filterset_class = HarborFilter
+        connection_class = CountConnection
 
     name = graphene.String()
     street_address = graphene.String()
@@ -334,6 +338,7 @@ class WinterStoragePlaceTypeNode(DjangoObjectType):
     class Meta:
         model = WinterStoragePlaceType
         interfaces = (relay.Node,)
+        connection_class = CountConnection
 
     width = graphene.Float(description=_("width (m)"), required=True)
     length = graphene.Float(description=_("length (m)"), required=True)
@@ -351,6 +356,7 @@ class WinterStoragePlaceNode(DjangoObjectType):
             "modified_at",
         )
         interfaces = (relay.Node,)
+        connection_class = CountConnection
 
 
 class WinterStorageSectionNode(graphql_geojson.GeoJSONType):
@@ -366,6 +372,7 @@ class WinterStorageSectionNode(graphql_geojson.GeoJSONType):
         ]
         geojson_field = "location"
         interfaces = (relay.Node,)
+        connection_class = CountConnection
 
 
 class WinterStorageAreaFilter(django_filters.FilterSet):
@@ -391,6 +398,7 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
         geojson_field = "location"
         interfaces = (relay.Node,)
         filterset_class = WinterStorageAreaFilter
+        connection_class = CountConnection
 
     name = graphene.String()
     street_address = graphene.String()

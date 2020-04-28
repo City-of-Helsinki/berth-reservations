@@ -12,6 +12,7 @@ from users.decorators import (
     view_permission_required,
 )
 from utils.relay import get_node_from_global_id
+from utils.schema import CountConnection
 
 from .enums import ApplicationStatus
 from .models import BerthApplication, BerthSwitch, HarborChoice
@@ -77,6 +78,7 @@ class BerthApplicationNode(DjangoObjectType):
         model = BerthApplication
         interfaces = (graphene.relay.Node,)
         exclude = ("chosen_harbors", "harborchoice_set")
+        connection_class = CountConnection
 
     def resolve_boat_type(self, info, **kwargs):
         if self.boat_type:
