@@ -3,7 +3,7 @@ from django.contrib import admin
 from applications.admin import BerthApplicationInline
 from leases.admin import BerthLeaseInline
 
-from .models import Boat, CustomerProfile, Organization
+from .models import Boat, BoatCertificate, CustomerProfile, Organization
 
 
 class CustomerProfileInline(admin.StackedInline):
@@ -18,6 +18,12 @@ class BoatInline(admin.StackedInline):
     extra = 0
 
 
+class BoatCertificateInline(admin.StackedInline):
+    model = BoatCertificate
+    fk_name = "boat"
+    extra = 0
+
+
 class OrganizationInline(admin.StackedInline):
     model = Organization
     fk_name = "customer"
@@ -25,6 +31,10 @@ class OrganizationInline(admin.StackedInline):
 
 
 class BoatAdmin(admin.ModelAdmin):
+    inlines = (BoatCertificateInline,)
+
+
+class BoatCertificateAdmin(admin.ModelAdmin):
     pass
 
 
@@ -43,5 +53,6 @@ class CustomerProfileAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Boat, BoatAdmin)
+admin.site.register(BoatCertificate, BoatCertificateAdmin)
 admin.site.register(Organization, OrganizationAdmin)
 admin.site.register(CustomerProfile, CustomerProfileAdmin)
