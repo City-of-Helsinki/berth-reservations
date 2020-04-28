@@ -430,7 +430,7 @@ class AbstractAreaSectionInput:
 
 
 class AbstractBoatPlaceInput:
-    number = graphene.String()
+    number = graphene.Int()
     is_active = graphene.Boolean()
 
 
@@ -475,7 +475,7 @@ def get_berth_type(info, input):
 
 class CreateBerthMutation(graphene.ClientIDMutation):
     class Input(BerthInput):
-        number = graphene.String(required=True)
+        number = graphene.Int(required=True)
         pier_id = graphene.ID(required=True)
 
     berth = graphene.Field(BerthNode)
