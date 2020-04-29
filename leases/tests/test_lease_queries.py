@@ -10,7 +10,7 @@ from berth_reservations.tests.utils import assert_not_enough_permissions
 from customers.schema import BoatNode, ProfileNode
 from leases.schema import BerthLeaseNode
 from leases.tests.factories import BerthLeaseFactory
-from resources.schema import BerthNode, BerthTypeNode
+from resources.schema import BerthNode
 
 QUERY_BERTH_LEASES = """
 query GetBerthLeases {
@@ -45,9 +45,6 @@ query GetBerthLeases {
                 berth {
                     id
                     number
-                    berthType {
-                        id
-                    }
                 }
             }
         }
@@ -69,9 +66,6 @@ def test_query_berth_leases(api_client, berth_lease, berth_application):
 
     executed = api_client.execute(QUERY_BERTH_LEASES)
 
-    berth_type_id = to_global_id(
-        BerthTypeNode._meta.name, berth_lease.berth.berth_type.id
-    )
     berth_lease_id = to_global_id(BerthLeaseNode._meta.name, berth_lease.id)
     berth_application_id = to_global_id(
         BerthApplicationNode._meta.name, berth_application.id
@@ -95,7 +89,6 @@ def test_query_berth_leases(api_client, berth_lease, berth_application):
         "berth": {
             "id": to_global_id(BerthNode._meta.name, berth_lease.berth.id),
             "number": berth_lease.berth.number,
-            "berthType": {"id": berth_type_id},
         },
     }
 
@@ -139,9 +132,6 @@ query GetBerthLease {
         berth {
             id
             number
-            berthType {
-                id
-            }
         }
     }
 }
@@ -164,9 +154,6 @@ def test_query_berth_lease(api_client, berth_lease, berth_application):
     query = QUERY_BERTH_LEASE % berth_lease_id
     executed = api_client.execute(query)
 
-    berth_type_id = to_global_id(
-        BerthTypeNode._meta.name, berth_lease.berth.berth_type.id
-    )
     berth_application_id = to_global_id(
         BerthApplicationNode._meta.name, berth_application.id
     )
@@ -188,7 +175,6 @@ def test_query_berth_lease(api_client, berth_lease, berth_application):
         "berth": {
             "id": to_global_id(BerthNode._meta.name, berth_lease.berth.id),
             "number": berth_lease.berth.number,
-            "berthType": {"id": berth_type_id},
         },
     }
 

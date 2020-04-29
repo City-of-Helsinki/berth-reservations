@@ -365,10 +365,8 @@ def test_get_piers_filter_by_application(api_client, berth_application, berth):
                             berths {
                                 edges {
                                     node {
-                                        berthType {
-                                            width
-                                            length
-                                        }
+                                        width
+                                        length
                                     }
                                 }
                             }
@@ -391,10 +389,8 @@ def test_get_piers_filter_by_application(api_client, berth_application, berth):
         expected_berths = [
             {
                 "node": {
-                    "berthType": {
-                        "width": float(berth.berth_type.width),
-                        "length": float(berth.berth_type.length),
-                    }
+                    "width": float(berth.berth_type.width),
+                    "length": float(berth.berth_type.length),
                 }
             }
         ]

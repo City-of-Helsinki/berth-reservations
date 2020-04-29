@@ -40,7 +40,6 @@ from .models import (
     WinterStorageArea,
     WinterStorageAreaMap,
     WinterStoragePlace,
-    WinterStoragePlaceType,
     WinterStorageSection,
 )
 
@@ -174,17 +173,6 @@ class PierNode(graphql_geojson.GeoJSONType):
         connection_class = CountConnection
 
 
-class BerthTypeNode(DjangoObjectType):
-    class Meta:
-        model = BerthType
-        interfaces = (relay.Node,)
-
-    width = graphene.Float(description=_("width (m)"), required=True)
-    length = graphene.Float(description=_("length (m)"), required=True)
-    depth = graphene.Float(description=_("depth (m)"))
-    mooring_type = BerthMooringTypeEnum(required=True)
-
-
 class BerthNodeFilterSet(django_filters.FilterSet):
     min_width = django_filters.NumberFilter(
         field_name="berth_type__width", lookup_expr="gte"
@@ -206,6 +194,10 @@ class BerthNode(DjangoObjectType):
     )
     is_accessible = graphene.Boolean()
     is_available = graphene.Boolean(required=True)
+    width = graphene.Float(description=_("width (m)"), required=True)
+    length = graphene.Float(description=_("length (m)"), required=True)
+    depth = graphene.Float(description=_("depth (m)"))
+    mooring_type = BerthMooringTypeEnum(required=True)
 
     class Meta:
         model = Berth
@@ -213,7 +205,6 @@ class BerthNode(DjangoObjectType):
             "id",
             "number",
             "pier",
-            "berth_type",
             "comment",
             "is_active",
             "created_at",
@@ -226,6 +217,18 @@ class BerthNode(DjangoObjectType):
     @view_permission_required(BerthLease, BerthApplication, CustomerProfile)
     def resolve_leases(self, info, **kwargs):
         return self.leases.all()
+
+    def resolve_width(self, info, **kwargs):
+        return self.berth_type.width
+
+    def resolve_length(self, info, **kwargs):
+        return self.berth_type.length
+
+    def resolve_depth(self, info, **kwargs):
+        return self.berth_type.depth
+
+    def resolve_mooring_type(self, info, **kwargs):
+        return self.berth_type.mooring_type
 
 
 class AbstractMapType:
@@ -334,29 +337,27 @@ class HarborNode(graphql_geojson.GeoJSONType):
         return sum([pier.number_of_places or 0 for pier in self.piers.all()])
 
 
-class WinterStoragePlaceTypeNode(DjangoObjectType):
-    class Meta:
-        model = WinterStoragePlaceType
-        interfaces = (relay.Node,)
-        connection_class = CountConnection
-
+class WinterStoragePlaceNode(DjangoObjectType):
     width = graphene.Float(description=_("width (m)"), required=True)
     length = graphene.Float(description=_("length (m)"), required=True)
 
-
-class WinterStoragePlaceNode(DjangoObjectType):
     class Meta:
         model = WinterStoragePlace
         fields = (
             "id",
             "number",
             "winter_storage_section",
-            "place_type",
             "created_at",
             "modified_at",
         )
         interfaces = (relay.Node,)
         connection_class = CountConnection
+
+    def resolve_width(self, info, **kwargs):
+        return self.place_type.width
+
+    def resolve_length(self, info, **kwargs):
+        return self.place_type.length
 
 
 class WinterStorageSectionNode(graphql_geojson.GeoJSONType):
@@ -446,45 +447,19 @@ class BerthInput(AbstractBoatPlaceInput):
     pier_id = graphene.ID()
     comment = graphene.String()
     is_accessible = graphene.Boolean()
-    berth_type_id = graphene.ID()
     width = graphene.Float(description=_("width (m)"))
     length = graphene.Float(description=_("length (m)"))
     depth = graphene.Float(description=_("depth (m)"))
     mooring_type = BerthMooringTypeEnum()
 
 
-def get_berth_type(info, input):
-    berth_type = None
-    berth_type_id = input.pop("berth_type_id", None)
-    width = input.pop("width", None)
-    length = input.pop("length", None)
-    depth = input.pop("depth", None)
-    mooring_type = input.pop("mooring_type", None)
-    berth_type_params = [width, length, depth, mooring_type]
-
-    # Cannot have both fields at the same time
-    if berth_type_id and any(berth_type_params):
-        raise VenepaikkaGraphQLError(_("Cannot receive BerthType and dimensions"))
-
-    if berth_type_id:
-        berth_type = get_node_from_global_id(
-            info, berth_type_id, only_type=BerthTypeNode, nullable=False,
-        )
-    elif any(berth_type_params):
-        if all(berth_type_params):
-            berth_type, created = BerthType.objects.get_or_create(
-                width=width, length=length, depth=depth, mooring_type=mooring_type
-            )
-        else:
-            raise VenepaikkaGraphQLError(_("Missing fields to associate a BerthType"))
-
-    return berth_type
-
-
 class CreateBerthMutation(graphene.ClientIDMutation):
     class Input(BerthInput):
         number = graphene.Int(required=True)
         pier_id = graphene.ID(required=True)
+        width = graphene.Float(description=_("width (m)"), required=True)
+        length = graphene.Float(description=_("length (m)"), required=True)
+        mooring_type = BerthMooringTypeEnum(required=True)
 
     berth = graphene.Field(BerthNode)
 
@@ -492,7 +467,16 @@ class CreateBerthMutation(graphene.ClientIDMutation):
     @add_permission_required(Berth)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        input["berth_type"] = get_berth_type(info, input)
+        width = input.pop("width", None)
+        length = input.pop("length", None)
+        depth = input.pop("depth", None)
+        mooring_type = input.pop("mooring_type", None)
+
+        berth_type, created = BerthType.objects.get_or_create(
+            width=width, length=length, depth=depth, mooring_type=mooring_type
+        )
+        input["berth_type"] = berth_type
+
         input["pier"] = get_node_from_global_id(
             info, input.pop("pier_id"), only_type=PierNode, nullable=False,
         )
@@ -510,20 +494,24 @@ class UpdateBerthMutation(graphene.ClientIDMutation):
     @change_permission_required(Berth)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        # Check if the field should be updated
-        if input.get("berth_type_id") or any(
-            [
-                input.get("width"),
-                input.get("length"),
-                input.get("depth"),
-                input.get("mooring_type"),
-            ]
-        ):
-            input["berth_type"] = get_berth_type(info, input)
-
         berth = get_node_from_global_id(
             info, input.pop("id"), only_type=BerthNode, nullable=False,
         )
+
+        width = input.pop("width", None)
+        length = input.pop("length", None)
+        depth = input.pop("depth", None)
+        mooring_type = input.pop("mooring_type", None)
+
+        if any([width, length, mooring_type]):
+            old_berth_type = berth.berth_type
+            berth_type, created = BerthType.objects.get_or_create(
+                width=width or old_berth_type.width,
+                length=length or old_berth_type.length,
+                depth=depth or old_berth_type.depth,
+                mooring_type=mooring_type or old_berth_type.mooring_type,
+            )
+            input["berth_type"] = berth_type
 
         if input.get("pier_id"):
             input["pier"] = get_node_from_global_id(
@@ -552,63 +540,6 @@ class DeleteBerthMutation(graphene.ClientIDMutation):
         berth.delete()
 
         return DeleteBerthMutation()
-
-
-class CreateBerthTypeMutation(graphene.ClientIDMutation):
-    class Input:
-        mooring_type = BerthMooringTypeEnum(required=True)
-        width = graphene.Float(required=True)
-        length = graphene.Float(required=True)
-        depth = graphene.Float()
-
-    berth_type = graphene.Field(BerthTypeNode)
-
-    @classmethod
-    @add_permission_required(BerthType)
-    @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, **input):
-        berth_type = BerthType.objects.create(**input)
-        return CreateBerthTypeMutation(berth_type=berth_type)
-
-
-class UpdateBerthTypeMutation(graphene.ClientIDMutation):
-    class Input:
-        id = graphene.ID(required=True)
-        mooring_type = BerthMooringTypeEnum()
-        width = graphene.Float()
-        length = graphene.Float()
-        depth = graphene.Float()
-
-    berth_type = graphene.Field(BerthTypeNode)
-
-    @classmethod
-    @change_permission_required(BerthType)
-    @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, **input):
-        berth_type = get_node_from_global_id(
-            info, input.pop("id"), only_type=BerthTypeNode, nullable=False,
-        )
-
-        update_object(berth_type, input)
-
-        return UpdateBerthTypeMutation(berth_type=berth_type)
-
-
-class DeleteBerthTypeMutation(graphene.ClientIDMutation):
-    class Input:
-        id = graphene.ID(required=True)
-
-    @classmethod
-    @delete_permission_required(BerthType)
-    @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, **input):
-        berth_type = get_node_from_global_id(
-            info, input.pop("id"), only_type=BerthTypeNode, nullable=False,
-        )
-
-        berth_type.delete()
-
-        return DeleteBerthTypeMutation()
 
 
 class HarborInput(AbstractAreaInput):
@@ -832,9 +763,6 @@ class Query:
     availability_levels = DjangoListField(AvailabilityLevelType)
     boat_types = DjangoListField(BoatTypeType)
 
-    berth_type = relay.Node.Field(BerthTypeNode)
-    berth_types = DjangoConnectionField(BerthTypeNode)
-
     berth = relay.Node.Field(BerthNode)
     berths = DjangoFilterConnectionField(
         BerthNode,
@@ -868,9 +796,6 @@ class Query:
     harbors = DjangoFilterConnectionField(
         HarborNode, servicemap_ids=graphene.List(graphene.String)
     )
-
-    winter_storage_place_type = relay.Node.Field(WinterStoragePlaceTypeNode)
-    winter_storage_place_types = DjangoConnectionField(WinterStoragePlaceTypeNode)
 
     winter_storage_place = relay.Node.Field(WinterStoragePlaceNode)
     winter_storage_places = DjangoConnectionField(WinterStoragePlaceNode)
@@ -992,11 +917,6 @@ class Mutation:
         "\n* Both BerthType ID and BerthType dimensions are passed"
         "\n* BerthType dimensions or BerthMooringType are missing"
     )
-
-    # BerthType
-    create_berth_type = CreateBerthTypeMutation.Field()
-    delete_berth_type = DeleteBerthTypeMutation.Field()
-    update_berth_type = UpdateBerthTypeMutation.Field()
 
     # Harbors
     create_harbor = CreateHarborMutation.Field(
