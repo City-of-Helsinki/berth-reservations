@@ -1,5 +1,8 @@
+from datetime import date
+
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import ExpressionWrapper, Q
 from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumField
 
@@ -61,6 +64,30 @@ class AbstractLease(TimeStampedModel, UUIDModel):
         super().save(*args, **kwargs)
 
 
+class BerthLeaseManager(models.Manager):
+    def get_queryset(self):
+        current_season_start = calculate_berth_lease_start_date()
+        today = date.today()
+
+        active_current_status = Q(status=LeaseStatus.PAID)
+
+        if today < current_season_start:
+            in_current_season = Q(start_date=current_season_start)
+        else:
+            in_current_season = Q(start_date__lte=today) & Q(end_date__gte=today)
+
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                is_active=ExpressionWrapper(
+                    in_current_season & active_current_status,
+                    output_field=models.BooleanField(),
+                )
+            )
+        )
+
+
 class BerthLease(AbstractLease):
     berth = models.ForeignKey(
         Berth, verbose_name=_("berth"), on_delete=models.PROTECT, related_name="leases"
@@ -82,6 +109,7 @@ class BerthLease(AbstractLease):
     renew_automatically = models.BooleanField(
         verbose_name=_("renew automatically"), default=True
     )
+    objects = BerthLeaseManager()
 
     class Meta:
         verbose_name = _("berth lease")

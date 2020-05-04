@@ -1,7 +1,6 @@
 from datetime import date, timedelta
 
 import pytest
-from dateutil.utils import today
 from django.core.exceptions import ValidationError
 from freezegun import freeze_time
 
@@ -161,7 +160,7 @@ def test_berth_leases_should_not_overlap(berth):
 
 @freeze_time("2020-01-01T08:00:00Z")
 def test_winter_storage_leases_should_not_overlap(winter_storage_place):
-    start_date = today()
+    start_date = date.today()
     end_date = start_date.replace(month=start_date.month + 2)
 
     # Lease valid for a month starting at the beginning of the season
@@ -270,3 +269,43 @@ def test_winter_storage_lease_cannot_update_place(
         winter_storage_lease.save()
 
     assert "Cannot change the place assigned to this lease" in str(exception.value)
+
+
+@freeze_time("2020-01-01T08:00:00Z")
+def test_berth_lease_is_active_before_season():
+    lease = BerthLeaseFactory(status=LeaseStatus.PAID)
+
+    assert BerthLease.objects.get(id=lease.id).is_active
+
+
+@freeze_time("2020-07-10T08:00:00Z")
+def test_berth_lease_is_active_during_season():
+    lease = BerthLeaseFactory(status=LeaseStatus.PAID)
+
+    assert BerthLease.objects.get(id=lease.id).is_active
+
+
+@freeze_time("2020-01-01T08:00:00Z")
+def test_berth_lease_is_not_active_status():
+    lease = BerthLeaseFactory(status=LeaseStatus.EXPIRED)
+
+    assert not BerthLease.objects.get(id=lease.id).is_active
+
+
+@freeze_time("2020-07-10T08:00:00Z")
+def test_berth_lease_is_not_active_before_today():
+    today = date.today()
+    start_date = today.replace(day=today.day - 5)
+    end_date = today.replace(day=today.day - 1)
+    lease = BerthLeaseFactory(
+        status=LeaseStatus.PAID, start_date=start_date, end_date=end_date
+    )
+
+    assert not BerthLease.objects.get(id=lease.id).is_active
+
+
+@freeze_time("2020-07-10T08:00:00Z")
+def test_berth_lease_is_not_active_after_today():
+    start_date = date(year=2020, month=7, day=11)
+    lease = BerthLeaseFactory(status=LeaseStatus.PAID, start_date=start_date)
+    assert not BerthLease.objects.get(id=lease.id).is_active
