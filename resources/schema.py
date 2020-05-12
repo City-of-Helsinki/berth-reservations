@@ -500,17 +500,26 @@ class UpdateBerthMutation(graphene.ClientIDMutation):
 
         width = input.pop("width", None)
         length = input.pop("length", None)
-        depth = input.pop("depth", None)
+        depth = input.get("depth", None)
         mooring_type = input.pop("mooring_type", None)
+        berth_type = None
 
         if any([width, length, mooring_type]):
             old_berth_type = berth.berth_type
             berth_type, created = BerthType.objects.get_or_create(
                 width=width or old_berth_type.width,
                 length=length or old_berth_type.length,
-                depth=depth or old_berth_type.depth,
                 mooring_type=mooring_type or old_berth_type.mooring_type,
             )
+
+        # If only depth is passed, update it for the current berth_type
+        if "depth" in input:
+            del input["depth"]
+            berth_type = berth_type or berth.berth_type
+            berth_type.depth = depth
+            berth_type.save()
+
+        if berth_type:
             input["berth_type"] = berth_type
 
         if input.get("pier_id"):
