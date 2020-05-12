@@ -349,6 +349,7 @@ def test_update_berth_existing_berth_type(berth, pier, berth_type, api_client):
         "depth": variables["depth"],
         "mooringType": variables["mooringType"],
     }
+    assert Berth.objects.get(id=berth.id).berth_type == berth_type
 
 
 @pytest.mark.parametrize(
@@ -408,7 +409,7 @@ def test_update_berth_existing_berth_type_only_depth(berth, pier, api_client):
     executed = api_client.execute(UPDATE_BERTH_MUTATION, input=variables)
 
     assert Berth.objects.count() == 1
-    assert BerthType.objects.count() == 1
+    assert BerthType.objects.count() == 2
 
     assert executed["data"]["updateBerth"]["berth"] == {
         "id": global_id,

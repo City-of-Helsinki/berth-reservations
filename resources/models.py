@@ -10,6 +10,7 @@ from django.db.models import (
     PositiveIntegerField,
     Q,
     Subquery,
+    UniqueConstraint,
 )
 from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumIntegerField
@@ -476,7 +477,12 @@ class BerthType(AbstractPlaceType):
         verbose_name = _("berth type")
         verbose_name_plural = _("berth types")
         ordering = ("width", "length", "depth")
-        unique_together = (("width", "length", "mooring_type"),)
+        constraints = [
+            UniqueConstraint(
+                fields=("width", "length", "depth", "mooring_type"),
+                name="unique_dimension",
+            )
+        ]
 
     def __str__(self):
         return "{} x {} - {}".format(self.width, self.length, str(self.mooring_type))
