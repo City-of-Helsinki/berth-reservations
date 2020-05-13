@@ -24,6 +24,7 @@ from resources.models import (
     Pier,
 )
 from resources.schema import BerthNode, HarborNode, PierNode
+from resources.tests.factories import BerthTypeFactory
 
 CREATE_BERTH_MUTATION = """
 mutation CreateBerth($input: CreateBerthMutationInput!) {
@@ -347,6 +348,80 @@ def test_update_berth_existing_berth_type(berth, pier, berth_type, api_client):
         "length": variables["length"],
         "depth": variables["depth"],
         "mooringType": variables["mooringType"],
+    }
+    assert Berth.objects.get(id=berth.id).berth_type == berth_type
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_update_berth_existing_berth_type_null_depth(berth, pier, api_client):
+    global_id = to_global_id(BerthNode._meta.name, str(berth.id))
+    berth_type = BerthTypeFactory(depth=None)
+
+    variables = {
+        "id": global_id,
+        "width": float(berth_type.width),
+        "length": float(berth_type.length),
+        "depth": berth_type.depth,
+        "mooringType": berth_type.mooring_type.name,
+    }
+
+    assert berth.berth_type != berth_type
+    assert Berth.objects.count() == 1
+    assert BerthType.objects.count() == 2
+
+    executed = api_client.execute(UPDATE_BERTH_MUTATION, input=variables)
+
+    assert Berth.objects.count() == 1
+    assert BerthType.objects.count() == 2
+
+    assert executed["data"]["updateBerth"]["berth"] == {
+        "id": global_id,
+        "comment": berth.comment,
+        "number": berth.number,
+        "isAccessible": berth.is_accessible,
+        "pier": {"id": to_global_id(PierNode._meta.name, berth.pier.id)},
+        "isActive": berth.is_active,
+        "width": variables["width"],
+        "length": variables["length"],
+        "depth": variables["depth"],
+        "mooringType": variables["mooringType"],
+    }
+    assert Berth.objects.get(id=berth.id).berth_type == berth_type
+    assert Berth.objects.get(id=berth.id).berth_type.depth is None
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_update_berth_existing_berth_type_only_depth(berth, pier, api_client):
+    global_id = to_global_id(BerthNode._meta.name, str(berth.id))
+
+    variables = {
+        "id": global_id,
+        "depth": round(random.uniform(1.5, 99.0), 2),
+    }
+
+    assert Berth.objects.count() == 1
+    assert BerthType.objects.count() == 1
+
+    executed = api_client.execute(UPDATE_BERTH_MUTATION, input=variables)
+
+    assert Berth.objects.count() == 1
+    assert BerthType.objects.count() == 2
+
+    assert executed["data"]["updateBerth"]["berth"] == {
+        "id": global_id,
+        "comment": berth.comment,
+        "number": berth.number,
+        "isAccessible": berth.is_accessible,
+        "pier": {"id": to_global_id(PierNode._meta.name, berth.pier.id)},
+        "isActive": berth.is_active,
+        "width": float(berth.berth_type.width),
+        "length": float(berth.berth_type.length),
+        "depth": variables["depth"],
+        "mooringType": berth.berth_type.mooring_type.name,
     }
 
 
