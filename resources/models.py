@@ -472,6 +472,13 @@ class BerthType(AbstractPlaceType):
         blank=True,
         null=True,
     )
+    price_group = models.ForeignKey(
+        "payments.BerthPriceGroup",
+        verbose_name=_("price group"),
+        related_name="berth_types",
+        null=True,
+        on_delete=models.SET_NULL,
+    )
 
     class Meta:
         verbose_name = _("berth type")

@@ -134,6 +134,7 @@ INSTALLED_APPS = [
     "harbors",
     "resources",
     "leases",
+    "payments",
 ]
 
 AUTH_USER_MODEL = "users.User"
