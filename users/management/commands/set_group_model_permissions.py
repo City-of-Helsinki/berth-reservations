@@ -214,6 +214,32 @@ DEFAULT_MODELS_PERMS = {
             HARBOR_SERVICES: ("view", "add", "change", "delete",),
         },
     },
+    "payments": {
+        "berthpricegroup": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: ("view",),
+            HARBOR_SERVICES: None,
+        },
+        "berthproduct": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: ("view",),
+            HARBOR_SERVICES: None,
+        },
+        "winterstorageproduct": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: ("view",),
+            HARBOR_SERVICES: None,
+        },
+        "additionalproduct": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: ("view",),
+            HARBOR_SERVICES: None,
+        },
+    },
 }
 
 
