@@ -1,4 +1,5 @@
 import os
+import random
 from pathlib import Path
 
 import pytest  # noqa
@@ -11,8 +12,11 @@ from leases.utils import (
     calculate_berth_lease_end_date,
     calculate_berth_lease_start_date,
 )
+from payments.models import BerthPriceGroup
+from payments.tests.factories import BerthPriceGroupFactory
 from resources.models import (
     Berth,
+    BerthType,
     get_harbor_media_folder,
     get_winter_area_media_folder,
     Harbor,
@@ -20,6 +24,7 @@ from resources.models import (
     WinterStorageArea,
     WinterStorageAreaMap,
 )
+from resources.tests.factories import BerthTypeFactory
 
 
 def test_harbor_map_file_path(harbor):
@@ -437,3 +442,22 @@ def test_berth_is_not_available_auto_renew_last_season(superuser_api_client, ber
         renew_automatically=True,
     )
     assert not Berth.objects.get(id=berth.id).is_available
+
+
+def test_berth_type_is_assigned_new_price_group():
+    assert BerthPriceGroup.objects.count() == 0
+    width = round(random.uniform(1, 999), 2)
+
+    berth_type = BerthTypeFactory(width=width)
+
+    assert BerthType.objects.get(id=berth_type.id).price_group.name == f"{width}m"
+    assert BerthPriceGroup.objects.count() == 1
+
+
+def test_berth_type_is_assigned_existing_price_group():
+    width = round(random.uniform(1, 999), 2)
+    price_group = BerthPriceGroupFactory(name=f"{width}m")
+
+    berth_type = BerthTypeFactory(width=width)
+
+    assert BerthType.objects.get(id=berth_type.id).price_group == price_group

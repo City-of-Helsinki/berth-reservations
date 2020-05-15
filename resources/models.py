@@ -20,6 +20,7 @@ from parler.models import TranslatableModel, TranslatedFields
 from leases.consts import ACTIVE_LEASE_STATUSES
 from leases.enums import LeaseStatus
 from leases.utils import calculate_berth_lease_end_date
+from payments.models import BerthPriceGroup
 from utils.models import TimeStampedModel, UUIDModel
 
 from .enums import BerthMooringType
@@ -472,6 +473,13 @@ class BerthType(AbstractPlaceType):
         blank=True,
         null=True,
     )
+    price_group = models.ForeignKey(
+        "payments.BerthPriceGroup",
+        verbose_name=_("price group"),
+        related_name="berth_types",
+        null=True,
+        on_delete=models.SET_NULL,
+    )
 
     class Meta:
         verbose_name = _("berth type")
@@ -483,6 +491,13 @@ class BerthType(AbstractPlaceType):
                 name="unique_dimension",
             )
         ]
+
+    def save(self, *args, **kwargs):
+        if not self.price_group:
+            self.price_group, created = BerthPriceGroup.objects.get_or_create_for_width(
+                self.width
+            )
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return "{} x {} - {}".format(self.width, self.length, str(self.mooring_type))
