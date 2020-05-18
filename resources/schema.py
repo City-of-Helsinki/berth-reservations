@@ -26,7 +26,7 @@ from users.decorators import (
 )
 from users.utils import user_has_view_permission
 from utils.relay import get_node_from_global_id
-from utils.schema import CountConnection
+from utils.schema import CountConnection, update_object
 
 from .enums import BerthMooringType
 from .models import (
@@ -46,14 +46,6 @@ from .models import (
 BerthMooringTypeEnum = graphene.Enum.from_enum(
     BerthMooringType, description=lambda e: e.label if e else ""
 )
-
-
-def update_object(obj, data):
-    if not data:
-        return
-    for k, v in data.items():
-        setattr(obj, k, v)
-    obj.save()
 
 
 def _resolve_piers(info, **kwargs):
