@@ -1,3 +1,6 @@
+import random
+from decimal import Decimal
+
 import factory
 
 from resources.tests.factories import HarborFactory, WinterStorageAreaFactory
@@ -15,8 +18,8 @@ from ..models import (
 
 
 class AbstractBaseProductFactory(factory.django.DjangoModelFactory):
-    price_value = factory.Faker(
-        "pydecimal", min_value=1, max_value=999, right_digits=2, positive=True
+    price_value = factory.LazyFunction(
+        lambda: round(Decimal(random.uniform(1, 999)), 2)
     )
     price_unit = factory.Faker("random_element", elements=list(PriceUnits))
     tax_percentage = factory.Faker("random_element", elements=TAX_PERCENTAGES)
