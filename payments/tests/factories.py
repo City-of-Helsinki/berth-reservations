@@ -1,11 +1,6 @@
 import factory
-from factory.random import randgen
 
-from resources.tests.factories import (
-    BerthTypeFactory,
-    HarborFactory,
-    WinterStorageAreaFactory,
-)
+from resources.tests.factories import HarborFactory, WinterStorageAreaFactory
 
 from ..enums import PeriodType, PriceUnits, ServiceType
 from ..models import (
@@ -35,11 +30,6 @@ class BerthPriceGroupFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = BerthPriceGroup
-
-    @factory.post_generation
-    def berth_types(self, created, extracted, **kwargs):
-        for bt in BerthTypeFactory.create_batch(randgen.randint(1, 10), **kwargs):
-            self.berth_types.add(bt)
 
 
 class AbstractPlaceProductFactory(AbstractBaseProductFactory):
