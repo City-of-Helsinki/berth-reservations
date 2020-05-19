@@ -23,15 +23,16 @@ from users.decorators import (
     view_permission_required,
 )
 from users.utils import user_has_view_permission
+from utils.enum import graphene_enum
 from utils.relay import get_node_from_global_id
 from utils.schema import CountConnection
 
 from .enums import BoatCertificateType, InvoicingType, OrganizationType
 from .models import Boat, BoatCertificate, CustomerProfile, Organization
 
-InvoicingTypeEnum = graphene.Enum.from_enum(InvoicingType)
-OrganizationTypeEnum = graphene.Enum.from_enum(OrganizationType)
-BoatCertificateTypeEnum = graphene.Enum.from_enum(BoatCertificateType)
+InvoicingTypeEnum = graphene_enum(InvoicingType)
+OrganizationTypeEnum = graphene_enum(OrganizationType)
+BoatCertificateTypeEnum = graphene_enum(BoatCertificateType)
 
 
 class BoatCertificateNode(DjangoObjectType):

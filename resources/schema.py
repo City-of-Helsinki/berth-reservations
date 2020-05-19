@@ -25,6 +25,7 @@ from users.decorators import (
     view_permission_required,
 )
 from users.utils import user_has_view_permission
+from utils.enum import graphene_enum
 from utils.relay import get_node_from_global_id
 from utils.schema import CountConnection, update_object
 
@@ -43,9 +44,7 @@ from .models import (
     WinterStorageSection,
 )
 
-BerthMooringTypeEnum = graphene.Enum.from_enum(
-    BerthMooringType, description=lambda e: e.label if e else ""
-)
+BerthMooringTypeEnum = graphene_enum(BerthMooringType)
 
 
 def _resolve_piers(info, **kwargs):
