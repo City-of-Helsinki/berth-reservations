@@ -10,7 +10,8 @@ from enumfields import EnumField
 from payments.enums import AdditionalProductType, PeriodType, PriceUnits, ServiceType
 from utils.models import TimeStampedModel, UUIDModel
 
-TAX_PERCENTAGES = [Decimal(x) for x in ("24.00", "10.00")]
+PLACE_PRODUCT_TAX_PERCENTAGES = [Decimal(x) for x in ("24.00",)]
+ADDITIONAL_PRODUCT_TAX_PERCENTAGES = [Decimal(x) for x in ("24.00", "10.00")]
 
 DEFAULT_TAX_PERCENTAGE = Decimal("24.0")
 
@@ -23,13 +24,6 @@ class AbstractBaseProduct(TimeStampedModel, UUIDModel):
         validators=[MinValueValidator(Decimal("0.01"))],
     )
     price_unit = EnumField(PriceUnits, default=PriceUnits.AMOUNT)
-    tax_percentage = models.DecimalField(
-        verbose_name=_("tax percentage"),
-        max_digits=5,
-        decimal_places=2,
-        default=DEFAULT_TAX_PERCENTAGE,
-        choices=[(tax, str(tax)) for tax in TAX_PERCENTAGES],
-    )
 
     class Meta:
         abstract = True
@@ -66,7 +60,7 @@ class AbstractPlaceProduct(AbstractBaseProduct):
         max_digits=5,
         decimal_places=2,
         default=DEFAULT_TAX_PERCENTAGE,
-        choices=[(DEFAULT_TAX_PERCENTAGE, str(DEFAULT_TAX_PERCENTAGE))],
+        choices=[(tax, str(tax)) for tax in PLACE_PRODUCT_TAX_PERCENTAGES],
     )
 
     class Meta:
@@ -116,6 +110,13 @@ class WinterStorageProduct(AbstractPlaceProduct):
 class AdditionalProduct(AbstractBaseProduct):
     service = EnumField(ServiceType, verbose_name=_("service"), max_length=40)
     period = EnumField(PeriodType, max_length=8)
+    tax_percentage = models.DecimalField(
+        verbose_name=_("tax percentage"),
+        max_digits=5,
+        decimal_places=2,
+        default=DEFAULT_TAX_PERCENTAGE,
+        choices=[(tax, str(tax)) for tax in ADDITIONAL_PRODUCT_TAX_PERCENTAGES],
+    )
 
     @property
     def product_type(self):

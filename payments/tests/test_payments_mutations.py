@@ -12,8 +12,8 @@ from payments.enums import PriceUnits
 from resources.schema import HarborNode
 from utils.relay import to_global_id
 
-from ..models import BerthProduct
-from ..schema.types import BerthPriceGroupNode, BerthProductNode
+from ..models import BerthProduct, DEFAULT_TAX_PERCENTAGE
+from ..schema.types import BerthPriceGroupNode, BerthProductNode, PlaceProductTaxEnum
 
 CREATE_BERTH_PRODUCT_MUTATION = """
 mutation CREATE_BERTH_PRODUCT($input: CreateBerthProductMutationInput!) {
@@ -22,6 +22,7 @@ mutation CREATE_BERTH_PRODUCT($input: CreateBerthProductMutationInput!) {
             id
             priceValue
             priceUnit
+            taxPercentage
             priceGroup {
                 name
             }
@@ -55,6 +56,7 @@ def test_create_berth_product(api_client, berth_price_group, harbor):
         "priceValue": variables["priceValue"],
         "priceUnit": PriceUnits.AMOUNT.name,
         "priceGroup": {"name": berth_price_group.name},
+        "taxPercentage": PlaceProductTaxEnum.get(DEFAULT_TAX_PERCENTAGE).name,
         "harbor": {"id": variables["harborId"]},
     }
 

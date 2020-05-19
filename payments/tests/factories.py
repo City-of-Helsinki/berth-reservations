@@ -12,7 +12,6 @@ from ..models import (
     BerthPriceGroup,
     BerthProduct,
     DEFAULT_TAX_PERCENTAGE,
-    TAX_PERCENTAGES,
     WinterStorageProduct,
 )
 
@@ -22,7 +21,6 @@ class AbstractBaseProductFactory(factory.django.DjangoModelFactory):
         lambda: round(Decimal(random.uniform(1, 999)), 2)
     )
     price_unit = factory.Faker("random_element", elements=list(PriceUnits))
-    tax_percentage = factory.Faker("random_element", elements=TAX_PERCENTAGES)
 
     class Meta:
         model = AbstractBaseProduct

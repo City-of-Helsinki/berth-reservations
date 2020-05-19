@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 import pytest
 
 from berth_reservations.tests.utils import assert_not_enough_permissions
@@ -7,7 +5,7 @@ from payments.tests.factories import BerthProductFactory
 from resources.schema import HarborNode
 from utils.relay import to_global_id
 
-from ..schema.types import BerthPriceGroupNode, BerthProductNode
+from ..schema.types import BerthPriceGroupNode, BerthProductNode, PlaceProductTaxEnum
 
 BERTH_PRICE_GROUPS_QUERY = """
 query BERTH_PRICE_GROUPS {
@@ -60,7 +58,7 @@ def test_get_berth_price_groups(api_client, berth_price_group):
         "id": to_global_id(BerthProductNode, product.id),
         "priceValue": str(product.price_value),
         "priceUnit": product.price_unit.name,
-        "taxPercentage": str(Decimal(product.tax_percentage).quantize(Decimal("1.00"))),
+        "taxPercentage": PlaceProductTaxEnum.get(product.tax_percentage).name,
         "harbor": None,
     }
 
@@ -132,7 +130,7 @@ def test_get_berth_price_group(api_client, berth_price_group):
         "id": to_global_id(BerthProductNode, product.id),
         "priceValue": str(product.price_value),
         "priceUnit": product.price_unit.name,
-        "taxPercentage": str(Decimal(product.tax_percentage).quantize(Decimal("1.00"))),
+        "taxPercentage": PlaceProductTaxEnum.get(product.tax_percentage).name,
         "harbor": None,
     }
 
@@ -190,9 +188,7 @@ def test_get_berth_products(api_client, berth_product):
         "id": to_global_id(BerthProductNode, berth_product.id),
         "priceValue": str(berth_product.price_value),
         "priceUnit": berth_product.price_unit.name,
-        "taxPercentage": str(
-            Decimal(berth_product.tax_percentage).quantize(Decimal("1.00"))
-        ),
+        "taxPercentage": PlaceProductTaxEnum.get(berth_product.tax_percentage).name,
         "priceGroup": {"name": berth_product.price_group.name},
         "harbor": {"id": to_global_id(HarborNode, berth_product.harbor.id)},
     }
@@ -238,9 +234,7 @@ def test_get_berth_product(api_client, berth_product):
         "id": product_global_id,
         "priceValue": str(berth_product.price_value),
         "priceUnit": berth_product.price_unit.name,
-        "taxPercentage": str(
-            Decimal(berth_product.tax_percentage).quantize(Decimal("1.00"))
-        ),
+        "taxPercentage": PlaceProductTaxEnum.get(berth_product.tax_percentage).name,
         "priceGroup": {"name": berth_product.price_group.name},
         "harbor": {"id": to_global_id(HarborNode, berth_product.harbor.id)},
     }

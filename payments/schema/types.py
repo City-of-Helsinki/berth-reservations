@@ -5,10 +5,31 @@ from payments.enums import PriceUnits
 from users.decorators import view_permission_required
 from utils.schema import CountConnection
 
-from ..models import BerthPriceGroup, BerthProduct, TAX_PERCENTAGES
+from ..models import (
+    ADDITIONAL_PRODUCT_TAX_PERCENTAGES,
+    BerthPriceGroup,
+    BerthProduct,
+    PLACE_PRODUCT_TAX_PERCENTAGES,
+)
 
 PriceUnitsEnum = graphene.Enum.from_enum(
     PriceUnits, description=lambda e: e.label if e else ""
+)
+
+PlaceProductTaxEnum = graphene.Enum(
+    "PlaceProductTaxEnum",
+    [
+        (f"TAX_{str(tax).replace('.', '_')}", tax)
+        for tax in PLACE_PRODUCT_TAX_PERCENTAGES
+    ],
+)
+
+AdditionalProductTaxEnum = graphene.Enum(
+    "AdditionalProductTaxEnum",
+    [
+        (f"TAX_{str(tax).replace('.', '_')}", tax)
+        for tax in ADDITIONAL_PRODUCT_TAX_PERCENTAGES
+    ],
 )
 
 
@@ -40,11 +61,7 @@ class BerthProductNode(DjangoObjectType):
     price_unit = PriceUnitsEnum(
         required=True, description="`Fixed to PriceUnit.AMOUNT`"
     )
-    tax_percentage = graphene.Decimal(
-        required=True,
-        description=f"Takes the following options:\n\n"
-        f"{', '.join([str(p)+'%' for p in TAX_PERCENTAGES])}",
-    )
+    tax_percentage = PlaceProductTaxEnum(required=True)
     price_group = graphene.Field("payments.schema.BerthPriceGroupNode", required=True)
     harbor = graphene.Field("resources.schema.HarborNode")
 
