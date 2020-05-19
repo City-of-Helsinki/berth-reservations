@@ -401,6 +401,7 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
     max_width = graphene.Float()
     max_length = graphene.Float()
     number_of_marked_places = graphene.Int(required=True)
+    product = graphene.Field("payments.schema.WinterStorageProductNode")
 
     def resolve_image_file(self, info, **kwargs):
         if self.image_file:

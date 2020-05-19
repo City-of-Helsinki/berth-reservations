@@ -10,6 +10,7 @@ from ..models import (
     BerthPriceGroup,
     BerthProduct,
     PLACE_PRODUCT_TAX_PERCENTAGES,
+    WinterStorageProduct,
 )
 
 PriceUnitsEnum = graphene.Enum.from_enum(
@@ -56,12 +57,15 @@ class BerthPriceGroupNode(DjangoObjectType):
         return self.products.filter(harbor__isnull=True).first()
 
 
-class BerthProductNode(DjangoObjectType):
+class AbstractPlaceProductNode:
     price_value = graphene.Decimal(required=True)
     price_unit = PriceUnitsEnum(
         required=True, description="`Fixed to PriceUnit.AMOUNT`"
     )
     tax_percentage = PlaceProductTaxEnum(required=True)
+
+
+class BerthProductNode(DjangoObjectType, AbstractPlaceProductNode):
     price_group = graphene.Field("payments.schema.BerthPriceGroupNode", required=True)
     harbor = graphene.Field("resources.schema.HarborNode")
 
@@ -72,5 +76,19 @@ class BerthProductNode(DjangoObjectType):
 
     @classmethod
     @view_permission_required(BerthProduct)
+    def get_queryset(cls, queryset, info):
+        return super().get_queryset(queryset, info)
+
+
+class WinterStorageProductNode(DjangoObjectType, AbstractPlaceProductNode):
+    winter_storage_area = graphene.Field("resources.schema.WinterStorageAreaNode")
+
+    class Meta:
+        model = WinterStorageProduct
+        interfaces = (graphene.relay.Node,)
+        connection_class = CountConnection
+
+    @classmethod
+    @view_permission_required(WinterStorageProduct)
     def get_queryset(cls, queryset, info):
         return super().get_queryset(queryset, info)

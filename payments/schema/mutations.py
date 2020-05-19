@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
-from resources.schema import HarborNode
+from resources.schema import HarborNode, WinterStorageAreaNode
 from users.decorators import (
     add_permission_required,
     change_permission_required,
@@ -12,8 +12,8 @@ from users.decorators import (
 from utils.relay import get_node_from_global_id
 from utils.schema import update_object
 
-from ..models import BerthProduct
-from .types import BerthPriceGroupNode, BerthProductNode
+from ..models import BerthProduct, WinterStorageProduct
+from .types import BerthPriceGroupNode, BerthProductNode, WinterStorageProductNode
 
 
 class CreateBerthProductMutation(graphene.ClientIDMutation):
@@ -97,6 +97,77 @@ class DeleteBerthProductMutation(graphene.ClientIDMutation):
         return DeleteBerthProductMutation()
 
 
+class CreateWinterStorageProductMutation(graphene.ClientIDMutation):
+    class Input:
+        price_value = graphene.Decimal(required=True)
+        winter_storage_area_id = graphene.ID()
+
+    winter_storage_product = graphene.Field(WinterStorageProductNode)
+
+    @classmethod
+    @add_permission_required(WinterStorageProduct)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        input["winter_storage_area"] = get_node_from_global_id(
+            info,
+            input.pop("winter_storage_area_id", None),
+            only_type=WinterStorageAreaNode,
+            nullable=True,
+        )
+        try:
+            product = WinterStorageProduct.objects.create(**input)
+        except (ValidationError, IntegrityError) as e:
+            raise VenepaikkaGraphQLError(e)
+        return CreateWinterStorageProductMutation(winter_storage_product=product)
+
+
+class UpdateWinterStorageProductMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+        price_value = graphene.Decimal()
+        winter_storage_area_id = graphene.ID()
+
+    winter_storage_product = graphene.Field(WinterStorageProductNode)
+
+    @classmethod
+    @change_permission_required(WinterStorageProduct)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        product = get_node_from_global_id(
+            info, input.pop("id"), only_type=WinterStorageProductNode, nullable=False
+        )
+        if "winter_storage_area_id" in input:
+            input["winter_storage_area"] = get_node_from_global_id(
+                info,
+                input.pop("winter_storage_area_id", None),
+                only_type=WinterStorageAreaNode,
+                nullable=True,
+            )
+        try:
+            update_object(product, input)
+        except (ValidationError, IntegrityError) as e:
+            raise VenepaikkaGraphQLError(e)
+
+        return UpdateWinterStorageProductMutation(winter_storage_product=product)
+
+
+class DeleteWinterStorageProductMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+
+    @classmethod
+    @delete_permission_required(WinterStorageProduct)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        product = get_node_from_global_id(
+            info, input.pop("id"), only_type=WinterStorageProductNode, nullable=False,
+        )
+
+        product.delete()
+
+        return DeleteWinterStorageProductMutation()
+
+
 class Mutation:
     create_berth_product = CreateBerthProductMutation.Field(
         description="Creates a `BerthProduct` object."
@@ -115,4 +186,21 @@ class Mutation:
         "\n\n**Requires permissions** to edit payments."
         "\n\nErrors:"
         "\n* The `BerthProduct` doesn't exist"
+    )
+
+    create_winter_storage_product = CreateWinterStorageProductMutation.Field(
+        description="Creates a `WinterStorageProduct` object."
+        "\n\n**Requires permissions** to edit payments."
+    )
+    update_winter_storage_product = UpdateWinterStorageProductMutation.Field(
+        description="Updates a `WinterStorageProduct` object."
+        "\n\n**Requires permissions** to edit payments."
+        "\n\nErrors:"
+        "\n* The `WinterStorageProduct` doesn't exist"
+    )
+    delete_winter_storage_product = DeleteWinterStorageProductMutation.Field(
+        description="Deletes a `WinterStorageProduct` object."
+        "\n\n**Requires permissions** to edit payments."
+        "\n\nErrors:"
+        "\n* The `WinterStorageProduct` doesn't exist"
     )

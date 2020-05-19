@@ -2,10 +2,15 @@ import pytest
 
 from berth_reservations.tests.utils import assert_not_enough_permissions
 from payments.tests.factories import BerthProductFactory
-from resources.schema import HarborNode
+from resources.schema import HarborNode, WinterStorageAreaNode
 from utils.relay import to_global_id
 
-from ..schema.types import BerthPriceGroupNode, BerthProductNode, PlaceProductTaxEnum
+from ..schema.types import (
+    BerthPriceGroupNode,
+    BerthProductNode,
+    PlaceProductTaxEnum,
+    WinterStorageProductNode,
+)
 
 BERTH_PRICE_GROUPS_QUERY = """
 query BERTH_PRICE_GROUPS {
@@ -246,5 +251,111 @@ def test_get_berth_product(api_client, berth_product):
 def test_get_berth_product_not_enough_permissions(api_client, berth_product):
     product_global_id = to_global_id(BerthProductNode, berth_product.id)
     executed = api_client.execute(BERTH_PRODUCT_QUERY % product_global_id)
+
+    assert_not_enough_permissions(executed)
+
+
+WINTER_STORAGE_PRODUCTS_QUERY = """
+query WINTER_STORAGE_PRODUCTS {
+    winterStorageProducts {
+        edges {
+            node {
+                id
+                priceValue
+                priceUnit
+                taxPercentage
+                winterStorageArea {
+                    id
+                }
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_winter_storage_products(api_client, winter_storage_product):
+    executed = api_client.execute(WINTER_STORAGE_PRODUCTS_QUERY)
+
+    assert executed["data"]["winterStorageProducts"]["edges"][0]["node"] == {
+        "id": to_global_id(WinterStorageProductNode, winter_storage_product.id),
+        "priceValue": str(winter_storage_product.price_value),
+        "priceUnit": winter_storage_product.price_unit.name,
+        "taxPercentage": PlaceProductTaxEnum.get(
+            winter_storage_product.tax_percentage
+        ).name,
+        "winterStorageArea": {
+            "id": to_global_id(
+                WinterStorageAreaNode, winter_storage_product.winter_storage_area.id
+            )
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+)
+def test_get_winter_storage_products_not_enough_permissions(api_client):
+    executed = api_client.execute(WINTER_STORAGE_PRODUCTS_QUERY)
+
+    assert_not_enough_permissions(executed)
+
+
+WINTER_STORAGE_PRODUCT_QUERY = """
+query WINTER_STORAGE_PRODUCTS {
+    winterStorageProduct(id: "%s") {
+        id
+        priceValue
+        priceUnit
+        taxPercentage
+        winterStorageArea {
+            id
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_winter_storage_product(api_client, winter_storage_product):
+    product_global_id = to_global_id(
+        WinterStorageProductNode, winter_storage_product.id
+    )
+    executed = api_client.execute(WINTER_STORAGE_PRODUCT_QUERY % product_global_id)
+
+    assert executed["data"]["winterStorageProduct"] == {
+        "id": product_global_id,
+        "priceValue": str(winter_storage_product.price_value),
+        "priceUnit": winter_storage_product.price_unit.name,
+        "taxPercentage": PlaceProductTaxEnum.get(
+            winter_storage_product.tax_percentage
+        ).name,
+        "winterStorageArea": {
+            "id": to_global_id(
+                WinterStorageAreaNode, winter_storage_product.winter_storage_area.id
+            )
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+)
+def test_get_winter_storage_product_not_enough_permissions(
+    api_client, winter_storage_product
+):
+    product_global_id = to_global_id(
+        WinterStorageProductNode, winter_storage_product.id
+    )
+    executed = api_client.execute(WINTER_STORAGE_PRODUCT_QUERY % product_global_id)
 
     assert_not_enough_permissions(executed)
