@@ -1,21 +1,27 @@
 import graphene
 from graphene_django import DjangoConnectionField, DjangoObjectType
 
-from payments.enums import PriceUnits
+from payments.enums import AdditionalProductType, PeriodType, PriceUnits, ServiceType
 from users.decorators import view_permission_required
+from utils.enum import graphene_enum
 from utils.schema import CountConnection
 
 from ..models import (
     ADDITIONAL_PRODUCT_TAX_PERCENTAGES,
+    AdditionalProduct,
     BerthPriceGroup,
     BerthProduct,
     PLACE_PRODUCT_TAX_PERCENTAGES,
     WinterStorageProduct,
 )
 
-PriceUnitsEnum = graphene.Enum.from_enum(
-    PriceUnits, description=lambda e: e.label if e else ""
-)
+PriceUnitsEnum = graphene_enum(PriceUnits)
+
+AdditionalProductTypeEnum = graphene_enum(AdditionalProductType)
+
+ServiceTypeEnum = graphene_enum(ServiceType)
+
+PeriodTypeEnum = graphene_enum(PeriodType)
 
 PlaceProductTaxEnum = graphene.Enum(
     "PlaceProductTaxEnum",
@@ -90,5 +96,24 @@ class WinterStorageProductNode(DjangoObjectType, AbstractPlaceProductNode):
 
     @classmethod
     @view_permission_required(WinterStorageProduct)
+    def get_queryset(cls, queryset, info):
+        return super().get_queryset(queryset, info)
+
+
+class AdditionalProductNode(DjangoObjectType):
+    service = ServiceTypeEnum(required=True)
+    period = PeriodTypeEnum(required=True)
+    price_value = graphene.Decimal(required=True)
+    price_unit = PriceUnitsEnum(required=True)
+    tax_percentage = AdditionalProductTaxEnum(required=True)
+    product_type = AdditionalProductTypeEnum(required=True)
+
+    class Meta:
+        model = AdditionalProduct
+        interfaces = (graphene.relay.Node,)
+        connection_class = CountConnection
+
+    @classmethod
+    @view_permission_required(AdditionalProduct)
     def get_queryset(cls, queryset, info):
         return super().get_queryset(queryset, info)

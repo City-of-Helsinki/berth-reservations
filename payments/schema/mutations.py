@@ -12,8 +12,17 @@ from users.decorators import (
 from utils.relay import get_node_from_global_id
 from utils.schema import update_object
 
-from ..models import BerthProduct, WinterStorageProduct
-from .types import BerthPriceGroupNode, BerthProductNode, WinterStorageProductNode
+from ..models import AdditionalProduct, BerthProduct, WinterStorageProduct
+from .types import (
+    AdditionalProductNode,
+    AdditionalProductTaxEnum,
+    BerthPriceGroupNode,
+    BerthProductNode,
+    PeriodTypeEnum,
+    PriceUnitsEnum,
+    ServiceTypeEnum,
+    WinterStorageProductNode,
+)
 
 
 class CreateBerthProductMutation(graphene.ClientIDMutation):
@@ -168,6 +177,70 @@ class DeleteWinterStorageProductMutation(graphene.ClientIDMutation):
         return DeleteWinterStorageProductMutation()
 
 
+class AdditionalProductInput:
+    service = ServiceTypeEnum()
+    period = PeriodTypeEnum()
+    price_value = graphene.Decimal()
+    price_unit = PriceUnitsEnum()
+    tax_percentage = AdditionalProductTaxEnum()
+
+
+class CreateAdditionalProductMutation(graphene.ClientIDMutation):
+    class Input(AdditionalProductInput):
+        service = ServiceTypeEnum(required=True)
+        period = PeriodTypeEnum(required=True)
+        price_value = graphene.Decimal(required=True)
+
+    additional_product = graphene.Field(AdditionalProductNode)
+
+    @classmethod
+    @add_permission_required(AdditionalProduct)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        try:
+            product = AdditionalProduct.objects.create(**input)
+        except (ValidationError, IntegrityError) as e:
+            raise VenepaikkaGraphQLError(e)
+        return CreateAdditionalProductMutation(additional_product=product)
+
+
+class UpdateAdditionalProductMutation(graphene.ClientIDMutation):
+    class Input(AdditionalProductInput):
+        id = graphene.ID(required=True)
+
+    additional_product = graphene.Field(AdditionalProductNode)
+
+    @classmethod
+    @add_permission_required(AdditionalProduct)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        product = get_node_from_global_id(
+            info, input.pop("id"), only_type=AdditionalProductNode, nullable=False
+        )
+        try:
+            update_object(product, input)
+        except (ValidationError, IntegrityError) as e:
+            raise VenepaikkaGraphQLError(e)
+        return UpdateAdditionalProductMutation(additional_product=product)
+
+
+class DeleteAdditionalProductMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+
+    @classmethod
+    @delete_permission_required(AdditionalProduct)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        product = get_node_from_global_id(
+            info, input.pop("id"), only_type=AdditionalProductNode, nullable=False,
+        )
+
+        product.delete()
+
+        return DeleteAdditionalProductMutation()
+
+
 class Mutation:
     create_berth_product = CreateBerthProductMutation.Field(
         description="Creates a `BerthProduct` object."
@@ -203,4 +276,21 @@ class Mutation:
         "\n\n**Requires permissions** to edit payments."
         "\n\nErrors:"
         "\n* The `WinterStorageProduct` doesn't exist"
+    )
+
+    create_additional_product = CreateAdditionalProductMutation.Field(
+        description="Deletes a `AdditionalProduct` object."
+        "\n\n**Requires permissions** to edit payments."
+    )
+    update_additional_product = UpdateAdditionalProductMutation.Field(
+        description="Updates a `AdditionalProduct` object."
+        "\n\n**Requires permissions** to edit payments."
+        "\n\nErrors:"
+        "\n* The `AdditionalProduct` doesn't exist"
+    )
+    delete_additional_product = DeleteAdditionalProductMutation.Field(
+        description="Deletes a `AdditionalProduct` object."
+        "\n\n**Requires permissions** to edit payments."
+        "\n\nErrors:"
+        "\n* The `AdditionalProduct` doesn't exist"
     )

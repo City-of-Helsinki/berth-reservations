@@ -1,11 +1,16 @@
+import random
+
 import pytest
 
 from berth_reservations.tests.utils import assert_not_enough_permissions
-from payments.tests.factories import BerthProductFactory
+from payments.enums import ServiceType
+from payments.tests.factories import AdditionalProductFactory, BerthProductFactory
 from resources.schema import HarborNode, WinterStorageAreaNode
 from utils.relay import to_global_id
 
 from ..schema.types import (
+    AdditionalProductNode,
+    AdditionalProductTaxEnum,
     BerthPriceGroupNode,
     BerthProductNode,
     PlaceProductTaxEnum,
@@ -357,5 +362,135 @@ def test_get_winter_storage_product_not_enough_permissions(
         WinterStorageProductNode, winter_storage_product.id
     )
     executed = api_client.execute(WINTER_STORAGE_PRODUCT_QUERY % product_global_id)
+
+    assert_not_enough_permissions(executed)
+
+
+ADDITIONAL_PRODUCTS_QUERY = """
+query ADDITIONAL_PRODUCTS {
+    additionalProducts {
+        edges {
+            node {
+                id
+                service
+                period
+                priceValue
+                priceUnit
+                taxPercentage
+                productType
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_additional_products(api_client, additional_product):
+    executed = api_client.execute(ADDITIONAL_PRODUCTS_QUERY)
+
+    assert executed["data"]["additionalProducts"]["edges"][0]["node"] == {
+        "id": to_global_id(AdditionalProductNode, additional_product.id),
+        "service": additional_product.service.name,
+        "period": additional_product.period.name,
+        "priceValue": str(additional_product.price_value),
+        "priceUnit": additional_product.price_unit.name,
+        "taxPercentage": AdditionalProductTaxEnum.get(
+            additional_product.tax_percentage
+        ).name,
+        "productType": additional_product.product_type.name,
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+)
+def test_get_additional_products_not_enough_permissions(api_client):
+    executed = api_client.execute(ADDITIONAL_PRODUCTS_QUERY)
+
+    assert_not_enough_permissions(executed)
+
+
+ADDITIONAL_PRODUCTS_FILTERED_QUERY = """
+query ADDITIONAL_PRODUCTS {
+    additionalProducts(productType: %s) {
+        edges {
+            node {
+                id
+                productType
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize("filter", ["FIXED_SERVICE", "OPTIONAL_SERVICE"])
+def test_get_additional_products_filtered(superuser_api_client, filter):
+    fixed = AdditionalProductFactory(
+        service=random.choice(ServiceType.FIXED_SERVICES())
+    )
+    optional = AdditionalProductFactory(
+        service=random.choice(ServiceType.OPTIONAL_SERVICES())
+    )
+
+    executed = superuser_api_client.execute(ADDITIONAL_PRODUCTS_FILTERED_QUERY % filter)
+
+    product = fixed if filter == "FIXED_SERVICE" else optional
+
+    assert len(executed["data"]["additionalProducts"]) == 1
+    assert executed["data"]["additionalProducts"]["edges"][0]["node"] == {
+        "id": to_global_id(AdditionalProductNode, product.id),
+        "productType": product.product_type.name,
+    }
+
+
+ADDITIONAL_PRODUCT_QUERY = """
+query ADDITIONAL_PRODUCT {
+    additionalProduct(id: "%s") {
+        id
+        service
+        period
+        priceValue
+        priceUnit
+        taxPercentage
+        productType
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_additional_product(api_client, additional_product):
+    product_global_id = to_global_id(AdditionalProductNode, additional_product.id)
+    executed = api_client.execute(ADDITIONAL_PRODUCT_QUERY % product_global_id)
+
+    assert executed["data"]["additionalProduct"] == {
+        "id": product_global_id,
+        "service": additional_product.service.name,
+        "period": additional_product.period.name,
+        "priceValue": str(additional_product.price_value),
+        "priceUnit": additional_product.price_unit.name,
+        "taxPercentage": AdditionalProductTaxEnum.get(
+            additional_product.tax_percentage
+        ).name,
+        "productType": additional_product.product_type.name,
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+)
+def test_get_additional_product_not_enough_permissions(api_client, additional_product):
+    product_global_id = to_global_id(AdditionalProductNode, additional_product.id)
+    executed = api_client.execute(ADDITIONAL_PRODUCT_QUERY % product_global_id)
 
     assert_not_enough_permissions(executed)
