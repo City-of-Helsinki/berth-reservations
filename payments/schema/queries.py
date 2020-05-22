@@ -1,4 +1,4 @@
-from graphene import Node
+from graphene import List, Node
 from graphene_django import DjangoConnectionField
 
 from payments.enums import AdditionalProductType, ServiceType
@@ -6,6 +6,7 @@ from payments.models import AdditionalProduct
 
 from .types import (
     AdditionalProductNode,
+    AdditionalProductServiceNode,
     AdditionalProductTypeEnum,
     BerthPriceGroupNode,
     BerthProductNode,
@@ -46,6 +47,9 @@ class Query:
         AdditionalProductNode,
         description="**Requires permissions** to access payments.",
     )
+    additional_product_services = List(
+        AdditionalProductServiceNode, product_type=AdditionalProductTypeEnum()
+    )
 
     def resolve_additional_products(self, info, **kwargs):
         product_type = kwargs.get("product_type")
@@ -61,3 +65,18 @@ class Query:
                 )
 
         return AdditionalProduct.objects.all()
+
+    def resolve_additional_product_services(self, info, **kwargs):
+        service_list = list(ServiceType)
+        product_type = kwargs.get("product_type")
+
+        if product_type:
+            product_type = AdditionalProductType(product_type)
+            if product_type == AdditionalProductType.FIXED_SERVICE:
+                service_list = ServiceType.FIXED_SERVICES()
+            elif product_type == AdditionalProductType.OPTIONAL_SERVICE:
+                service_list = ServiceType.OPTIONAL_SERVICES()
+
+        return [
+            AdditionalProductServiceNode(service=service) for service in service_list
+        ]

@@ -117,3 +117,19 @@ class AdditionalProductNode(DjangoObjectType):
     @view_permission_required(AdditionalProduct)
     def get_queryset(cls, queryset, info):
         return super().get_queryset(queryset, info)
+
+
+class AdditionalProductServiceNode(graphene.ObjectType):
+    service = ServiceTypeEnum(required=True)
+    product_type = AdditionalProductTypeEnum(required=True)
+
+    class Meta:
+        interfaces = (graphene.relay.Node,)
+        connection_class = CountConnection
+
+    def resolve_product_type(self, info):
+        return (
+            AdditionalProductType.FIXED_SERVICE
+            if self.service.is_fixed_service()
+            else AdditionalProductType.OPTIONAL_SERVICE
+        )
