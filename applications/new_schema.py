@@ -11,6 +11,7 @@ from users.decorators import (
     delete_permission_required,
     view_permission_required,
 )
+from utils.enum import graphene_enum
 from utils.relay import get_node_from_global_id
 from utils.schema import CountConnection
 
@@ -18,7 +19,7 @@ from .enums import ApplicationStatus
 from .models import BerthApplication, BerthSwitch, HarborChoice
 from .schema import BerthSwitchType as OldBerthSwitchType
 
-ApplicationStatusEnum = graphene.Enum.from_enum(ApplicationStatus)
+ApplicationStatusEnum = graphene_enum(ApplicationStatus)
 
 
 class HarborChoiceType(DjangoObjectType):

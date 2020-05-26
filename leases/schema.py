@@ -20,13 +20,14 @@ from users.decorators import (
     view_permission_required,
 )
 from users.utils import user_has_view_permission
+from utils.enum import graphene_enum
 from utils.relay import get_node_from_global_id
 from utils.schema import CountConnection
 
 from .enums import LeaseStatus
 from .models import BerthLease
 
-LeaseStatusEnum = graphene.Enum.from_enum(LeaseStatus)
+LeaseStatusEnum = graphene_enum(LeaseStatus)
 
 
 class BerthLeaseNodeFilter(django_filters.FilterSet):

@@ -4,6 +4,7 @@ from graphene_federation import build_schema
 import applications.new_schema
 import customers.schema
 import leases.schema
+import payments.schema
 import resources.schema
 
 # =====================================================
@@ -19,6 +20,7 @@ class Query(
     customers.schema.Query,
     leases.schema.Query,
     resources.schema.Query,
+    payments.schema.Query,
     graphene.ObjectType,
 ):
     pass
@@ -29,6 +31,7 @@ class Mutation(
     customers.schema.Mutation,
     leases.schema.Mutation,
     resources.schema.Mutation,
+    payments.schema.Mutation,
     graphene.ObjectType,
 ):
     pass

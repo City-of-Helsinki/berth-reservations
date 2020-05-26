@@ -1,30 +1,28 @@
-import factory
-from factory.random import randgen
+import random
+from decimal import Decimal
 
-from resources.tests.factories import (
-    BerthTypeFactory,
-    HarborFactory,
-    WinterStorageAreaFactory,
-)
+import factory
+
+from resources.tests.factories import HarborFactory, WinterStorageAreaFactory
 
 from ..enums import PeriodType, PriceUnits, ServiceType
 from ..models import (
     AbstractBaseProduct,
+    ADDITIONAL_PRODUCT_TAX_PERCENTAGES,
     AdditionalProduct,
     BerthPriceGroup,
     BerthProduct,
     DEFAULT_TAX_PERCENTAGE,
-    TAX_PERCENTAGES,
+    PLACE_PRODUCT_TAX_PERCENTAGES,
     WinterStorageProduct,
 )
 
 
 class AbstractBaseProductFactory(factory.django.DjangoModelFactory):
-    price_value = factory.Faker(
-        "pydecimal", min_value=1, max_value=999, right_digits=2, positive=True
+    price_value = factory.LazyFunction(
+        lambda: round(Decimal(random.uniform(1, 999)), 2)
     )
     price_unit = factory.Faker("random_element", elements=list(PriceUnits))
-    tax_percentage = factory.Faker("random_element", elements=TAX_PERCENTAGES)
 
     class Meta:
         model = AbstractBaseProduct
@@ -36,15 +34,12 @@ class BerthPriceGroupFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = BerthPriceGroup
 
-    @factory.post_generation
-    def berth_types(self, created, extracted, **kwargs):
-        for bt in BerthTypeFactory.create_batch(randgen.randint(1, 10), **kwargs):
-            self.berth_types.add(bt)
-
 
 class AbstractPlaceProductFactory(AbstractBaseProductFactory):
     price_unit = factory.LazyFunction(lambda: PriceUnits.AMOUNT)
-    tax_percentage = factory.LazyFunction(lambda: DEFAULT_TAX_PERCENTAGE)
+    tax_percentage = factory.Faker(
+        "random_element", elements=PLACE_PRODUCT_TAX_PERCENTAGES
+    )
 
 
 class BerthProductFactory(AbstractPlaceProductFactory):
@@ -64,7 +59,18 @@ class WinterStorageProductFactory(AbstractPlaceProductFactory):
 
 class AdditionalProductFactory(AbstractBaseProductFactory):
     service = factory.Faker("random_element", elements=list(ServiceType))
-    period = factory.Faker("random_element", elements=list(PeriodType))
+    period = factory.LazyFunction(lambda: PeriodType.SEASON)
+    tax_percentage = factory.LazyFunction(lambda: DEFAULT_TAX_PERCENTAGE)
+
+    # Because of the FIXED_SERVICE restrictions (only allowed to have 24% VAT)
+    # the actual assignment of a random Tax value is done once the service has
+    # been assigned to the model.
+    @factory.post_generation
+    def service_taxes(self, created, extracted, **kwargs):
+        if self.service.is_fixed_service():
+            self.tax_percentage = DEFAULT_TAX_PERCENTAGE
+        else:
+            self.tax_percentage = random.choice(ADDITIONAL_PRODUCT_TAX_PERCENTAGES)
 
     class Meta:
         model = AdditionalProduct

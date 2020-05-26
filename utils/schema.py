@@ -1,6 +1,14 @@
 import graphene
 
 
+def update_object(instance, input):
+    if not input:
+        return
+    for k, v in input.items():
+        setattr(instance, k, v)
+    instance.save()
+
+
 class CountConnection(graphene.Connection):
     class Meta:
         abstract = True

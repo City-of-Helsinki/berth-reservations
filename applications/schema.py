@@ -2,6 +2,7 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 from harbors.schema import HarborType, WinterStorageAreaType
+from utils.enum import graphene_enum
 from utils.relay import get_node_from_global_id
 
 from .enums import WinterStorageMethod
@@ -16,7 +17,7 @@ from .models import (
 )
 from .signals import application_saved
 
-WinterStorageMethodEnum = graphene.Enum.from_enum(WinterStorageMethod)
+WinterStorageMethodEnum = graphene_enum(WinterStorageMethod)
 
 
 class HarborChoiceType(DjangoObjectType):

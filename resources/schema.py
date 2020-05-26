@@ -25,8 +25,9 @@ from users.decorators import (
     view_permission_required,
 )
 from users.utils import user_has_view_permission
+from utils.enum import graphene_enum
 from utils.relay import get_node_from_global_id
-from utils.schema import CountConnection
+from utils.schema import CountConnection, update_object
 
 from .enums import BerthMooringType
 from .models import (
@@ -43,17 +44,7 @@ from .models import (
     WinterStorageSection,
 )
 
-BerthMooringTypeEnum = graphene.Enum.from_enum(
-    BerthMooringType, description=lambda e: e.label if e else ""
-)
-
-
-def update_object(obj, data):
-    if not data:
-        return
-    for k, v in data.items():
-        setattr(obj, k, v)
-    obj.save()
+BerthMooringTypeEnum = graphene_enum(BerthMooringType)
 
 
 def _resolve_piers(info, **kwargs):
@@ -409,6 +400,7 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
     max_width = graphene.Float()
     max_length = graphene.Float()
     number_of_marked_places = graphene.Int(required=True)
+    product = graphene.Field("payments.schema.WinterStorageProductNode")
 
     def resolve_image_file(self, info, **kwargs):
         if self.image_file:
