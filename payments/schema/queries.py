@@ -1,7 +1,7 @@
 from graphene import List, Node
 from graphene_django import DjangoConnectionField
 
-from payments.enums import AdditionalProductType, ServiceType
+from payments.enums import AdditionalProductType, ProductServiceType
 from payments.models import AdditionalProduct
 
 from .types import (
@@ -57,25 +57,25 @@ class Query:
             product_type = AdditionalProductType(product_type)
             if product_type == AdditionalProductType.FIXED_SERVICE:
                 return AdditionalProduct.objects.filter(
-                    service__in=ServiceType.FIXED_SERVICES()
+                    service__in=ProductServiceType.FIXED_SERVICES()
                 )
             elif product_type == AdditionalProductType.OPTIONAL_SERVICE:
                 return AdditionalProduct.objects.filter(
-                    service__in=ServiceType.OPTIONAL_SERVICES()
+                    service__in=ProductServiceType.OPTIONAL_SERVICES()
                 )
 
         return AdditionalProduct.objects.all()
 
     def resolve_additional_product_services(self, info, **kwargs):
-        service_list = list(ServiceType)
+        service_list = list(ProductServiceType)
         product_type = kwargs.get("product_type")
 
         if product_type:
             product_type = AdditionalProductType(product_type)
             if product_type == AdditionalProductType.FIXED_SERVICE:
-                service_list = ServiceType.FIXED_SERVICES()
+                service_list = ProductServiceType.FIXED_SERVICES()
             elif product_type == AdditionalProductType.OPTIONAL_SERVICE:
-                service_list = ServiceType.OPTIONAL_SERVICES()
+                service_list = ProductServiceType.OPTIONAL_SERVICES()
 
         return [
             AdditionalProductServiceNode(service=service) for service in service_list

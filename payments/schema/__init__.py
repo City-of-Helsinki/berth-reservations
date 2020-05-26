@@ -9,7 +9,7 @@ from .types import (
     PeriodTypeEnum,
     PlaceProductTaxEnum,
     PriceUnitsEnum,
-    ServiceTypeEnum,
+    ProductServiceTypeEnum,
     WinterStorageProductNode,
 )
 
@@ -24,6 +24,6 @@ __all__ = [
     "PlaceProductTaxEnum",
     "PriceUnitsEnum",
     "Query",
-    "ServiceTypeEnum",
+    "ProductServiceTypeEnum",
     "WinterStorageProductNode",
 ]

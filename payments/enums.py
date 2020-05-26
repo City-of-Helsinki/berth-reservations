@@ -2,7 +2,7 @@ from django.utils.translation import ugettext_lazy as _
 from enumfields import Enum
 
 
-class ServiceType(Enum):
+class ProductServiceType(Enum):
     # Fixed services
     ELECTRICITY = "electricity"
     WATER = "water"
@@ -32,21 +32,21 @@ class ServiceType(Enum):
     @staticmethod
     def FIXED_SERVICES():
         return [
-            ServiceType.ELECTRICITY,
-            ServiceType.WATER,
-            ServiceType.GATE,
-            ServiceType.MOORING,
-            ServiceType.WASTE_COLLECTION,
-            ServiceType.LIGHTING,
+            ProductServiceType.ELECTRICITY,
+            ProductServiceType.WATER,
+            ProductServiceType.GATE,
+            ProductServiceType.MOORING,
+            ProductServiceType.WASTE_COLLECTION,
+            ProductServiceType.LIGHTING,
         ]
 
     @staticmethod
     def OPTIONAL_SERVICES():
         return [
-            ServiceType.SUMMER_STORAGE_FOR_DOCKING_EQUIPMENT,
-            ServiceType.SUMMER_STORAGE_FOR_TRAILERS,
-            ServiceType.PARKING_PERMIT,
-            ServiceType.DINGHY_PLACE,
+            ProductServiceType.SUMMER_STORAGE_FOR_DOCKING_EQUIPMENT,
+            ProductServiceType.SUMMER_STORAGE_FOR_TRAILERS,
+            ProductServiceType.PARKING_PERMIT,
+            ProductServiceType.DINGHY_PLACE,
         ]
 
     def is_fixed_service(self):

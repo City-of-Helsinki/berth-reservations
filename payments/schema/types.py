@@ -1,7 +1,12 @@
 import graphene
 from graphene_django import DjangoConnectionField, DjangoObjectType
 
-from payments.enums import AdditionalProductType, PeriodType, PriceUnits, ServiceType
+from payments.enums import (
+    AdditionalProductType,
+    PeriodType,
+    PriceUnits,
+    ProductServiceType,
+)
 from users.decorators import view_permission_required
 from utils.enum import graphene_enum
 from utils.schema import CountConnection
@@ -19,7 +24,7 @@ PriceUnitsEnum = graphene_enum(PriceUnits)
 
 AdditionalProductTypeEnum = graphene_enum(AdditionalProductType)
 
-ServiceTypeEnum = graphene_enum(ServiceType)
+ProductServiceTypeEnum = graphene_enum(ProductServiceType)
 
 PeriodTypeEnum = graphene_enum(PeriodType)
 
@@ -101,7 +106,7 @@ class WinterStorageProductNode(DjangoObjectType, AbstractPlaceProductNode):
 
 
 class AdditionalProductNode(DjangoObjectType):
-    service = ServiceTypeEnum(required=True)
+    service = ProductServiceTypeEnum(required=True)
     period = PeriodTypeEnum(required=True)
     price_value = graphene.Decimal(required=True)
     price_unit = PriceUnitsEnum(required=True)
@@ -120,7 +125,7 @@ class AdditionalProductNode(DjangoObjectType):
 
 
 class AdditionalProductServiceNode(graphene.ObjectType):
-    service = ServiceTypeEnum(required=True)
+    service = ProductServiceTypeEnum(required=True)
     product_type = AdditionalProductTypeEnum(required=True)
 
     class Meta:

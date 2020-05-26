@@ -5,7 +5,12 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 
-from payments.enums import AdditionalProductType, PeriodType, PriceUnits, ServiceType
+from payments.enums import (
+    AdditionalProductType,
+    PeriodType,
+    PriceUnits,
+    ProductServiceType,
+)
 from payments.models import DEFAULT_TAX_PERCENTAGE
 from payments.tests.factories import (
     AdditionalProductFactory,
@@ -52,7 +57,7 @@ def test_winter_storage_product_invalid_tax():
 
 def test_additional_product_product_type_fixed():
     product = AdditionalProductFactory(
-        service=ServiceType.ELECTRICITY,
+        service=ProductServiceType.ELECTRICITY,
         tax_percentage=DEFAULT_TAX_PERCENTAGE,
         period=PeriodType.SEASON,
     )
@@ -60,12 +65,12 @@ def test_additional_product_product_type_fixed():
 
 
 def test_additional_product_product_type_optional():
-    product = AdditionalProductFactory(service=ServiceType.DINGHY_PLACE)
+    product = AdditionalProductFactory(service=ProductServiceType.DINGHY_PLACE)
     assert product.product_type == AdditionalProductType.OPTIONAL_SERVICE
 
 
 def test_additional_product_one_service_per_period():
-    service = random.choice(ServiceType.OPTIONAL_SERVICES())
+    service = random.choice(ProductServiceType.OPTIONAL_SERVICES())
     period = random.choice(list(PeriodType))
 
     AdditionalProductFactory(service=service, period=period)
@@ -84,7 +89,7 @@ def test_additional_product_one_service_per_period():
 def test_additional_product_no_season(period):
     with pytest.raises(ValidationError) as exception:
         AdditionalProductFactory(
-            service=ServiceType.ELECTRICITY,
+            service=ProductServiceType.ELECTRICITY,
             tax_percentage=DEFAULT_TAX_PERCENTAGE,
             period=period,
         )
@@ -96,7 +101,7 @@ def test_additional_product_no_season(period):
 def test_additional_product_fixed_service_tax_value():
     with pytest.raises(ValidationError) as exception:
         AdditionalProductFactory(
-            service=random.choice(ServiceType.FIXED_SERVICES()),
+            service=random.choice(ProductServiceType.FIXED_SERVICES()),
             tax_percentage=Decimal("10.00"),
         )
 
