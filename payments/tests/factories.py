@@ -5,7 +5,7 @@ import factory
 
 from resources.tests.factories import HarborFactory, WinterStorageAreaFactory
 
-from ..enums import PeriodType, PriceUnits, ServiceType
+from ..enums import PeriodType, PriceUnits, ProductServiceType
 from ..models import (
     AbstractBaseProduct,
     ADDITIONAL_PRODUCT_TAX_PERCENTAGES,
@@ -58,7 +58,7 @@ class WinterStorageProductFactory(AbstractPlaceProductFactory):
 
 
 class AdditionalProductFactory(AbstractBaseProductFactory):
-    service = factory.Faker("random_element", elements=list(ServiceType))
+    service = factory.Faker("random_element", elements=list(ProductServiceType))
     period = factory.LazyFunction(lambda: PeriodType.SEASON)
     tax_percentage = factory.LazyFunction(lambda: DEFAULT_TAX_PERCENTAGE)
 

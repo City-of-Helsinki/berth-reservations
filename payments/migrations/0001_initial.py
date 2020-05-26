@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
                 (
                     "service",
                     enumfields.fields.EnumField(
-                        enum=payments.enums.ServiceType,
+                        enum=payments.enums.ProductServiceType,
                         max_length=40,
                         verbose_name="service",
                     ),
@@ -246,12 +246,14 @@ class Migration(migrations.Migration):
             constraint=models.UniqueConstraint(
                 condition=models.Q(
                     service__in=[
-                        payments.enums.ServiceType(
+                        payments.enums.ProductServiceType(
                             "summer_storage_for_docking_equipment"
                         ),
-                        payments.enums.ServiceType("summer_storage_for_trailers"),
-                        payments.enums.ServiceType("parking_permit"),
-                        payments.enums.ServiceType("dinghy_place"),
+                        payments.enums.ProductServiceType(
+                            "summer_storage_for_trailers"
+                        ),
+                        payments.enums.ProductServiceType("parking_permit"),
+                        payments.enums.ProductServiceType("dinghy_place"),
                     ]
                 ),
                 fields=("service", "period"),

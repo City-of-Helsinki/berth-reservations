@@ -20,7 +20,7 @@ from .types import (
     BerthProductNode,
     PeriodTypeEnum,
     PriceUnitsEnum,
-    ServiceTypeEnum,
+    ProductServiceTypeEnum,
     WinterStorageProductNode,
 )
 
@@ -178,7 +178,7 @@ class DeleteWinterStorageProductMutation(graphene.ClientIDMutation):
 
 
 class AdditionalProductInput:
-    service = ServiceTypeEnum()
+    service = ProductServiceTypeEnum()
     period = PeriodTypeEnum()
     price_value = graphene.Decimal()
     price_unit = PriceUnitsEnum()
@@ -187,7 +187,7 @@ class AdditionalProductInput:
 
 class CreateAdditionalProductMutation(graphene.ClientIDMutation):
     class Input(AdditionalProductInput):
-        service = ServiceTypeEnum(required=True)
+        service = ProductServiceTypeEnum(required=True)
         period = PeriodTypeEnum(required=True)
         price_value = graphene.Decimal(required=True)
 

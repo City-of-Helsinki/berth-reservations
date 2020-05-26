@@ -7,7 +7,12 @@ from django.db.models import Q, UniqueConstraint
 from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumField
 
-from payments.enums import AdditionalProductType, PeriodType, PriceUnits, ServiceType
+from payments.enums import (
+    AdditionalProductType,
+    PeriodType,
+    PriceUnits,
+    ProductServiceType,
+)
 from utils.models import TimeStampedModel, UUIDModel
 
 PLACE_PRODUCT_TAX_PERCENTAGES = [Decimal(x) for x in ("24.00",)]
@@ -108,7 +113,7 @@ class WinterStorageProduct(AbstractPlaceProduct):
 
 
 class AdditionalProduct(AbstractBaseProduct):
-    service = EnumField(ServiceType, verbose_name=_("service"), max_length=40)
+    service = EnumField(ProductServiceType, verbose_name=_("service"), max_length=40)
     period = EnumField(PeriodType, max_length=8)
     tax_percentage = models.DecimalField(
         verbose_name=_("tax percentage"),
@@ -130,7 +135,7 @@ class AdditionalProduct(AbstractBaseProduct):
         constraints = [
             UniqueConstraint(
                 fields=["service", "period"],
-                condition=Q(service__in=ServiceType.OPTIONAL_SERVICES()),
+                condition=Q(service__in=ProductServiceType.OPTIONAL_SERVICES()),
                 name="optional_services_per_period",
             ),
         ]

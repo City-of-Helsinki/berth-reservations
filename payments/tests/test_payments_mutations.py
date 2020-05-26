@@ -8,7 +8,12 @@ from berth_reservations.tests.utils import (
     assert_field_missing,
     assert_not_enough_permissions,
 )
-from payments.enums import AdditionalProductType, PeriodType, PriceUnits, ServiceType
+from payments.enums import (
+    AdditionalProductType,
+    PeriodType,
+    PriceUnits,
+    ProductServiceType,
+)
 from resources.schema import HarborNode, WinterStorageAreaNode
 from utils.relay import to_global_id
 
@@ -498,7 +503,7 @@ mutation CREATE_ADDITIONAL_PRODUCT($input: CreateAdditionalProductMutationInput!
     "api_client", ["berth_services"], indirect=True,
 )
 def test_create_additional_product(api_client):
-    service = random.choice(list(ServiceType))
+    service = random.choice(list(ProductServiceType))
     period = (
         PeriodType.SEASON
         if service.is_fixed_service()
@@ -552,7 +557,7 @@ def test_create_additional_product(api_client):
 )
 def test_create_additional_product_not_enough_permissions(api_client):
     variables = {
-        "service": random.choice(list(ServiceType)).name,
+        "service": random.choice(list(ProductServiceType)).name,
         "period": random.choice(list(PeriodType)).name,
         "priceValue": "1.00",
     }
@@ -632,7 +637,7 @@ mutation UPDATE_ADDITIONAL_PRODUCT($input: UpdateAdditionalProductMutationInput!
 )
 def test_update_additional_product(api_client, additional_product):
     product_global_id = to_global_id(AdditionalProductNode, additional_product.id)
-    service = random.choice(list(ServiceType))
+    service = random.choice(list(ProductServiceType))
     period = (
         PeriodType.SEASON
         if service.is_fixed_service()

@@ -3,7 +3,7 @@ import random
 import pytest
 
 from berth_reservations.tests.utils import assert_not_enough_permissions
-from payments.enums import ServiceType
+from payments.enums import ProductServiceType
 from payments.tests.factories import AdditionalProductFactory, BerthProductFactory
 from resources.schema import HarborNode, WinterStorageAreaNode
 from utils.relay import to_global_id
@@ -432,10 +432,10 @@ query ADDITIONAL_PRODUCTS {
 @pytest.mark.parametrize("filter", ["FIXED_SERVICE", "OPTIONAL_SERVICE"])
 def test_get_additional_products_filtered(superuser_api_client, filter):
     fixed = AdditionalProductFactory(
-        service=random.choice(ServiceType.FIXED_SERVICES())
+        service=random.choice(ProductServiceType.FIXED_SERVICES())
     )
     optional = AdditionalProductFactory(
-        service=random.choice(ServiceType.OPTIONAL_SERVICES())
+        service=random.choice(ProductServiceType.OPTIONAL_SERVICES())
     )
 
     executed = superuser_api_client.execute(ADDITIONAL_PRODUCTS_FILTERED_QUERY % filter)
