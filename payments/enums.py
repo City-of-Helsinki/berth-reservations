@@ -83,3 +83,16 @@ class PriceUnits(Enum):
     class Labels:
         AMOUNT = _("Amount")
         PERCENTAGE = _("Percentage")
+
+
+class OrderStatus(Enum):
+    WAITING = "waiting"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
+    PAID = "paid"
+
+    class Labels:
+        WAITING = _("Waiting")
+        REJECTED = _("Rejected")
+        EXPIRED = _("Expired")
+        PAID = _("Paid")
