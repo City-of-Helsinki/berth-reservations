@@ -1,8 +1,10 @@
 import graphene
 from graphene_django import DjangoConnectionField, DjangoObjectType
 
+from leases.schema import BerthLeaseNode
 from payments.enums import (
     AdditionalProductType,
+    OrderStatus,
     PeriodType,
     PriceUnits,
     ProductServiceType,
@@ -16,6 +18,9 @@ from ..models import (
     AdditionalProduct,
     BerthPriceGroup,
     BerthProduct,
+    Order,
+    OrderLine,
+    OrderLogEntry,
     PLACE_PRODUCT_TAX_PERCENTAGES,
     WinterStorageProduct,
 )
@@ -42,6 +47,12 @@ AdditionalProductTaxEnum = graphene.Enum(
         (f"TAX_{str(tax).replace('.', '_')}", tax)
         for tax in ADDITIONAL_PRODUCT_TAX_PERCENTAGES
     ],
+)
+
+OrderStatusEnum = graphene_enum(OrderStatus)
+
+OrderTypeEnum = graphene.Enum(
+    "OrderTypeEnum", [("BERTH", "BERTH"), ("WINTER_STORAGE", "WINTER_STORAGE")]
 )
 
 
@@ -138,3 +149,90 @@ class AdditionalProductServiceNode(graphene.ObjectType):
             if self.service.is_fixed_service()
             else AdditionalProductType.OPTIONAL_SERVICE
         )
+
+
+class ProductUnion(graphene.Union):
+    class Meta:
+        types = (BerthProductNode, WinterStorageProductNode)
+
+
+class LeaseUnion(graphene.Union):
+    class Meta:
+        # TODO: Add WinterStorageLeaseNode
+        types = (BerthLeaseNode,)
+
+
+class OrderNode(DjangoObjectType):
+    customer = graphene.Field("customers.schema.ProfileNode", required=True)
+    product = graphene.Field(ProductUnion)
+    lease = graphene.Field(LeaseUnion)
+    status = OrderStatusEnum(required=True)
+    comment = graphene.String()
+    price = graphene.Decimal(required=True)
+    tax_percentage = graphene.Decimal(required=True)
+    pretax_price = graphene.Decimal(required=True)
+    total_price = graphene.Decimal(required=True)
+    total_pretax_price = graphene.Decimal(required=True)
+    total_tax_percentage = graphene.Decimal(required=True)
+    due_date = graphene.Date(required=True)
+    order_lines = DjangoConnectionField("payments.schema.OrderLineNode", required=True)
+    log_entries = DjangoConnectionField(
+        "payments.schema.OrderLogEntryNode", required=True
+    )
+
+    class Meta:
+        model = Order
+        interfaces = (graphene.relay.Node,)
+        connection_class = CountConnection
+        exclude = (
+            "_product_content_type",
+            "_product_object_id",
+            "_lease_content_type",
+            "_lease_object_id",
+        )
+
+    @classmethod
+    @view_permission_required(Order)
+    def get_queryset(cls, queryset, info):
+        return super().get_queryset(queryset, info)
+
+    def resolve_order_lines(self, info, **kwargs):
+        return OrderLine.objects.filter(order=self)
+
+    def resolve_log_entries(self, info, **kwargs):
+        return OrderLogEntry.objects.filter(order=self)
+
+
+class OrderLineNode(DjangoObjectType):
+    product = graphene.Field("payments.schema.AdditionalProductNode")
+    quantity = graphene.Int(required=True)
+    price = graphene.Decimal(required=True)
+    tax_percentage = graphene.Decimal(required=True)
+    pretax_price = graphene.Decimal(required=True)
+
+    class Meta:
+        model = OrderLine
+        interfaces = (graphene.relay.Node,)
+        connection_class = CountConnection
+        exclude = ("order",)
+
+    @classmethod
+    @view_permission_required(OrderLine)
+    def get_queryset(cls, queryset, info):
+        return super().get_queryset(queryset, info)
+
+
+class OrderLogEntryNode(DjangoObjectType):
+    status = OrderStatusEnum(required=True)
+    comment = graphene.String()
+
+    class Meta:
+        model = OrderLogEntry
+        interfaces = (graphene.relay.Node,)
+        connection_class = CountConnection
+        exclude = ("order",)
+
+    @classmethod
+    @view_permission_required(OrderLogEntry)
+    def get_queryset(cls, queryset, info):
+        return super().get_queryset(queryset, info)
