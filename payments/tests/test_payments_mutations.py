@@ -11,18 +11,25 @@ from berth_reservations.tests.utils import (
     assert_not_enough_permissions,
 )
 from customers.schema import ProfileNode
+from leases.models import BerthLease
 from leases.schema import BerthLeaseNode
-from payments.enums import (
+from resources.schema import HarborNode, WinterStorageAreaNode
+from utils.relay import to_global_id
+
+from ..enums import (
     AdditionalProductType,
     OrderStatus,
     PeriodType,
     PriceUnits,
     ProductServiceType,
 )
-from resources.schema import HarborNode, WinterStorageAreaNode
-from utils.relay import to_global_id
-
-from ..models import BerthProduct, DEFAULT_TAX_PERCENTAGE, Order, WinterStorageProduct
+from ..models import (
+    BerthProduct,
+    DEFAULT_TAX_PERCENTAGE,
+    Order,
+    OrderLine,
+    WinterStorageProduct,
+)
 from ..schema.types import (
     ADDITIONAL_PRODUCT_TAX_PERCENTAGES,
     AdditionalProduct,
@@ -30,9 +37,18 @@ from ..schema.types import (
     AdditionalProductTaxEnum,
     BerthPriceGroupNode,
     BerthProductNode,
+    OrderLineNode,
     OrderNode,
     PlaceProductTaxEnum,
     WinterStorageProductNode,
+)
+from ..utils import (
+    calculate_product_partial_month_price,
+    calculate_product_partial_season_price,
+    calculate_product_partial_year_price,
+    calculate_product_percentage_price,
+    convert_aftertax_to_pretax,
+    round_price,
 )
 from .factories import OrderFactory
 
@@ -972,3 +988,248 @@ def test_delete_order_does_not_exist(superuser_api_client):
     executed = superuser_api_client.execute(DELETE_ORDER_MUTATION, input=variables)
 
     assert_doesnt_exist("Order", executed)
+
+
+CREATE_ORDER_LINE_MUTATION = """
+mutation CREATE_ORDER_LINE($input: CreateOrderLineMutationInput!) {
+    createOrderLine(input: $input) {
+        orderLine {
+            id
+            price
+            taxPercentage
+            pretaxPrice
+            product {
+                id
+                priceValue
+                priceUnit
+            }
+        }
+        order {
+            id
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+def test_create_order_line(api_client, order, additional_product):
+    order_id = to_global_id(OrderNode, order.id)
+    product_id = to_global_id(AdditionalProductNode, additional_product.id)
+
+    variables = {
+        "orderId": order_id,
+        "productId": product_id,
+    }
+
+    assert OrderLine.objects.count() == 0
+
+    executed = api_client.execute(CREATE_ORDER_LINE_MUTATION, input=variables)
+
+    assert OrderLine.objects.count() == 1
+
+    expected_price = additional_product.price_value
+    if additional_product.price_unit == PriceUnits.PERCENTAGE:
+        expected_price = calculate_product_percentage_price(
+            order.price, additional_product.price_value
+        )
+
+    if additional_product.period == PeriodType.MONTH:
+        expected_price = calculate_product_partial_month_price(
+            expected_price, order.lease.start_date, order.lease.end_date
+        )
+    elif additional_product.period == PeriodType.SEASON:
+        expected_price = calculate_product_partial_season_price(
+            expected_price,
+            order.lease.start_date,
+            order.lease.end_date,
+            summer_season=isinstance(order.lease, BerthLease),
+        )
+    elif additional_product.period == PeriodType.YEAR:
+        expected_price = calculate_product_partial_year_price(
+            expected_price, order.lease.start_date, order.lease.end_date
+        )
+
+    assert executed["data"]["createOrderLine"]["orderLine"].pop("id") is not None
+    assert executed["data"]["createOrderLine"] == {
+        "orderLine": {
+            "price": str(expected_price),
+            "taxPercentage": str(round_price(additional_product.tax_percentage)),
+            "pretaxPrice": str(
+                convert_aftertax_to_pretax(
+                    expected_price, additional_product.tax_percentage,
+                )
+            ),
+            "product": {
+                "id": to_global_id(AdditionalProductNode, additional_product.id),
+                "priceValue": str(additional_product.price_value),
+                "priceUnit": additional_product.price_unit.name,
+            },
+        },
+        "order": {"id": order_id},
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "harbor_services", "berth_supervisor", "berth_handler"],
+    indirect=True,
+)
+def test_create_order_line_not_enough_permissions(api_client):
+    variables = {
+        "orderId": to_global_id(OrderNode, uuid.uuid4()),
+        "productId": to_global_id(ProfileNode, uuid.uuid4()),
+    }
+
+    assert OrderLine.objects.count() == 0
+
+    executed = api_client.execute(CREATE_ORDER_LINE_MUTATION, input=variables)
+
+    assert OrderLine.objects.count() == 0
+    assert_not_enough_permissions(executed)
+
+
+def test_create_order_line_order_does_not_exist(
+    superuser_api_client, additional_product
+):
+    variables = {
+        "orderId": to_global_id(OrderNode, uuid.uuid4()),
+        "productId": to_global_id(ProfileNode, additional_product.id),
+    }
+
+    assert OrderLine.objects.count() == 0
+
+    executed = superuser_api_client.execute(CREATE_ORDER_LINE_MUTATION, input=variables)
+
+    assert OrderLine.objects.count() == 0
+    assert_doesnt_exist("Order", executed)
+
+
+def test_create_order_line_product_does_not_exist(superuser_api_client, order):
+    variables = {
+        "orderId": to_global_id(OrderNode, order.id),
+        "productId": to_global_id(AdditionalProductNode, uuid.uuid4()),
+    }
+
+    assert OrderLine.objects.count() == 0
+
+    executed = superuser_api_client.execute(CREATE_ORDER_LINE_MUTATION, input=variables)
+
+    assert OrderLine.objects.count() == 0
+    assert_doesnt_exist("AdditionalProduct", executed)
+
+
+UPDATE_ORDER_LINE_MUTATION = """
+mutation UPDATE_ORDER_LINE($input: UpdateOrderLineMutationInput!) {
+    updateOrderLine(input: $input) {
+        orderLine {
+            id
+            quantity
+            product {
+                id
+            }
+        }
+        order {
+            id
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+def test_update_order_line(api_client, order_line):
+    order_line_id = to_global_id(OrderLineNode, order_line.id)
+    product_id = to_global_id(AdditionalProductNode, order_line.product.id)
+
+    variables = {
+        "id": order_line_id,
+        "quantity": random.randint(1, 5),
+    }
+
+    assert OrderLine.objects.count() == 1
+
+    executed = api_client.execute(UPDATE_ORDER_LINE_MUTATION, input=variables)
+
+    assert OrderLine.objects.count() == 1
+
+    assert executed["data"]["updateOrderLine"]["orderLine"] == {
+        "id": order_line_id,
+        "quantity": variables["quantity"],
+        "product": {"id": product_id},
+    }
+    assert executed["data"]["updateOrderLine"]["order"]["id"] == to_global_id(
+        OrderNode, order_line.order.id
+    )
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "harbor_services", "berth_supervisor", "berth_handler"],
+    indirect=True,
+)
+def test_update_order_line_not_enough_permissions(api_client):
+    variables = {
+        "id": to_global_id(OrderNode, uuid.uuid4()),
+    }
+
+    executed = api_client.execute(UPDATE_ORDER_LINE_MUTATION, input=variables)
+
+    assert_not_enough_permissions(executed)
+
+
+def test_update_order_line_does_not_exist(superuser_api_client):
+    variables = {
+        "id": to_global_id(OrderLineNode, uuid.uuid4()),
+    }
+    executed = superuser_api_client.execute(UPDATE_ORDER_LINE_MUTATION, input=variables)
+
+    assert_doesnt_exist("OrderLine", executed)
+
+
+DELETE_ORDER_LINE_MUTATION = """
+mutation DELETE_ORDER_LINE($input: DeleteOrderLineMutationInput!) {
+    deleteOrderLine(input: $input) {
+        clientMutationId
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+def test_delete_order_line(api_client, order_line):
+    variables = {"id": to_global_id(OrderLineNode, order_line.id)}
+    assert OrderLine.objects.count() == 1
+
+    api_client.execute(DELETE_ORDER_LINE_MUTATION, input=variables)
+
+    assert OrderLine.objects.count() == 0
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "harbor_services", "berth_supervisor", "berth_handler"],
+    indirect=True,
+)
+def test_delete_order_line_not_enough_permissions(api_client, order_line):
+    variables = {"id": to_global_id(OrderLineNode, order_line.id)}
+    assert OrderLine.objects.count() == 1
+
+    executed = api_client.execute(DELETE_ORDER_LINE_MUTATION, input=variables)
+
+    assert OrderLine.objects.count() == 1
+    assert_not_enough_permissions(executed)
+
+
+def test_delete_order_line_does_not_exist(superuser_api_client):
+    variables = {"id": to_global_id(OrderLineNode, uuid.uuid4())}
+
+    executed = superuser_api_client.execute(DELETE_ORDER_LINE_MUTATION, input=variables)
+
+    assert_doesnt_exist("OrderLine", executed)
