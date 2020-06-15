@@ -2,9 +2,13 @@ import pytest
 from factory.random import randgen
 
 from berth_reservations.tests.conftest import *  # noqa
+from leases.tests.conftest import *  # noqa
 from payments.tests.factories import (
     AdditionalProductFactory,
     BerthProductFactory,
+    OrderFactory,
+    OrderLineFactory,
+    OrderLogEntryFactory,
     WinterStorageProductFactory,
 )
 from resources.tests.conftest import *  # noqa
@@ -40,3 +44,21 @@ def winter_storage_product():
 def additional_product():
     additional_product = AdditionalProductFactory()
     return additional_product
+
+
+@pytest.fixture
+def order():
+    order = OrderFactory()
+    return order
+
+
+@pytest.fixture
+def order_line():
+    order_line = OrderLineFactory()
+    return order_line
+
+
+@pytest.fixture
+def order_log_entry():
+    order_log_entry = OrderLogEntryFactory()
+    return order_log_entry

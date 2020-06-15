@@ -20,7 +20,6 @@ from parler.models import TranslatableModel, TranslatedFields
 from leases.consts import ACTIVE_LEASE_STATUSES
 from leases.enums import LeaseStatus
 from leases.utils import calculate_berth_lease_end_date
-from payments.models import BerthPriceGroup
 from utils.models import TimeStampedModel, UUIDModel
 
 from .enums import BerthMooringType
@@ -493,6 +492,8 @@ class BerthType(AbstractPlaceType):
         ]
 
     def save(self, *args, **kwargs):
+        from payments.models import BerthPriceGroup
+
         if not self.price_group:
             self.price_group, created = BerthPriceGroup.objects.get_or_create_for_width(
                 self.width
