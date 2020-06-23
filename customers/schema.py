@@ -86,6 +86,7 @@ PROFILE_NODE_FIELDS = (
     "boats",
     "berth_applications",
     "berth_leases",
+    "orders",
 )
 
 
@@ -118,6 +119,7 @@ class BaseProfileFieldsMixin:
         description="`BerthApplications` are ordered by `createdAt` in ascending order by default.",
     )
     berth_leases = DjangoConnectionField(BerthLeaseNode)
+    orders = DjangoConnectionField("payments.schema.OrderNode")
 
     def resolve_berth_applications(self, info, **kwargs):
         return self.berth_applications.order_by("created_at")

@@ -1,15 +1,16 @@
 from graphene import List, Node
 from graphene_django import DjangoConnectionField
 
-from payments.enums import AdditionalProductType, ProductServiceType
-from payments.models import AdditionalProduct
-
+from ..enums import AdditionalProductType, ProductServiceType
+from ..models import AdditionalProduct, Order
 from .types import (
     AdditionalProductNode,
     AdditionalProductServiceNode,
     AdditionalProductTypeEnum,
     BerthPriceGroupNode,
     BerthProductNode,
+    OrderNode,
+    OrderTypeEnum,
     WinterStorageProductNode,
 )
 
@@ -51,6 +52,15 @@ class Query:
         AdditionalProductServiceNode, product_type=AdditionalProductTypeEnum()
     )
 
+    order = Node.Field(
+        OrderNode, description="**Requires permissions** to access payments.",
+    )
+    orders = DjangoConnectionField(
+        OrderNode,
+        order_type=OrderTypeEnum(),
+        description="**Requires permissions** to access payments.",
+    )
+
     def resolve_additional_products(self, info, **kwargs):
         product_type = kwargs.get("product_type")
         if product_type:
@@ -80,3 +90,14 @@ class Query:
         return [
             AdditionalProductServiceNode(service=service) for service in service_list
         ]
+
+    def resolve_orders(self, info, **kwargs):
+        order_type = kwargs.get("order_type")
+
+        if order_type:
+            if order_type == "BERTH":
+                return Order.objects.berth_orders()
+            else:
+                return Order.objects.winter_storage_orders()
+
+        return Order.objects.all()

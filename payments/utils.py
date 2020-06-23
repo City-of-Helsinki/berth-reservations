@@ -56,7 +56,8 @@ def percentage(func):
     return wrapped
 
 
-def convert_aftertax_to_pretax(aftertax_price, tax_percentage):
+@rounded
+def convert_aftertax_to_pretax(aftertax_price, tax_percentage) -> Decimal:
     return aftertax_price / (1 + tax_percentage / 100)
 
 

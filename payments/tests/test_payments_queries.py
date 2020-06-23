@@ -3,16 +3,30 @@ import random
 import pytest
 
 from berth_reservations.tests.utils import assert_not_enough_permissions
+from customers.schema import ProfileNode
+from leases.models import BerthLease
+from leases.schema import BerthLeaseNode
 from payments.enums import ProductServiceType
-from payments.tests.factories import AdditionalProductFactory, BerthProductFactory
+from payments.tests.factories import (
+    AdditionalProductFactory,
+    BerthProductFactory,
+    OrderFactory,
+    OrderLineFactory,
+    OrderLogEntryFactory,
+    WinterStorageProductFactory,
+)
 from resources.schema import HarborNode, WinterStorageAreaNode
 from utils.relay import to_global_id
 
+from ..models import BerthProduct
 from ..schema.types import (
     AdditionalProductNode,
     AdditionalProductTaxEnum,
     BerthPriceGroupNode,
     BerthProductNode,
+    OrderLineNode,
+    OrderLogEntryNode,
+    OrderNode,
     PlaceProductTaxEnum,
     WinterStorageProductNode,
 )
@@ -494,3 +508,257 @@ def test_get_additional_product_not_enough_permissions(api_client, additional_pr
     executed = api_client.execute(ADDITIONAL_PRODUCT_QUERY % product_global_id)
 
     assert_not_enough_permissions(executed)
+
+
+ORDERS_QUERY = """
+query ORDERS {
+    orders {
+        edges {
+            node {
+                id
+                price
+                taxPercentage
+                customer {
+                    id
+                }
+                orderLines {
+                    edges {
+                        node {
+                            id
+                            product {
+                                id
+                            }
+                        }
+                    }
+                }
+                logEntries {
+                    edges {
+                        node {
+                            id
+                        }
+                    }
+                }
+                product {
+                    ... on BerthProductNode {
+                        id
+                    }
+                    ... on WinterStorageProductNode {
+                        id
+                    }
+                }
+                lease {
+                    ... on BerthLeaseNode {
+                        id
+                    }
+                }
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_orders(api_client, order):
+    OrderLogEntryFactory(order=order)
+    OrderLineFactory(order=order)
+
+    order_lines = []
+    for ol in order.order_lines.all():
+        order_lines.append(
+            {
+                "node": {
+                    "id": to_global_id(OrderLineNode, ol.id),
+                    "product": {
+                        "id": to_global_id(AdditionalProductNode, ol.product.id)
+                    },
+                }
+            }
+        )
+    log_entries = []
+    for le in order.log_entries.all():
+        log_entries.append({"node": {"id": to_global_id(OrderLogEntryNode, le.id)}})
+
+    product_id = to_global_id(
+        BerthProductNode
+        if isinstance(order.product, BerthProduct)
+        else WinterStorageProductNode,
+        order.product.id,
+    )
+
+    # TODO: Add WinterStorageLeaseNode
+    # Since there's no WinterStorageLeaseNode yet, we cannot convert to the type's global ID,
+    # so for now we'll null leases that have WSL, just for testing purposes.
+    lease_id = (
+        to_global_id(BerthLeaseNode, order.lease.id)
+        if isinstance(order.lease, BerthLease)
+        else None
+    )
+
+    executed = api_client.execute(ORDERS_QUERY)
+
+    assert executed["data"]["orders"]["edges"][0]["node"] == {
+        "id": to_global_id(OrderNode, order.id),
+        "price": str(order.price),
+        "taxPercentage": str(order.tax_percentage),
+        "customer": {"id": to_global_id(ProfileNode, order.customer.id)},
+        "orderLines": {"edges": order_lines},
+        "logEntries": {"edges": log_entries},
+        "product": {"id": product_id},
+        # TODO: remove when we have WinterStorageLeaseNode
+        "lease": {"id": lease_id} if lease_id else None,
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+)
+def test_get_orders_not_enough_permissions(api_client):
+    executed = api_client.execute(ORDERS_QUERY)
+
+    assert_not_enough_permissions(executed)
+
+
+ORDER_QUERY = """
+query ORDER {
+    order(id: "%s") {
+        id
+        price
+        taxPercentage
+        customer {
+            id
+        }
+        orderLines {
+            edges {
+                node {
+                    id
+                    product {
+                        id
+                    }
+                }
+            }
+        }
+        logEntries {
+            edges {
+                node {
+                    id
+                }
+            }
+        }
+        product {
+            ... on BerthProductNode {
+                id
+            }
+            ... on WinterStorageProductNode {
+                id
+            }
+        }
+        lease {
+            ... on BerthLeaseNode {
+                id
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_order(api_client, order):
+    order_global_id = to_global_id(OrderNode, order.id)
+
+    OrderLogEntryFactory(order=order)
+    OrderLineFactory(order=order)
+
+    order_lines = []
+    for ol in order.order_lines.all():
+        order_lines.append(
+            {
+                "node": {
+                    "id": to_global_id(OrderLineNode, ol.id),
+                    "product": {
+                        "id": to_global_id(AdditionalProductNode, ol.product.id)
+                    },
+                }
+            }
+        )
+    log_entries = []
+    for le in order.log_entries.all():
+        log_entries.append({"node": {"id": to_global_id(OrderLogEntryNode, le.id)}})
+
+    product_id = to_global_id(
+        BerthProductNode
+        if isinstance(order.product, BerthProduct)
+        else WinterStorageProductNode,
+        order.product.id,
+    )
+
+    # TODO: Add WinterStorageLeaseNode
+    # Since there's no WinterStorageLeaseNode yet, we cannot convert to the type's global ID,
+    # so for now we'll null leases that have WSL, just for testing purposes.
+    lease_id = (
+        to_global_id(BerthLeaseNode, order.lease.id)
+        if isinstance(order.lease, BerthLease)
+        else None
+    )
+
+    executed = api_client.execute(ORDER_QUERY % order_global_id)
+
+    assert executed["data"]["order"] == {
+        "id": order_global_id,
+        "price": str(order.price),
+        "taxPercentage": str(order.tax_percentage),
+        "customer": {"id": to_global_id(ProfileNode, order.customer.id)},
+        "orderLines": {"edges": order_lines},
+        "logEntries": {"edges": log_entries},
+        "product": {"id": product_id},
+        # TODO: remove when we have WinterStorageLeaseNode
+        "lease": {"id": lease_id} if lease_id else None,
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+)
+def test_get_order_not_enough_permissions(api_client, order):
+    order_global_id = to_global_id(OrderNode, order.id)
+
+    executed = api_client.execute(ORDER_QUERY % order_global_id)
+
+    assert_not_enough_permissions(executed)
+
+
+ORDERS_FILTERED_QUERY = """
+query ORDERS {
+    orders(orderType: %s) {
+        edges {
+            node {
+                id
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize("filter", ["BERTH", "WINTER_STORAGE"])
+def test_get_orders_filtered(superuser_api_client, filter):
+    berth_order = OrderFactory(product=BerthProductFactory())
+    ws_order = OrderFactory(product=WinterStorageProductFactory())
+
+    executed = superuser_api_client.execute(ORDERS_FILTERED_QUERY % filter)
+
+    order = berth_order if filter == "BERTH" else ws_order
+
+    assert len(executed["data"]["orders"]["edges"]) == 1
+    assert executed["data"]["orders"]["edges"][0]["node"] == {
+        "id": to_global_id(OrderNode, order.id)
+    }

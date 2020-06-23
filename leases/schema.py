@@ -41,6 +41,7 @@ class BerthLeaseNode(DjangoObjectType):
     berth = graphene.Field(BerthNode, required=True)
     status = LeaseStatusEnum(required=True)
     customer = graphene.Field("customers.schema.ProfileNode", required=True)
+    order = graphene.Field("payments.schema.OrderNode")
     is_active = graphene.Boolean(
         required=True,
         description="For a Lease to be active, it has to have `status == PAID`. "

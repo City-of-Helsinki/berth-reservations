@@ -239,6 +239,24 @@ DEFAULT_MODELS_PERMS = {
             BERTH_SUPERVISOR: ("view",),
             HARBOR_SERVICES: None,
         },
+        "order": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: ("view",),
+            HARBOR_SERVICES: None,
+        },
+        "orderline": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: ("view",),
+            HARBOR_SERVICES: None,
+        },
+        "orderlogentry": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: ("view",),
+            HARBOR_SERVICES: None,
+        },
     },
 }
 
