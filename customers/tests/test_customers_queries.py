@@ -1,6 +1,8 @@
 import random
 
 import pytest
+from dateutil.parser import isoparse
+from freezegun import freeze_time
 
 from applications.new_schema import BerthApplicationNode
 from applications.tests.factories import BerthApplicationFactory
@@ -110,6 +112,68 @@ def test_query_extended_profile_nodes(api_client, customer_profile):
         "berthApplications": {"edges": [{"node": {"id": berth_application_id}}]},
         "berthLeases": {"edges": [{"node": {"id": berth_lease_id}}]},
     }
+
+
+FEDERATED_PROFILES_QUERY_WITH_ORDER_BY = """
+query($_representations: [_Any!]!) {
+    _entities(representations: $_representations) {
+        ... on ProfileNode {
+            id
+            berthApplications(orderBy: "%s") {
+                edges {
+                    node {
+                        id
+                        createdAt
+                    }
+                }
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_services", "berth_handler", "berth_supervisor"],
+    indirect=True,
+)
+@pytest.mark.parametrize(
+    "order_by,ascending", [("createdAt", True), ("-createdAt", False)]
+)
+def test_query_extended_profile_applications_order_by_created(
+    order_by, ascending, api_client, customer_profile
+):
+    customer_profile_id = to_global_id(ProfileNode, customer_profile.id)
+
+    with freeze_time("2020-02-01"):
+        BerthApplicationFactory(customer=customer_profile)
+
+    with freeze_time("2020-01-01"):
+        BerthApplicationFactory(customer=customer_profile)
+
+    variables = {
+        "_representations": [
+            {"id": customer_profile_id, "__typename": ProfileNode._meta.name}
+        ]
+    }
+
+    query = FEDERATED_PROFILES_QUERY_WITH_ORDER_BY % order_by
+
+    executed = api_client.execute(query, variables=variables)
+
+    first_date = isoparse(
+        executed["data"]["_entities"][0]["berthApplications"]["edges"][
+            0 if ascending else 1
+        ]["node"]["createdAt"]
+    )
+    second_date = isoparse(
+        executed["data"]["_entities"][0]["berthApplications"]["edges"][
+            1 if ascending else 0
+        ]["node"]["createdAt"]
+    )
+
+    assert first_date < second_date
 
 
 @pytest.mark.parametrize(
