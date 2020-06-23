@@ -1,3 +1,4 @@
+import django_filters
 import graphene
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -88,6 +89,13 @@ PROFILE_NODE_FIELDS = (
 )
 
 
+class BerthApplicationFilter(django_filters.FilterSet):
+    order_by = django_filters.OrderingFilter(
+        fields=(("created_at", "createdAt"),),
+        label="Supports `createdAt` and `-createdAt`.",
+    )
+
+
 class BaseProfileFieldsMixin:
     """
     Mixin that stores the attributes that are exactly
@@ -104,8 +112,15 @@ class BaseProfileFieldsMixin:
     comment = graphene.String()
     organization = graphene.Field(OrganizationNode)
     boats = DjangoConnectionField(BoatNode)
-    berth_applications = DjangoConnectionField(BerthApplicationNode)
+    berth_applications = DjangoFilterConnectionField(
+        BerthApplicationNode,
+        filterset_class=BerthApplicationFilter,
+        description="`BerthApplications` are ordered by `createdAt` in ascending order by default.",
+    )
     berth_leases = DjangoConnectionField(BerthLeaseNode)
+
+    def resolve_berth_applications(self, info, **kwargs):
+        return self.berth_applications.order_by("created_at")
 
 
 @extend(fields="id")
