@@ -257,6 +257,14 @@ class BerthApplication(BaseApplication):
 
 
 class WinterStorageApplication(BaseApplication):
+    customer = models.ForeignKey(
+        CustomerProfile,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="winter_storage_applications",
+    )
+
     chosen_areas = models.ManyToManyField(
         WinterStorageArea,
         through=WinterStorageAreaChoice,
