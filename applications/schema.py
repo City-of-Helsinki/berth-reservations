@@ -51,6 +51,7 @@ class BerthSwitchReasonType(DjangoObjectType):
 class WinterStorageApplicationType(DjangoObjectType):
     class Meta:
         model = WinterStorageApplication
+        exclude = ("customer",)
 
 
 class HarborChoiceInput(graphene.InputObjectType):
