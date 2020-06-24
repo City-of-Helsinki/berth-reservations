@@ -4,7 +4,10 @@ import pytest
 from django.core.exceptions import ValidationError
 from freezegun import freeze_time
 
-from applications.tests.factories import BerthApplicationFactory
+from applications.tests.factories import (
+    BerthApplicationFactory,
+    WinterStorageApplicationFactory,
+)
 from berth_reservations.tests.factories import CustomerProfileFactory
 from customers.tests.factories import BoatFactory
 
@@ -269,6 +272,32 @@ def test_winter_storage_lease_cannot_update_place(
         winter_storage_lease.save()
 
     assert "Cannot change the place assigned to this lease" in str(exception.value)
+
+
+def test_winter_storage_lease_application_different_customer(winter_storage_lease):
+    first_application = WinterStorageApplicationFactory(
+        customer=CustomerProfileFactory()
+    )
+    second_application = WinterStorageApplicationFactory(
+        customer=CustomerProfileFactory()
+    )
+
+    winter_storage_lease.application = first_application
+    winter_storage_lease.save()
+
+    assert (
+        WinterStorageLease.objects.get(id=winter_storage_lease.id).application
+        == first_application
+    )
+
+    with pytest.raises(ValidationError) as exception:
+        winter_storage_lease.application = second_application
+        winter_storage_lease.save()
+
+    assert (
+        "Cannot change the application to one which belongs to another customer"
+        in str(exception.value)
+    )
 
 
 @freeze_time("2020-01-01T08:00:00Z")

@@ -187,19 +187,35 @@ class WinterStorageLease(AbstractLease):
         )
         creating = self._state.adding
         if not creating:
+            old_instance = WinterStorageLease.objects.get(id=self.id)
+
             # If the place is being changed
-            if not WinterStorageLease.objects.filter(
-                id=self.id, place=self.place
-            ).exists():
+            if old_instance.place != self.place:
                 raise ValidationError(
                     _("Cannot change the place assigned to this lease")
                 )
+
+            self._check_application_customer(old_instance)
+
             existing_leases = existing_leases.exclude(pk=self.pk)
         if existing_leases.exists():
             raise ValidationError(_("WinterStoragePlace already has a lease"))
         if not self.place.is_active and creating:
             raise ValidationError(_("Selected place is not active"))
         super().clean()
+
+    def _check_application_customer(self, old_instance) -> None:
+        # If the application is being changed, it has to belong to the same customer
+        if (
+            self.application
+            and old_instance.application
+            and old_instance.application.customer != self.application.customer
+        ):
+            raise ValidationError(
+                _(
+                    "Cannot change the application to one which belongs to another customer"
+                )
+            )
 
     def __str__(self):
         return " {} > {} - {} ({})".format(
