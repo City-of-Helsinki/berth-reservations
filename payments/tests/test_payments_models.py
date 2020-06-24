@@ -363,7 +363,12 @@ def test_order_berth_lease_right_price_for_full_season(harbor):
             order_line = OrderLine.objects.filter(
                 order=order, product__service=ProductServiceType(service)
             ).first()
-            product_price = order_line.product.price_value
+            product_price = calculate_product_partial_season_price(
+                order_line.product.price_value,
+                order.lease.start_date,
+                order.lease.end_date,
+                summer_season=True,
+            )
             order_price = order_line.price
             assert product_price == order_price
 
@@ -771,6 +776,8 @@ def test_order_line_product_price(period):
     assert order_line.tax_percentage == product.tax_percentage
 
 
+# Freezing time to avoid season price miscalculation
+@freeze_time("2020-01-01T08:00:00Z")
 def test_order_line_percentage_price():
     product = AdditionalProductFactory(price_unit=PriceUnits.PERCENTAGE)
     order_line = OrderLineFactory(
