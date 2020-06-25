@@ -1,5 +1,6 @@
 from datetime import date
 
+from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import ExpressionWrapper, Q
@@ -109,12 +110,21 @@ class BerthLease(AbstractLease):
     renew_automatically = models.BooleanField(
         verbose_name=_("renew automatically"), default=True
     )
+    _orders_relation = GenericRelation(
+        "payments.Order",
+        object_id_field="_lease_object_id",
+        content_type_field="_lease_content_type",
+    )
     objects = BerthLeaseManager()
 
     class Meta:
         verbose_name = _("berth lease")
         verbose_name_plural = _("berth leases")
         default_related_name = "berth_leases"
+
+    @property
+    def order(self):
+        return self._orders_relation.first()
 
     def clean(self):
         if self.start_date.year != self.end_date.year:

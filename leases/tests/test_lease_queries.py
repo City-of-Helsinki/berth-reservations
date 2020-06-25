@@ -10,6 +10,8 @@ from berth_reservations.tests.utils import assert_not_enough_permissions
 from customers.schema import BoatNode, ProfileNode
 from leases.schema import BerthLeaseNode
 from leases.tests.factories import BerthLeaseFactory
+from payments.schema import OrderNode
+from payments.tests.factories import BerthProductFactory, OrderFactory
 from resources.schema import BerthNode
 
 QUERY_BERTH_LEASES = """
@@ -133,6 +135,9 @@ query GetBerthLease {
             id
             number
         }
+        order {
+            id
+        }
     }
 }
 """
@@ -150,6 +155,10 @@ def test_query_berth_lease(api_client, berth_lease, berth_application):
     berth_application.save()
     berth_lease.application = berth_application
     berth_lease.save()
+
+    order = OrderFactory(
+        lease=berth_lease, customer=berth_lease.customer, product=BerthProductFactory()
+    )
 
     query = QUERY_BERTH_LEASE % berth_lease_id
     executed = api_client.execute(query)
@@ -176,6 +185,7 @@ def test_query_berth_lease(api_client, berth_lease, berth_application):
             "id": to_global_id(BerthNode._meta.name, berth_lease.berth.id),
             "number": berth_lease.berth.number,
         },
+        "order": {"id": to_global_id(OrderNode._meta.name, order.id)},
     }
 
 

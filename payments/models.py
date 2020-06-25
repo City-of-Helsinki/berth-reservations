@@ -242,6 +242,13 @@ class Order(UUIDModel, TimeStampedModel):
 
     objects = OrderManager()
 
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["_lease_content_type", "_lease_object_id"], name="unique_lease"
+            )
+        ]
+
     def __str__(self):
         return f"{self.product} [{self.status}]"
 
