@@ -241,6 +241,7 @@ class WinterStorageApplicationAdmin(admin.ModelAdmin):
                 "fields": [
                     "created_at",
                     "status",
+                    "customer",
                     "storage_method",
                     "trailer_registration_number",
                 ]
