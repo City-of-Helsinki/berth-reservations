@@ -7,10 +7,7 @@ from typing import Callable
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import MONTHLY, rrule
 
-from leases.utils import (
-    calculate_berth_lease_end_date,
-    calculate_berth_lease_start_date,
-)
+from leases.utils import calculate_season_end_date, calculate_season_start_date
 
 
 def round_price(price):
@@ -116,7 +113,7 @@ def calculate_product_partial_season_price(
     base_price: Decimal, start_date: date, end_date: date, summer_season: bool = True
 ) -> Decimal:
     # If it's the "normal" (summer) season, calculate with the normal dates
-    season_days = calculate_berth_lease_end_date() - calculate_berth_lease_start_date()
+    season_days = calculate_season_end_date() - calculate_season_start_date()
     # If it's for the opposite season ("winter season"), calculate the inverse
     if not summer_season:
         # Calculate the amount of days in the year, in case it's a leap year

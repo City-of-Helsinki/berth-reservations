@@ -10,10 +10,7 @@ from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumField
 
 from leases.models import BerthLease, WinterStorageLease
-from leases.utils import (
-    calculate_berth_lease_end_date,
-    calculate_berth_lease_start_date,
-)
+from leases.utils import calculate_season_end_date, calculate_season_start_date
 from payments.enums import (
     AdditionalProductType,
     OrderStatus,
@@ -344,9 +341,10 @@ class Order(UUIDModel, TimeStampedModel):
             self._check_same_lease(old_instance)
 
     def is_full_season(self):
-        return (
-            self.lease.start_date == calculate_berth_lease_start_date()
-            and self.lease.end_date == calculate_berth_lease_end_date()
+        return self.lease.start_date == calculate_season_start_date(
+            lease_start=self.lease.start_date
+        ) and self.lease.end_date == calculate_season_end_date(
+            lease_end=self.lease.end_date
         )
 
     def _create_order_lines(self, section):

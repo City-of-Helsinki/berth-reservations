@@ -13,6 +13,8 @@ from berth_reservations.tests.utils import (
 from customers.schema import ProfileNode
 from leases.models import BerthLease
 from leases.schema import BerthLeaseNode
+from leases.tests.factories import BerthLeaseFactory
+from leases.utils import calculate_season_start_date
 from resources.schema import HarborNode, WinterStorageAreaNode
 from utils.relay import to_global_id
 
@@ -753,7 +755,10 @@ mutation CREATE_ORDER($input: CreateOrderMutationInput!) {
 @pytest.mark.parametrize(
     "api_client", ["berth_services"], indirect=True,
 )
-def test_create_order_berth_product(api_client, berth_product, berth_lease):
+# Freezing time to avoid season price miscalculation
+@freeze_time("2020-01-01T08:00:00Z")
+def test_create_order_berth_product(api_client, berth_product):
+    berth_lease = BerthLeaseFactory(start_date=calculate_season_start_date())
     customer_id = to_global_id(ProfileNode, berth_lease.customer.id)
     product_id = to_global_id(BerthProductNode, berth_product.id)
     lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
