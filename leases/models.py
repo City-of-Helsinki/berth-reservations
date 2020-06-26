@@ -35,6 +35,11 @@ class AbstractLease(TimeStampedModel, UUIDModel):
         max_length=30,
         default=LeaseStatus.DRAFTED,
     )
+    _orders_relation = GenericRelation(
+        "payments.Order",
+        object_id_field="_lease_object_id",
+        content_type_field="_lease_content_type",
+    )
 
     start_date = models.DateField(verbose_name=_("start date"))
     end_date = models.DateField(verbose_name=_("end date"))
@@ -43,6 +48,10 @@ class AbstractLease(TimeStampedModel, UUIDModel):
 
     class Meta:
         abstract = True
+
+    @property
+    def order(self):
+        return self._orders_relation.first()
 
     def clean(self):
         if self.boat and not self.boat.owner == self.customer:
@@ -110,21 +119,12 @@ class BerthLease(AbstractLease):
     renew_automatically = models.BooleanField(
         verbose_name=_("renew automatically"), default=True
     )
-    _orders_relation = GenericRelation(
-        "payments.Order",
-        object_id_field="_lease_object_id",
-        content_type_field="_lease_content_type",
-    )
     objects = BerthLeaseManager()
 
     class Meta:
         verbose_name = _("berth lease")
         verbose_name_plural = _("berth leases")
         default_related_name = "berth_leases"
-
-    @property
-    def order(self):
-        return self._orders_relation.first()
 
     def clean(self):
         if self.start_date.year != self.end_date.year:
