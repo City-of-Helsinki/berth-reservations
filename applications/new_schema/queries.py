@@ -59,6 +59,7 @@ class Query:
                 "berth_switch",
                 "berth_switch__harbor",
                 "berth_switch__reason",
+                "customer",
             )
             .prefetch_related(
                 "berth_switch__reason__translations",
