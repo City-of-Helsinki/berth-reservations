@@ -341,8 +341,8 @@ query APPLICATION {
     indirect=True,
 )
 def test_winter_storage_application_query(winter_storage_application, api_client):
-    WinterAreaChoiceFactory(priority=1, application=winter_storage_application)
     WinterAreaChoiceFactory(priority=2, application=winter_storage_application)
+    WinterAreaChoiceFactory(priority=1, application=winter_storage_application)
 
     application_id = to_global_id(
         WinterStorageApplicationNode._meta.name, winter_storage_application.id,
@@ -361,9 +361,9 @@ def test_winter_storage_application_query(winter_storage_application, api_client
     assert len(areas) == 2
 
     first_area = areas[0]
-    assert first_area["priority"] > 0
+    assert first_area["priority"] == 1
     assert len(first_area["winterStorageAreaName"]) > 0
 
     second_area = areas[1]
-    assert second_area["priority"] > 0
+    assert second_area["priority"] == 2
     assert len(second_area["winterStorageAreaName"]) > 0

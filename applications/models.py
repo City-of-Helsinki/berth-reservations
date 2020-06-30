@@ -20,6 +20,7 @@ class HarborChoice(models.Model):
 
     class Meta:
         unique_together = ("application", "priority")
+        ordering = ("application", "priority")
 
 
 class WinterStorageAreaChoice(models.Model):
@@ -31,6 +32,7 @@ class WinterStorageAreaChoice(models.Model):
 
     class Meta:
         unique_together = ("application", "priority")
+        ordering = ("application", "priority")
 
 
 class BerthSwitchReason(TranslatableModel):
