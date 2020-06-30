@@ -1,6 +1,5 @@
 import factory.fuzzy
 
-from berth_reservations.tests.factories import MunicipalityFactory
 from harbors.tests.factories import (
     BoatTypeFactory,
     HarborFactory,
@@ -26,7 +25,7 @@ class BaseApplicationFactory(factory.django.DjangoModelFactory):
     phone_number = factory.Faker("phone_number")
     address = factory.Faker("address")
     zip_code = factory.Faker("zipcode")
-    municipality = factory.SubFactory(MunicipalityFactory)
+    municipality = factory.Faker("word")
 
 
 class BerthApplicationFactory(BaseApplicationFactory):
