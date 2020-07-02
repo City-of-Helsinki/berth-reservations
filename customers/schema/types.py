@@ -40,6 +40,9 @@ class BoatCertificateNode(DjangoObjectType):
 class BoatNode(DjangoObjectType):
     owner = graphene.Field("customers.schema.ProfileNode", required=True)
     certificates = graphene.List("customers.schema.BoatCertificateNode", required=True)
+    length = graphene.Decimal(required=True)
+    width = graphene.Decimal(required=True)
+    draught = graphene.Decimal()
 
     class Meta:
         model = Boat
