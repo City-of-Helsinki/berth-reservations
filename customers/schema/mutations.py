@@ -1,22 +1,54 @@
 import graphene
 from django.core.exceptions import ValidationError
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from graphene_file_upload.scalars import Upload
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
+from resources.models import BoatType
 from users.decorators import (
     add_permission_required,
     change_permission_required,
     delete_permission_required,
 )
-from utils.relay import get_node_from_global_id
+from utils.relay import from_global_id, get_node_from_global_id
 from utils.schema import update_object
 
-from ..models import BoatCertificate
-from .types import BoatCertificateNode, BoatCertificateTypeEnum, BoatNode
+from ..models import Boat, BoatCertificate
+from .types import BoatCertificateNode, BoatCertificateTypeEnum, BoatNode, ProfileNode
 
 
-class BoatCertificateInput:
+def add_boat_certificates(certificates, boat):
+    try:
+        for cert_input in certificates:
+            BoatCertificate.objects.create(**cert_input, boat=boat)
+    except IntegrityError as e:
+        raise VenepaikkaGraphQLError(e)
+
+
+def update_boat_certificates(certificates, info):
+    try:
+        for cert_input in certificates:
+            cert = get_node_from_global_id(
+                info,
+                cert_input.pop("id"),
+                only_type=BoatCertificateNode,
+                nullable=False,
+            )
+            update_object(cert, cert_input)
+    except IntegrityError as e:
+        raise VenepaikkaGraphQLError(e)
+
+
+def remove_boat_certificates(certificates, boat):
+    try:
+        for cert_id in certificates:
+            cert_id = from_global_id(cert_id)
+            BoatCertificate.objects.get(pk=cert_id, boat=boat).delete()
+    except BoatCertificate.DoesNotExist as e:
+        raise VenepaikkaGraphQLError(e)
+
+
+class BoatCertificateInput(graphene.InputObjectType):
     file = Upload()
     certificate_type = BoatCertificateTypeEnum()
     valid_until = graphene.Date()
@@ -24,87 +56,137 @@ class BoatCertificateInput:
     checked_by = graphene.String()
 
 
-class CreateBoatCertificateMutation(graphene.ClientIDMutation):
-    class Input(BoatCertificateInput):
-        boat_id = graphene.ID(required=True)
-        certificate_type = BoatCertificateTypeEnum(required=True)
+class AddBoatCertificateInput(BoatCertificateInput):
+    certificate_type = BoatCertificateTypeEnum(required=True)
 
-    boat_certificate = graphene.Field(BoatCertificateNode)
+
+class UpdateBoatCertificateInput(BoatCertificateInput):
+    id = graphene.ID(required=True)
+
+
+class BoatInput:
+    boat_type_id = graphene.ID()
+    registration_number = graphene.String()
+    name = graphene.String()
+    model = graphene.String()
+    length = graphene.Decimal()
+    width = graphene.Decimal()
+    draught = graphene.Decimal()
+    weight = graphene.Int()
+    propulsion = graphene.String()
+    hull_material = graphene.String()
+    intended_use = graphene.String()
+    add_boat_certificates = graphene.List(AddBoatCertificateInput)
+
+
+class CreateBoatMutation(graphene.ClientIDMutation):
+    class Input(BoatInput):
+        owner_id = graphene.ID(required=True)
+        boat_type_id = graphene.ID(required=True)
+        length = graphene.Decimal(required=True)
+        width = graphene.Decimal(required=True)
+
+    boat = graphene.Field(BoatNode)
+
+    @classmethod
+    @add_permission_required(Boat, BoatCertificate)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        owner = get_node_from_global_id(
+            info, input.pop("owner_id"), only_type=ProfileNode, nullable=False
+        )
+        input["owner"] = owner
+        try:
+            input["boat_type"] = BoatType.objects.get(id=input.pop("boat_type_id"))
+        except BoatType.DoesNotExist as e:
+            raise VenepaikkaGraphQLError(e)
+
+        add_certificates = input.pop("add_boat_certificates", [])
+
+        try:
+            boat = Boat.objects.create(**input)
+            add_boat_certificates(add_certificates, boat)
+        except ValidationError as e:
+            # Flatten all the error messages on a single list
+            errors = sum(e.message_dict.values(), [])
+            raise VenepaikkaGraphQLError(errors)
+
+        return CreateBoatMutation(boat=boat)
+
+
+class UpdateBoatMutation(graphene.ClientIDMutation):
+    class Input(BoatInput):
+        id = graphene.ID(required=True)
+        update_boat_certificates = graphene.List(UpdateBoatCertificateInput)
+        remove_boat_certificates = graphene.List(graphene.ID)
+
+    boat = graphene.Field(BoatNode)
 
     @classmethod
     @add_permission_required(BoatCertificate)
+    @change_permission_required(Boat)
+    @delete_permission_required(BoatCertificate)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         boat = get_node_from_global_id(
-            info, input.pop("boat_id"), only_type=BoatNode, nullable=False
+            info, input.pop("id"), only_type=BoatNode, nullable=False
         )
-        input["boat"] = boat
+        if "boat_type_id" in input:
+            boat_type = get_node_from_global_id(
+                info, input.pop("boat_type_id"), only_type=BoatNode, nullable=True
+            )
+            input["boat_type"] = boat_type
+
+        add_certificates = input.pop("add_boat_certificates", [])
+        update_certificates = input.pop("update_boat_certificates", [])
+        remove_certificates = input.pop("remove_boat_certificates", [])
 
         try:
-            certificate = BoatCertificate.objects.create(**input)
+            update_object(boat, input)
+            remove_boat_certificates(remove_certificates, boat)
+            update_boat_certificates(update_certificates, info)
+            add_boat_certificates(add_certificates, boat)
         except ValidationError as e:
-            # Flatten all the error messages on a single list
-            errors = sum(e.message_dict.values(), [])
-            raise VenepaikkaGraphQLError(errors)
+            raise VenepaikkaGraphQLError(e)
 
-        return CreateBoatCertificateMutation(boat_certificate=certificate)
+        return UpdateBoatMutation(boat=boat)
 
 
-class UpdateBoatCertificateMutation(graphene.ClientIDMutation):
-    class Input(BoatCertificateInput):
-        id = graphene.ID(required=True)
-
-    boat_certificate = graphene.Field(BoatCertificateNode)
-
-    @classmethod
-    @change_permission_required(BoatCertificate)
-    @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, **input):
-        certificate = get_node_from_global_id(
-            info, input.pop("id"), only_type=BoatCertificateNode, nullable=False
-        )
-
-        try:
-            update_object(certificate, input)
-        except ValidationError as e:
-            # Flatten all the error messages on a single list
-            errors = sum(e.message_dict.values(), [])
-            raise VenepaikkaGraphQLError(errors)
-
-        return UpdateBoatCertificateMutation(boat_certificate=certificate)
-
-
-class DeleteBoatCertificateMutation(graphene.ClientIDMutation):
+class DeleteBoatMutation(graphene.ClientIDMutation):
     class Input:
         id = graphene.ID(required=True)
 
     @classmethod
-    @delete_permission_required(BoatCertificate)
+    @delete_permission_required(Boat)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        certificate = get_node_from_global_id(
-            info, input.pop("id"), only_type=BoatCertificateNode, nullable=False
+        boat = get_node_from_global_id(
+            info, input.pop("id"), only_type=BoatNode, nullable=False
         )
 
-        certificate.delete()
+        boat.delete()
 
-        return DeleteBoatCertificateMutation()
+        return DeleteBoatMutation()
 
 
 class Mutation:
-    create_boat_certificate = CreateBoatCertificateMutation.Field(
-        description="Creates a `BoatCertificate` associated with `Boat` passed. "
-        "A `Boat` can only have one certificate from each `BoatCertificateType`."
-        "\n\n**Requires permissions** to create boat certificates."
-    )
-    update_boat_certificate = UpdateBoatCertificateMutation.Field(
-        description="Updates a `BoatCertificate` object."
-        "\n\n**Requires permissions** to edit boat certificates."
+    create_boat = CreateBoatMutation.Field(
+        description="Creates a `Boat` associated with the `ProfileNode` passed."
+        "\n\n**Requires permissions** to create boats."
         "\n\nErrors:"
-        "\n* The passed certificate ID doesn't exist"
+        "\n* The passed customer doesn't exist"
+        "\n* The passed boat type doesn't exist"
     )
-    delete_boat_certificate = DeleteBoatCertificateMutation.Field(
-        description="Deletes a `BoatCertificate` object."
+    update_boat = UpdateBoatMutation.Field(
+        description="Updates a `Boat`."
+        "\n\n**Requires permissions** to update boats."
         "\n\nErrors:"
-        "\n* The passed certificate ID doesn't exist"
+        "\n* The passed boat doesn't exist"
+        "\n* The passed boat type doesn't exist"
+        "\n* The passed `removeBoatCertificates` don't exist"
+    )
+    delete_boat = DeleteBoatMutation.Field(
+        description="Deletes a `Boat` object."
+        "\n\nErrors:"
+        "\n* The passed boat doesn't exist"
     )

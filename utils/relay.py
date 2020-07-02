@@ -51,5 +51,7 @@ def from_global_id(global_id, node_type=None):
     """
     _type, _id = relay_from_global_id(global_id)
     if node_type:
-        assert _type == node_type, f"Must receive a {node_type._meta.name} id."
+        assert (
+            _type == node_type._meta.name
+        ), f"Must receive a {node_type._meta.name} id."
     return _id

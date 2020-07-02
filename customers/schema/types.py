@@ -32,6 +32,7 @@ class BoatCertificateNode(DjangoObjectType):
         model = BoatCertificate
         interfaces = (relay.Node,)
         connection_class = CountConnection
+        exclude = ("boat",)
 
     def resolve_file(self, info, **kwargs):
         return info.context.build_absolute_uri(self.file.url) if self.file else None

@@ -149,9 +149,11 @@ class Boat(TimeStampedModel, UUIDModel):
 
 
 def get_boat_media_folder(instance, filename):
-    return "boats/{boat_id}/{filename}".format(
-        boat_id=instance.boat.id, filename=filename
-    )
+    return "boats/{boat_id}/{filename}".format(boat_id=instance.id, filename=filename)
+
+
+def get_boat_certificate_media_folder(instance, filename):
+    return get_boat_media_folder(instance=instance.boat, filename=filename)
 
 
 class BoatCertificate(UUIDModel):
@@ -163,7 +165,7 @@ class BoatCertificate(UUIDModel):
     )
     file = models.FileField(
         verbose_name="certificate file",
-        upload_to=get_boat_media_folder,
+        upload_to=get_boat_certificate_media_folder,
         storage=FileSystemStorage(),
         blank=True,
         null=True,
