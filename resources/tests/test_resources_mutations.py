@@ -487,6 +487,7 @@ def test_update_berth_not_enough_permissions(api_client, berth, pier, berth_type
     pier_id = to_global_id(PierNode._meta.name, str(pier.id))
 
     variables = {
+        "id": to_global_id(BerthNode._meta.name, str(berth.id)),
         "number": 666,
         "comment": "foobar",
         "pierId": pier_id,
@@ -497,7 +498,7 @@ def test_update_berth_not_enough_permissions(api_client, berth, pier, berth_type
     }
     assert Berth.objects.count() == 1
 
-    executed = api_client.execute(CREATE_BERTH_MUTATION, input=variables)
+    executed = api_client.execute(UPDATE_BERTH_MUTATION, input=variables)
 
     assert Berth.objects.count() == 1
     assert_not_enough_permissions(executed)
