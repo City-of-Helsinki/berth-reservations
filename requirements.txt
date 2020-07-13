@@ -32,7 +32,7 @@ factory-boy==2.12.0       # via -r requirements.in
 faker==2.0.3              # via factory-boy
 future==0.18.1            # via pyjwkest, python-jose
 graphene-django==2.6.0    # via -r requirements.in, django-graphql-geojson, django-graphql-jwt
-graphene-federation==0.0.4  # via -r requirements.in
+graphene-federation==0.1.0  # via -r requirements.in
 graphene-file-upload==1.2.2  # via -r requirements.in
 graphene==2.1.8           # via graphene-django, graphene-federation
 graphql-core==2.2.1       # via django-graphql-jwt, graphene, graphene-django, graphql-relay

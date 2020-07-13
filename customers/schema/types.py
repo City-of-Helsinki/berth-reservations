@@ -125,12 +125,9 @@ class ProfileNode(BaseProfileFieldsMixin, DjangoObjectType):
 
     # explicitly mark shadowed ID field as external
     # otherwise, graphene-federation cannot catch it.
-    id = external(relay.GlobalID())
     # TODO: maybe later investigate other approaches for this?
-    # there is also this bug: if we include this ProfileNode
-    # in some Query fields (e.g. profile = graphene.Field(ProfileNode))
-    # graphene will also mark ID fields as "@external" on some
-    # other random Node types (e.g. WinterStorageAreaNode)
+    #  This one might or might not be the right one.
+    id = external(relay.GlobalID())
 
     @login_required
     def __resolve_reference(self, info, **kwargs):
