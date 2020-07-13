@@ -131,11 +131,6 @@ class UpdateBoatMutation(graphene.ClientIDMutation):
         boat = get_node_from_global_id(
             info, input.pop("id"), only_type=BoatNode, nullable=False
         )
-        if "boat_type_id" in input:
-            boat_type = get_node_from_global_id(
-                info, input.pop("boat_type_id"), only_type=BoatNode, nullable=True
-            )
-            input["boat_type"] = boat_type
 
         add_certificates = input.pop("add_boat_certificates", [])
         update_certificates = input.pop("update_boat_certificates", [])
