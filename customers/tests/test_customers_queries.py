@@ -15,7 +15,7 @@ from leases.schema import BerthLeaseNode
 from leases.tests.factories import BerthLeaseFactory
 from utils.relay import to_global_id
 
-from ..schema import BerthProfileNode, BoatCertificateNode, BoatNode, ProfileNode
+from ..schema import BoatCertificateNode, BoatNode, ProfileNode
 from ..tests.factories import BoatFactory, OrganizationFactory
 
 FEDERATED_SCHEMA_QUERY = """
@@ -244,7 +244,7 @@ def test_query_berth_profiles(api_client, customer_profile):
 
     executed = api_client.execute(QUERY_BERTH_PROFILES)
 
-    customer_id = to_global_id(BerthProfileNode, customer_profile.id)
+    customer_id = to_global_id(ProfileNode, customer_profile.id)
     boat_id = to_global_id(BoatNode, boat.id)
     berth_application_id = to_global_id(BerthApplicationNode, berth_application.id)
     berth_lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
@@ -314,7 +314,7 @@ query GetBerthProfile {
     indirect=True,
 )
 def test_query_berth_profile(api_client, customer_profile):
-    berth_profile_id = to_global_id(BerthProfileNode, customer_profile.id)
+    berth_profile_id = to_global_id(ProfileNode, customer_profile.id)
 
     berth_application = BerthApplicationFactory(customer=customer_profile)
     berth_lease = BerthLeaseFactory(customer=customer_profile)
@@ -344,7 +344,7 @@ def test_query_berth_profile(api_client, customer_profile):
 
 
 def test_query_berth_profile_self_user(customer_profile):
-    berth_profile_id = to_global_id(BerthProfileNode, customer_profile.id)
+    berth_profile_id = to_global_id(ProfileNode, customer_profile.id)
 
     berth_application = BerthApplicationFactory(customer=customer_profile)
     berth_lease = BerthLeaseFactory(customer=customer_profile)
@@ -380,7 +380,7 @@ def test_query_berth_profile_self_user(customer_profile):
 def test_query_berth_profile_not_enough_permissions_valid_id(
     api_client, customer_profile
 ):
-    berth_profile_id = to_global_id(BerthProfileNode, customer_profile.id)
+    berth_profile_id = to_global_id(ProfileNode, customer_profile.id)
 
     query = QUERY_BERTH_PROFILE % berth_profile_id
 
@@ -411,7 +411,7 @@ query BOATS_CERTIFICATES {
 def test_query_boat_certificates(superuser_api_client, boat_certificate):
     certificate_id = to_global_id(BoatCertificateNode, boat_certificate.id)
     boat_id = to_global_id(BoatNode, boat_certificate.boat.id)
-    customer_id = to_global_id(BerthProfileNode, boat_certificate.boat.owner.id)
+    customer_id = to_global_id(ProfileNode, boat_certificate.boat.owner.id)
 
     query = QUERY_BOAT_CERTIFICATES % customer_id
 
@@ -442,7 +442,7 @@ def test_query_customer_boat_count(superuser_api_client, customer_profile):
             }
         }
     """ % to_global_id(
-        BerthProfileNode, customer_profile.id
+        ProfileNode, customer_profile.id
     )
 
     executed = superuser_api_client.execute(query)

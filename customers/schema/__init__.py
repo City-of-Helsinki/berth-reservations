@@ -1,7 +1,6 @@
 from .mutations import Mutation
 from .queries import Query
 from .types import (
-    BerthProfileNode,
     BoatCertificateNode,
     BoatCertificateTypeEnum,
     BoatNode,
@@ -12,7 +11,6 @@ from .types import (
 )
 
 __all__ = [
-    "BerthProfileNode",
     "BoatCertificateNode",
     "BoatCertificateTypeEnum",
     "BoatNode",

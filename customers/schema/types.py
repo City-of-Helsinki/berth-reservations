@@ -1,6 +1,5 @@
 import django_filters
 import graphene
-from django.utils.translation import ugettext_lazy as _
 from graphene import relay
 from graphene_django import DjangoConnectionField, DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -9,12 +8,10 @@ from graphql_jwt.decorators import login_required
 
 from applications.models import BerthApplication
 from applications.new_schema import BerthApplicationNode
-from berth_reservations.exceptions import VenepaikkaGraphQLError
 from leases.models import BerthLease
 from leases.schema import BerthLeaseNode
-from users.utils import user_has_view_permission
 from utils.enum import graphene_enum
-from utils.relay import get_node_from_global_id
+from utils.relay import get_node_from_global_id, return_node_if_user_has_permissions
 from utils.schema import CountConnection
 
 from ..enums import BoatCertificateType, InvoicingType, OrganizationType
@@ -65,18 +62,6 @@ class OrganizationNode(DjangoObjectType):
         connection_class = CountConnection
 
 
-PROFILE_NODE_FIELDS = (
-    "id",
-    "invoicing_type",
-    "comment",
-    "organization",
-    "boats",
-    "berth_applications",
-    "berth_leases",
-    "orders",
-)
-
-
 class BerthApplicationFilter(django_filters.FilterSet):
     order_by = django_filters.OrderingFilter(
         fields=(("created_at", "createdAt"),),
@@ -84,18 +69,40 @@ class BerthApplicationFilter(django_filters.FilterSet):
     )
 
 
-class BaseProfileFieldsMixin:
+@extend(fields="id")
+class ProfileNode(DjangoObjectType):
     """
-    Mixin that stores the attributes that are exactly
-    the same between ProfileNode and BerthProfileNode
-
-    BEWARE: since ProfileNode is extended, none of its
-    fields could be non-nullable (i.e. required=True),
-    because then the entire ProfileNode will be null at
-    the federation level, if the profile object has no
-    object in our database.
+    ProfileNode extended from the open-city-profile's ProfileNode.
     """
 
+    class Meta:
+        model = CustomerProfile
+        fields = (
+            "id",
+            "invoicing_type",
+            "comment",
+            "organization",
+            "boats",
+            "berth_applications",
+            "berth_leases",
+            "orders",
+        )
+        filter_fields = ("comment",)
+        interfaces = (relay.Node,)
+        connection_class = CountConnection
+
+    # explicitly mark shadowed ID field as external
+    # otherwise, graphene-federation cannot catch it.
+    # TODO: maybe later investigate other approaches for this?
+    #  This one might or might not be the right one.
+    id = external(relay.GlobalID())
+
+    # The fields below come from our backend.
+    # BEWARE: since ProfileNode is extended, none of its
+    # fields could be non-nullable (i.e. required=True),
+    # because then the entire ProfileNode will be null at
+    # the federation level, if the profile object has no
+    # object in our database.
     invoicing_type = InvoicingTypeEnum()
     comment = graphene.String()
     organization = graphene.Field(OrganizationNode)
@@ -111,66 +118,17 @@ class BaseProfileFieldsMixin:
     def resolve_berth_applications(self, info, **kwargs):
         return self.berth_applications.order_by("created_at")
 
-
-@extend(fields="id")
-class ProfileNode(BaseProfileFieldsMixin, DjangoObjectType):
-    """
-    ProfileNode extended from the open-city-profile's ProfileNode.
-    """
-
-    class Meta:
-        model = CustomerProfile
-        fields = PROFILE_NODE_FIELDS
-        interfaces = (relay.Node,)
-
-    # explicitly mark shadowed ID field as external
-    # otherwise, graphene-federation cannot catch it.
-    # TODO: maybe later investigate other approaches for this?
-    #  This one might or might not be the right one.
-    id = external(relay.GlobalID())
-
     @login_required
     def __resolve_reference(self, info, **kwargs):
-        user = info.context.user
         profile = get_node_from_global_id(info, self.id, only_type=ProfileNode)
-        if not profile:
-            return None
-
-        if profile.user == user or user_has_view_permission(
-            user, CustomerProfile, BerthApplication, BerthLease
-        ):
-            return profile
-        else:
-            raise VenepaikkaGraphQLError(
-                _("You do not have permission to perform this action.")
-            )
-
-
-class BerthProfileNode(BaseProfileFieldsMixin, DjangoObjectType):
-    """
-    ProfileNode that only contains profile info stored in this service.
-    """
-
-    class Meta:
-        model = CustomerProfile
-        filter_fields = ("invoicing_type",)
-        fields = PROFILE_NODE_FIELDS
-        interfaces = (relay.Node,)
-        connection_class = CountConnection
+        return return_node_if_user_has_permissions(
+            profile, info.context.user, CustomerProfile, BerthApplication, BerthLease
+        )
 
     @classmethod
     @login_required
     def get_node(cls, info, id):
         node = super().get_node(info, id)
-        if not node:
-            return None
-
-        user = info.context.user
-        if node.user == user or user_has_view_permission(
-            user, CustomerProfile, BerthApplication, BerthLease
-        ):
-            return node
-        else:
-            raise VenepaikkaGraphQLError(
-                _("You do not have permission to perform this action.")
-            )
+        return return_node_if_user_has_permissions(
+            node, info.context.user, CustomerProfile, BerthApplication, BerthLease
+        )

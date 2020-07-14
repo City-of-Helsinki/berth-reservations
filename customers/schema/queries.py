@@ -6,12 +6,12 @@ from leases.models import BerthLease
 from users.decorators import view_permission_required
 
 from ..models import CustomerProfile
-from .types import BerthProfileNode
+from .types import ProfileNode
 
 
 class Query:
-    berth_profile = graphene.relay.Node.Field(BerthProfileNode)
-    berth_profiles = DjangoFilterConnectionField(BerthProfileNode)
+    berth_profile = graphene.relay.Node.Field(ProfileNode)
+    berth_profiles = DjangoFilterConnectionField(ProfileNode)
 
     @view_permission_required(CustomerProfile, BerthApplication, BerthLease)
     def resolve_berth_profiles(self, info, **kwargs):
