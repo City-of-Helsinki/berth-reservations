@@ -258,6 +258,14 @@ DEFAULT_MODELS_PERMS = {
             HARBOR_SERVICES: None,
         },
     },
+    "django_ilmoitin": {
+        "notificationtemplate": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: None,
+            HARBOR_SERVICES: ("view",),
+        },
+    },
 }
 
 
