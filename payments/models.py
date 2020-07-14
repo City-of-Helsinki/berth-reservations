@@ -25,6 +25,7 @@ from payments.utils import (
     calculate_product_partial_year_price,
     calculate_product_percentage_price,
     convert_aftertax_to_pretax,
+    round_price,
     rounded,
 )
 from utils.models import TimeStampedModel, UUIDModel
@@ -411,15 +412,29 @@ class Order(UUIDModel, TimeStampedModel):
             price = self.product.price_value
             tax_percentage = self.product.tax_percentage
 
-            # If the lease doesn't last for the whole season
-            if self.lease and not self.is_full_season():
-                price = calculate_product_partial_season_price(
-                    price,
-                    self.lease.start_date,
-                    self.lease.end_date,
-                    summer_season=isinstance(self.lease, BerthLease),
-                )
-            self.price = self.price or price
+            if self.lease:
+                # If the lease doesn't last for the whole season
+                if not self.is_full_season():
+                    price = calculate_product_partial_season_price(
+                        price,
+                        self.lease.start_date,
+                        self.lease.end_date,
+                        summer_season=isinstance(self.lease, BerthLease),
+                    )
+
+                # If the order is for a winter product with a lease, the price
+                # has to be calculated based on the dimensions of the place associated
+                # to the lease
+                if isinstance(self.lease, WinterStorageLease) and isinstance(
+                    self.product, WinterStorageProduct
+                ):
+                    place_sqm = (
+                        self.lease.place.place_type.width
+                        * self.lease.place.place_type.length
+                    )
+                    price = price * place_sqm
+
+            self.price = round_price(self.price or price)
             self.tax_percentage = self.tax_percentage or tax_percentage
 
         old_instance = Order.objects.filter(id=self.id).first()

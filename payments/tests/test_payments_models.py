@@ -42,6 +42,7 @@ from resources.tests.factories import (
     WinterStoragePlaceFactory,
     WinterStorageSectionFactory,
 )
+from utils.numbers import rounded
 
 
 def test_berth_product_invalid_price_unit():
@@ -208,8 +209,21 @@ def test_order_retrieves_winter_storage_lease(
         customer=customer_profile,
         product=winter_storage_product,
     )
+    sqm = (
+        winter_storage_lease.place.place_type.width
+        * winter_storage_lease.place.place_type.length
+    )
+    expected_price = calculate_product_partial_season_price(
+        winter_storage_product.price_value,
+        winter_storage_lease.start_date,
+        winter_storage_lease.end_date,
+        summer_season=False,
+    )
+    expected_price = rounded(expected_price * sqm, decimals=2)
+
     assert order.lease.id == winter_storage_lease.id
     assert order._lease_content_type.name == winter_storage_lease._meta.verbose_name
+    assert order.price == expected_price
 
 
 def test_order_berth_product_price(berth_product, customer_profile):
