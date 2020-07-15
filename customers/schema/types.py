@@ -69,6 +69,14 @@ class BerthApplicationFilter(django_filters.FilterSet):
     )
 
 
+class ProfileFilterSet(django_filters.FilterSet):
+    class Meta:
+        model = CustomerProfile
+        fields = ("comment",)
+
+    comment = django_filters.CharFilter(lookup_expr="icontains")
+
+
 @extend(fields="id")
 class ProfileNode(DjangoObjectType):
     """
@@ -87,7 +95,6 @@ class ProfileNode(DjangoObjectType):
             "berth_leases",
             "orders",
         )
-        filter_fields = ("comment",)
         interfaces = (relay.Node,)
         connection_class = CountConnection
 

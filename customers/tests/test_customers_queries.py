@@ -15,6 +15,7 @@ from leases.schema import BerthLeaseNode
 from leases.tests.factories import BerthLeaseFactory
 from utils.relay import to_global_id
 
+from ..enums import InvoicingType
 from ..schema import BoatCertificateNode, BoatNode, ProfileNode
 from ..tests.factories import BoatFactory, OrganizationFactory
 
@@ -270,6 +271,70 @@ def test_query_berth_profiles_not_enough_permissions(api_client):
     executed = api_client.execute(QUERY_BERTH_PROFILES)
 
     assert_not_enough_permissions(executed)
+
+
+QUERY_BERTH_PROFILES_FILTERED = """
+query GetBerthProfilesByComment {
+    berthProfiles(comment: "%s", invoicingTypes: [%s]) {
+        edges {
+            node {
+                id
+                comment
+                invoicingType
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize("should_find_match", [True, False])
+def test_filter_berth_profiles_comment(
+    should_find_match, superuser_api_client, customer_profile
+):
+    comment = "my lovely comment"
+    customer_profile.comment = comment
+    customer_profile.save()
+
+    passed_comment = "totally different comment"
+    if should_find_match:
+        passed_comment = "lovely"
+
+    query = QUERY_BERTH_PROFILES_FILTERED % (passed_comment, "")
+
+    executed = superuser_api_client.execute(query)
+
+    if should_find_match:
+        assert (
+            executed["data"]["berthProfiles"]["edges"][0]["node"]["comment"]
+            == customer_profile.comment
+        )
+    else:
+        assert not executed["data"]["berthProfiles"]["edges"]
+
+
+@pytest.mark.parametrize("should_find_match", [True, False])
+def test_filter_berth_profiles_invoicing_type(
+    should_find_match, superuser_api_client, customer_profile
+):
+    customer_profile.invoicing_type = InvoicingType.ONLINE_PAYMENT
+    customer_profile.save()
+
+    passed_invoicing_type = InvoicingType.DIGITAL_INVOICE.name
+    if should_find_match:
+        passed_invoicing_type = customer_profile.invoicing_type.name
+
+    query = QUERY_BERTH_PROFILES_FILTERED % ("", passed_invoicing_type)
+
+    executed = superuser_api_client.execute(query)
+
+    if should_find_match:
+        assert (
+            executed["data"]["berthProfiles"]["edges"][0]["node"]["invoicingType"]
+            == passed_invoicing_type
+        )
+    else:
+        assert not executed["data"]["berthProfiles"]["edges"]
 
 
 QUERY_BERTH_PROFILE = """
