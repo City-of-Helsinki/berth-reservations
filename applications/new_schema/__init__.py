@@ -5,6 +5,8 @@ from .types import (
     BerthApplicationNode,
     BerthSwitchType,
     HarborChoiceType,
+    WinterStorageApplicationNode,
+    WinterStorageAreaChoiceType,
 )
 
 __all__ = [
@@ -14,4 +16,6 @@ __all__ = [
     "HarborChoiceType",
     "Mutation",
     "Query",
+    "WinterStorageApplicationNode",
+    "WinterStorageAreaChoiceType",
 ]
