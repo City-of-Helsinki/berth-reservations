@@ -15,7 +15,7 @@ from leases.schema import BerthLeaseNode
 from leases.tests.factories import BerthLeaseFactory
 from utils.relay import to_global_id
 
-from ..enums import InvoicingType
+from ..enums import InvoicingType, OrganizationType
 from ..schema import BoatCertificateNode, BoatNode, ProfileNode
 from ..tests.factories import BoatFactory, OrganizationFactory
 
@@ -275,12 +275,13 @@ def test_query_berth_profiles_not_enough_permissions(api_client):
 
 QUERY_BERTH_PROFILES_FILTERED = """
 query GetBerthProfilesByComment {
-    berthProfiles(comment: "%s", invoicingTypes: [%s]) {
+    berthProfiles(comment: "%s", invoicingTypes: [%s], customerGroups: [%s]) {
         edges {
             node {
                 id
                 comment
                 invoicingType
+                customerGroup
             }
         }
     }
@@ -300,7 +301,7 @@ def test_filter_berth_profiles_comment(
     if should_find_match:
         passed_comment = "lovely"
 
-    query = QUERY_BERTH_PROFILES_FILTERED % (passed_comment, "")
+    query = QUERY_BERTH_PROFILES_FILTERED % (passed_comment, "", "")
 
     executed = superuser_api_client.execute(query)
 
@@ -324,7 +325,7 @@ def test_filter_berth_profiles_invoicing_type(
     if should_find_match:
         passed_invoicing_type = customer_profile.invoicing_type.name
 
-    query = QUERY_BERTH_PROFILES_FILTERED % ("", passed_invoicing_type)
+    query = QUERY_BERTH_PROFILES_FILTERED % ("", passed_invoicing_type, "")
 
     executed = superuser_api_client.execute(query)
 
@@ -332,6 +333,35 @@ def test_filter_berth_profiles_invoicing_type(
         assert (
             executed["data"]["berthProfiles"]["edges"][0]["node"]["invoicingType"]
             == passed_invoicing_type
+        )
+    else:
+        assert not executed["data"]["berthProfiles"]["edges"]
+
+
+@pytest.mark.parametrize("should_find_match", [True, False])
+@pytest.mark.parametrize("organization_customer", [True, False])
+def test_filter_berth_profiles_customer_group(
+    should_find_match, organization_customer, superuser_api_client, customer_profile
+):
+    if organization_customer:
+        organization = OrganizationFactory(
+            customer=customer_profile, organization_type=OrganizationType.INTERNAL
+        )
+
+    passed_customer_group = OrganizationType.COMPANY.name
+    if should_find_match:
+        passed_customer_group = (
+            organization.organization_type.name if organization_customer else "PRIVATE"
+        )
+
+    query = QUERY_BERTH_PROFILES_FILTERED % ("", "", passed_customer_group)
+
+    executed = superuser_api_client.execute(query)
+
+    if should_find_match:
+        assert (
+            executed["data"]["berthProfiles"]["edges"][0]["node"]["customerGroup"]
+            == passed_customer_group
         )
     else:
         assert not executed["data"]["berthProfiles"]["edges"]

@@ -21,6 +21,11 @@ InvoicingTypeEnum = graphene_enum(InvoicingType)
 OrganizationTypeEnum = graphene_enum(OrganizationType)
 BoatCertificateTypeEnum = graphene_enum(BoatCertificateType)
 
+CustomerGroupEnum = graphene.Enum(
+    "CustomerGroup",
+    [("PRIVATE", "private")] + [(enum.name, enum.value) for enum in OrganizationType],
+)
+
 
 class BoatCertificateNode(DjangoObjectType):
     certificate_type = BoatCertificateTypeEnum(required=True)
@@ -112,6 +117,7 @@ class ProfileNode(DjangoObjectType):
     # object in our database.
     invoicing_type = InvoicingTypeEnum()
     comment = graphene.String()
+    customer_group = CustomerGroupEnum()
     organization = graphene.Field(OrganizationNode)
     boats = DjangoConnectionField(BoatNode)
     berth_applications = DjangoFilterConnectionField(
