@@ -1,77 +1,26 @@
-import django_filters
 import graphene
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
-from graphene_django import DjangoObjectType
-from graphene_django.filter import DjangoFilterConnectionField
-from graphql_jwt.decorators import login_required
 
 from applications.enums import ApplicationStatus
 from applications.models import BerthApplication
 from applications.new_schema import BerthApplicationNode
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.models import CustomerProfile
-from resources.schema import BerthNode, update_object
+from resources.schema import BerthNode
 from users.decorators import (
     add_permission_required,
     change_permission_required,
     delete_permission_required,
     view_permission_required,
 )
-from users.utils import user_has_view_permission
-from utils.enum import graphene_enum
 from utils.relay import get_node_from_global_id
-from utils.schema import CountConnection
+from utils.schema import update_object
 
-from .enums import LeaseStatus
-from .models import BerthLease
-
-LeaseStatusEnum = graphene_enum(LeaseStatus)
-
-
-class BerthLeaseNodeFilter(django_filters.FilterSet):
-    order_by = django_filters.OrderingFilter(
-        fields=(("created_at", "createdAt"),),
-        label="Supports only `createdAt` and `-createdAt`.",
-    )
-
-
-class BerthLeaseNode(DjangoObjectType):
-    berth = graphene.Field(BerthNode, required=True)
-    status = LeaseStatusEnum(required=True)
-    customer = graphene.Field("customers.schema.ProfileNode", required=True)
-    order = graphene.Field("payments.schema.OrderNode")
-    is_active = graphene.Boolean(
-        required=True,
-        description="For a Lease to be active, it has to have `status == PAID`. "
-        "\n\nIf the present date is before the season starts (10.6.2020), "
-        "a lease will be active if it starts at the same date as the season. "
-        "If the present date is during the season, a lease will be active if the "
-        "dates `start date < today < end date`.",
-    )
-
-    class Meta:
-        model = BerthLease
-        interfaces = (graphene.relay.Node,)
-        connection_class = CountConnection
-
-    @classmethod
-    @login_required
-    def get_node(cls, info, id):
-        node = super().get_node(info, id)
-        if not node:
-            return None
-
-        user = info.context.user
-        if (node.customer and node.customer.user == user) or user_has_view_permission(
-            user, BerthLease, BerthApplication, CustomerProfile
-        ):
-            return node
-        else:
-            raise VenepaikkaGraphQLError(
-                _("You do not have permission to perform this action.")
-            )
+from ..enums import LeaseStatus
+from ..models import BerthLease
+from .types import BerthLeaseNode
 
 
 class BerthLeaseInput:
@@ -216,29 +165,6 @@ class DeleteBerthLeaseMutation(graphene.ClientIDMutation):
         lease.delete()
 
         return DeleteBerthLeaseMutation()
-
-
-class Query:
-    berth_lease = graphene.relay.Node.Field(BerthLeaseNode)
-    berth_leases = DjangoFilterConnectionField(
-        BerthLeaseNode,
-        filterset_class=BerthLeaseNodeFilter,
-        description="`BerthLeases` are ordered by `createdAt` in ascending order by default.",
-    )
-
-    @view_permission_required(BerthLease, BerthApplication, CustomerProfile)
-    def resolve_berth_leases(self, info, **kwargs):
-        return (
-            BerthLease.objects.select_related(
-                "application",
-                "application__customer",
-                "berth",
-                "berth__pier",
-                "berth__pier__harbor",
-            )
-            .prefetch_related("application__customer__boats")
-            .order_by("created_at")
-        )
 
 
 class Mutation:
