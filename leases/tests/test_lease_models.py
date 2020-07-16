@@ -20,6 +20,10 @@ from ..models import (
     WinterStorageLease,
     WinterStorageLeaseChange,
 )
+from ..utils import (
+    calculate_winter_storage_lease_end_date,
+    calculate_winter_storage_lease_start_date,
+)
 from .factories import BerthLeaseFactory, WinterStorageLeaseFactory
 
 
@@ -91,7 +95,12 @@ def test_other_lease_changes_are_not_tracked(berth_lease):
 
 
 def test_winter_storage_lease_model(winter_storage_lease):
+
     assert WinterStorageLease.objects.count() == 1
+    assert (
+        winter_storage_lease.start_date == calculate_winter_storage_lease_start_date()
+    )
+    assert winter_storage_lease.end_date == calculate_winter_storage_lease_end_date()
 
 
 def test_winter_storage_lease_status_changes_are_tracked(winter_storage_lease):

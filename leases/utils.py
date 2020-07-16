@@ -63,3 +63,34 @@ def calculate_berth_lease_end_date() -> date:
     Leases always end on 14.9, the year depends on the current year
     """
     return calculate_season_end_date()
+
+
+def calculate_winter_storage_lease_start_date() -> date:
+    """
+    Return the date when the "winter" lease season should start
+
+    The season should start by default on 15.9 (one day after the "summer" season ends)
+    """
+
+    # Return the earliest date between the default start date or today
+    today = date.today()
+    default = max(date(day=15, month=9, year=today.year), today)
+
+    if today < date(day=10, month=6, year=today.year):
+        return today
+
+    return default
+
+
+def calculate_winter_storage_lease_end_date() -> date:
+    """Return the date when the lease season should end
+
+    The season should end by default on 10.6 on the following year
+    """
+    today = date.today()
+    default = date(day=10, month=6, year=today.year + 1)
+
+    if today.month <= default.month and today.day < default.day:
+        default = default.replace(year=today.year)
+
+    return default
