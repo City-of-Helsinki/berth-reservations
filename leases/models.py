@@ -14,7 +14,12 @@ from utils.models import TimeStampedModel, UUIDModel
 
 from .consts import ACTIVE_LEASE_STATUSES
 from .enums import LeaseStatus
-from .utils import calculate_berth_lease_end_date, calculate_berth_lease_start_date
+from .utils import (
+    calculate_berth_lease_end_date,
+    calculate_berth_lease_start_date,
+    calculate_winter_storage_lease_end_date,
+    calculate_winter_storage_lease_start_date,
+)
 
 
 class AbstractLease(TimeStampedModel, UUIDModel):
@@ -40,9 +45,6 @@ class AbstractLease(TimeStampedModel, UUIDModel):
         object_id_field="_lease_object_id",
         content_type_field="_lease_content_type",
     )
-
-    start_date = models.DateField(verbose_name=_("start date"))
-    end_date = models.DateField(verbose_name=_("end date"))
 
     comment = models.TextField(verbose_name=_("comment"), blank=True)
 
@@ -182,6 +184,12 @@ class WinterStorageLease(AbstractLease):
         blank=True,
         null=True,
         related_name="lease",
+    )
+    start_date = models.DateField(
+        verbose_name=_("start date"), default=calculate_winter_storage_lease_start_date
+    )
+    end_date = models.DateField(
+        verbose_name=_("end date"), default=calculate_winter_storage_lease_end_date
     )
 
     class Meta:

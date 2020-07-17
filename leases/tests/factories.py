@@ -1,7 +1,4 @@
-from datetime import date, timedelta
-
 import factory
-from factory.random import randgen
 
 from customers.tests.factories import CustomerProfileFactory
 from resources.tests.factories import BerthFactory, WinterStoragePlaceFactory
@@ -23,12 +20,6 @@ class BerthLeaseFactory(AbstractLeaseFactory):
 
 class WinterStorageLeaseFactory(AbstractLeaseFactory):
     place = factory.SubFactory(WinterStoragePlaceFactory)
-    start_date = factory.LazyFunction(
-        lambda: date.today() + timedelta(days=randgen.randint(1, 30))
-    )
-    end_date = factory.LazyAttribute(
-        lambda l: l.start_date + timedelta(days=randgen.randint(60, 180))
-    )
 
     class Meta:
         model = WinterStorageLease
