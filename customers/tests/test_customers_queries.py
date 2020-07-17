@@ -15,7 +15,8 @@ from leases.schema import BerthLeaseNode
 from leases.tests.factories import BerthLeaseFactory
 from utils.relay import to_global_id
 
-from ..schema import BerthProfileNode, BoatCertificateNode, BoatNode, ProfileNode
+from ..enums import InvoicingType, OrganizationType
+from ..schema import BoatCertificateNode, BoatNode, ProfileNode
 from ..tests.factories import BoatFactory, OrganizationFactory
 
 FEDERATED_SCHEMA_QUERY = """
@@ -30,9 +31,8 @@ FEDERATED_SCHEMA_QUERY = """
 def test_profile_node_gets_extended_properly(api_client):
     executed = api_client.execute(FEDERATED_SCHEMA_QUERY)
     assert (
-        # TODO: remove the second "@key" when/if graphene-federartion fixes itself
-        'extend type ProfileNode  implements Node  @key(fields: "id") '
-        ' @key(fields: "id") {   id: ID! @external'
+        "extend type ProfileNode  implements Node "
+        ' @key(fields: "id") {   id: ID! @external '
         in executed["data"]["_service"]["sdl"]
     )
 
@@ -245,7 +245,7 @@ def test_query_berth_profiles(api_client, customer_profile):
 
     executed = api_client.execute(QUERY_BERTH_PROFILES)
 
-    customer_id = to_global_id(BerthProfileNode, customer_profile.id)
+    customer_id = to_global_id(ProfileNode, customer_profile.id)
     boat_id = to_global_id(BoatNode, boat.id)
     berth_application_id = to_global_id(BerthApplicationNode, berth_application.id)
     berth_lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
@@ -271,6 +271,100 @@ def test_query_berth_profiles_not_enough_permissions(api_client):
     executed = api_client.execute(QUERY_BERTH_PROFILES)
 
     assert_not_enough_permissions(executed)
+
+
+QUERY_BERTH_PROFILES_FILTERED = """
+query GetBerthProfilesByComment {
+    berthProfiles(comment: "%s", invoicingTypes: [%s], customerGroups: [%s]) {
+        edges {
+            node {
+                id
+                comment
+                invoicingType
+                customerGroup
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize("should_find_match", [True, False])
+def test_filter_berth_profiles_comment(
+    should_find_match, superuser_api_client, customer_profile
+):
+    comment = "my lovely comment"
+    customer_profile.comment = comment
+    customer_profile.save()
+
+    passed_comment = "totally different comment"
+    if should_find_match:
+        passed_comment = "lovely"
+
+    query = QUERY_BERTH_PROFILES_FILTERED % (passed_comment, "", "")
+
+    executed = superuser_api_client.execute(query)
+
+    if should_find_match:
+        assert (
+            executed["data"]["berthProfiles"]["edges"][0]["node"]["comment"]
+            == customer_profile.comment
+        )
+    else:
+        assert not executed["data"]["berthProfiles"]["edges"]
+
+
+@pytest.mark.parametrize("should_find_match", [True, False])
+def test_filter_berth_profiles_invoicing_type(
+    should_find_match, superuser_api_client, customer_profile
+):
+    customer_profile.invoicing_type = InvoicingType.ONLINE_PAYMENT
+    customer_profile.save()
+
+    passed_invoicing_type = InvoicingType.DIGITAL_INVOICE.name
+    if should_find_match:
+        passed_invoicing_type = customer_profile.invoicing_type.name
+
+    query = QUERY_BERTH_PROFILES_FILTERED % ("", passed_invoicing_type, "")
+
+    executed = superuser_api_client.execute(query)
+
+    if should_find_match:
+        assert (
+            executed["data"]["berthProfiles"]["edges"][0]["node"]["invoicingType"]
+            == passed_invoicing_type
+        )
+    else:
+        assert not executed["data"]["berthProfiles"]["edges"]
+
+
+@pytest.mark.parametrize("should_find_match", [True, False])
+@pytest.mark.parametrize("organization_customer", [True, False])
+def test_filter_berth_profiles_customer_group(
+    should_find_match, organization_customer, superuser_api_client, customer_profile
+):
+    if organization_customer:
+        organization = OrganizationFactory(
+            customer=customer_profile, organization_type=OrganizationType.INTERNAL
+        )
+
+    passed_customer_group = OrganizationType.COMPANY.name
+    if should_find_match:
+        passed_customer_group = (
+            organization.organization_type.name if organization_customer else "PRIVATE"
+        )
+
+    query = QUERY_BERTH_PROFILES_FILTERED % ("", "", passed_customer_group)
+
+    executed = superuser_api_client.execute(query)
+
+    if should_find_match:
+        assert (
+            executed["data"]["berthProfiles"]["edges"][0]["node"]["customerGroup"]
+            == passed_customer_group
+        )
+    else:
+        assert not executed["data"]["berthProfiles"]["edges"]
 
 
 QUERY_BERTH_PROFILE = """
@@ -315,7 +409,7 @@ query GetBerthProfile {
     indirect=True,
 )
 def test_query_berth_profile(api_client, customer_profile):
-    berth_profile_id = to_global_id(BerthProfileNode, customer_profile.id)
+    berth_profile_id = to_global_id(ProfileNode, customer_profile.id)
 
     berth_application = BerthApplicationFactory(customer=customer_profile)
     berth_lease = BerthLeaseFactory(customer=customer_profile)
@@ -345,7 +439,7 @@ def test_query_berth_profile(api_client, customer_profile):
 
 
 def test_query_berth_profile_self_user(customer_profile):
-    berth_profile_id = to_global_id(BerthProfileNode, customer_profile.id)
+    berth_profile_id = to_global_id(ProfileNode, customer_profile.id)
 
     berth_application = BerthApplicationFactory(customer=customer_profile)
     berth_lease = BerthLeaseFactory(customer=customer_profile)
@@ -381,7 +475,7 @@ def test_query_berth_profile_self_user(customer_profile):
 def test_query_berth_profile_not_enough_permissions_valid_id(
     api_client, customer_profile
 ):
-    berth_profile_id = to_global_id(BerthProfileNode, customer_profile.id)
+    berth_profile_id = to_global_id(ProfileNode, customer_profile.id)
 
     query = QUERY_BERTH_PROFILE % berth_profile_id
 
@@ -412,7 +506,7 @@ query BOATS_CERTIFICATES {
 def test_query_boat_certificates(superuser_api_client, boat_certificate):
     certificate_id = to_global_id(BoatCertificateNode, boat_certificate.id)
     boat_id = to_global_id(BoatNode, boat_certificate.boat.id)
-    customer_id = to_global_id(BerthProfileNode, boat_certificate.boat.owner.id)
+    customer_id = to_global_id(ProfileNode, boat_certificate.boat.owner.id)
 
     query = QUERY_BOAT_CERTIFICATES % customer_id
 
@@ -443,7 +537,7 @@ def test_query_customer_boat_count(superuser_api_client, customer_profile):
             }
         }
     """ % to_global_id(
-        BerthProfileNode, customer_profile.id
+        ProfileNode, customer_profile.id
     )
 
     executed = superuser_api_client.execute(query)

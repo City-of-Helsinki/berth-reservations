@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import UniqueConstraint
+from django.db.models import Case, UniqueConstraint, Value, When
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumField
@@ -19,6 +19,24 @@ from .enums import BoatCertificateType, InvoicingType, OrganizationType
 User = get_user_model()
 
 
+class CustomerProfileManager(models.Manager):
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                customer_group=Case(
+                    When(
+                        organization__isnull=False,
+                        then="organization__organization_type",
+                    ),
+                    default=Value("private"),
+                    output_field=models.CharField(),
+                )
+            )
+        )
+
+
 class CustomerProfile(TimeStampedModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
@@ -29,6 +47,8 @@ class CustomerProfile(TimeStampedModel):
         default=InvoicingType.ONLINE_PAYMENT,
     )
     comment = models.TextField(verbose_name=_("comment"), blank=True)
+
+    objects = CustomerProfileManager()
 
     class Meta:
         verbose_name = _("customer profile")
