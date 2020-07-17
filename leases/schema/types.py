@@ -1,14 +1,12 @@
 import graphene
-from django.utils.translation import ugettext_lazy as _
 from graphene_django import DjangoObjectType
 from graphql_jwt.decorators import login_required
 
 from applications.models import BerthApplication, WinterStorageApplication
-from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.models import CustomerProfile
 from resources.schema import BerthNode, WinterStoragePlaceNode
-from users.utils import user_has_view_permission
 from utils.enum import graphene_enum
+from utils.relay import return_node_if_user_has_permissions
 from utils.schema import CountConnection
 
 from ..enums import LeaseStatus
@@ -40,18 +38,9 @@ class BerthLeaseNode(DjangoObjectType):
     @login_required
     def get_node(cls, info, id):
         node = super().get_node(info, id)
-        if not node:
-            return None
-
-        user = info.context.user
-        if (node.customer and node.customer.user == user) or user_has_view_permission(
-            user, BerthLease, BerthApplication, CustomerProfile
-        ):
-            return node
-        else:
-            raise VenepaikkaGraphQLError(
-                _("You do not have permission to perform this action.")
-            )
+        return return_node_if_user_has_permissions(
+            node, info.context.user, BerthLease, BerthApplication, CustomerProfile
+        )
 
 
 class WinterStorageLeaseNode(DjangoObjectType):
@@ -69,15 +58,10 @@ class WinterStorageLeaseNode(DjangoObjectType):
     @login_required
     def get_node(cls, info, id):
         node = super().get_node(info, id)
-        if not node:
-            return None
-
-        user = info.context.user
-        if (node.customer and node.customer.user == user) or user_has_view_permission(
-            user, WinterStorageLease, WinterStorageApplication, CustomerProfile
-        ):
-            return node
-        else:
-            raise VenepaikkaGraphQLError(
-                _("You do not have permission to perform this action.")
-            )
+        return return_node_if_user_has_permissions(
+            node,
+            info.context.user,
+            WinterStorageLease,
+            WinterStorageApplication,
+            CustomerProfile,
+        )
