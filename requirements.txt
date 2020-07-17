@@ -24,7 +24,7 @@ django-mptt==0.10.0       # via django-munigeo
 django-munigeo==0.3.3     # via -r requirements.in
 django-parler-rest==2.0   # via django-munigeo
 django-parler==1.9.2      # via -r requirements.in, django-ilmoitin, django-munigeo, django-parler-rest
-django==2.2.6             # via -r requirements.in, django-anymail, django-cors-headers, django-filter, django-graphql-geojson, django-graphql-jwt, django-helusers, django-ilmoitin, django-mailer, django-mptt, django-munigeo, drf-oidc-auth, graphene-django
+django==2.2.13            # via -r requirements.in, django-anymail, django-cors-headers, django-filter, django-graphql-geojson, django-graphql-jwt, django-helusers, django-ilmoitin, django-mailer, django-mptt, django-munigeo, drf-oidc-auth, graphene-django
 djangorestframework==3.10.3  # via django-parler-rest, drf-oidc-auth
 drf-oidc-auth==0.9        # via django-helusers
 ecdsa==0.13.3             # via python-jose
