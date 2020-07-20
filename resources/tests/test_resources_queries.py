@@ -35,8 +35,18 @@ def test_get_boat_type(api_client, boat_type):
     assert executed["data"] == {"boatTypes": [{"name": boat_type.name}]}
 
 
-def test_get_harbors(api_client, berth):
-    harbor = berth.pier.harbor
+def test_get_harbors(api_client, pier):
+    harbor = pier.harbor
+    big_berth = BerthFactory(
+        pier=pier,
+        berth_type=BerthTypeFactory(width=10, length=10, depth=10),
+        is_active=True,
+    )
+    BerthFactory(
+        pier=pier,
+        berth_type=BerthTypeFactory(width=1, length=1, depth=1),
+        is_active=False,
+    )
 
     query = """
         {
@@ -55,6 +65,7 @@ def test_get_harbors(api_client, berth):
                             maxDepth
                             numberOfPlaces
                             numberOfFreePlaces
+                            numberOfInactivePlaces
                             createdAt
                             modifiedAt
                         }
@@ -73,11 +84,12 @@ def test_get_harbors(api_client, berth):
                         "properties": {
                             "name": harbor.name,
                             "zipCode": harbor.zip_code,
-                            "maxWidth": float(berth.berth_type.width),
-                            "maxLength": float(berth.berth_type.length),
-                            "maxDepth": float(berth.berth_type.depth),
-                            "numberOfPlaces": 1,
+                            "maxWidth": float(big_berth.berth_type.width),
+                            "maxLength": float(big_berth.berth_type.length),
+                            "maxDepth": float(big_berth.berth_type.depth),
+                            "numberOfPlaces": 2,
                             "numberOfFreePlaces": 1,
+                            "numberOfInactivePlaces": 1,
                             "createdAt": harbor.created_at.isoformat(),
                             "modifiedAt": harbor.modified_at.isoformat(),
                         },

@@ -11,7 +11,9 @@ from django.db.models import (
     Q,
     Subquery,
     UniqueConstraint,
+    Value,
 )
+from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumIntegerField
 from munigeo.models import Municipality
@@ -314,11 +316,26 @@ class PierManager(models.Manager):
             berth_qs, place_type_name="berth_type", section_name="pier"
         )
 
+        # When annotating the count, if no elements match the filter, the whole queryset will
+        # return an empty QuerySet<[]>, which will then return None as value for the count.
+        #
+        # By adding the other annotate with Coalesce, we ensure that, we'll always get an int value
         available_berths = (
             berth_qs.filter(is_available=True, is_active=True)
             .order_by()
             .values("pier")
-            .annotate(count=Count("*"))
+            .annotate(nullable_count=Count("*"))
+            .values("nullable_count")
+            .annotate(count=Coalesce("nullable_count", Value(0)))
+            .values("count")
+        )
+        inactive_berths = (
+            berth_qs.filter(Q(is_active=False))
+            .order_by()
+            .values("pier")
+            .annotate(nullable_count=Count("*"))
+            .values("nullable_count")
+            .annotate(count=Coalesce("nullable_count", Value(0)))
             .values("count")
         )
 
@@ -343,6 +360,9 @@ class PierManager(models.Manager):
                 ),
                 number_of_free_places=Subquery(
                     available_berths, output_field=PositiveIntegerField()
+                ),
+                number_of_inactive_places=Subquery(
+                    inactive_berths, output_field=PositiveIntegerField(),
                 ),
             )
         )
