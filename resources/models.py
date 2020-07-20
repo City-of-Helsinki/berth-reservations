@@ -401,9 +401,7 @@ class Pier(AbstractAreaSection):
         unique_together = (("identifier", "harbor"),)
 
     def __str__(self):
-        if self.identifier:
-            return "{} ({})".format(self.harbor, self.identifier)
-        return self.harbor
+        return "{} ({})".format(self.harbor, self.identifier or "-")
 
 
 class WinterStorageSection(AbstractAreaSection):
@@ -435,9 +433,7 @@ class WinterStorageSection(AbstractAreaSection):
         unique_together = (("area", "identifier"),)
 
     def __str__(self):
-        if self.identifier:
-            return "{} ({})".format(self.area, self.identifier)
-        return self.area
+        return "{} ({})".format(self.area, self.identifier or "-")
 
 
 class AbstractPlaceType(TimeStampedModel, UUIDModel):
