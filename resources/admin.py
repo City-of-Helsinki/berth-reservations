@@ -83,6 +83,11 @@ class HarborAdmin(CustomTranslatableAdmin, admin.OSMGeoAdmin):
 class PierAdmin(admin.OSMGeoAdmin):
     filter_horizontal = ("suitable_boat_types",)
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "harbor":
+            kwargs["queryset"] = Harbor.objects.all()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 class WinterStorageAreaAdmin(CustomTranslatableAdmin, admin.OSMGeoAdmin):
     ordering = ("translations__name",)
@@ -112,7 +117,10 @@ class WinterStorageAreaAdmin(CustomTranslatableAdmin, admin.OSMGeoAdmin):
 
 
 class WinterStorageSectionAdmin(admin.OSMGeoAdmin):
-    pass
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "area":
+            kwargs["queryset"] = WinterStorageArea.objects.all()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 admin.site.register(AvailabilityLevel, AvailabilityLevelAdmin)
