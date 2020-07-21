@@ -404,8 +404,10 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
     maps = graphene.List(WinterStorageAreaMapType, required=True)
     max_width = graphene.Float()
     max_length = graphene.Float()
-    number_of_marked_places = graphene.Int()
     product = graphene.Field("payments.schema.WinterStorageProductNode")
+    number_of_places = graphene.Int(required=True)
+    number_of_free_places = graphene.Int(required=True)
+    number_of_inactive_places = graphene.Int(required=True)
 
     def resolve_image_file(self, info, **kwargs):
         if self.image_file:
@@ -415,6 +417,31 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
 
     def resolve_maps(self, info, **kwargs):
         return self.maps.all()
+
+    def resolve_max_width(self, info, **kwargs):
+        return (
+            max([section.max_width or 0 for section in self.sections.all()], default=0)
+            or None
+        )
+
+    def resolve_max_length(self, info, **kwargs):
+        return (
+            max([section.max_length or 0 for section in self.sections.all()], default=0)
+            or None
+        )
+
+    def resolve_number_of_free_places(self, info, **kwargs):
+        return sum(
+            [section.number_of_free_places or 0 for section in self.sections.all()]
+        )
+
+    def resolve_number_of_inactive_places(self, info, **kwargs):
+        return sum(
+            [section.number_of_inactive_places or 0 for section in self.sections.all()]
+        )
+
+    def resolve_number_of_places(self, info, **kwargs):
+        return sum([section.number_of_places or 0 for section in self.sections.all()])
 
 
 class AbstractAreaInput:

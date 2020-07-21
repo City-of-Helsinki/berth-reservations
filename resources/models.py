@@ -21,7 +21,10 @@ from parler.models import TranslatableModel, TranslatedFields
 
 from leases.consts import ACTIVE_LEASE_STATUSES
 from leases.enums import LeaseStatus
-from leases.utils import calculate_berth_lease_end_date
+from leases.utils import (
+    calculate_berth_lease_end_date,
+    calculate_winter_storage_lease_end_date,
+)
 from utils.models import TimeStampedModel, UUIDModel
 
 from .enums import BerthMooringType
@@ -197,8 +200,8 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
     # People just queue for these, then as long as there s still space
     # next person in the queue can put his/her boat there.
     # The area is separated into sections, that limit the length of the suitable boat.
-    number_of_section_spaces = models.PositiveSmallIntegerField(
-        verbose_name=_("number of section places"), null=True, blank=True
+    estimated_number_of_section_spaces = models.PositiveSmallIntegerField(
+        verbose_name=_("estimated number of section places"), null=True, blank=True
     )
     max_length_of_section_spaces = models.DecimalField(
         max_digits=5,
@@ -211,8 +214,8 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
     # Nostojärjestyspaikat (~ unmarked places)
     # Same queing algorithm as with lohkopaikat.
     # No data of the dimensions.
-    number_of_unmarked_spaces = models.PositiveSmallIntegerField(
-        verbose_name=_("number of unmarked places"), null=True, blank=True
+    estimated_number_of_unmarked_spaces = models.PositiveSmallIntegerField(
+        verbose_name=_("estimated number of unmarked places"), null=True, blank=True
     )
 
     translations = TranslatedFields(
@@ -378,6 +381,37 @@ class WinterStorageSectionManager(models.Manager):
             place_type_name="place_type",
             section_name="winter_storage_section",
         )
+
+        # When annotating the count, if no elements match the filter, the whole queryset will
+        # return an empty QuerySet<[]>, which will then return None as value for the count.
+        #
+        # By adding the other annotate with Coalesce, we ensure that, we'll always get an int value
+        available_places = (
+            place_qs.filter(is_available=True, is_active=True)
+            .order_by()
+            .values("winter_storage_section")
+            .annotate(nullable_count=Count("*"))
+            .values("nullable_count")
+            .annotate(count=Coalesce("nullable_count", Value(0)))
+            .values("count")
+        )
+        inactive_places = (
+            place_qs.filter(Q(is_active=False))
+            .order_by()
+            .values("winter_storage_section")
+            .annotate(nullable_count=Count("*"))
+            .values("nullable_count")
+            .annotate(count=Coalesce("nullable_count", Value(0)))
+            .values("count")
+        )
+
+        all_places = (
+            place_qs.order_by()
+            .values("winter_storage_section")
+            .annotate(count=Count("*"))
+            .values("count")
+        )
+
         return (
             super()
             .get_queryset()
@@ -385,6 +419,15 @@ class WinterStorageSectionManager(models.Manager):
                 max_width=Subquery(dimension_qs("width"), output_field=DecimalField(),),
                 max_length=Subquery(
                     dimension_qs("length"), output_field=DecimalField(),
+                ),
+                number_of_places=Subquery(
+                    all_places, output_field=PositiveIntegerField()
+                ),
+                number_of_free_places=Subquery(
+                    available_places, output_field=PositiveIntegerField()
+                ),
+                number_of_inactive_places=Subquery(
+                    inactive_places, output_field=PositiveIntegerField(),
                 ),
             )
         )
@@ -599,6 +642,38 @@ class Berth(AbstractBoatPlace):
         return "{}: {}".format(self.pier, self.number)
 
 
+class WinterStoragePlaceManager(models.Manager):
+    def get_queryset(self):
+        """
+        The QuerySet annotates whether a berth is available or not. For this,
+        it considers the following criteria:
+            - If there are leases associated to the berth
+            - If any lease ends during the current or the last season (previous year)
+                + If a lease ends during the current season:
+                    * It needs to have a "valid" status (DRAFTED, OFFERED, PAID)
+                + If a lease ended during the last season:
+                    * It needs to have a "valid" status (PAID)
+                    * It needs to have renew automatically set
+        """
+        from leases.models import WinterStorageLease
+
+        current_season_end = calculate_winter_storage_lease_end_date()
+
+        in_current_season = Q(end_date=current_season_end)
+        in_last_season = Q(
+            end_date=current_season_end.replace(current_season_end.year - 1)
+        )
+        active_current_status = Q(status__in=ACTIVE_LEASE_STATUSES)
+        paid_status = Q(status=LeaseStatus.PAID)
+
+        active_leases = WinterStorageLease.objects.filter(place=OuterRef("pk")).filter(
+            Q(in_current_season & active_current_status)
+            | Q(in_last_season & paid_status)
+        )
+
+        return super().get_queryset().annotate(is_available=~Exists(active_leases))
+
+
 class WinterStoragePlace(AbstractBoatPlace):
     winter_storage_section = models.ForeignKey(
         WinterStorageSection,
@@ -612,6 +687,7 @@ class WinterStoragePlace(AbstractBoatPlace):
         related_name="places",
         on_delete=models.PROTECT,
     )
+    objects = WinterStoragePlaceManager()
 
     class Meta:
         verbose_name = _("winter storage place")
