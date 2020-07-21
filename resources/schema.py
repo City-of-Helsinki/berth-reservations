@@ -143,6 +143,7 @@ class BoatTypeType(DjangoObjectType):
 
 class PierNode(graphql_geojson.GeoJSONType):
     number_of_free_places = graphene.Int(required=True)
+    number_of_inactive_places = graphene.Int(required=True)
     number_of_places = graphene.Int(required=True)
     max_width = graphene.Float()
     max_length = graphene.Float()
@@ -282,6 +283,7 @@ class HarborNode(graphql_geojson.GeoJSONType):
     max_depth = graphene.Float()
     number_of_places = graphene.Int(required=True)
     number_of_free_places = graphene.Int(required=True)
+    number_of_inactive_places = graphene.Int(required=True)
     piers = DjangoFilterConnectionField(
         PierNode,
         min_berth_width=graphene.Float(),
@@ -323,6 +325,9 @@ class HarborNode(graphql_geojson.GeoJSONType):
 
     def resolve_number_of_free_places(self, info, **kwargs):
         return sum([pier.number_of_free_places or 0 for pier in self.piers.all()])
+
+    def resolve_number_of_inactive_places(self, info, **kwargs):
+        return sum([pier.number_of_inactive_places or 0 for pier in self.piers.all()])
 
     def resolve_number_of_places(self, info, **kwargs):
         return sum([pier.number_of_places or 0 for pier in self.piers.all()])

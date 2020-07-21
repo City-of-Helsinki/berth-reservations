@@ -21,10 +21,11 @@ from resources.models import (
     get_winter_area_media_folder,
     Harbor,
     HarborMap,
+    Pier,
     WinterStorageArea,
     WinterStorageAreaMap,
 )
-from resources.tests.factories import BerthTypeFactory
+from resources.tests.factories import BerthFactory, BerthTypeFactory, PierFactory
 
 
 def test_harbor_map_file_path(harbor):
@@ -461,3 +462,20 @@ def test_berth_type_is_assigned_existing_price_group():
     berth_type = BerthTypeFactory(width=width)
 
     assert BerthType.objects.get(id=berth_type.id).price_group == price_group
+
+
+def test_pier_number_of_places():
+    pier = PierFactory()
+    free_berths = random.randint(1, 10)
+    inactive_berths = random.randint(1, 10)
+
+    for _berth in range(0, free_berths):
+        BerthFactory(pier=pier, is_active=True)
+
+    for _berth in range(0, inactive_berths):
+        BerthFactory(pier=pier, is_active=False)
+
+    pier = Pier.objects.get(pk=pier.pk)
+    assert pier.number_of_free_places == free_berths
+    assert pier.number_of_inactive_places == inactive_berths
+    assert pier.number_of_places == free_berths + inactive_berths
