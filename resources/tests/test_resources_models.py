@@ -7,10 +7,11 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from freezegun import freeze_time
 
 from leases.enums import LeaseStatus
-from leases.tests.factories import BerthLeaseFactory
+from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from leases.utils import (
     calculate_berth_lease_end_date,
     calculate_berth_lease_start_date,
+    calculate_winter_storage_lease_end_date,
 )
 from payments.models import BerthPriceGroup
 from payments.tests.factories import BerthPriceGroupFactory
@@ -24,8 +25,16 @@ from resources.models import (
     Pier,
     WinterStorageArea,
     WinterStorageAreaMap,
+    WinterStoragePlace,
+    WinterStorageSection,
 )
-from resources.tests.factories import BerthFactory, BerthTypeFactory, PierFactory
+from resources.tests.factories import (
+    BerthFactory,
+    BerthTypeFactory,
+    PierFactory,
+    WinterStoragePlaceFactory,
+    WinterStorageSectionFactory,
+)
 
 
 def test_harbor_map_file_path(harbor):
@@ -479,3 +488,57 @@ def test_pier_number_of_places():
     assert pier.number_of_free_places == free_berths
     assert pier.number_of_inactive_places == inactive_berths
     assert pier.number_of_places == free_berths + inactive_berths
+
+
+def test_winter_storage_place_is_available_no_leases(
+    superuser_api_client, winter_storage_place
+):
+    assert WinterStoragePlace.objects.get(id=winter_storage_place.id).is_available
+
+
+@pytest.mark.parametrize("status", ["expired", "refused"])
+def test_winter_storage_place_is_available_lease_status(
+    superuser_api_client, winter_storage_place, status
+):
+    WinterStorageLeaseFactory(place=winter_storage_place, status=LeaseStatus(status))
+    assert WinterStoragePlace.objects.get(id=winter_storage_place.id).is_available
+
+
+@freeze_time("2020-01-01T08:00:00Z")
+@pytest.mark.parametrize("status", ["drafted", "offered", "paid", "expired", "refused"])
+def test_winter_storage_place_is_available_ends_during_season(
+    superuser_api_client, winter_storage_place, status
+):
+    end_date = calculate_winter_storage_lease_end_date()
+    end_date = end_date.replace(month=end_date.month - 1)
+
+    WinterStorageLeaseFactory(
+        place=winter_storage_place, end_date=end_date, status=LeaseStatus(status),
+    )
+    assert WinterStoragePlace.objects.get(id=winter_storage_place.id).is_available
+
+
+@freeze_time("2020-01-01T08:00:00Z")
+@pytest.mark.parametrize("status", ["drafted", "offered", "paid"])
+def test_winter_storage_place_is_not_available_valid_through_whole_season(
+    superuser_api_client, winter_storage_place, status
+):
+    WinterStorageLeaseFactory(place=winter_storage_place, status=status)
+    assert not WinterStoragePlace.objects.get(id=winter_storage_place.id).is_available
+
+
+def test_winter_storage_section_number_of_places():
+    section = WinterStorageSectionFactory()
+    free_places = random.randint(1, 10)
+    inactive_places = random.randint(1, 10)
+
+    for _place in range(0, free_places):
+        WinterStoragePlaceFactory(winter_storage_section=section, is_active=True)
+
+    for _place in range(0, inactive_places):
+        WinterStoragePlaceFactory(winter_storage_section=section, is_active=False)
+
+    section = WinterStorageSection.objects.get(pk=section.pk)
+    assert section.number_of_free_places == free_places
+    assert section.number_of_inactive_places == inactive_places
+    assert section.number_of_places == free_places + inactive_places

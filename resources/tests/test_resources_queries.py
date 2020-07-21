@@ -19,6 +19,7 @@ from resources.tests.factories import (
     PierFactory,
     WinterStorageAreaFactory,
     WinterStoragePlaceFactory,
+    WinterStoragePlaceTypeFactory,
     WinterStorageSectionFactory,
 )
 
@@ -251,7 +252,19 @@ def test_get_berth_with_leases_not_enough_permissions(api_client, berth):
     assert_not_enough_permissions(executed)
 
 
-def test_get_winter_storage_areas(api_client, winter_storage_area):
+def test_get_winter_storage_areas(api_client, winter_storage_section):
+    winter_storage_area = winter_storage_section.area
+    big_place = WinterStoragePlaceFactory(
+        winter_storage_section=winter_storage_section,
+        place_type=WinterStoragePlaceTypeFactory(width=10, length=10),
+        is_active=True,
+    )
+    WinterStoragePlaceFactory(
+        winter_storage_section=winter_storage_section,
+        place_type=WinterStoragePlaceTypeFactory(width=1, length=1),
+        is_active=False,
+    )
+
     query = """
         {
             winterStorageAreas {
@@ -266,6 +279,11 @@ def test_get_winter_storage_areas(api_client, winter_storage_area):
                             zipCode
                             createdAt
                             modifiedAt
+                            maxWidth
+                            maxLength
+                            numberOfPlaces
+                            numberOfFreePlaces
+                            numberOfInactivePlaces
                         }
                     }
                 }
@@ -284,6 +302,11 @@ def test_get_winter_storage_areas(api_client, winter_storage_area):
                             "zipCode": winter_storage_area.zip_code,
                             "createdAt": winter_storage_area.created_at.isoformat(),
                             "modifiedAt": winter_storage_area.modified_at.isoformat(),
+                            "maxWidth": float(big_place.place_type.width),
+                            "maxLength": float(big_place.place_type.length),
+                            "numberOfPlaces": 2,
+                            "numberOfFreePlaces": 1,
+                            "numberOfInactivePlaces": 1,
                         },
                     }
                 }
