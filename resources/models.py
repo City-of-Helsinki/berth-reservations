@@ -197,8 +197,8 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
     # People just queue for these, then as long as there s still space
     # next person in the queue can put his/her boat there.
     # The area is separated into sections, that limit the length of the suitable boat.
-    number_of_section_spaces = models.PositiveSmallIntegerField(
-        verbose_name=_("number of section places"), null=True, blank=True
+    estimated_number_of_section_spaces = models.PositiveSmallIntegerField(
+        verbose_name=_("estimated number of section places"), null=True, blank=True
     )
     max_length_of_section_spaces = models.DecimalField(
         max_digits=5,
@@ -211,8 +211,8 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
     # Nostojärjestyspaikat (~ unmarked places)
     # Same queing algorithm as with lohkopaikat.
     # No data of the dimensions.
-    number_of_unmarked_spaces = models.PositiveSmallIntegerField(
-        verbose_name=_("number of unmarked places"), null=True, blank=True
+    estimated_number_of_unmarked_spaces = models.PositiveSmallIntegerField(
+        verbose_name=_("estimated number of unmarked places"), null=True, blank=True
     )
 
     translations = TranslatedFields(
