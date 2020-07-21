@@ -4,8 +4,8 @@ import pytest
 
 from berth_reservations.tests.utils import assert_not_enough_permissions
 from customers.schema import ProfileNode
-from leases.models import BerthLease
-from leases.schema import BerthLeaseNode
+from leases.models import BerthLease, WinterStorageLease
+from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from payments.enums import ProductServiceType
 from payments.tests.factories import (
     AdditionalProductFactory,
@@ -550,6 +550,9 @@ query ORDERS {
                     ... on BerthLeaseNode {
                         id
                     }
+                    ... on WinterStorageLeaseNode {
+                        id
+                    }
                 }
             }
         }
@@ -590,14 +593,11 @@ def test_get_orders(api_client, order):
         order.product.id,
     )
 
-    # TODO: Add WinterStorageLeaseNode
-    # Since there's no WinterStorageLeaseNode yet, we cannot convert to the type's global ID,
-    # so for now we'll null leases that have WSL, just for testing purposes.
-    lease_id = (
-        to_global_id(BerthLeaseNode, order.lease.id)
-        if isinstance(order.lease, BerthLease)
-        else None
-    )
+    lease_id = None
+    if isinstance(order.lease, BerthLease):
+        lease_id = to_global_id(BerthLeaseNode, order.lease.id)
+    elif isinstance(order.lease, WinterStorageLease):
+        lease_id = to_global_id(WinterStorageLeaseNode, order.lease.id)
 
     executed = api_client.execute(ORDERS_QUERY)
 
@@ -609,8 +609,7 @@ def test_get_orders(api_client, order):
         "orderLines": {"edges": order_lines},
         "logEntries": {"edges": log_entries},
         "product": {"id": product_id},
-        # TODO: remove when we have WinterStorageLeaseNode
-        "lease": {"id": lease_id} if lease_id else None,
+        "lease": {"id": lease_id},
     }
 
 
@@ -661,6 +660,9 @@ query ORDER {
             ... on BerthLeaseNode {
                 id
             }
+            ... on WinterStorageLeaseNode {
+                id
+            }
         }
     }
 }
@@ -701,14 +703,11 @@ def test_get_order(api_client, order):
         order.product.id,
     )
 
-    # TODO: Add WinterStorageLeaseNode
-    # Since there's no WinterStorageLeaseNode yet, we cannot convert to the type's global ID,
-    # so for now we'll null leases that have WSL, just for testing purposes.
-    lease_id = (
-        to_global_id(BerthLeaseNode, order.lease.id)
-        if isinstance(order.lease, BerthLease)
-        else None
-    )
+    lease_id = None
+    if isinstance(order.lease, BerthLease):
+        lease_id = to_global_id(BerthLeaseNode, order.lease.id)
+    elif isinstance(order.lease, WinterStorageLease):
+        lease_id = to_global_id(WinterStorageLeaseNode, order.lease.id)
 
     executed = api_client.execute(ORDER_QUERY % order_global_id)
 
@@ -720,8 +719,7 @@ def test_get_order(api_client, order):
         "orderLines": {"edges": order_lines},
         "logEntries": {"edges": log_entries},
         "product": {"id": product_id},
-        # TODO: remove when we have WinterStorageLeaseNode
-        "lease": {"id": lease_id} if lease_id else None,
+        "lease": {"id": lease_id},
     }
 
 

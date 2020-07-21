@@ -1,11 +1,12 @@
 import graphene
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
+from django.utils.translation import ugettext_lazy as _
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.schema import ProfileNode
 from leases.models import BerthLease, WinterStorageLease
-from leases.schema import BerthLeaseNode
+from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from resources.schema import HarborNode, WinterStorageAreaNode
 from users.decorators import (
     add_permission_required,
@@ -295,15 +296,23 @@ class CreateOrderMutation(graphene.ClientIDMutation):
 
         lease_id = input.pop("lease_id", None)
         if lease_id:
-            lease = get_node_from_global_id(
-                info, lease_id, BerthLeaseNode, nullable=True
-            )
-            # TODO: Check for WinterStorageLeaseNode
-            # if not lease:
-            #     product = get_node_from_global_id(
-            #         info, product_id, WinterStorageLeaseNode, nullable=True
-            #     )
-            input["lease"] = lease
+            lease = None
+            try:
+                lease = get_node_from_global_id(
+                    info, lease_id, BerthLeaseNode, nullable=True
+                )
+            # If a different node type is received get_node raises an assertion error
+            # when trying to validate the type
+            except AssertionError:
+                lease = get_node_from_global_id(
+                    info, lease_id, WinterStorageLeaseNode, nullable=True
+                )
+            finally:
+                if not lease:
+                    raise VenepaikkaGraphQLError(
+                        _("Lease with the given ID does not exist")
+                    )
+                input["lease"] = lease
 
         try:
             order = Order.objects.create(**input)
@@ -326,18 +335,25 @@ class UpdateOrderMutation(graphene.ClientIDMutation):
         order = get_node_from_global_id(
             info, input.pop("id"), only_type=OrderNode, nullable=False
         )
-
         lease_id = input.pop("lease_id", None)
         if lease_id:
-            lease = get_node_from_global_id(
-                info, lease_id, BerthLeaseNode, nullable=False
-            )
-            # TODO: Check for WinterStorageLeaseNode
-            # if not lease:
-            #     product = get_node_from_global_id(
-            #         info, product_id, WinterStorageLeaseNode, nullable=True
-            #     )
-            input["lease"] = lease
+            lease = None
+            try:
+                lease = get_node_from_global_id(
+                    info, lease_id, BerthLeaseNode, nullable=True
+                )
+            # If a different node type is received get_node raises an assertion error
+            # when trying to validate the type
+            except AssertionError:
+                lease = get_node_from_global_id(
+                    info, lease_id, WinterStorageLeaseNode, nullable=True
+                )
+            finally:
+                if not lease:
+                    raise VenepaikkaGraphQLError(
+                        _("Lease with the given ID does not exist")
+                    )
+                input["lease"] = lease
 
         try:
             update_object(order, input)

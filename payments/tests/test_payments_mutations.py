@@ -8,11 +8,12 @@ from freezegun import freeze_time
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
     assert_field_missing,
+    assert_in_errors,
     assert_not_enough_permissions,
 )
 from customers.schema import ProfileNode
 from leases.models import BerthLease
-from leases.schema import BerthLeaseNode
+from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from leases.tests.factories import BerthLeaseFactory
 from leases.utils import calculate_season_start_date
 from resources.schema import HarborNode, WinterStorageAreaNode
@@ -554,11 +555,11 @@ def test_create_additional_product(api_client):
         "taxPercentage": tax_percentage.name,
     }
 
-    AdditionalProduct.objects.count() == 0
+    assert AdditionalProduct.objects.count() == 0
 
     executed = api_client.execute(CREATE_ADDITIONAL_PRODUCT_MUTATION, input=variables)
 
-    AdditionalProduct.objects.count() == 1
+    assert AdditionalProduct.objects.count() == 1
 
     assert (
         executed["data"]["createAdditionalProduct"]["additionalProduct"].pop("id")
@@ -689,11 +690,11 @@ def test_update_additional_product(api_client, additional_product):
         "taxPercentage": tax_percentage.name,
     }
 
-    AdditionalProduct.objects.count() == 1
+    assert AdditionalProduct.objects.count() == 1
 
     executed = api_client.execute(UPDATE_ADDITIONAL_PRODUCT_MUTATION, input=variables)
 
-    AdditionalProduct.objects.count() == 1
+    assert AdditionalProduct.objects.count() == 1
 
     assert executed["data"]["updateAdditionalProduct"]["additionalProduct"] == {
         "id": variables["id"],
@@ -846,6 +847,27 @@ def test_create_order_profile_does_not_exist(superuser_api_client):
     assert_doesnt_exist("CustomerProfile", executed)
 
 
+@pytest.mark.parametrize("lease_type", ["berth", "winter"])
+def test_create_order_lease_does_not_exist(
+    superuser_api_client, customer_profile, lease_type
+):
+    lease_id = to_global_id(
+        BerthLeaseNode if lease_type == "berth" else WinterStorageLeaseNode,
+        uuid.uuid4(),
+    )
+    variables = {
+        "customerId": to_global_id(ProfileNode, customer_profile.id),
+        "leaseId": lease_id,
+    }
+
+    assert Order.objects.count() == 0
+
+    executed = superuser_api_client.execute(CREATE_ORDER_MUTATION, input=variables)
+
+    assert Order.objects.count() == 0
+    assert_in_errors("Lease with the given ID does not exist", executed)
+
+
 UPDATE_ORDER_MUTATION = """
 mutation UPDATE_ORDER($input: UpdateOrderMutationInput!) {
     updateOrder(input: $input) {
@@ -941,14 +963,19 @@ def test_update_order_does_not_exist(superuser_api_client):
     assert_doesnt_exist("Order", executed)
 
 
-def test_update_order_lease_does_not_exist(superuser_api_client, order):
+@pytest.mark.parametrize("lease_type", ["berth", "winter"])
+def test_update_order_lease_does_not_exist(superuser_api_client, order, lease_type):
+    lease_id = to_global_id(
+        BerthLeaseNode if lease_type == "berth" else WinterStorageLeaseNode,
+        uuid.uuid4(),
+    )
     variables = {
         "id": to_global_id(OrderNode, order.id),
-        "leaseId": to_global_id(BerthLeaseNode, uuid.uuid4()),
+        "leaseId": lease_id,
     }
     executed = superuser_api_client.execute(UPDATE_ORDER_MUTATION, input=variables)
 
-    assert_doesnt_exist("BerthLease", executed)
+    assert_in_errors("Lease with the given ID does not exist", executed)
 
 
 DELETE_ORDER_MUTATION = """
