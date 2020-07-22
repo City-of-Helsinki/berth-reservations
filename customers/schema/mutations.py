@@ -13,8 +13,15 @@ from users.decorators import (
 from utils.relay import from_global_id, get_node_from_global_id
 from utils.schema import update_object
 
-from ..models import Boat, BoatCertificate
-from .types import BoatCertificateNode, BoatCertificateTypeEnum, BoatNode, ProfileNode
+from ..models import Boat, BoatCertificate, CustomerProfile, Organization
+from .types import (
+    BoatCertificateNode,
+    BoatCertificateTypeEnum,
+    BoatNode,
+    InvoicingTypeEnum,
+    OrganizationTypeEnum,
+    ProfileNode,
+)
 
 
 def add_boat_certificates(certificates, boat):
@@ -164,6 +171,52 @@ class DeleteBoatMutation(graphene.ClientIDMutation):
         return DeleteBoatMutation()
 
 
+class OrganizationInput(graphene.InputObjectType):
+    organization_type = OrganizationTypeEnum(required=True)
+    business_id = graphene.String()
+    name = graphene.String()
+    address = graphene.String()
+    postal_code = graphene.String()
+    city = graphene.String()
+
+
+class BerthServicesInput:
+    invoicing_type = InvoicingTypeEnum()
+    comment = graphene.String()
+
+
+class CreateBerthServicesProfileMutation(graphene.ClientIDMutation):
+    class Input(BerthServicesInput):
+        id = graphene.GlobalID(
+            required=True,
+            description="`GlobalID` associated to the Open City Profile customer profile",
+        )
+        organization = OrganizationInput()
+
+    profile = graphene.Field(ProfileNode)
+
+    @classmethod
+    @add_permission_required(CustomerProfile, Organization)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        input["id"] = from_global_id(global_id=input.pop("id"), node_type=ProfileNode)
+
+        organization_input = None
+        if "organization" in input:
+            organization_input = input.pop("organization")
+
+        try:
+            profile = CustomerProfile.objects.create(**input)
+            if organization_input:
+                Organization.objects.create(customer=profile, **organization_input)
+        except ValidationError as e:
+            # Flatten all the error messages on a single list
+            errors = sum(e.message_dict.values(), [])
+            raise VenepaikkaGraphQLError(errors)
+
+        return CreateBerthServicesProfileMutation(profile=profile)
+
+
 class Mutation:
     create_boat = CreateBoatMutation.Field(
         description="Creates a `Boat` associated with the `ProfileNode` passed."
@@ -184,4 +237,13 @@ class Mutation:
         description="Deletes a `Boat` object."
         "\n\nErrors:"
         "\n* The passed boat doesn't exist"
+    )
+
+    create_berth_services_profile = CreateBerthServicesProfileMutation.Field(
+        description="Creates a `ProfileNode`."
+        "\n\n**Requires permissions** to create profiles."
+        "\n\nA customer GlobalID is required from an existing user from Open City Profile. "
+        "The created `BerthServicesProfile` will be associated to that Open City profile."
+        "\n\nErrors:"
+        "\n* No customer `GlobalID` is provided"
     )
