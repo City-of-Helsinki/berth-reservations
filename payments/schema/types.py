@@ -2,7 +2,7 @@ import graphene
 from graphene_django import DjangoConnectionField, DjangoObjectType
 
 from customers.schema import ProfileNode
-from leases.schema import BerthLeaseNode
+from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from payments.enums import (
     AdditionalProductType,
     OrderStatus,
@@ -160,8 +160,7 @@ class ProductUnion(graphene.Union):
 
 class LeaseUnion(graphene.Union):
     class Meta:
-        # TODO: Add WinterStorageLeaseNode
-        types = (BerthLeaseNode,)
+        types = (BerthLeaseNode, WinterStorageLeaseNode)
 
 
 class OrderLineNode(DjangoObjectType):
