@@ -807,3 +807,24 @@ def test_order_line_pretax_price(order_line):
     assert order_line.pretax_price == round(
         order_line.price / (1 + (order_line.tax_percentage / 100)), 2
     )
+
+
+def test_order_tax_percentage():
+    # Hard-code the base price. Base tax percentage currently is always 24%
+    o = OrderFactory(price=Decimal("100.00"))
+
+    # Create a product for an optional service
+    ap = AdditionalProductFactory(
+        service=ProductServiceType.PARKING_PERMIT,
+        price_unit=PriceUnits.AMOUNT,
+        tax_percentage=Decimal("10.00"),
+    )
+
+    # Hard-code the price of additional product to override model's save method
+    OrderLineFactory(order=o, product=ap, price=Decimal("88.70"))
+
+    # Calculations:
+    # base product: pretax = 80.65, tax = 24.0%, tax amount = 19.35
+    # order line: pretax = 80.64, tax = 10.0%, tax amount = 8.06
+    # total tax should be: (24.0 + 10.0) / 2 == 17.0
+    assert o.total_tax_percentage == Decimal("17.00")

@@ -1,5 +1,4 @@
 import random
-from decimal import Decimal
 
 import factory
 
@@ -25,10 +24,12 @@ from .utils import random_bool, random_price
 
 
 class AbstractBaseProductFactory(factory.django.DjangoModelFactory):
-    price_value = factory.LazyFunction(
-        lambda: round(Decimal(random.uniform(1, 999)), 2)
-    )
     price_unit = factory.Faker("random_element", elements=list(PriceUnits))
+    price_value = factory.LazyAttribute(
+        lambda o: random_price()
+        if o.price_unit == PriceUnits.AMOUNT
+        else random_price(0, 100, decimals=0)
+    )
 
     class Meta:
         model = AbstractBaseProduct
@@ -72,11 +73,10 @@ class AdditionalProductFactory(AbstractBaseProductFactory):
     # the actual assignment of a random Tax value is done once the service has
     # been assigned to the model.
     @factory.post_generation
-    def service_taxes(self, created, extracted, **kwargs):
-        if self.price_unit == PriceUnits.PERCENTAGE:
-            self.price_value = random_price(1, 100, decimals=0)
-
-        if self.service.is_fixed_service():
+    def tax_percentage(self, created, extracted, **kwargs):
+        if extracted:
+            self.tax_percentage = extracted
+        elif self.service.is_fixed_service():
             self.tax_percentage = DEFAULT_TAX_PERCENTAGE
         else:
             self.tax_percentage = random.choice(ADDITIONAL_PRODUCT_TAX_PERCENTAGES)
