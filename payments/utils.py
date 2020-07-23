@@ -1,6 +1,6 @@
 import calendar
 from datetime import date, timedelta
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal
 from functools import wraps
 from typing import Callable
 
@@ -8,10 +8,7 @@ from dateutil.relativedelta import relativedelta
 from dateutil.rrule import MONTHLY, rrule
 
 from leases.utils import calculate_season_end_date, calculate_season_start_date
-
-
-def round_price(price):
-    return price.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+from utils.numbers import rounded as rounded_decimal
 
 
 def rounded(func):
@@ -22,13 +19,13 @@ def rounded(func):
     @wraps(func)
     def wrapped(*args, **kwargs):
         value = func(*args, **kwargs)
-        return round_price(value)
+        return rounded_decimal(value)
 
     return wrapped
 
 
 def currency_format(value):
-    return f"{round_price(value)}€"
+    return f"{rounded_decimal(value)}€"
 
 
 def currency(func):
@@ -41,7 +38,7 @@ def currency(func):
 
 
 def percentage_format(value):
-    return f"{round_price(value)}%"
+    return f"{rounded_decimal(value)}%"
 
 
 def percentage(func):

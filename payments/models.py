@@ -25,10 +25,10 @@ from payments.utils import (
     calculate_product_partial_year_price,
     calculate_product_percentage_price,
     convert_aftertax_to_pretax,
-    round_price,
     rounded,
 )
 from utils.models import TimeStampedModel, UUIDModel
+from utils.numbers import rounded as rounded_decimal
 
 PLACE_PRODUCT_TAX_PERCENTAGES = [Decimal(x) for x in ("24.00",)]
 ADDITIONAL_PRODUCT_TAX_PERCENTAGES = [Decimal(x) for x in ("24.00", "10.00")]
@@ -268,9 +268,12 @@ class Order(UUIDModel, TimeStampedModel):
         )
 
     @property
-    @rounded
     def total_tax_percentage(self):
-        return ((self.total_price - self.total_pretax_price) / self.total_price) * 100
+        return rounded_decimal(
+            ((self.total_price - self.total_pretax_price) / self.total_pretax_price)
+            * 100,
+            round_to_nearest=0.05,
+        )
 
     def _check_valid_products(self) -> None:
         if self.product and not isinstance(
@@ -434,7 +437,7 @@ class Order(UUIDModel, TimeStampedModel):
                     )
                     price = price * place_sqm
 
-            self.price = round_price(self.price or price)
+            self.price = rounded_decimal(self.price or price)
             self.tax_percentage = self.tax_percentage or tax_percentage
 
         old_instance = Order.objects.filter(id=self.id).first()

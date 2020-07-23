@@ -17,6 +17,7 @@ from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from leases.tests.factories import BerthLeaseFactory
 from leases.utils import calculate_season_start_date
 from resources.schema import HarborNode, WinterStorageAreaNode
+from utils.numbers import rounded
 from utils.relay import to_global_id
 
 from ..enums import (
@@ -51,7 +52,6 @@ from ..utils import (
     calculate_product_partial_year_price,
     calculate_product_percentage_price,
     convert_aftertax_to_pretax,
-    round_price,
 )
 from .factories import OrderFactory
 
@@ -1088,7 +1088,12 @@ def test_create_order_line(api_client, order, additional_product):
     assert executed["data"]["createOrderLine"] == {
         "orderLine": {
             "price": str(expected_price),
-            "taxPercentage": str(round_price(additional_product.tax_percentage)),
+            "taxPercentage": rounded(
+                additional_product.tax_percentage,
+                decimals=2,
+                round_to_nearest=0.05,
+                as_string=True,
+            ),
             "pretaxPrice": str(
                 convert_aftertax_to_pretax(
                     expected_price, additional_product.tax_percentage,
