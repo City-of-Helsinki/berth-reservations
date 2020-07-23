@@ -9,9 +9,9 @@ from berth_reservations.tests.utils import (
     assert_in_errors,
     assert_not_enough_permissions,
 )
-from leases.schema import BerthLeaseNode
-from leases.tests.factories import BerthLeaseFactory
-from resources.schema import BerthNode, HarborNode, PierNode
+from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
+from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
+from resources.schema import BerthNode, HarborNode, PierNode, WinterStoragePlaceNode
 from resources.tests.factories import (
     BerthFactory,
     BerthTypeFactory,
@@ -382,6 +382,71 @@ def test_get_winter_storage_places(api_client, winter_storage_place):
             ]
         }
     }
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_winter_storage_place_with_leases(api_client, winter_storage_place):
+    ws_lease = WinterStorageLeaseFactory(place=winter_storage_place)
+
+    query = """
+        {
+            winterStoragePlace(id: "%s") {
+                leases {
+                    edges {
+                        node {
+                            id
+                        }
+                    }
+                }
+            }
+        }
+    """ % to_global_id(
+        WinterStoragePlaceNode._meta.name, winter_storage_place.id
+    )
+    executed = api_client.execute(query)
+
+    assert executed["data"]["winterStoragePlace"] == {
+        "leases": {
+            "edges": [
+                {
+                    "node": {
+                        "id": to_global_id(
+                            WinterStorageLeaseNode._meta.name, ws_lease.id
+                        )
+                    }
+                }
+            ]
+        }
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+)
+def test_get_winter_storage_place_with_leases_not_enough_permissions(
+    api_client, winter_storage_place
+):
+    query = """
+        {
+            winterStoragePlace(id: "%s") {
+                leases {
+                    edges {
+                        node {
+                            id
+                        }
+                    }
+                }
+            }
+        }
+    """ % to_global_id(
+        WinterStoragePlaceNode._meta.name, winter_storage_place.id
+    )
+    executed = api_client.execute(query)
+    assert_not_enough_permissions(executed)
 
 
 @pytest.mark.parametrize(
