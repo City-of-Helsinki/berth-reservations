@@ -23,7 +23,7 @@ from ..models import (
     get_boat_media_folder,
     Organization,
 )
-from ..schema import BoatCertificateNode, BoatNode, ProfileNode
+from ..schema import BoatCertificateNode, BoatNode, OrganizationNode, ProfileNode
 from ..tests.factories import BoatCertificateFactory
 
 CREATE_BOAT_MUTATION = """
@@ -495,4 +495,165 @@ def test_create_berth_service_profile_no_id(superuser_api_client):
     )
 
     assert CustomerProfile.objects.count() == 0
+    assert_field_missing("id", executed)
+
+
+UPDATE_BERTH_SERVICE_PROFILE_MUTATION = """
+mutation UPDATE_BERTH_SERVICE_PROFILE($input: UpdateBerthServicesProfileMutationInput!) {
+    updateBerthServicesProfile(input: $input) {
+        profile {
+            id
+            invoicingType
+            comment
+            organization {
+                id
+                organizationType
+                businessId
+                name
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+def test_update_berth_service_profile(api_client, organization):
+    profile = organization.customer
+
+    variables = {
+        "id": to_global_id(ProfileNode, profile.id),
+        "comment": "Foobar",
+        "invoicingType": random.choice(list(InvoicingType)).name,
+        "organization": {
+            "organizationType": random.choice(list(OrganizationType)).name,
+            "name": "East Indian Trading Company",
+            "businessId": "12345678-90X",
+        },
+    }
+
+    assert CustomerProfile.objects.count() == 1
+    assert Organization.objects.count() == 1
+
+    executed = api_client.execute(
+        UPDATE_BERTH_SERVICE_PROFILE_MUTATION, input=variables
+    )
+
+    assert CustomerProfile.objects.count() == 1
+    assert Organization.objects.count() == 1
+
+    assert executed["data"]["updateBerthServicesProfile"]["profile"] == {
+        "id": variables["id"],
+        "comment": variables["comment"],
+        "invoicingType": variables["invoicingType"],
+        "organization": {
+            "id": to_global_id(OrganizationNode, organization.id),
+            **variables["organization"],
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+def test_update_berth_service_profile_create_organization(api_client, customer_profile):
+    variables = {
+        "id": to_global_id(ProfileNode, customer_profile.id),
+        "organization": {
+            "organizationType": random.choice(list(OrganizationType)).name,
+            "name": "East Indian Trading Company",
+            "businessId": "12345678-90X",
+        },
+    }
+
+    assert CustomerProfile.objects.count() == 1
+    assert Organization.objects.count() == 0
+
+    executed = api_client.execute(
+        UPDATE_BERTH_SERVICE_PROFILE_MUTATION, input=variables
+    )
+
+    assert CustomerProfile.objects.count() == 1
+    assert Organization.objects.count() == 1
+
+    assert (
+        executed["data"]["updateBerthServicesProfile"]["profile"]["organization"].pop(
+            "id"
+        )
+        is not None
+    )
+    assert executed["data"]["updateBerthServicesProfile"]["profile"] == {
+        "id": variables["id"],
+        "comment": customer_profile.comment,
+        "invoicingType": customer_profile.invoicing_type.name,
+        "organization": variables["organization"],
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+def test_update_berth_service_profile_delete_organization(api_client, organization):
+    profile = organization.customer
+
+    variables = {
+        "id": to_global_id(ProfileNode, profile.id),
+        "comment": "Foobar",
+        "invoicingType": random.choice(list(InvoicingType)).name,
+        "deleteOrganization": True,
+    }
+
+    assert CustomerProfile.objects.count() == 1
+    assert Organization.objects.count() == 1
+
+    executed = api_client.execute(
+        UPDATE_BERTH_SERVICE_PROFILE_MUTATION, input=variables
+    )
+
+    assert CustomerProfile.objects.count() == 1
+    assert Organization.objects.count() == 0
+
+    assert executed["data"]["updateBerthServicesProfile"]["profile"] == {
+        "id": variables["id"],
+        "comment": variables["comment"],
+        "invoicingType": variables["invoicingType"],
+        "organization": None,
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "harbour_services", "berth_supervisor", "berth_handler"],
+    indirect=True,
+)
+def test_update_berth_service_profile_not_enough_permissions(
+    api_client, customer_profile
+):
+    customer_id = to_global_id(ProfileNode, customer_profile.id)
+
+    variables = {
+        "id": customer_id,
+    }
+
+    assert CustomerProfile.objects.count() == 1
+
+    executed = api_client.execute(
+        UPDATE_BERTH_SERVICE_PROFILE_MUTATION, input=variables
+    )
+
+    assert CustomerProfile.objects.count() == 1
+    assert_not_enough_permissions(executed)
+
+
+def test_update_berth_service_profile_no_id(superuser_api_client, customer_profile):
+    variables = {"comment": "This is not gonna work..."}
+    assert CustomerProfile.objects.count() == 1
+
+    executed = superuser_api_client.execute(
+        UPDATE_BERTH_SERVICE_PROFILE_MUTATION, input=variables
+    )
+
+    assert CustomerProfile.objects.count() == 1
     assert_field_missing("id", executed)

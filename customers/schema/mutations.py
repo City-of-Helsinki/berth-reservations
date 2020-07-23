@@ -1,6 +1,7 @@
 import graphene
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
+from django.utils.translation import ugettext_lazy as _
 from graphene_file_upload.scalars import Upload
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
@@ -217,6 +218,57 @@ class CreateBerthServicesProfileMutation(graphene.ClientIDMutation):
         return CreateBerthServicesProfileMutation(profile=profile)
 
 
+class UpdateBerthServicesProfileMutation(graphene.ClientIDMutation):
+    class Input(BerthServicesInput):
+        id = graphene.GlobalID(required=True)
+        organization = OrganizationInput(
+            description="With the values provided, the Organization associated to the Profile "
+            "will be either created or updated as required."
+        )
+        delete_organization = graphene.Boolean(
+            description="If `true` is passed, the organization will be deleted."
+        )
+
+    profile = graphene.Field(ProfileNode)
+
+    @classmethod
+    @add_permission_required(Organization)
+    @change_permission_required(CustomerProfile, Organization)
+    @delete_permission_required(Organization)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        profile = get_node_from_global_id(
+            info, input.pop("id"), only_type=ProfileNode, nullable=False
+        )
+
+        delete_organization = input.pop("delete_organization", False)
+        if delete_organization:
+            if "organization" in input:
+                raise VenepaikkaGraphQLError(
+                    _("You cannot pass deleteOrganization: true and organization input")
+                )
+            if not profile.organization:
+                raise VenepaikkaGraphQLError(
+                    _("The passed Profile is not associated with an Organization")
+                )
+            profile.organization.delete()
+            profile.refresh_from_db()
+        elif "organization" in input:
+            Organization.objects.update_or_create(
+                customer=profile, defaults=input.pop("organization")
+            )
+            profile.refresh_from_db()
+
+        try:
+            update_object(profile, input)
+        except ValidationError as e:
+            # Flatten all the error messages on a single list
+            errors = sum(e.message_dict.values(), [])
+            raise VenepaikkaGraphQLError(errors)
+
+        return UpdateBerthServicesProfileMutation(profile=profile)
+
+
 class Mutation:
     create_boat = CreateBoatMutation.Field(
         description="Creates a `Boat` associated with the `ProfileNode` passed."
@@ -246,4 +298,13 @@ class Mutation:
         "The created `BerthServicesProfile` will be associated to that Open City profile."
         "\n\nErrors:"
         "\n* No customer `GlobalID` is provided"
+    )
+    update_berth_services_profile = UpdateBerthServicesProfileMutation.Field(
+        description="Updates a `ProfileNode`."
+        "\n\n**Requires permissions** to update profiles."
+        "\n\nIf an `organization` field is passed on the input, it will create or update "
+        "the Organization associated to this profile."
+        "\n\nErrors:"
+        "\n* No customer `GlobalID` is provided"
+        "\n* Both `organization` and `deleteOrganization: true` are passed"
     )
