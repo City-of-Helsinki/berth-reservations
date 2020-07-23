@@ -367,6 +367,12 @@ class WinterStoragePlaceNode(DjangoObjectType):
 
 
 class WinterStorageSectionNode(graphql_geojson.GeoJSONType):
+    max_width = graphene.Float()
+    max_length = graphene.Float()
+    number_of_places = graphene.Int(required=True)
+    number_of_free_places = graphene.Int(required=True)
+    number_of_inactive_places = graphene.Int(required=True)
+
     class Meta:
         model = WinterStorageSection
         filter_fields = [
