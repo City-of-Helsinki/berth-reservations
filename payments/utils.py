@@ -25,7 +25,7 @@ def rounded(func):
 
 
 def currency_format(value):
-    return f"{rounded_decimal(value)}€"
+    return f"{rounded_decimal(value)}€" if value else "-"
 
 
 def currency(func):
@@ -38,7 +38,7 @@ def currency(func):
 
 
 def percentage_format(value):
-    return f"{rounded_decimal(value)}%"
+    return f"{rounded_decimal(value)}%" if value else "-"
 
 
 def percentage(func):

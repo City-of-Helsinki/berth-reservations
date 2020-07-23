@@ -103,7 +103,7 @@ class OrderAdmin(admin.ModelAdmin):
 
     @currency
     def total_price(self, obj):
-        return obj.total_price
+        return obj.total_price if obj.price and obj.tax_percentage else None
 
     @currency
     def total_pretax_price(self, obj):
@@ -111,7 +111,7 @@ class OrderAdmin(admin.ModelAdmin):
 
     @percentage
     def total_tax_percentage(self, obj):
-        return obj.total_tax_percentage
+        return obj.total_tax_percentage if obj.price and obj.tax_percentage else None
 
     pretax_price.short_description = _("Pretax price")
     pretax_price.admin_order_field = "pretax_price"
