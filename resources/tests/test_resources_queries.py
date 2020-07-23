@@ -316,6 +316,16 @@ def test_get_winter_storage_areas(api_client, winter_storage_section):
 
 
 def test_get_winter_storage_sections(api_client, winter_storage_section):
+    big_place = WinterStoragePlaceFactory(
+        winter_storage_section=winter_storage_section,
+        place_type=WinterStoragePlaceTypeFactory(width=10, length=10),
+        is_active=True,
+    )
+    WinterStoragePlaceFactory(
+        winter_storage_section=winter_storage_section,
+        place_type=WinterStoragePlaceTypeFactory(width=1, length=1),
+        is_active=False,
+    )
     query = """
         {
             winterStorageSections {
@@ -329,6 +339,11 @@ def test_get_winter_storage_sections(api_client, winter_storage_section):
                             identifier
                             createdAt
                             modifiedAt
+                            maxWidth
+                            maxLength
+                            numberOfPlaces
+                            numberOfFreePlaces
+                            numberOfInactivePlaces
                         }
                     }
                 }
@@ -346,6 +361,11 @@ def test_get_winter_storage_sections(api_client, winter_storage_section):
                             "identifier": winter_storage_section.identifier,
                             "createdAt": winter_storage_section.created_at.isoformat(),
                             "modifiedAt": winter_storage_section.modified_at.isoformat(),
+                            "maxWidth": float(big_place.place_type.width),
+                            "maxLength": float(big_place.place_type.length),
+                            "numberOfPlaces": 2,
+                            "numberOfFreePlaces": 1,
+                            "numberOfInactivePlaces": 1,
                         },
                     }
                 }
