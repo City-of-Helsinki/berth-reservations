@@ -12,12 +12,12 @@ from graphene_django.types import DjangoObjectType
 from graphene_file_upload.scalars import Upload
 from munigeo.models import Municipality
 
-from applications.models import BerthApplication
+from applications.models import BerthApplication, WinterStorageApplication
 from applications.new_schema import BerthApplicationNode
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.models import CustomerProfile
 from leases.enums import LeaseStatus
-from leases.models import BerthLease
+from leases.models import BerthLease, WinterStorageLease
 from users.decorators import (
     add_permission_required,
     change_permission_required,
@@ -334,6 +334,10 @@ class HarborNode(graphql_geojson.GeoJSONType):
 
 
 class WinterStoragePlaceNode(DjangoObjectType):
+    leases = DjangoConnectionField(
+        "leases.schema.WinterStorageLeaseNode",
+        description="**Requires permissions** to query this field.",
+    )
     width = graphene.Float(description=_("width (m)"), required=True)
     length = graphene.Float(description=_("length (m)"), required=True)
 
@@ -348,6 +352,12 @@ class WinterStoragePlaceNode(DjangoObjectType):
         )
         interfaces = (relay.Node,)
         connection_class = CountConnection
+
+    @view_permission_required(
+        WinterStorageLease, WinterStorageApplication, CustomerProfile
+    )
+    def resolve_leases(self, info, **kwargs):
+        return self.leases.all()
 
     def resolve_width(self, info, **kwargs):
         return self.place_type.width
