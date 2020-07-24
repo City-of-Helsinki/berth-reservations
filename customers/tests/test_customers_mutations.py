@@ -384,7 +384,7 @@ def test_delete_boat(api_client, boat):
     ["api_client", "user", "harbour_services", "berth_supervisor", "berth_handler"],
     indirect=True,
 )
-def test_delete_not_enough_permissions(api_client, boat):
+def test_delete_boat_not_enough_permissions(api_client, boat):
     variables = {"id": to_global_id(BoatNode, boat.id)}
     assert Boat.objects.count() == 1
 
@@ -394,7 +394,7 @@ def test_delete_not_enough_permissions(api_client, boat):
     assert_not_enough_permissions(executed)
 
 
-def test_delete_berth_inexistent_boat(superuser_api_client):
+def test_delete_boat_does_not_exist(superuser_api_client):
     variables = {
         "id": to_global_id(BoatNode, uuid.uuid4()),
     }
@@ -657,3 +657,58 @@ def test_update_berth_service_profile_no_id(superuser_api_client, customer_profi
 
     assert CustomerProfile.objects.count() == 1
     assert_field_missing("id", executed)
+
+
+DELETE_BERTH_SERVICE_PROFILE_MUTATION = """
+mutation DELETE_BERTH_SERVICE_PROFILE_MUTATION($input: DeleteBerthServicesProfileMutationInput!) {
+    deleteBerthServicesProfile(input: $input) {
+        __typename
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+def test_delete_berth_service_profile(api_client, customer_profile):
+    variables = {
+        "id": to_global_id(ProfileNode, customer_profile.id),
+    }
+
+    assert CustomerProfile.objects.count() == 1
+
+    api_client.execute(DELETE_BERTH_SERVICE_PROFILE_MUTATION, input=variables)
+
+    assert CustomerProfile.objects.count() == 0
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "harbour_services", "berth_supervisor", "berth_handler"],
+    indirect=True,
+)
+def test_delete_berth_service_profile_not_enough_permissions(
+    api_client, customer_profile
+):
+    variables = {"id": to_global_id(ProfileNode, customer_profile.id)}
+    assert CustomerProfile.objects.count() == 1
+
+    executed = api_client.execute(
+        DELETE_BERTH_SERVICE_PROFILE_MUTATION, input=variables
+    )
+
+    assert CustomerProfile.objects.count() == 1
+    assert_not_enough_permissions(executed)
+
+
+def test_delete_berth_service_profile_does_not_exist(superuser_api_client):
+    variables = {
+        "id": to_global_id(ProfileNode, uuid.uuid4()),
+    }
+
+    executed = superuser_api_client.execute(
+        DELETE_BERTH_SERVICE_PROFILE_MUTATION, input=variables
+    )
+
+    assert_doesnt_exist("CustomerProfile", executed)

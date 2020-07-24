@@ -269,6 +269,23 @@ class UpdateBerthServicesProfileMutation(graphene.ClientIDMutation):
         return UpdateBerthServicesProfileMutation(profile=profile)
 
 
+class DeleteBerthServicesProfileMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+
+    @classmethod
+    @delete_permission_required(CustomerProfile, Organization)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        profile = get_node_from_global_id(
+            info, input.pop("id"), only_type=ProfileNode, nullable=False
+        )
+
+        profile.delete()
+
+        return DeleteBoatMutation()
+
+
 class Mutation:
     create_boat = CreateBoatMutation.Field(
         description="Creates a `Boat` associated with the `ProfileNode` passed."
@@ -287,6 +304,7 @@ class Mutation:
     )
     delete_boat = DeleteBoatMutation.Field(
         description="Deletes a `Boat` object."
+        "\n\n**Requires permissions** to delete boats."
         "\n\nErrors:"
         "\n* The passed boat doesn't exist"
     )
@@ -307,4 +325,10 @@ class Mutation:
         "\n\nErrors:"
         "\n* No customer `GlobalID` is provided"
         "\n* Both `organization` and `deleteOrganization: true` are passed"
+    )
+    delete_berth_services_profile = DeleteBerthServicesProfileMutation.Field(
+        description="Deletes a `ProfileNode` object."
+        "\n\n**Requires permissions** to delete profiles."
+        "\n\nErrors:"
+        "\n* The passed profile doesn't exist"
     )
