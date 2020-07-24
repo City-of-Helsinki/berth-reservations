@@ -10,7 +10,6 @@ from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumField
 
 from leases.models import BerthLease, WinterStorageLease
-from leases.utils import calculate_season_end_date, calculate_season_start_date
 from payments.enums import (
     AdditionalProductType,
     OrderStatus,
@@ -344,13 +343,6 @@ class Order(UUIDModel, TimeStampedModel):
             # If the lease is being changed
             self._check_same_lease(old_instance)
 
-    def is_full_season(self):
-        return self.lease.start_date == calculate_season_start_date(
-            lease_start=self.lease.start_date
-        ) and self.lease.end_date == calculate_season_end_date(
-            lease_end=self.lease.end_date
-        )
-
     def _create_order_lines(self, section):
         for service in ProductServiceType.FIXED_SERVICES():
             # If the section has the service (prop) and it's valid (True)
@@ -416,14 +408,12 @@ class Order(UUIDModel, TimeStampedModel):
             tax_percentage = self.product.tax_percentage
 
             if self.lease:
-                # If the lease doesn't last for the whole season
-                if not self.is_full_season():
-                    price = calculate_product_partial_season_price(
-                        price,
-                        self.lease.start_date,
-                        self.lease.end_date,
-                        summer_season=isinstance(self.lease, BerthLease),
-                    )
+                price = calculate_product_partial_season_price(
+                    price,
+                    self.lease.start_date,
+                    self.lease.end_date,
+                    summer_season=isinstance(self.lease, BerthLease),
+                )
 
                 # If the order is for a winter product with a lease, the price
                 # has to be calculated based on the dimensions of the place associated
@@ -525,10 +515,7 @@ class OrderLine(UUIDModel, TimeStampedModel):
                             self.order.lease.start_date,
                             self.order.lease.end_date,
                         )
-                    elif (
-                        self.product.period == PeriodType.SEASON
-                        and not self.order.is_full_season()
-                    ):
+                    elif self.product.period == PeriodType.SEASON:
                         # Calculate the actual price for the amount of days on the period
                         # price = (days_on_lease * product.price_value) / season_days
                         price = calculate_product_partial_season_price(

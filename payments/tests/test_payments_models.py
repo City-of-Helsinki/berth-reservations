@@ -4,6 +4,7 @@ from datetime import timedelta
 from decimal import Decimal
 
 import pytest
+from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
@@ -14,6 +15,12 @@ from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from leases.utils import (
     calculate_berth_lease_end_date,
     calculate_berth_lease_start_date,
+    calculate_season_end_date,
+    calculate_season_start_date,
+    calculate_winter_season_end_date,
+    calculate_winter_season_start_date,
+    calculate_winter_storage_lease_end_date,
+    calculate_winter_storage_lease_start_date,
 )
 from payments.enums import (
     AdditionalProductType,
@@ -40,6 +47,7 @@ from resources.tests.factories import (
     BerthFactory,
     PierFactory,
     WinterStoragePlaceFactory,
+    WinterStoragePlaceTypeFactory,
     WinterStorageSectionFactory,
 )
 from utils.numbers import rounded
@@ -385,6 +393,54 @@ def test_order_berth_lease_right_price_for_full_season(harbor):
             )
             order_price = order_line.price
             assert product_price == order_price
+
+
+@freeze_time("2020-06-11T08:00:00Z")
+def test_order_winter_storage_lease_right_price_for_full_season(winter_storage_area):
+    services = {
+        "summer_storage_for_docking_equipment": True,
+        "summer_storage_for_trailers": random_bool(),
+    }
+    for service, create in services.items():
+        if create:
+            # Using PriceUnits.AMOUNT to simplify testing
+            AdditionalProductFactory(
+                service=ProductServiceType(service),
+                price_value=Decimal("25.00"),
+                price_unit=PriceUnits.AMOUNT,
+            )
+
+    section = WinterStorageSectionFactory(**services, area=winter_storage_area)
+    lease = WinterStorageLeaseFactory(
+        place=WinterStoragePlaceFactory(winter_storage_section=section)
+    )
+    product = WinterStorageProductFactory(
+        winter_storage_area=winter_storage_area, price_value=Decimal("100.00")
+    )
+    order = Order.objects.create(product=product, customer=lease.customer, lease=lease)
+
+    for service, create in services.items():
+        if create:
+            additional_product = AdditionalProduct.objects.filter(
+                service=ProductServiceType(service),
+                price_unit=PriceUnits.AMOUNT,
+                period=PeriodType.SEASON,
+            ).first()
+            OrderLine.objects.create(order=order, product=additional_product)
+
+    assert order.lease.start_date == calculate_winter_storage_lease_start_date()
+    assert order.lease.end_date == calculate_winter_storage_lease_end_date()
+    sqm = order.lease.place.place_type.width * order.lease.place.place_type.length
+
+    expected_price = rounded(Decimal("100.00") * sqm, decimals=2)
+    assert order.price == expected_price
+
+    for service, created in services.items():
+        if created:
+            order_line = OrderLine.objects.filter(
+                order=order, product__service=ProductServiceType(service)
+            ).first()
+            assert order_line.price == Decimal("25.00")
 
 
 @freeze_time("2020-01-01T08:00:00Z")
@@ -828,3 +884,34 @@ def test_order_tax_percentage():
     # order line: pretax = 80.64, tax = 10.0%, tax amount = 8.06
     # total tax should be: (24.0 + 10.0) / 2 == 17.0
     assert o.total_tax_percentage == Decimal("17.00")
+
+
+def test_winter_season_price():
+    start_date = today()
+    end_date = start_date + relativedelta(days=15)
+
+    # 1m2 place for simplicity
+    place = WinterStoragePlaceFactory(
+        place_type=WinterStoragePlaceTypeFactory(width=1, length=1)
+    )
+
+    days_in_season = (
+        calculate_winter_season_end_date() - calculate_winter_season_start_date()
+    ).days
+    product = WinterStorageProductFactory(price_value=Decimal(days_in_season))
+    lease = WinterStorageLeaseFactory(
+        place=place, start_date=start_date, end_date=end_date
+    )
+    order = Order.objects.create(product=product, lease=lease, customer=lease.customer)
+    assert order.price == Decimal("15.00")
+
+
+def test_berth_season_price(berth):
+    start_date = today()
+    end_date = start_date + relativedelta(days=15)
+
+    days_in_season = (calculate_season_end_date() - calculate_season_start_date()).days
+    product = BerthProductFactory(price_value=Decimal(days_in_season))
+    lease = BerthLeaseFactory(berth=berth, start_date=start_date, end_date=end_date)
+    order = Order.objects.create(product=product, lease=lease, customer=lease.customer)
+    assert order.price == Decimal("15.00")
