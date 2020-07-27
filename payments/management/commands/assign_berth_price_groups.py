@@ -15,15 +15,14 @@ class Command(BaseCommand):
         #   get_or_create a BPG with the BT width
         #   Assign the price_group to the recovered BPG
 
-        groups_created = 0
+        start_groups = BerthPriceGroup.objects.count()
         for berth_type in berth_types:
-            group, created = BerthPriceGroup.objects.get_or_create_for_width(
-                berth_type.width
-            )
+            group = BerthPriceGroup.objects.get_or_create_for_width(berth_type.width)
             berth_type.price_group = group
             berth_type.save()
-            groups_created += 1 if created else 0
+        end_groups = BerthPriceGroup.objects.count()
 
+        groups_created = end_groups - start_groups
         self.stdout.write(
             self.style.SUCCESS(
                 f"BerthTypes assigned: {len(berth_types)}\n"
