@@ -53,9 +53,14 @@ class AbstractBaseProduct(TimeStampedModel, UUIDModel):
 
 
 class BerthPriceGroupManager(models.Manager):
+    def get_for_width(self, width):
+        # One single common way to get a BPG based on the width
+        return self.get(name=f"{width}m")
+
     def get_or_create_for_width(self, width):
         # One single common way to get a BPG based on the width
-        return self.get_or_create(name=f"{width}m")
+        price_group, _created = self.get_or_create(name=f"{rounded_decimal(width)}m")
+        return price_group
 
 
 class BerthPriceGroup(UUIDModel):

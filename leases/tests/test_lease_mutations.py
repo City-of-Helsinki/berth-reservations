@@ -14,7 +14,11 @@ from berth_reservations.tests.utils import (
     assert_not_enough_permissions,
 )
 from customers.schema import BoatNode, ProfileNode
+from payments.models import BerthPriceGroup, Order
+from payments.tests.factories import BerthProductFactory, WinterStorageProductFactory
+from payments.utils import calculate_product_partial_season_price
 from resources.schema import BerthNode, WinterStoragePlaceNode
+from utils.numbers import rounded
 from utils.relay import to_global_id
 
 from ..enums import LeaseStatus
@@ -61,6 +65,10 @@ mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
 def test_create_berth_lease(api_client, berth_application, berth, customer_profile):
     berth_application.customer = customer_profile
     berth_application.save()
+    price_group = BerthPriceGroup.objects.get_or_create_for_width(
+        berth.berth_type.width
+    )
+    BerthProductFactory(harbor=berth.pier.harbor, price_group=price_group)
 
     variables = {
         "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
@@ -100,6 +108,10 @@ def test_create_berth_lease_all_arguments(
     berth_application.save()
     boat.owner = customer_profile
     boat.save()
+    price_group = BerthPriceGroup.objects.get_or_create_for_width(
+        berth.berth_type.width
+    )
+    BerthProductFactory(harbor=berth.pier.harbor, price_group=price_group)
 
     variables = {
         "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
@@ -241,6 +253,114 @@ def test_create_berth_lease_application_already_has_lease(
     )
 
     assert_in_errors("Berth lease with this Application already exists", executed)
+
+
+CREATE_BERTH_LEASE_WITH_ORDER_MUTATION = """
+mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
+    createBerthLease(input:$input){
+        berthLease {
+            id
+            berth {
+                id
+            }
+            order {
+                id
+                price
+                customer {
+                    id
+                }
+                product {
+                    ... on BerthProductNode {
+                        priceUnit
+                        priceValue
+                        priceGroup {
+                            name
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+@freeze_time("2020-01-01T08:00:00Z")
+def test_create_berth_lease_with_order(
+    api_client, berth_application, berth, customer_profile
+):
+    berth_application.customer = customer_profile
+    berth_application.save()
+    price_group = BerthPriceGroup.objects.get_or_create_for_width(
+        berth.berth_type.width
+    )
+    berth_product = BerthProductFactory(
+        harbor=berth.pier.harbor, price_group=price_group
+    )
+
+    variables = {
+        "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
+        "berthId": to_global_id(BerthNode, berth.id),
+    }
+
+    assert BerthLease.objects.count() == 0
+    assert Order.objects.count() == 0
+
+    executed = api_client.execute(
+        CREATE_BERTH_LEASE_WITH_ORDER_MUTATION, input=variables
+    )
+
+    assert BerthLease.objects.count() == 1
+    assert Order.objects.count() == 1
+
+    assert executed["data"]["createBerthLease"]["berthLease"].pop("id") is not None
+    assert (
+        executed["data"]["createBerthLease"]["berthLease"]["order"].pop("id")
+        is not None
+    )
+    assert executed["data"]["createBerthLease"]["berthLease"] == {
+        "berth": {"id": variables["berthId"]},
+        "order": {
+            "price": str(berth_product.price_value),
+            "customer": {"id": to_global_id(ProfileNode, customer_profile.id)},
+            "product": {
+                "priceUnit": berth_product.price_unit.name,
+                "priceValue": str(berth_product.price_value),
+                "priceGroup": {"name": berth_product.price_group.name},
+            },
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+@freeze_time("2020-01-01T08:00:00Z")
+def test_create_berth_lease_with_order_no_product(
+    api_client, berth_application, berth, customer_profile
+):
+    berth_application.customer = customer_profile
+    berth_application.save()
+
+    variables = {
+        "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
+        "berthId": to_global_id(BerthNode, berth.id),
+    }
+
+    assert BerthLease.objects.count() == 0
+    assert Order.objects.count() == 0
+
+    executed = api_client.execute(
+        CREATE_BERTH_LEASE_WITH_ORDER_MUTATION, input=variables
+    )
+
+    assert BerthLease.objects.count() == 0
+    assert Order.objects.count() == 0
+
+    assert_doesnt_exist("BerthProduct", executed)
 
 
 DELETE_BERTH_LEASE_MUTATION = """
@@ -499,6 +619,9 @@ mutation CreateWinterStorageLease($input: CreateWinterStorageLeaseMutationInput!
 def test_create_winter_storage_lease(
     api_client, winter_storage_application, winter_storage_place, customer_profile
 ):
+    WinterStorageProductFactory(
+        winter_storage_area=winter_storage_place.winter_storage_section.area
+    )
     winter_storage_application.customer = customer_profile
     winter_storage_application.save()
 
@@ -660,6 +783,123 @@ def test_create_winter_storage_lease_application_already_has_lease(
     assert_in_errors(
         "Winter storage lease with this Application already exists", executed
     )
+
+
+CREATE_WINTER_STORAGE_LEASE_WITH_ORDER_MUTATION = """
+mutation CreateWinterStorageLease($input: CreateWinterStorageLeaseMutationInput!) {
+    createWinterStorageLease(input:$input){
+        winterStorageLease {
+            id
+            place {
+                id
+            }
+            order {
+                id
+                price
+                customer {
+                    id
+                }
+                product {
+                    ... on WinterStorageProductNode {
+                        priceUnit
+                        priceValue
+                    }
+                }
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+@freeze_time("2020-06-11T08:00:00Z")
+def test_create_winter_storage_lease_with_order(
+    api_client, winter_storage_application, winter_storage_place, customer_profile
+):
+    winter_storage_application.customer = customer_profile
+    winter_storage_application.save()
+    product = WinterStorageProductFactory(
+        winter_storage_area=winter_storage_place.winter_storage_section.area
+    )
+
+    variables = {
+        "applicationId": to_global_id(
+            WinterStorageApplicationNode, winter_storage_application.id
+        ),
+        "placeId": to_global_id(WinterStoragePlaceNode, winter_storage_place.id),
+    }
+
+    assert WinterStorageLease.objects.count() == 0
+    assert Order.objects.count() == 0
+
+    executed = api_client.execute(
+        CREATE_WINTER_STORAGE_LEASE_WITH_ORDER_MUTATION, input=variables
+    )
+
+    assert WinterStorageLease.objects.count() == 1
+    assert Order.objects.count() == 1
+    sqm = winter_storage_place.place_type.width * winter_storage_place.place_type.length
+    expected_price = calculate_product_partial_season_price(
+        product.price_value,
+        calculate_winter_storage_lease_start_date(),
+        calculate_winter_storage_lease_end_date(),
+        summer_season=False,
+    )
+    expected_price = rounded(expected_price * sqm, decimals=2, as_string=True)
+
+    assert (
+        executed["data"]["createWinterStorageLease"]["winterStorageLease"].pop("id")
+        is not None
+    )
+    assert (
+        executed["data"]["createWinterStorageLease"]["winterStorageLease"]["order"].pop(
+            "id"
+        )
+        is not None
+    )
+    assert executed["data"]["createWinterStorageLease"]["winterStorageLease"] == {
+        "place": {"id": variables["placeId"]},
+        "order": {
+            "price": expected_price,
+            "customer": {"id": to_global_id(ProfileNode, customer_profile.id)},
+            "product": {
+                "priceUnit": product.price_unit.name,
+                "priceValue": str(product.price_value),
+            },
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+@freeze_time("2020-01-01T08:00:00Z")
+def test_create_winter_storage_lease_with_order_no_product(
+    api_client, winter_storage_application, winter_storage_place, customer_profile
+):
+    winter_storage_application.customer = customer_profile
+    winter_storage_application.save()
+
+    variables = {
+        "applicationId": to_global_id(
+            WinterStorageApplicationNode, winter_storage_application.id
+        ),
+        "placeId": to_global_id(WinterStoragePlaceNode, winter_storage_place.id),
+    }
+
+    assert WinterStorageLease.objects.count() == 0
+    assert Order.objects.count() == 0
+
+    executed = api_client.execute(
+        CREATE_WINTER_STORAGE_LEASE_WITH_ORDER_MUTATION, input=variables
+    )
+
+    assert WinterStorageLease.objects.count() == 0
+    assert Order.objects.count() == 0
+    assert_doesnt_exist("WinterStorageProduct", executed)
 
 
 DELETE_WINTER_STORAGE_LEASE_MUTATION = """

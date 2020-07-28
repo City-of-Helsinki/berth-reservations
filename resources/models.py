@@ -554,7 +554,7 @@ class BerthType(AbstractPlaceType):
         from payments.models import BerthPriceGroup
 
         if not self.price_group:
-            self.price_group, created = BerthPriceGroup.objects.get_or_create_for_width(
+            self.price_group = BerthPriceGroup.objects.get_or_create_for_width(
                 self.width
             )
         return super().save(*args, **kwargs)
