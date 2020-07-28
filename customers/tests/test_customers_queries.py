@@ -20,7 +20,7 @@ from utils.relay import to_global_id
 
 from ..enums import InvoicingType, OrganizationType
 from ..schema import BoatCertificateNode, BoatNode, ProfileNode
-from ..tests.factories import BoatFactory, OrganizationFactory
+from .factories import BoatFactory, OrganizationFactory
 
 FEDERATED_SCHEMA_QUERY = """
     {

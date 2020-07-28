@@ -1,8 +1,9 @@
 from django.db.models.signals import post_delete, pre_save
 from django.dispatch import receiver
 
-from customers.models import BoatCertificate
 from utils.files import remove_file
+
+from .models import BoatCertificate
 
 
 @receiver(post_delete, sender=BoatCertificate)

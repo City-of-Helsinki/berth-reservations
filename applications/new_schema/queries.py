@@ -1,11 +1,11 @@
 import graphene
 from graphene_django.filter import DjangoFilterConnectionField
 
-from applications.models import BerthApplication, WinterStorageApplication
 from customers.models import CustomerProfile
 from leases.models import BerthLease, WinterStorageLease
 from users.decorators import view_permission_required
 
+from ..models import BerthApplication, WinterStorageApplication
 from .types import (
     ApplicationStatusEnum,
     BerthApplicationFilter,

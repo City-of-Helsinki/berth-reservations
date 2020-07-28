@@ -5,11 +5,12 @@ from dateutil.parser import isoparse
 from freezegun import freeze_time
 from graphql_relay.node.node import to_global_id
 
-from applications.enums import ApplicationStatus
-from applications.new_schema import BerthApplicationNode
-from applications.tests.factories import BerthApplicationFactory
 from berth_reservations.tests.utils import assert_in_errors
 from leases.tests.factories import BerthLeaseFactory
+
+from ..enums import ApplicationStatus
+from ..new_schema import BerthApplicationNode
+from .factories import BerthApplicationFactory
 
 BERTH_APPLICATIONS_WITH_NO_CUSTOMER_FILTER_QUERY = """
 query APPLICATIONS {

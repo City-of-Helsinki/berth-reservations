@@ -3,7 +3,10 @@ from factory.random import randgen
 
 from berth_reservations.tests.conftest import *  # noqa
 from leases.tests.conftest import *  # noqa
-from payments.tests.factories import (
+from resources.tests.conftest import *  # noqa
+from resources.tests.factories import BerthTypeFactory
+
+from .factories import (
     AdditionalProductFactory,
     BerthProductFactory,
     OrderFactory,
@@ -11,8 +14,6 @@ from payments.tests.factories import (
     OrderLogEntryFactory,
     WinterStorageProductFactory,
 )
-from resources.tests.conftest import *  # noqa
-from resources.tests.factories import BerthTypeFactory
 
 
 @pytest.fixture

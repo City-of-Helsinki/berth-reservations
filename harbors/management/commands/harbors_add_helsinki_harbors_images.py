@@ -5,7 +5,7 @@ from django.core.files import File
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 
-from harbors.models import Harbor
+from ...models import Harbor
 
 
 class Command(BaseCommand):

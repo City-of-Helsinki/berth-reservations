@@ -24,11 +24,11 @@ from utils.relay import to_global_id
 from ..enums import LeaseStatus
 from ..models import BerthLease, WinterStorageLease
 from ..schema import BerthLeaseNode, WinterStorageLeaseNode
-from ..tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from ..utils import (
     calculate_winter_storage_lease_end_date,
     calculate_winter_storage_lease_start_date,
 )
+from .factories import BerthLeaseFactory, WinterStorageLeaseFactory
 
 CREATE_BERTH_LEASE_MUTATION = """
 mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {

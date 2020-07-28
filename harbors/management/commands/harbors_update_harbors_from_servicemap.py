@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from munigeo.models import Municipality
 
-from harbors.models import Harbor
+from ...models import Harbor
 
 
 class Command(BaseCommand):

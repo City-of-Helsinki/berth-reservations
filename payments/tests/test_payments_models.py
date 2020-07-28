@@ -22,27 +22,6 @@ from leases.utils import (
     calculate_winter_storage_lease_end_date,
     calculate_winter_storage_lease_start_date,
 )
-from payments.enums import (
-    AdditionalProductType,
-    PeriodType,
-    PriceUnits,
-    ProductServiceType,
-)
-from payments.models import AdditionalProduct, DEFAULT_TAX_PERCENTAGE, Order, OrderLine
-from payments.tests.factories import (
-    AdditionalProductFactory,
-    BerthProductFactory,
-    OrderFactory,
-    OrderLineFactory,
-    WinterStorageProductFactory,
-)
-from payments.tests.utils import random_bool, random_price, random_tax
-from payments.utils import (
-    calculate_product_partial_month_price,
-    calculate_product_partial_season_price,
-    calculate_product_partial_year_price,
-    calculate_product_percentage_price,
-)
 from resources.tests.factories import (
     BerthFactory,
     PierFactory,
@@ -51,6 +30,23 @@ from resources.tests.factories import (
     WinterStorageSectionFactory,
 )
 from utils.numbers import rounded
+
+from ..enums import AdditionalProductType, PeriodType, PriceUnits, ProductServiceType
+from ..models import AdditionalProduct, DEFAULT_TAX_PERCENTAGE, Order, OrderLine
+from ..utils import (
+    calculate_product_partial_month_price,
+    calculate_product_partial_season_price,
+    calculate_product_partial_year_price,
+    calculate_product_percentage_price,
+)
+from .factories import (
+    AdditionalProductFactory,
+    BerthProductFactory,
+    OrderFactory,
+    OrderLineFactory,
+    WinterStorageProductFactory,
+)
+from .utils import random_bool, random_price, random_tax
 
 
 def test_berth_product_invalid_price_unit():

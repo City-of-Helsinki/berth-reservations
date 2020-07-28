@@ -2,9 +2,6 @@ import random
 
 import pytest
 
-from applications.models import BerthApplication, WinterStorageApplication
-from applications.new_schema import BerthApplicationNode
-from applications.new_schema.types import WinterStorageApplicationNode
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
     assert_field_missing,
@@ -12,6 +9,10 @@ from berth_reservations.tests.utils import (
 )
 from customers.schema import ProfileNode
 from utils.relay import to_global_id
+
+from ..models import BerthApplication, WinterStorageApplication
+from ..new_schema import BerthApplicationNode
+from ..new_schema.types import WinterStorageApplicationNode
 
 UPDATE_BERTH_APPLICATION_MUTATION = """
 mutation UpdateApplication($input: UpdateBerthApplicationInput!) {

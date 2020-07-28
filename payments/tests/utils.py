@@ -1,8 +1,9 @@
 import random
 from decimal import Decimal
 
-from payments.utils import rounded
 from utils.numbers import random_decimal
+
+from ..utils import rounded
 
 
 @rounded

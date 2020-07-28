@@ -1,7 +1,8 @@
 import pytest
 
 from customers.models import User
-from users.utils import _build_permstring, _user_has_models_perms
+
+from ..utils import _build_permstring, _user_has_models_perms
 
 
 @pytest.mark.parametrize(

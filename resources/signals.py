@@ -5,7 +5,9 @@ from django.conf import settings
 from django.db.models.signals import post_delete, pre_save
 from django.dispatch import receiver
 
-from resources.models import (
+from utils.files import remove_file
+
+from .models import (
     get_harbor_media_folder,
     get_winter_area_media_folder,
     Harbor,
@@ -13,7 +15,6 @@ from resources.models import (
     WinterStorageArea,
     WinterStorageAreaMap,
 )
-from utils.files import remove_file
 
 
 @receiver(post_delete, sender=HarborMap)

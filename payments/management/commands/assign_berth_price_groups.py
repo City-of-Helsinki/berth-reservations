@@ -1,7 +1,8 @@
 from django.core.management import BaseCommand
 
-from payments.models import BerthPriceGroup
 from resources.models import BerthType
+
+from ...models import BerthPriceGroup
 
 
 class Command(BaseCommand):

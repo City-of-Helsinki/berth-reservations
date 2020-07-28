@@ -24,7 +24,7 @@ from ..models import (
     Organization,
 )
 from ..schema import BoatCertificateNode, BoatNode, OrganizationNode, ProfileNode
-from ..tests.factories import BoatCertificateFactory
+from .factories import BoatCertificateFactory
 
 CREATE_BOAT_MUTATION = """
 mutation CREATE_BOAT($input: CreateBoatMutationInput!) {

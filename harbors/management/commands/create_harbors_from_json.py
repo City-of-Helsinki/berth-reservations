@@ -16,7 +16,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils.text import slugify
 
-from harbors.models import Harbor
+from ...models import Harbor
 
 
 class Command(BaseCommand):

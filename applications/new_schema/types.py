@@ -2,20 +2,21 @@ import django_filters
 import graphene
 from graphene_django import DjangoObjectType
 
-from applications.enums import ApplicationStatus, WinterStorageMethod
-from applications.models import (
+from customers.models import CustomerProfile
+from leases.models import BerthLease, WinterStorageLease
+from users.decorators import view_permission_required
+from utils.enum import graphene_enum
+from utils.schema import CountConnection
+
+from ..enums import ApplicationStatus, WinterStorageMethod
+from ..models import (
     BerthApplication,
     BerthSwitch,
     HarborChoice,
     WinterStorageApplication,
     WinterStorageAreaChoice,
 )
-from applications.schema import BerthSwitchType as OldBerthSwitchType
-from customers.models import CustomerProfile
-from leases.models import BerthLease, WinterStorageLease
-from users.decorators import view_permission_required
-from utils.enum import graphene_enum
-from utils.schema import CountConnection
+from ..schema import BerthSwitchType as OldBerthSwitchType
 
 ApplicationStatusEnum = graphene_enum(ApplicationStatus)
 
