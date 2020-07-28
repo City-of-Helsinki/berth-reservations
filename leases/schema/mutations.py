@@ -82,9 +82,15 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
             price_group = BerthPriceGroup.objects.get_or_create_for_width(
                 berth.berth_type.width
             )
-            product = BerthProduct.objects.get(
-                harbor=berth.pier.harbor, price_group=price_group
+            price_group_products = BerthProduct.objects.filter(price_group=price_group)
+            harbor_product = price_group_products.filter(harbor=berth.pier.harbor)
+
+            product = (
+                harbor_product.first()
+                if harbor_product
+                else price_group_products.get(harbor__isnull=True)
             )
+
             Order.objects.create(
                 customer=input["customer"], lease=lease, product=product
             )
