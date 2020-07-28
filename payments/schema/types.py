@@ -3,18 +3,18 @@ from graphene_django import DjangoConnectionField, DjangoObjectType
 
 from customers.schema import ProfileNode
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
-from payments.enums import (
+from resources.schema import HarborNode, WinterStorageAreaNode
+from users.decorators import view_permission_required
+from utils.enum import graphene_enum
+from utils.schema import CountConnection
+
+from ..enums import (
     AdditionalProductType,
     OrderStatus,
     PeriodType,
     PriceUnits,
     ProductServiceType,
 )
-from resources.schema import HarborNode, WinterStorageAreaNode
-from users.decorators import view_permission_required
-from utils.enum import graphene_enum
-from utils.schema import CountConnection
-
 from ..models import (
     ADDITIONAL_PRODUCT_TAX_PERCENTAGES,
     AdditionalProduct,

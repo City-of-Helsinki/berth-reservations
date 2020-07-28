@@ -6,18 +6,10 @@ from berth_reservations.tests.utils import assert_not_enough_permissions
 from customers.schema import ProfileNode
 from leases.models import BerthLease, WinterStorageLease
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
-from payments.enums import ProductServiceType
-from payments.tests.factories import (
-    AdditionalProductFactory,
-    BerthProductFactory,
-    OrderFactory,
-    OrderLineFactory,
-    OrderLogEntryFactory,
-    WinterStorageProductFactory,
-)
 from resources.schema import HarborNode, WinterStorageAreaNode
 from utils.relay import to_global_id
 
+from ..enums import ProductServiceType
 from ..models import BerthProduct
 from ..schema.types import (
     AdditionalProductNode,
@@ -29,6 +21,14 @@ from ..schema.types import (
     OrderNode,
     PlaceProductTaxEnum,
     WinterStorageProductNode,
+)
+from .factories import (
+    AdditionalProductFactory,
+    BerthProductFactory,
+    OrderFactory,
+    OrderLineFactory,
+    OrderLogEntryFactory,
+    WinterStorageProductFactory,
 )
 
 BERTH_PRICE_GROUPS_QUERY = """

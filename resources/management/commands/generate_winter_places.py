@@ -5,7 +5,8 @@ from django.utils.translation import activate
 from parler.utils.context import switch_language
 
 from harbors.models import WinterStorageArea as OldWinterArea
-from resources.models import (
+
+from ...models import (
     WinterStorageArea,
     WinterStoragePlace,
     WinterStoragePlaceType,

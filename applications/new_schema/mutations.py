@@ -1,7 +1,6 @@
 import graphene
 from django.db import transaction
 
-from applications.models import BerthApplication, WinterStorageApplication
 from customers.models import CustomerProfile
 from leases.models import BerthLease, WinterStorageLease
 from users.decorators import (
@@ -12,6 +11,7 @@ from users.decorators import (
 from utils.relay import get_node_from_global_id
 from utils.schema import update_object
 
+from ..models import BerthApplication, WinterStorageApplication
 from .types import BerthApplicationNode, WinterStorageApplicationNode
 
 

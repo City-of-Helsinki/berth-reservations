@@ -11,8 +11,9 @@ from berth_reservations.tests.utils import (
 )
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
-from resources.schema import BerthNode, HarborNode, PierNode, WinterStoragePlaceNode
-from resources.tests.factories import (
+
+from ..schema import BerthNode, HarborNode, PierNode, WinterStoragePlaceNode
+from .factories import (
     BerthFactory,
     BerthTypeFactory,
     HarborFactory,

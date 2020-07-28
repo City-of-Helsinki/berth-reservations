@@ -40,8 +40,9 @@ from django.utils import translation
 from parler.utils.context import switch_language
 
 from harbors.models import Harbor as OldHarbor
-from resources.enums import BerthMooringType
-from resources.models import Berth, BerthType, Harbor, Pier
+
+from ...enums import BerthMooringType
+from ...models import Berth, BerthType, Harbor, Pier
 
 MOORING_TYPES_MAP = {
     "ILMAN PERÄKIINNITYSTÄ": BerthMooringType.NO_STERN_TO_MOORING,

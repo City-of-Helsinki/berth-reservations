@@ -15,7 +15,9 @@ from leases.utils import (
 )
 from payments.models import BerthPriceGroup
 from payments.tests.factories import BerthPriceGroupFactory
-from resources.models import (
+from utils.numbers import rounded
+
+from ..models import (
     Berth,
     BerthType,
     get_harbor_media_folder,
@@ -28,14 +30,13 @@ from resources.models import (
     WinterStoragePlace,
     WinterStorageSection,
 )
-from resources.tests.factories import (
+from .factories import (
     BerthFactory,
     BerthTypeFactory,
     PierFactory,
     WinterStoragePlaceFactory,
     WinterStorageSectionFactory,
 )
-from utils.numbers import rounded
 
 
 def test_harbor_map_file_path(harbor):

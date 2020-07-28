@@ -10,14 +10,17 @@ from django.utils.translation import ugettext_lazy as _
 from enumfields import EnumField
 
 from leases.models import BerthLease, WinterStorageLease
-from payments.enums import (
+from utils.models import TimeStampedModel, UUIDModel
+from utils.numbers import rounded as rounded_decimal
+
+from .enums import (
     AdditionalProductType,
     OrderStatus,
     PeriodType,
     PriceUnits,
     ProductServiceType,
 )
-from payments.utils import (
+from .utils import (
     calculate_order_due_date,
     calculate_product_partial_month_price,
     calculate_product_partial_season_price,
@@ -26,8 +29,6 @@ from payments.utils import (
     convert_aftertax_to_pretax,
     rounded,
 )
-from utils.models import TimeStampedModel, UUIDModel
-from utils.numbers import rounded as rounded_decimal
 
 PLACE_PRODUCT_TAX_PERCENTAGES = [Decimal(x) for x in ("24.00",)]
 ADDITIONAL_PRODUCT_TAX_PERCENTAGES = [Decimal(x) for x in ("24.00", "10.00")]

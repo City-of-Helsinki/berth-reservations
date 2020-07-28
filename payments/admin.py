@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.forms import ChoiceField, UUIDField
 from django.utils.translation import ugettext_lazy as _
 
-from payments.models import (
+from .models import (
     AdditionalProduct,
     BerthPriceGroup,
     BerthProduct,
@@ -11,7 +11,7 @@ from payments.models import (
     OrderLogEntry,
     WinterStorageProduct,
 )
-from payments.utils import currency, percentage
+from .utils import currency, percentage
 
 
 class BerthPriceGroupAdmin(admin.ModelAdmin):

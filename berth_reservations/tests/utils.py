@@ -2,8 +2,8 @@ from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory
 from graphene.test import Client as GrapheneClient
 
-from berth_reservations.new_schema import new_schema
-from berth_reservations.schema import schema
+from ..new_schema import new_schema
+from ..schema import schema
 
 
 class ApiClient(GrapheneClient):

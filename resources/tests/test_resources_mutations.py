@@ -14,17 +14,11 @@ from berth_reservations.tests.utils import (
 )
 from leases.enums import LeaseStatus
 from leases.tests.factories import BerthLeaseFactory
-from resources.enums import BerthMooringType
-from resources.models import (
-    Berth,
-    BerthType,
-    get_harbor_media_folder,
-    Harbor,
-    HarborMap,
-    Pier,
-)
-from resources.schema import BerthNode, HarborNode, PierNode
-from resources.tests.factories import BerthTypeFactory
+
+from ..enums import BerthMooringType
+from ..models import Berth, BerthType, get_harbor_media_folder, Harbor, HarborMap, Pier
+from ..schema import BerthNode, HarborNode, PierNode
+from .factories import BerthTypeFactory
 
 CREATE_BERTH_MUTATION = """
 mutation CreateBerth($input: CreateBerthMutationInput!) {
