@@ -4,15 +4,18 @@ import pytest
 from dateutil.parser import isoparse
 from freezegun import freeze_time
 
-from applications.new_schema import BerthApplicationNode
-from applications.tests.factories import BerthApplicationFactory
+from applications.new_schema import BerthApplicationNode, WinterStorageApplicationNode
+from applications.tests.factories import (
+    BerthApplicationFactory,
+    WinterStorageApplicationFactory,
+)
 from berth_reservations.tests.factories import CustomerProfileFactory
 from berth_reservations.tests.utils import (
     assert_not_enough_permissions,
     create_api_client,
 )
-from leases.schema import BerthLeaseNode
-from leases.tests.factories import BerthLeaseFactory
+from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
+from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from utils.relay import to_global_id
 
 from ..enums import InvoicingType, OrganizationType
@@ -69,6 +72,20 @@ query($_representations: [_Any!]!) {
                     }
                 }
             }
+            winterStorageApplications {
+                edges {
+                    node {
+                        id
+                    }
+                }
+            }
+            winterStorageLeases {
+                edges {
+                    node {
+                        id
+                    }
+                }
+            }
         }
     }
 }
@@ -85,6 +102,10 @@ def test_query_extended_profile_nodes(api_client, customer_profile):
 
     berth_application = BerthApplicationFactory(customer=customer_profile)
     berth_lease = BerthLeaseFactory(customer=customer_profile)
+    winter_storage_application = WinterStorageApplicationFactory(
+        customer=customer_profile
+    )
+    winter_storage_lease = WinterStorageLeaseFactory(customer=customer_profile)
     organization = OrganizationFactory(customer=customer_profile)
     boat = BoatFactory(owner=customer_profile)
 
@@ -99,6 +120,12 @@ def test_query_extended_profile_nodes(api_client, customer_profile):
     boat_id = to_global_id(BoatNode, boat.id)
     berth_application_id = to_global_id(BerthApplicationNode, berth_application.id)
     berth_lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
+    winter_storage_application_id = to_global_id(
+        WinterStorageApplicationNode, winter_storage_application.id
+    )
+    winter_storage_lease_id = to_global_id(
+        WinterStorageLeaseNode, winter_storage_lease.id
+    )
 
     assert executed["data"]["_entities"][0] == {
         "id": customer_profile_id,
@@ -111,6 +138,10 @@ def test_query_extended_profile_nodes(api_client, customer_profile):
         "boats": {"edges": [{"node": {"id": boat_id}}]},
         "berthApplications": {"edges": [{"node": {"id": berth_application_id}}]},
         "berthLeases": {"edges": [{"node": {"id": berth_lease_id}}]},
+        "winterStorageApplications": {
+            "edges": [{"node": {"id": winter_storage_application_id}}]
+        },
+        "winterStorageLeases": {"edges": [{"node": {"id": winter_storage_lease_id}}]},
     }
 
 
@@ -225,6 +256,20 @@ query GetBerthProfiles {
                         }
                     }
                 }
+                winterStorageApplications {
+                    edges {
+                        node {
+                            id
+                        }
+                    }
+                }
+                winterStorageLeases {
+                    edges {
+                        node {
+                            id
+                        }
+                    }
+                }
             }
         }
     }
@@ -240,6 +285,10 @@ query GetBerthProfiles {
 def test_query_berth_profiles(api_client, customer_profile):
     berth_application = BerthApplicationFactory(customer=customer_profile)
     berth_lease = BerthLeaseFactory(customer=customer_profile)
+    winter_storage_application = WinterStorageApplicationFactory(
+        customer=customer_profile
+    )
+    winter_storage_lease = WinterStorageLeaseFactory(customer=customer_profile)
     organization = OrganizationFactory(customer=customer_profile)
     boat = BoatFactory(owner=customer_profile)
 
@@ -249,6 +298,12 @@ def test_query_berth_profiles(api_client, customer_profile):
     boat_id = to_global_id(BoatNode, boat.id)
     berth_application_id = to_global_id(BerthApplicationNode, berth_application.id)
     berth_lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
+    winter_storage_application_id = to_global_id(
+        WinterStorageApplicationNode, winter_storage_application.id
+    )
+    winter_storage_lease_id = to_global_id(
+        WinterStorageLeaseNode, winter_storage_lease.id
+    )
 
     assert executed["data"]["berthProfiles"]["edges"][0]["node"] == {
         "id": customer_id,
@@ -261,6 +316,10 @@ def test_query_berth_profiles(api_client, customer_profile):
         "boats": {"edges": [{"node": {"id": boat_id}}]},
         "berthApplications": {"edges": [{"node": {"id": berth_application_id}}]},
         "berthLeases": {"edges": [{"node": {"id": berth_lease_id}}]},
+        "winterStorageApplications": {
+            "edges": [{"node": {"id": winter_storage_application_id}}]
+        },
+        "winterStorageLeases": {"edges": [{"node": {"id": winter_storage_lease_id}}]},
     }
 
 
@@ -398,6 +457,20 @@ query GetBerthProfile {
                 }
             }
         }
+        winterStorageApplications {
+            edges {
+                node {
+                    id
+                }
+            }
+        }
+        winterStorageLeases {
+            edges {
+                node {
+                    id
+                }
+            }
+        }
     }
 }
 """
@@ -413,6 +486,10 @@ def test_query_berth_profile(api_client, customer_profile):
 
     berth_application = BerthApplicationFactory(customer=customer_profile)
     berth_lease = BerthLeaseFactory(customer=customer_profile)
+    winter_storage_application = WinterStorageApplicationFactory(
+        customer=customer_profile
+    )
+    winter_storage_lease = WinterStorageLeaseFactory(customer=customer_profile)
     organization = OrganizationFactory(customer=customer_profile)
     boat = BoatFactory(owner=customer_profile)
 
@@ -423,6 +500,12 @@ def test_query_berth_profile(api_client, customer_profile):
     boat_id = to_global_id(BoatNode, boat.id)
     berth_application_id = to_global_id(BerthApplicationNode, berth_application.id)
     berth_lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
+    winter_storage_application_id = to_global_id(
+        WinterStorageApplicationNode, winter_storage_application.id
+    )
+    winter_storage_lease_id = to_global_id(
+        WinterStorageLeaseNode, winter_storage_lease.id
+    )
 
     assert executed["data"]["berthProfile"] == {
         "id": berth_profile_id,
@@ -435,6 +518,10 @@ def test_query_berth_profile(api_client, customer_profile):
         "boats": {"edges": [{"node": {"id": boat_id}}]},
         "berthApplications": {"edges": [{"node": {"id": berth_application_id}}]},
         "berthLeases": {"edges": [{"node": {"id": berth_lease_id}}]},
+        "winterStorageApplications": {
+            "edges": [{"node": {"id": winter_storage_application_id}}]
+        },
+        "winterStorageLeases": {"edges": [{"node": {"id": winter_storage_lease_id}}]},
     }
 
 
@@ -443,6 +530,10 @@ def test_query_berth_profile_self_user(customer_profile):
 
     berth_application = BerthApplicationFactory(customer=customer_profile)
     berth_lease = BerthLeaseFactory(customer=customer_profile)
+    winter_storage_application = WinterStorageApplicationFactory(
+        customer=customer_profile
+    )
+    winter_storage_lease = WinterStorageLeaseFactory(customer=customer_profile)
     organization = OrganizationFactory(customer=customer_profile)
     boat = BoatFactory(owner=customer_profile)
 
@@ -454,6 +545,12 @@ def test_query_berth_profile_self_user(customer_profile):
     boat_id = to_global_id(BoatNode, boat.id)
     berth_application_id = to_global_id(BerthApplicationNode, berth_application.id)
     berth_lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
+    winter_storage_application_id = to_global_id(
+        WinterStorageApplicationNode, winter_storage_application.id
+    )
+    winter_storage_lease_id = to_global_id(
+        WinterStorageLeaseNode, winter_storage_lease.id
+    )
 
     assert executed["data"]["berthProfile"] == {
         "id": berth_profile_id,
@@ -466,6 +563,10 @@ def test_query_berth_profile_self_user(customer_profile):
         "boats": {"edges": [{"node": {"id": boat_id}}]},
         "berthApplications": {"edges": [{"node": {"id": berth_application_id}}]},
         "berthLeases": {"edges": [{"node": {"id": berth_lease_id}}]},
+        "winterStorageApplications": {
+            "edges": [{"node": {"id": winter_storage_application_id}}]
+        },
+        "winterStorageLeases": {"edges": [{"node": {"id": winter_storage_lease_id}}]},
     }
 
 

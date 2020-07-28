@@ -7,9 +7,10 @@ from graphene_federation import extend, external
 from graphql_jwt.decorators import login_required
 
 from applications.models import BerthApplication
-from applications.new_schema import BerthApplicationNode
+from applications.new_schema import BerthApplicationNode, WinterStorageApplicationNode
+from applications.new_schema.types import WinterStorageApplicationFilter
 from leases.models import BerthLease
-from leases.schema import BerthLeaseNode
+from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from utils.enum import graphene_enum
 from utils.relay import get_node_from_global_id, return_node_if_user_has_permissions
 from utils.schema import CountConnection
@@ -98,6 +99,8 @@ class ProfileNode(DjangoObjectType):
             "boats",
             "berth_applications",
             "berth_leases",
+            "winter_storage_applications",
+            "winter_storage_leases",
             "orders",
         )
         interfaces = (relay.Node,)
@@ -126,10 +129,19 @@ class ProfileNode(DjangoObjectType):
         description="`BerthApplications` are ordered by `createdAt` in ascending order by default.",
     )
     berth_leases = DjangoConnectionField(BerthLeaseNode)
+    winter_storage_applications = DjangoFilterConnectionField(
+        WinterStorageApplicationNode,
+        filterset_class=WinterStorageApplicationFilter,
+        description="`WinterStorageApplications` are ordered by `createdAt` in ascending order by default.",
+    )
+    winter_storage_leases = DjangoConnectionField(WinterStorageLeaseNode)
     orders = DjangoConnectionField("payments.schema.OrderNode")
 
     def resolve_berth_applications(self, info, **kwargs):
         return self.berth_applications.order_by("created_at")
+
+    def resolve_winter_storage_applications(self, info, **kwargs):
+        return self.winter_storage_applications.order_by("created_at")
 
     @login_required
     def __resolve_reference(self, info, **kwargs):
