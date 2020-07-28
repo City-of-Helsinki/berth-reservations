@@ -35,6 +35,7 @@ from resources.tests.factories import (
     WinterStoragePlaceFactory,
     WinterStorageSectionFactory,
 )
+from utils.numbers import rounded
 
 
 def test_harbor_map_file_path(harbor):
@@ -460,13 +461,16 @@ def test_berth_type_is_assigned_new_price_group():
 
     berth_type = BerthTypeFactory(width=width)
 
-    assert BerthType.objects.get(id=berth_type.id).price_group.name == f"{width}m"
+    assert (
+        BerthType.objects.get(id=berth_type.id).price_group.name
+        == f"{rounded(width, decimals=2)}m"
+    )
     assert BerthPriceGroup.objects.count() == 1
 
 
 def test_berth_type_is_assigned_existing_price_group():
     width = round(random.uniform(1, 999), 2)
-    price_group = BerthPriceGroupFactory(name=f"{width}m")
+    price_group = BerthPriceGroupFactory(name=f"{rounded(width, decimals=2)}m")
 
     berth_type = BerthTypeFactory(width=width)
 

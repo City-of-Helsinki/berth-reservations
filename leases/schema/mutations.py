@@ -8,6 +8,7 @@ from applications.models import BerthApplication, WinterStorageApplication
 from applications.new_schema import BerthApplicationNode, WinterStorageApplicationNode
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.models import CustomerProfile
+from payments.models import BerthPriceGroup, BerthProduct, Order, WinterStorageProduct
 from resources.schema import BerthNode, WinterStoragePlaceNode
 from users.decorators import (
     add_permission_required,
@@ -78,6 +79,17 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
 
         try:
             lease = BerthLease.objects.create(**input)
+            price_group = BerthPriceGroup.objects.get_or_create_for_width(
+                berth.berth_type.width
+            )
+            product = BerthProduct.objects.get(
+                harbor=berth.pier.harbor, price_group=price_group
+            )
+            Order.objects.create(
+                customer=input["customer"], lease=lease, product=product
+            )
+        except BerthProduct.DoesNotExist as e:
+            raise VenepaikkaGraphQLError(e)
         except ValidationError as e:
             # Flatten all the error messages on a single list
             errors = sum(e.message_dict.values(), [])
@@ -218,6 +230,14 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
 
         try:
             lease = WinterStorageLease.objects.create(**input)
+            product = WinterStorageProduct.objects.get(
+                winter_storage_area=place.winter_storage_section.area
+            )
+            Order.objects.create(
+                customer=input["customer"], lease=lease, product=product
+            )
+        except WinterStorageProduct.DoesNotExist as e:
+            raise VenepaikkaGraphQLError(e)
         except ValidationError as e:
             # Flatten all the error messages on a single list
             errors = sum(e.message_dict.values(), [])
@@ -314,6 +334,7 @@ class Mutation:
     create_berth_lease = CreateBerthLeaseMutation.Field(
         description="Creates a `BerthLease` associated with the `BerthApplication` and `Berth` passed. "
         "The lease is associated with the `CustomerProfile` that owns the application."
+        "\n\nAn `Order` will be generated with this lease. A valid `BerthProduct` is required."
         "\n\n**Requires permissions** to access applications."
         "\n\nLeases have default start and end dates: 10.6. - 14.9. If a lease object is being created before 10.6, "
         "then the dates are in the same year. If the object is being created between those dates, "
@@ -322,6 +343,7 @@ class Mutation:
         "\n\nErrors:"
         "\n* An application without a customer associated is passed"
         "\n* A boat is passed and the owner of the boat differs from the owner of the application"
+        "\n* There is no `BerthProduct` that can be associated to the `order`/`lease`"
     )
     update_berth_lease = UpdateBerthLeaseMutation.Field(
         description="Updates a `BerthLease` object."
@@ -343,10 +365,12 @@ class Mutation:
     create_winter_storage_lease = CreateWinterStorageLeaseMutation.Field(
         description="Creates a `WinterStorageLease` associated with the `WinterStorageApplication` "
         "and `WinterStoragePlace` passed. The lease is associated with the `CustomerProfile` that owns the application."
+        "\n\nAn `Order` will be generated with this lease. A valid `WinterStorageProduct` is required."
         "\n\n**Requires permissions** to access applications."
         "\n\nErrors:"
         "\n* An application without a customer associated is passed"
         "\n* A boat is passed and the owner of the boat differs from the owner of the application"
+        "\n* There is no `WinterStorageProduct` that can be associated to the `order`/`lease`"
     )
     update_winter_storage_lease = UpdateWinterStorageLeaseMutation.Field(
         description="Updates a `WinterStorageLease` object."
