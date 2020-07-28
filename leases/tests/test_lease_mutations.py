@@ -17,7 +17,7 @@ from customers.schema import BoatNode, ProfileNode
 from payments.models import BerthPriceGroup, Order
 from payments.tests.factories import BerthProductFactory, WinterStorageProductFactory
 from payments.utils import calculate_product_partial_season_price
-from resources.schema import BerthNode, WinterStoragePlaceNode
+from resources.schema import BerthNode, HarborNode, WinterStoragePlaceNode
 from utils.numbers import rounded
 from utils.relay import to_global_id
 
@@ -276,6 +276,9 @@ mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
                         priceGroup {
                             name
                         }
+                        harbor {
+                            id
+                        }
                     }
                 }
             }
@@ -330,6 +333,56 @@ def test_create_berth_lease_with_order(
                 "priceUnit": berth_product.price_unit.name,
                 "priceValue": str(berth_product.price_value),
                 "priceGroup": {"name": berth_product.price_group.name},
+                "harbor": {"id": to_global_id(HarborNode, berth.pier.harbor.id)},
+            },
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+@freeze_time("2020-01-01T08:00:00Z")
+def test_create_berth_lease_with_order_default_product(
+    api_client, berth_application, berth, customer_profile
+):
+    berth_application.customer = customer_profile
+    berth_application.save()
+    price_group = BerthPriceGroup.objects.get_or_create_for_width(
+        berth.berth_type.width
+    )
+    berth_product = BerthProductFactory(harbor=None, price_group=price_group)
+
+    variables = {
+        "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
+        "berthId": to_global_id(BerthNode, berth.id),
+    }
+
+    assert BerthLease.objects.count() == 0
+    assert Order.objects.count() == 0
+
+    executed = api_client.execute(
+        CREATE_BERTH_LEASE_WITH_ORDER_MUTATION, input=variables
+    )
+
+    assert BerthLease.objects.count() == 1
+    assert Order.objects.count() == 1
+
+    assert executed["data"]["createBerthLease"]["berthLease"].pop("id") is not None
+    assert (
+        executed["data"]["createBerthLease"]["berthLease"]["order"].pop("id")
+        is not None
+    )
+    assert executed["data"]["createBerthLease"]["berthLease"] == {
+        "berth": {"id": variables["berthId"]},
+        "order": {
+            "price": str(berth_product.price_value),
+            "customer": {"id": to_global_id(ProfileNode, customer_profile.id)},
+            "product": {
+                "priceUnit": berth_product.price_unit.name,
+                "priceValue": str(berth_product.price_value),
+                "priceGroup": {"name": berth_product.price_group.name},
+                "harbor": None,
             },
         },
     }
