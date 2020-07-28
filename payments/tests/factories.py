@@ -28,7 +28,7 @@ class AbstractBaseProductFactory(factory.django.DjangoModelFactory):
     price_value = factory.LazyAttribute(
         lambda o: random_price()
         if o.price_unit == PriceUnits.AMOUNT
-        else random_price(0, 100, decimals=0)
+        else random_price(1, 100, decimals=0)
     )
 
     class Meta:

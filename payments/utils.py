@@ -7,7 +7,12 @@ from typing import Callable
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import MONTHLY, rrule
 
-from leases.utils import calculate_season_end_date, calculate_season_start_date
+from leases.utils import (
+    calculate_season_end_date,
+    calculate_season_start_date,
+    calculate_winter_season_end_date,
+    calculate_winter_season_start_date,
+)
 from utils.numbers import rounded as rounded_decimal
 
 
@@ -113,9 +118,9 @@ def calculate_product_partial_season_price(
     season_days = calculate_season_end_date() - calculate_season_start_date()
     # If it's for the opposite season ("winter season"), calculate the inverse
     if not summer_season:
-        # Calculate the amount of days in the year, in case it's a leap year
-        days_in_year = (start_date + relativedelta(years=1)) - start_date
-        season_days = days_in_year - season_days
+        season_days = (
+            calculate_winter_season_end_date() - calculate_winter_season_start_date()
+        )
     delta = (end_date - start_date).days
     price = (delta * base_price) / season_days.days
     return price
