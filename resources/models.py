@@ -14,7 +14,7 @@ from django.db.models import (
     Value,
 )
 from django.db.models.functions import Coalesce
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from enumfields import EnumIntegerField
 from munigeo.models import Municipality
 from parler.models import TranslatableModel, TranslatedFields

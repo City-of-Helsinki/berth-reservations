@@ -1,4 +1,4 @@
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from graphene import relay
 from graphql_relay import (
     from_global_id as relay_from_global_id,
