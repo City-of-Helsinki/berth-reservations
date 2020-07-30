@@ -1,9 +1,9 @@
-dist: xenial
+dist: bionic
 
 branches: {only: [master, develop]}
 sudo: false
 language: python
-python: "3.6"
+python: "3.8"
 cache: pip
 
 addons:
@@ -29,4 +29,4 @@ matrix:
       script:
         - black --check .
         - flake8
-        - isort -c
+        - isort . -c
