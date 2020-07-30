@@ -3,8 +3,9 @@ import io
 from django.conf import settings
 from django.utils import dateformat, formats, timezone, translation
 from django.utils.translation import gettext_lazy as _
-from enumfields import Enum
 from xlsxwriter import Workbook
+
+from applications.enums import WinterStorageMethod
 
 
 def export_berth_applications_as_xlsx(applications):
@@ -156,8 +157,9 @@ def export_winter_storage_applications_as_xlsx(applications):
                     value = getattr(application, attr_name)
                     if isinstance(value, bool):
                         value = "Yes" if value else ""
-                    elif isinstance(value, Enum):
-                        value = str(value)
+                    elif value in WinterStorageMethod:
+                        status = WinterStorageMethod(value)
+                        value = str(getattr(status, "label", str(status)))
 
                 ws.write(row_number, column_number, value)
 

@@ -3,8 +3,6 @@
 import django.contrib.postgres.fields.jsonb
 from django.db import migrations, models
 import django.db.models.deletion
-import enumfields.fields
-import applications.enums
 
 
 class Migration(migrations.Migration):
@@ -211,8 +209,12 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "storage_method",
-                    enumfields.fields.EnumField(
-                        enum=applications.enums.WinterStorageMethod,
+                    models.CharField(
+                        choices=[
+                            ("on_trestles", "On trestles"),
+                            ("on_trailer", "On a trailer"),
+                            ("under_tarp", "Under a tarp"),
+                        ],
                         max_length=60,
                         verbose_name="Storage setup",
                     ),

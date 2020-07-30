@@ -1,8 +1,8 @@
+from django.db.models import TextChoices
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_ilmoitin.dummy_context import COMMON_CONTEXT, dummy_context
 from django_ilmoitin.registry import notifications
-from enumfields import Enum
 
 from .tests.factories import (
     BerthApplicationFactory,
@@ -13,13 +13,15 @@ from .tests.factories import (
 from .utils import localize_datetime
 
 
-class NotificationType(Enum):
-    BERTH_APPLICATION_CREATED = "berth_application_created"
-    WINTER_STORAGE_APPLICATION_CREATED = "winter_storage_application_created"
-
-    class Labels:
-        BERTH_APPLICATION_CREATED = _("Berth application created")
-        WINTER_STORAGE_APPLICATION_CREATED = _("Winter storage application created")
+class NotificationType(TextChoices):
+    BERTH_APPLICATION_CREATED = (
+        "berth_application_created",
+        _("Berth application created"),
+    )
+    WINTER_STORAGE_APPLICATION_CREATED = (
+        "winter_storage_application_created",
+        _("Winter storage application created"),
+    )
 
 
 notifications.register(
