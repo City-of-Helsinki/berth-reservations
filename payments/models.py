@@ -167,7 +167,7 @@ class AdditionalProduct(AbstractBaseProduct):
                     _(f"Fixed services must have VAT of {DEFAULT_TAX_PERCENTAGE}€")
                 )
             if self.period != PeriodType.SEASON:
-                raise ValidationError(_(f"Fixed services are only valid for season"))
+                raise ValidationError(_("Fixed services are only valid for season"))
 
     def __str__(self):
         return (
