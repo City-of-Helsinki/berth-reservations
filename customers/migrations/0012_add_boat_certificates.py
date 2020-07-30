@@ -4,9 +4,7 @@ import customers.enums
 import customers.models
 import django.core.files.storage
 from django.db import migrations, models
-import django.db.models.deletion
 import django.utils.timezone
-import enumfields.fields
 import uuid
 
 
@@ -43,8 +41,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "certificate_type",
-                    enumfields.fields.EnumField(
-                        enum=customers.enums.BoatCertificateType,
+                    models.CharField(
+                        choices=[
+                            ("inspection", "Inspection"),
+                            ("insurance", "Insurance"),
+                        ],
                         max_length=16,
                         verbose_name="certificate type",
                     ),
