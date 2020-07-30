@@ -1,34 +1,23 @@
+from django.db.models import IntegerChoices
 from django.utils.translation import gettext_lazy as _
-from enumfields import IntEnum
 
 
-class BerthMooringType(IntEnum):
+class BerthMooringType(IntegerChoices):
     # In Finnish: "ILMAN PERÄKIINNITYSTÄ"
-    NO_STERN_TO_MOORING = 1
+    NO_STERN_TO_MOORING = 1, _("No stern-to mooring")
     # In Finnish: "AISAPAIKKA"
-    SINGLE_SLIP_PLACE = 2
+    SINGLE_SLIP_PLACE = 2, _("Single slip place")
     # In Finnish: "KÄVELYAISAPAIKKA"
-    SIDE_SLIP_PLACE = 3
+    SIDE_SLIP_PLACE = 3, _("Side slip place")
     # In Finnish: "PERÄPOIJUPAIKKA"
-    STERN_BUOY_PLACE = 4
+    STERN_BUOY_PLACE = 4, _("Stern buoy place")
     # In Finnish: "PAALUPERÄKIINNITYS"
-    STERN_POLE_MOORING = 5
+    STERN_POLE_MOORING = 5, _("Stern pole mooring")
     # In Finnish: "SIVUKIINNITYS"
-    QUAYSIDE_MOORING = 6
+    QUAYSIDE_MOORING = 6, _("Quayside mooring")
     # In Finnish: "JOLLAPAIKKA"
-    DINGHY_PLACE = 7
+    DINGHY_PLACE = 7, _("Dinghy place")
     # In Finnish: "POIJU (MERELLÄ)"
-    SEA_BUOY_MOORING = 8
+    SEA_BUOY_MOORING = 8, _("Sea buoy mooring")
     # In Finnish: "TRAILERIPAIKKA"
-    TRAWLER_PLACE = 9
-
-    class Labels:
-        NO_STERN_TO_MOORING = _("No stern-to mooring")
-        SINGLE_SLIP_PLACE = _("Single slip place")
-        SIDE_SLIP_PLACE = _("Side slip place")
-        STERN_BUOY_PLACE = _("Stern buoy place")
-        STERN_POLE_MOORING = _("Stern pole mooring")
-        QUAYSIDE_MOORING = _("Quayside mooring")
-        DINGHY_PLACE = _("Dinghy place")
-        SEA_BUOY_MOORING = _("Sea buoy mooring")
-        TRAWLER_PLACE = _("Trawler place")
+    TRAWLER_PLACE = 9, _("Trawler place")
