@@ -382,6 +382,7 @@ def test_get_winter_storage_places(api_client, winter_storage_place):
                 edges {
                     node {
                         number
+                        isActive
                         createdAt
                         modifiedAt
                     }
@@ -396,6 +397,7 @@ def test_get_winter_storage_places(api_client, winter_storage_place):
                 {
                     "node": {
                         "number": winter_storage_place.number,
+                        "isActive": winter_storage_place.is_active,
                         "createdAt": winter_storage_place.created_at.isoformat(),
                         "modifiedAt": winter_storage_place.modified_at.isoformat(),
                     }

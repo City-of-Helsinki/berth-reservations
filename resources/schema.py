@@ -347,6 +347,7 @@ class WinterStoragePlaceNode(DjangoObjectType):
             "id",
             "number",
             "winter_storage_section",
+            "is_active",
             "created_at",
             "modified_at",
         )
