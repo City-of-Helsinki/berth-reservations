@@ -100,14 +100,16 @@ query($_representations: [_Any!]!) {
 def test_query_extended_profile_nodes(api_client, customer_profile):
     customer_profile_id = to_global_id(ProfileNode, customer_profile.id)
 
+    boat = BoatFactory(owner=customer_profile)
     berth_application = BerthApplicationFactory(customer=customer_profile)
-    berth_lease = BerthLeaseFactory(customer=customer_profile)
+    berth_lease = BerthLeaseFactory(customer=customer_profile, boat=boat)
     winter_storage_application = WinterStorageApplicationFactory(
         customer=customer_profile
     )
-    winter_storage_lease = WinterStorageLeaseFactory(customer=customer_profile)
+    winter_storage_lease = WinterStorageLeaseFactory(
+        customer=customer_profile, boat=boat
+    )
     organization = OrganizationFactory(customer=customer_profile)
-    boat = BoatFactory(owner=customer_profile)
 
     variables = {
         "_representations": [
@@ -284,13 +286,15 @@ query GetBerthProfiles {
 )
 def test_query_berth_profiles(api_client, customer_profile):
     berth_application = BerthApplicationFactory(customer=customer_profile)
-    berth_lease = BerthLeaseFactory(customer=customer_profile)
+    boat = BoatFactory(owner=customer_profile)
+    berth_lease = BerthLeaseFactory(customer=customer_profile, boat=boat)
     winter_storage_application = WinterStorageApplicationFactory(
         customer=customer_profile
     )
-    winter_storage_lease = WinterStorageLeaseFactory(customer=customer_profile)
+    winter_storage_lease = WinterStorageLeaseFactory(
+        customer=customer_profile, boat=boat
+    )
     organization = OrganizationFactory(customer=customer_profile)
-    boat = BoatFactory(owner=customer_profile)
 
     executed = api_client.execute(QUERY_BERTH_PROFILES)
 
@@ -484,14 +488,16 @@ query GetBerthProfile {
 def test_query_berth_profile(api_client, customer_profile):
     berth_profile_id = to_global_id(ProfileNode, customer_profile.id)
 
+    boat = BoatFactory(owner=customer_profile)
     berth_application = BerthApplicationFactory(customer=customer_profile)
-    berth_lease = BerthLeaseFactory(customer=customer_profile)
+    berth_lease = BerthLeaseFactory(customer=customer_profile, boat=boat)
     winter_storage_application = WinterStorageApplicationFactory(
         customer=customer_profile
     )
-    winter_storage_lease = WinterStorageLeaseFactory(customer=customer_profile)
+    winter_storage_lease = WinterStorageLeaseFactory(
+        customer=customer_profile, boat=boat
+    )
     organization = OrganizationFactory(customer=customer_profile)
-    boat = BoatFactory(owner=customer_profile)
 
     query = QUERY_BERTH_PROFILE % berth_profile_id
 
@@ -528,14 +534,16 @@ def test_query_berth_profile(api_client, customer_profile):
 def test_query_berth_profile_self_user(customer_profile):
     berth_profile_id = to_global_id(ProfileNode, customer_profile.id)
 
+    boat = BoatFactory(owner=customer_profile)
     berth_application = BerthApplicationFactory(customer=customer_profile)
-    berth_lease = BerthLeaseFactory(customer=customer_profile)
+    berth_lease = BerthLeaseFactory(customer=customer_profile, boat=boat)
     winter_storage_application = WinterStorageApplicationFactory(
         customer=customer_profile
     )
-    winter_storage_lease = WinterStorageLeaseFactory(customer=customer_profile)
+    winter_storage_lease = WinterStorageLeaseFactory(
+        customer=customer_profile, boat=boat
+    )
     organization = OrganizationFactory(customer=customer_profile)
-    boat = BoatFactory(owner=customer_profile)
 
     query = QUERY_BERTH_PROFILE % berth_profile_id
 

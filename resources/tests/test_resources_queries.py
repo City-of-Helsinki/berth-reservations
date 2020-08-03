@@ -12,7 +12,13 @@ from berth_reservations.tests.utils import (
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 
-from ..schema import BerthNode, HarborNode, PierNode, WinterStoragePlaceNode
+from ..schema import (
+    BerthNode,
+    HarborNode,
+    PierNode,
+    WinterStorageAreaNode,
+    WinterStoragePlaceNode,
+)
 from .factories import (
     BerthFactory,
     BerthTypeFactory,
@@ -314,6 +320,79 @@ def test_get_winter_storage_areas(api_client, winter_storage_section):
             ]
         }
     }
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_winter_storage_area_with_leases(api_client, winter_storage_area):
+    ws_lease = WinterStorageLeaseFactory(place=None, area=winter_storage_area)
+
+    query = """
+        {
+            winterStorageArea(id: "%s") {
+                properties {
+                    leases {
+                        edges {
+                            node {
+                                id
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    """ % to_global_id(
+        WinterStorageAreaNode._meta.name, winter_storage_area.id
+    )
+    executed = api_client.execute(query)
+
+    assert executed["data"]["winterStorageArea"] == {
+        "properties": {
+            "leases": {
+                "edges": [
+                    {
+                        "node": {
+                            "id": to_global_id(
+                                WinterStorageLeaseNode._meta.name, ws_lease.id
+                            )
+                        }
+                    }
+                ]
+            }
+        }
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+)
+def test_get_winter_storage_area_with_leases_not_enough_permissions(
+    api_client, winter_storage_area
+):
+    WinterStorageLeaseFactory(place=None, area=winter_storage_area)
+
+    query = """
+        {
+            winterStorageArea(id: "%s") {
+                properties {
+                    leases {
+                        edges {
+                            node {
+                                id
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    """ % to_global_id(
+        WinterStorageAreaNode._meta.name, winter_storage_area.id
+    )
+    executed = api_client.execute(query)
+    assert_not_enough_permissions(executed)
 
 
 def test_get_winter_storage_sections(api_client, winter_storage_section):

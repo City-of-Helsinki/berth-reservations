@@ -13,7 +13,11 @@ from payments.tests.factories import (
     OrderFactory,
     WinterStorageProductFactory,
 )
-from resources.schema import BerthNode, WinterStoragePlaceNode
+from resources.schema import BerthNode, WinterStorageAreaNode, WinterStoragePlaceNode
+from resources.tests.factories import (
+    WinterStorageAreaFactory,
+    WinterStoragePlaceFactory,
+)
 from utils.relay import to_global_id
 
 from ..schema import BerthLeaseNode, WinterStorageLeaseNode
@@ -342,6 +346,9 @@ query GetWinterStorageLeases {
                 place {
                     id
                 }
+                area {
+                    id
+                }
             }
         }
     }
@@ -354,9 +361,17 @@ query GetWinterStorageLeases {
     ["berth_services", "berth_handler", "berth_supervisor"],
     indirect=True,
 )
-def test_query_winter_storage_leases(
-    api_client, winter_storage_lease, winter_storage_application
-):
+@pytest.mark.parametrize("place", [True, False])
+def test_query_winter_storage_leases(api_client, place, winter_storage_application):
+    if place:
+        winter_storage_lease = WinterStorageLeaseFactory(
+            place=WinterStoragePlaceFactory(), area=None
+        )
+    else:
+        winter_storage_lease = WinterStorageLeaseFactory(
+            place=None, area=WinterStorageAreaFactory()
+        )
+
     winter_storage_application.customer = winter_storage_lease.customer
     winter_storage_application.save()
     winter_storage_lease.application = winter_storage_application
@@ -371,6 +386,19 @@ def test_query_winter_storage_leases(
     customer_id = to_global_id(ProfileNode, winter_storage_lease.customer.id)
     boat_id = to_global_id(BoatNode, winter_storage_lease.boat.id)
 
+    place_dict = {
+        "place": {
+            "id": to_global_id(WinterStoragePlaceNode, winter_storage_lease.place.id),
+        }
+        if place
+        else None,
+        "area": {
+            "id": to_global_id(WinterStorageAreaNode, winter_storage_lease.area.id),
+        }
+        if not place
+        else None,
+    }
+
     assert executed["data"]["winterStorageLeases"]["edges"][0]["node"] == {
         "id": lease_id,
         "status": "DRAFTED",
@@ -383,9 +411,7 @@ def test_query_winter_storage_leases(
             "boats": {"edges": [{"node": {"id": boat_id}}]},
         },
         "application": {"id": application_id, "customer": {"id": customer_id}},
-        "place": {
-            "id": to_global_id(WinterStoragePlaceNode, winter_storage_lease.place.id),
-        },
+        **place_dict,
     }
 
 

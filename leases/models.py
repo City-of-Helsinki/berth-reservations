@@ -9,7 +9,7 @@ from enumfields import EnumField
 
 from applications.models import BerthApplication, WinterStorageApplication
 from customers.models import Boat, CustomerProfile
-from resources.models import Berth, WinterStoragePlace
+from resources.models import Berth, WinterStorageArea, WinterStoragePlace
 from utils.models import TimeStampedModel, UUIDModel
 
 from .consts import ACTIVE_LEASE_STATUSES
@@ -176,6 +176,16 @@ class WinterStorageLease(AbstractLease):
         verbose_name=_("place"),
         on_delete=models.PROTECT,
         related_name="leases",
+        null=True,
+        blank=True,
+    )
+    area = models.ForeignKey(
+        WinterStorageArea,
+        verbose_name=_("area"),
+        on_delete=models.PROTECT,
+        related_name="leases",
+        null=True,
+        blank=True,
     )
     application = models.OneToOneField(
         WinterStorageApplication,
@@ -198,29 +208,41 @@ class WinterStorageLease(AbstractLease):
         default_related_name = "winter_storage_leases"
 
     def clean(self):
-        existing_leases = WinterStorageLease.objects.filter(
-            place=self.place,
-            end_date__gte=self.start_date,
-            status__in=ACTIVE_LEASE_STATUSES,
-        )
         creating = self._state.adding
+
+        if self.place and self.area:
+            raise ValidationError(_("Lease cannot have both place and area assigned"))
+        elif not self.place and not self.area:
+            raise ValidationError(_("Lease must have either place or area assigned"))
+
         if not creating:
             old_instance = WinterStorageLease.objects.get(id=self.id)
 
-            # If the place is being changed
-            if old_instance.place != self.place:
-                raise ValidationError(
-                    _("Cannot change the place assigned to this lease")
-                )
-
+            # Check that the place/area are not being changed
+            self._check_lease_place(old_instance)
+            # Check that the application belongs to the same customer
             self._check_application_customer(old_instance)
 
-            existing_leases = existing_leases.exclude(pk=self.pk)
-        if existing_leases.exists():
-            raise ValidationError(_("WinterStoragePlace already has a lease"))
-        if not self.place.is_active and creating:
+        # If the lease is associated with an area, we don not need to check for
+        # other existing leases, since the area can have many active leases at the same time.
+        if not self.area:
+            existing_leases = WinterStorageLease.objects.filter(
+                place=self.place,
+                end_date__gte=self.start_date,
+                status__in=ACTIVE_LEASE_STATUSES,
+            ).exclude(pk=self.pk or None)
+            if existing_leases.exists():
+                raise ValidationError(_("WinterStoragePlace already has a lease"))
+        if creating and self.place and not self.place.is_active:
             raise ValidationError(_("Selected place is not active"))
+
         super().clean()
+
+    def _check_lease_place(self, old_instance) -> None:
+        if self.place and self.place != old_instance.place:
+            raise ValidationError(_("Cannot change the place assigned to this lease"))
+        elif self.area and self.area != old_instance.area:
+            raise ValidationError(_("Cannot change the area assigned to this lease"))
 
     def _check_application_customer(self, old_instance) -> None:
         # If the application is being changed, it has to belong to the same customer
