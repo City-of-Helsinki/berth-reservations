@@ -347,3 +347,56 @@ def test_berth_lease_is_not_active_after_today():
     start_date = date(year=2020, month=7, day=11)
     lease = BerthLeaseFactory(status=LeaseStatus.PAID, start_date=start_date)
     assert not BerthLease.objects.get(id=lease.id).is_active
+
+
+def test_winter_storage_lease_assign_area(winter_storage_area):
+    lease = WinterStorageLeaseFactory(place=None, area=winter_storage_area)
+
+    assert lease.area == winter_storage_area
+    assert lease.place is None
+
+
+def test_winter_storage_lease_area_can_have_multiple_leases(winter_storage_area):
+    WinterStorageLeaseFactory(place=None, area=winter_storage_area)
+    WinterStorageLeaseFactory(place=None, area=winter_storage_area)
+    WinterStorageLeaseFactory(place=None, area=winter_storage_area)
+
+    assert winter_storage_area.leases.count() == 3
+
+
+def test_winter_storage_lease_assign_area_and_place_raises_error(
+    winter_storage_place, winter_storage_area
+):
+    with pytest.raises(ValidationError) as exception:
+        WinterStorageLeaseFactory(place=winter_storage_place, area=winter_storage_area)
+
+    error_msg = str(exception.value)
+    assert "Lease cannot have both place and area assigned" in error_msg
+
+
+def test_winter_storage_lease_assign_no_area_or_place_raises_error():
+    with pytest.raises(ValidationError) as exception:
+        WinterStorageLeaseFactory(place=None, area=None)
+
+    error_msg = str(exception.value)
+    assert "Lease must have either place or area assigned" in error_msg
+
+
+def test_winter_storage_lease_one_lease_per_place(winter_storage_place):
+    WinterStorageLeaseFactory(place=winter_storage_place)
+
+    with pytest.raises(ValidationError) as exception:
+        WinterStorageLeaseFactory(place=winter_storage_place)
+
+    error_msg = str(exception.value)
+    assert "WinterStoragePlace already has a lease" in error_msg
+
+
+def test_berth_lease_one_lease_per_place(berth):
+    BerthLeaseFactory(berth=berth)
+
+    with pytest.raises(ValidationError) as exception:
+        BerthLeaseFactory(berth=berth)
+
+    error_msg = str(exception.value)
+    assert "Berth already has a lease" in error_msg

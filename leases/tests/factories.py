@@ -1,14 +1,16 @@
 import factory
 
-from customers.tests.factories import CustomerProfileFactory
+from berth_reservations.tests.factories import CustomerProfileFactory
+from customers.tests.factories import BoatFactory
 from resources.tests.factories import BerthFactory, WinterStoragePlaceFactory
 
 from ..models import BerthLease, WinterStorageLease
 
 
 class AbstractLeaseFactory(factory.django.DjangoModelFactory):
-    customer = factory.SubFactory(CustomerProfileFactory)
     comment = factory.Faker("text")
+    boat = factory.SubFactory(BoatFactory, owner=factory.SelfAttribute("..customer"))
+    customer = factory.SubFactory(CustomerProfileFactory)
 
 
 class BerthLeaseFactory(AbstractLeaseFactory):
