@@ -81,6 +81,7 @@ class OrderAdmin(admin.ModelAdmin):
         "total_pretax_price",
         "total_tax_percentage",
         "total_price",
+        "order_number",
     )
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):

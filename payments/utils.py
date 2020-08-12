@@ -1,4 +1,8 @@
+import base64
 import calendar
+import random
+import struct
+import time
 from datetime import date, timedelta
 from decimal import Decimal
 from functools import wraps
@@ -143,3 +147,16 @@ def calculate_product_partial_year_price(
 @rounded
 def calculate_product_percentage_price(base_price, percentage):
     return base_price * (percentage / 100)
+
+
+def price_as_fractional_int(price: Decimal) -> int:
+    """
+    Bambora requires amounts in fractional monetary units (e.g. 1€ = 100)
+    """
+    return int(rounded_decimal(price) * 100)
+
+
+def generate_order_number() -> str:
+    t = time.time() * 1000000 * random.uniform(1, 1000)
+    b = base64.b32encode(struct.pack(">Q", int(t)).lstrip(b"\x00")).strip(b"=").lower()
+    return b.decode("utf8")

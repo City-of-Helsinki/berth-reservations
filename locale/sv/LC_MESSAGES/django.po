@@ -1,0 +1,1301 @@
+# Berth Reservations API
+# Copyright (C) 2020 City of Helsinki
+# This file is distributed under the same license as the berth-reservations package.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-08-25 10:12+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: applications/admin.py:31
+msgid "Application type"
+msgstr ""
+
+#: applications/admin.py:36 applications/admin.py:151
+msgid "Application"
+msgstr ""
+
+#: applications/admin.py:36 applications/admin.py:151
+msgid "Switch application"
+msgstr ""
+
+#: applications/admin.py:73 applications/admin.py:251
+msgid "Contact information"
+msgstr ""
+
+#: applications/admin.py:89 applications/admin.py:267
+msgid "Main boat information"
+msgstr ""
+
+#: applications/admin.py:105
+msgid "Large vessel information"
+msgstr ""
+
+#: applications/admin.py:121
+msgid "Switch berth information"
+msgstr ""
+
+#: applications/admin.py:132 applications/admin.py:280
+msgid "Other information"
+msgstr ""
+
+#: applications/admin.py:156
+msgid "Harbor"
+msgstr ""
+
+#: applications/admin.py:161
+msgid "Pier"
+msgstr ""
+
+#: applications/admin.py:166
+msgid "Berth number"
+msgstr ""
+
+#: applications/admin.py:171
+msgid "Reason"
+msgstr ""
+
+#: applications/admin.py:188 applications/admin.py:312
+msgid "Download list of chosen applications in Excel file"
+msgstr ""
+
+#: applications/admin.py:211
+#, python-format
+msgid "Resent confirmation for %d berth application(s)"
+msgstr ""
+
+#: applications/admin.py:216 applications/admin.py:341
+msgid "Send confirmation again for chosen application"
+msgstr ""
+
+#: applications/admin.py:335
+#, python-format
+msgid "Resent confirmation for %d winter storage application(s)"
+msgstr ""
+
+#: applications/enums.py:6
+msgid "On trestles"
+msgstr ""
+
+#: applications/enums.py:7
+msgid "On a trailer"
+msgstr ""
+
+#: applications/enums.py:8
+msgid "Under a tarp"
+msgstr ""
+
+#: applications/enums.py:12
+msgid "Pending"
+msgstr ""
+
+#: applications/enums.py:13
+msgid "Offer generated"
+msgstr ""
+
+#: applications/enums.py:14
+msgid "Offer sent"
+msgstr ""
+
+#: applications/enums.py:15
+msgid "No suitable berths"
+msgstr ""
+
+#: applications/enums.py:18
+msgid "Notified that there are no suitable berths"
+msgstr ""
+
+#: applications/enums.py:20
+msgid "Handled"
+msgstr ""
+
+#: applications/enums.py:21 leases/enums.py:9 payments/enums.py:67
+msgid "Expired"
+msgstr "Utgången"
+
+#: applications/models.py:17 applications/models.py:29
+msgid "priority"
+msgstr ""
+
+#: applications/models.py:39 harbors/models.py:56 resources/models.py:71
+msgid "title"
+msgstr ""
+
+#: applications/models.py:42
+msgid "Title of the berth switch reason"
+msgstr ""
+
+#: applications/models.py:52 resources/models.py:460 resources/models.py:621
+msgid "pier"
+msgstr ""
+
+#: applications/models.py:53
+msgid "berth number"
+msgstr ""
+
+#: applications/models.py:58
+msgid "berth switch reason"
+msgstr ""
+
+#: applications/models.py:64
+msgid "created at"
+msgstr ""
+
+#: applications/models.py:68
+msgid "handling status"
+msgstr ""
+
+#: applications/models.py:74
+msgid "language"
+msgstr ""
+
+#: applications/models.py:81
+msgid "first name"
+msgstr ""
+
+#: applications/models.py:82
+msgid "last name"
+msgstr ""
+
+#: applications/models.py:83
+msgid "email address"
+msgstr ""
+
+#: applications/models.py:84 resources/models.py:105
+msgid "phone number"
+msgstr ""
+
+#: applications/models.py:85 customers/models.py:82
+msgid "address"
+msgstr ""
+
+#: applications/models.py:86
+msgid "zip code"
+msgstr ""
+
+#: applications/models.py:87 resources/models.py:126 resources/models.py:176
+msgid "municipality"
+msgstr ""
+
+#: applications/models.py:91
+msgid "company name"
+msgstr ""
+
+#: applications/models.py:94
+msgid "business ID"
+msgstr ""
+
+#: applications/models.py:100 customers/models.py:117 harbors/models.py:20
+#: resources/models.py:40
+msgid "boat type"
+msgstr ""
+
+#: applications/models.py:107
+msgid "boat registration number"
+msgstr ""
+
+#: applications/models.py:109 customers/models.py:126
+msgid "boat name"
+msgstr ""
+
+#: applications/models.py:111
+msgid "boat model"
+msgstr ""
+
+#: applications/models.py:114
+msgid "boat length"
+msgstr ""
+
+#: applications/models.py:117
+msgid "boat width"
+msgstr ""
+
+#: applications/models.py:121
+msgid "accept boating newsletter"
+msgstr ""
+
+#: applications/models.py:124
+msgid "accept fitness news"
+msgstr ""
+
+#: applications/models.py:127
+msgid "accept library news"
+msgstr ""
+
+#: applications/models.py:130
+msgid "accept other culture news"
+msgstr ""
+
+#: applications/models.py:134
+msgid "information accuracy confirmed"
+msgstr ""
+
+#: applications/models.py:137
+msgid "application code"
+msgstr ""
+
+#: applications/models.py:142
+msgid "Can resend confirmation for applications"
+msgstr ""
+
+#: applications/models.py:159
+msgid "chosen harbors"
+msgstr ""
+
+#: applications/models.py:164
+msgid "berth switch"
+msgstr ""
+
+#: applications/models.py:172
+msgid "boat draught"
+msgstr ""
+
+#: applications/models.py:179
+msgid "boat weight"
+msgstr ""
+
+#: applications/models.py:187
+msgid "accessibility required"
+msgstr ""
+
+#: applications/models.py:192
+msgid "boat propulsion"
+msgstr ""
+
+#: applications/models.py:195
+msgid "boat hull material"
+msgstr ""
+
+#: applications/models.py:198
+msgid "boat intended use"
+msgstr ""
+
+#: applications/models.py:201
+msgid "renting period"
+msgstr ""
+
+#: applications/models.py:203
+msgid "rent from"
+msgstr ""
+
+#: applications/models.py:204
+msgid "rent till"
+msgstr ""
+
+#: applications/models.py:206
+msgid "boat is inspected"
+msgstr ""
+
+#: applications/models.py:209
+msgid "boat is insured"
+msgstr ""
+
+#: applications/models.py:212
+msgid "agree to terms"
+msgstr ""
+
+#: applications/models.py:240
+msgid "BerthApplication with no lease can only be "
+msgstr ""
+
+#: applications/models.py:269
+msgid "chosen winter storage areas"
+msgstr ""
+
+#: applications/models.py:275
+msgid "storage method"
+msgstr ""
+
+#: applications/models.py:281
+msgid "trailer registration number"
+msgstr ""
+
+#: applications/notifications.py:19
+msgid "Berth application created"
+msgstr ""
+
+#: applications/notifications.py:23
+msgid "Winter storage application created"
+msgstr ""
+
+#: berth_reservations/settings.py:104
+msgid "Finnish"
+msgstr ""
+
+#: berth_reservations/settings.py:104
+msgid "English"
+msgstr ""
+
+#: berth_reservations/settings.py:104
+msgid "Swedish"
+msgstr ""
+
+#: customers/enums.py:6
+msgid "Online payment"
+msgstr ""
+
+#: customers/enums.py:7
+msgid "Digital invoice"
+msgstr ""
+
+#: customers/enums.py:8
+msgid "Paper invoice"
+msgstr ""
+
+#: customers/enums.py:12
+msgid "Company"
+msgstr ""
+
+#: customers/enums.py:13
+msgid "Internal"
+msgstr ""
+
+#: customers/enums.py:14
+msgid "Non-billable"
+msgstr ""
+
+#: customers/enums.py:15
+msgid "Other"
+msgstr ""
+
+#: customers/enums.py:19
+msgid "Inspection"
+msgstr ""
+
+#: customers/enums.py:20
+msgid "Insurance"
+msgstr ""
+
+#: customers/models.py:44
+msgid "invoicing type"
+msgstr ""
+
+#: customers/models.py:48 leases/models.py:48 resources/models.py:629
+msgid "comment"
+msgstr ""
+
+#: customers/models.py:53
+msgid "customer profile"
+msgstr ""
+
+#: customers/models.py:54
+msgid "customer profiles"
+msgstr ""
+
+#: customers/models.py:69 leases/models.py:26 payments/models.py:237
+msgid "customer"
+msgstr ""
+
+#: customers/models.py:75
+msgid "organization type"
+msgstr ""
+
+#: customers/models.py:79
+msgid "business id"
+msgstr ""
+
+#: customers/models.py:81 harbors/models.py:15 harbors/models.py:169
+#: harbors/models.py:263 resources/models.py:35 resources/models.py:150
+#: resources/models.py:222
+msgid "name"
+msgstr ""
+
+#: customers/models.py:84 resources/models.py:104
+msgid "postal code"
+msgstr ""
+
+#: customers/models.py:86
+msgid "city"
+msgstr ""
+
+#: customers/models.py:89
+msgid "organization"
+msgstr ""
+
+#: customers/models.py:90
+msgid "organizations"
+msgstr ""
+
+#: customers/models.py:100
+msgid "A company must have a business id"
+msgstr ""
+
+#: customers/models.py:111
+msgid "owner"
+msgstr ""
+
+#: customers/models.py:124
+msgid "registration number"
+msgstr ""
+
+#: customers/models.py:127
+msgid "model"
+msgstr ""
+
+#: customers/models.py:131 resources/models.py:517 resources/schema.py:190
+#: resources/schema.py:342 resources/schema.py:502 resources/schema.py:512
+msgid "length (m)"
+msgstr ""
+
+#: customers/models.py:137 resources/models.py:514 resources/schema.py:189
+#: resources/schema.py:341 resources/schema.py:501 resources/schema.py:511
+msgid "width (m)"
+msgstr ""
+
+#: customers/models.py:143
+msgid "draught (m)"
+msgstr ""
+
+#: customers/models.py:151
+msgid "weight (kg)"
+msgstr ""
+
+#: customers/models.py:156
+msgid "propulsion"
+msgstr ""
+
+#: customers/models.py:159
+msgid "hull material"
+msgstr ""
+
+#: customers/models.py:161
+msgid "intended use"
+msgstr ""
+
+#: customers/models.py:164 customers/models.py:183
+msgid "boat"
+msgstr ""
+
+#: customers/models.py:165
+msgid "boats"
+msgstr ""
+
+#: customers/models.py:196
+msgid "certificate type"
+msgstr ""
+
+#: customers/models.py:199
+msgid "valid until"
+msgstr ""
+
+#: customers/models.py:200
+msgid "checked at"
+msgstr ""
+
+#: customers/models.py:202
+msgid "checked by"
+msgstr ""
+
+#: customers/models.py:223
+msgid "Cannot change the boat assigned to this certificate"
+msgstr ""
+
+#: customers/schema/mutations.py:248
+msgid "You cannot pass deleteOrganization: true and organization input"
+msgstr ""
+
+#: customers/schema/mutations.py:252
+msgid "The passed Profile is not associated with an Organization"
+msgstr ""
+
+#: harbors/models.py:15 resources/models.py:35
+msgid "Name of the boat type"
+msgstr ""
+
+#: harbors/models.py:21 resources/models.py:41
+msgid "boat types"
+msgstr ""
+
+#: harbors/models.py:59 resources/models.py:74
+msgid "Title of the availability level"
+msgstr ""
+
+#: harbors/models.py:62 resources/models.py:77
+msgid "description"
+msgstr ""
+
+#: harbors/models.py:65 resources/models.py:80
+msgid "Description of the availability level"
+msgstr ""
+
+#: harbors/models.py:70 resources/models.py:85 resources/models.py:143
+#: resources/models.py:193
+msgid "availability level"
+msgstr ""
+
+#: harbors/models.py:71 resources/models.py:86
+msgid "availability levels"
+msgstr ""
+
+#: harbors/models.py:81
+msgid "Servicemap ID"
+msgstr ""
+
+#: harbors/models.py:83 resources/models.py:98
+msgid "ID in the Servicemap system"
+msgstr ""
+
+#: harbors/models.py:89
+msgid "Disabled"
+msgstr ""
+
+#: harbors/models.py:91
+msgid "Postal code"
+msgstr ""
+
+#: harbors/models.py:92
+msgid "Phone number"
+msgstr ""
+
+#: harbors/models.py:93
+msgid "Email"
+msgstr ""
+
+#: harbors/models.py:94 resources/models.py:107
+msgid "WWW link"
+msgstr ""
+
+#: harbors/models.py:97
+msgid "Location"
+msgstr ""
+
+#: harbors/models.py:101
+msgid "Image link"
+msgstr ""
+
+#: harbors/models.py:105 payments/enums.py:7
+msgid "Electricity"
+msgstr "El"
+
+#: harbors/models.py:106 payments/enums.py:8
+msgid "Water"
+msgstr "Vatten"
+
+#: harbors/models.py:107 payments/enums.py:9
+msgid "Gate"
+msgstr "Port"
+
+#: harbors/models.py:118 harbors/models.py:196
+msgid "Municipality"
+msgstr ""
+
+#: harbors/models.py:126 harbors/models.py:204
+msgid "Image file"
+msgstr ""
+
+#: harbors/models.py:132 payments/enums.py:10
+msgid "Mooring"
+msgstr "Förtöjning"
+
+#: harbors/models.py:134 payments/enums.py:11
+msgid "Waste collection"
+msgstr "Avfallshantering"
+
+#: harbors/models.py:136 payments/enums.py:12
+msgid "Lighting"
+msgstr "Belysning"
+
+#: harbors/models.py:140
+msgid "Suitable boat types"
+msgstr ""
+
+#: harbors/models.py:149 harbors/models.py:225
+msgid "Availability level"
+msgstr ""
+
+#: harbors/models.py:155 resources/admin.py:61
+msgid "Number of places"
+msgstr ""
+
+#: harbors/models.py:158
+msgid "Maximum berth width"
+msgstr ""
+
+#: harbors/models.py:161
+msgid "Maximum berth length"
+msgstr ""
+
+#: harbors/models.py:164
+msgid "Maximum berth depth"
+msgstr ""
+
+#: harbors/models.py:171 resources/models.py:152
+msgid "Name of the harbor"
+msgstr ""
+
+#: harbors/models.py:175 harbors/models.py:269 resources/models.py:156
+#: resources/models.py:228
+msgid "street address"
+msgstr ""
+
+#: harbors/models.py:177 resources/models.py:158
+msgid "Street address of the harbor"
+msgstr ""
+
+#: harbors/models.py:183 payments/models.py:109 resources/models.py:164
+#: resources/models.py:258 resources/models.py:437
+msgid "harbor"
+msgstr ""
+
+#: harbors/models.py:184 resources/models.py:165
+msgid "harbors"
+msgstr ""
+
+#: harbors/models.py:210
+msgid "Repair area"
+msgstr ""
+
+#: harbors/models.py:212 payments/enums.py:17
+msgid "Summer storage for docking equipment"
+msgstr "Sommarförvaring av uppläggningsutrustning"
+
+#: harbors/models.py:215 payments/enums.py:21
+msgid "Summer storage for trailers"
+msgstr "Sommarförvaring av trailer"
+
+#: harbors/models.py:218
+msgid "Summer storage for boats"
+msgstr ""
+
+#: harbors/models.py:234 resources/admin.py:103
+msgid "Number of marked places"
+msgstr ""
+
+#: harbors/models.py:237
+msgid "Maximum place width"
+msgstr ""
+
+#: harbors/models.py:240
+msgid "Maximum place length"
+msgstr ""
+
+#: harbors/models.py:248
+msgid "Number of section places"
+msgstr ""
+
+#: harbors/models.py:251
+msgid "Maximum length of section spaces"
+msgstr ""
+
+#: harbors/models.py:258
+msgid "Number of unmarked places"
+msgstr ""
+
+#: harbors/models.py:265 resources/models.py:224
+msgid "Name of the area"
+msgstr ""
+
+#: harbors/models.py:271 resources/models.py:230
+msgid "Street address of the area"
+msgstr ""
+
+#: leases/enums.py:6
+msgid "Drafted"
+msgstr ""
+
+#: leases/enums.py:7
+msgid "Offered"
+msgstr ""
+
+#: leases/enums.py:8
+msgid "Refused"
+msgstr ""
+
+#: leases/enums.py:10 payments/enums.py:68
+msgid "Paid"
+msgstr "Betald"
+
+#: leases/models.py:30
+msgid "customer's boat"
+msgstr ""
+
+#: leases/models.py:38
+msgid "lease status"
+msgstr ""
+
+#: leases/models.py:60
+msgid "The boat should belong to the customer who is creating the lease"
+msgstr ""
+
+#: leases/models.py:63
+msgid "Lease start date cannot be after end date"
+msgstr ""
+
+#: leases/models.py:104 resources/models.py:637
+msgid "berth"
+msgstr ""
+
+#: leases/models.py:108 leases/models.py:214
+msgid "application"
+msgstr ""
+
+#: leases/models.py:115 leases/models.py:221
+msgid "start date"
+msgstr ""
+
+#: leases/models.py:118 leases/models.py:224
+msgid "end date"
+msgstr ""
+
+#: leases/models.py:121
+msgid "renew automatically"
+msgstr ""
+
+#: leases/models.py:126
+msgid "berth lease"
+msgstr ""
+
+#: leases/models.py:127
+msgid "berth leases"
+msgstr ""
+
+#: leases/models.py:133
+msgid "BerthLease start and end year have to be the same"
+msgstr ""
+
+#: leases/models.py:146
+msgid "Cannot change the berth assigned to this lease"
+msgstr ""
+
+#: leases/models.py:156 leases/models.py:279
+msgid "Cannot change the application to one which belongs to another customer"
+msgstr ""
+
+#: leases/models.py:161
+msgid "Berth already has a lease"
+msgstr ""
+
+#: leases/models.py:163
+msgid "Selected berth is not active"
+msgstr ""
+
+#: leases/models.py:198
+msgid "place"
+msgstr ""
+
+#: leases/models.py:206
+msgid "area"
+msgstr ""
+
+#: leases/models.py:229
+msgid "winter storage lease"
+msgstr ""
+
+#: leases/models.py:230
+msgid "winter storage leases"
+msgstr ""
+
+#: leases/models.py:237
+msgid "Lease cannot have both place and area assigned"
+msgstr ""
+
+#: leases/models.py:239
+msgid "Lease must have either place or area assigned"
+msgstr ""
+
+#: leases/models.py:258
+msgid "WinterStoragePlace already has a lease"
+msgstr ""
+
+#: leases/models.py:260
+msgid "Selected place is not active"
+msgstr ""
+
+#: leases/models.py:266
+msgid "Cannot change the place assigned to this lease"
+msgstr ""
+
+#: leases/models.py:268
+msgid "Cannot change the area assigned to this lease"
+msgstr ""
+
+#: leases/models.py:290 utils/models.py:15
+msgid "time created"
+msgstr ""
+
+#: leases/models.py:292
+msgid "from status"
+msgstr ""
+
+#: leases/models.py:295
+msgid "to status"
+msgstr ""
+
+#: leases/models.py:310 leases/models.py:323 payments/models.py:283
+msgid "lease"
+msgstr ""
+
+#: leases/models.py:316
+msgid "berth lease change"
+msgstr ""
+
+#: leases/models.py:317
+msgid "berth lease changes"
+msgstr ""
+
+#: leases/models.py:329
+msgid "winter storage lease change"
+msgstr ""
+
+#: leases/models.py:330
+msgid "winter storage lease changes"
+msgstr ""
+
+#: leases/schema/mutations.py:55 leases/schema/mutations.py:133
+#: leases/schema/mutations.py:215 leases/schema/mutations.py:296
+msgid "Application must be connected to an existing customer first"
+msgstr ""
+
+#: leases/schema/mutations.py:75 leases/schema/mutations.py:147
+#: leases/schema/mutations.py:246 leases/schema/mutations.py:310
+msgid "Boat does not belong to the same customer as the Application"
+msgstr ""
+
+#: leases/schema/mutations.py:176 leases/schema/mutations.py:339
+#, python-brace-format
+msgid "Lease object is not DRAFTED anymore: {lease.status}"
+msgstr ""
+
+#: leases/schema/mutations.py:203
+msgid "Cannot receive both Winter Storage Place and Area"
+msgstr ""
+
+#: leases/schema/mutations.py:231
+msgid "Either Winter Storage Place or Area are required"
+msgstr ""
+
+#: payments/admin.py:38
+msgid "Berth types"
+msgstr ""
+
+#: payments/admin.py:55 payments/admin.py:72 payments/admin.py:117
+msgid "Pretax price"
+msgstr ""
+
+#: payments/admin.py:58
+msgid "Product type"
+msgstr ""
+
+#: payments/admin.py:120
+msgid "Total order price"
+msgstr ""
+
+#: payments/admin.py:123
+msgid "Total order pretax price"
+msgstr ""
+
+#: payments/admin.py:126
+msgid "Total order tax percentage"
+msgstr ""
+
+#: payments/enums.py:23
+msgid "Parking permit"
+msgstr "Parkeringstillstånd"
+
+#: payments/enums.py:24 resources/enums.py:19
+msgid "Dinghy place"
+msgstr "Jolleplats"
+
+#: payments/enums.py:48
+msgid "Fixed service"
+msgstr "Obligatorisk service"
+
+#: payments/enums.py:49
+msgid "Optional service"
+msgstr "Valfri service"
+
+#: payments/enums.py:53
+msgid "Year"
+msgstr "År"
+
+#: payments/enums.py:54
+msgid "Season"
+msgstr "Säsong"
+
+#: payments/enums.py:55
+msgid "Month"
+msgstr "Månad"
+
+#: payments/enums.py:59
+msgid "Amount"
+msgstr "Värde"
+
+#: payments/enums.py:60
+msgid "Percentage"
+msgstr "Procentvärde"
+
+#: payments/enums.py:64
+msgid "Waiting"
+msgstr "Väntar"
+
+#: payments/enums.py:65
+msgid "Rejected"
+msgstr "Avvisad"
+
+#: payments/enums.py:66
+msgid "Cancelled"
+msgstr "Anullerad"
+
+#: payments/models.py:44 payments/models.py:248 payments/models.py:580
+msgid "price"
+msgstr ""
+
+#: payments/models.py:74
+msgid "berth price group name"
+msgstr ""
+
+#: payments/models.py:89 payments/models.py:155 payments/models.py:255
+#: payments/models.py:587
+msgid "tax percentage"
+msgstr ""
+
+#: payments/models.py:104 resources/models.py:537
+msgid "price group"
+msgstr ""
+
+#: payments/models.py:130
+msgid "Berth product"
+msgstr "Båtplats"
+
+#: payments/models.py:136 resources/models.py:236 resources/models.py:265
+#: resources/models.py:472
+msgid "winter storage area"
+msgstr ""
+
+#: payments/models.py:146
+msgid "Winter Storage product"
+msgstr "Vinteruppläggningsplats"
+
+#: payments/models.py:151
+msgid "service"
+msgstr ""
+
+#: payments/models.py:183
+#, python-brace-format
+msgid "Fixed services must have VAT of {DEFAULT_TAX_PERCENTAGE}€"
+msgstr ""
+
+#: payments/models.py:186
+msgid "Fixed services are only valid for season"
+msgstr ""
+
+#: payments/models.py:229
+msgid "order number"
+msgstr ""
+
+#: payments/models.py:262
+msgid "due date"
+msgstr ""
+
+#: payments/models.py:273 payments/models.py:570
+msgid "product"
+msgstr ""
+
+#: payments/models.py:337
+msgid "You cannot assign other types of products"
+msgstr ""
+
+#: payments/models.py:342
+msgid "You cannot assign other types of leases"
+msgstr ""
+
+#: payments/models.py:347
+msgid "The lease provided belongs to a different customer"
+msgstr ""
+
+#: payments/models.py:355
+msgid "A BerthProduct must be associated with a BerthLease"
+msgstr ""
+
+#: payments/models.py:361
+msgid "A WinterStorageProduct must be associated with a WinterStorageLease"
+msgstr ""
+
+#: payments/models.py:367
+msgid "Order must have either product object or price value"
+msgstr ""
+
+#: payments/models.py:372
+msgid "Cannot change the product assigned to this order"
+msgstr ""
+
+#: payments/models.py:377
+msgid "Cannot change the lease associated with this order"
+msgstr ""
+
+#: payments/models.py:428
+msgid "The product passed is not valid"
+msgstr ""
+
+#: payments/models.py:443
+msgid "The lease passed is not valid"
+msgstr ""
+
+#: payments/models.py:564
+msgid "order"
+msgstr ""
+
+#: payments/models.py:577
+msgid "quantity"
+msgstr ""
+
+#: payments/models.py:601
+msgid "Cannot change the order associated with this order line"
+msgstr ""
+
+#: payments/models.py:607
+msgid "Cannot change the product assigned to this order line"
+msgstr ""
+
+#: payments/models.py:664
+msgid "order log entry"
+msgstr ""
+
+#: payments/models.py:673
+msgid "order log entries"
+msgstr ""
+
+#: payments/schema/mutations.py:313 payments/schema/mutations.py:354
+msgid "Lease with the given ID does not exist"
+msgstr ""
+
+#: resources/admin.py:41
+msgid "Berth available"
+msgstr ""
+
+#: resources/admin.py:67 resources/admin.py:109
+msgid "Maximum allowed width"
+msgstr ""
+
+#: resources/admin.py:73 resources/admin.py:115
+msgid "Maximum allowed length"
+msgstr ""
+
+#: resources/admin.py:79
+msgid "Maximum allowed depth"
+msgstr ""
+
+#: resources/enums.py:7
+msgid "No stern-to mooring"
+msgstr ""
+
+#: resources/enums.py:9
+msgid "Single slip place"
+msgstr ""
+
+#: resources/enums.py:11
+msgid "Side slip place"
+msgstr ""
+
+#: resources/enums.py:13
+msgid "Stern buoy place"
+msgstr ""
+
+#: resources/enums.py:15
+msgid "Stern pole mooring"
+msgstr ""
+
+#: resources/enums.py:17
+msgid "Quayside mooring"
+msgstr ""
+
+#: resources/enums.py:21
+msgid "Sea buoy mooring"
+msgstr ""
+
+#: resources/enums.py:23
+msgid "Trawler place"
+msgstr ""
+
+#: resources/models.py:96
+msgid "servicemap ID"
+msgstr ""
+
+#: resources/models.py:106
+msgid "email"
+msgstr ""
+
+#: resources/models.py:110 resources/models.py:289
+msgid "location"
+msgstr ""
+
+#: resources/models.py:114
+msgid "image link"
+msgstr ""
+
+#: resources/models.py:134 resources/models.py:184
+msgid "image file"
+msgstr ""
+
+#: resources/models.py:203
+msgid "estimated number of section places"
+msgstr ""
+
+#: resources/models.py:208
+msgid "maximum length of section spaces"
+msgstr ""
+
+#: resources/models.py:217
+msgid "estimated number of unmarked places"
+msgstr ""
+
+#: resources/models.py:237
+msgid "winter storage areas"
+msgstr ""
+
+#: resources/models.py:247
+msgid "map file"
+msgstr ""
+
+#: resources/models.py:281
+msgid "identifier"
+msgstr ""
+
+#: resources/models.py:282
+msgid "Identifier of the pier / section"
+msgstr ""
+
+#: resources/models.py:294
+msgid "electricity"
+msgstr "el"
+
+#: resources/models.py:295
+msgid "water"
+msgstr "vatten"
+
+#: resources/models.py:296
+msgid "gate"
+msgstr "port"
+
+#: resources/models.py:442
+msgid "suitable boat types"
+msgstr ""
+
+#: resources/models.py:448
+msgid "mooring"
+msgstr "förtöjning"
+
+#: resources/models.py:450
+msgid "waste collection"
+msgstr "avfallshantering"
+
+#: resources/models.py:452
+msgid "lighting"
+msgstr "belysning"
+
+#: resources/models.py:454
+msgid "personal electricity contract"
+msgstr ""
+
+#: resources/models.py:461
+msgid "piers"
+msgstr ""
+
+#: resources/models.py:478
+msgid "repair area"
+msgstr ""
+
+#: resources/models.py:480
+msgid "summer storage for docking equipment"
+msgstr "sommarförvaring av uppläggningsutrustning"
+
+#: resources/models.py:483
+msgid "summer storage for trailers"
+msgstr "sommarförvaring av trailer"
+
+#: resources/models.py:486
+msgid "summer storage for boats"
+msgstr ""
+
+#: resources/models.py:492 resources/models.py:681
+msgid "winter storage section"
+msgstr ""
+
+#: resources/models.py:493
+msgid "winter storage sections"
+msgstr ""
+
+#: resources/models.py:526
+msgid "mooring type"
+msgstr ""
+
+#: resources/models.py:531 resources/schema.py:191 resources/schema.py:503
+msgid "depth (m)"
+msgstr ""
+
+#: resources/models.py:544 resources/models.py:625
+msgid "berth type"
+msgstr ""
+
+#: resources/models.py:545
+msgid "berth types"
+msgstr ""
+
+#: resources/models.py:569
+msgid "winter storage place type"
+msgstr ""
+
+#: resources/models.py:570
+msgid "winter storage place types"
+msgstr ""
+
+#: resources/models.py:579
+msgid "number"
+msgstr ""
+
+#: resources/models.py:580
+msgid "is active"
+msgstr ""
+
+#: resources/models.py:631
+msgid "is accessible"
+msgstr ""
+
+#: resources/models.py:638
+msgid "berths"
+msgstr ""
+
+#: resources/models.py:687
+msgid "place type"
+msgstr ""
+
+#: resources/models.py:694
+msgid "winter storage place"
+msgstr ""
+
+#: resources/models.py:695
+msgid "winter storage places"
+msgstr ""
+
+#: resources/schema.py:65
+msgid ""
+"You cannot filter by dimension (width, length) and application a the same "
+"time."
+msgstr ""
+
+#: resources/schema.py:84
+msgid "You do not have permission to perform this action"
+msgstr ""
+
+#: resources/schema.py:120
+#, python-brace-format
+msgid "Cannot delete {model_name} because it has some related leases"
+msgstr ""
+
+#: utils/models.py:16
+msgid "time modified"
+msgstr ""
+
+#: utils/relay.py:96
+msgid "You do not have permission to perform this action."
+msgstr ""

@@ -1,3 +1,4 @@
+from datetime import date
 from decimal import Decimal
 
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -8,6 +9,7 @@ from django.db import models
 from django.db.models import Q, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
+from leases.enums import LeaseStatus
 from leases.models import BerthLease, WinterStorageLease
 from utils.models import TimeStampedModel, UUIDModel
 from utils.numbers import rounded as rounded_decimal
@@ -19,6 +21,7 @@ from .enums import (
     PriceUnits,
     ProductServiceType,
 )
+from .exceptions import OrderStatusTransitionError
 from .utils import (
     calculate_order_due_date,
     calculate_product_partial_month_price,
@@ -26,6 +29,7 @@ from .utils import (
     calculate_product_partial_year_price,
     calculate_product_percentage_price,
     convert_aftertax_to_pretax,
+    generate_order_number,
     rounded,
 )
 
@@ -118,7 +122,12 @@ class BerthProduct(AbstractPlaceProduct):
         ]
 
     def __str__(self):
-        return f"{self.price_group} - {self.harbor} ({self.price_value}€)"
+        harbor_name = self.harbor.name + " " if self.harbor else ""
+        return f"{self.price_group.name} - {harbor_name}({self.price_value}€)"
+
+    @property
+    def name(self):
+        return _("Berth product") + f": {self}"
 
 
 class WinterStorageProduct(AbstractPlaceProduct):
@@ -130,7 +139,11 @@ class WinterStorageProduct(AbstractPlaceProduct):
     )
 
     def __str__(self):
-        return f"{self.winter_storage_area} ({self.price_value}€)"
+        return f"{self.winter_storage_area.name} ({self.price_value}€)"
+
+    @property
+    def name(self):
+        return _("Winter Storage product") + f": {self}"
 
 
 class AdditionalProduct(AbstractBaseProduct):
@@ -173,10 +186,11 @@ class AdditionalProduct(AbstractBaseProduct):
                 raise ValidationError(_("Fixed services are only valid for season"))
 
     def __str__(self):
-        return (
-            f"{self.service} - {self.period} "
-            f"({self.price_value}{'€' if self.price_unit == PriceUnits.AMOUNT else '%'})"
-        )
+        return self.name
+
+    @property
+    def name(self):
+        return f"{ProductServiceType(self.service).label} - {PeriodType(self.period).label}"
 
 
 class OrderManager(models.Manager):
@@ -196,8 +210,28 @@ class OrderManager(models.Manager):
             )
         )
 
+    def update_expired(self) -> int:
+        too_old_waiting_orders = self.get_queryset().filter(
+            status=OrderStatus.WAITING, due_date__lt=date.today()
+        )
+
+        for order in too_old_waiting_orders:
+            order.set_status(
+                OrderStatus.EXPIRED, comment=f"{_('Order expired at')} {order.due_date}"
+            )
+
+        return too_old_waiting_orders.count()
+
 
 class Order(UUIDModel, TimeStampedModel):
+    order_number = models.CharField(
+        max_length=64,
+        verbose_name=_("order number"),
+        default=generate_order_number,
+        unique=True,
+        editable=False,
+        db_index=True,
+    )
     customer = models.ForeignKey(
         "customers.CustomerProfile",
         verbose_name=_("customer"),
@@ -207,7 +241,7 @@ class Order(UUIDModel, TimeStampedModel):
     product = GenericForeignKey("_product_content_type", "_product_object_id")
     lease = GenericForeignKey("_lease_content_type", "_lease_object_id")
     status = models.CharField(
-        choices=OrderStatus.choices, default=OrderStatus.WAITING, max_length=8
+        choices=OrderStatus.choices, default=OrderStatus.WAITING, max_length=9
     )
     comment = models.TextField(blank=True, null=True)
     price = models.DecimalField(
@@ -259,6 +293,17 @@ class Order(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"{self.product} [{self.status}]"
+
+    @property
+    def name(self):
+        lease_type = self._lease_content_type.name.capitalize()
+        price_group = ""
+        if isinstance(self.lease, BerthLease):
+            place = self.lease.berth
+            price_group = f" ({self.product.price_group.name})"
+        else:
+            place = self.lease.place
+        return f"{lease_type} - {place}{price_group} - {self.price}€"
 
     @property
     @rounded
@@ -460,6 +505,58 @@ class Order(UUIDModel, TimeStampedModel):
         ):
             self._create_order_lines(self.lease.berth.pier)
 
+    def set_status(self, new_status: OrderStatus, comment: str = None) -> None:
+        old_status = self.status
+        if new_status == old_status:
+            return
+
+        valid_status_changes = {
+            OrderStatus.WAITING: (
+                OrderStatus.PAID,
+                OrderStatus.REJECTED,
+                OrderStatus.EXPIRED,
+            ),
+            OrderStatus.PAID: (OrderStatus.CANCELLED,),
+        }
+        valid_new_status = valid_status_changes.get(old_status, ())
+
+        if new_status not in valid_new_status:
+            raise OrderStatusTransitionError(
+                'Cannot set order {} state to "{}", it is in an invalid state "{}".'.format(
+                    self.order_number, new_status, old_status
+                )
+            )
+
+        self.status = new_status
+
+        if new_status == OrderStatus.PAID:
+            self.lease.status = LeaseStatus.PAID
+        elif new_status in (OrderStatus.REJECTED, OrderStatus.CANCELLED):
+            self.lease.status = LeaseStatus.REFUSED
+        elif new_status == OrderStatus.EXPIRED:
+            self.lease.status = LeaseStatus.EXPIRED
+        elif new_status == OrderStatus.WAITING:
+            self.lease = LeaseStatus.OFFERED
+
+        self.lease.save()
+        self.save()
+        self.create_log_entry(
+            from_status=old_status, to_status=new_status, comment=comment
+        )
+
+    def create_log_entry(
+        self,
+        from_status: OrderStatus = None,
+        to_status: OrderStatus = None,
+        comment: str = "",
+    ) -> None:
+        OrderLogEntry.objects.create(
+            order=self,
+            from_status=from_status,
+            to_status=to_status or self.status,
+            comment=comment,
+        )
+
 
 class OrderLine(UUIDModel, TimeStampedModel):
     order = models.ForeignKey(
@@ -568,8 +665,14 @@ class OrderLogEntry(UUIDModel, TimeStampedModel):
         related_name="log_entries",
         on_delete=models.CASCADE,
     )
-    status = models.CharField(choices=OrderStatus.choices, max_length=8)
+    from_status = models.CharField(choices=OrderStatus.choices, max_length=9)
+    to_status = models.CharField(choices=OrderStatus.choices, max_length=9)
     comment = models.TextField(blank=True, null=True)
 
     class Meta:
         verbose_name_plural = _("order log entries")
+
+    def __str__(self):
+        return (
+            f"Order {self.order.id} | {self.from_status or 'N/A'} --> {self.to_status}"
+        )
