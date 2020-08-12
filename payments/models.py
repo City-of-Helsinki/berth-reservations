@@ -122,7 +122,7 @@ class BerthProduct(AbstractPlaceProduct):
         ]
 
     def __str__(self):
-        harbor_name = self.harbor.name + " " if self.harbor else ""
+        harbor_name = str(self.harbor) + " " if self.harbor else ""
         return f"{self.price_group.name} - {harbor_name}({self.price_value}€)"
 
     @property
@@ -139,7 +139,7 @@ class WinterStorageProduct(AbstractPlaceProduct):
     )
 
     def __str__(self):
-        return f"{self.winter_storage_area.name} ({self.price_value}€)"
+        return f"{self.winter_storage_area} ({self.price_value}€)"
 
     @property
     def name(self):
@@ -293,17 +293,6 @@ class Order(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"{self.product} [{self.status}]"
-
-    @property
-    def name(self):
-        lease_type = self._lease_content_type.name.capitalize()
-        price_group = ""
-        if isinstance(self.lease, BerthLease):
-            place = self.lease.berth
-            price_group = f" ({self.product.price_group.name})"
-        else:
-            place = self.lease.place
-        return f"{lease_type} - {place}{price_group} - {self.price}€"
 
     @property
     @rounded
@@ -517,6 +506,9 @@ class Order(UUIDModel, TimeStampedModel):
                 OrderStatus.EXPIRED,
             ),
             OrderStatus.PAID: (OrderStatus.CANCELLED,),
+            # In rare cases, Bambora Notify would notify that a previously failed payment
+            # was later successful, we should allow this case.
+            OrderStatus.REJECTED: (OrderStatus.PAID,),
         }
         valid_new_status = valid_status_changes.get(old_status, ())
 
@@ -538,8 +530,8 @@ class Order(UUIDModel, TimeStampedModel):
         elif new_status == OrderStatus.WAITING:
             self.lease = LeaseStatus.OFFERED
 
-        self.lease.save()
-        self.save()
+        self.lease.save(update_fields=["status"])
+        self.save(update_fields=["status"])
         self.create_log_entry(
             from_status=old_status, to_status=new_status, comment=comment
         )
@@ -654,8 +646,15 @@ class OrderLine(UUIDModel, TimeStampedModel):
     def pretax_price(self):
         return convert_aftertax_to_pretax(self.price, self.tax_percentage)
 
+    @property
+    def name(self):
+        return f"{self.product.name}"
+
     def __str__(self):
-        return f"{self.order}  - {self.product}"
+        return (
+            f"{self.product.name} - {self.product.price_value}"
+            f"{'€' if self.product.price_unit == PriceUnits.AMOUNT else '%'}"
+        )
 
 
 class OrderLogEntry(UUIDModel, TimeStampedModel):

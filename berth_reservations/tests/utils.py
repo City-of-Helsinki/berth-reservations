@@ -76,4 +76,4 @@ def assert_invalid_enum(field_name, expected_value, executed):
 
 def assert_in_errors(message, executed):
     errors = str(executed["errors"])
-    assert message in errors
+    assert str(message) in errors

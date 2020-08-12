@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-25 10:12+0300\n"
+"POT-Creation-Date: 2020-08-25 11:41+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -328,15 +328,15 @@ msgstr ""
 msgid "Winter storage application created"
 msgstr ""
 
-#: berth_reservations/settings.py:104
+#: berth_reservations/settings.py:106
 msgid "Finnish"
 msgstr ""
 
-#: berth_reservations/settings.py:104
+#: berth_reservations/settings.py:106
 msgid "English"
 msgstr ""
 
-#: berth_reservations/settings.py:104
+#: berth_reservations/settings.py:106
 msgid "Swedish"
 msgstr ""
 
@@ -946,7 +946,7 @@ msgstr "Avvisad"
 msgid "Cancelled"
 msgstr "Anullerad"
 
-#: payments/models.py:44 payments/models.py:248 payments/models.py:580
+#: payments/models.py:44 payments/models.py:248 payments/models.py:572
 msgid "price"
 msgstr ""
 
@@ -955,7 +955,7 @@ msgid "berth price group name"
 msgstr ""
 
 #: payments/models.py:89 payments/models.py:155 payments/models.py:255
-#: payments/models.py:587
+#: payments/models.py:579
 msgid "tax percentage"
 msgstr ""
 
@@ -997,76 +997,100 @@ msgstr ""
 msgid "due date"
 msgstr ""
 
-#: payments/models.py:273 payments/models.py:570
+#: payments/models.py:273 payments/models.py:562
 msgid "product"
 msgstr ""
 
-#: payments/models.py:337
+#: payments/models.py:326
 msgid "You cannot assign other types of products"
 msgstr ""
 
-#: payments/models.py:342
+#: payments/models.py:331
 msgid "You cannot assign other types of leases"
 msgstr ""
 
-#: payments/models.py:347
+#: payments/models.py:336
 msgid "The lease provided belongs to a different customer"
 msgstr ""
 
-#: payments/models.py:355
+#: payments/models.py:344
 msgid "A BerthProduct must be associated with a BerthLease"
 msgstr ""
 
-#: payments/models.py:361
+#: payments/models.py:350
 msgid "A WinterStorageProduct must be associated with a WinterStorageLease"
 msgstr ""
 
-#: payments/models.py:367
+#: payments/models.py:356
 msgid "Order must have either product object or price value"
 msgstr ""
 
-#: payments/models.py:372
+#: payments/models.py:361
 msgid "Cannot change the product assigned to this order"
 msgstr ""
 
-#: payments/models.py:377
+#: payments/models.py:366
 msgid "Cannot change the lease associated with this order"
 msgstr ""
 
-#: payments/models.py:428
+#: payments/models.py:417
 msgid "The product passed is not valid"
 msgstr ""
 
-#: payments/models.py:443
+#: payments/models.py:432
 msgid "The lease passed is not valid"
 msgstr ""
 
-#: payments/models.py:564
+#: payments/models.py:556
 msgid "order"
 msgstr ""
 
-#: payments/models.py:577
+#: payments/models.py:569
 msgid "quantity"
 msgstr ""
 
-#: payments/models.py:601
+#: payments/models.py:593
 msgid "Cannot change the order associated with this order line"
 msgstr ""
 
-#: payments/models.py:607
+#: payments/models.py:599
 msgid "Cannot change the product assigned to this order line"
 msgstr ""
 
-#: payments/models.py:664
+#: payments/models.py:663
 msgid "order log entry"
 msgstr ""
 
-#: payments/models.py:673
+#: payments/models.py:672
 msgid "order log entries"
 msgstr ""
 
-#: payments/schema/mutations.py:313 payments/schema/mutations.py:354
+#: payments/providers/bambora_payform.py:86
+msgid "Payment service is unreachable"
+msgstr ""
+
+#: payments/providers/bambora_payform.py:92
+msgid "Order has already expired"
+msgstr ""
+
+#: payments/providers/bambora_payform.py:102
+msgid "Order with the same ID already exists"
+msgstr ""
+
+#: payments/providers/bambora_payform.py:104
+msgid "Payment service is down for maintenance"
+msgstr ""
+
+#: payments/providers/bambora_payform.py:159
+msgid "Order is not associated with a Lease"
+msgstr ""
+
+#: payments/schema/mutations.py:316 payments/schema/mutations.py:357
 msgid "Lease with the given ID does not exist"
+msgstr ""
+
+#: payments/schema/mutations.py:398
+msgid "The order is not valid anymore"
 msgstr ""
 
 #: resources/admin.py:41

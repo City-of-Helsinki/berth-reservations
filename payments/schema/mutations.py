@@ -1,4 +1,5 @@
 import graphene
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.utils.translation import gettext_lazy as _
@@ -17,6 +18,7 @@ from users.decorators import (
 from utils.relay import get_node_from_global_id
 from utils.schema import update_object
 
+from ..enums import OrderStatus
 from ..models import (
     AdditionalProduct,
     BerthProduct,
@@ -24,6 +26,7 @@ from ..models import (
     OrderLine,
     WinterStorageProduct,
 )
+from ..providers import get_payment_provider
 from .types import (
     AdditionalProductNode,
     AdditionalProductTaxEnum,
@@ -379,6 +382,31 @@ class DeleteOrderMutation(graphene.ClientIDMutation):
         return DeleteBerthProductMutation()
 
 
+class ConfirmPaymentMutation(graphene.ClientIDMutation):
+    class Input:
+        order_number = graphene.String(required=True)
+
+    url = graphene.String()
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **input):
+        order_number = input.get("order_number", None)
+        try:
+            order = Order.objects.get(order_number=order_number)
+            if order.status not in (OrderStatus.WAITING, OrderStatus.REJECTED):
+                raise VenepaikkaGraphQLError(
+                    _("The order is not valid anymore")
+                    + f": {OrderStatus(order.status).label}"
+                )
+            payment_url = get_payment_provider(
+                info.context, ui_return_url=settings.VENE_UI_RETURN_URL
+            ).initiate_payment(order)
+        except Order.DoesNotExist as e:
+            raise VenepaikkaGraphQLError(e)
+
+        return ConfirmPaymentMutation(url=payment_url)
+
+
 class OrderLineInput:
     quantity = graphene.Int(description="Defaults to 1")
 
@@ -551,3 +579,7 @@ class Mutation:
         "\n\nErrors:"
         "\n* The passed `OrderLine` does not exist"
     )
+
+
+class OldAPIMutation:
+    confirm_payment = ConfirmPaymentMutation.Field()

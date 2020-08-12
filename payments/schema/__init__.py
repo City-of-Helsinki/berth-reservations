@@ -1,4 +1,4 @@
-from .mutations import Mutation
+from .mutations import Mutation, OldAPIMutation
 from .queries import Query
 from .types import (
     AdditionalProductNode,
@@ -23,6 +23,7 @@ __all__ = [
     "BerthPriceGroupNode",
     "BerthProductNode",
     "Mutation",
+    "OldAPIMutation",
     "OrderLineNode",
     "OrderLogEntryNode",
     "OrderNode",

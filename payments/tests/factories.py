@@ -96,7 +96,12 @@ class OrderFactory(factory.django.DjangoModelFactory):
     price = None
     tax_percentage = None
     lease = None
-    status = factory.Faker("random_element", elements=OrderStatus.values)
+    status = factory.Faker(
+        "random_element",
+        elements=list(
+            filter(lambda os: os is not OrderStatus.EXPIRED.value, OrderStatus.values)
+        ),
+    )
     comment = factory.Faker("sentence")
 
     @factory.post_generation
