@@ -48,6 +48,14 @@ class WinterStorageLeaseNode(DjangoObjectType):
     status = LeaseStatusEnum(required=True)
     customer = graphene.Field("customers.schema.ProfileNode", required=True)
     order = graphene.Field("payments.schema.OrderNode")
+    is_active = graphene.Boolean(
+        required=True,
+        description="For a Lease to be active, it has to have `status == PAID`. "
+        "\n\nIf the present date is before the season starts (15.9.2020), "
+        "a lease will be active if it starts at the same date as the season. "
+        "If the present date is during the season, a lease will be active if the "
+        "dates `start date < today < end date`.",
+    )
 
     class Meta:
         model = WinterStorageLease
