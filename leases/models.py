@@ -4,8 +4,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import ExpressionWrapper, Q
-from django.utils.translation import ugettext_lazy as _
-from enumfields import EnumField
+from django.utils.translation import gettext_lazy as _
 
 from applications.models import BerthApplication, WinterStorageApplication
 from customers.models import Boat, CustomerProfile
@@ -34,8 +33,8 @@ class AbstractLease(TimeStampedModel, UUIDModel):
         blank=True,
     )
 
-    status = EnumField(
-        LeaseStatus,
+    status = models.CharField(
+        choices=LeaseStatus.choices,
         verbose_name=_("lease status"),
         max_length=30,
         default=LeaseStatus.DRAFTED,
@@ -265,8 +264,12 @@ class WinterStorageLease(AbstractLease):
 
 class AbstractLeaseChange(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("time created"))
-    from_status = EnumField(LeaseStatus, verbose_name=_("from status"), max_length=30)
-    to_status = EnumField(LeaseStatus, verbose_name=_("to status"), max_length=30)
+    from_status = models.CharField(
+        choices=LeaseStatus.choices, verbose_name=_("from status"), max_length=30
+    )
+    to_status = models.CharField(
+        choices=LeaseStatus.choices, verbose_name=_("to status"), max_length=30
+    )
 
     class Meta:
         abstract = True

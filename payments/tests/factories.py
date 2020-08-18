@@ -24,7 +24,7 @@ from .utils import random_bool, random_price
 
 
 class AbstractBaseProductFactory(factory.django.DjangoModelFactory):
-    price_unit = factory.Faker("random_element", elements=list(PriceUnits))
+    price_unit = factory.Faker("random_element", elements=PriceUnits.values)
     price_value = factory.LazyAttribute(
         lambda o: random_price()
         if o.price_unit == PriceUnits.AMOUNT
@@ -65,7 +65,7 @@ class WinterStorageProductFactory(AbstractPlaceProductFactory):
 
 
 class AdditionalProductFactory(AbstractBaseProductFactory):
-    service = factory.Faker("random_element", elements=list(ProductServiceType))
+    service = factory.Faker("random_element", elements=ProductServiceType.values)
     period = factory.LazyFunction(lambda: PeriodType.SEASON)
     tax_percentage = factory.LazyFunction(lambda: DEFAULT_TAX_PERCENTAGE)
 
@@ -76,7 +76,7 @@ class AdditionalProductFactory(AbstractBaseProductFactory):
     def tax_percentage(self, created, extracted, **kwargs):
         if extracted:
             self.tax_percentage = extracted
-        elif self.service.is_fixed_service():
+        elif self.service in ProductServiceType.FIXED_SERVICES():
             self.tax_percentage = DEFAULT_TAX_PERCENTAGE
         else:
             self.tax_percentage = random.choice(ADDITIONAL_PRODUCT_TAX_PERCENTAGES)
@@ -95,7 +95,7 @@ class OrderFactory(factory.django.DjangoModelFactory):
     price = None
     tax_percentage = None
     lease = None
-    status = factory.Faker("random_element", elements=list(OrderStatus))
+    status = factory.Faker("random_element", elements=OrderStatus.values)
     comment = factory.Faker("sentence")
 
     @factory.post_generation
@@ -121,7 +121,7 @@ class OrderLineFactory(factory.django.DjangoModelFactory):
 
 class OrderLogEntryFactory(factory.django.DjangoModelFactory):
     order = factory.SubFactory(OrderFactory)
-    status = factory.Faker("random_element", elements=list(OrderStatus))
+    status = factory.Faker("random_element", elements=OrderStatus.values)
     comment = factory.Faker("sentence")
 
     class Meta:

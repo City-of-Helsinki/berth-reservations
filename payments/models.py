@@ -6,8 +6,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Q, UniqueConstraint
-from django.utils.translation import ugettext_lazy as _
-from enumfields import EnumField
+from django.utils.translation import gettext_lazy as _
 
 from leases.models import BerthLease, WinterStorageLease
 from utils.models import TimeStampedModel, UUIDModel
@@ -43,7 +42,9 @@ class AbstractBaseProduct(TimeStampedModel, UUIDModel):
         decimal_places=2,
         validators=[MinValueValidator(Decimal("0.01"))],
     )
-    price_unit = EnumField(PriceUnits, default=PriceUnits.AMOUNT)
+    price_unit = models.CharField(
+        choices=PriceUnits.choices, default=PriceUnits.AMOUNT, max_length=10
+    )
 
     class Meta:
         abstract = True
@@ -75,10 +76,10 @@ class BerthPriceGroup(UUIDModel):
 
 
 class AbstractPlaceProduct(AbstractBaseProduct):
-    price_unit = EnumField(
-        PriceUnits,
+    price_unit = models.CharField(
         choices=[(PriceUnits.AMOUNT, PriceUnits.AMOUNT.label)],
         default=PriceUnits.AMOUNT,
+        max_length=10,
     )
     tax_percentage = models.DecimalField(
         verbose_name=_("tax percentage"),
@@ -133,8 +134,10 @@ class WinterStorageProduct(AbstractPlaceProduct):
 
 
 class AdditionalProduct(AbstractBaseProduct):
-    service = EnumField(ProductServiceType, verbose_name=_("service"), max_length=40)
-    period = EnumField(PeriodType, max_length=8)
+    service = models.CharField(
+        choices=ProductServiceType.choices, verbose_name=_("service"), max_length=40
+    )
+    period = models.CharField(choices=PeriodType.choices, max_length=8)
     tax_percentage = models.DecimalField(
         verbose_name=_("tax percentage"),
         max_digits=5,
@@ -145,9 +148,9 @@ class AdditionalProduct(AbstractBaseProduct):
 
     @property
     def product_type(self):
-        if self.service.is_fixed_service():
+        if self.service in ProductServiceType.FIXED_SERVICES():
             return AdditionalProductType.FIXED_SERVICE
-        elif self.service.is_optional_service():
+        elif self.service in ProductServiceType.OPTIONAL_SERVICES():
             return AdditionalProductType.OPTIONAL_SERVICE
         return None
 
@@ -161,13 +164,13 @@ class AdditionalProduct(AbstractBaseProduct):
         ]
 
     def clean(self):
-        if self.service.is_fixed_service():
+        if self.service in ProductServiceType.FIXED_SERVICES():
             if self.tax_percentage != DEFAULT_TAX_PERCENTAGE:
                 raise ValidationError(
                     _(f"Fixed services must have VAT of {DEFAULT_TAX_PERCENTAGE}€")
                 )
             if self.period != PeriodType.SEASON:
-                raise ValidationError(_(f"Fixed services are only valid for season"))
+                raise ValidationError(_("Fixed services are only valid for season"))
 
     def __str__(self):
         return (
@@ -203,7 +206,9 @@ class Order(UUIDModel, TimeStampedModel):
     )
     product = GenericForeignKey("_product_content_type", "_product_object_id")
     lease = GenericForeignKey("_lease_content_type", "_lease_object_id")
-    status = EnumField(OrderStatus, default=OrderStatus.WAITING)
+    status = models.CharField(
+        choices=OrderStatus.choices, default=OrderStatus.WAITING, max_length=8
+    )
     comment = models.TextField(blank=True, null=True)
     price = models.DecimalField(
         verbose_name=_("price"),
@@ -558,7 +563,7 @@ class OrderLogEntry(UUIDModel, TimeStampedModel):
         related_name="log_entries",
         on_delete=models.CASCADE,
     )
-    status = EnumField(OrderStatus)
+    status = models.CharField(choices=OrderStatus.choices, max_length=8)
     comment = models.TextField(blank=True, null=True)
 
     class Meta:

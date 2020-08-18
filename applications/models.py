@@ -2,8 +2,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
-from enumfields import EnumField
+from django.utils.translation import gettext_lazy as _
 from parler.models import TranslatableModel, TranslatedFields
 
 from customers.models import CustomerProfile
@@ -65,8 +64,8 @@ class BerthSwitch(models.Model):
 class BaseApplication(models.Model):
     created_at = models.DateTimeField(verbose_name=_("created at"), auto_now_add=True)
 
-    status = EnumField(
-        ApplicationStatus,
+    status = models.CharField(
+        choices=ApplicationStatus.choices,
         verbose_name=_("handling status"),
         max_length=32,
         default=ApplicationStatus.PENDING,
@@ -274,8 +273,10 @@ class WinterStorageApplication(BaseApplication):
         blank=True,
     )
 
-    storage_method = EnumField(
-        WinterStorageMethod, verbose_name=_("storage method"), max_length=60
+    storage_method = models.CharField(
+        choices=WinterStorageMethod.choices,
+        verbose_name=_("storage method"),
+        max_length=60,
     )
 
     # If boat stored on a trailer, trailer's registration number is required

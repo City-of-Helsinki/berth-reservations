@@ -14,8 +14,7 @@ from django.db.models import (
     Value,
 )
 from django.db.models.functions import Coalesce
-from django.utils.translation import ugettext_lazy as _
-from enumfields import EnumIntegerField
+from django.utils.translation import gettext_lazy as _
 from munigeo.models import Municipality
 from parler.models import TranslatableModel, TranslatedFields
 
@@ -523,7 +522,9 @@ class AbstractPlaceType(TimeStampedModel, UUIDModel):
 
 
 class BerthType(AbstractPlaceType):
-    mooring_type = EnumIntegerField(BerthMooringType, verbose_name=_("mooring type"))
+    mooring_type = models.PositiveSmallIntegerField(
+        choices=BerthMooringType.choices, verbose_name=_("mooring type")
+    )
     depth = models.DecimalField(
         max_digits=5,
         decimal_places=2,

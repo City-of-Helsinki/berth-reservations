@@ -5,7 +5,6 @@ from graphene_django import DjangoObjectType
 from customers.models import CustomerProfile
 from leases.models import BerthLease, WinterStorageLease
 from users.decorators import view_permission_required
-from utils.enum import graphene_enum
 from utils.schema import CountConnection
 
 from ..enums import ApplicationStatus, WinterStorageMethod
@@ -18,9 +17,8 @@ from ..models import (
 )
 from ..schema import BerthSwitchType as OldBerthSwitchType
 
-ApplicationStatusEnum = graphene_enum(ApplicationStatus)
-
-WinterStorageMethodEnum = graphene_enum(WinterStorageMethod)
+ApplicationStatusEnum = graphene.Enum.from_enum(ApplicationStatus)
+WinterStorageMethodEnum = graphene.Enum.from_enum(WinterStorageMethod)
 
 
 class HarborChoiceType(DjangoObjectType):

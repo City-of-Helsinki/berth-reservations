@@ -39,11 +39,16 @@ from ..schema.types import (
     AdditionalProduct,
     AdditionalProductNode,
     AdditionalProductTaxEnum,
+    AdditionalProductTypeEnum,
     BerthPriceGroupNode,
     BerthProductNode,
     OrderLineNode,
     OrderNode,
+    OrderStatusEnum,
+    PeriodTypeEnum,
     PlaceProductTaxEnum,
+    PriceUnitsEnum,
+    ProductServiceTypeEnum,
     WinterStorageProductNode,
 )
 from ..utils import (
@@ -54,6 +59,7 @@ from ..utils import (
     convert_aftertax_to_pretax,
 )
 from .factories import OrderFactory
+from .utils import random_price
 
 CREATE_BERTH_PRODUCT_MUTATION = """
 mutation CREATE_BERTH_PRODUCT($input: CreateBerthProductMutationInput!) {
@@ -80,7 +86,7 @@ mutation CREATE_BERTH_PRODUCT($input: CreateBerthProductMutationInput!) {
 )
 def test_create_berth_product(api_client, berth_price_group, harbor):
     variables = {
-        "priceValue": str(round(random.uniform(1, 999), 2)),
+        "priceValue": str(random_price()),
         "priceGroupId": to_global_id(BerthPriceGroupNode, berth_price_group.id),
         "harborId": to_global_id(HarborNode, harbor.id),
     }
@@ -94,7 +100,7 @@ def test_create_berth_product(api_client, berth_price_group, harbor):
 
     assert executed["data"]["createBerthProduct"]["berthProduct"] == {
         "priceValue": variables["priceValue"],
-        "priceUnit": PriceUnits.AMOUNT.name,
+        "priceUnit": PriceUnitsEnum.AMOUNT.name,
         "priceGroup": {"name": berth_price_group.name},
         "taxPercentage": PlaceProductTaxEnum.get(DEFAULT_TAX_PERCENTAGE).name,
         "harbor": {"id": variables["harborId"]},
@@ -237,7 +243,7 @@ mutation UPDATE_BERTH_PRODUCT($input: UpdateBerthProductMutationInput!) {
 def test_update_berth_product(api_client, berth_product, berth_price_group, harbor):
     variables = {
         "id": to_global_id(BerthProductNode, berth_product.id),
-        "priceValue": str(round(random.uniform(1, 999), 2)),
+        "priceValue": str(random_price()),
         "priceGroupId": to_global_id(BerthPriceGroupNode, berth_price_group.id),
         "harborId": to_global_id(HarborNode, harbor.id),
     }
@@ -251,7 +257,7 @@ def test_update_berth_product(api_client, berth_product, berth_price_group, harb
     assert executed["data"]["updateBerthProduct"]["berthProduct"] == {
         "id": variables["id"],
         "priceValue": variables["priceValue"],
-        "priceUnit": PriceUnits.AMOUNT.name,
+        "priceUnit": PriceUnitsEnum.AMOUNT.name,
         "priceGroup": {"name": berth_price_group.name},
         "harbor": {"id": variables["harborId"]},
     }
@@ -322,7 +328,7 @@ mutation CREATE_WINTER_STORAGE_PRODUCT($input: CreateWinterStorageProductMutatio
 )
 def test_create_winter_storage_product(api_client, winter_storage_area):
     variables = {
-        "priceValue": str(round(random.uniform(1, 999), 2)),
+        "priceValue": str(random_price()),
         "winterStorageAreaId": to_global_id(
             WinterStorageAreaNode, winter_storage_area.id
         ),
@@ -342,7 +348,7 @@ def test_create_winter_storage_product(api_client, winter_storage_area):
 
     assert executed["data"]["createWinterStorageProduct"]["winterStorageProduct"] == {
         "priceValue": variables["priceValue"],
-        "priceUnit": PriceUnits.AMOUNT.name,
+        "priceUnit": PriceUnitsEnum.AMOUNT.name,
         "taxPercentage": PlaceProductTaxEnum.get(DEFAULT_TAX_PERCENTAGE).name,
         "winterStorageArea": {"id": variables["winterStorageAreaId"]},
     }
@@ -476,7 +482,7 @@ def test_update_winter_storage_product(
     assert executed["data"]["updateWinterStorageProduct"]["winterStorageProduct"] == {
         "id": variables["id"],
         "priceValue": variables["priceValue"],
-        "priceUnit": PriceUnits.AMOUNT.name,
+        "priceUnit": PriceUnitsEnum.AMOUNT.name,
         "winterStorageArea": {"id": variables["winterStorageAreaId"]},
     }
 
@@ -529,29 +535,27 @@ mutation CREATE_ADDITIONAL_PRODUCT($input: CreateAdditionalProductMutationInput!
     "api_client", ["berth_services"], indirect=True,
 )
 def test_create_additional_product(api_client):
-    service = random.choice(list(ProductServiceType))
-    period = (
+    service = ProductServiceTypeEnum.get(random.choice(ProductServiceType.values))
+    period = PeriodTypeEnum.get(
         PeriodType.SEASON
-        if service.is_fixed_service()
-        else random.choice(list(PeriodType))
+        if service in ProductServiceType.FIXED_SERVICES()
+        else random.choice(PeriodType.values)
     )
     tax_percentage = AdditionalProductTaxEnum.get(
-        (
-            DEFAULT_TAX_PERCENTAGE
-            if service.is_fixed_service()
-            else random.choice(ADDITIONAL_PRODUCT_TAX_PERCENTAGES)
-        )
+        DEFAULT_TAX_PERCENTAGE
+        if service in ProductServiceType.FIXED_SERVICES()
+        else random.choice(ADDITIONAL_PRODUCT_TAX_PERCENTAGES)
     )
-    product_type = (
+    product_type = AdditionalProductTypeEnum.get(
         AdditionalProductType.FIXED_SERVICE
-        if service.is_fixed_service()
+        if service in ProductServiceType.FIXED_SERVICES()
         else AdditionalProductType.OPTIONAL_SERVICE
     )
     variables = {
         "service": service.name,
         "period": period.name,
-        "priceValue": str(round(random.uniform(1, 999), 2)),
-        "priceUnit": random.choice(list(PriceUnits)).name,
+        "priceValue": str(random_price()),
+        "priceUnit": PriceUnitsEnum.get(random.choice(PriceUnits.values)).name,
         "taxPercentage": tax_percentage.name,
     }
 
@@ -582,9 +586,11 @@ def test_create_additional_product(api_client):
     indirect=True,
 )
 def test_create_additional_product_not_enough_permissions(api_client):
+    service = ProductServiceTypeEnum.get(random.choice(ProductServiceType.values))
+    period = PeriodTypeEnum.get(random.choice(PeriodType.values))
     variables = {
-        "service": random.choice(list(ProductServiceType)).name,
-        "period": random.choice(list(PeriodType)).name,
+        "service": service.name,
+        "period": period.name,
         "priceValue": "1.00",
     }
 
@@ -663,30 +669,28 @@ mutation UPDATE_ADDITIONAL_PRODUCT($input: UpdateAdditionalProductMutationInput!
 )
 def test_update_additional_product(api_client, additional_product):
     product_global_id = to_global_id(AdditionalProductNode, additional_product.id)
-    service = random.choice(list(ProductServiceType))
-    period = (
+    service = ProductServiceTypeEnum.get(random.choice(ProductServiceType.values))
+    period = PeriodTypeEnum.get(
         PeriodType.SEASON
-        if service.is_fixed_service()
-        else random.choice(list(PeriodType))
+        if service in ProductServiceType.FIXED_SERVICES()
+        else random.choice(PeriodType.values)
     )
     tax_percentage = AdditionalProductTaxEnum.get(
-        (
-            DEFAULT_TAX_PERCENTAGE
-            if service.is_fixed_service()
-            else random.choice(ADDITIONAL_PRODUCT_TAX_PERCENTAGES)
-        )
+        DEFAULT_TAX_PERCENTAGE
+        if service in ProductServiceType.FIXED_SERVICES()
+        else random.choice(ADDITIONAL_PRODUCT_TAX_PERCENTAGES)
     )
-    product_type = (
+    product_type = AdditionalProductTypeEnum.get(
         AdditionalProductType.FIXED_SERVICE
-        if service.is_fixed_service()
+        if service in ProductServiceType.FIXED_SERVICES()
         else AdditionalProductType.OPTIONAL_SERVICE
     )
     variables = {
         "id": product_global_id,
         "service": service.name,
         "period": period.name,
-        "priceValue": str(round(random.uniform(1, 999), 2)),
-        "priceUnit": random.choice(list(PriceUnits)).name,
+        "priceValue": str(random_price()),
+        "priceUnit": PriceUnitsEnum.get(random.choice(PriceUnits.values)).name,
         "taxPercentage": tax_percentage.name,
     }
 
@@ -914,7 +918,7 @@ def test_update_order_berth_product(api_client, berth_product, berth_lease):
         "id": global_id,
         "comment": "foobar",
         "dueDate": today(),
-        "status": random.choice(list(OrderStatus)).name,
+        "status": OrderStatusEnum.get(random.choice(OrderStatus.values)).name,
     }
 
     assert Order.objects.count() == 1
@@ -1102,7 +1106,7 @@ def test_create_order_line(api_client, order, additional_product):
             "product": {
                 "id": to_global_id(AdditionalProductNode, additional_product.id),
                 "priceValue": str(additional_product.price_value),
-                "priceUnit": additional_product.price_unit.name,
+                "priceUnit": PriceUnitsEnum.get(additional_product.price_unit).name,
             },
         },
         "order": {"id": order_id},

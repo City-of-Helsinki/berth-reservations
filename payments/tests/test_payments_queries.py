@@ -14,12 +14,16 @@ from ..models import BerthProduct
 from ..schema.types import (
     AdditionalProductNode,
     AdditionalProductTaxEnum,
+    AdditionalProductTypeEnum,
     BerthPriceGroupNode,
     BerthProductNode,
     OrderLineNode,
     OrderLogEntryNode,
     OrderNode,
+    PeriodTypeEnum,
     PlaceProductTaxEnum,
+    PriceUnitsEnum,
+    ProductServiceTypeEnum,
     WinterStorageProductNode,
 )
 from .factories import (
@@ -409,14 +413,16 @@ def test_get_additional_products(api_client, additional_product):
 
     assert executed["data"]["additionalProducts"]["edges"][0]["node"] == {
         "id": to_global_id(AdditionalProductNode, additional_product.id),
-        "service": additional_product.service.name,
-        "period": additional_product.period.name,
+        "service": ProductServiceTypeEnum.get(additional_product.service).name,
+        "period": PeriodTypeEnum.get(additional_product.period).name,
         "priceValue": str(additional_product.price_value),
-        "priceUnit": additional_product.price_unit.name,
+        "priceUnit": PriceUnitsEnum.get(additional_product.price_unit).name,
         "taxPercentage": AdditionalProductTaxEnum.get(
             additional_product.tax_percentage
         ).name,
-        "productType": additional_product.product_type.name,
+        "productType": AdditionalProductTypeEnum.get(
+            additional_product.product_type
+        ).name,
     }
 
 
@@ -489,14 +495,16 @@ def test_get_additional_product(api_client, additional_product):
 
     assert executed["data"]["additionalProduct"] == {
         "id": product_global_id,
-        "service": additional_product.service.name,
-        "period": additional_product.period.name,
+        "service": ProductServiceTypeEnum.get(additional_product.service).name,
+        "period": PeriodTypeEnum.get(additional_product.period).name,
         "priceValue": str(additional_product.price_value),
-        "priceUnit": additional_product.price_unit.name,
+        "priceUnit": PriceUnitsEnum.get(additional_product.price_unit).name,
         "taxPercentage": AdditionalProductTaxEnum.get(
             additional_product.tax_percentage
         ).name,
-        "productType": additional_product.product_type.name,
+        "productType": AdditionalProductTypeEnum.get(
+            additional_product.product_type
+        ).name,
     }
 
 

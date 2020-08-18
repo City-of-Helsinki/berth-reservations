@@ -5,14 +5,13 @@ from graphql_jwt.decorators import login_required
 from applications.models import BerthApplication, WinterStorageApplication
 from customers.models import CustomerProfile
 from resources.schema import BerthNode, WinterStorageAreaNode, WinterStoragePlaceNode
-from utils.enum import graphene_enum
 from utils.relay import return_node_if_user_has_permissions
 from utils.schema import CountConnection
 
 from ..enums import LeaseStatus
 from ..models import BerthLease, WinterStorageLease
 
-LeaseStatusEnum = graphene_enum(LeaseStatus)
+LeaseStatusEnum = graphene.Enum.from_enum(LeaseStatus)
 
 
 class BerthLeaseNode(DjangoObjectType):

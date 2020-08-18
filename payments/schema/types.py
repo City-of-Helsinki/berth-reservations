@@ -5,7 +5,6 @@ from customers.schema import ProfileNode
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from resources.schema import HarborNode, WinterStorageAreaNode
 from users.decorators import view_permission_required
-from utils.enum import graphene_enum
 from utils.schema import CountConnection
 
 from ..enums import (
@@ -27,14 +26,11 @@ from ..models import (
     WinterStorageProduct,
 )
 
-PriceUnitsEnum = graphene_enum(PriceUnits)
-
-AdditionalProductTypeEnum = graphene_enum(AdditionalProductType)
-
-ProductServiceTypeEnum = graphene_enum(ProductServiceType)
-
-PeriodTypeEnum = graphene_enum(PeriodType)
-
+PriceUnitsEnum = graphene.Enum.from_enum(PriceUnits)
+AdditionalProductTypeEnum = graphene.Enum.from_enum(AdditionalProductType)
+ProductServiceTypeEnum = graphene.Enum.from_enum(ProductServiceType)
+PeriodTypeEnum = graphene.Enum.from_enum(PeriodType)
+OrderStatusEnum = graphene.Enum.from_enum(OrderStatus)
 PlaceProductTaxEnum = graphene.Enum(
     "PlaceProductTaxEnum",
     [
@@ -42,7 +38,6 @@ PlaceProductTaxEnum = graphene.Enum(
         for tax in PLACE_PRODUCT_TAX_PERCENTAGES
     ],
 )
-
 AdditionalProductTaxEnum = graphene.Enum(
     "AdditionalProductTaxEnum",
     [
@@ -50,9 +45,6 @@ AdditionalProductTaxEnum = graphene.Enum(
         for tax in ADDITIONAL_PRODUCT_TAX_PERCENTAGES
     ],
 )
-
-OrderStatusEnum = graphene_enum(OrderStatus)
-
 OrderTypeEnum = graphene.Enum(
     "OrderTypeEnum", [("BERTH", "BERTH"), ("WINTER_STORAGE", "WINTER_STORAGE")]
 )
@@ -148,7 +140,7 @@ class AdditionalProductServiceNode(graphene.ObjectType):
     def resolve_product_type(self, info):
         return (
             AdditionalProductType.FIXED_SERVICE
-            if self.service.is_fixed_service()
+            if self.service in ProductServiceType.FIXED_SERVICES()
             else AdditionalProductType.OPTIONAL_SERVICE
         )
 

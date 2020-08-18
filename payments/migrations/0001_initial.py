@@ -4,7 +4,6 @@ from decimal import Decimal
 import django.core.validators
 from django.db import migrations, models
 import django.db.models.deletion
-import enumfields.fields
 import payments.enums
 import uuid
 
@@ -53,8 +52,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "price_unit",
-                    enumfields.fields.EnumField(
-                        default="amount", enum=payments.enums.PriceUnits, max_length=10
+                    models.CharField(
+                        choices=[("amount", "Amount"), ("percentage", "Percentage")],
+                        default="amount",
+                        max_length=10,
                     ),
                 ),
                 (
@@ -72,16 +73,38 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "service",
-                    enumfields.fields.EnumField(
-                        enum=payments.enums.ProductServiceType,
+                    models.CharField(
+                        choices=[
+                            ("electricity", "Electricity"),
+                            ("water", "Water"),
+                            ("gate", "Gate"),
+                            ("mooring", "Mooring"),
+                            ("waste_collection", "Waste collection"),
+                            ("lighting", "Lighting"),
+                            (
+                                "summer_storage_for_docking_equipment",
+                                "Summer storage for docking equipment",
+                            ),
+                            (
+                                "summer_storage_for_trailers",
+                                "Summer storage for trailers",
+                            ),
+                            ("parking_permit", "Parking permit"),
+                            ("dinghy_place", "Dinghy place"),
+                        ],
                         max_length=40,
                         verbose_name="service",
                     ),
                 ),
                 (
                     "period",
-                    enumfields.fields.EnumField(
-                        enum=payments.enums.PeriodType, max_length=8
+                    models.CharField(
+                        choices=[
+                            ("year", "Year"),
+                            ("season", "Season"),
+                            ("month", "Month"),
+                        ],
+                        max_length=8,
                     ),
                 ),
             ],
@@ -154,8 +177,8 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "price_unit",
-                    enumfields.fields.EnumField(
-                        default="amount", enum=payments.enums.PriceUnits, max_length=10
+                    models.CharField(
+                        choices=[("amount", "Amount")], default="amount", max_length=10,
                     ),
                 ),
                 (
@@ -205,8 +228,8 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "price_unit",
-                    enumfields.fields.EnumField(
-                        default="amount", enum=payments.enums.PriceUnits, max_length=10
+                    models.CharField(
+                        choices=[("amount", "Amount")], default="amount", max_length=10,
                     ),
                 ),
                 (

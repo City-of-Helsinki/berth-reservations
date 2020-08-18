@@ -11,16 +11,15 @@ from applications.new_schema import BerthApplicationNode, WinterStorageApplicati
 from applications.new_schema.types import WinterStorageApplicationFilter
 from leases.models import BerthLease
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
-from utils.enum import graphene_enum
 from utils.relay import get_node_from_global_id, return_node_if_user_has_permissions
 from utils.schema import CountConnection
 
 from ..enums import BoatCertificateType, InvoicingType, OrganizationType
 from ..models import Boat, BoatCertificate, CustomerProfile, Organization
 
-InvoicingTypeEnum = graphene_enum(InvoicingType)
-OrganizationTypeEnum = graphene_enum(OrganizationType)
-BoatCertificateTypeEnum = graphene_enum(BoatCertificateType)
+InvoicingTypeEnum = graphene.Enum.from_enum(InvoicingType)
+OrganizationTypeEnum = graphene.Enum.from_enum(OrganizationType)
+BoatCertificateTypeEnum = graphene.Enum.from_enum(BoatCertificateType)
 
 CustomerGroupEnum = graphene.Enum(
     "CustomerGroup",

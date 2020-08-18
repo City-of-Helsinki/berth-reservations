@@ -4,7 +4,6 @@ from django.core.files.storage import FileSystemStorage
 import django.contrib.gis.db.models.fields
 from django.db import migrations, models
 import django.db.models.deletion
-import enumfields.fields
 import parler.models
 import resources.enums
 import resources.models
@@ -490,8 +489,18 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "mooring_type",
-                    enumfields.fields.EnumIntegerField(
-                        enum=resources.enums.BerthMooringType,
+                    models.PositiveSmallIntegerField(
+                        choices=[
+                            (1, "No stern-to mooring"),
+                            (2, "Single slip place"),
+                            (3, "Side slip place"),
+                            (4, "Stern buoy place"),
+                            (5, "Stern pole mooring"),
+                            (6, "Quayside mooring"),
+                            (7, "Dinghy place"),
+                            (8, "Sea buoy mooring"),
+                            (9, "Trawler place"),
+                        ],
                         verbose_name="mooring type",
                     ),
                 ),

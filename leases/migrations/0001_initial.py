@@ -2,8 +2,6 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import enumfields.fields
-import leases.enums
 import uuid
 
 
@@ -42,9 +40,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "status",
-                    enumfields.fields.EnumField(
+                    models.CharField(
+                        choices=[
+                            ("drafted", "Drafted"),
+                            ("offered", "Offered"),
+                            ("refused", "Refused"),
+                            ("expired", "Expired"),
+                            ("paid", "Paid"),
+                        ],
                         default="offered",
-                        enum=leases.enums.LeaseStatus,
                         max_length=30,
                         verbose_name="lease status",
                     ),
@@ -121,9 +125,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "status",
-                    enumfields.fields.EnumField(
+                    models.CharField(
+                        choices=[
+                            ("drafted", "Drafted"),
+                            ("offered", "Offered"),
+                            ("refused", "Refused"),
+                            ("expired", "Expired"),
+                            ("paid", "Paid"),
+                        ],
                         default="offered",
-                        enum=leases.enums.LeaseStatus,
                         max_length=30,
                         verbose_name="lease status",
                     ),
@@ -196,16 +206,28 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "from_status",
-                    enumfields.fields.EnumField(
-                        enum=leases.enums.LeaseStatus,
+                    models.CharField(
+                        choices=[
+                            ("drafted", "Drafted"),
+                            ("offered", "Offered"),
+                            ("refused", "Refused"),
+                            ("expired", "Expired"),
+                            ("paid", "Paid"),
+                        ],
                         max_length=30,
                         verbose_name="from status",
                     ),
                 ),
                 (
                     "to_status",
-                    enumfields.fields.EnumField(
-                        enum=leases.enums.LeaseStatus,
+                    models.CharField(
+                        choices=[
+                            ("drafted", "Drafted"),
+                            ("offered", "Offered"),
+                            ("refused", "Refused"),
+                            ("expired", "Expired"),
+                            ("paid", "Paid"),
+                        ],
                         max_length=30,
                         verbose_name="to status",
                     ),
@@ -245,16 +267,28 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "from_status",
-                    enumfields.fields.EnumField(
-                        enum=leases.enums.LeaseStatus,
+                    models.CharField(
+                        choices=[
+                            ("drafted", "Drafted"),
+                            ("offered", "Offered"),
+                            ("refused", "Refused"),
+                            ("expired", "Expired"),
+                            ("paid", "Paid"),
+                        ],
                         max_length=30,
                         verbose_name="from status",
                     ),
                 ),
                 (
                     "to_status",
-                    enumfields.fields.EnumField(
-                        enum=leases.enums.LeaseStatus,
+                    models.CharField(
+                        choices=[
+                            ("drafted", "Drafted"),
+                            ("offered", "Offered"),
+                            ("refused", "Refused"),
+                            ("expired", "Expired"),
+                            ("paid", "Paid"),
+                        ],
                         max_length=30,
                         verbose_name="to status",
                     ),

@@ -4,8 +4,6 @@ from decimal import Decimal
 import django.core.validators
 from django.db import migrations, models
 import django.db.models.deletion
-import enumfields.fields
-import payments.enums
 import payments.utils
 import uuid
 
@@ -43,10 +41,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "status",
-                    enumfields.fields.EnumField(
+                    models.CharField(
+                        choices=[
+                            ("waiting", "Waiting"),
+                            ("rejected", "Rejected"),
+                            ("expired", "Expired"),
+                            ("paid", "Paid"),
+                        ],
                         default="waiting",
-                        enum=payments.enums.OrderStatus,
-                        max_length=10,
+                        max_length=8,
                     ),
                 ),
                 ("comment", models.TextField(blank=True, null=True)),
@@ -145,8 +148,14 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "status",
-                    enumfields.fields.EnumField(
-                        enum=payments.enums.OrderStatus, max_length=10
+                    models.CharField(
+                        choices=[
+                            ("waiting", "Waiting"),
+                            ("rejected", "Rejected"),
+                            ("expired", "Expired"),
+                            ("paid", "Paid"),
+                        ],
+                        max_length=8,
                     ),
                 ),
                 ("comment", models.TextField(blank=True, null=True)),

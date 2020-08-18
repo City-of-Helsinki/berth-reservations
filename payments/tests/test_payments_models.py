@@ -125,7 +125,7 @@ def test_additional_product_no_season(period):
         )
 
     errors = str(exception.value)
-    assert f"Fixed services are only valid for season" in errors
+    assert "Fixed services are only valid for season" in errors
 
 
 def test_additional_product_fixed_service_tax_value():

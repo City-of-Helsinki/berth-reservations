@@ -4,7 +4,7 @@ import graphql_geojson
 from django.db import transaction
 from django.db.models import Count, Prefetch, Q
 from django.db.utils import IntegrityError
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from graphene import relay
 from graphene_django.fields import DjangoConnectionField, DjangoListField
 from graphene_django.filter import DjangoFilterConnectionField

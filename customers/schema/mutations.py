@@ -1,7 +1,7 @@
 import graphene
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from graphene_file_upload.scalars import Upload
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError

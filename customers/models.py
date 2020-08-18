@@ -8,8 +8,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Case, UniqueConstraint, Value, When
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
-from enumfields import EnumField
+from django.utils.translation import gettext_lazy as _
 
 from resources.models import BoatType
 from utils.models import TimeStampedModel, UUIDModel
@@ -40,8 +39,8 @@ class CustomerProfileManager(models.Manager):
 class CustomerProfile(TimeStampedModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
-    invoicing_type = EnumField(
-        InvoicingType,
+    invoicing_type = models.CharField(
+        choices=InvoicingType.choices,
         verbose_name=_("invoicing type"),
         max_length=30,
         default=InvoicingType.ONLINE_PAYMENT,
@@ -71,8 +70,10 @@ class Organization(TimeStampedModel, UUIDModel):
         related_name="organization",
         on_delete=models.CASCADE,
     )
-    organization_type = EnumField(
-        OrganizationType, verbose_name=_("organization type"), max_length=16,
+    organization_type = models.CharField(
+        choices=OrganizationType.choices,
+        verbose_name=_("organization type"),
+        max_length=16,
     )
     business_id = models.CharField(
         verbose_name=_("business id"), max_length=32, blank=True
@@ -190,8 +191,10 @@ class BoatCertificate(UUIDModel):
         blank=True,
         null=True,
     )
-    certificate_type = EnumField(
-        BoatCertificateType, verbose_name=_("certificate type"), max_length=16,
+    certificate_type = models.CharField(
+        choices=BoatCertificateType.choices,
+        verbose_name=_("certificate type"),
+        max_length=16,
     )
     valid_until = models.DateField(verbose_name=_("valid until"), blank=True, null=True)
     checked_at = models.DateField(verbose_name=_("checked at"), default=timezone.now)

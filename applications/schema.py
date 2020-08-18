@@ -2,7 +2,6 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 from harbors.schema import HarborType, WinterStorageAreaType
-from utils.enum import graphene_enum
 from utils.relay import get_node_from_global_id
 
 from .enums import WinterStorageMethod
@@ -17,7 +16,7 @@ from .models import (
 )
 from .signals import application_saved
 
-WinterStorageMethodEnum = graphene_enum(WinterStorageMethod)
+WinterStorageMethodEnum = graphene.Enum.from_enum(WinterStorageMethod)
 
 
 class HarborChoiceType(DjangoObjectType):
@@ -43,7 +42,7 @@ class BerthSwitchType(DjangoObjectType):
 class BerthSwitchReasonType(DjangoObjectType):
     class Meta:
         model = BerthSwitchReason
-        exclude_fields = ("berthswitch_set",)
+        exclude = ("berthswitch_set",)
 
     title = graphene.String()
 
