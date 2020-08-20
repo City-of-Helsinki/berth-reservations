@@ -432,10 +432,15 @@ class Order(UUIDModel, TimeStampedModel):
                 if isinstance(self.lease, WinterStorageLease) and isinstance(
                     self.product, WinterStorageProduct
                 ):
-                    place_sqm = (
-                        self.lease.place.place_type.width
-                        * self.lease.place.place_type.length
-                    )
+                    if self.lease.place:
+                        place_sqm = (
+                            self.lease.place.place_type.width
+                            * self.lease.place.place_type.length
+                        )
+                    else:
+                        # If the lease is only associated to an area,
+                        # calculate the price based on the boat dimensions
+                        place_sqm = self.lease.boat.width * self.lease.boat.length
                     price = price * place_sqm
 
             self.price = rounded_decimal(self.price or price)

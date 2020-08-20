@@ -9,7 +9,7 @@ from applications.new_schema import BerthApplicationNode, WinterStorageApplicati
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.models import CustomerProfile
 from payments.models import BerthPriceGroup, BerthProduct, Order, WinterStorageProduct
-from resources.schema import BerthNode, WinterStoragePlaceNode
+from resources.schema import BerthNode, WinterStorageAreaNode, WinterStoragePlaceNode
 from users.decorators import (
     add_permission_required,
     change_permission_required,
@@ -188,7 +188,8 @@ class DeleteBerthLeaseMutation(graphene.ClientIDMutation):
 class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
     class Input(AbstractLeaseInput):
         application_id = graphene.ID(required=True)
-        place_id = graphene.ID(required=True)
+        place_id = graphene.ID()
+        area_id = graphene.ID()
 
     winter_storage_lease = graphene.Field(WinterStorageLeaseNode)
 
@@ -197,6 +198,11 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
     @add_permission_required(WinterStorageLease)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
+        if "place_id" in input and "area_id" in input:
+            raise VenepaikkaGraphQLError(
+                _("Cannot receive both Winter Storage Place and Area")
+            )
+
         application = get_node_from_global_id(
             info,
             input.pop("application_id"),
@@ -209,15 +215,23 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
                 _("Application must be connected to an existing customer first")
             )
 
-        place = get_node_from_global_id(
-            info,
-            input.pop("place_id"),
-            only_type=WinterStoragePlaceNode,
-            nullable=False,
-        )
+        if place_id := input.pop("place_id", None):  # noqa
+            place = get_node_from_global_id(
+                info, place_id, only_type=WinterStoragePlaceNode, nullable=False,
+            )
+            input["place"] = place
+            area = place.winter_storage_section.area
+        elif area_id := input.pop("area_id", None):  # noqa
+            area = get_node_from_global_id(
+                info, area_id, only_type=WinterStorageAreaNode, nullable=False,
+            )
+            input["area"] = area
+        else:
+            raise VenepaikkaGraphQLError(
+                _("Either Winter Storage Place or Area are required")
+            )
 
         input["application"] = application
-        input["place"] = place
         input["customer"] = application.customer
 
         if input.get("boat_id", None):
@@ -236,9 +250,7 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
 
         try:
             lease = WinterStorageLease.objects.create(**input)
-            product = WinterStorageProduct.objects.get(
-                winter_storage_area=place.winter_storage_section.area
-            )
+            product = WinterStorageProduct.objects.get(winter_storage_area=area)
             Order.objects.create(
                 customer=input["customer"], lease=lease, product=product
             )
@@ -377,6 +389,7 @@ class Mutation:
         "\n* An application without a customer associated is passed"
         "\n* A boat is passed and the owner of the boat differs from the owner of the application"
         "\n* There is no `WinterStorageProduct` that can be associated to the `order`/`lease`"
+        "\n* Neither `placeId` or `areaId` is passed"
     )
     update_winter_storage_lease = UpdateWinterStorageLeaseMutation.Field(
         description="Updates a `WinterStorageLease` object."
