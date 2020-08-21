@@ -911,3 +911,29 @@ def test_berth_season_price(berth):
     lease = BerthLeaseFactory(berth=berth, start_date=start_date, end_date=end_date)
     order = Order.objects.create(product=product, lease=lease, customer=lease.customer)
     assert order.price == Decimal("15.00")
+
+
+def test_order_winter_storage_lease_with_area_right_price(
+    winter_storage_area, winter_storage_product, boat
+):
+    winter_storage_lease = WinterStorageLeaseFactory(
+        place=None, area=winter_storage_area, customer=boat.owner, boat=boat
+    )
+    order = Order.objects.create(
+        _lease_object_id=winter_storage_lease.id,
+        customer=boat.owner,
+        product=winter_storage_product,
+    )
+    sqm = boat.width * boat.length
+
+    expected_price = calculate_product_partial_season_price(
+        winter_storage_product.price_value,
+        winter_storage_lease.start_date,
+        winter_storage_lease.end_date,
+        summer_season=False,
+    )
+    expected_price = rounded(expected_price * sqm, decimals=2)
+
+    assert order.lease.id == winter_storage_lease.id
+    assert order._lease_content_type.name == winter_storage_lease._meta.verbose_name
+    assert order.price == expected_price

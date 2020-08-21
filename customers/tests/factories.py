@@ -13,8 +13,8 @@ class BoatFactory(factory.django.DjangoModelFactory):
     registration_number = factory.Faker("bs")
     name = factory.Faker("bs")
     # even though these are decimals, Faker uses ints for generation ¯\_(ツ)_/¯
-    length = factory.Faker("pydecimal", min_value=0, max_value=999)
-    width = factory.Faker("pydecimal", min_value=0, max_value=999)
+    length = factory.Faker("pydecimal", min_value=1, max_value=100, right_digits=2)
+    width = factory.Faker("pydecimal", min_value=1, max_value=100, right_digits=2)
 
     class Meta:
         model = Boat
