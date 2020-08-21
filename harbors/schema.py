@@ -69,6 +69,9 @@ class HarborType(graphql_geojson.GeoJSONType):
         else:
             return None
 
+    def resolve_suitable_boat_types(self, info):
+        return self.suitable_boat_types.all()
+
 
 class WinterStorageAreaType(graphql_geojson.GeoJSONType):
     class Meta:
