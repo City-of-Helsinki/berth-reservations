@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -134,8 +133,6 @@ class BaseApplication(models.Model):
     information_accuracy_confirmed = models.BooleanField(
         verbose_name=_("information accuracy confirmed"), default=False
     )
-
-    data = JSONField(blank=True, null=True)
 
     application_code = models.TextField(verbose_name=_("application code"), blank=True)
 
