@@ -169,6 +169,29 @@ class BerthLease(AbstractLease):
         )
 
 
+class WinterStorageLeaseManager(models.Manager):
+    def get_queryset(self):
+        current_season_start = calculate_winter_storage_lease_start_date()
+        today = date.today()
+
+        is_paid = Q(status=LeaseStatus.PAID)
+
+        if today < current_season_start:
+            in_current_season = Q(start_date=current_season_start)
+        else:
+            in_current_season = Q(start_date__lte=today) & Q(end_date__gte=today)
+
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                is_active=ExpressionWrapper(
+                    in_current_season & is_paid, output_field=models.BooleanField(),
+                )
+            )
+        )
+
+
 class WinterStorageLease(AbstractLease):
     place = models.ForeignKey(
         WinterStoragePlace,
@@ -200,6 +223,7 @@ class WinterStorageLease(AbstractLease):
     end_date = models.DateField(
         verbose_name=_("end date"), default=calculate_winter_storage_lease_end_date
     )
+    objects = WinterStorageLeaseManager()
 
     class Meta:
         verbose_name = _("winter storage lease")
@@ -227,7 +251,7 @@ class WinterStorageLease(AbstractLease):
         if not self.area:
             existing_leases = WinterStorageLease.objects.filter(
                 place=self.place,
-                end_date__gte=self.start_date,
+                end_date__gt=self.start_date,
                 status__in=ACTIVE_LEASE_STATUSES,
             ).exclude(pk=self.pk or None)
             if existing_leases.exists():

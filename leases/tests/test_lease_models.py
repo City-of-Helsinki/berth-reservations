@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 
 import pytest
+from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from freezegun import freeze_time
 
@@ -347,6 +348,46 @@ def test_berth_lease_is_not_active_after_today():
     start_date = date(year=2020, month=7, day=11)
     lease = BerthLeaseFactory(status=LeaseStatus.PAID, start_date=start_date)
     assert not BerthLease.objects.get(id=lease.id).is_active
+
+
+@freeze_time("2020-06-01T08:00:00Z")
+def test_winter_storage_lease_is_active_before_season():
+    lease = WinterStorageLeaseFactory(status=LeaseStatus.PAID)
+
+    assert WinterStorageLease.objects.get(id=lease.id).is_active
+
+
+@freeze_time("2020-10-01T08:00:00Z")
+def test_winter_storage_lease_is_active_during_season():
+    lease = WinterStorageLeaseFactory(status=LeaseStatus.PAID)
+
+    assert WinterStorageLease.objects.get(id=lease.id).is_active
+
+
+@freeze_time("2020-10-01T08:00:00Z")
+def test_winter_storage_lease_is_not_active_status():
+    lease = WinterStorageLeaseFactory(status=LeaseStatus.EXPIRED)
+
+    assert not WinterStorageLease.objects.get(id=lease.id).is_active
+
+
+@freeze_time("2020-10-01T08:00:00Z")
+def test_winter_storage_lease_is_not_active_before_today():
+    today = date.today()
+    start_date = today - relativedelta(days=5)
+    end_date = today - relativedelta(days=1)
+    lease = WinterStorageLeaseFactory(
+        status=LeaseStatus.PAID, start_date=start_date, end_date=end_date
+    )
+
+    assert not WinterStorageLease.objects.get(id=lease.id).is_active
+
+
+@freeze_time("2020-10-10T08:00:00Z")
+def test_winter_storage_lease_is_active_today():
+    start_date = date.today()
+    lease = WinterStorageLeaseFactory(status=LeaseStatus.PAID, start_date=start_date)
+    assert WinterStorageLease.objects.get(id=lease.id).is_active
 
 
 def test_winter_storage_lease_assign_area(winter_storage_area):
