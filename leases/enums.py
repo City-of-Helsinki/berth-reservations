@@ -1,17 +1,10 @@
-from django.utils.translation import ugettext_lazy as _
-from enumfields import Enum
+from django.db.models import TextChoices
+from django.utils.translation import gettext_lazy as _
 
 
-class LeaseStatus(Enum):
-    DRAFTED = "drafted"
-    OFFERED = "offered"
-    REFUSED = "refused"
-    EXPIRED = "expired"
-    PAID = "paid"
-
-    class Labels:
-        DRAFTED = _("Drafted")
-        OFFERED = _("Offered")
-        REFUSED = _("Refused")
-        EXPIRED = _("Expired")
-        PAID = _("Paid")
+class LeaseStatus(TextChoices):
+    DRAFTED = "drafted", _("Drafted")
+    OFFERED = "offered", _("Offered")
+    REFUSED = "refused", _("Refused")
+    EXPIRED = "expired", _("Expired")
+    PAID = "paid", _("Paid")

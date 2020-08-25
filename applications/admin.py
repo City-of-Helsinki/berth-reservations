@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.auth.models import Permission
 from django.http import HttpResponse
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django_ilmoitin.utils import send_notification
 from parler.admin import TranslatableAdmin
 from pytz import timezone
@@ -241,6 +241,7 @@ class WinterStorageApplicationAdmin(admin.ModelAdmin):
                 "fields": [
                     "created_at",
                     "status",
+                    "customer",
                     "storage_method",
                     "trailer_registration_number",
                 ]

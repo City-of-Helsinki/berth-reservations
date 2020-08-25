@@ -9,7 +9,9 @@ from customers.models import CustomerProfile
 class UserFactory(factory.django.DjangoModelFactory):
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
-    username = factory.Faker("user_name")
+    username = factory.Sequence(
+        lambda n: factory.Faker("user_name").generate() + f"{n}"
+    )
     email = factory.Faker("email")
 
     class Meta:
@@ -17,7 +19,7 @@ class UserFactory(factory.django.DjangoModelFactory):
 
 
 class MunicipalityFactory(factory.django.DjangoModelFactory):
-    id = factory.Faker("word")
+    id = factory.Sequence(lambda n: factory.Faker("word").generate() + f"-{n}")
     name = factory.Faker("city")
 
     class Meta:

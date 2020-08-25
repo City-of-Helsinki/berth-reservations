@@ -1,23 +1,16 @@
-from datetime import date, timedelta
-
 import factory
-from factory.random import randgen
 
-from customers.tests.factories import CustomerProfileFactory
+from berth_reservations.tests.factories import CustomerProfileFactory
+from customers.tests.factories import BoatFactory
 from resources.tests.factories import BerthFactory, WinterStoragePlaceFactory
 
 from ..models import BerthLease, WinterStorageLease
 
 
 class AbstractLeaseFactory(factory.django.DjangoModelFactory):
-    customer = factory.SubFactory(CustomerProfileFactory)
     comment = factory.Faker("text")
-    start_date = factory.LazyFunction(
-        lambda: date.today() + timedelta(days=randgen.randint(1, 30))
-    )
-    end_date = factory.LazyAttribute(
-        lambda l: l.start_date + timedelta(days=randgen.randint(60, 180))
-    )
+    boat = factory.SubFactory(BoatFactory, owner=factory.SelfAttribute("..customer"))
+    customer = factory.SubFactory(CustomerProfileFactory)
 
 
 class BerthLeaseFactory(AbstractLeaseFactory):

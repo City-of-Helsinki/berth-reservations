@@ -42,7 +42,7 @@ class BerthSwitchType(DjangoObjectType):
 class BerthSwitchReasonType(DjangoObjectType):
     class Meta:
         model = BerthSwitchReason
-        exclude_fields = ("berthswitch_set",)
+        exclude = ("berthswitch_set",)
 
     title = graphene.String()
 
@@ -50,6 +50,7 @@ class BerthSwitchReasonType(DjangoObjectType):
 class WinterStorageApplicationType(DjangoObjectType):
     class Meta:
         model = WinterStorageApplication
+        exclude = ("customer", "lease")
 
 
 class HarborChoiceInput(graphene.InputObjectType):

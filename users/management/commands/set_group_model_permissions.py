@@ -69,13 +69,19 @@ DEFAULT_MODELS_PERMS = {
             BERTH_SUPERVISOR: ("view",),
             HARBOR_SERVICES: None,
         },
-        "company": {
+        "organization": {
             BERTH_SERVICES: ("view", "add", "change", "delete",),
             BERTH_HANDLER: ("view",),
             BERTH_SUPERVISOR: ("view",),
             HARBOR_SERVICES: None,
         },
         "boat": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: ("view",),
+            HARBOR_SERVICES: None,
+        },
+        "boatcertificate": {
             BERTH_SERVICES: ("view", "add", "change", "delete",),
             BERTH_HANDLER: ("view",),
             BERTH_SUPERVISOR: ("view",),
@@ -206,6 +212,58 @@ DEFAULT_MODELS_PERMS = {
             BERTH_HANDLER: ("view",),
             BERTH_SUPERVISOR: ("view",),
             HARBOR_SERVICES: ("view", "add", "change", "delete",),
+        },
+    },
+    "payments": {
+        "berthpricegroup": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: ("view",),
+            HARBOR_SERVICES: None,
+        },
+        "berthproduct": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: ("view",),
+            HARBOR_SERVICES: None,
+        },
+        "winterstorageproduct": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: ("view",),
+            HARBOR_SERVICES: None,
+        },
+        "additionalproduct": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: ("view",),
+            HARBOR_SERVICES: None,
+        },
+        "order": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: ("view",),
+            HARBOR_SERVICES: None,
+        },
+        "orderline": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: ("view",),
+            HARBOR_SERVICES: None,
+        },
+        "orderlogentry": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: ("view",),
+            HARBOR_SERVICES: None,
+        },
+    },
+    "django_ilmoitin": {
+        "notificationtemplate": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: None,
+            HARBOR_SERVICES: ("view",),
         },
     },
 }

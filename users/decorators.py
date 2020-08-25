@@ -1,6 +1,6 @@
 from graphql_jwt.decorators import permission_required, user_passes_test
 
-from users.utils import _user_has_models_perms
+from .utils import _user_has_models_perms
 
 
 def view_permission_required(*models):

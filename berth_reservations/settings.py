@@ -3,7 +3,7 @@ import subprocess
 
 import environ
 import sentry_sdk
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from sentry_sdk.integrations.django import DjangoIntegration
 
 checkout_dir = environ.Path(__file__) - 2
@@ -134,6 +134,7 @@ INSTALLED_APPS = [
     "harbors",
     "resources",
     "leases",
+    "payments",
 ]
 
 AUTH_USER_MODEL = "users.User"

@@ -1,5 +1,5 @@
 from django.contrib.gis import admin
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from parler.admin import TranslatableAdmin
 
 from .models import (
@@ -30,6 +30,16 @@ class CustomTranslatableAdmin(TranslatableAdmin):
 
 class AvailabilityLevelAdmin(TranslatableAdmin):
     pass
+
+
+class BerthAdmin(admin.ModelAdmin):
+    readonly_fields = ("is_available",)
+
+    def is_available(self, obj):
+        return obj.is_available
+
+    is_available.short_description = _("Berth available")
+    is_available.admin_order_field = "is_available"
 
 
 class BoatTypeAdmin(TranslatableAdmin):
@@ -73,6 +83,11 @@ class HarborAdmin(CustomTranslatableAdmin, admin.OSMGeoAdmin):
 class PierAdmin(admin.OSMGeoAdmin):
     filter_horizontal = ("suitable_boat_types",)
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "harbor":
+            kwargs["queryset"] = Harbor.objects.all()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 class WinterStorageAreaAdmin(CustomTranslatableAdmin, admin.OSMGeoAdmin):
     ordering = ("translations__name",)
@@ -102,12 +117,15 @@ class WinterStorageAreaAdmin(CustomTranslatableAdmin, admin.OSMGeoAdmin):
 
 
 class WinterStorageSectionAdmin(admin.OSMGeoAdmin):
-    pass
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "area":
+            kwargs["queryset"] = WinterStorageArea.objects.all()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 admin.site.register(AvailabilityLevel, AvailabilityLevelAdmin)
 admin.site.register(BoatType, BoatTypeAdmin)
-admin.site.register(Berth)
+admin.site.register(Berth, BerthAdmin)
 admin.site.register(BerthType)
 admin.site.register(Harbor, HarborAdmin)
 admin.site.register(HarborMap)

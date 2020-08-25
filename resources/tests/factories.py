@@ -65,6 +65,7 @@ class AbstractAreaSectionFactory(factory.django.DjangoModelFactory):
 
 class PierFactory(AbstractAreaSectionFactory):
     harbor = factory.SubFactory(HarborFactory)
+    personal_electricity = factory.Faker("boolean")
 
     class Meta:
         model = Pier
@@ -86,10 +87,10 @@ class WinterStorageSectionFactory(AbstractAreaSectionFactory):
 
 class AbstractPlaceTypeFactory(factory.django.DjangoModelFactory):
     length = factory.Faker(
-        "pydecimal", min_value=0, max_value=999, right_digits=2, positive=True
+        "pydecimal", min_value=0, max_value=99, right_digits=2, positive=True
     )
     width = factory.Faker(
-        "pydecimal", min_value=0, max_value=999, right_digits=2, positive=True
+        "pydecimal", min_value=0, max_value=99, right_digits=2, positive=True
     )
 
 
@@ -109,7 +110,7 @@ class WinterStoragePlaceTypeFactory(AbstractPlaceTypeFactory):
 
 
 class AbstractPlaceFactory(factory.django.DjangoModelFactory):
-    number = factory.LazyFunction(lambda: str(randgen.randint(1, 999)).zfill(2))
+    number = factory.Faker("random_int")
 
 
 class BerthFactory(AbstractPlaceFactory):

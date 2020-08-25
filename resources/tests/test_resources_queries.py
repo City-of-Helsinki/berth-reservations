@@ -1,4 +1,5 @@
 import json
+import random
 
 import pytest
 from graphql_relay import to_global_id
@@ -8,9 +9,26 @@ from berth_reservations.tests.utils import (
     assert_in_errors,
     assert_not_enough_permissions,
 )
-from leases.schema import BerthLeaseNode
-from leases.tests.factories import BerthLeaseFactory
-from resources.schema import BerthNode, PierNode
+from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
+from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
+
+from ..schema import (
+    BerthNode,
+    HarborNode,
+    PierNode,
+    WinterStorageAreaNode,
+    WinterStoragePlaceNode,
+)
+from .factories import (
+    BerthFactory,
+    BerthTypeFactory,
+    HarborFactory,
+    PierFactory,
+    WinterStorageAreaFactory,
+    WinterStoragePlaceFactory,
+    WinterStoragePlaceTypeFactory,
+    WinterStorageSectionFactory,
+)
 
 
 def test_get_boat_type(api_client, boat_type):
@@ -25,8 +43,18 @@ def test_get_boat_type(api_client, boat_type):
     assert executed["data"] == {"boatTypes": [{"name": boat_type.name}]}
 
 
-def test_get_harbors(api_client, berth):
-    harbor = berth.pier.harbor
+def test_get_harbors(api_client, pier):
+    harbor = pier.harbor
+    big_berth = BerthFactory(
+        pier=pier,
+        berth_type=BerthTypeFactory(width=10, length=10, depth=10),
+        is_active=True,
+    )
+    BerthFactory(
+        pier=pier,
+        berth_type=BerthTypeFactory(width=1, length=1, depth=1),
+        is_active=False,
+    )
 
     query = """
         {
@@ -44,6 +72,8 @@ def test_get_harbors(api_client, berth):
                             maxLength
                             maxDepth
                             numberOfPlaces
+                            numberOfFreePlaces
+                            numberOfInactivePlaces
                             createdAt
                             modifiedAt
                         }
@@ -62,10 +92,12 @@ def test_get_harbors(api_client, berth):
                         "properties": {
                             "name": harbor.name,
                             "zipCode": harbor.zip_code,
-                            "maxWidth": float(berth.berth_type.width),
-                            "maxLength": float(berth.berth_type.length),
-                            "maxDepth": float(berth.berth_type.depth),
-                            "numberOfPlaces": harbor.piers.count(),
+                            "maxWidth": float(big_berth.berth_type.width),
+                            "maxLength": float(big_berth.berth_type.length),
+                            "maxDepth": float(big_berth.berth_type.depth),
+                            "numberOfPlaces": 2,
+                            "numberOfFreePlaces": 1,
+                            "numberOfInactivePlaces": 1,
                             "createdAt": harbor.created_at.isoformat(),
                             "modifiedAt": harbor.modified_at.isoformat(),
                         },
@@ -76,7 +108,9 @@ def test_get_harbors(api_client, berth):
     }
 
 
-def test_get_piers(api_client, pier):
+def test_get_piers(api_client, berth):
+    pier = berth.pier
+
     query = """
         {
             piers {
@@ -91,6 +125,10 @@ def test_get_piers(api_client, pier):
                             suitableBoatTypes {
                                 name
                             }
+                            personalElectricity
+                            maxWidth
+                            maxLength
+                            maxDepth
                             createdAt
                             modifiedAt
                         }
@@ -112,6 +150,10 @@ def test_get_piers(api_client, pier):
                         "properties": {
                             "identifier": pier.identifier,
                             "suitableBoatTypes": expected_suitables_boat_types,
+                            "personalElectricity": pier.personal_electricity,
+                            "maxWidth": float(berth.berth_type.width),
+                            "maxLength": float(berth.berth_type.length),
+                            "maxDepth": float(berth.berth_type.depth),
                             "createdAt": pier.created_at.isoformat(),
                             "modifiedAt": pier.modified_at.isoformat(),
                         },
@@ -129,6 +171,7 @@ def test_get_berths(api_client, berth):
                 edges {
                     node {
                         number
+                        isActive
                         createdAt
                         modifiedAt
                     }
@@ -143,6 +186,7 @@ def test_get_berths(api_client, berth):
                 {
                     "node": {
                         "number": berth.number,
+                        "isActive": berth.is_active,
                         "createdAt": berth.created_at.isoformat(),
                         "modifiedAt": berth.modified_at.isoformat(),
                     }
@@ -215,7 +259,19 @@ def test_get_berth_with_leases_not_enough_permissions(api_client, berth):
     assert_not_enough_permissions(executed)
 
 
-def test_get_winter_storage_areas(api_client, winter_storage_area):
+def test_get_winter_storage_areas(api_client, winter_storage_section):
+    winter_storage_area = winter_storage_section.area
+    big_place = WinterStoragePlaceFactory(
+        winter_storage_section=winter_storage_section,
+        place_type=WinterStoragePlaceTypeFactory(width=10, length=10),
+        is_active=True,
+    )
+    WinterStoragePlaceFactory(
+        winter_storage_section=winter_storage_section,
+        place_type=WinterStoragePlaceTypeFactory(width=1, length=1),
+        is_active=False,
+    )
+
     query = """
         {
             winterStorageAreas {
@@ -230,6 +286,11 @@ def test_get_winter_storage_areas(api_client, winter_storage_area):
                             zipCode
                             createdAt
                             modifiedAt
+                            maxWidth
+                            maxLength
+                            numberOfPlaces
+                            numberOfFreePlaces
+                            numberOfInactivePlaces
                         }
                     }
                 }
@@ -248,6 +309,11 @@ def test_get_winter_storage_areas(api_client, winter_storage_area):
                             "zipCode": winter_storage_area.zip_code,
                             "createdAt": winter_storage_area.created_at.isoformat(),
                             "modifiedAt": winter_storage_area.modified_at.isoformat(),
+                            "maxWidth": float(big_place.place_type.width),
+                            "maxLength": float(big_place.place_type.length),
+                            "numberOfPlaces": 2,
+                            "numberOfFreePlaces": 1,
+                            "numberOfInactivePlaces": 1,
                         },
                     }
                 }
@@ -256,7 +322,90 @@ def test_get_winter_storage_areas(api_client, winter_storage_area):
     }
 
 
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_winter_storage_area_with_leases(api_client, winter_storage_area):
+    ws_lease = WinterStorageLeaseFactory(place=None, area=winter_storage_area)
+
+    query = """
+        {
+            winterStorageArea(id: "%s") {
+                properties {
+                    leases {
+                        edges {
+                            node {
+                                id
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    """ % to_global_id(
+        WinterStorageAreaNode._meta.name, winter_storage_area.id
+    )
+    executed = api_client.execute(query)
+
+    assert executed["data"]["winterStorageArea"] == {
+        "properties": {
+            "leases": {
+                "edges": [
+                    {
+                        "node": {
+                            "id": to_global_id(
+                                WinterStorageLeaseNode._meta.name, ws_lease.id
+                            )
+                        }
+                    }
+                ]
+            }
+        }
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+)
+def test_get_winter_storage_area_with_leases_not_enough_permissions(
+    api_client, winter_storage_area
+):
+    WinterStorageLeaseFactory(place=None, area=winter_storage_area)
+
+    query = """
+        {
+            winterStorageArea(id: "%s") {
+                properties {
+                    leases {
+                        edges {
+                            node {
+                                id
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    """ % to_global_id(
+        WinterStorageAreaNode._meta.name, winter_storage_area.id
+    )
+    executed = api_client.execute(query)
+    assert_not_enough_permissions(executed)
+
+
 def test_get_winter_storage_sections(api_client, winter_storage_section):
+    big_place = WinterStoragePlaceFactory(
+        winter_storage_section=winter_storage_section,
+        place_type=WinterStoragePlaceTypeFactory(width=10, length=10),
+        is_active=True,
+    )
+    WinterStoragePlaceFactory(
+        winter_storage_section=winter_storage_section,
+        place_type=WinterStoragePlaceTypeFactory(width=1, length=1),
+        is_active=False,
+    )
     query = """
         {
             winterStorageSections {
@@ -270,6 +419,11 @@ def test_get_winter_storage_sections(api_client, winter_storage_section):
                             identifier
                             createdAt
                             modifiedAt
+                            maxWidth
+                            maxLength
+                            numberOfPlaces
+                            numberOfFreePlaces
+                            numberOfInactivePlaces
                         }
                     }
                 }
@@ -287,6 +441,11 @@ def test_get_winter_storage_sections(api_client, winter_storage_section):
                             "identifier": winter_storage_section.identifier,
                             "createdAt": winter_storage_section.created_at.isoformat(),
                             "modifiedAt": winter_storage_section.modified_at.isoformat(),
+                            "maxWidth": float(big_place.place_type.width),
+                            "maxLength": float(big_place.place_type.length),
+                            "numberOfPlaces": 2,
+                            "numberOfFreePlaces": 1,
+                            "numberOfInactivePlaces": 1,
                         },
                     }
                 }
@@ -302,6 +461,7 @@ def test_get_winter_storage_places(api_client, winter_storage_place):
                 edges {
                     node {
                         number
+                        isActive
                         createdAt
                         modifiedAt
                     }
@@ -316,6 +476,7 @@ def test_get_winter_storage_places(api_client, winter_storage_place):
                 {
                     "node": {
                         "number": winter_storage_place.number,
+                        "isActive": winter_storage_place.is_active,
                         "createdAt": winter_storage_place.created_at.isoformat(),
                         "modifiedAt": winter_storage_place.modified_at.isoformat(),
                     }
@@ -323,6 +484,71 @@ def test_get_winter_storage_places(api_client, winter_storage_place):
             ]
         }
     }
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_winter_storage_place_with_leases(api_client, winter_storage_place):
+    ws_lease = WinterStorageLeaseFactory(place=winter_storage_place)
+
+    query = """
+        {
+            winterStoragePlace(id: "%s") {
+                leases {
+                    edges {
+                        node {
+                            id
+                        }
+                    }
+                }
+            }
+        }
+    """ % to_global_id(
+        WinterStoragePlaceNode._meta.name, winter_storage_place.id
+    )
+    executed = api_client.execute(query)
+
+    assert executed["data"]["winterStoragePlace"] == {
+        "leases": {
+            "edges": [
+                {
+                    "node": {
+                        "id": to_global_id(
+                            WinterStorageLeaseNode._meta.name, ws_lease.id
+                        )
+                    }
+                }
+            ]
+        }
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+)
+def test_get_winter_storage_place_with_leases_not_enough_permissions(
+    api_client, winter_storage_place
+):
+    query = """
+        {
+            winterStoragePlace(id: "%s") {
+                leases {
+                    edges {
+                        node {
+                            id
+                        }
+                    }
+                }
+            }
+        }
+    """ % to_global_id(
+        WinterStoragePlaceNode._meta.name, winter_storage_place.id
+    )
+    executed = api_client.execute(query)
+    assert_not_enough_permissions(executed)
 
 
 @pytest.mark.parametrize(
@@ -341,10 +567,8 @@ def test_get_piers_filter_by_application(api_client, berth_application, berth):
                             berths {
                                 edges {
                                     node {
-                                        berthType {
-                                            width
-                                            length
-                                        }
+                                        width
+                                        length
                                     }
                                 }
                             }
@@ -367,10 +591,8 @@ def test_get_piers_filter_by_application(api_client, berth_application, berth):
         expected_berths = [
             {
                 "node": {
-                    "berthType": {
-                        "width": float(berth.berth_type.width),
-                        "length": float(berth.berth_type.length),
-                    }
+                    "width": float(berth.berth_type.width),
+                    "length": float(berth.berth_type.length),
                 }
             }
         ]
@@ -458,3 +680,371 @@ def test_get_piers_filter_by_application_not_enough_permissions(
     executed = api_client.execute(query)
 
     assert_not_enough_permissions(executed)
+
+
+@pytest.mark.parametrize("available", [True, False])
+def test_get_harbor_available_berths(api_client, pier, available):
+    harbor = pier.harbor
+    # Add an available berth
+    BerthFactory(pier=pier)
+    # Add a berth and assign it to a lease
+    unavailable_berth = BerthFactory(pier=pier)
+    BerthLeaseFactory(berth=unavailable_berth)
+
+    query = """
+        {
+            harbor(id: "%s") {
+                properties {
+                    numberOfPlaces
+                    numberOfFreePlaces
+                    piers {
+                        edges {
+                            node {
+                                properties {
+                                    berths(isAvailable: %s) {
+                                        edges {
+                                            node {
+                                                isAvailable
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    """ % (
+        to_global_id(HarborNode._meta.name, harbor.id),
+        "true" if available else "false",
+    )
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {
+        "harbor": {
+            "properties": {
+                "numberOfPlaces": 2,
+                "numberOfFreePlaces": 1,
+                "piers": {
+                    "edges": [
+                        {
+                            "node": {
+                                "properties": {
+                                    "berths": {
+                                        "edges": [{"node": {"isAvailable": available}}]
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                },
+            },
+        }
+    }
+
+
+@pytest.mark.parametrize("available", [True, False])
+def test_get_harbor_available_active_berths(api_client, pier, available):
+    harbor = pier.harbor
+    # Add an unavailable berth
+    BerthFactory(pier=pier, is_active=False)
+    # Add a berth and assign it to a lease
+    BerthLeaseFactory(berth=BerthFactory(pier=pier))
+
+    query = """
+        {
+            harbor(id: "%s") {
+                properties {
+                    numberOfPlaces
+                    numberOfFreePlaces
+                }
+            }
+        }
+    """ % (
+        to_global_id(HarborNode._meta.name, harbor.id),
+    )
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {
+        "harbor": {"properties": {"numberOfPlaces": 2, "numberOfFreePlaces": 0}}
+    }
+
+
+def test_get_harbor_count(api_client):
+    count = random.randint(1, 10)
+    for _i in range(count):
+        HarborFactory()
+
+    query = """
+        {
+            harbors {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {"harbors": {"count": count, "totalCount": count}}
+
+
+def test_get_harbor_count_filtered(api_client):
+    electricity_count = random.randint(1, 10)
+    no_electricity_count = random.randint(1, 10)
+    total_count = electricity_count + no_electricity_count
+
+    for _i in range(electricity_count):
+        harbor = HarborFactory()
+        PierFactory(harbor=harbor, electricity=True)
+    for _i in range(no_electricity_count):
+        harbor = HarborFactory()
+        PierFactory(harbor=harbor, electricity=False)
+
+    query = """
+        {
+            harbors(piers_Electricity: %s) {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query % "true")
+    assert executed["data"] == {
+        "harbors": {"count": electricity_count, "totalCount": total_count}
+    }
+
+    executed = api_client.execute(query % "false")
+    assert executed["data"] == {
+        "harbors": {"count": no_electricity_count, "totalCount": total_count}
+    }
+
+
+def test_get_pier_count(api_client):
+    count = random.randint(1, 10)
+    for _i in range(count):
+        PierFactory()
+
+    query = """
+        {
+            piers {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {"piers": {"count": count, "totalCount": count}}
+
+
+def test_get_pier_count_filtered(api_client):
+    electricity_count = random.randint(1, 10)
+    no_electricity_count = random.randint(1, 10)
+    total_count = electricity_count + no_electricity_count
+
+    for _i in range(electricity_count):
+        PierFactory(electricity=True)
+    for _i in range(no_electricity_count):
+        PierFactory(electricity=False)
+
+    query = """
+        {
+            piers(electricity: %s) {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query % "true")
+    assert executed["data"] == {
+        "piers": {"count": electricity_count, "totalCount": total_count}
+    }
+
+    executed = api_client.execute(query % "false")
+    assert executed["data"] == {
+        "piers": {"count": no_electricity_count, "totalCount": total_count}
+    }
+
+
+def test_get_berth_count(api_client):
+    count = random.randint(1, 10)
+    for _i in range(count):
+        BerthFactory()
+
+    query = """
+        {
+            berths {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {"berths": {"count": count, "totalCount": count}}
+
+
+def test_get_berth_count_filtered(api_client):
+    smaller_width_count = random.randint(1, 10)
+    larger_width_count = random.randint(1, 10)
+    total_count = smaller_width_count + larger_width_count
+
+    smaller_bt = BerthTypeFactory(width=round(random.uniform(0.1, 4.99), 2))
+    larger_bt = BerthTypeFactory(width=round(random.uniform(5, 9.99), 2))
+    for _i in range(smaller_width_count):
+        BerthFactory(berth_type=smaller_bt)
+    for _i in range(larger_width_count):
+        BerthFactory(berth_type=larger_bt)
+
+    query = """
+        {
+            berths(minWidth: %d) {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query % 5)
+    assert executed["data"] == {
+        "berths": {"count": larger_width_count, "totalCount": total_count}
+    }
+
+    executed = api_client.execute(query % 0)
+    assert executed["data"] == {
+        "berths": {
+            "count": smaller_width_count + larger_width_count,
+            "totalCount": total_count,
+        }
+    }
+
+
+def test_get_winter_storage_area_count(api_client):
+    count = random.randint(1, 10)
+    for _i in range(count):
+        WinterStorageAreaFactory()
+
+    query = """
+        {
+            winterStorageAreas {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {
+        "winterStorageAreas": {"count": count, "totalCount": count}
+    }
+
+
+def test_get_winter_storage_area_count_filtered(api_client):
+    electricity_count = random.randint(1, 10)
+    no_electricity_count = random.randint(1, 10)
+    total_count = electricity_count + no_electricity_count
+
+    for _i in range(electricity_count):
+        area = WinterStorageAreaFactory()
+        WinterStorageSectionFactory(area=area, electricity=True)
+    for _i in range(no_electricity_count):
+        area = WinterStorageAreaFactory()
+        WinterStorageSectionFactory(area=area, electricity=False)
+
+    query = """
+        {
+            winterStorageAreas(sections_Electricity: %s) {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query % "true")
+    assert executed["data"] == {
+        "winterStorageAreas": {"count": electricity_count, "totalCount": total_count}
+    }
+
+    executed = api_client.execute(query % "false")
+    assert executed["data"] == {
+        "winterStorageAreas": {"count": no_electricity_count, "totalCount": total_count}
+    }
+
+
+def test_get_winter_storage_section_count(api_client):
+    count = random.randint(1, 10)
+    for _i in range(count):
+        WinterStorageSectionFactory()
+
+    query = """
+        {
+            winterStorageSections {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {
+        "winterStorageSections": {"count": count, "totalCount": count}
+    }
+
+
+def test_get_winter_storage_section_count_filtered(api_client):
+    electricity_count = random.randint(1, 10)
+    no_electricity_count = random.randint(1, 10)
+    total_count = electricity_count + no_electricity_count
+
+    for _i in range(electricity_count):
+        WinterStorageSectionFactory(electricity=True)
+    for _i in range(no_electricity_count):
+        WinterStorageSectionFactory(electricity=False)
+
+    query = """
+        {
+            winterStorageSections(electricity: %s) {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query % "true")
+    assert executed["data"] == {
+        "winterStorageSections": {
+            "count": electricity_count,
+            "totalCount": total_count,
+        }
+    }
+
+    executed = api_client.execute(query % "false")
+    assert executed["data"] == {
+        "winterStorageSections": {
+            "count": no_electricity_count,
+            "totalCount": total_count,
+        }
+    }
+
+
+def test_get_winter_storage_place_count(api_client):
+    count = random.randint(1, 10)
+    for _i in range(count):
+        WinterStoragePlaceFactory()
+
+    query = """
+        {
+            winterStoragePlaces {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {
+        "winterStoragePlaces": {"count": count, "totalCount": count}
+    }

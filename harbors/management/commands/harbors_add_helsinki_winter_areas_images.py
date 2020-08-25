@@ -5,7 +5,7 @@ from django.core.files import File
 from django.core.management.base import BaseCommand
 from django.utils.translation import activate
 
-from harbors.models import WinterStorageArea
+from ...models import WinterStorageArea
 
 
 class Command(BaseCommand):

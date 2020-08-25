@@ -24,7 +24,7 @@ Project uses following software verisons:
 
 * Postgres 9.6
 * Postgis 2.4
-* Python 3.6
+* Python 3.8
 
 ### Database
 

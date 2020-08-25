@@ -38,39 +38,39 @@ class HarborType(graphql_geojson.GeoJSONType):
         ]
         geojson_field = "location"
         interfaces = (relay.Node,)
-        fields = (
-            "servicemap_id",
-            "zip_code",
-            "phone",
-            "email",
-            "www_url",
-            "image_link",
-            "zip_code",
-            "mooring",
-            "electricity",
-            "water",
-            "waste_collection",
-            "gate",
-            "lighting",
-            "suitable_boat_types",
-            "availability_level",
-            "maximum_width",
-            "maximum_length",
-            "maximum_depth",
-            "location",
-            "number_of_places",
-        )
+        fields = ("location",)
 
     name = graphene.String()
     street_address = graphene.String()
     municipality = graphene.String()
     image_file = graphene.String()
+    servicemap_id = graphene.String()
+    zip_code = graphene.String()
+    phone = graphene.String()
+    email = graphene.String()
+    www_url = graphene.String()
+    image_link = graphene.String()
+    mooring = graphene.Boolean()
+    electricity = graphene.Boolean()
+    water = graphene.Boolean()
+    waste_collection = graphene.Boolean()
+    gate = graphene.Boolean()
+    lighting = graphene.Boolean()
+    suitable_boat_types = graphene.List(BoatTypeType)
+    availability_level = graphene.Field(AvailabilityLevelType)
+    maximum_width = graphene.Int()
+    maximum_length = graphene.Int()
+    maximum_depth = graphene.Int()
+    number_of_places = graphene.Int()
 
     def resolve_image_file(self, info, **kwargs):
         if self.image_file:
             return info.context.build_absolute_uri(self.image_file.url)
         else:
             return None
+
+    def resolve_suitable_boat_types(self, info):
+        return self.suitable_boat_types.all()
 
 
 class WinterStorageAreaType(graphql_geojson.GeoJSONType):
@@ -89,35 +89,28 @@ class WinterStorageAreaType(graphql_geojson.GeoJSONType):
         ]
         geojson_field = "location"
         interfaces = (relay.Node,)
-        fields = (
-            "servicemap_id",
-            "zip_code",
-            "phone",
-            "email",
-            "www_url",
-            "image_link",
-            "zip_code",
-            "repair_area",
-            "electricity",
-            "water",
-            "gate",
-            "summer_storage_for_docking_equipment",
-            "summer_storage_for_trailers",
-            "summer_storage_for_boats",
-            "availability_level",
-            "number_of_marked_places",
-            "max_width",
-            "max_length",
-            "number_of_section_spaces",
-            "max_length_of_section_spaces",
-            "number_of_unmarked_spaces",
-            "location",
-        )
+        fields = ("location",)
 
     name = graphene.String()
     street_address = graphene.String()
     municipality = graphene.String()
     image_file = graphene.String()
+    servicemap_id = graphene.String()
+    zip_code = graphene.String()
+    phone = graphene.String()
+    email = graphene.String()
+    www_url = graphene.String()
+    image_link = graphene.String()
+    repair_area = graphene.Boolean()
+    electricity = graphene.Boolean()
+    water = graphene.Boolean()
+    gate = graphene.Boolean()
+    summer_storage_for_docking_equipment = graphene.Boolean()
+    summer_storage_for_trailers = graphene.Boolean()
+    summer_storage_for_boats = graphene.Boolean()
+    max_length_of_section_spaces = graphene.Int()
+    number_of_section_spaces = graphene.Int()
+    number_of_unmarked_spaces = graphene.Int()
 
     def resolve_image_file(self, info, **kwargs):
         if self.image_file:

@@ -1,13 +1,16 @@
+import random
+
 import pytest
 from dateutil.parser import isoparse
 from freezegun import freeze_time
 from graphql_relay.node.node import to_global_id
 
-from applications.enums import ApplicationStatus
-from applications.new_schema import BerthApplicationNode
-from applications.tests.factories import BerthApplicationFactory
 from berth_reservations.tests.utils import assert_in_errors
 from leases.tests.factories import BerthLeaseFactory
+
+from ..enums import ApplicationStatus
+from ..new_schema import BerthApplicationNode
+from .factories import BerthApplicationFactory
 
 BERTH_APPLICATIONS_WITH_NO_CUSTOMER_FILTER_QUERY = """
 query APPLICATIONS {
@@ -269,3 +272,53 @@ def test_berth_applications_order_by_created_at_default(api_client):
     )
 
     assert first_date < second_date
+
+
+def test_query_berth_application_count(superuser_api_client):
+    count = random.randint(1, 10)
+    for _i in range(count):
+        BerthApplicationFactory()
+
+    query = """
+        {
+            berthApplications {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = superuser_api_client.execute(query)
+    assert executed["data"] == {
+        "berthApplications": {"count": count, "totalCount": count}
+    }
+
+
+def test_query_berth_application_count_filtered(superuser_api_client, customer_profile):
+    customer_count = random.randint(1, 10)
+    no_customer_count = random.randint(1, 10)
+    total_count = customer_count + no_customer_count
+
+    for _i in range(customer_count):
+        BerthApplicationFactory(customer=customer_profile)
+    for _i in range(no_customer_count):
+        BerthApplicationFactory(customer=None)
+
+    query = """
+        {
+            berthApplications(noCustomer: %s) {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = superuser_api_client.execute(query % "true")
+    assert executed["data"] == {
+        "berthApplications": {"count": no_customer_count, "totalCount": total_count}
+    }
+
+    executed = superuser_api_client.execute(query % "false")
+    assert executed["data"] == {
+        "berthApplications": {"count": customer_count, "totalCount": total_count}
+    }

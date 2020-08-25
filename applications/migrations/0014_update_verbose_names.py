@@ -2,8 +2,6 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import enumfields.fields
-import applications.enums
 
 
 class Migration(migrations.Migration):
@@ -25,8 +23,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="winterstoragereservation",
             name="storage_method",
-            field=enumfields.fields.EnumField(
-                enum=applications.enums.WinterStorageMethod,
+            field=models.CharField(
+                choices=[
+                    ("on_trestles", "On trestles"),
+                    ("on_trailer", "On a trailer"),
+                    ("under_tarp", "Under a tarp"),
+                ],
                 max_length=60,
                 verbose_name="storage method",
             ),

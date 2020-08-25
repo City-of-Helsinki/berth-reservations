@@ -1,9 +1,7 @@
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
-from enumfields import EnumField
+from django.utils.translation import gettext_lazy as _
 from parler.models import TranslatableModel, TranslatedFields
 
 from customers.models import CustomerProfile
@@ -20,6 +18,7 @@ class HarborChoice(models.Model):
 
     class Meta:
         unique_together = ("application", "priority")
+        ordering = ("application", "priority")
 
 
 class WinterStorageAreaChoice(models.Model):
@@ -31,6 +30,7 @@ class WinterStorageAreaChoice(models.Model):
 
     class Meta:
         unique_together = ("application", "priority")
+        ordering = ("application", "priority")
 
 
 class BerthSwitchReason(TranslatableModel):
@@ -63,8 +63,8 @@ class BerthSwitch(models.Model):
 class BaseApplication(models.Model):
     created_at = models.DateTimeField(verbose_name=_("created at"), auto_now_add=True)
 
-    status = EnumField(
-        ApplicationStatus,
+    status = models.CharField(
+        choices=ApplicationStatus.choices,
         verbose_name=_("handling status"),
         max_length=32,
         default=ApplicationStatus.PENDING,
@@ -133,8 +133,6 @@ class BaseApplication(models.Model):
     information_accuracy_confirmed = models.BooleanField(
         verbose_name=_("information accuracy confirmed"), default=False
     )
-
-    data = JSONField(blank=True, null=True)
 
     application_code = models.TextField(verbose_name=_("application code"), blank=True)
 
@@ -257,6 +255,14 @@ class BerthApplication(BaseApplication):
 
 
 class WinterStorageApplication(BaseApplication):
+    customer = models.ForeignKey(
+        CustomerProfile,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="winter_storage_applications",
+    )
+
     chosen_areas = models.ManyToManyField(
         WinterStorageArea,
         through=WinterStorageAreaChoice,
@@ -264,8 +270,10 @@ class WinterStorageApplication(BaseApplication):
         blank=True,
     )
 
-    storage_method = EnumField(
-        WinterStorageMethod, verbose_name=_("storage method"), max_length=60
+    storage_method = models.CharField(
+        choices=WinterStorageMethod.choices,
+        verbose_name=_("storage method"),
+        max_length=60,
     )
 
     # If boat stored on a trailer, trailer's registration number is required
