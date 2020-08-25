@@ -22,6 +22,7 @@ from .factories import (
     OrderLogEntryFactory,
     WinterStorageProductFactory,
 )
+from .utils import random_price, random_tax
 
 FAKE_BAMBORA_API_URL = "https://fake-bambora-api-url/api"
 UI_RETURN_URL = "https://front-end-url/{LANG}/"
@@ -75,6 +76,14 @@ def _generate_order(order_type: str = None):
             lease=WinterStorageLeaseFactory(
                 application=WinterStorageApplicationFactory(), customer=customer_profile
             ),
+        )
+    elif order_type == "empty_order":
+        order = OrderFactory(
+            customer=customer_profile,
+            price=random_price(),
+            tax_percentage=random_tax(),
+            product=None,
+            lease=None,
         )
     else:
         order = OrderFactory(customer=customer_profile)

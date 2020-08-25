@@ -110,7 +110,7 @@ class OrderFactory(factory.django.DjangoModelFactory):
             self.lease = extracted
         elif isinstance(self.product, BerthProduct):
             self.lease = BerthLeaseFactory(customer=self.customer)
-        else:
+        elif isinstance(self.product, WinterStorageProduct):
             self.lease = WinterStorageLeaseFactory(customer=self.customer)
 
     class Meta:

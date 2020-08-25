@@ -46,7 +46,8 @@ AdditionalProductTaxEnum = graphene.Enum(
     ],
 )
 OrderTypeEnum = graphene.Enum(
-    "OrderTypeEnum", [("BERTH", "BERTH"), ("WINTER_STORAGE", "WINTER_STORAGE")]
+    "OrderTypeEnum",
+    [("BERTH", "BERTH"), ("WINTER_STORAGE", "WINTER_STORAGE"), ("UNKNOWN", "UNKNOWN")],
 )
 
 
@@ -221,3 +222,8 @@ class OrderNode(DjangoObjectType):
     @view_permission_required(Order)
     def get_queryset(cls, queryset, info):
         return super().get_queryset(queryset, info)
+
+
+class OrderStatusType(graphene.ObjectType):
+    order_type = OrderTypeEnum(required=True)
+    status = OrderStatusEnum(required=True)
