@@ -2,10 +2,12 @@ import graphene
 
 import applications.schema
 import harbors.schema
-from payments.schema import OldAPIMutation
+from payments.schema import OldAPIMutation, OldAPIQuery
 
 
-class Query(harbors.schema.Query, applications.schema.Query, graphene.ObjectType):
+class Query(
+    harbors.schema.Query, applications.schema.Query, OldAPIQuery, graphene.ObjectType
+):
     pass
 
 
