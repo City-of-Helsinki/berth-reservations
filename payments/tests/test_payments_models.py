@@ -103,10 +103,12 @@ def test_additional_product_one_service_per_period():
     service = random.choice(ProductServiceType.OPTIONAL_SERVICES())
     period = random.choice(list(PeriodType))
 
-    AdditionalProductFactory(service=service, period=period)
+    product = AdditionalProductFactory(service=service, period=period)
 
     with pytest.raises(IntegrityError) as exception:
-        AdditionalProductFactory(service=service, period=period)
+        # Copy the product to a new identical one
+        product.pk = None
+        product.save()
 
     errors = str(exception.value)
     assert (
