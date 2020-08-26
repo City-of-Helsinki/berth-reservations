@@ -31,6 +31,7 @@ env = environ.Env(
         str,
         "postgis://berth_reservations:berth_reservations@localhost/berth_reservations",
     ),
+    DATABASE_CONN_MAX_AGE=(int, 60 * 60),  # 60 min
     CACHE_URL=(str, "locmemcache://"),
     MAILER_EMAIL_BACKEND=(str, "django.core.mail.backends.console.EmailBackend"),
     DEFAULT_FROM_EMAIL=(str, "venepaikkavaraukset@hel.fi"),
@@ -67,6 +68,8 @@ USE_X_FORWARDED_HOST = env.bool("USE_X_FORWARDED_HOST")
 DATABASES = {"default": env.db()}
 # Ensure postgis engine
 DATABASES["default"]["ENGINE"] = "django.contrib.gis.db.backends.postgis"
+# Configure the age of DB connections
+DATABASES["default"]["CONN_MAX_AGE"] = env.int("DATABASE_CONN_MAX_AGE")
 
 CACHES = {"default": env.cache()}
 
