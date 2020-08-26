@@ -1,0 +1,33 @@
+# Generated with https://sequencediagram.org/
+
+title Venepaikka payment flow
+
+note over Admin: Confirm order
+Admin->Back-end: confirmOrderMuation
+Back-end->User: Send email with the following link to Customer UI\nhttps://venepaikat.hel.fi/{LANG}/payment?order_number={str}
+
+User->Back-end: Fetch order status
+Back-end-->>User:OrderStatus
+
+
+note over User: If the due date is past, show an error
+note over User: Review order terms
+
+User->Back-end: confirmPaymentMutation
+
+note over Back-end,Bambora API: Generate payment link
+Back-end->Bambora API: Get Payment Token\n/payment-token-request
+Bambora API-->>Back-end: payment token
+
+Back-end-->>User: PayForm URL
+
+note over User: Customer UI is responsible for handling\nthe response url and redirecting the user
+User->Bambora PayForm: Redirect
+
+note over Bambora PayForm: Handle payment
+
+Bambora PayForm->Back-end: Redirect to success/failure
+note over Back-end: Update order details
+Back-end-->>User: Redirect to Customer UI success/failure page\nhttps://venepaikat.hel.fi/payments?payment_status={success|failure}
+
+note over User: Show success/failure message

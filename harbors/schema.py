@@ -111,6 +111,10 @@ class WinterStorageAreaType(graphql_geojson.GeoJSONType):
     max_length_of_section_spaces = graphene.Int()
     number_of_section_spaces = graphene.Int()
     number_of_unmarked_spaces = graphene.Int()
+    number_of_marked_places = graphene.Int()
+    availability_level = graphene.Field(AvailabilityLevelType)
+    max_width = graphene.Int()
+    max_length = graphene.Int()
 
     def resolve_image_file(self, info, **kwargs):
         if self.image_file:

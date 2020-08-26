@@ -2,15 +2,18 @@ import random
 
 import pytest
 
-from berth_reservations.tests.utils import assert_not_enough_permissions
+from berth_reservations.tests.utils import (
+    assert_doesnt_exist,
+    assert_not_enough_permissions,
+)
 from customers.schema import ProfileNode
 from leases.models import BerthLease, WinterStorageLease
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from resources.schema import HarborNode, WinterStorageAreaNode
 from utils.relay import to_global_id
 
-from ..enums import ProductServiceType
-from ..models import BerthProduct
+from ..enums import OrderStatus, ProductServiceType
+from ..models import BerthProduct, Order
 from ..schema.types import (
     AdditionalProductNode,
     AdditionalProductTaxEnum,
@@ -20,12 +23,15 @@ from ..schema.types import (
     OrderLineNode,
     OrderLogEntryNode,
     OrderNode,
+    OrderStatusEnum,
+    OrderTypeEnum,
     PeriodTypeEnum,
     PlaceProductTaxEnum,
     PriceUnitsEnum,
     ProductServiceTypeEnum,
     WinterStorageProductNode,
 )
+from ..utils import generate_order_number
 from .factories import (
     AdditionalProductFactory,
     BerthProductFactory,
@@ -768,3 +774,45 @@ def test_get_orders_filtered(superuser_api_client, filter):
     assert executed["data"]["orders"]["edges"][0]["node"] == {
         "id": to_global_id(OrderNode, order.id)
     }
+
+
+ORDER_STATUS_QUERY = """
+query ORDER_STATUS {
+    orderStatus(orderNumber: "%s") {
+        orderType
+        status
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order", "empty_order"], indirect=True,
+)
+@pytest.mark.parametrize("status", OrderStatus.values)
+def test_get_order_status(old_schema_api_client, status, order: Order):
+    order.status = status
+    order.save()
+
+    executed = old_schema_api_client.execute(ORDER_STATUS_QUERY % order.order_number)
+
+    if order.product:
+        if "berth" in order._product_content_type.model:
+            order_type = OrderTypeEnum.BERTH
+        else:
+            order_type = OrderTypeEnum.WINTER_STORAGE
+    else:
+        order_type = OrderTypeEnum.UNKNOWN
+
+    assert executed["data"]["orderStatus"] == {
+        "orderType": OrderTypeEnum.get(order_type).name,
+        "status": OrderStatusEnum.get(order.status).name,
+    }
+
+
+def test_get_order_status_order_does_not_exist(old_schema_api_client):
+    executed = old_schema_api_client.execute(
+        ORDER_STATUS_QUERY % generate_order_number()
+    )
+
+    assert_doesnt_exist("Order", executed)

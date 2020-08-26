@@ -1,11 +1,19 @@
 import pytest
 from factory.random import randgen
+from requests import RequestException
 
+from applications.tests.factories import (
+    BerthApplicationFactory,
+    WinterStorageApplicationFactory,
+)
 from berth_reservations.tests.conftest import *  # noqa
+from berth_reservations.tests.factories import CustomerProfileFactory
 from leases.tests.conftest import *  # noqa
+from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from resources.tests.conftest import *  # noqa
 from resources.tests.factories import BerthTypeFactory
 
+from ..providers import BamboraPayformProvider
 from .factories import (
     AdditionalProductFactory,
     BerthProductFactory,
@@ -14,6 +22,10 @@ from .factories import (
     OrderLogEntryFactory,
     WinterStorageProductFactory,
 )
+from .utils import random_price, random_tax
+
+FAKE_BAMBORA_API_URL = "https://fake-bambora-api-url/api"
+UI_RETURN_URL = "https://front-end-url/{LANG}/"
 
 
 @pytest.fixture
@@ -47,9 +59,66 @@ def additional_product():
     return additional_product
 
 
+def _generate_order(order_type: str = None):
+    customer_profile = CustomerProfileFactory()
+    if order_type == "berth_order":
+        order = OrderFactory(
+            customer=customer_profile,
+            product=BerthProductFactory(),
+            lease=BerthLeaseFactory(
+                application=BerthApplicationFactory(), customer=customer_profile
+            ),
+        )
+    elif order_type == "winter_storage_order":
+        order = OrderFactory(
+            customer=customer_profile,
+            product=WinterStorageProductFactory(),
+            lease=WinterStorageLeaseFactory(
+                application=WinterStorageApplicationFactory(), customer=customer_profile
+            ),
+        )
+    elif order_type == "empty_order":
+        order = OrderFactory(
+            customer=customer_profile,
+            price=random_price(),
+            tax_percentage=random_tax(),
+            product=None,
+            lease=None,
+        )
+    else:
+        order = OrderFactory(customer=customer_profile)
+    return order
+
+
 @pytest.fixture
-def order():
-    order = OrderFactory()
+def order(request):
+    order_type = request.param if hasattr(request, "param") else None
+    return _generate_order(order_type)
+
+
+@pytest.fixture
+def order_with_products(request):
+    order_type = request.param if hasattr(request, "param") else None
+
+    order = _generate_order(order_type)
+
+    OrderLineFactory(order=order)
+    OrderLineFactory(order=order)
+    OrderLineFactory(order=order)
+    OrderLineFactory(order=order)
+
+    return order
+
+
+@pytest.fixture
+def berth_order(customer_profile):
+    order = _generate_order("berth_order")
+    return order
+
+
+@pytest.fixture
+def winter_storage_order(customer_profile):
+    order = _generate_order("winter_storage_order")
     return order
 
 
@@ -63,3 +132,50 @@ def order_line():
 def order_log_entry():
     order_log_entry = OrderLogEntryFactory()
     return order_log_entry
+
+
+@pytest.fixture()
+def provider_base_config():
+    return {
+        "VENE_PAYMENTS_BAMBORA_API_URL": "https://real-bambora-api-url/api",
+        "VENE_PAYMENTS_BAMBORA_API_KEY": "dummy-key",
+        "VENE_PAYMENTS_BAMBORA_API_SECRET": "dummy-secret",
+        "VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS": ["dummy-bank"],
+    }
+
+
+@pytest.fixture()
+def payment_provider(provider_base_config):
+    """When it doesn't matter if request is contained within provider the fixture can still be used"""
+    return BamboraPayformProvider(config=provider_base_config)
+
+
+def create_bambora_provider(provider_base_config, request, return_url=None):
+    """Helper for creating a new instance of provider with request and optional return_url contained within"""
+    return BamboraPayformProvider(
+        config=provider_base_config, request=request, ui_return_url=return_url
+    )
+
+
+def mocked_response_create(*args, **kwargs):
+    """Mock Bambora auth token responses based on provider url"""
+
+    class MockResponse:
+        def __init__(self, data, status_code=200):
+            self.json_data = data
+            self.status_code = status_code
+
+        def json(self):
+            return self.json_data
+
+        def raise_for_status(self):
+            if self.status_code != 200:
+                raise RequestException(
+                    "Mock request error with status_code {}.".format(self.status_code)
+                )
+            pass
+
+    if args[0].startswith(FAKE_BAMBORA_API_URL):
+        return MockResponse(data={}, status_code=500)
+    else:
+        return MockResponse(data={"result": 0, "token": "abc123", "type": "e-payment"})

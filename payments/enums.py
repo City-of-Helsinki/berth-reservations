@@ -63,5 +63,6 @@ class PriceUnits(TextChoices):
 class OrderStatus(TextChoices):
     WAITING = "waiting", _("Waiting")
     REJECTED = "rejected", _("Rejected")
+    CANCELLED = "cancelled", _("Cancelled")
     EXPIRED = "expired", _("Expired")
     PAID = "paid", _("Paid")

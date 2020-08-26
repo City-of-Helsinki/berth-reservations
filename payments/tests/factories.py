@@ -83,6 +83,7 @@ class AdditionalProductFactory(AbstractBaseProductFactory):
 
     class Meta:
         model = AdditionalProduct
+        django_get_or_create = ("service", "period")
 
 
 class OrderFactory(factory.django.DjangoModelFactory):
@@ -95,7 +96,12 @@ class OrderFactory(factory.django.DjangoModelFactory):
     price = None
     tax_percentage = None
     lease = None
-    status = factory.Faker("random_element", elements=OrderStatus.values)
+    status = factory.Faker(
+        "random_element",
+        elements=list(
+            filter(lambda os: os is not OrderStatus.EXPIRED.value, OrderStatus.values)
+        ),
+    )
     comment = factory.Faker("sentence")
 
     @factory.post_generation
@@ -104,7 +110,7 @@ class OrderFactory(factory.django.DjangoModelFactory):
             self.lease = extracted
         elif isinstance(self.product, BerthProduct):
             self.lease = BerthLeaseFactory(customer=self.customer)
-        else:
+        elif isinstance(self.product, WinterStorageProduct):
             self.lease = WinterStorageLeaseFactory(customer=self.customer)
 
     class Meta:
@@ -121,7 +127,13 @@ class OrderLineFactory(factory.django.DjangoModelFactory):
 
 class OrderLogEntryFactory(factory.django.DjangoModelFactory):
     order = factory.SubFactory(OrderFactory)
-    status = factory.Faker("random_element", elements=OrderStatus.values)
+    from_status = factory.Faker("random_element", elements=OrderStatus.values)
+    # This ensures that the status are always different
+    to_status = factory.LazyAttribute(
+        lambda ole: random.choice(
+            list(filter(lambda s: s is not ole.from_status, OrderStatus.values))
+        )
+    )
     comment = factory.Faker("sentence")
 
     class Meta:

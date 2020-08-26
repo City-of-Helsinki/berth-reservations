@@ -1,5 +1,6 @@
 import random
 import uuid
+from unittest import mock
 
 import pytest
 from dateutil.utils import today
@@ -57,7 +58,9 @@ from ..utils import (
     calculate_product_partial_year_price,
     calculate_product_percentage_price,
     convert_aftertax_to_pretax,
+    generate_order_number,
 )
+from .conftest import mocked_response_create
 from .factories import OrderFactory
 from .utils import random_price
 
@@ -1274,3 +1277,66 @@ def test_delete_order_line_does_not_exist(superuser_api_client):
     executed = superuser_api_client.execute(DELETE_ORDER_LINE_MUTATION, input=variables)
 
     assert_doesnt_exist("OrderLine", executed)
+
+
+CONFIRM_PAYMENT_MUTATION = """
+mutation CONFIRM_PAYMENT_MUTATION($input: ConfirmPaymentMutationInput!) {
+    confirmPayment(input: $input) {
+        url
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
+)
+@pytest.mark.parametrize("status", [OrderStatus.WAITING, OrderStatus.REJECTED])
+def test_confirm_payment(old_schema_api_client, order: Order, status):
+    order.status = status
+    order.save()
+    variables = {"orderNumber": order.order_number}
+
+    with mock.patch(
+        "payments.providers.bambora_payform.requests.post",
+        side_effect=mocked_response_create,
+    ):
+        executed = old_schema_api_client.execute(
+            CONFIRM_PAYMENT_MUTATION, input=variables
+        )
+
+    assert "token/abc123" in executed["data"]["confirmPayment"]["url"]
+
+
+def test_confirm_payment_does_not_exist(old_schema_api_client):
+    variables = {"orderNumber": generate_order_number()}
+
+    with mock.patch(
+        "payments.providers.bambora_payform.requests.post",
+        side_effect=mocked_response_create,
+    ):
+        executed = old_schema_api_client.execute(
+            CONFIRM_PAYMENT_MUTATION, input=variables
+        )
+
+    assert_doesnt_exist("Order", executed)
+
+
+@pytest.mark.parametrize(
+    "status", [OrderStatus.EXPIRED, OrderStatus.CANCELLED, OrderStatus.PAID]
+)
+def test_confirm_payment_invalid_status(old_schema_api_client, status):
+    order = OrderFactory(status=status)
+    variables = {"orderNumber": order.order_number}
+
+    with mock.patch(
+        "payments.providers.bambora_payform.requests.post",
+        side_effect=mocked_response_create,
+    ) as mock_call:
+        executed = old_schema_api_client.execute(
+            CONFIRM_PAYMENT_MUTATION, input=variables
+        )
+
+    mock_call.assert_not_called()
+    assert_in_errors("The order is not valid anymore", executed)
+    assert_in_errors(status.label, executed)

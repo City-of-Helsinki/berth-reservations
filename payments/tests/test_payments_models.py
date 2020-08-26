@@ -103,10 +103,12 @@ def test_additional_product_one_service_per_period():
     service = random.choice(ProductServiceType.OPTIONAL_SERVICES())
     period = random.choice(list(PeriodType))
 
-    AdditionalProductFactory(service=service, period=period)
+    product = AdditionalProductFactory(service=service, period=period)
 
     with pytest.raises(IntegrityError) as exception:
-        AdditionalProductFactory(service=service, period=period)
+        # Copy the product to a new identical one
+        product.pk = None
+        product.save()
 
     errors = str(exception.value)
     assert (
@@ -925,6 +927,39 @@ def test_order_winter_storage_lease_with_area_right_price(
         product=winter_storage_product,
     )
     sqm = boat.width * boat.length
+
+    expected_price = calculate_product_partial_season_price(
+        winter_storage_product.price_value,
+        winter_storage_lease.start_date,
+        winter_storage_lease.end_date,
+        summer_season=False,
+    )
+    expected_price = rounded(expected_price * sqm, decimals=2)
+
+    assert order.lease.id == winter_storage_lease.id
+    assert order._lease_content_type.name == winter_storage_lease._meta.verbose_name
+    assert order.price == expected_price
+
+
+def test_order_winter_storage_lease_without_boat_right_price(
+    winter_storage_area,
+    winter_storage_product,
+    winter_storage_application,
+    customer_profile,
+):
+    winter_storage_lease = WinterStorageLeaseFactory(
+        place=None,
+        area=winter_storage_area,
+        customer=customer_profile,
+        boat=None,
+        application=winter_storage_application,
+    )
+    order = Order.objects.create(
+        _lease_object_id=winter_storage_lease.id,
+        customer=customer_profile,
+        product=winter_storage_product,
+    )
+    sqm = winter_storage_application.boat_width * winter_storage_application.boat_length
 
     expected_price = calculate_product_partial_season_price(
         winter_storage_product.price_value,
