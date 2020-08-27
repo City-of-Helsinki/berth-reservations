@@ -215,13 +215,13 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
                 _("Application must be connected to an existing customer first")
             )
 
-        if place_id := input.pop("place_id", None):  # noqa
+        if place_id := input.pop("place_id", None):
             place = get_node_from_global_id(
                 info, place_id, only_type=WinterStoragePlaceNode, nullable=False,
             )
             input["place"] = place
             area = place.winter_storage_section.area
-        elif area_id := input.pop("area_id", None):  # noqa
+        elif area_id := input.pop("area_id", None):
             area = get_node_from_global_id(
                 info, area_id, only_type=WinterStorageAreaNode, nullable=False,
             )

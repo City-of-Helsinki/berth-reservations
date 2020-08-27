@@ -55,7 +55,7 @@ class AbstractLease(TimeStampedModel, UUIDModel):
         return self._orders_relation.first()
 
     def clean(self):
-        if self.boat and not self.boat.owner == self.customer:
+        if self.boat and self.boat.owner != self.customer:
             raise ValidationError(
                 _("The boat should belong to the customer who is creating the lease")
             )

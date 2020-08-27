@@ -1,7 +1,7 @@
 import pytest
 
 from berth_reservations.tests.conftest import *  # noqa
-from resources.tests.conftest import boat_type  # noqa
+from resources.tests.conftest import berth, boat_type  # noqa
 
 from .factories import BoatCertificateFactory, BoatFactory, OrganizationFactory
 
