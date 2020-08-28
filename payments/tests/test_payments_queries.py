@@ -776,9 +776,9 @@ def test_get_orders_filtered(superuser_api_client, filter):
     }
 
 
-ORDER_STATUS_QUERY = """
-query ORDER_STATUS {
-    orderStatus(orderNumber: "%s") {
+ORDER_DETAILS_QUERY = """
+query ORDER_DETAILS {
+    orderDetails(orderNumber: "%s") {
         orderType
         status
     }
@@ -794,7 +794,7 @@ def test_get_order_status(old_schema_api_client, status, order: Order):
     order.status = status
     order.save()
 
-    executed = old_schema_api_client.execute(ORDER_STATUS_QUERY % order.order_number)
+    executed = old_schema_api_client.execute(ORDER_DETAILS_QUERY % order.order_number)
 
     if order.product:
         if "berth" in order._product_content_type.model:
@@ -804,7 +804,7 @@ def test_get_order_status(old_schema_api_client, status, order: Order):
     else:
         order_type = OrderTypeEnum.UNKNOWN
 
-    assert executed["data"]["orderStatus"] == {
+    assert executed["data"]["orderDetails"] == {
         "orderType": OrderTypeEnum.get(order_type).name,
         "status": OrderStatusEnum.get(order.status).name,
     }
@@ -812,7 +812,7 @@ def test_get_order_status(old_schema_api_client, status, order: Order):
 
 def test_get_order_status_order_does_not_exist(old_schema_api_client):
     executed = old_schema_api_client.execute(
-        ORDER_STATUS_QUERY % generate_order_number()
+        ORDER_DETAILS_QUERY % generate_order_number()
     )
 
     assert_doesnt_exist("Order", executed)
