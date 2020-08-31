@@ -14,27 +14,42 @@ from ...models import (
 )
 
 WINTER_AREAS_MAP = {
-    # TODO: update temporary values here
-    # from_place_number, to_place_number are just in basic order,
-    # modify these numbers when more we have more specs
+    # The data has the following shape:
+    # (section_identifier, (from_place_number, to_place_number), width, length)
     "Iso-Sarvasto": [
-        ((1, 29), 2.5, 6.0),  # ((from_place_number, to_place_number), width, length)
-        ((30, 69), 3.0, 8.0),
-        ((70, 85), 3.5, 10.0),
-        ((86, 89), 4.5, 12.0),
+        ("A", (1, 14), 2.5, 6.0,),
+        ("B", (15, 22), 3.0, 8.0),
+        ("B", (23, 23), 2.5, 6.0,),
+        ("C", (24, 37), 2.5, 6.0,),
+        ("Alakenttä", (1, 19), 3.0, 8.0),
+        ("Alakenttä", (20, 20), 2.5, 6.0),
+        ("Alakenttä", (21, 36), 3.5, 10.0),
+        ("Alakenttä", (37, 40), 4.5, 12.0),
+        ("Alakenttä", (41, 52), 3.0, 8.0),
     ],
     "Laivalahti": [
-        ((1, 43), 2.5, 6.0),
-        ((44, 68), 3.0, 8.0),
-        ((69, 88), 3.5, 10.0),
-        ((89, 100), 4.5, 12.0),
+        ("-", (1, 20), 3.5, 10.0),
+        ("-", (21, 40), 3.0, 8.0),
+        ("-", (41, 41), 3.5, 10.0),
+        ("-", (42, 65), 2.5, 6.0),
+        ("-", (66, 69), 3.0, 8.0),
+        ("-", (70, 88), 2.5, 6.0),
+        ("-", (89, 100), 4.5, 12.0),
     ],
-    "Porslahti": [((1, 21), 2.5, 6.0), ((22, 57), 3.0, 10.0)],
+    "Porslahti": [
+        ("A", (1, 22), 3.0, 10.0),
+        ("B", (1, 21), 2.5, 6.0),
+        ("C", (1, 14), 3.0, 10.0),
+    ],
     "Rajasaari": [
-        ((1, 65), 2.4, 6.0),
-        ((66, 135), 2.5, 6.0),
-        ((136, 230), 3.0, 10.0),
-        ((231, 253), 4.0, 20.0),
+        ("A", (1, 70), 2.5, 6.0),
+        ("B", (1, 27), 3.5, 12.0),
+        ("C", (1, 64), 3.0, 10.0),
+        ("D", (1, 31), 3.0, 8.0),
+        ("D", (32, 54), 4.0, 12.0),
+        ("E", (1, 25), 2.4, 6.0),
+        ("F", (1, 20), 2.4, 6.0),
+        ("G", (1, 20), 2.4, 6.0),
     ],
 }
 
@@ -47,8 +62,7 @@ class Command(BaseCommand):
         self.missing_old_areas = []
 
     def handle(self, **options):
-
-        for area_name, places_data in WINTER_AREAS_MAP.items():
+        for area_name, sections_data in WINTER_AREAS_MAP.items():
             activate("fi")
 
             with transaction.atomic():
@@ -64,7 +78,10 @@ class Command(BaseCommand):
                         )
 
                     self._import_area_data_from_old_area(area, old_area)
-                    self._import_section_data_from_old_area(area, old_area, places_data)
+                    for places_data in sections_data:
+                        self._import_section_data_from_old_area(
+                            area, old_area, places_data
+                        )
 
                 else:
                     self.missing_old_areas.append(area_name)
@@ -102,8 +119,9 @@ class Command(BaseCommand):
                 area.save()
 
     def _import_section_data_from_old_area(self, area, old_area, places_data):
-        section, _ = WinterStorageSection.objects.get_or_create(
-            area=area, identifier="-"
+        section_identifier, *places_data = places_data
+        section, _created = WinterStorageSection.objects.get_or_create(
+            area=area, identifier=section_identifier
         )
         section.location = area.location
         section.electricity = old_area.electricity
@@ -120,26 +138,25 @@ class Command(BaseCommand):
         self._import_places(section, places_data)
 
     def _import_places(self, section, places_data):
-        for places_type in places_data:
-            place_nums, width, length = places_type
-            from_place_num, to_place_num = place_nums
+        place_nums, width, length = places_data
+        from_place_num, to_place_num = place_nums
 
-            for place_number in range(from_place_num, to_place_num + 1):
-                place_number_str = str(place_number)
-                if len(place_number_str) == 1:
-                    # prepend 0 to number before 10
-                    place_number_str = str(place_number).zfill(2)
+        for place_number in range(from_place_num, to_place_num + 1):
+            place_number_str = str(place_number)
+            if len(place_number_str) == 1:
+                # prepend 0 to number before 10
+                place_number_str = str(place_number).zfill(2)
 
-                place_type, _ = WinterStoragePlaceType.objects.get_or_create(
-                    width=width, length=length
-                )
+            place_type, _ = WinterStoragePlaceType.objects.get_or_create(
+                width=width, length=length
+            )
 
-                _, created = WinterStoragePlace.objects.update_or_create(
-                    winter_storage_section=section,
-                    number=place_number_str,
-                    defaults={"place_type": place_type},
-                )
-                if created:
-                    self.number_of_created_places += 1
-                else:
-                    self.number_of_modified_places += 1
+            _, created = WinterStoragePlace.objects.update_or_create(
+                winter_storage_section=section,
+                number=place_number_str,
+                defaults={"place_type": place_type},
+            )
+            if created:
+                self.number_of_created_places += 1
+            else:
+                self.number_of_modified_places += 1
