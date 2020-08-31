@@ -2,6 +2,7 @@ import uuid
 from random import randint
 
 import pytest
+from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from freezegun import freeze_time
 
@@ -536,7 +537,7 @@ def test_update_berth_lease_all_fields(
     boat.save()
 
     start_date = today()
-    end_date = start_date.replace(month=start_date.month + 3)
+    end_date = start_date + relativedelta(months=3)
 
     variables = {
         "id": berth_lease_id,
@@ -1164,7 +1165,7 @@ def test_update_winter_storage_lease_all_fields(
     boat.save()
 
     start_date = today()
-    end_date = start_date.replace(month=start_date.month + 3)
+    end_date = start_date + relativedelta(months=3)
 
     variables = {
         "id": lease_id,
