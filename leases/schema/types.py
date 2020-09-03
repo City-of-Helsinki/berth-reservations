@@ -4,7 +4,7 @@ from graphql_jwt.decorators import login_required
 
 from applications.models import BerthApplication, WinterStorageApplication
 from customers.models import CustomerProfile
-from resources.schema import BerthNode, WinterStorageAreaNode, WinterStoragePlaceNode
+from resources.schema import BerthNode, WinterStoragePlaceNode, WinterStorageSectionNode
 from utils.relay import return_node_if_user_has_permissions
 from utils.schema import CountConnection
 
@@ -44,7 +44,7 @@ class BerthLeaseNode(DjangoObjectType):
 
 class WinterStorageLeaseNode(DjangoObjectType):
     place = graphene.Field(WinterStoragePlaceNode)
-    area = graphene.Field(WinterStorageAreaNode)
+    section = graphene.Field(WinterStorageSectionNode)
     status = LeaseStatusEnum(required=True)
     customer = graphene.Field("customers.schema.ProfileNode", required=True)
     order = graphene.Field("payments.schema.OrderNode")

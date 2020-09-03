@@ -16,8 +16,8 @@ from ..schema import (
     BerthNode,
     HarborNode,
     PierNode,
-    WinterStorageAreaNode,
     WinterStoragePlaceNode,
+    WinterStorageSectionNode,
 )
 from .factories import (
     BerthFactory,
@@ -327,12 +327,12 @@ def test_get_winter_storage_areas(api_client, winter_storage_section):
     ["berth_supervisor", "berth_handler", "berth_services"],
     indirect=True,
 )
-def test_get_winter_storage_area_with_leases(api_client, winter_storage_area):
-    ws_lease = WinterStorageLeaseFactory(place=None, area=winter_storage_area)
+def test_get_winter_storage_section_with_leases(api_client, winter_storage_section):
+    ws_lease = WinterStorageLeaseFactory(place=None, section=winter_storage_section)
 
     query = """
         {
-            winterStorageArea(id: "%s") {
+            winterStorageSection(id: "%s") {
                 properties {
                     leases {
                         edges {
@@ -345,11 +345,11 @@ def test_get_winter_storage_area_with_leases(api_client, winter_storage_area):
             }
         }
     """ % to_global_id(
-        WinterStorageAreaNode._meta.name, winter_storage_area.id
+        WinterStorageSectionNode._meta.name, winter_storage_section.id
     )
     executed = api_client.execute(query)
 
-    assert executed["data"]["winterStorageArea"] == {
+    assert executed["data"]["winterStorageSection"] == {
         "properties": {
             "leases": {
                 "edges": [
@@ -369,14 +369,14 @@ def test_get_winter_storage_area_with_leases(api_client, winter_storage_area):
 @pytest.mark.parametrize(
     "api_client", ["api_client", "user", "harbor_services"], indirect=True,
 )
-def test_get_winter_storage_area_with_leases_not_enough_permissions(
-    api_client, winter_storage_area
+def test_get_winter_storage_section_with_leases_not_enough_permissions(
+    api_client, winter_storage_section
 ):
-    WinterStorageLeaseFactory(place=None, area=winter_storage_area)
+    WinterStorageLeaseFactory(place=None, section=winter_storage_section)
 
     query = """
         {
-            winterStorageArea(id: "%s") {
+            winterStorageSection(id: "%s") {
                 properties {
                     leases {
                         edges {
@@ -389,7 +389,7 @@ def test_get_winter_storage_area_with_leases_not_enough_permissions(
             }
         }
     """ % to_global_id(
-        WinterStorageAreaNode._meta.name, winter_storage_area.id
+        WinterStorageSectionNode._meta.name, winter_storage_section.id
     )
     executed = api_client.execute(query)
     assert_not_enough_permissions(executed)

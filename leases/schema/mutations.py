@@ -9,7 +9,7 @@ from applications.new_schema import BerthApplicationNode, WinterStorageApplicati
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.models import CustomerProfile
 from payments.models import BerthPriceGroup, BerthProduct, Order, WinterStorageProduct
-from resources.schema import BerthNode, WinterStorageAreaNode, WinterStoragePlaceNode
+from resources.schema import BerthNode, WinterStoragePlaceNode, WinterStorageSectionNode
 from users.decorators import (
     add_permission_required,
     change_permission_required,
@@ -189,7 +189,7 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
     class Input(AbstractLeaseInput):
         application_id = graphene.ID(required=True)
         place_id = graphene.ID()
-        area_id = graphene.ID()
+        section_id = graphene.ID()
 
     winter_storage_lease = graphene.Field(WinterStorageLeaseNode)
 
@@ -198,9 +198,9 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
     @add_permission_required(WinterStorageLease)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        if "place_id" in input and "area_id" in input:
+        if "place_id" in input and "section_id" in input:
             raise VenepaikkaGraphQLError(
-                _("Cannot receive both Winter Storage Place and Area")
+                _("Cannot receive both Winter Storage Place and Section")
             )
 
         application = get_node_from_global_id(
@@ -221,14 +221,15 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
             )
             input["place"] = place
             area = place.winter_storage_section.area
-        elif area_id := input.pop("area_id", None):
-            area = get_node_from_global_id(
-                info, area_id, only_type=WinterStorageAreaNode, nullable=False,
+        elif section_id := input.pop("section_id", None):
+            section = get_node_from_global_id(
+                info, section_id, only_type=WinterStorageSectionNode, nullable=False,
             )
-            input["area"] = area
+            area = section.area
+            input["section"] = section
         else:
             raise VenepaikkaGraphQLError(
-                _("Either Winter Storage Place or Area are required")
+                _("Either Winter Storage Place or Section are required")
             )
 
         input["application"] = application
