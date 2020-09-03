@@ -915,6 +915,7 @@ def test_update_order_berth_product(api_client, berth_product, berth_lease):
     order = OrderFactory(
         product=berth_product, lease=berth_lease, customer=berth_lease.customer
     )
+
     global_id = to_global_id(OrderNode, order.id)
 
     variables = {
@@ -933,7 +934,11 @@ def test_update_order_berth_product(api_client, berth_product, berth_lease):
     assert executed["data"]["updateOrder"]["order"] == {
         "id": variables["id"],
         "comment": variables["comment"],
-        "price": str(berth_product.price_value),
+        "price": str(
+            calculate_product_partial_season_price(
+                berth_product.price_value, berth_lease.start_date, berth_lease.end_date
+            )
+        ),
         "taxPercentage": str(berth_product.tax_percentage),
         "dueDate": str(variables["dueDate"].date()),
         "status": variables["status"],

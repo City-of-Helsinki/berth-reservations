@@ -31,6 +31,7 @@ def force_settings(settings):
     settings.MAILER_EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
     settings.DEFAULT_FROM_EMAIL = "noreply@foo.bar"
     settings.LANGUAGE_CODE = "en"
+    settings.VENE_UI_RETURN_URL = "https://front-end-url/{LANG}"
 
 
 @pytest.fixture

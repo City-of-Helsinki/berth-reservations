@@ -5,6 +5,7 @@ import factory
 from berth_reservations.tests.factories import CustomerProfileFactory
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from resources.tests.factories import HarborFactory, WinterStorageAreaFactory
+from utils.numbers import rounded
 
 from ..enums import OrderStatus, PeriodType, PriceUnits, ProductServiceType
 from ..models import (
@@ -36,10 +37,11 @@ class AbstractBaseProductFactory(factory.django.DjangoModelFactory):
 
 
 class BerthPriceGroupFactory(factory.django.DjangoModelFactory):
-    name = factory.Faker("word")
+    name = factory.LazyFunction(lambda: f"{rounded(random.uniform(0, 99))}m")
 
     class Meta:
         model = BerthPriceGroup
+        django_get_or_create = ("name",)
 
 
 class AbstractPlaceProductFactory(AbstractBaseProductFactory):
@@ -95,7 +97,6 @@ class OrderFactory(factory.django.DjangoModelFactory):
     )
     price = None
     tax_percentage = None
-    lease = None
     status = factory.Faker(
         "random_element",
         elements=list(
@@ -104,14 +105,14 @@ class OrderFactory(factory.django.DjangoModelFactory):
     )
     comment = factory.Faker("sentence")
 
-    @factory.post_generation
-    def lease(self, created, extracted, **kwargs):
-        if extracted:
-            self.lease = extracted
-        elif isinstance(self.product, BerthProduct):
-            self.lease = BerthLeaseFactory(customer=self.customer)
+    @factory.lazy_attribute
+    def lease(self):
+        if isinstance(self.product, BerthProduct):
+            return BerthLeaseFactory(customer=self.customer)
         elif isinstance(self.product, WinterStorageProduct):
-            self.lease = WinterStorageLeaseFactory(customer=self.customer)
+            return WinterStorageLeaseFactory(customer=self.customer)
+        else:
+            return None
 
     class Meta:
         model = Order
