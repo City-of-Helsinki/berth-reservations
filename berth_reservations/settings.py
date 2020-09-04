@@ -133,6 +133,7 @@ INSTALLED_APPS = [
     "mailer",
     "graphene_django",
     "django_ilmoitin",
+    "elasticapm.contrib.django",
     # Local apps
     "users",
     "customers",
