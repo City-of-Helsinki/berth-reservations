@@ -373,6 +373,10 @@ class WinterStorageSectionNode(graphql_geojson.GeoJSONType):
     number_of_places = graphene.Int(required=True)
     number_of_free_places = graphene.Int(required=True)
     number_of_inactive_places = graphene.Int(required=True)
+    leases = DjangoConnectionField(
+        "leases.schema.WinterStorageLeaseNode",
+        description="**Requires permissions** to query this field.",
+    )
 
     class Meta:
         model = WinterStorageSection
@@ -387,6 +391,12 @@ class WinterStorageSectionNode(graphql_geojson.GeoJSONType):
         geojson_field = "location"
         interfaces = (relay.Node,)
         connection_class = CountConnection
+
+    @view_permission_required(
+        WinterStorageLease, WinterStorageApplication, CustomerProfile
+    )
+    def resolve_leases(self, info, **kwargs):
+        return self.leases.all()
 
 
 class WinterStorageAreaFilter(django_filters.FilterSet):
@@ -425,10 +435,6 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
     number_of_places = graphene.Int(required=True)
     number_of_free_places = graphene.Int(required=True)
     number_of_inactive_places = graphene.Int(required=True)
-    leases = DjangoConnectionField(
-        "leases.schema.WinterStorageLeaseNode",
-        description="**Requires permissions** to query this field.",
-    )
 
     def resolve_image_file(self, info, **kwargs):
         if self.image_file:
@@ -463,12 +469,6 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
 
     def resolve_number_of_places(self, info, **kwargs):
         return sum([section.number_of_places or 0 for section in self.sections.all()])
-
-    @view_permission_required(
-        WinterStorageLease, WinterStorageApplication, CustomerProfile
-    )
-    def resolve_leases(self, info, **kwargs):
-        return self.leases.all()
 
 
 class AbstractAreaInput:

@@ -13,10 +13,10 @@ from payments.tests.factories import (
     OrderFactory,
     WinterStorageProductFactory,
 )
-from resources.schema import BerthNode, WinterStorageAreaNode, WinterStoragePlaceNode
+from resources.schema import BerthNode, WinterStoragePlaceNode, WinterStorageSectionNode
 from resources.tests.factories import (
-    WinterStorageAreaFactory,
     WinterStoragePlaceFactory,
+    WinterStorageSectionFactory,
 )
 from utils.relay import to_global_id
 
@@ -346,7 +346,7 @@ query GetWinterStorageLeases {
                 place {
                     id
                 }
-                area {
+                section {
                     id
                 }
             }
@@ -365,11 +365,11 @@ query GetWinterStorageLeases {
 def test_query_winter_storage_leases(api_client, place, winter_storage_application):
     if place:
         winter_storage_lease = WinterStorageLeaseFactory(
-            place=WinterStoragePlaceFactory(), area=None
+            place=WinterStoragePlaceFactory(), section=None
         )
     else:
         winter_storage_lease = WinterStorageLeaseFactory(
-            place=None, area=WinterStorageAreaFactory()
+            place=None, section=WinterStorageSectionFactory()
         )
 
     winter_storage_application.customer = winter_storage_lease.customer
@@ -392,8 +392,10 @@ def test_query_winter_storage_leases(api_client, place, winter_storage_applicati
         }
         if place
         else None,
-        "area": {
-            "id": to_global_id(WinterStorageAreaNode, winter_storage_lease.area.id),
+        "section": {
+            "id": to_global_id(
+                WinterStorageSectionNode, winter_storage_lease.section.id
+            ),
         }
         if not place
         else None,

@@ -472,7 +472,7 @@ class Order(UUIDModel, TimeStampedModel):
                             * self.lease.place.place_type.length
                         )
                     elif self.lease.boat:
-                        # If the lease is only associated to an area,
+                        # If the lease is only associated to an section,
                         # calculate the price based on the boat dimensions
                         place_sqm = self.lease.boat.width * self.lease.boat.length
                     else:
