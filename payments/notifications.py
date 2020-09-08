@@ -9,7 +9,6 @@ from django_ilmoitin.registry import notifications
 from berth_reservations.tests.factories import CustomerProfileFactory
 
 from .providers import BamboraPayformProvider
-from .tests.conftest import PROVIDER_BASE_CONFIG
 from .tests.factories import OrderFactory
 
 
@@ -34,7 +33,13 @@ order = OrderFactory.build(
 
 
 payment_url = BamboraPayformProvider(
-    config=PROVIDER_BASE_CONFIG, ui_return_url=settings.VENE_UI_RETURN_URL
+    config={
+        "VENE_PAYMENTS_BAMBORA_API_URL": "https://real-bambora-api-url/api",
+        "VENE_PAYMENTS_BAMBORA_API_KEY": "dummy-key",
+        "VENE_PAYMENTS_BAMBORA_API_SECRET": "dummy-secret",
+        "VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS": ["dummy-bank"],
+    },
+    ui_return_url=settings.VENE_UI_RETURN_URL,
 ).get_payment_email_url(order, lang=settings.LANGUAGE_CODE)
 
 dummy_context.update(
