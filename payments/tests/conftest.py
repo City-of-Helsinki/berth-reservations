@@ -1,4 +1,6 @@
 import pytest
+from django.conf import settings
+from django_ilmoitin.models import NotificationTemplate
 from factory.random import randgen
 from requests import RequestException
 
@@ -25,7 +27,12 @@ from .factories import (
 from .utils import random_price, random_tax
 
 FAKE_BAMBORA_API_URL = "https://fake-bambora-api-url/api"
-UI_RETURN_URL = "https://front-end-url/{LANG}/"
+PROVIDER_BASE_CONFIG = {
+    "VENE_PAYMENTS_BAMBORA_API_URL": "https://real-bambora-api-url/api",
+    "VENE_PAYMENTS_BAMBORA_API_KEY": "dummy-key",
+    "VENE_PAYMENTS_BAMBORA_API_SECRET": "dummy-secret",
+    "VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS": ["dummy-bank"],
+}
 
 
 @pytest.fixture
@@ -136,24 +143,23 @@ def order_log_entry():
 
 @pytest.fixture()
 def provider_base_config():
-    return {
-        "VENE_PAYMENTS_BAMBORA_API_URL": "https://real-bambora-api-url/api",
-        "VENE_PAYMENTS_BAMBORA_API_KEY": "dummy-key",
-        "VENE_PAYMENTS_BAMBORA_API_SECRET": "dummy-secret",
-        "VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS": ["dummy-bank"],
-    }
+    return PROVIDER_BASE_CONFIG
 
 
 @pytest.fixture()
 def payment_provider(provider_base_config):
     """When it doesn't matter if request is contained within provider the fixture can still be used"""
-    return BamboraPayformProvider(config=provider_base_config)
+    return BamboraPayformProvider(
+        config=provider_base_config, ui_return_url=settings.VENE_UI_RETURN_URL
+    )
 
 
-def create_bambora_provider(provider_base_config, request, return_url=None):
+def create_bambora_provider(provider_base_config, request):
     """Helper for creating a new instance of provider with request and optional return_url contained within"""
     return BamboraPayformProvider(
-        config=provider_base_config, request=request, ui_return_url=return_url
+        config=provider_base_config,
+        request=request,
+        ui_return_url=settings.VENE_UI_RETURN_URL,
     )
 
 
@@ -179,3 +185,22 @@ def mocked_response_create(*args, **kwargs):
         return MockResponse(data={}, status_code=500)
     else:
         return MockResponse(data={"result": 0, "token": "abc123", "type": "e-payment"})
+
+
+@pytest.fixture
+def notification_template_order_approved():
+    from ..notifications import NotificationType
+
+    notification = NotificationTemplate.objects.language("fi").create(
+        type=NotificationType.ORDER_APPROVED.value,
+        subject="test order approved subject, event: {{ order.order_number }}!",
+        body_html="<b>{{ order.order_number }} {{ payment_url }}</b>",
+        body_text="{{ order.order_number }} {{ payment_url }}",
+    )
+    notification.create_translation(
+        "en",
+        subject="test order approved subject, event: {{ order.order_number }}!",
+        body_html="<b>{{ order.order_number }} {{ payment_url }}</b>",
+        body_text="{{ order.order_number }} {{ payment_url }}",
+    )
+    return notification
