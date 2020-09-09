@@ -125,6 +125,13 @@ class OrderLineFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = OrderLine
 
+    @factory.post_generation
+    def price(self, create, extracted, **kwargs):
+        if extracted:
+            self.price = extracted
+        elif not self.price and not self.product:
+            self.price = random_price()
+
 
 class OrderLogEntryFactory(factory.django.DjangoModelFactory):
     order = factory.SubFactory(OrderFactory)

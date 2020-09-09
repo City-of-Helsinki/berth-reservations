@@ -7,9 +7,11 @@ from django_ilmoitin.dummy_context import dummy_context
 from django_ilmoitin.registry import notifications
 
 from berth_reservations.tests.factories import CustomerProfileFactory
+from leases.tests.factories import BerthLeaseFactory
 
+from .enums import ProductServiceType
 from .providers import BamboraPayformProvider
-from .tests.factories import OrderFactory
+from .tests.factories import BerthProductFactory, OrderFactory, OrderLineFactory
 
 
 class NotificationType(TextChoices):
@@ -26,11 +28,33 @@ notifications.register(
 customer = CustomerProfileFactory.build()
 order = OrderFactory.build(
     customer=customer,
-    product=None,
+    product=BerthProductFactory.build(),
+    lease=BerthLeaseFactory.build(customer=customer),
     price=Decimal("100"),
     tax_percentage=Decimal("24.00"),
 )
-
+fixed_services = [
+    OrderLineFactory.build(
+        order=order, product__service=ProductServiceType.FIXED_SERVICES()[0]
+    ),
+    OrderLineFactory.build(
+        order=order, product__service=ProductServiceType.FIXED_SERVICES()[1]
+    ),
+    OrderLineFactory.build(
+        order=order, product__service=ProductServiceType.FIXED_SERVICES()[2]
+    ),
+    OrderLineFactory.build(
+        order=order, product__service=ProductServiceType.FIXED_SERVICES()[3]
+    ),
+]
+optional_services = [
+    OrderLineFactory.build(
+        order=order, product__service=ProductServiceType.OPTIONAL_SERVICES()[0]
+    ),
+    OrderLineFactory.build(
+        order=order, product__service=ProductServiceType.OPTIONAL_SERVICES()[1]
+    ),
+]
 
 payment_url = BamboraPayformProvider(
     config={
@@ -43,5 +67,12 @@ payment_url = BamboraPayformProvider(
 ).get_payment_email_url(order, lang=settings.LANGUAGE_CODE)
 
 dummy_context.update(
-    {NotificationType.ORDER_APPROVED: {"order": order, "payment_url": payment_url}}
+    {
+        NotificationType.ORDER_APPROVED: {
+            "order": order,
+            "payment_url": payment_url,
+            "fixed_services": fixed_services,
+            "optional_services": optional_services,
+        }
+    }
 )

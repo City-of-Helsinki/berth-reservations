@@ -13,7 +13,7 @@ from resources.schema import HarborNode, WinterStorageAreaNode
 from utils.relay import to_global_id
 
 from ..enums import OrderStatus, ProductServiceType
-from ..models import BerthProduct, Order
+from ..models import BerthProduct, Order, WinterStorageProduct
 from ..schema.types import (
     AdditionalProductNode,
     AdditionalProductTaxEnum,
@@ -797,9 +797,9 @@ def test_get_order_status(old_schema_api_client, status, order: Order):
     executed = old_schema_api_client.execute(ORDER_DETAILS_QUERY % order.order_number)
 
     if order.product:
-        if "berth" in order._product_content_type.model:
+        if isinstance(order.product, BerthProduct):
             order_type = OrderTypeEnum.BERTH
-        else:
+        elif isinstance(order.product, WinterStorageProduct):
             order_type = OrderTypeEnum.WINTER_STORAGE
     else:
         order_type = OrderTypeEnum.UNKNOWN
