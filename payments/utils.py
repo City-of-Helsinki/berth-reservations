@@ -6,7 +6,8 @@ import time
 from datetime import date, timedelta
 from decimal import Decimal
 from functools import wraps
-from typing import Callable
+from typing import Callable, Optional, Union
+from uuid import UUID
 
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import MONTHLY, rrule
@@ -17,6 +18,8 @@ from leases.utils import (
     calculate_winter_season_end_date,
     calculate_winter_season_start_date,
 )
+from resources.enums import AreaRegion
+from resources.models import Harbor, WinterStorageArea
 from utils.numbers import rounded as rounded_decimal
 
 
@@ -160,3 +163,53 @@ def generate_order_number() -> str:
     t = time.time() * 1000000 * random.uniform(1, 1000)
     b = base64.b32encode(struct.pack(">Q", int(t)).lstrip(b"\x00")).strip(b"=").lower()
     return b.decode("utf8")
+
+
+def get_talpa_product_id(
+    product_id: Union[UUID, str],
+    area: Optional[Union[Harbor, WinterStorageArea]] = None,
+):
+    """
+    The required ID for Talpa should have the following format:
+    Tilino_Tulosyksikkö_Sisäinentilaus_Projekti_Toimintoalue_ALV-koodi_Vapaaehtoinenomatuotenumero
+
+    Tilinumero                      Account number
+    Tulosyksikkö                    Business unit
+    Sisäinen Tilaus                 Internal Order
+    Projekti                        Project
+    Toimintoalue                    Function area
+    ALV-koodi                       VAT code
+    Vapaaehtoinen Oma Tuotenumero   Optional own product number
+    """
+    account_number = "340100"
+    project = " "  # Empty
+    vat_code = "44"  # Fixed
+    own_product_number = str(product_id)
+    business_unit = " "
+    function_area = " "
+    internal_order = " "
+
+    if isinstance(area, Harbor):
+        function_area = "292015"
+    if isinstance(area, WinterStorageArea):
+        function_area = "292014"
+
+    if area:
+        if area.region == AreaRegion.EAST:
+            business_unit = "2923301"
+            internal_order = "2923301100"
+        elif area.region == AreaRegion.WEST:
+            business_unit = "2923302"
+            internal_order = "2923302200"
+
+    return "_".join(
+        [
+            account_number,
+            business_unit,
+            internal_order,
+            project,
+            function_area,
+            vat_code,
+            own_product_number,
+        ]
+    )
