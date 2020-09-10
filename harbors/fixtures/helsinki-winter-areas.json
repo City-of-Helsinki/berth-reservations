@@ -162,9 +162,9 @@
         "number_of_marked_places": null,
         "max_width": null,
         "max_length": null,
-        "number_of_section_spaces": 100,
-        "max_length_of_section_spaces": 1000,
-        "number_of_unmarked_spaces": null
+        "number_of_section_spaces": null,
+        "max_length_of_section_spaces": null,
+        "number_of_unmarked_spaces": 100
     }
 },
 {

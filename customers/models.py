@@ -1,11 +1,12 @@
 import uuid
 from decimal import Decimal
 
+from dateutil.parser import parse
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.core.validators import MinValueValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Case, UniqueConstraint, Value, When
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -14,6 +15,7 @@ from resources.models import BoatType
 from utils.models import TimeStampedModel, UUIDModel
 
 from .enums import BoatCertificateType, InvoicingType, OrganizationType
+from .utils import calculate_lease_start_and_end_dates
 
 User = get_user_model()
 
@@ -34,6 +36,196 @@ class CustomerProfileManager(models.Manager):
                 )
             )
         )
+
+    @transaction.atomic
+    def import_customer_data(self, data):  # noqa: C901
+        """
+        Imports list of customers of the following shape:
+        {
+            "id": "98edea83-4c92-4dda-bb90-f22e9dafe94c"  <-- profile should have this very ID
+            "comment": ""
+            "customer_id": "313431",  <-- not really used for any field
+            "boats": [
+                {
+                    "boat_type": "Perämoottorivene",  <-- Finnish name for the boat type, from translated_fields
+                    "name": "McBoatface 111",
+                    "registration_number": "31123A",
+                    "width": "2.00",
+                    "length": "5.30",
+                    "draught": null,  <-- either null or string like width and length above
+                    "weight": null  <-- either null or integer
+                }
+            ],
+            "leases": [
+                {
+                    "harbor_servicemap_id": "41074",
+                    "pier_id": "A",  <-- harbor identifier
+                    "berth_number": 4,
+                    "start_date": "2019-06-10",
+                    "end_date": "2019-09-14",
+                    "boat_index": 0  <-- index of the boat in the "boats" list
+                }
+            ],
+            "orders": [
+                {
+                    "created_at": "2019-12-02 00:00:00.000",
+                    "order_sum": "251.00",
+                    "vat_percentage": "25.0",
+                    "berth": {
+                        "harbor_servicemap_id": "41074",  <-- service map id
+                        "pier_id": "A",  <-- harbor identifier
+                        "berth_number": 4
+                    },
+                    "comment": "Laskunumero: 247509 RAMSAYRANTA A 004"
+                }
+            ],
+            "organization": {  <-- either a dict like here or it will not be in this customer's dict at all
+                "type": "company",  <-- values from OrganizationType enum
+                "name": "Nice Profitable Firm Ltd.",
+                "address": "Mannerheimintie 1 A 1",
+                "postal_code": "00100",
+                "city": "Helsinki"
+            },
+        }
+
+        And returns dict where key is the customer_id and value is the UUID of created profile object
+        """
+        from leases.models import BerthLease
+        from payments.models import Order
+        from resources.models import Berth, Harbor
+
+        def _get_berth(harbor_servicemap_id: str, berth_number: str, pier_id: str):
+            """
+            - Try to filter the pier based on the identifier
+            - If no pier with that identifier was found, look for the default "-" pier
+            - If that isn't found either, check how many berth are on the pier
+                - If there's only one, assign it; otherwise, raise an error
+            """
+            possible_berths = Berth.objects.filter(
+                pier__harbor=Harbor.objects.get(servicemap_id=harbor_servicemap_id),
+                number=berth_number,
+            )
+            # Filter only for the specified pier
+            # If there's only one berth matching the berth number + pier identifier, that's the one
+            if matching_berth := possible_berths.filter(
+                pier__identifier=pier_id
+            ).first():
+                berth = matching_berth
+            # If there's no berth on the pier with the identifier, but there's only one pier on the harbor,
+            # then we take it as "default" pier and we assign it to the berth on that pier
+            elif possible_berths.count() == 1:
+                berth = possible_berths.first()
+            # Otherwise, rise an error
+            else:
+                raise Berth.DoesNotExist(
+                    _(f"Berth {berth_number} does not exist on pier {pier_id}")
+                )
+            return berth
+
+        result = {}
+        for index, customer_data in enumerate(data):
+            try:
+                if not customer_data.get("id"):
+                    raise Exception(_("No customer ID provided"))
+
+                customer = self.create(
+                    id=customer_data.get("id"), comment=customer_data.get("comment"),
+                )
+                customer.refresh_from_db()
+
+                if organization := customer_data.get("organization"):
+                    organization_type = OrganizationType(organization.get("type"))
+                    Organization.objects.create(
+                        customer=customer,
+                        organization_type=organization_type,
+                        name=organization.get("name"),
+                        address=organization.get("address"),
+                        postal_code=organization.get("postal_code"),
+                        city=organization.get("city"),
+                        business_id="-"
+                        if organization_type == OrganizationType.COMPANY
+                        else "",
+                    )
+
+                boats = []
+                for boat in customer_data.get("boats", []):
+                    boat_type = BoatType.objects.language("fi").get(
+                        translations__name=boat.get("boat_type")
+                    )
+                    boats.append(
+                        Boat.objects.create(
+                            owner=customer,
+                            name=boat.get("name"),
+                            boat_type=boat_type,
+                            registration_number=boat.get("registration_number"),
+                            width=Decimal(boat.get("width")),
+                            length=Decimal(boat.get("length")),
+                            draught=Decimal(boat.get("draught"))
+                            if boat.get("draught")
+                            else None,
+                            weight=Decimal(boat.get("weight"))
+                            if boat.get("weight")
+                            else None,
+                        )
+                    )
+
+                for lease in customer_data.get("leases", []):
+                    berth = _get_berth(
+                        lease.get("harbor_servicemap_id"),
+                        lease.get("berth_number"),
+                        lease.get("pier_id", "-"),
+                    )
+
+                    BerthLease.objects.create(
+                        customer=customer,
+                        berth=berth,
+                        boat=boats[lease.get("boat_index")]
+                        if lease.get("boat_index")
+                        else None,
+                        start_date=lease.get("start_date"),
+                        end_date=lease.get("end_date"),
+                    )
+
+                for order in customer_data.get("orders", []):
+                    lease = None
+                    if berth_data := order.get("berth"):
+                        berth = _get_berth(
+                            berth_data.get("harbor_servicemap_id"),
+                            berth_data.get("berth_number"),
+                            berth_data.get("pier_id", "-"),
+                        )
+
+                        start_date, end_date = calculate_lease_start_and_end_dates(
+                            parse(order.get("created_at")).date()
+                        )
+
+                        lease, _created = BerthLease.objects.get_or_create(
+                            customer=customer,
+                            berth=berth,
+                            start_date=start_date,
+                            end_date=end_date,
+                        )
+
+                    Order.objects.create(
+                        customer=customer,
+                        lease=lease,
+                        created_at=order.get("created_at"),
+                        price=Decimal(order.get("order_sum")),
+                        tax_percentage=Decimal(order.get("vat_percentage")),
+                        comment=order.get("comment"),
+                    )
+                result[customer_data["customer_id"]] = customer.pk
+            except Exception as err:
+                msg = (
+                    "Could not import customer_id: {}, index: {}".format(
+                        customer_data["customer_id"], index
+                    )
+                    if "customer_id" in customer_data
+                    else "Could not import unknown customer, index: {}".format(index)
+                )
+                msg += f"\n{err}"
+                raise Exception(msg) from err
+        return result
 
 
 class CustomerProfile(TimeStampedModel):

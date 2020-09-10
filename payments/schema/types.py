@@ -224,6 +224,11 @@ class OrderNode(DjangoObjectType):
         return super().get_queryset(queryset, info)
 
 
-class OrderStatusType(graphene.ObjectType):
+class OrderDetailsType(graphene.ObjectType):
     order_type = OrderTypeEnum(required=True)
     status = OrderStatusEnum(required=True)
+
+
+class FailedOrderType(graphene.ObjectType):
+    id = graphene.ID(required=True)
+    error = graphene.String()

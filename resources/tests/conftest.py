@@ -25,6 +25,7 @@ def availability_level():
 @pytest.fixture
 def boat_type():
     boat_type = BoatTypeFactory()
+    boat_type.create_translation("fi", name="Jollavene")
     return boat_type
 
 

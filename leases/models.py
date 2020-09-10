@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 from applications.models import BerthApplication, WinterStorageApplication
 from customers.models import Boat, CustomerProfile
-from resources.models import Berth, WinterStorageArea, WinterStoragePlace
+from resources.models import Berth, WinterStoragePlace, WinterStorageSection
 from utils.models import TimeStampedModel, UUIDModel
 
 from .consts import ACTIVE_LEASE_STATUSES
@@ -55,7 +55,7 @@ class AbstractLease(TimeStampedModel, UUIDModel):
         return self._orders_relation.first()
 
     def clean(self):
-        if self.boat and not self.boat.owner == self.customer:
+        if self.boat and self.boat.owner != self.customer:
             raise ValidationError(
                 _("The boat should belong to the customer who is creating the lease")
             )
@@ -201,9 +201,9 @@ class WinterStorageLease(AbstractLease):
         null=True,
         blank=True,
     )
-    area = models.ForeignKey(
-        WinterStorageArea,
-        verbose_name=_("area"),
+    section = models.ForeignKey(
+        WinterStorageSection,
+        verbose_name=_("section"),
         on_delete=models.PROTECT,
         related_name="leases",
         null=True,
@@ -233,22 +233,24 @@ class WinterStorageLease(AbstractLease):
     def clean(self):
         creating = self._state.adding
 
-        if self.place and self.area:
-            raise ValidationError(_("Lease cannot have both place and area assigned"))
-        elif not self.place and not self.area:
-            raise ValidationError(_("Lease must have either place or area assigned"))
+        if self.place and self.section:
+            raise ValidationError(
+                _("Lease cannot have both place and section assigned")
+            )
+        elif not self.place and not self.section:
+            raise ValidationError(_("Lease must have either place or section assigned"))
 
         if not creating:
             old_instance = WinterStorageLease.objects.get(id=self.id)
 
-            # Check that the place/area are not being changed
+            # Check that the place/section are not being changed
             self._check_lease_place(old_instance)
             # Check that the application belongs to the same customer
             self._check_application_customer(old_instance)
 
-        # If the lease is associated with an area, we don not need to check for
-        # other existing leases, since the area can have many active leases at the same time.
-        if not self.area:
+        # If the lease is associated with an section, we don not need to check for
+        # other existing leases, since the section can have many active leases at the same time.
+        if not self.section:
             existing_leases = WinterStorageLease.objects.filter(
                 place=self.place,
                 end_date__gt=self.start_date,
@@ -264,8 +266,8 @@ class WinterStorageLease(AbstractLease):
     def _check_lease_place(self, old_instance) -> None:
         if self.place and self.place != old_instance.place:
             raise ValidationError(_("Cannot change the place assigned to this lease"))
-        elif self.area and self.area != old_instance.area:
-            raise ValidationError(_("Cannot change the area assigned to this lease"))
+        elif self.section and self.section != old_instance.section:
+            raise ValidationError(_("Cannot change the section assigned to this lease"))
 
     def _check_application_customer(self, old_instance) -> None:
         # If the application is being changed, it has to belong to the same customer

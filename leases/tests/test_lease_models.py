@@ -390,37 +390,39 @@ def test_winter_storage_lease_is_active_today():
     assert WinterStorageLease.objects.get(id=lease.id).is_active
 
 
-def test_winter_storage_lease_assign_area(winter_storage_area):
-    lease = WinterStorageLeaseFactory(place=None, area=winter_storage_area)
+def test_winter_storage_lease_assign_section(winter_storage_section):
+    lease = WinterStorageLeaseFactory(place=None, section=winter_storage_section)
 
-    assert lease.area == winter_storage_area
+    assert lease.section == winter_storage_section
     assert lease.place is None
 
 
-def test_winter_storage_lease_area_can_have_multiple_leases(winter_storage_area):
-    WinterStorageLeaseFactory(place=None, area=winter_storage_area)
-    WinterStorageLeaseFactory(place=None, area=winter_storage_area)
-    WinterStorageLeaseFactory(place=None, area=winter_storage_area)
+def test_winter_storage_lease_section_can_have_multiple_leases(winter_storage_section):
+    WinterStorageLeaseFactory(place=None, section=winter_storage_section)
+    WinterStorageLeaseFactory(place=None, section=winter_storage_section)
+    WinterStorageLeaseFactory(place=None, section=winter_storage_section)
 
-    assert winter_storage_area.leases.count() == 3
+    assert winter_storage_section.leases.count() == 3
 
 
-def test_winter_storage_lease_assign_area_and_place_raises_error(
-    winter_storage_place, winter_storage_area
+def test_winter_storage_lease_assign_section_and_place_raises_error(
+    winter_storage_place, winter_storage_section
 ):
     with pytest.raises(ValidationError) as exception:
-        WinterStorageLeaseFactory(place=winter_storage_place, area=winter_storage_area)
+        WinterStorageLeaseFactory(
+            place=winter_storage_place, section=winter_storage_section
+        )
 
     error_msg = str(exception.value)
-    assert "Lease cannot have both place and area assigned" in error_msg
+    assert "Lease cannot have both place and section assigned" in error_msg
 
 
-def test_winter_storage_lease_assign_no_area_or_place_raises_error():
+def test_winter_storage_lease_assign_no_section_or_place_raises_error():
     with pytest.raises(ValidationError) as exception:
-        WinterStorageLeaseFactory(place=None, area=None)
+        WinterStorageLeaseFactory(place=None, section=None)
 
     error_msg = str(exception.value)
-    assert "Lease must have either place or area assigned" in error_msg
+    assert "Lease must have either place or section assigned" in error_msg
 
 
 def test_winter_storage_lease_one_lease_per_place(winter_storage_place):

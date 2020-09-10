@@ -472,7 +472,7 @@ class Order(UUIDModel, TimeStampedModel):
                             * self.lease.place.place_type.length
                         )
                     elif self.lease.boat:
-                        # If the lease is only associated to an area,
+                        # If the lease is only associated to an section,
                         # calculate the price based on the boat dimensions
                         place_sqm = self.lease.boat.width * self.lease.boat.length
                     else:
@@ -494,10 +494,14 @@ class Order(UUIDModel, TimeStampedModel):
         # Create OrderLines for the corresponding services only:
         #   - If it's creating the order
         #   - If the previous lease value was None (setting a lease)
+        #   - If the order is associated with a product, otherwise (when only receiving a price),
+        #     it should not generate the order lines since they can't be added to the price
         # For now, it only applies BerthLeases, since WinterStorageLeases include the
         # services on the m2 price.
-        if (creating or (old_instance and not old_instance.lease)) and isinstance(
-            self.lease, BerthLease
+        if (
+            (creating or (old_instance and not old_instance.lease))
+            and isinstance(self.lease, BerthLease)
+            and self.product
         ):
             self._create_order_lines(self.lease.berth.pier)
 

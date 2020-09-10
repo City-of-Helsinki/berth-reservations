@@ -1,11 +1,18 @@
 import graphene
+from anymail.exceptions import AnymailError
+from dateutil.relativedelta import relativedelta
+from dateutil.utils import today
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.utils.translation import gettext_lazy as _
+from django_ilmoitin.utils import send_notification
 
+from applications.enums import ApplicationStatus
+from applications.models import BerthApplication, WinterStorageApplication
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.schema import ProfileNode
+from leases.enums import LeaseStatus
 from leases.models import BerthLease, WinterStorageLease
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from resources.schema import HarborNode, WinterStorageAreaNode
@@ -32,6 +39,7 @@ from .types import (
     AdditionalProductTaxEnum,
     BerthPriceGroupNode,
     BerthProductNode,
+    FailedOrderType,
     OrderLineNode,
     OrderNode,
     OrderStatusEnum,
@@ -479,6 +487,78 @@ class DeleteOrderLineMutation(graphene.ClientIDMutation):
         return DeleteOrderLineMutation()
 
 
+class OrderApprovalInput(graphene.InputObjectType):
+    order_id = graphene.ID(required=True)
+    email = graphene.String(required=True)
+
+
+class ApproveOrderMutation(graphene.ClientIDMutation):
+    class Input:
+        orders = graphene.List(OrderApprovalInput, required=True)
+        due_date = graphene.Date(description="Defaults to the Order due date")
+
+    failed_orders = graphene.List(FailedOrderType, required=True)
+
+    @classmethod
+    @change_permission_required(
+        Order,
+        BerthLease,
+        WinterStorageLease,
+        BerthApplication,
+        WinterStorageApplication,
+    )
+    def mutate_and_get_payload(cls, root, info, **input):
+        from ..notifications import NotificationType
+
+        failed_orders = []
+        due_date = input.get("due_date", today().date() + relativedelta(weeks=2))
+
+        for order_input in input.get("orders"):
+            order_id = order_input.get("order_id")
+            try:
+                with transaction.atomic():
+                    order = get_node_from_global_id(
+                        info, order_id, only_type=OrderNode, nullable=False,
+                    )
+
+                    # Update due date
+                    order.due_date = due_date
+                    order.save()
+
+                    # Update application status
+                    order.lease.application.status = ApplicationStatus.OFFER_SENT
+                    order.lease.application.save()
+
+                    # Update lease status
+                    order.lease.status = LeaseStatus.OFFERED
+                    order.lease.save()
+
+                    # Get payment URL
+                    language = (
+                        order.lease.application.language or settings.LANGUAGE_CODE
+                    )
+                    payment_url = get_payment_provider(
+                        info.context, ui_return_url=settings.VENE_UI_RETURN_URL
+                    ).get_payment_email_url(order, lang=language)
+
+                    # Send email
+                    email = order_input.get("email")
+                    context = {"order": order, "payment_url": payment_url}
+                    send_notification(
+                        email, NotificationType.ORDER_APPROVED.value, context, language
+                    )
+            except (
+                AnymailError,
+                OSError,
+                Order.DoesNotExist,
+                ValidationError,
+                VenepaikkaGraphQLError,
+            ) as e:
+                failed_orders.append(FailedOrderType(id=order_id, error=str(e)))
+
+        return ApproveOrderMutation(failed_orders=failed_orders)
+
+
 class Mutation:
     create_berth_product = CreateBerthProductMutation.Field(
         description="Creates a `BerthProduct` object."
@@ -578,6 +658,19 @@ class Mutation:
         "\n\n**Requires permissions** to edit payments."
         "\n\nErrors:"
         "\n* The passed `OrderLine` does not exist"
+    )
+
+    approve_orders = ApproveOrderMutation.Field(
+        description="Approves a list of Orders."
+        "\n\nIt receives a list of `GlobalID`s with the email to which the notification will be sent. "
+        "It also receives a `dueDate` for the orders. If no due date is passed, "
+        "it will take the due date set on the order."
+        "\n\nIt returns a list of failed order ids and the reason why they failed."
+        "\n\n**Requires permissions** to update orders, leases, and applications."
+        "\n\nErrors:"
+        "\n* The passed `order` does not exist"
+        "\n* An `order.lease` or `order.lease.application` have an invalid status transition"
+        "\n* There's an error when sending the email"
     )
 
 

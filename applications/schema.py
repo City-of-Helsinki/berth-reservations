@@ -4,6 +4,7 @@ from graphene_django.types import DjangoObjectType
 from harbors.schema import HarborType, WinterStorageAreaType
 from utils.relay import get_node_from_global_id
 
+from .constants import MARKED_WS_SENDER, UNMARKED_WS_SENDER
 from .enums import WinterStorageMethod
 from .models import (
     BerthApplication,
@@ -197,9 +198,12 @@ class CreateWinterStorageApplication(graphene.Mutation):
             )
 
         # Send notifications when all m2m relations are saved
-        application_saved.send(
-            sender="CreateWinterStorageApplication", application=application
+        sender = (
+            UNMARKED_WS_SENDER
+            if application.is_unmarked_ws_application()
+            else MARKED_WS_SENDER
         )
+        application_saved.send(sender=sender, application=application)
 
         ok = True
         return CreateWinterStorageApplication(

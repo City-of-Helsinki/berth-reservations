@@ -2,6 +2,7 @@ import uuid
 from random import randint
 
 import pytest
+from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from freezegun import freeze_time
 
@@ -20,8 +21,8 @@ from payments.utils import calculate_product_partial_season_price
 from resources.schema import (
     BerthNode,
     HarborNode,
-    WinterStorageAreaNode,
     WinterStoragePlaceNode,
+    WinterStorageSectionNode,
 )
 from utils.numbers import rounded
 from utils.relay import to_global_id
@@ -536,7 +537,7 @@ def test_update_berth_lease_all_fields(
     boat.save()
 
     start_date = today()
-    end_date = start_date.replace(month=start_date.month + 3)
+    end_date = start_date + relativedelta(months=3)
 
     variables = {
         "id": berth_lease_id,
@@ -661,12 +662,15 @@ mutation CreateWinterStorageLease($input: CreateWinterStorageLeaseMutationInput!
             place {
                 id
             }
-            area {
+            section {
                 id
             }
             application {
                 id
                 status
+            }
+            order {
+                id
             }
         }
     }
@@ -703,6 +707,10 @@ def test_create_winter_storage_lease(
         executed["data"]["createWinterStorageLease"]["winterStorageLease"].pop("id")
         is not None
     )
+    assert (
+        executed["data"]["createWinterStorageLease"]["winterStorageLease"].pop("order")
+        is not None
+    )
     assert executed["data"]["createWinterStorageLease"]["winterStorageLease"] == {
         "status": "DRAFTED",
         "startDate": str(calculate_winter_storage_lease_start_date()),
@@ -717,17 +725,17 @@ def test_create_winter_storage_lease(
             "status": ApplicationStatus.OFFER_GENERATED.name,
         },
         "place": {"id": variables.get("placeId")},
-        "area": None,
+        "section": None,
     }
 
 
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
-def test_create_winter_storage_lease_with_area(
-    api_client, winter_storage_application, winter_storage_area, boat
+def test_create_winter_storage_lease_with_section(
+    api_client, winter_storage_application, winter_storage_section, boat
 ):
-    WinterStorageProductFactory(winter_storage_area=winter_storage_area)
+    WinterStorageProductFactory(winter_storage_area=winter_storage_section.area)
     winter_storage_application.customer = boat.owner
     winter_storage_application.save()
 
@@ -735,7 +743,7 @@ def test_create_winter_storage_lease_with_area(
         "applicationId": to_global_id(
             WinterStorageApplicationNode, winter_storage_application.id
         ),
-        "areaId": to_global_id(WinterStorageAreaNode, winter_storage_area.id),
+        "sectionId": to_global_id(WinterStorageSectionNode, winter_storage_section.id),
         "boatId": to_global_id(BoatNode, boat.id),
     }
 
@@ -747,6 +755,10 @@ def test_create_winter_storage_lease_with_area(
 
     assert (
         executed["data"]["createWinterStorageLease"]["winterStorageLease"].pop("id")
+        is not None
+    )
+    assert (
+        executed["data"]["createWinterStorageLease"]["winterStorageLease"].pop("order")
         is not None
     )
     assert executed["data"]["createWinterStorageLease"]["winterStorageLease"] == {
@@ -763,7 +775,7 @@ def test_create_winter_storage_lease_with_area(
             "status": ApplicationStatus.OFFER_GENERATED.name,
         },
         "place": None,
-        "area": {"id": variables.get("areaId")},
+        "section": {"id": variables.get("sectionId")},
     }
 
 
@@ -881,11 +893,11 @@ def test_create_winter_storage_lease_application_already_has_lease(
     )
 
 
-def test_create_winter_storage_lease_both_place_and_area(
+def test_create_winter_storage_lease_both_place_and_section(
     superuser_api_client,
     winter_storage_application,
     winter_storage_place,
-    winter_storage_area,
+    winter_storage_section,
     customer_profile,
 ):
     winter_storage_application.customer = customer_profile
@@ -896,17 +908,17 @@ def test_create_winter_storage_lease_both_place_and_area(
             WinterStorageApplicationNode, winter_storage_application.id
         ),
         "placeId": to_global_id(WinterStoragePlaceNode, winter_storage_place.id),
-        "areaId": to_global_id(WinterStorageAreaNode, winter_storage_area.id),
+        "sectionId": to_global_id(WinterStorageSectionNode, winter_storage_section.id),
     }
 
     executed = superuser_api_client.execute(
         CREATE_WINTER_STORAGE_LEASE_MUTATION, input=variables,
     )
 
-    assert_in_errors("Cannot receive both Winter Storage Place and Area", executed)
+    assert_in_errors("Cannot receive both Winter Storage Place and Section", executed)
 
 
-def test_create_winter_storage_lease_no_place_or_area(
+def test_create_winter_storage_lease_no_place_or_section(
     superuser_api_client, winter_storage_application, customer_profile,
 ):
     winter_storage_application.customer = customer_profile
@@ -922,7 +934,7 @@ def test_create_winter_storage_lease_no_place_or_area(
         CREATE_WINTER_STORAGE_LEASE_MUTATION, input=variables,
     )
 
-    assert_in_errors("Either Winter Storage Place or Area are required", executed)
+    assert_in_errors("Either Winter Storage Place or Section are required", executed)
 
 
 CREATE_WINTER_STORAGE_LEASE_WITH_ORDER_MUTATION = """
@@ -1164,7 +1176,7 @@ def test_update_winter_storage_lease_all_fields(
     boat.save()
 
     start_date = today()
-    end_date = start_date.replace(month=start_date.month + 3)
+    end_date = start_date + relativedelta(months=3)
 
     variables = {
         "id": lease_id,

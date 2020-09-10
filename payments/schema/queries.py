@@ -11,8 +11,8 @@ from .types import (
     AdditionalProductTypeEnum,
     BerthPriceGroupNode,
     BerthProductNode,
+    OrderDetailsType,
     OrderNode,
-    OrderStatusType,
     OrderTypeEnum,
     WinterStorageProductNode,
 )
@@ -107,9 +107,9 @@ class Query:
 
 
 class OldAPIQuery:
-    order_status = Field(OrderStatusType, order_number=String(required=True))
+    order_details = Field(OrderDetailsType, order_number=String(required=True))
 
-    def resolve_order_status(self, info, order_number):
+    def resolve_order_details(self, info, order_number):
         try:
             order = Order.objects.get(order_number=order_number)
         except Order.DoesNotExist as e:
@@ -128,4 +128,4 @@ class OldAPIQuery:
             elif "winter" in order._lease_content_type.model:
                 order_type = OrderTypeEnum.WINTER_STORAGE
 
-        return OrderStatusType(status=order.status, order_type=order_type)
+        return OrderDetailsType(status=order.status, order_type=order_type)

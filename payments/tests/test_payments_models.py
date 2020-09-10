@@ -916,10 +916,10 @@ def test_berth_season_price(berth):
 
 
 def test_order_winter_storage_lease_with_area_right_price(
-    winter_storage_area, winter_storage_product, boat
+    winter_storage_section, winter_storage_product, boat
 ):
     winter_storage_lease = WinterStorageLeaseFactory(
-        place=None, area=winter_storage_area, customer=boat.owner, boat=boat
+        place=None, section=winter_storage_section, customer=boat.owner, boat=boat
     )
     order = Order.objects.create(
         _lease_object_id=winter_storage_lease.id,
@@ -942,14 +942,14 @@ def test_order_winter_storage_lease_with_area_right_price(
 
 
 def test_order_winter_storage_lease_without_boat_right_price(
-    winter_storage_area,
+    winter_storage_section,
     winter_storage_product,
     winter_storage_application,
     customer_profile,
 ):
     winter_storage_lease = WinterStorageLeaseFactory(
         place=None,
-        area=winter_storage_area,
+        section=winter_storage_section,
         customer=customer_profile,
         boat=None,
         application=winter_storage_application,

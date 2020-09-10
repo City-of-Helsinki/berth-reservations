@@ -4,6 +4,7 @@ from django.dispatch import Signal
 from django_ilmoitin.utils import send_notification
 from sentry_sdk import capture_exception
 
+from .constants import MARKED_WS_SENDER, UNMARKED_WS_SENDER
 from .notifications import NotificationType
 
 application_saved = Signal(providing_args=["application"])
@@ -11,8 +12,13 @@ application_saved = Signal(providing_args=["application"])
 
 def application_notification_handler(sender, application, **kwargs):
     notification_type = NotificationType.BERTH_APPLICATION_CREATED.value
-    if sender == "CreateWinterStorageApplication":
+    if sender == MARKED_WS_SENDER:
         notification_type = NotificationType.WINTER_STORAGE_APPLICATION_CREATED.value
+    elif sender == UNMARKED_WS_SENDER:
+        notification_type = (
+            NotificationType.UNMARKED_WINTER_STORAGE_APPLICATION_CREATED.value
+        )
+
     try:
         send_notification(
             application.email,
