@@ -1,0 +1,2 @@
+MARKED_WS_SENDER = "CreateMarkedWinterStorageApplication"
+UNMARKED_WS_SENDER = "CreateUnmarkedWinterStorageApplication"

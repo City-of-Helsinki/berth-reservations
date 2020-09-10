@@ -281,6 +281,15 @@ class WinterStorageApplication(BaseApplication):
         verbose_name=_("trailer registration number"), max_length=64, blank=True
     )
 
+    def is_unmarked_ws_application(self) -> bool:
+        first_area = self.chosen_areas.first()
+
+        return bool(
+            self.chosen_areas.count() == 1
+            and first_area.number_of_unmarked_spaces
+            and first_area.number_of_unmarked_spaces > 0
+        )
+
     def get_notification_context(self):
         return {
             "created_at": localize_datetime(self.created_at, self.language),

@@ -115,3 +115,9 @@ Lastly, you can load the User Groups:
 And install the model permissions:
 
     ./manage.py set_group_model_permissions
+
+## Running tests
+
+    pytest
+    
+In order to successfully run tests in ```applications/tests/test_applications_notifications.py``` you need to set env variable ```NOTIFICATIONS_ENABLED=1```

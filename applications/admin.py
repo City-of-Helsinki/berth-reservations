@@ -316,9 +316,14 @@ class WinterStorageApplicationAdmin(admin.ModelAdmin):
         resent_count = 0
         for application in queryset:
             try:
+                notification_type = (
+                    NotificationType.UNMARKED_WINTER_STORAGE_APPLICATION_CREATED.value
+                    if application.is_unmarked_ws_application()
+                    else NotificationType.WINTER_STORAGE_APPLICATION_CREATED.value
+                )
                 send_notification(
                     application.email,
-                    NotificationType.WINTER_STORAGE_APPLICATION_CREATED.value,
+                    notification_type,
                     application.get_notification_context(),
                     application.language,
                 )

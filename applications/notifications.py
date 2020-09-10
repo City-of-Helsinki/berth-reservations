@@ -22,6 +22,10 @@ class NotificationType(TextChoices):
         "winter_storage_application_created",
         _("Winter storage application created"),
     )
+    UNMARKED_WINTER_STORAGE_APPLICATION_CREATED = (
+        "unmarked_winter_storage_application_created",
+        _("Unmarked winter storage application created"),
+    )
 
 
 notifications.register(
@@ -31,6 +35,10 @@ notifications.register(
 notifications.register(
     NotificationType.WINTER_STORAGE_APPLICATION_CREATED.value,
     NotificationType.WINTER_STORAGE_APPLICATION_CREATED.label,
+)
+notifications.register(
+    NotificationType.UNMARKED_WINTER_STORAGE_APPLICATION_CREATED.value,
+    NotificationType.UNMARKED_WINTER_STORAGE_APPLICATION_CREATED.label,
 )
 
 berth_application = BerthApplicationFactory.build()
@@ -48,6 +56,10 @@ dummy_context.update(
             "harbor_choices": sorted(harbor_choices, key=lambda c: c.priority),
         },
         NotificationType.WINTER_STORAGE_APPLICATION_CREATED: {
+            "application": winter_storage_application,
+            "area_choices": sorted(winter_area_choices, key=lambda c: c.priority),
+        },
+        NotificationType.UNMARKED_WINTER_STORAGE_APPLICATION_CREATED: {
             "application": winter_storage_application,
             "area_choices": sorted(winter_area_choices, key=lambda c: c.priority),
         },
