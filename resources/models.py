@@ -26,7 +26,7 @@ from leases.utils import (
 )
 from utils.models import TimeStampedModel, UUIDModel
 
-from .enums import BerthMooringType
+from .enums import AreaRegion, BerthMooringType
 
 
 class BoatType(TranslatableModel):
@@ -112,6 +112,13 @@ class AbstractArea(TimeStampedModel, UUIDModel):
 
     image_link = models.URLField(
         verbose_name=_("image link"), max_length=400, blank=True
+    )
+    region = models.CharField(
+        choices=AreaRegion.choices,
+        verbose_name=_("area region"),
+        max_length=32,
+        blank=True,
+        null=True,
     )
 
     class Meta:

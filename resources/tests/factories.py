@@ -2,7 +2,7 @@ import factory
 from django.contrib.gis.geos import Point
 from factory.random import randgen
 
-from ..enums import BerthMooringType
+from ..enums import AreaRegion, BerthMooringType
 from ..models import (
     AvailabilityLevel,
     Berth,
@@ -37,6 +37,7 @@ class AbstractAreaFactory(factory.django.DjangoModelFactory):
     zip_code = factory.Faker("postcode", locale="fi_FI")
     name = factory.Faker("word")
     street_address = factory.Faker("address")
+    region = factory.Faker("random_element", elements=AreaRegion.values)
     location = factory.LazyFunction(
         lambda: Point(
             24.915 + randgen.uniform(0, 0.040), 60.154 + randgen.uniform(0, 0.022)
