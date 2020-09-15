@@ -6,6 +6,12 @@ from freezegun import freeze_time
 from graphql_relay.node.node import to_global_id
 
 from berth_reservations.tests.utils import assert_in_errors
+from harbors.tests.factories import WinterStorageAreaFactory
+from resources.schema import WinterStorageSectionNode
+from resources.tests.factories import (
+    WinterStorageAreaFactory as ResourcesWinterStorageAreaFactory,
+    WinterStorageSectionFactory,
+)
 
 from ..enums import ApplicationStatus
 from ..new_schema.types import WinterStorageApplicationNode
@@ -324,6 +330,7 @@ query APPLICATION {
         winterStorageAreaChoices {
             winterStorageAreaName
             priority
+            winterStorageSectionIds
         }
         customer {
             id
@@ -339,8 +346,17 @@ query APPLICATION {
     indirect=True,
 )
 def test_winter_storage_application_query(winter_storage_application, api_client):
+    resources_area = ResourcesWinterStorageAreaFactory()
+    section = WinterStorageSectionFactory(area=resources_area)
+
+    area = WinterStorageAreaFactory()
+    area.resources_area_id = resources_area.id
+    area.save()
+
     WinterAreaChoiceFactory(priority=2, application=winter_storage_application)
-    WinterAreaChoiceFactory(priority=1, application=winter_storage_application)
+    WinterAreaChoiceFactory(
+        priority=1, application=winter_storage_application, winter_storage_area=area
+    )
 
     application_id = to_global_id(
         WinterStorageApplicationNode._meta.name, winter_storage_application.id,
@@ -361,6 +377,12 @@ def test_winter_storage_application_query(winter_storage_application, api_client
     first_area = areas[0]
     assert first_area["priority"] == 1
     assert len(first_area["winterStorageAreaName"]) > 0
+
+    sections_ids = first_area["winterStorageSectionIds"]
+    assert len(sections_ids) == 1
+    assert sections_ids[0] == to_global_id(
+        WinterStorageSectionNode._meta.name, section.id,
+    )
 
     second_area = areas[1]
     assert second_area["priority"] == 2

@@ -421,6 +421,7 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
         model = WinterStorageArea
         geojson_field = "location"
         interfaces = (relay.Node,)
+        exclude = ("harbors_area",)
         filterset_class = WinterStorageAreaFilter
         connection_class = CountConnection
 

@@ -95,9 +95,9 @@ import them first:
 Then you can load the fixtures with the following commands:
 
     ./manage.py loaddata helsinki-harbors.json
+    ./manage.py loaddata helsinki-ws-resources.json
     ./manage.py loaddata helsinki-winter-areas.json
     ./manage.py loaddata helsinki-harbor-resources.json
-    ./manage.py loaddata helsinki-ws-resources.json
 
 And assign the corresponding region to areas:
 

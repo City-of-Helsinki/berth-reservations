@@ -1,6 +1,7 @@
 import django_filters
 import graphene
 from graphene_django import DjangoObjectType
+from graphql_relay import to_global_id
 
 from customers.models import CustomerProfile
 from leases.models import BerthLease, WinterStorageLease
@@ -99,6 +100,7 @@ class BerthApplicationNode(DjangoObjectType):
 class WinterStorageAreaChoiceType(DjangoObjectType):
     winter_storage_area = graphene.String()
     winter_storage_area_name = graphene.String(required=True)
+    winter_storage_section_ids = graphene.List(graphene.ID)
 
     class Meta:
         model = WinterStorageAreaChoice
@@ -109,6 +111,12 @@ class WinterStorageAreaChoiceType(DjangoObjectType):
 
     def resolve_winter_storage_area_name(self, info, **kwargs):
         return self.winter_storage_area.safe_translation_getter("name")
+
+    def resolve_winter_storage_section_ids(self, info, **kwargs):
+        return list(
+            to_global_id("WinterStorageSectionNode", section.id)
+            for section in self.winter_storage_area.resources_area.sections.all()
+        )
 
 
 class WinterStorageApplicationFilter(django_filters.FilterSet):
