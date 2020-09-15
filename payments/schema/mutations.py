@@ -25,7 +25,7 @@ from users.decorators import (
 from utils.relay import get_node_from_global_id
 from utils.schema import update_object
 
-from ..enums import OrderStatus
+from ..enums import OrderStatus, ProductServiceType
 from ..models import (
     AdditionalProduct,
     BerthProduct,
@@ -543,7 +543,17 @@ class ApproveOrderMutation(graphene.ClientIDMutation):
 
                     # Send email
                     email = order_input.get("email")
-                    context = {"order": order, "payment_url": payment_url}
+
+                    context = {
+                        "order": order,
+                        "fixed_services": order.order_lines.filter(
+                            product__service__in=ProductServiceType.FIXED_SERVICES()
+                        ),
+                        "optional_services": order.order_lines.filter(
+                            product__service__in=ProductServiceType.OPTIONAL_SERVICES()
+                        ),
+                        "payment_url": payment_url,
+                    }
                     send_notification(
                         email, NotificationType.ORDER_APPROVED.value, context, language
                     )

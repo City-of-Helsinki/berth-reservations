@@ -802,7 +802,7 @@ def test_order_manager_only_winter_storage_orders():
     OrderFactory(product=BerthProductFactory())
     OrderFactory(product=WinterStorageProductFactory())
 
-    orders = Order.objects.berth_orders()
+    orders = Order.objects.winter_storage_orders()
     assert orders.count() == 1
 
     for order in Order.objects.winter_storage_orders():
