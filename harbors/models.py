@@ -8,6 +8,8 @@ from django.utils.translation import gettext_lazy as _
 from munigeo.models import Municipality
 from parler.models import TranslatableModel, TranslatedFields
 
+from resources.models import WinterStorageArea as NewWSArea
+
 
 class BoatType(TranslatableModel):
     translations = TranslatedFields(
@@ -196,6 +198,14 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
         verbose_name=_("Municipality"),
         related_name="+",
         on_delete=models.SET_NULL,
+    )
+
+    resources_area = models.OneToOneField(
+        NewWSArea,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="harbors_area",
     )
 
     image_file = models.ImageField(

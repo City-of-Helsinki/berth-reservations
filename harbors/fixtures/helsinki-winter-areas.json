@@ -24,7 +24,8 @@
         "max_length": 1200,
         "number_of_section_spaces": null,
         "max_length_of_section_spaces": null,
-        "number_of_unmarked_spaces": null
+        "number_of_unmarked_spaces": null,
+        "resources_area_id": "9d577c99-63f3-4234-8138-f70a4f8684f2"
     }
 },
 {
@@ -52,7 +53,8 @@
         "max_length": 1200,
         "number_of_section_spaces": null,
         "max_length_of_section_spaces": null,
-        "number_of_unmarked_spaces": null
+        "number_of_unmarked_spaces": null,
+        "resources_area_id": "3631fbc5-1454-448f-9a9b-fff64588d208"
     }
 },
 {
@@ -80,7 +82,8 @@
         "max_length": 1000,
         "number_of_section_spaces": null,
         "max_length_of_section_spaces": null,
-        "number_of_unmarked_spaces": null
+        "number_of_unmarked_spaces": null,
+        "resources_area_id": "3f485ff8-36bf-4786-bfe6-b0729e8e9c6b"
     }
 },
 {
@@ -108,7 +111,8 @@
         "max_length": 2000,
         "number_of_section_spaces": null,
         "max_length_of_section_spaces": null,
-        "number_of_unmarked_spaces": null
+        "number_of_unmarked_spaces": null,
+        "resources_area_id": "ed291ec2-1cb3-4049-a642-e290280bd8bf"
     }
 },
 {
@@ -136,7 +140,8 @@
         "max_length": null,
         "number_of_section_spaces": null,
         "max_length_of_section_spaces": null,
-        "number_of_unmarked_spaces": 100
+        "number_of_unmarked_spaces": 100,
+        "resources_area_id": "10f6d541-5e4e-420c-abc4-014a48aca3c4"
     }
 },
 {
@@ -164,7 +169,8 @@
         "max_length": null,
         "number_of_section_spaces": null,
         "max_length_of_section_spaces": null,
-        "number_of_unmarked_spaces": 100
+        "number_of_unmarked_spaces": 100,
+        "resources_area_id": "a9ef8fe9-86a8-44e4-a806-32ed47494129"
     }
 },
 {
@@ -192,7 +198,8 @@
         "max_length": null,
         "number_of_section_spaces": null,
         "max_length_of_section_spaces": null,
-        "number_of_unmarked_spaces": 50
+        "number_of_unmarked_spaces": 50,
+        "resources_area_id": "5bfe1de8-dcc7-4ed4-b16d-c5f2fa08be0d"
     }
 },
 {
@@ -220,7 +227,8 @@
         "max_length": null,
         "number_of_section_spaces": null,
         "max_length_of_section_spaces": null,
-        "number_of_unmarked_spaces": 20
+        "number_of_unmarked_spaces": 20,
+        "resources_area_id": "72335b05-1913-44e2-8f5d-a4219498b47a"
     }
 },
 {
@@ -248,7 +256,8 @@
         "max_length": null,
         "number_of_section_spaces": null,
         "max_length_of_section_spaces": null,
-        "number_of_unmarked_spaces": 100
+        "number_of_unmarked_spaces": 100,
+        "resources_area_id": "94d97495-bb5c-4d6e-a91a-5da9e70d0aea"
     }
 },
 {
@@ -276,7 +285,8 @@
         "max_length": null,
         "number_of_section_spaces": null,
         "max_length_of_section_spaces": null,
-        "number_of_unmarked_spaces": 125
+        "number_of_unmarked_spaces": 125,
+        "resources_area_id": "c200c0fa-8afc-43ab-8d43-a3d10be4c44a"
     }
 },
 {
@@ -304,7 +314,8 @@
         "max_length": null,
         "number_of_section_spaces": null,
         "max_length_of_section_spaces": null,
-        "number_of_unmarked_spaces": 500
+        "number_of_unmarked_spaces": 500,
+        "resources_area_id": "db0323f0-8da5-40e3-a8aa-e46ad4af3e93"
     }
 },
 {
@@ -332,7 +343,8 @@
         "max_length": null,
         "number_of_section_spaces": null,
         "max_length_of_section_spaces": null,
-        "number_of_unmarked_spaces": 40
+        "number_of_unmarked_spaces": 40,
+        "resources_area_id": "506b0830-fa3e-4da7-a837-b4ffa1218eb1"
     }
 },
 {
