@@ -133,7 +133,6 @@ INSTALLED_APPS = [
     "mailer",
     "graphene_django",
     "django_ilmoitin",
-    "elasticapm.contrib.django",
     # Local apps
     "users",
     "customers",
@@ -143,6 +142,9 @@ INSTALLED_APPS = [
     "leases",
     "payments",
 ]
+
+if TIER in ("stage", "prod"):
+    INSTALLED_APPS += ["elasticapm.contrib.django"]
 
 AUTH_USER_MODEL = "users.User"
 
