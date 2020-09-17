@@ -13,7 +13,7 @@ from resources.tests.factories import (
     WinterStorageSectionFactory,
 )
 
-from ..enums import ApplicationStatus
+from ..enums import ApplicationAreaType, ApplicationStatus
 from ..new_schema.types import WinterStorageApplicationNode
 from .factories import WinterAreaChoiceFactory, WinterStorageApplicationFactory
 
@@ -387,3 +387,37 @@ def test_winter_storage_application_query(winter_storage_application, api_client
     second_area = areas[1]
     assert second_area["priority"] == 2
     assert len(second_area["winterStorageAreaName"]) > 0
+
+
+QUERY_WITH_AREA_FILTER = """
+        {
+            winterStorageApplications(areaTypes: [%s]) {
+                count
+                totalCount
+            }
+        }
+    """
+
+
+def test_query_with_area_type_filter(superuser_api_client):
+    for _i in range(5):
+        application = WinterStorageApplicationFactory()
+        application.area_type = ApplicationAreaType.MARKED
+        application.save()
+
+    for _i in range(3):
+        application = WinterStorageApplicationFactory()
+        application.area_type = ApplicationAreaType.UNMARKED
+        application.save()
+
+    query_marked = QUERY_WITH_AREA_FILTER % ApplicationAreaType.MARKED.value.upper()
+    executed_marked = superuser_api_client.execute(query_marked)
+    assert executed_marked["data"] == {
+        "winterStorageApplications": {"count": 5, "totalCount": 8}
+    }
+
+    query_unmarked = QUERY_WITH_AREA_FILTER % ApplicationAreaType.UNMARKED.value.upper()
+    executed_unmarked = superuser_api_client.execute(query_unmarked)
+    assert executed_unmarked["data"] == {
+        "winterStorageApplications": {"count": 3, "totalCount": 8}
+    }

@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 
 from harbors.tests.factories import WinterStorageAreaFactory
 
-from ..enums import ApplicationStatus
+from ..enums import ApplicationAreaType, ApplicationStatus
 from .factories import WinterAreaChoiceFactory
 
 
@@ -30,7 +30,7 @@ def test_berth_application_without_lease_invalid_statuses(berth_application):
     assert "BerthApplication with no lease can only be" in error_msg
 
 
-def test_winterstorage_application_is_not_unmarked(winter_storage_application):
+def test_winterstorage_application_resolve_marked_area(winter_storage_application):
     area = WinterStorageAreaFactory()
     area.number_of_unmarked_spaces = None
     area.save()
@@ -38,10 +38,10 @@ def test_winterstorage_application_is_not_unmarked(winter_storage_application):
         application=winter_storage_application, winter_storage_area=area
     )
 
-    assert winter_storage_application.is_unmarked_ws_application() is False
+    assert winter_storage_application.resolve_area_type() == ApplicationAreaType.MARKED
 
 
-def test_unmarked_winterstorage_application_is_unmarked(winter_storage_application):
+def test_winterstorage_application_resolve_unmarked_area(winter_storage_application):
     area = WinterStorageAreaFactory()
     area.number_of_unmarked_spaces = 50
     area.save()
@@ -49,4 +49,6 @@ def test_unmarked_winterstorage_application_is_unmarked(winter_storage_applicati
         application=winter_storage_application, winter_storage_area=area
     )
 
-    assert winter_storage_application.is_unmarked_ws_application() is True
+    assert (
+        winter_storage_application.resolve_area_type() == ApplicationAreaType.UNMARKED
+    )
