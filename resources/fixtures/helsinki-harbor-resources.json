@@ -1035,7 +1035,7 @@
   "pk": 61,
   "fields": {
     "language_code": "sv",
-    "name": "Skatuddens sm\u00e5b\u00e5tshamn",
+    "name": "Skatuddens småbåtshamn",
     "street_address": "Maringatan 1 C",
     "master": "7922e0bd-043a-4f21-b54d-9f594e5dcad6"
   }
@@ -1665,7 +1665,7 @@
   "pk": "0092ae70-cc46-44df-857e-79ea34e573d5",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.549Z",
+    "modified_at": "2020-09-17T15:56:26.060Z",
     "servicemap_id": "41189",
     "zip_code": "00810",
     "phone": "",
@@ -1673,6 +1673,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/kipparlahden-venesatama",
     "location": "SRID=4326;POINT (25.02156792855906 60.19045365285283)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -1683,7 +1684,7 @@
   "pk": "01b75ef7-82d5-4b38-8aa1-b7bddb2b2019",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.669Z",
+    "modified_at": "2020-09-17T15:56:26.041Z",
     "servicemap_id": "40800",
     "zip_code": "00990",
     "phone": "",
@@ -1691,6 +1692,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/aurinkolahden-venesatama",
     "location": "SRID=4326;POINT (25.14818799999996 60.20052999999999)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -1701,7 +1703,7 @@
   "pk": "0885f502-d566-4832-a782-b3137572bba4",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.729Z",
+    "modified_at": "2020-09-17T15:56:26.156Z",
     "servicemap_id": "41390",
     "zip_code": "00180",
     "phone": "",
@@ -1709,6 +1711,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/hietalahdenallas",
     "location": "SRID=4326;POINT (24.92907700000001 60.16155199999997)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -1719,7 +1722,7 @@
   "pk": "0fbae9d8-039e-47e4-aec7-9aaa00306af2",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.647Z",
+    "modified_at": "2020-09-17T15:56:26.202Z",
     "servicemap_id": "41150",
     "zip_code": "00170",
     "phone": "",
@@ -1727,6 +1730,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/pohjoisranta",
     "location": "SRID=4326;POINT (24.96115099999998 60.172394)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -1737,7 +1741,7 @@
   "pk": "13054f0b-8392-4d0f-8731-9af4093a5303",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.745Z",
+    "modified_at": "2020-09-17T15:56:26.047Z",
     "servicemap_id": "40672",
     "zip_code": "00570",
     "phone": "",
@@ -1745,6 +1749,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/honkaluoto",
     "location": "SRID=4326;POINT (25.00117000000002 60.18107199999997)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -1755,7 +1760,7 @@
   "pk": "26ec853e-fa8e-484f-9b5d-ecac3ad3c51d",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.691Z",
+    "modified_at": "2020-09-17T15:56:26.252Z",
     "servicemap_id": "41472",
     "zip_code": "00180",
     "phone": "",
@@ -1763,6 +1768,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/tammasaarenallas",
     "location": "SRID=4326;POINT (24.90518811639428 60.16102670629775)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -1773,7 +1779,7 @@
   "pk": "2cf50e2f-e101-48bd-8dfd-cf0d7501b654",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.783Z",
+    "modified_at": "2020-09-17T15:56:26.150Z",
     "servicemap_id": "39913",
     "zip_code": "00530",
     "phone": "",
@@ -1781,6 +1787,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/elaintarhanlahden-venesatama",
     "location": "SRID=4326;POINT (24.94178200000002 60.17999999999999)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -1791,7 +1798,7 @@
   "pk": "2e42adb3-0cdb-4823-868d-3b808cc55fe8",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.807Z",
+    "modified_at": "2020-09-17T15:56:26.026Z",
     "servicemap_id": "40393",
     "zip_code": "00830",
     "phone": "",
@@ -1799,6 +1806,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/airorannan-venesatama",
     "location": "SRID=4326;POINT (25.06585287235345 60.18815467436053)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -1809,7 +1817,7 @@
   "pk": "302ac304-9839-437a-811d-e53e074a999a",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.683Z",
+    "modified_at": "2020-09-17T15:56:26.247Z",
     "servicemap_id": "40876",
     "zip_code": "00170",
     "phone": "",
@@ -1817,6 +1825,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/sltavuoren-enesatama",
     "location": "SRID=4326;POINT (24.95591200000003 60.17663599999999)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -1827,7 +1836,7 @@
   "pk": "368f0621-b856-48fa-8224-0046cfd923ad",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.663Z",
+    "modified_at": "2020-09-17T15:56:26.110Z",
     "servicemap_id": "40897",
     "zip_code": "00930",
     "phone": "",
@@ -1835,6 +1844,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/puotilan-venesatama",
     "location": "SRID=4326;POINT (25.10433199999997 60.207024)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -1845,7 +1855,7 @@
   "pk": "3c35c79d-8169-4885-bdef-57e343bb43e9",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.711Z",
+    "modified_at": "2020-09-17T15:56:26.213Z",
     "servicemap_id": "40827",
     "zip_code": "00180",
     "phone": "",
@@ -1853,6 +1863,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/ruoholahden-venesatama",
     "location": "SRID=4326;POINT (24.91271000000004 60.161034)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -1863,7 +1874,7 @@
   "pk": "3d05bb47-4fc1-468b-b326-70bcee5d0cb2",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.721Z",
+    "modified_at": "2020-09-17T15:56:26.139Z",
     "servicemap_id": "42130",
     "zip_code": "00570",
     "phone": "",
@@ -1871,6 +1882,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/vahaniityn-venesatama",
     "location": "SRID=4326;POINT (25.01650000000001 60.18398699999997)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -1881,7 +1893,7 @@
   "pk": "4e700275-1e3d-43df-8407-b00d91195bf7",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.736Z",
+    "modified_at": "2020-09-17T15:56:26.116Z",
     "servicemap_id": "40166",
     "zip_code": "00840",
     "phone": "",
@@ -1889,6 +1901,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/sarvaston-venesatama",
     "location": "SRID=4326;POINT (25.05870200000003 60.16715999999997)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -1899,7 +1912,7 @@
   "pk": "4e982440-d032-4d9e-a827-e1c89e86da51",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.702Z",
+    "modified_at": "2020-09-17T15:56:26.127Z",
     "servicemap_id": "41415",
     "zip_code": "00860",
     "phone": "",
@@ -1907,6 +1920,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/vasikkasaaren-venesatama",
     "location": "SRID=4326;POINT (25.01452799999996 60.15482999999995)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -1917,7 +1931,7 @@
   "pk": "5141e8c0-3491-46b2-898a-16523c54df48",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.558Z",
+    "modified_at": "2020-09-17T15:56:26.065Z",
     "servicemap_id": "39950",
     "zip_code": "00930",
     "phone": "",
@@ -1925,6 +1939,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/koivuniemen-venesatama",
     "location": "SRID=4326;POINT (25.09772699999996 60.20078699999999)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -1935,7 +1950,7 @@
   "pk": "5299c27c-3cdb-4117-9f69-54bf3576927b",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.574Z",
+    "modified_at": "2020-09-17T15:56:26.168Z",
     "servicemap_id": "40290",
     "zip_code": "02480",
     "phone": "040 827 8310",
@@ -1943,6 +1958,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/lahteela",
     "location": "SRID=4326;POINT (24.43913699999998 59.981045)",
     "image_link": "",
+    "region": "west",
     "municipality": "kirkkonummi",
     "image_file": "",
     "availability_level": null
@@ -1953,7 +1969,7 @@
   "pk": "5a124b1b-010c-46e9-afc8-5d86045b155d",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.603Z",
+    "modified_at": "2020-09-17T15:56:26.083Z",
     "servicemap_id": "40359",
     "zip_code": "00570",
     "phone": "",
@@ -1961,6 +1977,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/mustikkamaan-venesatama",
     "location": "SRID=4326;POINT (24.99521236574618 60.18296813265754)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -1971,7 +1988,7 @@
   "pk": "5bf79d9b-b983-46b7-9b9f-2999827a0b0c",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.641Z",
+    "modified_at": "2020-09-17T15:56:26.144Z",
     "servicemap_id": "41669",
     "zip_code": "00530",
     "phone": "",
@@ -1979,6 +1996,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/elaintarhanlahden-venesatama",
     "location": "SRID=4326;POINT (24.946941 60.17735700000001)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -1989,7 +2007,7 @@
   "pk": "63c03361-4530-47fe-9902-37c9d6429034",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.755Z",
+    "modified_at": "2020-09-17T15:56:26.230Z",
     "servicemap_id": "40535",
     "zip_code": "00180",
     "phone": "",
@@ -1997,6 +2015,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/salmisaaren-venesatama",
     "location": "SRID=4326;POINT (24.90000199999996 60.16529500000001)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2007,7 +2026,7 @@
   "pk": "657ee3c0-c787-4e9e-bd7c-64ea3a534835",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.633Z",
+    "modified_at": "2020-09-17T15:56:26.100Z",
     "servicemap_id": "40590",
     "zip_code": "00980",
     "phone": "",
@@ -2015,6 +2034,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/pikku-kallahden-venesatama",
     "location": "SRID=4326;POINT (25.14131499999998 60.19891000000001)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2025,7 +2045,7 @@
   "pk": "70481d5c-9264-4c81-87af-e5cf7fb4efa0",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T14:12:35.211Z",
+    "modified_at": "2020-09-17T15:56:26.034Z",
     "servicemap_id": "41636",
     "zip_code": "00990",
     "phone": "",
@@ -2033,6 +2053,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/aurinkolahden-venesatama",
     "location": "SRID=4326;POINT (25.14785400000001 60.20036299999999)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2043,7 +2064,7 @@
   "pk": "78ef4aa0-22db-4bc7-bc2d-92e44f67a0fe",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.655Z",
+    "modified_at": "2020-09-17T15:56:26.105Z",
     "servicemap_id": "40842",
     "zip_code": "00990",
     "phone": "",
@@ -2051,6 +2072,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/porslahden-venesatama",
     "location": "SRID=4326;POINT (25.17723500000004 60.20771399999997)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2061,7 +2083,7 @@
   "pk": "7922e0bd-043a-4f21-b54d-9f594e5dcad6",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.522Z",
+    "modified_at": "2020-09-17T15:56:26.162Z",
     "servicemap_id": "48272",
     "zip_code": "00170",
     "phone": "",
@@ -2069,6 +2091,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/katajanokan-venesatama",
     "location": "SRID=4326;POINT (24.96585654232736 60.16959497046764)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2079,7 +2102,7 @@
   "pk": "816ca560-1c0f-4fca-b57e-c6cb27d0b4cc",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.565Z",
+    "modified_at": "2020-09-17T15:56:26.071Z",
     "servicemap_id": "40864",
     "zip_code": "00810",
     "phone": "",
@@ -2087,6 +2110,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/laivalahden-venesatama",
     "location": "SRID=4326;POINT (25.02772281481857 60.18698499999979)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2097,7 +2121,7 @@
   "pk": "8f2296b1-86b7-4059-8a24-efdcd726207d",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.589Z",
+    "modified_at": "2020-09-17T15:56:26.185Z",
     "servicemap_id": "40948",
     "zip_code": "00140",
     "phone": "",
@@ -2105,6 +2129,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/merisatama",
     "location": "SRID=4326;POINT (24.94809499999996 60.15480999999998)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2115,7 +2140,7 @@
   "pk": "9190743a-f883-4f92-8923-f572157bf6ab",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.581Z",
+    "modified_at": "2020-09-17T15:56:26.173Z",
     "servicemap_id": "41454",
     "zip_code": "00530",
     "phone": "",
@@ -2123,6 +2148,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/merihaan-venesatama",
     "location": "SRID=4326;POINT (24.959497 60.17813499999998)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2133,7 +2159,7 @@
   "pk": "95f0636e-f84e-48a6-bb6a-c716354c40f6",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.543Z",
+    "modified_at": "2020-09-17T15:56:26.219Z",
     "servicemap_id": "40310",
     "zip_code": "00180",
     "phone": "",
@@ -2141,6 +2167,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/ruoholahden-venesatama",
     "location": "SRID=4326;POINT (24.91256300000001 60.16163299999998)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2151,7 +2178,7 @@
   "pk": "97c033ad-5470-4225-a49b-03958ce910e1",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.611Z",
+    "modified_at": "2020-09-17T15:56:26.088Z",
     "servicemap_id": "42225",
     "zip_code": "00570",
     "phone": "",
@@ -2159,6 +2186,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/nandelstadhin-venesatama",
     "location": "SRID=4326;POINT (25.01524699999996 60.182655)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2169,7 +2197,7 @@
   "pk": "9a8d8313-eaa2-47d2-8f2d-2bb9893f9bc7",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.625Z",
+    "modified_at": "2020-09-17T15:56:26.196Z",
     "servicemap_id": "41359",
     "zip_code": "00210",
     "phone": "",
@@ -2177,6 +2205,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/pajalahden-venesatama",
     "location": "SRID=4326;POINT (24.88904799999996 60.15822599999999)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2187,7 +2216,7 @@
   "pk": "a1c7888b-bfe4-49c8-a0f9-fd6ba67bb877",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.617Z",
+    "modified_at": "2020-09-17T15:56:26.094Z",
     "servicemap_id": "40712",
     "zip_code": "00810",
     "phone": "",
@@ -2195,6 +2224,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/naurissalmen-venesatama",
     "location": "SRID=4326;POINT (25.01592299999999 60.19148599999995)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2205,7 +2235,7 @@
   "pk": "a4d2408c-ccd2-419a-9da8-676b0fd9e73b",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.676Z",
+    "modified_at": "2020-09-17T15:56:26.225Z",
     "servicemap_id": "40203",
     "zip_code": "00180",
     "phone": "",
@@ -2213,6 +2243,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/ruoholahden-venesatama",
     "location": "SRID=4326;POINT (24.915993 60.16185799999999)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2223,7 +2254,7 @@
   "pk": "a909810e-cff1-4360-8005-79c8d0269c6b",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.596Z",
+    "modified_at": "2020-09-17T15:56:26.190Z",
     "servicemap_id": "45995",
     "zip_code": "00150",
     "phone": "",
@@ -2231,6 +2262,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/merisatama",
     "location": "SRID=4326;POINT (24.94499199999997 60.154316)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2241,7 +2273,7 @@
   "pk": "b7148154-dba9-4e3b-9d6e-c5636a25aa39",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.821Z",
+    "modified_at": "2020-09-17T15:56:26.207Z",
     "servicemap_id": "41074",
     "zip_code": "00330",
     "phone": "",
@@ -2249,6 +2281,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/ramsaynrannan-venesatama",
     "location": "SRID=4326;POINT (24.88408300000004 60.19365299999998)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2259,7 +2292,7 @@
   "pk": "bf5a852a-f79a-4afe-b5ad-5d01e52e7bc3",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.814Z",
+    "modified_at": "2020-09-17T15:56:26.122Z",
     "servicemap_id": "42276",
     "zip_code": "00820",
     "phone": "",
@@ -2267,6 +2300,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/stromsinlahden-venesatama",
     "location": "SRID=4326;POINT (25.06527100000002 60.19763999999999)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2277,7 +2311,7 @@
   "pk": "c1bf3e03-aa6d-408f-963e-d655bcbd47b2",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.777Z",
+    "modified_at": "2020-09-17T15:56:26.236Z",
     "servicemap_id": "40627",
     "zip_code": "00180",
     "phone": "",
@@ -2285,6 +2319,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/saukonpaaden-venesatama",
     "location": "SRID=4326;POINT (24.90732199999999 60.15931299999999)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2295,7 +2330,7 @@
   "pk": "deb09f00-4ec3-4b5e-95c9-af296acd071b",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.763Z",
+    "modified_at": "2020-09-17T15:56:26.133Z",
     "servicemap_id": "41637",
     "zip_code": "00980",
     "phone": "",
@@ -2303,6 +2338,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/vuosaarenlahden-venesatama",
     "location": "SRID=4326;POINT (25.18621999999997 60.21003700000001)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2313,7 +2349,7 @@
   "pk": "e01a17fc-1702-4a4e-99a7-60ea027b935d",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.800Z",
+    "modified_at": "2020-09-17T15:56:26.077Z",
     "servicemap_id": "41066",
     "zip_code": "00980",
     "phone": "",
@@ -2321,6 +2357,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/meri-rastilan-venesatama",
     "location": "SRID=4326;POINT (25.113478 60.20614000000001)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2331,7 +2368,7 @@
   "pk": "e30e7a3e-3626-4beb-9d8e-8a0e86f115a4",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.795Z",
+    "modified_at": "2020-09-17T15:56:26.241Z",
     "servicemap_id": "41857",
     "zip_code": "00330",
     "phone": "",
@@ -2339,6 +2376,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/saunalahden-venesatama",
     "location": "SRID=4326;POINT (24.88216800000003 60.19230999999998)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2349,7 +2387,7 @@
   "pk": "ebc222e2-e7a4-4639-af35-de60075dd336",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.828Z",
+    "modified_at": "2020-09-17T15:56:26.258Z",
     "servicemap_id": "42136",
     "zip_code": "00170",
     "phone": "",
@@ -2357,6 +2395,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/tervasaari",
     "location": "SRID=4326;POINT (24.96509200000001 60.17399199999996)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2367,7 +2406,7 @@
   "pk": "ed355574-2a94-45e8-8e2a-3bd149866302",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.771Z",
+    "modified_at": "2020-09-17T15:56:26.179Z",
     "servicemap_id": "40971",
     "zip_code": "00140",
     "phone": "",
@@ -2375,6 +2414,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/merisatama",
     "location": "SRID=4326;POINT (24.95324466270327 60.15452603410284)",
     "image_link": "",
+    "region": "west",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
@@ -2385,7 +2425,7 @@
   "pk": "f7c6ab86-84cb-40f0-9eb2-3f82124b648b",
   "fields": {
     "created_at": "2020-04-06T11:56:25.857Z",
-    "modified_at": "2020-06-08T12:55:19.789Z",
+    "modified_at": "2020-09-17T15:56:26.054Z",
     "servicemap_id": "41926",
     "zip_code": "00570",
     "phone": "",
@@ -2393,6 +2433,7 @@
     "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/hopeasalmen-venesatama",
     "location": "SRID=4326;POINT (24.99573099999997 60.18447499999999)",
     "image_link": "",
+    "region": "east",
     "municipality": "helsinki",
     "image_file": "",
     "availability_level": null
