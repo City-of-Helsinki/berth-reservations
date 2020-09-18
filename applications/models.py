@@ -7,7 +7,7 @@ from parler.models import TranslatableModel, TranslatedFields
 from customers.models import CustomerProfile
 from harbors.models import BoatType, Harbor, WinterStorageArea
 
-from .enums import ApplicationStatus, WinterStorageMethod
+from .enums import ApplicationAreaType, ApplicationStatus, WinterStorageMethod
 from .utils import localize_datetime
 
 
@@ -255,6 +255,13 @@ class BerthApplication(BaseApplication):
 
 
 class WinterStorageApplication(BaseApplication):
+    area_type = models.CharField(
+        choices=ApplicationAreaType.choices,
+        verbose_name=_("application area type"),
+        max_length=30,
+        null=True,
+    )
+
     customer = models.ForeignKey(
         CustomerProfile,
         null=True,
@@ -281,13 +288,19 @@ class WinterStorageApplication(BaseApplication):
         verbose_name=_("trailer registration number"), max_length=64, blank=True
     )
 
-    def is_unmarked_ws_application(self) -> bool:
+    def resolve_area_type(self) -> ApplicationAreaType:
         first_area = self.chosen_areas.first()
 
-        return bool(
+        is_unmarked_area = bool(
             self.chosen_areas.count() == 1
             and first_area.number_of_unmarked_spaces
             and first_area.number_of_unmarked_spaces > 0
+        )
+
+        return (
+            ApplicationAreaType.UNMARKED
+            if is_unmarked_area
+            else ApplicationAreaType.MARKED
         )
 
     def get_notification_context(self):
