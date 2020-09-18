@@ -91,6 +91,7 @@ class CustomerProfileManager(models.Manager):
         And returns dict where key is the customer_id and value is the UUID of created profile object
         """
         from leases.models import BerthLease
+        from payments.enums import OrderStatus
         from payments.models import Order
         from resources.models import Berth, Harbor
 
@@ -210,6 +211,9 @@ class CustomerProfileManager(models.Manager):
                         customer=customer,
                         lease=lease,
                         created_at=order.get("created_at"),
+                        status=OrderStatus.PAID
+                        if order.get("is_paid")
+                        else OrderStatus.EXPIRED,
                         price=Decimal(order.get("order_sum")),
                         tax_percentage=Decimal(order.get("vat_percentage")),
                         comment=order.get("comment"),
