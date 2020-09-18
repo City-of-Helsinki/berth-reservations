@@ -188,19 +188,19 @@ def mocked_response_create(*args, **kwargs):
 
 
 @pytest.fixture
-def notification_template_order_approved():
+def notification_template_orders_approved():
     from ..notifications import NotificationType
 
-    notification = NotificationTemplate.objects.language("fi").create(
-        type=NotificationType.ORDER_APPROVED.value,
-        subject="test order approved subject, event: {{ order.order_number }}!",
-        body_html="<b>{{ order.order_number }} {{ payment_url }}</b>",
-        body_text="{{ order.order_number }} {{ payment_url }}",
-    )
-    notification.create_translation(
-        "en",
-        subject="test order approved subject, event: {{ order.order_number }}!",
-        body_html="<b>{{ order.order_number }} {{ payment_url }}</b>",
-        body_text="{{ order.order_number }} {{ payment_url }}",
-    )
-    return notification
+    for value in NotificationType.values:
+        notification = NotificationTemplate.objects.language("fi").create(
+            type=value,
+            subject="test order approved subject, event: {{ order.order_number }}!",
+            body_html="<b>{{ order.order_number }} {{ payment_url }}</b>",
+            body_text="{{ order.order_number }} {{ payment_url }}",
+        )
+        notification.create_translation(
+            "en",
+            subject="test order approved subject, event: {{ order.order_number }}!",
+            body_html="<b>{{ order.order_number }} {{ payment_url }}</b>",
+            body_text="{{ order.order_number }} {{ payment_url }}",
+        )

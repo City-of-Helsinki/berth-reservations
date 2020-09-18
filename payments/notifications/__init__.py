@@ -4,9 +4,8 @@ from django_ilmoitin.registry import notifications
 from .dummy_context import load_dummy_context
 from .types import NotificationType
 
-notifications.register(
-    NotificationType.ORDER_APPROVED.value, NotificationType.ORDER_APPROVED.label,
-)
+for (value, label) in NotificationType.choices:
+    notifications.register(value, label)
 
 try:
     load_dummy_context()

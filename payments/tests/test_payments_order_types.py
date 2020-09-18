@@ -17,7 +17,9 @@ from payments.tests.utils import random_price, random_tax
 
 
 def test_order_type_new_berth_order(berth_lease, berth_product):
-    order = OrderFactory(lease=berth_lease, product=berth_product)
+    order = OrderFactory(
+        lease=berth_lease, product=berth_product, customer=berth_lease.customer
+    )
     assert order.order_type == OrderType.NEW_BERTH_ORDER
 
 

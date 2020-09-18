@@ -35,7 +35,7 @@ mutation APPROVE_ORDER_MUTATION($input: ApproveOrderMutationInput!) {
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order(
-    api_client, order: Order, payment_provider, notification_template_order_approved,
+    api_client, order: Order, payment_provider, notification_template_orders_approved,
 ):
     due_date = (today() + relativedelta(days=14)).date()
     variables = {
@@ -80,7 +80,7 @@ def test_approve_order(
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_default_due_date(
-    api_client, order: Order, payment_provider, notification_template_order_approved,
+    api_client, order: Order, payment_provider, notification_template_orders_approved,
 ):
     order.due_date = today().date()
     order.save()
@@ -120,7 +120,7 @@ def test_approve_order_not_enough_permissions(api_client):
 
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_does_not_exist(
-    superuser_api_client, payment_provider, notification_template_order_approved,
+    superuser_api_client, payment_provider, notification_template_orders_approved,
 ):
     order_id = to_global_id(OrderNode, uuid.uuid4())
 
@@ -143,7 +143,7 @@ def test_approve_order_does_not_exist(
 def test_approve_order_anymail_error(
     superuser_api_client,
     payment_provider,
-    notification_template_order_approved,
+    notification_template_orders_approved,
     order: Order,
 ):
     order_id = to_global_id(OrderNode, order.id)
@@ -183,7 +183,7 @@ def test_approve_order_one_success_one_failure(
     superuser_api_client,
     order: Order,
     payment_provider,
-    notification_template_order_approved,
+    notification_template_orders_approved,
 ):
     due_date = (today() + relativedelta(days=14)).date()
     failure_order_id = to_global_id(OrderNode, uuid.uuid4())
