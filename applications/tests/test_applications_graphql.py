@@ -204,6 +204,7 @@ def test_create_winter_storage_application(
                 }
             ) {
                 winterStorageApplication {
+                    areaType
                     chosenAreas {
                         edges {
                             node {
@@ -225,11 +226,12 @@ def test_create_winter_storage_application(
         "data": {
             "createWinterStorageApplication": {
                 "winterStorageApplication": {
+                    "areaType": "MARKED",
                     "chosenAreas": {
                         "edges": [
                             {"node": {"properties": {"zipCode": winter_area.zip_code}}}
                         ]
-                    }
+                    },
                 }
             }
         }
