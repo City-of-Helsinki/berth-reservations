@@ -19,7 +19,7 @@ from ..exceptions import (
     UnknownReturnCodeError,
 )
 from ..models import AdditionalProduct, Order, OrderLine
-from ..utils import price_as_fractional_int
+from ..utils import get_talpa_product_id, price_as_fractional_int
 from .base import PaymentProvider
 
 logger = logging.getLogger(__name__)
@@ -114,6 +114,14 @@ class BamboraPayformProvider(PaymentProvider):
         order_lines: [OrderLine] = OrderLine.objects.filter(order=order.id)
         items: [dict] = []
 
+        area = None
+
+        if hasattr(order, "product"):
+            if hasattr(order.product, "harbor"):
+                area = order.product.harbor
+            elif hasattr(order.product, "winter_storage_area"):
+                area = order.product.winter_storage_area
+
         product = order.product
         int_tax = int(order.tax_percentage)
         assert int_tax == product.tax_percentage  # make sure the tax is a whole number
@@ -121,7 +129,7 @@ class BamboraPayformProvider(PaymentProvider):
             product_name = product.name
         items.append(
             {
-                "id": str(product.id),
+                "id": get_talpa_product_id(product.id, area),
                 "title": product_name,
                 "price": price_as_fractional_int(order.price),
                 "pretax_price": price_as_fractional_int(order.pretax_price),
@@ -141,7 +149,7 @@ class BamboraPayformProvider(PaymentProvider):
                 product_name = product.name
             items.append(
                 {
-                    "id": str(product.id),
+                    "id": get_talpa_product_id(product.id, area),
                     "title": product_name,
                     "price": price_as_fractional_int(order_line.price),
                     "pretax_price": price_as_fractional_int(order_line.pretax_price),

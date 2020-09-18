@@ -11,6 +11,7 @@ from django_ilmoitin.utils import send_notification
 from parler.admin import TranslatableAdmin
 from pytz import timezone
 
+from .enums import ApplicationAreaType
 from .models import (
     BerthApplication,
     BerthSwitchReason,
@@ -318,7 +319,7 @@ class WinterStorageApplicationAdmin(admin.ModelAdmin):
             try:
                 notification_type = (
                     NotificationType.UNMARKED_WINTER_STORAGE_APPLICATION_CREATED.value
-                    if application.is_unmarked_ws_application()
+                    if application.area_type == ApplicationAreaType.UNMARKED
                     else NotificationType.WINTER_STORAGE_APPLICATION_CREATED.value
                 )
                 send_notification(

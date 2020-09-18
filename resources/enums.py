@@ -1,4 +1,4 @@
-from django.db.models import IntegerChoices
+from django.db.models import IntegerChoices, TextChoices
 from django.utils.translation import gettext_lazy as _
 
 
@@ -21,3 +21,8 @@ class BerthMooringType(IntegerChoices):
     SEA_BUOY_MOORING = 8, _("Sea buoy mooring")
     # In Finnish: "TRAILERIPAIKKA"
     TRAWLER_PLACE = 9, _("Trawler place")
+
+
+class AreaRegion(TextChoices):
+    EAST = "east", _("East")
+    WEST = "west", _("West")

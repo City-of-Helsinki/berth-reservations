@@ -19,3 +19,8 @@ class ApplicationStatus(TextChoices):
     )
     HANDLED = "handled", _("Handled")
     EXPIRED = "expired", _("Expired")
+
+
+class ApplicationAreaType(TextChoices):
+    MARKED = "marked", _("Marked")
+    UNMARKED = "unmarked", _("Unmarked")

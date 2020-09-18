@@ -10,6 +10,8 @@ def test_generate_winter_places():
     # Helsinki municipalities required for the WSAreas
     Municipality.objects.create(id="helsinki")
     Municipality.objects.create(id="kirkkonummi")
+    # New WSAreas are required to load first
+    call_command("loaddata", "helsinki-ws-resources")
     # Old WSAreas are required
     call_command("loaddata", "helsinki-winter-areas")
     call_command("generate_winter_places")

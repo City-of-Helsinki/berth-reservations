@@ -7,6 +7,7 @@ from users.decorators import view_permission_required
 
 from ..models import BerthApplication, WinterStorageApplication
 from .types import (
+    ApplicationAreaTypeEnum,
     ApplicationStatusEnum,
     BerthApplicationFilter,
     BerthApplicationNode,
@@ -35,6 +36,7 @@ class Query:
         WinterStorageApplicationNode,
         filterset_class=WinterStorageApplicationFilter,
         statuses=graphene.List(ApplicationStatusEnum),
+        area_types=graphene.List(ApplicationAreaTypeEnum),
         description="The `statuses` filter takes a list of `ApplicationStatus` values "
         "representing the desired statuses. If an empty list is passed, no filter will be applied "
         "and all the results will be returned."
@@ -74,11 +76,14 @@ class Query:
     )
     def resolve_winter_storage_applications(self, info, **kwargs):
         statuses = kwargs.pop("statuses", [])
+        area_types = kwargs.pop("area_types", [])
 
         qs = WinterStorageApplication.objects
 
         if statuses:
             qs = qs.filter(status__in=statuses)
+        if area_types:
+            qs = qs.filter(area_type__in=area_types)
 
         return (
             qs.select_related("boat_type", "customer",)

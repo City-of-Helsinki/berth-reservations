@@ -195,19 +195,20 @@ class AdditionalProduct(AbstractBaseProduct):
 
 class OrderManager(models.Manager):
     def berth_orders(self):
-        return self.get_queryset().filter(
-            Q(
-                Q(_product_content_type__model=BerthProduct._meta.model_name)
-                | Q(_lease_content_type__model=BerthLease._meta.model_name)
-            )
-        )
+        product_ct = ContentType.objects.get_for_model(BerthProduct)
+        lease_ct = ContentType.objects.get_for_model(BerthLease)
+
+        return self._order_type_orders(product_ct, lease_ct)
 
     def winter_storage_orders(self):
+        product_ct = ContentType.objects.get_for_model(WinterStorageProduct)
+        lease_ct = ContentType.objects.get_for_model(WinterStorageLease)
+
+        return self._order_type_orders(product_ct, lease_ct)
+
+    def _order_type_orders(self, product_ct: ContentType, lease_ct: ContentType):
         return self.get_queryset().filter(
-            Q(
-                Q(_product_content_type__model=WinterStorageProduct._meta.model_name)
-                | Q(_lease_content_type__model=WinterStorageLease._meta.model_name)
-            )
+            Q(Q(_product_content_type=product_ct) | Q(_lease_content_type=lease_ct))
         )
 
     def update_expired(self) -> int:
@@ -303,6 +304,18 @@ class Order(UUIDModel, TimeStampedModel):
     @rounded
     def total_price(self):
         return sum([ol.price for ol in self.order_lines.all()], self.price)
+
+    @property
+    def fixed_price_total(self):
+        return sum(
+            [
+                ol.price
+                for ol in self.order_lines.filter(
+                    product__service__in=ProductServiceType.FIXED_SERVICES()
+                )
+            ],
+            self.price,
+        )
 
     @property
     @rounded
@@ -659,12 +672,16 @@ class OrderLine(UUIDModel, TimeStampedModel):
 
     @property
     def name(self):
-        return f"{self.product.name}"
+        return f"{self.product.name}" if self.product else self.id
 
     def __str__(self):
         return (
-            f"{self.product.name} - {self.product.price_value}"
-            f"{'€' if self.product.price_unit == PriceUnits.AMOUNT else '%'}"
+            (
+                f"{self.product.name} - {self.product.price_value}"
+                f"{'€' if self.product.price_unit == PriceUnits.AMOUNT else '%'}"
+            )
+            if self.product
+            else f"{_('No product')} - {self.price}€"
         )
 
 
