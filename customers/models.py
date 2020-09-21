@@ -277,7 +277,7 @@ class Organization(TimeStampedModel, UUIDModel):
     name = models.CharField(verbose_name=_("name"), max_length=128, blank=True)
     address = models.CharField(verbose_name=_("address"), max_length=128, blank=True)
     postal_code = models.CharField(
-        verbose_name=_("postal code"), max_length=5, blank=True
+        verbose_name=_("postal code"), max_length=10, blank=True
     )
     city = models.CharField(verbose_name=_("city"), max_length=64, blank=True)
 
