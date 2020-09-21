@@ -44,7 +44,7 @@ mutation CreateBerth($input: CreateBerthMutationInput!) {
 )
 def test_create_berth(pier, api_client, berth_type):
     variables = {
-        "number": 9999,
+        "number": "9999",
         "comment": "foobar",
         "pierId": to_global_id(PierNode._meta.name, str(pier.id)),
         "isActive": False,
@@ -66,7 +66,7 @@ def test_create_berth(pier, api_client, berth_type):
 
     assert executed["data"]["createBerth"]["berth"] == {
         "comment": "foobar",
-        "number": 9999,
+        "number": "9999",
         "isAccessible": None,
         "isActive": False,
         "width": variables["width"],
@@ -81,7 +81,7 @@ def test_create_berth(pier, api_client, berth_type):
 )
 def test_create_berth_new_berth_type(pier, api_client):
     variables = {
-        "number": 9999,
+        "number": "9999",
         "comment": "foobar",
         "pierId": to_global_id(PierNode._meta.name, str(pier.id)),
         "isActive": False,
@@ -103,7 +103,7 @@ def test_create_berth_new_berth_type(pier, api_client):
 
     assert executed["data"]["createBerth"]["berth"] == {
         "comment": "foobar",
-        "number": 9999,
+        "number": "9999",
         "isAccessible": None,
         "isActive": False,
         "width": variables["width"],
@@ -120,7 +120,7 @@ def test_create_berth_new_berth_type(pier, api_client):
 )
 def test_create_berth_not_enough_permissions(api_client, pier, berth_type):
     variables = {
-        "number": 9999,
+        "number": "9999",
         "comment": "foobar",
         "pierId": to_global_id(PierNode._meta.name, str(pier.id)),
         "width": float(berth_type.width),
@@ -154,7 +154,7 @@ def test_create_berth_missing_berth_type_params(
     superuser_api_client, missing_field, pier
 ):
     variables = {
-        "number": 9999,
+        "number": "9999",
         "pierId": to_global_id(PierNode._meta.name, str(pier.id)),
         "width": round(random.uniform(1.5, 99.0), 2),
         "length": round(random.uniform(1.5, 99.0), 2),
@@ -282,7 +282,7 @@ def test_update_berth(berth, pier, api_client):
 
     variables = {
         "id": global_id,
-        "number": 666,
+        "number": "666",
         "comment": "foobar",
         "isAccessible": True,
         "pierId": pier_id,
@@ -297,7 +297,7 @@ def test_update_berth(berth, pier, api_client):
     assert executed["data"]["updateBerth"]["berth"] == {
         "id": global_id,
         "comment": variables["comment"],
-        "number": 666,
+        "number": "666",
         "isAccessible": variables["isAccessible"],
         "pier": {"id": variables["pierId"]},
         "isActive": variables["isActive"],
@@ -459,7 +459,7 @@ def test_update_berth_no_id(berth, pier, berth_type, superuser_api_client):
     pier_id = to_global_id(PierNode._meta.name, str(pier.id))
 
     variables = {
-        "number": 666,
+        "number": "666",
         "comment": "foobar",
         "pierId": pier_id,
     }
@@ -482,7 +482,7 @@ def test_update_berth_not_enough_permissions(api_client, berth, pier, berth_type
 
     variables = {
         "id": to_global_id(BerthNode._meta.name, str(berth.id)),
-        "number": 666,
+        "number": "666",
         "comment": "foobar",
         "pierId": pier_id,
         "width": round(random.uniform(1.5, 99.0), 2),
