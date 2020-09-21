@@ -179,15 +179,17 @@ class CustomerProfileManager(models.Manager):
                         lease.get("pier_id", "-"),
                     )
 
-                    BerthLease.objects.create(
-                        customer=customer,
-                        berth=berth,
-                        boat=boats[lease.get("boat_index")]
-                        if lease.get("boat_index")
-                        else None,
-                        start_date=lease.get("start_date"),
-                        end_date=lease.get("end_date"),
-                    )
+                    # Only create a lease if the berth exists
+                    if berth:
+                        BerthLease.objects.create(
+                            customer=customer,
+                            berth=berth,
+                            boat=boats[lease.get("boat_index")]
+                            if lease.get("boat_index")
+                            else None,
+                            start_date=lease.get("start_date"),
+                            end_date=lease.get("end_date"),
+                        )
 
                 for order in customer_data.get("orders", []):
                     lease = None
@@ -201,17 +203,19 @@ class CustomerProfileManager(models.Manager):
                             berth_data.get("pier_id", "-"),
                         )
 
-                        start_date, end_date = calculate_lease_start_and_end_dates(
-                            parse(order.get("created_at")).date()
-                        )
+                        # Only create a lease if the berth exists
+                        if berth:
+                            start_date, end_date = calculate_lease_start_and_end_dates(
+                                parse(order.get("created_at")).date()
+                            )
 
-                        lease, _created = BerthLease.objects.get_or_create(
-                            customer=customer,
-                            berth=berth,
-                            start_date=start_date,
-                            end_date=end_date,
-                            status=LeaseStatus.PAID,
-                        )
+                            lease, _created = BerthLease.objects.get_or_create(
+                                customer=customer,
+                                berth=berth,
+                                start_date=start_date,
+                                end_date=end_date,
+                                status=LeaseStatus.PAID,
+                            )
 
                     Order.objects.create(
                         customer=customer,
