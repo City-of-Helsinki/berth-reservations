@@ -11,6 +11,7 @@ from django.db.models import Case, UniqueConstraint, Value, When
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from leases.enums import LeaseStatus
 from resources.models import BoatType
 from utils.models import TimeStampedModel, UUIDModel
 
@@ -71,6 +72,7 @@ class CustomerProfileManager(models.Manager):
                     "created_at": "2019-12-02 00:00:00.000",
                     "order_sum": "251.00",
                     "vat_percentage": "25.0",
+                    "is_paid": True,
                     "berth": {
                         "harbor_servicemap_id": "41074",  <-- service map id
                         "pier_id": "A",  <-- harbor identifier
@@ -177,35 +179,43 @@ class CustomerProfileManager(models.Manager):
                         lease.get("pier_id", "-"),
                     )
 
-                    BerthLease.objects.create(
-                        customer=customer,
-                        berth=berth,
-                        boat=boats[lease.get("boat_index")]
-                        if lease.get("boat_index")
-                        else None,
-                        start_date=lease.get("start_date"),
-                        end_date=lease.get("end_date"),
-                    )
+                    # Only create a lease if the berth exists
+                    if berth:
+                        BerthLease.objects.create(
+                            customer=customer,
+                            berth=berth,
+                            boat=boats[lease.get("boat_index")]
+                            if lease.get("boat_index")
+                            else None,
+                            start_date=lease.get("start_date"),
+                            end_date=lease.get("end_date"),
+                        )
 
                 for order in customer_data.get("orders", []):
                     lease = None
-                    if berth_data := order.get("berth"):
+                    # Only add leases for paid orders
+                    if (berth_data := order.get("berth")) and order.get(
+                        "is_paid", False
+                    ):
                         berth = _get_berth(
                             berth_data.get("harbor_servicemap_id"),
                             berth_data.get("berth_number"),
                             berth_data.get("pier_id", "-"),
                         )
 
-                        start_date, end_date = calculate_lease_start_and_end_dates(
-                            parse(order.get("created_at")).date()
-                        )
+                        # Only create a lease if the berth exists
+                        if berth:
+                            start_date, end_date = calculate_lease_start_and_end_dates(
+                                parse(order.get("created_at")).date()
+                            )
 
-                        lease, _created = BerthLease.objects.get_or_create(
-                            customer=customer,
-                            berth=berth,
-                            start_date=start_date,
-                            end_date=end_date,
-                        )
+                            lease, _created = BerthLease.objects.get_or_create(
+                                customer=customer,
+                                berth=berth,
+                                start_date=start_date,
+                                end_date=end_date,
+                                status=LeaseStatus.PAID,
+                            )
 
                     Order.objects.create(
                         customer=customer,
