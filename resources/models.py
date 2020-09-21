@@ -583,7 +583,6 @@ class WinterStoragePlaceType(AbstractPlaceType):
 
 
 class AbstractBoatPlace(TimeStampedModel, UUIDModel):
-    number = models.PositiveSmallIntegerField(verbose_name=_("number"))
     is_active = models.BooleanField(verbose_name=_("is active"), default=True)
 
     class Meta:
@@ -624,6 +623,8 @@ class BerthManager(models.Manager):
 
 
 class Berth(AbstractBoatPlace):
+    number = models.CharField(verbose_name=_("number"), max_length=30)
+
     pier = models.ForeignKey(
         Pier, verbose_name=_("pier"), related_name="berths", on_delete=models.CASCADE
     )
@@ -683,6 +684,8 @@ class WinterStoragePlaceManager(models.Manager):
 
 
 class WinterStoragePlace(AbstractBoatPlace):
+    number = models.PositiveSmallIntegerField(verbose_name=_("number"))
+
     winter_storage_section = models.ForeignKey(
         WinterStorageSection,
         verbose_name=_("winter storage section"),

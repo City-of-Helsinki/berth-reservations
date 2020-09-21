@@ -491,11 +491,11 @@ class AbstractAreaSectionInput:
 
 
 class AbstractBoatPlaceInput:
-    number = graphene.Int()
     is_active = graphene.Boolean()
 
 
 class BerthInput(AbstractBoatPlaceInput):
+    number = graphene.String()
     pier_id = graphene.ID()
     comment = graphene.String()
     is_accessible = graphene.Boolean()
@@ -507,7 +507,7 @@ class BerthInput(AbstractBoatPlaceInput):
 
 class CreateBerthMutation(graphene.ClientIDMutation):
     class Input(BerthInput):
-        number = graphene.Int(required=True)
+        number = graphene.String(required=True)
         pier_id = graphene.ID(required=True)
         width = graphene.Float(description=_("width (m)"), required=True)
         length = graphene.Float(description=_("length (m)"), required=True)
