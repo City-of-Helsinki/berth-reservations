@@ -11,6 +11,7 @@ from django.db.models import Case, UniqueConstraint, Value, When
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from leases.enums import LeaseStatus
 from resources.models import BoatType
 from utils.models import TimeStampedModel, UUIDModel
 
@@ -71,6 +72,7 @@ class CustomerProfileManager(models.Manager):
                     "created_at": "2019-12-02 00:00:00.000",
                     "order_sum": "251.00",
                     "vat_percentage": "25.0",
+                    "is_paid": True,
                     "berth": {
                         "harbor_servicemap_id": "41074",  <-- service map id
                         "pier_id": "A",  <-- harbor identifier
@@ -189,7 +191,10 @@ class CustomerProfileManager(models.Manager):
 
                 for order in customer_data.get("orders", []):
                     lease = None
-                    if berth_data := order.get("berth"):
+                    # Only add leases for paid orders
+                    if (berth_data := order.get("berth")) and order.get(
+                        "is_paid", False
+                    ):
                         berth = _get_berth(
                             berth_data.get("harbor_servicemap_id"),
                             berth_data.get("berth_number"),
@@ -205,6 +210,7 @@ class CustomerProfileManager(models.Manager):
                             berth=berth,
                             start_date=start_date,
                             end_date=end_date,
+                            status=LeaseStatus.PAID,
                         )
 
                     Order.objects.create(
