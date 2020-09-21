@@ -443,3 +443,42 @@ def test_berth_lease_one_lease_per_place(berth):
 
     error_msg = str(exception.value)
     assert "Berth already has a lease" in error_msg
+
+
+def test_berth_lease_overlapping_leases_start(berth):
+    BerthLeaseFactory(berth=berth, start_date="2020-06-10", end_date="2020-09-14")
+
+    with pytest.raises(ValidationError) as exception:
+        # The start date of the second lease overlaps with the end date of the existing lease
+        BerthLeaseFactory(berth=berth, start_date="2020-08-01", end_date="2020-12-31")
+
+    error_msg = str(exception.value)
+    assert "Berth already has a lease" in error_msg
+
+
+def test_berth_lease_overlapping_leases_end(berth):
+    BerthLeaseFactory(berth=berth, start_date="2020-06-10", end_date="2020-09-14")
+
+    with pytest.raises(ValidationError) as exception:
+        # The end date of the second lease overlaps with the start date of the existing lease
+        BerthLeaseFactory(berth=berth, start_date="2020-01-01", end_date="2020-07-01")
+
+    error_msg = str(exception.value)
+    assert "Berth already has a lease" in error_msg
+
+
+def test_berth_lease_overlapping_leases_start_and_end(berth):
+    BerthLeaseFactory(berth=berth, start_date="2020-06-10", end_date="2020-09-14")
+
+    with pytest.raises(ValidationError) as exception:
+        BerthLeaseFactory(berth=berth, start_date="2020-01-01", end_date="2020-12-31")
+
+    error_msg = str(exception.value)
+    assert "Berth already has a lease" in error_msg
+
+
+def test_berth_lease_non_overlapping_leases(berth):
+    BerthLeaseFactory(berth=berth, start_date="2020-06-10", end_date="2020-09-14")
+    BerthLeaseFactory(berth=berth, start_date="2020-01-01", end_date="2020-05-01")
+
+    assert BerthLease.objects.count() == 2
