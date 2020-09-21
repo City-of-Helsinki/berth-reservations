@@ -11,6 +11,7 @@ from django.db.utils import IntegrityError
 
 from berth_reservations.tests.conftest import *  # noqa
 from berth_reservations.tests.factories import CustomerProfileFactory
+from leases.enums import LeaseStatus
 from resources.tests.factories import BerthFactory, BoatTypeFactory, PierFactory
 
 from ..enums import BoatCertificateType, OrganizationType
@@ -171,6 +172,7 @@ def test_import_customer_data_with_valid_data_set():
                     "created_at": "2019-12-02 00:00:00.000",
                     "order_sum": "251.00",
                     "vat_percentage": "25.0",
+                    "is_paid": True,
                     "berth": {
                         "harbor_servicemap_id": berth2.pier.harbor.servicemap_id,
                         "pier_id": berth2.pier.identifier,
@@ -244,6 +246,7 @@ def test_import_customer_data_with_valid_data_set():
     )
     order = customer1.orders.first()
     assert order.lease.berth.number == berth2.number
+    assert order.lease.status == LeaseStatus.PAID
     assert order.price == Decimal("251.00")
     assert order.tax_percentage == Decimal("25.00")
     assert order.order_lines.count() == 0
@@ -380,6 +383,7 @@ def test_import_customer_data_order_many_piers_no_berth_found(berth, boat_type):
                     "created_at": "2019-12-02 00:00:00.000",
                     "order_sum": "251.00",
                     "vat_percentage": "25.0",
+                    "is_paid": True,
                     "berth": {
                         "harbor_servicemap_id": berth.pier.harbor.servicemap_id,
                         "pier_id": "Fake-identifier",
@@ -412,6 +416,7 @@ def test_import_customer_data_order_many_piers_default_berth(berth, boat_type):
                     "created_at": "2019-12-02 00:00:00.000",
                     "order_sum": "251.00",
                     "vat_percentage": "25.0",
+                    "is_paid": True,
                     "berth": {
                         "harbor_servicemap_id": berth.pier.harbor.servicemap_id,
                         "pier_id": "Fake-identifier",

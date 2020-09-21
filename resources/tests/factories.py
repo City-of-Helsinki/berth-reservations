@@ -110,11 +110,8 @@ class WinterStoragePlaceTypeFactory(AbstractPlaceTypeFactory):
         model = WinterStoragePlaceType
 
 
-class AbstractPlaceFactory(factory.django.DjangoModelFactory):
-    number = factory.Faker("random_int")
-
-
-class BerthFactory(AbstractPlaceFactory):
+class BerthFactory(factory.django.DjangoModelFactory):
+    number = factory.LazyFunction(lambda: str(randgen.randint(1, 1_000_000)))
     pier = factory.SubFactory(PierFactory)
     berth_type = factory.SubFactory(BerthTypeFactory)
 
@@ -122,7 +119,8 @@ class BerthFactory(AbstractPlaceFactory):
         model = Berth
 
 
-class WinterStoragePlaceFactory(AbstractPlaceFactory):
+class WinterStoragePlaceFactory(factory.django.DjangoModelFactory):
+    number = factory.Faker("random_int")
     winter_storage_section = factory.SubFactory(WinterStorageSectionFactory)
     place_type = factory.SubFactory(WinterStoragePlaceTypeFactory)
 
