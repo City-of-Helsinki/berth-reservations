@@ -11,7 +11,6 @@ from django.utils.translation import gettext_lazy as _
 
 from applications.enums import ApplicationAreaType
 from applications.models import BerthApplication, WinterStorageApplication
-from leases.enums import LeaseStatus
 from leases.models import BerthLease, WinterStorageLease
 from utils.models import TimeStampedModel, UUIDModel
 from utils.numbers import rounded as rounded_decimal
@@ -33,6 +32,7 @@ from .utils import (
     calculate_product_percentage_price,
     convert_aftertax_to_pretax,
     generate_order_number,
+    get_lease_status,
     rounded,
 )
 
@@ -592,15 +592,7 @@ class Order(UUIDModel, TimeStampedModel):
             )
 
         self.status = new_status
-
-        if new_status == OrderStatus.PAID:
-            self.lease.status = LeaseStatus.PAID
-        elif new_status in (OrderStatus.REJECTED, OrderStatus.CANCELLED):
-            self.lease.status = LeaseStatus.REFUSED
-        elif new_status == OrderStatus.EXPIRED:
-            self.lease.status = LeaseStatus.EXPIRED
-        elif new_status == OrderStatus.WAITING:
-            self.lease = LeaseStatus.OFFERED
+        self.lease.status = get_lease_status(new_status)
 
         self.lease.save(update_fields=["status"])
         self.save(update_fields=["status"])
