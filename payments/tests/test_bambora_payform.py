@@ -105,7 +105,9 @@ def test_handle_initiate_payment_error_unknown_code(order, payment_provider):
 def test_payload_add_products_success(payment_provider, order_with_products: Order):
     """Test the products and total order price data is added correctly into payload"""
     payload = {}
-    payment_provider.payload_add_products(payload, order_with_products)
+    payment_provider.payload_add_products(
+        payload, order_with_products, order_with_products.lease.application.language
+    )
     assert "amount" in payload
     assert payload.get("amount") == price_as_fractional_int(
         order_with_products.total_price
