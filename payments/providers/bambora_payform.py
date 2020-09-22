@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 
 import requests
+from django.conf import settings
 from django.http import HttpRequest, HttpResponse, HttpResponseServerError
 from django.utils.translation import gettext_lazy as _, override
 from requests.exceptions import RequestException
@@ -55,15 +56,18 @@ class BamboraPayformProvider(PaymentProvider):
 
     def initiate_payment(self, order: Order) -> str:
         """Initiate payment by constructing the payload with necessary items"""
+        language = (
+            order.lease.application.language
+            if hasattr(order, "lease") and hasattr(order.lease, "application")
+            else settings.LANGUAGE_CODE
+        )
 
         payload = {
             "version": "w3.1",
             "api_key": self.config.get(VENE_PAYMENTS_BAMBORA_API_KEY),
             "payment_method": {
                 "type": "e-payment",
-                "return_url": self.get_success_url(
-                    lang=order.lease.application.language
-                ),
+                "return_url": self.get_success_url(lang=language),
                 "notify_url": self.get_notify_url(),
                 "selected": self.config.get(VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS),
                 "token_valid_until": datetime.combine(
@@ -74,7 +78,7 @@ class BamboraPayformProvider(PaymentProvider):
             "order_number": str(order.order_number),
         }
 
-        self.payload_add_products(payload, order)
+        self.payload_add_products(payload, order, language)
         self.payload_add_customer(payload, order)
         self.payload_add_auth_code(payload)
 
@@ -107,7 +111,7 @@ class BamboraPayformProvider(PaymentProvider):
                 f"{_('Return code was not recognized: ')} {result}"
             )
 
-    def payload_add_products(self, payload: dict, order: Order):
+    def payload_add_products(self, payload: dict, order: Order, language: str):
         """Attach info of bought products to payload
 
         Order lines that contain bought products are retrieved through order"""
@@ -125,7 +129,7 @@ class BamboraPayformProvider(PaymentProvider):
         product = order.product
         int_tax = int(order.tax_percentage)
         assert int_tax == product.tax_percentage  # make sure the tax is a whole number
-        with override(order.lease.application.language):
+        with override(language):
             product_name = product.name
         items.append(
             {
@@ -145,7 +149,7 @@ class BamboraPayformProvider(PaymentProvider):
             assert (
                 int_tax == product.tax_percentage
             )  # make sure the tax is a whole number
-            with override(order.lease.application.language):
+            with override(language):
                 product_name = product.name
             items.append(
                 {
