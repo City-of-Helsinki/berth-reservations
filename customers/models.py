@@ -173,14 +173,14 @@ class CustomerProfileManager(models.Manager):
                     )
 
                 for lease in customer_data.get("leases", []):
-                    berth = _get_berth(
-                        lease.get("harbor_servicemap_id"),
-                        lease.get("berth_number"),
-                        lease.get("pier_id", "-"),
-                    )
+                    try:
+                        berth = _get_berth(
+                            lease.get("harbor_servicemap_id"),
+                            lease.get("berth_number"),
+                            lease.get("pier_id", "-"),
+                        )
 
-                    # Only create a lease if the berth exists
-                    if berth:
+                        # Only create a lease if the berth exists
                         BerthLease.objects.create(
                             customer=customer,
                             berth=berth,
@@ -189,7 +189,10 @@ class CustomerProfileManager(models.Manager):
                             else None,
                             start_date=lease.get("start_date"),
                             end_date=lease.get("end_date"),
+                            status=LeaseStatus.PAID,
                         )
+                    except Berth.DoesNotExist:
+                        pass
 
                 for order in customer_data.get("orders", []):
                     lease = None
@@ -197,18 +200,17 @@ class CustomerProfileManager(models.Manager):
                     if (berth_data := order.get("berth")) and order.get(
                         "is_paid", False
                     ):
-                        berth = _get_berth(
-                            berth_data.get("harbor_servicemap_id"),
-                            berth_data.get("berth_number"),
-                            berth_data.get("pier_id", "-"),
-                        )
-
-                        # Only create a lease if the berth exists
-                        if berth:
+                        try:
+                            berth = _get_berth(
+                                berth_data.get("harbor_servicemap_id"),
+                                berth_data.get("berth_number"),
+                                berth_data.get("pier_id", "-"),
+                            )
                             start_date, end_date = calculate_lease_start_and_end_dates(
                                 parse(order.get("created_at")).date()
                             )
 
+                            # Only create a lease if the berth exists
                             lease, _created = BerthLease.objects.get_or_create(
                                 customer=customer,
                                 berth=berth,
@@ -216,6 +218,8 @@ class CustomerProfileManager(models.Manager):
                                 end_date=end_date,
                                 status=LeaseStatus.PAID,
                             )
+                        except Berth.DoesNotExist:
+                            pass
 
                     Order.objects.create(
                         customer=customer,

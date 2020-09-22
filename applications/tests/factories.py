@@ -9,6 +9,7 @@ from harbors.tests.factories import (
 from ..enums import WinterStorageMethod
 from ..models import (
     BerthApplication,
+    BerthSwitch,
     HarborChoice,
     WinterStorageApplication,
     WinterStorageAreaChoice,
@@ -56,3 +57,12 @@ class WinterAreaChoiceFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = WinterStorageAreaChoice
+
+
+class BerthSwitchFactory(factory.django.DjangoModelFactory):
+    harbor = factory.SubFactory(HarborFactory)
+    pier = factory.Faker("random_int", min=1, max=100)
+    berth_number = factory.Faker("random_int", min=1, max=100)
+
+    class Meta:
+        model = BerthSwitch
