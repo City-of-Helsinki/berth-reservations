@@ -5145,6 +5145,19 @@
 },
 {
   "model": "resources.berthtype",
+  "pk": "64dc0afd-8c73-4fe8-8722-688fe2e5d699",
+  "fields": {
+    "created_at": "2020-09-22T11:29:07.693Z",
+    "modified_at": "2020-09-22T11:31:10.440Z",
+    "width": "4.50",
+    "length": "20.00",
+    "mooring_type": 4,
+    "depth": null,
+    "price_group": null
+  }
+},
+{
+  "model": "resources.berthtype",
   "pk": "66cdb170-39ab-4432-bcda-522fbc67aaab",
   "fields": {
     "created_at": "2020-04-06T11:56:25.813Z",
@@ -6397,9 +6410,9 @@
   "pk": "01b34777-36fd-4e89-a73c-a7c1371c8a99",
   "fields": {
     "created_at": "2020-09-21T12:39:34.620Z",
-    "modified_at": "2020-09-21T13:25:17.603Z",
+    "modified_at": "2020-09-22T11:52:27.654Z",
     "is_active": true,
-    "number": "003",
+    "number": "3",
     "pier": "067acaa1-8175-4e0b-a28e-ea1c5a0ac653",
     "berth_type": "3cc66512-7904-4fb9-9688-f50e986f75d1",
     "comment": "",
@@ -8791,9 +8804,9 @@
   "pk": "0c2b2681-4563-4cc4-b04e-140d1b6bfcd1",
   "fields": {
     "created_at": "2020-09-21T12:39:43.950Z",
-    "modified_at": "2020-09-21T13:24:12.024Z",
+    "modified_at": "2020-09-22T11:52:27.648Z",
     "is_active": true,
-    "number": "001",
+    "number": "1",
     "pier": "067acaa1-8175-4e0b-a28e-ea1c5a0ac653",
     "berth_type": "3cc66512-7904-4fb9-9688-f50e986f75d1",
     "comment": "",
@@ -12106,6 +12119,20 @@
 },
 {
   "model": "resources.berth",
+  "pk": "1bc4a482-c5b3-4be6-80a8-16666e76eb49",
+  "fields": {
+    "created_at": "2020-09-22T08:04:10.666Z",
+    "modified_at": "2020-09-22T08:04:10.666Z",
+    "is_active": true,
+    "number": "02",
+    "pier": "650c6657-a90a-42a1-9ca7-390e49f42937",
+    "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
+    "comment": "",
+    "is_accessible": null
+  }
+},
+{
+  "model": "resources.berth",
   "pk": "1bd0e5f3-2eda-4a2c-a5b7-52dfa4471357",
   "fields": {
     "created_at": "2020-04-06T11:56:25.666Z",
@@ -12758,6 +12785,20 @@
     "number": "5",
     "pier": "cc5a8a71-dec8-41cb-806f-368b41065cb3",
     "berth_type": "8eb481cc-c32c-49ef-a9b8-dada59e6624b",
+    "comment": "",
+    "is_accessible": null
+  }
+},
+{
+  "model": "resources.berth",
+  "pk": "1e793d24-6744-4e9d-a9bc-fb44a7d1857f",
+  "fields": {
+    "created_at": "2020-09-22T08:05:30.230Z",
+    "modified_at": "2020-09-22T08:05:30.230Z",
+    "is_active": true,
+    "number": "01",
+    "pier": "4c75a2d0-9cf3-4a0c-97fc-99e1c2a15ee7",
+    "berth_type": "bd1516f1-7650-425b-86f6-8eb7ea7c845d",
     "comment": "",
     "is_accessible": null
   }
@@ -15847,9 +15888,9 @@
   "pk": "2c166438-e7ab-4371-9d56-5fccc37d8611",
   "fields": {
     "created_at": "2020-09-21T12:29:23.954Z",
-    "modified_at": "2020-09-21T13:24:55.869Z",
+    "modified_at": "2020-09-22T11:52:27.652Z",
     "is_active": true,
-    "number": "002",
+    "number": "2",
     "pier": "067acaa1-8175-4e0b-a28e-ea1c5a0ac653",
     "berth_type": "3cc66512-7904-4fb9-9688-f50e986f75d1",
     "comment": "",
@@ -27570,6 +27611,20 @@
     "number": "8",
     "pier": "650c6657-a90a-42a1-9ca7-390e49f42937",
     "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
+    "comment": "",
+    "is_accessible": null
+  }
+},
+{
+  "model": "resources.berth",
+  "pk": "6081e327-b4a6-48b1-ac43-4bfcb735ef25",
+  "fields": {
+    "created_at": "2020-09-22T08:08:40.463Z",
+    "modified_at": "2020-09-22T08:08:40.463Z",
+    "is_active": true,
+    "number": "02",
+    "pier": "c3b8ff59-d610-4441-802f-a924490416c5",
+    "berth_type": "100b7106-5349-4e49-8146-de6acbb857e6",
     "comment": "",
     "is_accessible": null
   }
@@ -42290,6 +42345,20 @@
 },
 {
   "model": "resources.berth",
+  "pk": "a1901ce5-dc83-4de0-8151-71d67eb8f648",
+  "fields": {
+    "created_at": "2020-09-22T08:05:48.672Z",
+    "modified_at": "2020-09-22T08:05:48.672Z",
+    "is_active": true,
+    "number": "02",
+    "pier": "4c75a2d0-9cf3-4a0c-97fc-99e1c2a15ee7",
+    "berth_type": "bd1516f1-7650-425b-86f6-8eb7ea7c845d",
+    "comment": "",
+    "is_accessible": null
+  }
+},
+{
+  "model": "resources.berth",
   "pk": "a1ade3fa-a48a-489e-821d-49b7e51d9c1d",
   "fields": {
     "created_at": "2020-04-06T11:56:25.666Z",
@@ -43754,6 +43823,20 @@
     "number": "27",
     "pier": "cacb19e6-5bca-4ee6-b961-d20cb27c225f",
     "berth_type": "5de05a46-176d-4025-a38c-b0f813f6eef9",
+    "comment": "",
+    "is_accessible": null
+  }
+},
+{
+  "model": "resources.berth",
+  "pk": "a890e5b7-11c5-4689-a595-80058c311ca6",
+  "fields": {
+    "created_at": "2020-09-22T08:04:21.213Z",
+    "modified_at": "2020-09-22T08:04:21.213Z",
+    "is_active": true,
+    "number": "04",
+    "pier": "650c6657-a90a-42a1-9ca7-390e49f42937",
+    "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
     "comment": "",
     "is_accessible": null
   }
@@ -55618,6 +55701,20 @@
 },
 {
   "model": "resources.berth",
+  "pk": "de911e35-0cb3-412f-b397-6b4a7f100ec4",
+  "fields": {
+    "created_at": "2020-09-22T11:29:10.051Z",
+    "modified_at": "2020-09-22T11:34:01.790Z",
+    "is_active": true,
+    "number": "17A",
+    "pier": "9c7cf0cc-ee59-4c69-9fa3-f1b3b775455f",
+    "berth_type": "e2369759-533a-484c-ad19-107dee25b3e3",
+    "comment": "",
+    "is_accessible": null
+  }
+},
+{
+  "model": "resources.berth",
   "pk": "deb37897-ea37-47fc-b626-799aa03269e2",
   "fields": {
     "created_at": "2020-04-06T11:56:25.666Z",
@@ -56326,6 +56423,20 @@
     "number": "15",
     "pier": "c3b8ff59-d610-4441-802f-a924490416c5",
     "berth_type": "2bd4ea7a-427f-4299-be66-b0a94b754052",
+    "comment": "",
+    "is_accessible": null
+  }
+},
+{
+  "model": "resources.berth",
+  "pk": "e151b91c-a82f-434b-b935-a0e2d983af30",
+  "fields": {
+    "created_at": "2020-09-22T08:08:27.750Z",
+    "modified_at": "2020-09-22T08:08:27.750Z",
+    "is_active": true,
+    "number": "01",
+    "pier": "c3b8ff59-d610-4441-802f-a924490416c5",
+    "berth_type": "100b7106-5349-4e49-8146-de6acbb857e6",
     "comment": "",
     "is_accessible": null
   }
@@ -60554,6 +60665,20 @@
     "number": "27",
     "pier": "a58e0114-6da0-4342-8394-0ace16cafd03",
     "berth_type": "35feca2a-b76c-4cd1-a062-e352a57d708a",
+    "comment": "",
+    "is_accessible": null
+  }
+},
+{
+  "model": "resources.berth",
+  "pk": "f4c3fefb-0c3f-4ded-b85e-695579fc9766",
+  "fields": {
+    "created_at": "2020-09-22T08:04:33.596Z",
+    "modified_at": "2020-09-22T08:04:33.596Z",
+    "is_active": true,
+    "number": "06",
+    "pier": "650c6657-a90a-42a1-9ca7-390e49f42937",
+    "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
     "comment": "",
     "is_accessible": null
   }
