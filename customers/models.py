@@ -189,6 +189,7 @@ class CustomerProfileManager(models.Manager):
                             else None,
                             start_date=lease.get("start_date"),
                             end_date=lease.get("end_date"),
+                            status=LeaseStatus.PAID,
                         )
                     except Berth.DoesNotExist:
                         pass
