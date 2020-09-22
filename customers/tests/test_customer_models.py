@@ -12,6 +12,7 @@ from django.db.utils import IntegrityError
 from berth_reservations.tests.conftest import *  # noqa
 from berth_reservations.tests.factories import CustomerProfileFactory
 from leases.enums import LeaseStatus
+from leases.models import BerthLease
 from resources.tests.factories import BerthFactory, BoatTypeFactory, PierFactory
 
 from ..enums import BoatCertificateType, OrganizationType
@@ -320,11 +321,13 @@ def test_import_customer_data_lease_many_piers_no_berth_found(berth, boat_type):
     ]
 
     assert CustomerProfile.objects.count() == 0
-    with pytest.raises(Exception) as e:
-        CustomerProfile.objects.import_customer_data(data)
+    assert BerthLease.objects.count() == 0
 
-    assert f"Berth {berth.number} does not exist on pier Fake-identifier" in str(e)
-    assert CustomerProfile.objects.count() == 0
+    result = CustomerProfile.objects.import_customer_data(data)
+    assert result == {"313432": UUID("48319ebc-5eaf-4285-a565-15848225614b")}
+
+    assert CustomerProfile.objects.count() == 1
+    assert BerthLease.objects.count() == 0
 
 
 def test_import_customer_data_lease_many_piers_default_berth(berth, boat_type):
@@ -398,11 +401,13 @@ def test_import_customer_data_order_many_piers_no_berth_found(berth, boat_type):
     ]
 
     assert CustomerProfile.objects.count() == 0
-    with pytest.raises(Exception) as e:
-        CustomerProfile.objects.import_customer_data(data)
+    assert BerthLease.objects.count() == 0
 
-    assert f"Berth {berth.number} does not exist on pier Fake-identifier" in str(e)
-    assert CustomerProfile.objects.count() == 0
+    result = CustomerProfile.objects.import_customer_data(data)
+    assert result == {"313432": UUID("48319ebc-5eaf-4285-a565-15848225614b")}
+
+    assert CustomerProfile.objects.count() == 1
+    assert BerthLease.objects.count() == 0
 
 
 def test_import_customer_data_order_many_piers_default_berth(berth, boat_type):
