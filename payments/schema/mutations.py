@@ -34,6 +34,7 @@ from ..models import (
     WinterStorageProduct,
 )
 from ..providers import get_payment_provider
+from ..utils import get_order_notification_type
 from .types import (
     AdditionalProductNode,
     AdditionalProductTaxEnum,
@@ -508,8 +509,6 @@ class ApproveOrderMutation(graphene.ClientIDMutation):
         WinterStorageApplication,
     )
     def mutate_and_get_payload(cls, root, info, **input):
-        from ..notifications import NotificationType
-
         failed_orders = []
         due_date = input.get("due_date", today().date() + relativedelta(weeks=2))
 
@@ -554,9 +553,9 @@ class ApproveOrderMutation(graphene.ClientIDMutation):
                         ),
                         "payment_url": payment_url,
                     }
-                    send_notification(
-                        email, NotificationType.ORDER_APPROVED.value, context, language
-                    )
+
+                    notification_type = get_order_notification_type(order)
+                    send_notification(email, notification_type.value, context, language)
             except (
                 AnymailError,
                 OSError,

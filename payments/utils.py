@@ -11,6 +11,8 @@ from uuid import UUID
 
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import MONTHLY, rrule
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from leases.utils import (
     calculate_season_end_date,
@@ -213,3 +215,19 @@ def get_talpa_product_id(
             own_product_number,
         ]
     )
+
+
+def get_order_notification_type(order):
+    from .enums import OrderType
+    from .notifications import NotificationType
+
+    if order.order_type == OrderType.NEW_BERTH_ORDER:
+        return NotificationType.NEW_BERTH_ORDER_APPROVED
+    elif order.order_type == OrderType.BERTH_SWITCH_ORDER:
+        return NotificationType.BERTH_SWITCH_ORDER_APPROVED
+    elif order.order_type == OrderType.WINTER_STORAGE_ORDER:
+        return NotificationType.NEW_WINTER_STORAGE_ORDER_APPROVED
+    elif order.order_type == OrderType.UNMARKED_WINTER_STORAGE_ORDER:
+        return NotificationType.UNMARKED_WINTER_STORAGE_ORDER_APPROVED
+    else:
+        raise ValidationError(_("Order does not have a valid type"))

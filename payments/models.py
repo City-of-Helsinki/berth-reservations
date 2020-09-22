@@ -9,6 +9,8 @@ from django.db import models
 from django.db.models import Q, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
+from applications.enums import ApplicationAreaType
+from applications.models import BerthApplication, WinterStorageApplication
 from leases.enums import LeaseStatus
 from leases.models import BerthLease, WinterStorageLease
 from utils.models import TimeStampedModel, UUIDModel
@@ -17,6 +19,7 @@ from utils.numbers import rounded as rounded_decimal
 from .enums import (
     AdditionalProductType,
     OrderStatus,
+    OrderType,
     PeriodType,
     PriceUnits,
     ProductServiceType,
@@ -294,6 +297,51 @@ class Order(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"{self.product} [{self.status}]"
+
+    @property
+    def order_type(self) -> OrderType:
+        if not hasattr(self, "lease"):
+            return OrderType.INVALID
+
+        # Check for application-specific fields:
+        # - if it's a winter storage application:
+        #   - return the type based on the area_type property
+        # - if it's a berth application, check for a berth_switch
+        if hasattr(self.lease, "application"):
+            if isinstance(self.lease.application, WinterStorageApplication):
+                return (
+                    OrderType.UNMARKED_WINTER_STORAGE_ORDER
+                    if self.lease.application.area_type == ApplicationAreaType.UNMARKED
+                    else OrderType.WINTER_STORAGE_ORDER
+                )
+            elif (
+                isinstance(self.lease.application, BerthApplication)
+                and self.lease.application.berth_switch
+            ):
+                return OrderType.BERTH_SWITCH_ORDER
+
+        # If it's a berth lease, check if it's a new lease or not
+        if isinstance(self.lease, BerthLease):
+            # Look for leases before the one associated to the order,
+            # that belong to the same customer and berth
+            has_previous_lease = (
+                BerthLease.objects.filter(
+                    customer=self.customer,
+                    berth=self.lease.berth,
+                    end_date__lte=self.lease.start_date,
+                )
+                .exclude(id=self.lease.id)
+                .exists()
+            )
+            if has_previous_lease:
+                return OrderType.RENEW_BERTH_ORDER
+            return OrderType.NEW_BERTH_ORDER
+
+        # Winter storage only has one type (unless it's unmarked)
+        elif isinstance(self.lease, WinterStorageLease):
+            return OrderType.WINTER_STORAGE_ORDER
+
+        return OrderType.INVALID
 
     @property
     @rounded
