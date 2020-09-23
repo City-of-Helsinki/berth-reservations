@@ -37403,6 +37403,20 @@
 },
 {
   "model": "resources.berth",
+  "pk": "8ca69fb7-536b-4397-b164-18f8e1d3b1b6",
+  "fields": {
+    "created_at": "2020-09-22T15:26:42.682Z",
+    "modified_at": "2020-09-22T15:26:42.682Z",
+    "is_active": true,
+    "number": "02",
+    "pier": "6e11b488-7036-4092-9a65-7eb016cd2128",
+    "berth_type": "64dc0afd-8c73-4fe8-8722-688fe2e5d699",
+    "comment": "",
+    "is_accessible": null
+  }
+},
+{
+  "model": "resources.berth",
   "pk": "8cc900df-6435-49e8-92f2-185f08ffb949",
   "fields": {
     "created_at": "2020-04-06T11:56:25.666Z",
@@ -56432,7 +56446,7 @@
   "pk": "e151b91c-a82f-434b-b935-a0e2d983af30",
   "fields": {
     "created_at": "2020-09-22T08:08:27.750Z",
-    "modified_at": "2020-09-22T08:08:27.750Z",
+    "modified_at": "2020-09-22T15:26:04.843Z",
     "is_active": true,
     "number": "01",
     "pier": "c3b8ff59-d610-4441-802f-a924490416c5",
