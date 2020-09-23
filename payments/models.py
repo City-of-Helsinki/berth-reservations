@@ -9,7 +9,7 @@ from django.db import models
 from django.db.models import Q, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
-from applications.enums import ApplicationAreaType
+from applications.enums import ApplicationAreaType, ApplicationStatus
 from applications.models import BerthApplication, WinterStorageApplication
 from leases.models import BerthLease, WinterStorageLease
 from utils.models import TimeStampedModel, UUIDModel
@@ -593,6 +593,11 @@ class Order(UUIDModel, TimeStampedModel):
 
         self.status = new_status
         self.lease.status = get_lease_status(new_status)
+
+        if new_status == OrderStatus.PAID:
+            application = self.lease.application
+            application.status = ApplicationStatus.HANDLED
+            self.lease.application.save(update_fields=["status"])
 
         self.lease.save(update_fields=["status"])
         self.save(update_fields=["status"])
