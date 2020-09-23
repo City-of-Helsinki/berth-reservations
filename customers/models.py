@@ -99,31 +99,15 @@ class CustomerProfileManager(models.Manager):
 
         def _get_berth(harbor_servicemap_id: str, berth_number: str, pier_id: str):
             """
-            - Try to filter the pier based on the identifier
-            - If no pier with that identifier was found, look for the default "-" pier
-            - If that isn't found either, check how many berth are on the pier
-                - If there's only one, assign it; otherwise, raise an error
+            Filter the berths based on the pier identifier and berth number.
+            If no berth is found, an error is raised.
+            (since we can identify specific berths with number and pier id)
             """
-            possible_berths = Berth.objects.filter(
+            return Berth.objects.get(
                 pier__harbor=Harbor.objects.get(servicemap_id=harbor_servicemap_id),
                 number=berth_number,
+                pier__identifier=pier_id,
             )
-            # Filter only for the specified pier
-            # If there's only one berth matching the berth number + pier identifier, that's the one
-            if matching_berth := possible_berths.filter(
-                pier__identifier=pier_id
-            ).first():
-                berth = matching_berth
-            # If there's no berth on the pier with the identifier, but there's only one pier on the harbor,
-            # then we take it as "default" pier and we assign it to the berth on that pier
-            elif possible_berths.count() == 1:
-                berth = possible_berths.first()
-            # Otherwise, rise an error
-            else:
-                raise Berth.DoesNotExist(
-                    _(f"Berth {berth_number} does not exist on pier {pier_id}")
-                )
-            return berth
 
         result = {}
         for index, customer_data in enumerate(data):
@@ -191,7 +175,12 @@ class CustomerProfileManager(models.Manager):
                             end_date=lease.get("end_date"),
                             status=LeaseStatus.PAID,
                         )
-                    except Berth.DoesNotExist:
+                    except (
+                        Berth.DoesNotExist,
+                        Berth.MultipleObjectsReturned,
+                        # Catch ValidationError to ignore errors creating leases
+                        ValidationError,
+                    ):
                         pass
 
                 for order in customer_data.get("orders", []):
@@ -218,7 +207,12 @@ class CustomerProfileManager(models.Manager):
                                 end_date=end_date,
                                 status=LeaseStatus.PAID,
                             )
-                        except Berth.DoesNotExist:
+                        except (
+                            Berth.DoesNotExist,
+                            Berth.MultipleObjectsReturned,
+                            # Catch ValidationError to ignore errors creating leases
+                            ValidationError,
+                        ):
                             pass
 
                     Order.objects.create(
