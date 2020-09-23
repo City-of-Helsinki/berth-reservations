@@ -19,7 +19,7 @@ from ..exceptions import (
     ServiceUnavailableError,
     UnknownReturnCodeError,
 )
-from ..models import AdditionalProduct, Order, OrderLine
+from ..models import AdditionalProduct, BerthProduct, Order, OrderLine
 from ..utils import get_talpa_product_id, price_as_fractional_int
 from .base import PaymentProvider
 
@@ -121,8 +121,9 @@ class BamboraPayformProvider(PaymentProvider):
         area = None
 
         if hasattr(order, "product"):
-            if hasattr(order.product, "harbor"):
-                area = order.product.harbor
+            if isinstance(order.product, BerthProduct):
+                # If the product is the "default" product (applies to all areas)
+                area = order.product.harbor or order.lease.berth.pier.harbor
             elif hasattr(order.product, "winter_storage_area"):
                 area = order.product.winter_storage_area
 
