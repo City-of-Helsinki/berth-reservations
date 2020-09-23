@@ -6,6 +6,7 @@ from django.conf import settings
 from django.http import HttpResponse, HttpResponseServerError
 from django.test.client import RequestFactory
 
+from applications.enums import ApplicationStatus
 from payments.enums import OrderStatus
 from payments.models import Order
 from payments.providers.bambora_payform import (
@@ -105,7 +106,9 @@ def test_handle_initiate_payment_error_unknown_code(order, payment_provider):
 def test_payload_add_products_success(payment_provider, order_with_products: Order):
     """Test the products and total order price data is added correctly into payload"""
     payload = {}
-    payment_provider.payload_add_products(payload, order_with_products)
+    payment_provider.payload_add_products(
+        payload, order_with_products, order_with_products.lease.application.language
+    )
     assert "amount" in payload
     assert payload.get("amount") == price_as_fractional_int(
         order_with_products.total_price
@@ -265,8 +268,11 @@ def test_handle_success_request_success(provider_base_config, order: Order):
     request = rf.get("/payments/success/", params)
     payment_provider = create_bambora_provider(provider_base_config, request)
     returned = payment_provider.handle_success_request()
+
     order_after = Order.objects.get(order_number=params.get("ORDER_NUMBER"))
     assert order_after.status == OrderStatus.PAID
+    assert order_after.lease.application.status == ApplicationStatus.HANDLED
+
     assert isinstance(returned, HttpResponse)
     url = returned.url
     assert "/payment-result" in url
@@ -378,14 +384,14 @@ def test_handle_notify_request_order_not_found(provider_base_config, order):
 )
 def test_handle_notify_request_success(
     provider_base_config,
-    order: Order,
+    berth_order: Order,
     order_status: OrderStatus,
     expected_order_status: OrderStatus,
 ):
     """Test request notify helper returns http 204 and order status is correct when successful"""
-    order.order_number = "abc123"
-    order.status = order_status
-    order.save()
+    berth_order.order_number = "abc123"
+    berth_order.status = order_status
+    berth_order.save()
 
     params = {
         "VENE_UI_RETURN_URL": "http%3A%2F%2F127.0.0.1%3A8000%2Fv1",

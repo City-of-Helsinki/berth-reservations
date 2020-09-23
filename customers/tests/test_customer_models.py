@@ -330,49 +330,6 @@ def test_import_customer_data_lease_many_piers_no_berth_found(berth, boat_type):
     assert BerthLease.objects.count() == 0
 
 
-def test_import_customer_data_lease_many_piers_default_berth(berth, boat_type):
-    data = [
-        {
-            "customer_id": "313432",
-            "leases": [
-                {
-                    "harbor_servicemap_id": berth.pier.harbor.servicemap_id,
-                    "pier_id": "Fake-identifier",
-                    "berth_number": berth.number,
-                    "start_date": "2019-06-10",
-                    "end_date": "2019-09-14",
-                    "boat_index": 0,
-                }
-            ],
-            "boats": [
-                {
-                    "boat_type": boat_type.name,
-                    "name": "My Boaty",
-                    "registration_number": "",
-                    "width": "1.40",
-                    "length": "3.30",
-                    "draught": None,
-                    "weight": 500,
-                }
-            ],
-            "orders": [],
-            "comment": "",
-            "id": "48319ebc-5eaf-4285-a565-15848225614b",
-        }
-    ]
-
-    assert CustomerProfile.objects.count() == 0
-
-    result = CustomerProfile.objects.import_customer_data(data)
-
-    assert CustomerProfile.objects.count() == 1
-
-    assert result == {"313432": UUID("48319ebc-5eaf-4285-a565-15848225614b")}
-    profile = CustomerProfile.objects.first()
-    assert profile.berth_leases.first().berth.pier.identifier != "Fake-identifier"
-    assert profile.berth_leases.first().berth.number == berth.number
-
-
 def test_import_customer_data_order_many_piers_no_berth_found(berth, boat_type):
     BerthFactory(pier=PierFactory(harbor=berth.pier.harbor), number=berth.number)
 
@@ -408,48 +365,3 @@ def test_import_customer_data_order_many_piers_no_berth_found(berth, boat_type):
 
     assert CustomerProfile.objects.count() == 1
     assert BerthLease.objects.count() == 0
-
-
-def test_import_customer_data_order_many_piers_default_berth(berth, boat_type):
-    data = [
-        {
-            "customer_id": "313432",
-            "leases": [],
-            "boats": [],
-            "orders": [
-                {
-                    "created_at": "2019-12-02 00:00:00.000",
-                    "order_sum": "251.00",
-                    "vat_percentage": "25.0",
-                    "is_paid": True,
-                    "berth": {
-                        "harbor_servicemap_id": berth.pier.harbor.servicemap_id,
-                        "pier_id": "Fake-identifier",
-                        "berth_number": berth.number,
-                    },
-                    "comment": "Laskunumero: 247509 RAMSAYRANTA A 004",
-                }
-            ],
-            "comment": "",
-            "id": "48319ebc-5eaf-4285-a565-15848225614b",
-        }
-    ]
-
-    assert CustomerProfile.objects.count() == 0
-
-    result = CustomerProfile.objects.import_customer_data(data)
-
-    assert CustomerProfile.objects.count() == 1
-
-    assert result == {"313432": UUID("48319ebc-5eaf-4285-a565-15848225614b")}
-    profile = CustomerProfile.objects.first()
-
-    assert profile.orders.count() == 1
-    assert profile.berth_leases.count() == 1
-
-    lease = profile.berth_leases.first()
-
-    assert profile.orders.first().lease == lease
-
-    assert lease.berth.pier.identifier != "Fake-identifier"
-    assert lease.berth.number == berth.number
