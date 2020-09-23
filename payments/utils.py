@@ -14,12 +14,14 @@ from dateutil.rrule import MONTHLY, rrule
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from leases.enums import LeaseStatus
 from leases.utils import (
     calculate_season_end_date,
     calculate_season_start_date,
     calculate_winter_season_end_date,
     calculate_winter_season_start_date,
 )
+from payments.enums import OrderStatus
 from resources.enums import AreaRegion
 from resources.models import Harbor, WinterStorageArea
 from utils.numbers import rounded as rounded_decimal
@@ -231,3 +233,16 @@ def get_order_notification_type(order):
         return NotificationType.UNMARKED_WINTER_STORAGE_ORDER_APPROVED
     else:
         raise ValidationError(_("Order does not have a valid type"))
+
+
+def get_lease_status(new_status) -> LeaseStatus:
+    if new_status == OrderStatus.PAID:
+        return LeaseStatus.PAID
+    elif new_status in (OrderStatus.REJECTED, OrderStatus.CANCELLED):
+        return LeaseStatus.REFUSED
+    elif new_status == OrderStatus.EXPIRED:
+        return LeaseStatus.EXPIRED
+    elif new_status == OrderStatus.WAITING:
+        return LeaseStatus.OFFERED
+    else:
+        raise ValidationError(_("Invalid order status"))
