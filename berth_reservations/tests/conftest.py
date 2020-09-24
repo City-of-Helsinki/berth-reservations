@@ -4,6 +4,9 @@ import pytest
 from django.contrib.auth.models import Group
 from django.core.management import call_command
 
+from customers.enums import OrganizationType
+from customers.tests.factories import OrganizationFactory
+
 from .factories import CustomerProfileFactory, MunicipalityFactory, UserFactory
 from .utils import create_api_client
 
@@ -119,3 +122,19 @@ def municipality():
 @pytest.fixture
 def customer_profile():
     return CustomerProfileFactory()
+
+
+@pytest.fixture
+def company_customer(customer_profile):
+    OrganizationFactory(
+        customer=customer_profile, organization_type=OrganizationType.COMPANY
+    )
+    return customer_profile
+
+
+@pytest.fixture
+def non_billable_customer(customer_profile):
+    OrganizationFactory(
+        customer=customer_profile, organization_type=OrganizationType.NON_BILLABLE
+    )
+    return customer_profile

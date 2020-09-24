@@ -972,3 +972,108 @@ def test_order_winter_storage_lease_without_boat_right_price(
     assert order.lease.id == winter_storage_lease.id
     assert order._lease_content_type.name == winter_storage_lease._meta.verbose_name
     assert order.price == expected_price
+
+
+def test_order_right_price_for_company(
+    winter_storage_section, winter_storage_product, boat, company_customer
+):
+    boat.owner = company_customer
+    # we don't use decimals for width and length in this unit test
+    # it causes random rounding problems when asserting the double price
+    boat.width = 1
+    boat.length = 4
+    boat.save()
+
+    winter_storage_lease = WinterStorageLeaseFactory(
+        place=None, section=winter_storage_section, customer=boat.owner, boat=boat
+    )
+    order = Order.objects.create(
+        _lease_object_id=winter_storage_lease.id,
+        customer=boat.owner,
+        product=winter_storage_product,
+    )
+    sqm = boat.width * boat.length
+
+    expected_price = (
+        calculate_product_partial_season_price(
+            winter_storage_product.price_value,
+            winter_storage_lease.start_date,
+            winter_storage_lease.end_date,
+            summer_season=False,
+        )
+        * sqm
+        * 2  # expect double the price
+    )
+
+    assert order.price == expected_price
+    assert order.tax_percentage == winter_storage_product.tax_percentage
+
+
+def test_order_right_price_for_non_billable(
+    winter_storage_section, winter_storage_product, boat, non_billable_customer
+):
+    boat.owner = non_billable_customer
+    boat.save()
+
+    winter_storage_lease = WinterStorageLeaseFactory(
+        place=None, section=winter_storage_section, customer=boat.owner, boat=boat
+    )
+    order = Order.objects.create(
+        _lease_object_id=winter_storage_lease.id,
+        customer=boat.owner,
+        product=winter_storage_product,
+    )
+
+    assert order.price == 0
+    assert order.tax_percentage == 0
+
+
+def test_order_line_product_price_for_company(
+    berth_lease, berth_product, company_customer
+):
+    product = AdditionalProductFactory(
+        price_unit=PriceUnits.AMOUNT,
+        period=PeriodType("year"),
+        service=ProductServiceType.PARKING_PERMIT,
+    )
+
+    order = Order.objects.create(
+        _lease_object_id=berth_lease.id,
+        _product_object_id=berth_product.id,
+        customer=company_customer,
+    )
+
+    order_line = OrderLineFactory(product=product, order=order)
+
+    expected_price = (
+        calculate_product_partial_year_price(
+            product.price_value,
+            order_line.order.lease.start_date,
+            order_line.order.lease.end_date,
+        )
+        * 2
+    )  # expect double price
+
+    assert order_line.price == expected_price
+    assert order_line.tax_percentage == product.tax_percentage
+
+
+def test_order_line_product_price_for_non_billable(
+    berth_lease, berth_product, non_billable_customer
+):
+    product = AdditionalProductFactory(
+        price_unit=PriceUnits.AMOUNT,
+        period=PeriodType("year"),
+        service=ProductServiceType.PARKING_PERMIT,
+    )
+
+    order = Order.objects.create(
+        _lease_object_id=berth_lease.id,
+        _product_object_id=berth_product.id,
+        customer=non_billable_customer,
+    )
+
+    order_line = OrderLineFactory(product=product, order=order)
+
+    assert order_line.price == 0
+    assert order_line.tax_percentage == 0

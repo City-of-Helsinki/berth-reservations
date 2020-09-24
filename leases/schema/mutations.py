@@ -8,6 +8,7 @@ from applications.models import BerthApplication, WinterStorageApplication
 from applications.new_schema import BerthApplicationNode, WinterStorageApplicationNode
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.models import CustomerProfile
+from payments.enums import OrderStatus
 from payments.models import BerthPriceGroup, BerthProduct, Order, WinterStorageProduct
 from resources.schema import BerthNode, WinterStoragePlaceNode, WinterStorageSectionNode
 from users.decorators import (
@@ -91,7 +92,7 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
                 else price_group_products.get(harbor__isnull=True)
             )
 
-            Order.objects.create(
+            order = Order.objects.create(
                 customer=input["customer"], lease=lease, product=product
             )
         except BerthProduct.DoesNotExist as e:
@@ -103,6 +104,9 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
 
         application.status = ApplicationStatus.OFFER_GENERATED
         application.save()
+
+        if order.customer.is_non_billable_customer():
+            order.set_status(OrderStatus.PAID, "Non-billable customer.")
 
         return CreateBerthLeaseMutation(berth_lease=lease)
 
@@ -197,7 +201,7 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
     @view_permission_required(WinterStorageApplication, CustomerProfile)
     @add_permission_required(WinterStorageLease)
     @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, **input):
+    def mutate_and_get_payload(cls, root, info, **input):  # noqa: C901
         if "place_id" in input and "section_id" in input:
             raise VenepaikkaGraphQLError(
                 _("Cannot receive both Winter Storage Place and Section")
@@ -252,7 +256,7 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
         try:
             lease = WinterStorageLease.objects.create(**input)
             product = WinterStorageProduct.objects.get(winter_storage_area=area)
-            Order.objects.create(
+            order = Order.objects.create(
                 customer=input["customer"], lease=lease, product=product
             )
         except WinterStorageProduct.DoesNotExist as e:
@@ -264,6 +268,9 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
 
         application.status = ApplicationStatus.OFFER_GENERATED
         application.save()
+
+        if order.customer.is_non_billable_customer():
+            order.set_status(OrderStatus.PAID, "Non-billable customer.")
 
         return CreateWinterStorageLeaseMutation(winter_storage_lease=lease)
 
