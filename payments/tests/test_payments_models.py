@@ -915,7 +915,7 @@ def test_berth_season_price(berth):
     assert order.price == Decimal("15.00")
 
 
-def test_order_winter_storage_lease_with_area_right_price(
+def test_order_winter_storage_lease_with_section_right_price(
     winter_storage_section, winter_storage_product, boat
 ):
     winter_storage_lease = WinterStorageLeaseFactory(
