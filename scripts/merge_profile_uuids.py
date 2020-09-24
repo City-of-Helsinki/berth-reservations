@@ -1,8 +1,11 @@
 """
-This script merges together two json files with the specific names and format:
+This script merges together json files with profiles' uuids and a json file
+with customers'  boat and berth related data, all should have specific names
+and specific format:
 
-1. "berth_profile_uuids.json" - the output of helsinki profile's import view.
-It contains a dict of key-value pairs where the key is the customer_id and the
+1. ten files "berth_profile_uuids_<file_index_1_to_10>.json" - the outputs of
+helsinki profile's import view.
+They contain a dict of key-value pairs where the key is the customer_id and the
 value is the UUID of the newly created profile object for that customer.
 
 2. "berth_profile_stubs.json" - the output of "parse_berth_customers_data_csv.py"
@@ -10,10 +13,13 @@ script - which has a dict of key-value pairs where the key is the customer_id an
 the value is another dict with data to be imported into the berth-reservations
 backend.
 
-This script will inject the UUIDs from the first file into appropriate customers'
+The script will combine all files from #1 with customers' ids and uuids into
+one json file - "berth_profiles_uuids.json".
+
+This script will inject the UUIDs from the files in #1 into appropriate customers'
 data dict from the second file under the key "id". The dicts with customers' data
-will be dumped as a list into the "berth_profiles.json" file. This is how that
-file's format will look like:
+will be dumped as a list into 34 files "berth_profiles_<file_index_from_1_to_34>.json"
+file. This is how those files' format will look like:
     ...
     {
         "customer_id": "313431",
@@ -86,7 +92,13 @@ file's format will look like:
     },
     ...
 
-This file will then be imported into berth-reservations backend using custom
+We are splitting the data into so many files, because we want to have a more
+controlled file import then on the Django admin side. Importing one big file
+in production would probably take 3-4 hours, smaller files take around 10 mins
+or less, which gives us time to react to potential errors. So the whole list
+is paginated across 34 files with 300 objects in each file.
+
+These files will then be imported into berth-reservations backend using custom
 import view in Django admin, that is expecting json file with this structure.
 Profiles will be created using the UUIDs in the "id" field in order to have
 them federated between berth-reservations and helsinki profile services.
@@ -108,8 +120,15 @@ def do_merge():
     with open("berth_profile_stubs.json", "r") as stubs_json_file:
         profile_stubs = json.load(stubs_json_file)
 
-    with open("berth_profile_uuids.json", "r") as uuids_json_file:
-        profile_uuids = json.load(uuids_json_file)
+    # We have ten files from profile import
+    for file_index in range(1, 11):
+        with open(f"berth_profile_uuids_{file_index}.json", "r") as uuids_json_file:
+            uuids_from_json = json.load(uuids_json_file)
+            profile_uuids.update(uuids_from_json)
+
+    # Save the timmi_id: our_id map as one file
+    with open("berth_profiles_uuids.json", "w") as json_file:
+        json.dump(profile_uuids, json_file, ensure_ascii=False, indent=2)
 
     for customer_id, profile_stub in profile_stubs.items():
         profile_uuid = profile_uuids.get(customer_id)
@@ -118,8 +137,23 @@ def do_merge():
         else:
             customers_missing_uuids.append(customer_id)
 
-    with open("berth_profiles.json", "w") as json_file:
-        json.dump(list(profile_stubs.values()), json_file, ensure_ascii=False, indent=2)
+    # Paginate files for berth backend by 300 objects
+    # to avoid having too big files, as those might get
+    # dropped by the backend midway
+    objects_per_file = 300
+    berth_profiles = list(profile_stubs.values())
+
+    for file_index in range(1, (len(berth_profiles) // objects_per_file) + 2):
+        end_index = objects_per_file * file_index
+        start_index = end_index - objects_per_file
+
+        with open(f"berth_profiles_{file_index}.json", "w") as json_file:
+            json.dump(
+                berth_profiles[start_index:end_index],
+                json_file,
+                ensure_ascii=False,
+                indent=2,
+            )
 
     if customers_missing_uuids:
         with open("customers_missing_uuids.txt", "w") as txt_file:
