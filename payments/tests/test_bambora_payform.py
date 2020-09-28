@@ -21,7 +21,8 @@ from payments.tests.conftest import (
     FAKE_BAMBORA_API_URL,
     mocked_response_create,
 )
-from payments.utils import price_as_fractional_int
+from payments.tests.factories import BerthProductFactory, OrderFactory
+from payments.utils import get_talpa_product_id, price_as_fractional_int
 
 
 @pytest.mark.parametrize(
@@ -127,6 +128,19 @@ def test_payload_add_products_success(payment_provider, order_with_products: Ord
         assert "tax" in product
         assert "count" in product
         assert "type" in product
+
+
+def test_payload_add_product_default_berth_product(payment_provider, berth_lease):
+    product = BerthProductFactory(harbor=None)
+    order = OrderFactory(
+        customer=berth_lease.customer, lease=berth_lease, product=product
+    )
+    payload = {}
+    payment_provider.payload_add_products(payload, order, "fi")
+    assert "amount" in payload
+    assert payload.get("products")[0].get("id") == get_talpa_product_id(
+        product.id, area=berth_lease.berth.pier.harbor
+    )
 
 
 @pytest.mark.parametrize(
