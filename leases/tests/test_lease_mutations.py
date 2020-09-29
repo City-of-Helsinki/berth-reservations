@@ -272,6 +272,7 @@ mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
             order {
                 id
                 price
+                status
                 customer {
                     id
                 }
@@ -334,6 +335,7 @@ def test_create_berth_lease_with_order(
         "berth": {"id": variables["berthId"]},
         "order": {
             "price": str(berth_product.price_value),
+            "status": "WAITING",
             "customer": {"id": to_global_id(ProfileNode, customer_profile.id)},
             "product": {
                 "priceUnit": berth_product.price_unit.name,
@@ -383,6 +385,7 @@ def test_create_berth_lease_with_order_default_product(
         "berth": {"id": variables["berthId"]},
         "order": {
             "price": str(berth_product.price_value),
+            "status": "WAITING",
             "customer": {"id": to_global_id(ProfileNode, customer_profile.id)},
             "product": {
                 "priceUnit": berth_product.price_unit.name,
@@ -948,6 +951,7 @@ mutation CreateWinterStorageLease($input: CreateWinterStorageLeaseMutationInput!
             order {
                 id
                 price
+                status
                 customer {
                     id
                 }
@@ -1016,6 +1020,7 @@ def test_create_winter_storage_lease_with_order(
         "place": {"id": variables["placeId"]},
         "order": {
             "price": expected_price,
+            "status": "WAITING",
             "customer": {"id": to_global_id(ProfileNode, customer_profile.id)},
             "product": {
                 "priceUnit": product.price_unit.name,
@@ -1291,3 +1296,101 @@ def test_update_winter_storage_lease_application_already_has_lease(
     assert_in_errors(
         "Winter storage lease with this Application already exists", executed
     )
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+@freeze_time("2020-01-01T08:00:00Z")
+def test_create_berth_lease_for_non_billable_customer(
+    api_client, berth_application, berth, non_billable_customer
+):
+    berth_application.customer = non_billable_customer
+    berth_application.save()
+    price_group = BerthPriceGroup.objects.get_or_create_for_width(
+        berth.berth_type.width
+    )
+    berth_product = BerthProductFactory(
+        harbor=berth.pier.harbor, price_group=price_group
+    )
+
+    variables = {
+        "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
+        "berthId": to_global_id(BerthNode, berth.id),
+    }
+
+    executed = api_client.execute(
+        CREATE_BERTH_LEASE_WITH_ORDER_MUTATION, input=variables
+    )
+
+    assert executed["data"]["createBerthLease"]["berthLease"].pop("id") is not None
+    assert (
+        executed["data"]["createBerthLease"]["berthLease"]["order"].pop("id")
+        is not None
+    )
+    assert executed["data"]["createBerthLease"]["berthLease"] == {
+        "berth": {"id": variables["berthId"]},
+        "order": {
+            "price": "0.00",
+            "status": "PAID",
+            "customer": {"id": to_global_id(ProfileNode, non_billable_customer.id)},
+            "product": {
+                "priceUnit": berth_product.price_unit.name,
+                "priceValue": str(berth_product.price_value),
+                "priceGroup": {"name": berth_product.price_group.name},
+                "harbor": {"id": to_global_id(HarborNode, berth.pier.harbor.id)},
+            },
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+@freeze_time("2020-06-11T08:00:00Z")
+def test_create_winter_storage_lease_for_non_billable_customer(
+    api_client,
+    winter_storage_application,
+    winter_storage_place,
+    customer_profile,
+    non_billable_customer,
+):
+    winter_storage_application.customer = non_billable_customer
+    winter_storage_application.save()
+    product = WinterStorageProductFactory(
+        winter_storage_area=winter_storage_place.winter_storage_section.area
+    )
+
+    variables = {
+        "applicationId": to_global_id(
+            WinterStorageApplicationNode, winter_storage_application.id
+        ),
+        "placeId": to_global_id(WinterStoragePlaceNode, winter_storage_place.id),
+    }
+
+    executed = api_client.execute(
+        CREATE_WINTER_STORAGE_LEASE_WITH_ORDER_MUTATION, input=variables
+    )
+
+    assert (
+        executed["data"]["createWinterStorageLease"]["winterStorageLease"].pop("id")
+        is not None
+    )
+    assert (
+        executed["data"]["createWinterStorageLease"]["winterStorageLease"]["order"].pop(
+            "id"
+        )
+        is not None
+    )
+    assert executed["data"]["createWinterStorageLease"]["winterStorageLease"] == {
+        "place": {"id": variables["placeId"]},
+        "order": {
+            "price": "0.00",
+            "status": "PAID",
+            "customer": {"id": to_global_id(ProfileNode, non_billable_customer.id)},
+            "product": {
+                "priceUnit": product.price_unit.name,
+                "priceValue": str(product.price_value),
+            },
+        },
+    }

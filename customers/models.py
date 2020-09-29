@@ -258,6 +258,12 @@ class CustomerProfile(TimeStampedModel):
         verbose_name_plural = _("customer profiles")
         ordering = ("id",)
 
+    def is_non_billable_customer(self):
+        return (
+            hasattr(self, "organization")
+            and self.organization.organization_type == OrganizationType.NON_BILLABLE
+        )
+
     def __str__(self):
         if self.user:
             return "{} {} ({})".format(

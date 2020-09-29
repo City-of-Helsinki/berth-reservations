@@ -26,6 +26,8 @@ from .enums import (
 from .exceptions import OrderStatusTransitionError
 from .utils import (
     calculate_order_due_date,
+    calculate_organization_price,
+    calculate_organization_tax_percentage,
     calculate_product_partial_month_price,
     calculate_product_partial_season_price,
     calculate_product_partial_year_price,
@@ -252,7 +254,7 @@ class Order(UUIDModel, TimeStampedModel):
         verbose_name=_("price"),
         max_digits=10,
         decimal_places=2,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        validators=[MinValueValidator(Decimal("0.00"))],
         blank=True,
     )
     tax_percentage = models.DecimalField(
@@ -545,8 +547,22 @@ class Order(UUIDModel, TimeStampedModel):
                         )
                     price = price * place_sqm
 
-            self.price = rounded_decimal(self.price or price)
-            self.tax_percentage = self.tax_percentage or tax_percentage
+            # This self override capability seems to be needed for unit tests
+            price_value = self.price or price
+            tax_percentage_value = self.tax_percentage or tax_percentage
+
+            if hasattr(self.customer, "organization"):
+                organization_type = self.customer.organization.organization_type
+
+                self.price = calculate_organization_price(
+                    price_value, organization_type
+                )
+                self.tax_percentage = calculate_organization_tax_percentage(
+                    tax_percentage_value, organization_type
+                )
+            else:
+                self.price = rounded_decimal(price_value)
+                self.tax_percentage = tax_percentage_value
 
         old_instance = Order.objects.filter(id=self.id).first()
         # Save before adding additional products to have access to self
@@ -641,7 +657,7 @@ class OrderLine(UUIDModel, TimeStampedModel):
         verbose_name=_("price"),
         max_digits=10,
         decimal_places=2,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        validators=[MinValueValidator(Decimal("0.00"))],
         blank=True,
     )
     tax_percentage = models.DecimalField(
@@ -676,36 +692,39 @@ class OrderLine(UUIDModel, TimeStampedModel):
             price = self.product.price_value
             unit = self.product.price_unit
 
-            if not self.price:
-                if unit == PriceUnits.PERCENTAGE:
-                    price = calculate_product_percentage_price(
-                        self.order.price, self.product.price_value
+            if unit == PriceUnits.PERCENTAGE:
+                price = calculate_product_percentage_price(
+                    self.order.price, self.product.price_value
+                )
+
+            if self.order.lease:
+                if self.product.period == PeriodType.MONTH:
+                    price = calculate_product_partial_month_price(
+                        price, self.order.lease.start_date, self.order.lease.end_date,
+                    )
+                elif self.product.period == PeriodType.SEASON:
+                    # Calculate the actual price for the amount of days on the period
+                    # price = (days_on_lease * product.price_value) / season_days
+                    price = calculate_product_partial_season_price(
+                        price,
+                        self.order.lease.start_date,
+                        self.order.lease.end_date,
+                        summer_season=isinstance(self.order.lease, BerthLease),
+                    )
+                elif self.product.period == PeriodType.YEAR:
+                    price = calculate_product_partial_year_price(
+                        price, self.order.lease.start_date, self.order.lease.end_date,
                     )
 
-                if self.order.lease:
-                    if self.product.period == PeriodType.MONTH:
-                        price = calculate_product_partial_month_price(
-                            price,
-                            self.order.lease.start_date,
-                            self.order.lease.end_date,
-                        )
-                    elif self.product.period == PeriodType.SEASON:
-                        # Calculate the actual price for the amount of days on the period
-                        # price = (days_on_lease * product.price_value) / season_days
-                        price = calculate_product_partial_season_price(
-                            price,
-                            self.order.lease.start_date,
-                            self.order.lease.end_date,
-                            summer_season=isinstance(self.order.lease, BerthLease),
-                        )
-                    elif self.product.period == PeriodType.YEAR:
-                        price = calculate_product_partial_year_price(
-                            price,
-                            self.order.lease.start_date,
-                            self.order.lease.end_date,
-                        )
-                self.price = price
-            if not self.tax_percentage:
+            if hasattr(self.order.customer, "organization"):
+                organization_type = self.order.customer.organization.organization_type
+
+                self.price = calculate_organization_price(price, organization_type)
+                self.tax_percentage = calculate_organization_tax_percentage(
+                    self.product.tax_percentage, organization_type,
+                )
+            else:
+                self.price = rounded_decimal(price)
                 self.tax_percentage = self.product.tax_percentage
 
         super().save(*args, **kwargs)

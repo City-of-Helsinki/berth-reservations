@@ -9,7 +9,7 @@ from applications.tests.factories import (
     WinterStorageApplicationFactory,
 )
 from berth_reservations.tests.conftest import *  # noqa
-from berth_reservations.tests.factories import CustomerProfileFactory
+from customers.tests.factories import CustomerProfileFactory
 from leases.tests.conftest import *  # noqa
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from resources.tests.conftest import *  # noqa
