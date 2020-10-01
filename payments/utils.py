@@ -14,6 +14,7 @@ from dateutil.rrule import MONTHLY, rrule
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from customers.enums import OrganizationType
 from leases.enums import LeaseStatus
 from leases.utils import (
     calculate_season_end_date,
@@ -154,6 +155,22 @@ def calculate_product_partial_year_price(
 @rounded
 def calculate_product_percentage_price(base_price, percentage):
     return base_price * (percentage / 100)
+
+
+@rounded
+def calculate_organization_price(price, organization_type: OrganizationType) -> Decimal:
+    if organization_type == OrganizationType.COMPANY:
+        return price * 2
+    elif organization_type == OrganizationType.NON_BILLABLE:
+        return Decimal("0.00")
+    else:
+        return price
+
+
+def calculate_organization_tax_percentage(tax, organization_type) -> Decimal:
+    return (
+        Decimal("0.00") if organization_type == OrganizationType.NON_BILLABLE else tax
+    )
 
 
 def price_as_fractional_int(price: Decimal) -> int:
