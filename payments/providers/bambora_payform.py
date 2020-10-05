@@ -4,6 +4,8 @@ import logging
 from datetime import datetime
 
 import requests
+from dateutil.relativedelta import relativedelta
+from dateutil.utils import today
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse, HttpResponseServerError
 from django.utils.translation import gettext_lazy as _, override
@@ -19,7 +21,7 @@ from ..exceptions import (
     ServiceUnavailableError,
     UnknownReturnCodeError,
 )
-from ..models import AdditionalProduct, BerthProduct, Order, OrderLine
+from ..models import AdditionalProduct, BerthProduct, Order, OrderLine, OrderToken
 from ..utils import get_talpa_product_id, price_as_fractional_int
 from .base import PaymentProvider
 
@@ -62,6 +64,26 @@ class BamboraPayformProvider(PaymentProvider):
             else settings.LANGUAGE_CODE
         )
 
+        # Bambora only allows for the token to live up to 7 days since the order has been created,
+        # so we make the token valid until midnight on the 6th day to be sure that we can
+        # always get the expiration at the same hour
+        #   "Allowed values are 1 hour from current timestamp to 7 days from current timestamp."
+        #   "Default value is 1 hour from current timestamp."
+        token_valid_until = datetime.combine(
+            today() + relativedelta(days=6), datetime.max.time()
+        )
+
+        order_token = order.tokens.order_by("-created_at").first()
+
+        # Check if there's a valid OrderToken for the current order to avoid
+        # generating duplicate orders. If there's a token,
+        if order_token and order_token.is_valid:
+            return self.url_payment_token.format(token=order_token.token)
+
+        order_token = OrderToken.objects.create(
+            order=order, valid_until=token_valid_until
+        )
+
         payload = {
             "version": "w3.1",
             "api_key": self.config.get(VENE_PAYMENTS_BAMBORA_API_KEY),
@@ -70,12 +92,10 @@ class BamboraPayformProvider(PaymentProvider):
                 "return_url": self.get_success_url(lang=language),
                 "notify_url": self.get_notify_url(),
                 "selected": self.config.get(VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS),
-                "token_valid_until": datetime.combine(
-                    order.due_date, datetime.max.time()
-                ).timestamp(),
+                "token_valid_until": token_valid_until.timestamp(),
             },
             "currency": "EUR",
-            "order_number": str(order.order_number),
+            "order_number": f"{order.order_number}-{order_token.created_at}",
         }
 
         self.payload_add_products(payload, order, language)
@@ -85,11 +105,15 @@ class BamboraPayformProvider(PaymentProvider):
         try:
             r = requests.post(self.url_payment_auth, json=payload, timeout=60)
             r.raise_for_status()
-            return self.handle_initiate_payment(order, r.json())
+            return self.handle_initiate_payment(
+                order, r.json(), order_token=order_token
+            )
         except RequestException as e:
             raise ServiceUnavailableError(_("Payment service is unreachable")) from e
 
-    def handle_initiate_payment(self, order: Order, response) -> str:
+    def handle_initiate_payment(
+        self, order: Order, response, order_token: OrderToken = None
+    ) -> str:
         """Handling the Bambora payment auth response"""
         result = response["result"]
         if order.status == OrderStatus.EXPIRED:
@@ -97,7 +121,13 @@ class BamboraPayformProvider(PaymentProvider):
         if result == 0:
             # Create the URL where user is redirected to complete the payment
             # Append "?minified" to get a stripped version of the payment page
-            return self.url_payment_token.format(token=response["token"])
+            token = response["token"]
+
+            if order_token:
+                order_token.token = token
+                order_token.save()
+
+            return self.url_payment_token.format(token=token)
         elif result == 1:
             raise PayloadValidationError(
                 f"{_('Payment payload data validation failed: ')} {' '.join(response['errors'])}"

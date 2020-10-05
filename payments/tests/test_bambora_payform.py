@@ -5,10 +5,11 @@ import pytest
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseServerError
 from django.test.client import RequestFactory
+from freezegun import freeze_time
 
 from applications.enums import ApplicationStatus
 from payments.enums import OrderStatus
-from payments.models import Order
+from payments.models import Order, OrderToken
 from payments.providers.bambora_payform import (
     DuplicateOrderError,
     PayloadValidationError,
@@ -53,10 +54,11 @@ def test_initiate_payment_error_unavailable(provider_base_config, order: Order):
     """Test the request creator raises service unavailable if request doesn't go through"""
     request = RequestFactory().request()
 
-    provider_base_config["VENE_PAYMENTS_BAMBORA_API_URL"] = FAKE_BAMBORA_API_URL
-    unavailable_payment_provider = create_bambora_provider(
-        provider_base_config, request
-    )
+    invalid_config = {
+        **provider_base_config,
+        "VENE_PAYMENTS_BAMBORA_API_URL": FAKE_BAMBORA_API_URL,
+    }
+    unavailable_payment_provider = create_bambora_provider(invalid_config, request)
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
@@ -487,3 +489,69 @@ def test_get_payment_email_url(provider_base_config, order):
         url
         == f"{ui_return_url.format(LANG=lang)}/payment?order_number={order.order_number}"
     )
+
+
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
+)
+def test_initiate_duplicated_payment(provider_base_config, order):
+    request = RequestFactory().request()
+
+    payment_provider = create_bambora_provider(provider_base_config, request)
+    assert OrderToken.objects.count() == 0
+
+    with mock.patch(
+        "payments.providers.bambora_payform.requests.post",
+        side_effect=mocked_response_create,
+    ) as mock_call:
+        payment_provider.initiate_payment(order)
+        assert OrderToken.objects.count() == 1
+        url = payment_provider.initiate_payment(order)
+        # Verify that the return URL passed includes the application language
+        assert order.lease.application.language in mock_call.call_args.kwargs.get(
+            "json"
+        ).get("payment_method").get("return_url")
+
+    assert OrderToken.objects.count() == 1
+    assert OrderToken.objects.first().order == order
+
+    assert url.startswith(payment_provider.url_payment_api)
+    assert "token/abc123" in url
+
+
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
+)
+@freeze_time("2019-01-14T08:00:00Z")
+def test_initiate_duplicated_payment_new_token_after_expiry(
+    provider_base_config, order
+):
+    request = RequestFactory().request()
+
+    payment_provider = create_bambora_provider(provider_base_config, request)
+    assert OrderToken.objects.count() == 0
+
+    with mock.patch(
+        "payments.providers.bambora_payform.requests.post",
+        side_effect=mocked_response_create,
+    ) as mock_call:
+        payment_provider.initiate_payment(order)
+        assert OrderToken.objects.count() == 1
+        token = OrderToken.objects.first()
+
+        assert token.order == order
+        assert token.valid_until.isoformat() == "2019-01-20T21:59:59.999999+00:00"
+
+        # Try to pay again 7 days after the day when the payment was created
+        with freeze_time("2019-01-21T08:00:00Z"):
+            url = payment_provider.initiate_payment(order)
+
+        # Verify that the return URL passed includes the application language
+        assert order.lease.application.language in mock_call.call_args.kwargs.get(
+            "json"
+        ).get("payment_method").get("return_url")
+
+    assert OrderToken.objects.count() == 2
+
+    assert url.startswith(payment_provider.url_payment_api)
+    assert "token/abc123" in url

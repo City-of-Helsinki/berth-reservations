@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Q, UniqueConstraint
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 from applications.enums import ApplicationAreaType, ApplicationStatus
@@ -767,3 +768,18 @@ class OrderLogEntry(UUIDModel, TimeStampedModel):
         return (
             f"Order {self.order.id} | {self.from_status or 'N/A'} --> {self.to_status}"
         )
+
+
+class OrderToken(UUIDModel, TimeStampedModel):
+    order = models.ForeignKey(
+        Order,
+        verbose_name=_("order tokens"),
+        related_name="tokens",
+        on_delete=models.CASCADE,
+    )
+    token = models.CharField(verbose_name=_("token"), max_length=64, blank=True)
+    valid_until = models.DateTimeField(verbose_name=_("valid until"))
+
+    @property
+    def is_valid(self):
+        return now() < self.valid_until
