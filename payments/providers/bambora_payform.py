@@ -95,7 +95,7 @@ class BamboraPayformProvider(PaymentProvider):
                 "token_valid_until": token_valid_until.timestamp(),
             },
             "currency": "EUR",
-            "order_number": f"{order.order_number}-{order_token.created_at}",
+            "order_number": f"{order.order_number}-{order_token.created_at.timestamp()}",
         }
 
         self.payload_add_products(payload, order, language)
