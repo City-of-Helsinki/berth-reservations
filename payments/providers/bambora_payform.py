@@ -290,18 +290,7 @@ class BamboraPayformProvider(PaymentProvider):
                 return self.ui_redirect_failure()
         elif return_code == "1":
             logger.debug("Payment failed.")
-            try:
-                order.set_status(
-                    OrderStatus.REJECTED,
-                    "Code 1 (payment rejected) in Bambora Payform success request.",
-                )
-                return self.ui_redirect_failure()
-            except OrderStatusTransitionError as oste:
-                logger.warning(oste)
-                order.create_log_entry(
-                    "Code 1 (payment rejected) in Bambora Payform success request."
-                )
-                return self.ui_redirect_failure()
+            return self.ui_redirect_failure()
         elif return_code == "4":
             logger.debug("Transaction status could not be updated.")
             order.create_log_entry(

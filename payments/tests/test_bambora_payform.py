@@ -313,7 +313,7 @@ def test_handle_success_request_payment_failed(provider_base_config, order):
     payment_provider = create_bambora_provider(provider_base_config, request)
     returned = payment_provider.handle_success_request()
     order_after = Order.objects.get(order_number=params.get("ORDER_NUMBER"))
-    assert order_after.status == OrderStatus.REJECTED
+    assert order_after.status == OrderStatus.WAITING
     assert isinstance(returned, HttpResponse)
     assert "payment_status=failure" in returned.url
 
