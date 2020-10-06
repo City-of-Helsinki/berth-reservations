@@ -21,6 +21,12 @@ review:
     K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://tunnistamo.test.kuva.hel.ninja/openid"
     K8S_SECRET_CORS_ORIGIN_ALLOW_ALL: 1
 
+    K8S_SECRET_VENE_UI_RETURN_URL: "https://venepaikat.hel.ninja/"
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_URL": "https://real-bambora-api-url/api",
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_KEY": "dummy-key",
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_SECRET": "dummy-secret",
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS": [ "dummy-bank" ]
+
 staging:
   # By default the staging environment is created from the master-branch.
   # Here we define that it should be created from the branch called "develop" instead.
@@ -37,7 +43,6 @@ staging:
     K8S_SECRET_MAIL_MAILGUN_KEY: "$SECRET_MAILGUN_API_KEY"
     K8S_SECRET_MAIL_MAILGUN_DOMAIN: "mail.hel.ninja"
     K8S_SECRET_MAIL_MAILGUN_API: "https://api.eu.mailgun.net/v3"
-    K8S_SECRET_MAILER_EMAIL_BACKEND: TODO #"anymail.backends.mailgun.EmailBackend" or "django.core.mail.backends.console.EmailBackend"
     K8S_SECRET_DEFAULT_FROM_EMAIL: "venepaikkavaraukset@hel.ninja"
     K8S_SECRET_SENTRY_DSN: "$GL_SENTRY_DNS"
     K8S_SECRET_SENTRY_ENVIRONMENT: "test"
@@ -48,28 +53,4 @@ staging:
     K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_SECRET": "dummy-secret",
     K8S_SECRET_VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS": [ "dummy-bank" ]
 
-production:
-  # It is highly discouraged to define own triggering rules in production. Don't do it.
-  # only:
-  #   refs:
-  #     - master
-  # These variables are available only for production env and are merged with the general variables defined above
-  variables:
-    K8S_SECRET_TIER: "prod"
-    K8S_SECRET_ALLOWED_HOSTS: "*"
-    K8S_SECRET_CORS_ORIGIN_ALLOW_ALL: 1
-    K8S_SECRET_SECRET_KEY: "$GL_PRODUCTION_DJANGO_SECRET_KEY"
-    K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://api.hel.fi/sso/openid"
-    K8S_SECRET_MAIL_MAILGUN_KEY: "$SECRET_MAILGUN_API_KEY"
-    K8S_SECRET_MAIL_MAILGUN_DOMAIN: "mail.hel.ninja"
-    K8S_SECRET_MAIL_MAILGUN_API: "https://api.eu.mailgun.net/v3"
-    K8S_SECRET_MAILER_EMAIL_BACKEND: TODO #"anymail.backends.mailgun.EmailBackend" or "django.core.mail.backends.console.EmailBackend"
-    K8S_SECRET_DEFAULT_FROM_EMAIL: "venepaikkavaraukset@hel.fi"
-    K8S_SECRET_SENTRY_DSN: "$GL_SENTRY_DNS"
-    K8S_SECRET_SENTRY_ENVIRONMENT: "production"
 
-    K8S_SECRET_VENE_UI_RETURN_URL: "https://venepaikat.hel.fi/"
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_URL": "https://real-bambora-api-url/api",
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_KEY": "real-key",
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_SECRET": "real-secret",
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS": [ "dummy-bank" ]
