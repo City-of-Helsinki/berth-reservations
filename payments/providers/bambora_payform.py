@@ -264,13 +264,15 @@ class BamboraPayformProvider(PaymentProvider):
             "Handling Bambora user return request, params: {}.".format(request.GET)
         )
 
-        if not self.check_new_payment_authcode(request):
-            return self.ui_redirect_failure()
-
         try:
             order = Order.objects.get(order_number=request.GET["ORDER_NUMBER"])
         except Order.DoesNotExist:
             logger.warning("Order does not exist.")
+            return self.ui_redirect_failure()
+
+        order.invalidate_tokens()
+
+        if not self.check_new_payment_authcode(request):
             return self.ui_redirect_failure()
 
         return_code = request.GET["RETURN_CODE"]
