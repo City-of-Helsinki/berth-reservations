@@ -635,6 +635,12 @@ class Order(UUIDModel, TimeStampedModel):
             comment=comment,
         )
 
+    def invalidate_tokens(self):
+        tokens = list(self.tokens.all())
+        for token in tokens:
+            token.cancelled = True
+        self.tokens.bulk_update(tokens, ["cancelled"])
+
 
 class OrderLine(UUIDModel, TimeStampedModel):
     order = models.ForeignKey(
@@ -779,7 +785,8 @@ class OrderToken(UUIDModel, TimeStampedModel):
     )
     token = models.CharField(verbose_name=_("token"), max_length=64, blank=True)
     valid_until = models.DateTimeField(verbose_name=_("valid until"))
+    cancelled = models.BooleanField(verbose_name=_("cancelled"), default=False)
 
     @property
     def is_valid(self):
-        return now() < self.valid_until
+        return not self.cancelled and now() < self.valid_until

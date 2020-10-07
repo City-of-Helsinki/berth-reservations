@@ -483,11 +483,11 @@ def test_pier_number_of_places():
     free_berths = random.randint(1, 10)
     inactive_berths = random.randint(1, 10)
 
-    for _berth in range(0, free_berths):
-        BerthFactory(pier=pier, is_active=True)
+    for number in range(0, free_berths):
+        BerthFactory(pier=pier, number=number, is_active=True)
 
-    for _berth in range(0, inactive_berths):
-        BerthFactory(pier=pier, is_active=False)
+    for number in range(free_berths, free_berths + inactive_berths):
+        BerthFactory(pier=pier, number=number, is_active=False)
 
     pier = Pier.objects.get(pk=pier.pk)
     assert pier.number_of_free_places == free_berths
@@ -537,11 +537,15 @@ def test_winter_storage_section_number_of_places():
     free_places = random.randint(1, 10)
     inactive_places = random.randint(1, 10)
 
-    for _place in range(0, free_places):
-        WinterStoragePlaceFactory(winter_storage_section=section, is_active=True)
+    for number in range(0, free_places):
+        WinterStoragePlaceFactory(
+            winter_storage_section=section, number=number, is_active=True
+        )
 
-    for _place in range(0, inactive_places):
-        WinterStoragePlaceFactory(winter_storage_section=section, is_active=False)
+    for number in range(free_places, free_places + inactive_places):
+        WinterStoragePlaceFactory(
+            winter_storage_section=section, number=number, is_active=False
+        )
 
     section = WinterStorageSection.objects.get(pk=section.pk)
     assert section.number_of_free_places == free_places
