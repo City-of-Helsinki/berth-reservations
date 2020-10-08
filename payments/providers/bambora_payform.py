@@ -264,8 +264,9 @@ class BamboraPayformProvider(PaymentProvider):
             "Handling Bambora user return request, params: {}.".format(request.GET)
         )
 
+        order_number, _timestamp = request.GET.get("ORDER_NUMBER", "-").split("-")
         try:
-            order = Order.objects.get(order_number=request.GET["ORDER_NUMBER"])
+            order = Order.objects.get(order_number=order_number)
         except Order.DoesNotExist:
             logger.warning("Order does not exist.")
             return self.ui_redirect_failure()
@@ -322,14 +323,17 @@ class BamboraPayformProvider(PaymentProvider):
         request = self.request
         logger.debug("Handling Bambora notify request, params: {}.".format(request.GET))
 
-        if not self.check_new_payment_authcode(request):
-            return HttpResponse(status=204)
-
+        order_number, _timestamp = request.GET.get("ORDER_NUMBER", "-").split("-")
         try:
-            order = Order.objects.get(order_number=request.GET["ORDER_NUMBER"])
+            order = Order.objects.get(order_number=order_number)
         except Order.DoesNotExist:
             # Target order might be deleted after posting but before the notify arrives
             logger.warning("Notify: Order does not exist.")
+            return HttpResponse(status=204)
+
+        order.invalidate_tokens()
+
+        if not self.check_new_payment_authcode(request):
             return HttpResponse(status=204)
 
         return_code = request.GET["RETURN_CODE"]

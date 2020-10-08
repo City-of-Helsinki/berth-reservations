@@ -84,6 +84,14 @@ class OrderAdmin(admin.ModelAdmin):
         "total_price",
         "order_number",
     )
+    list_display = ("name", "order_number", "status", "customer", "lease", "product")
+    list_filter = ("status",)
+    search_fields = ("order_number", "customer__id")
+
+    def name(self, obj):
+        return str(obj)
+
+    name.short_description = _("Order number")
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == "_product_object_id":
@@ -128,9 +136,29 @@ class OrderAdmin(admin.ModelAdmin):
     total_tax_percentage.admin_order_field = "total_tax_percentage"
 
 
-admin.site.register(
-    [WinterStorageProduct, BerthProduct, OrderLine, OrderLogEntry, OrderToken]
-)
+class OrderTokenAdmin(admin.ModelAdmin):
+    list_display = (
+        "order",
+        "order_number",
+        "cancelled",
+    )
+    list_filter = ("cancelled",)
+    search_fields = ("order__order_number",)
+    actions = ("invalidate_tokens",)
+
+    def order_number(self, obj):
+        return obj.order.order_number
+
+    order_number.short_description = _("Order number")
+
+    def invalidate_tokens(self, request, queryset):
+        queryset.update(cancelled=True)
+
+    invalidate_tokens.short_description = _("Invalidate selected tokens")
+
+
+admin.site.register([WinterStorageProduct, BerthProduct, OrderLine, OrderLogEntry])
 admin.site.register(AdditionalProduct, AdditionalProductAdmin)
 admin.site.register(BerthPriceGroup, BerthPriceGroupAdmin)
 admin.site.register(Order, OrderAdmin)
+admin.site.register(OrderToken, OrderTokenAdmin)

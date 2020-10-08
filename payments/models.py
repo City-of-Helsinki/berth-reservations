@@ -778,10 +778,7 @@ class OrderLogEntry(UUIDModel, TimeStampedModel):
 
 class OrderToken(UUIDModel, TimeStampedModel):
     order = models.ForeignKey(
-        Order,
-        verbose_name=_("order tokens"),
-        related_name="tokens",
-        on_delete=models.CASCADE,
+        Order, verbose_name=_("order"), related_name="tokens", on_delete=models.CASCADE,
     )
     token = models.CharField(verbose_name=_("token"), max_length=64, blank=True)
     valid_until = models.DateTimeField(verbose_name=_("valid until"))

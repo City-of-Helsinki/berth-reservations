@@ -1310,7 +1310,7 @@ def test_confirm_payment(old_schema_api_client, order: Order, status):
             CONFIRM_PAYMENT_MUTATION, input=variables
         )
 
-    assert "token/abc123" in executed["data"]["confirmPayment"]["url"]
+    assert "token/token123" in executed["data"]["confirmPayment"]["url"]
 
 
 def test_confirm_payment_does_not_exist(old_schema_api_client):
