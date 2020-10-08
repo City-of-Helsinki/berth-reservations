@@ -9,6 +9,7 @@ from .models import (
     Order,
     OrderLine,
     OrderLogEntry,
+    OrderToken,
     WinterStorageProduct,
 )
 from .utils import currency, percentage
@@ -127,7 +128,9 @@ class OrderAdmin(admin.ModelAdmin):
     total_tax_percentage.admin_order_field = "total_tax_percentage"
 
 
-admin.site.register([WinterStorageProduct, BerthProduct, OrderLine, OrderLogEntry])
+admin.site.register(
+    [WinterStorageProduct, BerthProduct, OrderLine, OrderLogEntry, OrderToken]
+)
 admin.site.register(AdditionalProduct, AdditionalProductAdmin)
 admin.site.register(BerthPriceGroup, BerthPriceGroupAdmin)
 admin.site.register(Order, OrderAdmin)
