@@ -13,7 +13,6 @@ from berth_reservations.tests.utils import (
     assert_not_enough_permissions,
 )
 from customers.schema import ProfileNode
-from leases.models import BerthLease
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from leases.tests.factories import BerthLeaseFactory
 from leases.utils import calculate_season_start_date
@@ -54,7 +53,6 @@ from ..schema.types import (
 )
 from ..utils import (
     calculate_product_partial_month_price,
-    calculate_product_partial_season_price,
     calculate_product_partial_year_price,
     calculate_product_percentage_price,
     convert_aftertax_to_pretax,
@@ -934,11 +932,7 @@ def test_update_order_berth_product(api_client, berth_product, berth_lease):
     assert executed["data"]["updateOrder"]["order"] == {
         "id": variables["id"],
         "comment": variables["comment"],
-        "price": str(
-            calculate_product_partial_season_price(
-                berth_product.price_value, berth_lease.start_date, berth_lease.end_date
-            )
-        ),
+        "price": str(berth_product.price_value),
         "taxPercentage": str(berth_product.tax_percentage),
         "dueDate": str(variables["dueDate"].date()),
         "status": variables["status"],
@@ -1084,17 +1078,11 @@ def test_create_order_line(api_client, order, additional_product):
         expected_price = calculate_product_partial_month_price(
             expected_price, order.lease.start_date, order.lease.end_date
         )
-    elif additional_product.period == PeriodType.SEASON:
-        expected_price = calculate_product_partial_season_price(
-            expected_price,
-            order.lease.start_date,
-            order.lease.end_date,
-            summer_season=isinstance(order.lease, BerthLease),
-        )
     elif additional_product.period == PeriodType.YEAR:
         expected_price = calculate_product_partial_year_price(
             expected_price, order.lease.start_date, order.lease.end_date
         )
+    # Season price is the same
 
     assert executed["data"]["createOrderLine"]["orderLine"].pop("id") is not None
     assert executed["data"]["createOrderLine"] == {
