@@ -84,7 +84,15 @@ class OrderAdmin(admin.ModelAdmin):
         "total_price",
         "order_number",
     )
-    list_display = ("name", "order_number", "status", "customer", "lease", "product")
+    list_display = (
+        "name",
+        "total_price",
+        "order_number",
+        "status",
+        "customer",
+        "lease",
+        "product",
+    )
     list_filter = ("status",)
     search_fields = ("order_number", "customer__id")
 
