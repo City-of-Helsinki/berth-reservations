@@ -17,7 +17,6 @@ from berth_reservations.tests.utils import (
 from customers.schema import BoatNode, ProfileNode
 from payments.models import BerthPriceGroup, Order
 from payments.tests.factories import BerthProductFactory, WinterStorageProductFactory
-from payments.utils import calculate_product_partial_season_price
 from resources.schema import (
     BerthNode,
     HarborNode,
@@ -998,12 +997,7 @@ def test_create_winter_storage_lease_with_order(
     assert WinterStorageLease.objects.count() == 1
     assert Order.objects.count() == 1
     sqm = winter_storage_place.place_type.width * winter_storage_place.place_type.length
-    expected_price = calculate_product_partial_season_price(
-        product.price_value,
-        calculate_winter_storage_lease_start_date(),
-        calculate_winter_storage_lease_end_date(),
-        summer_season=False,
-    )
+    expected_price = product.price_value
     expected_price = rounded(expected_price * sqm, decimals=2, as_string=True)
 
     assert (

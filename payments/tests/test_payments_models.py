@@ -10,15 +10,10 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from freezegun import freeze_time
 
-from leases.models import BerthLease
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from leases.utils import (
     calculate_berth_lease_end_date,
     calculate_berth_lease_start_date,
-    calculate_season_end_date,
-    calculate_season_start_date,
-    calculate_winter_season_end_date,
-    calculate_winter_season_start_date,
     calculate_winter_storage_lease_end_date,
     calculate_winter_storage_lease_start_date,
 )
@@ -35,7 +30,6 @@ from ..enums import AdditionalProductType, PeriodType, PriceUnits, ProductServic
 from ..models import AdditionalProduct, DEFAULT_TAX_PERCENTAGE, Order, OrderLine
 from ..utils import (
     calculate_product_partial_month_price,
-    calculate_product_partial_season_price,
     calculate_product_partial_year_price,
     calculate_product_percentage_price,
 )
@@ -219,13 +213,7 @@ def test_order_retrieves_winter_storage_lease(
         winter_storage_lease.place.place_type.width
         * winter_storage_lease.place.place_type.length
     )
-    expected_price = calculate_product_partial_season_price(
-        winter_storage_product.price_value,
-        winter_storage_lease.start_date,
-        winter_storage_lease.end_date,
-        summer_season=False,
-    )
-    expected_price = rounded(expected_price * sqm, decimals=2)
+    expected_price = rounded(winter_storage_product.price_value * sqm, decimals=2)
 
     assert order.lease.id == winter_storage_lease.id
     assert order._lease_content_type.name == winter_storage_lease._meta.verbose_name
@@ -383,12 +371,7 @@ def test_order_berth_lease_right_price_for_full_season(harbor):
             order_line = OrderLine.objects.filter(
                 order=order, product__service=ProductServiceType(service)
             ).first()
-            product_price = calculate_product_partial_season_price(
-                order_line.product.price_value,
-                order.lease.start_date,
-                order.lease.end_date,
-                summer_season=True,
-            )
+            product_price = order_line.product.price_value
             order_price = order_line.price
             assert product_price == order_price
 
@@ -535,49 +518,6 @@ def test_order_winter_storage_lease_right_price_for_partial_months(
                 order=order, product__service=ProductServiceType(service)
             ).first()
             partial_product_price = calculate_product_partial_month_price(
-                order_line.product.price_value,
-                order.lease.start_date,
-                order.lease.end_date,
-            )
-            order_price = order_line.price
-            assert partial_product_price == order_price
-
-
-@freeze_time("2020-01-01T08:00:00Z")
-def test_order_berth_lease_right_price_for_partial_season(harbor):
-    services = {
-        "mooring": random_bool(),
-        "waste_collection": random_bool(),
-        "lighting": random_bool(),
-        "electricity": random_bool(),
-        "water": random_bool(),
-        "gate": random_bool(),
-    }
-    day_offset = 14
-    for service, create in services.items():
-        if create:
-            # Using PriceUnits.AMOUNT to simplify testing
-            AdditionalProductFactory(
-                service=ProductServiceType(service), price_unit=PriceUnits.AMOUNT
-            )
-
-    pier = PierFactory(**services, harbor=harbor)
-    lease = BerthLeaseFactory(
-        berth=BerthFactory(pier=pier),
-        start_date=today(),
-        end_date=today() + timedelta(days=day_offset),
-    )
-    product = BerthProductFactory(harbor=harbor)
-    order = Order.objects.create(product=product, customer=lease.customer, lease=lease)
-
-    assert order.lease.start_date != calculate_berth_lease_start_date()
-    assert order.lease.end_date != calculate_berth_lease_end_date()
-    for service, created in services.items():
-        if created:
-            order_line = OrderLine.objects.filter(
-                order=order, product__service=ProductServiceType(service)
-            ).first()
-            partial_product_price = calculate_product_partial_season_price(
                 order_line.product.price_value,
                 order.lease.start_date,
                 order.lease.end_date,
@@ -828,12 +768,7 @@ def test_order_line_product_price(period):
             order_line.order.lease.end_date,
         )
     elif product.period == PeriodType.SEASON:
-        expected_price = calculate_product_partial_season_price(
-            product.price_value,
-            order_line.order.lease.start_date,
-            order_line.order.lease.end_date,
-            summer_season=isinstance(order_line.order.lease, BerthLease),
-        )
+        expected_price = product.price_value
     elif product.period == PeriodType.YEAR:
         expected_price = calculate_product_partial_year_price(
             product.price_value,
@@ -893,26 +828,22 @@ def test_winter_season_price():
         place_type=WinterStoragePlaceTypeFactory(width=1, length=1)
     )
 
-    days_in_season = (
-        calculate_winter_season_end_date() - calculate_winter_season_start_date()
-    ).days
-    product = WinterStorageProductFactory(price_value=Decimal(days_in_season))
+    product = WinterStorageProductFactory(price_value=Decimal("10"))
     lease = WinterStorageLeaseFactory(
         place=place, start_date=start_date, end_date=end_date
     )
     order = Order.objects.create(product=product, lease=lease, customer=lease.customer)
-    assert order.price == Decimal("15.00")
+    assert order.price == Decimal("10.00")
 
 
 def test_berth_season_price(berth):
     start_date = today()
     end_date = start_date + relativedelta(days=15)
 
-    days_in_season = (calculate_season_end_date() - calculate_season_start_date()).days
-    product = BerthProductFactory(price_value=Decimal(days_in_season))
+    product = BerthProductFactory(price_value=Decimal("10"))
     lease = BerthLeaseFactory(berth=berth, start_date=start_date, end_date=end_date)
     order = Order.objects.create(product=product, lease=lease, customer=lease.customer)
-    assert order.price == Decimal("15.00")
+    assert order.price == Decimal("10.00")
 
 
 def test_order_winter_storage_lease_with_section_right_price(
@@ -928,13 +859,7 @@ def test_order_winter_storage_lease_with_section_right_price(
     )
     sqm = boat.width * boat.length
 
-    expected_price = calculate_product_partial_season_price(
-        winter_storage_product.price_value,
-        winter_storage_lease.start_date,
-        winter_storage_lease.end_date,
-        summer_season=False,
-    )
-    expected_price = rounded(expected_price * sqm, decimals=2)
+    expected_price = rounded(winter_storage_product.price_value * sqm, decimals=2)
 
     assert order.lease.id == winter_storage_lease.id
     assert order._lease_content_type.name == winter_storage_lease._meta.verbose_name
@@ -961,13 +886,7 @@ def test_order_winter_storage_lease_without_boat_right_price(
     )
     sqm = winter_storage_application.boat_width * winter_storage_application.boat_length
 
-    expected_price = calculate_product_partial_season_price(
-        winter_storage_product.price_value,
-        winter_storage_lease.start_date,
-        winter_storage_lease.end_date,
-        summer_season=False,
-    )
-    expected_price = rounded(expected_price * sqm, decimals=2)
+    expected_price = rounded(winter_storage_product.price_value * sqm, decimals=2)
 
     assert order.lease.id == winter_storage_lease.id
     assert order._lease_content_type.name == winter_storage_lease._meta.verbose_name
@@ -994,16 +913,8 @@ def test_order_right_price_for_company(
     )
     sqm = boat.width * boat.length
 
-    expected_price = (
-        calculate_product_partial_season_price(
-            winter_storage_product.price_value,
-            winter_storage_lease.start_date,
-            winter_storage_lease.end_date,
-            summer_season=False,
-        )
-        * sqm
-        * 2  # expect double the price
-    )
+    # expect double the price
+    expected_price = winter_storage_product.price_value * sqm * 2
 
     assert order.price == expected_price
     assert order.tax_percentage == winter_storage_product.tax_percentage
