@@ -184,7 +184,9 @@ def mocked_response_create(*args, **kwargs):
     if args[0].startswith(FAKE_BAMBORA_API_URL):
         return MockResponse(data={}, status_code=500)
     else:
-        return MockResponse(data={"result": 0, "token": "abc123", "type": "e-payment"})
+        return MockResponse(
+            data={"result": 0, "token": "token123", "type": "e-payment"}
+        )
 
 
 @pytest.fixture

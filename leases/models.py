@@ -285,7 +285,7 @@ class WinterStorageLease(AbstractLease):
 
     def __str__(self):
         return " {} > {} - {} ({})".format(
-            self.place, self.start_date, self.end_date, self.status
+            self.place or self.section, self.start_date, self.end_date, self.status
         )
 
 

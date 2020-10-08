@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Q, UniqueConstraint
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 from applications.enums import ApplicationAreaType, ApplicationStatus
@@ -29,7 +30,6 @@ from .utils import (
     calculate_organization_price,
     calculate_organization_tax_percentage,
     calculate_product_partial_month_price,
-    calculate_product_partial_season_price,
     calculate_product_partial_year_price,
     calculate_product_percentage_price,
     convert_aftertax_to_pretax,
@@ -516,13 +516,6 @@ class Order(UUIDModel, TimeStampedModel):
             tax_percentage = self.product.tax_percentage
 
             if self.lease:
-                price = calculate_product_partial_season_price(
-                    price,
-                    self.lease.start_date,
-                    self.lease.end_date,
-                    summer_season=isinstance(self.lease, BerthLease),
-                )
-
                 # If the order is for a winter product with a lease, the price
                 # has to be calculated based on the dimensions of the place associated
                 # to the lease
@@ -634,6 +627,12 @@ class Order(UUIDModel, TimeStampedModel):
             comment=comment,
         )
 
+    def invalidate_tokens(self):
+        tokens = list(self.tokens.all())
+        for token in tokens:
+            token.cancelled = True
+        self.tokens.bulk_update(tokens, ["cancelled"])
+
 
 class OrderLine(UUIDModel, TimeStampedModel):
     order = models.ForeignKey(
@@ -702,19 +701,11 @@ class OrderLine(UUIDModel, TimeStampedModel):
                     price = calculate_product_partial_month_price(
                         price, self.order.lease.start_date, self.order.lease.end_date,
                     )
-                elif self.product.period == PeriodType.SEASON:
-                    # Calculate the actual price for the amount of days on the period
-                    # price = (days_on_lease * product.price_value) / season_days
-                    price = calculate_product_partial_season_price(
-                        price,
-                        self.order.lease.start_date,
-                        self.order.lease.end_date,
-                        summer_season=isinstance(self.order.lease, BerthLease),
-                    )
                 elif self.product.period == PeriodType.YEAR:
                     price = calculate_product_partial_year_price(
                         price, self.order.lease.start_date, self.order.lease.end_date,
                     )
+                # The price for season products should always be full
 
             if hasattr(self.order.customer, "organization"):
                 organization_type = self.order.customer.organization.organization_type
@@ -767,3 +758,16 @@ class OrderLogEntry(UUIDModel, TimeStampedModel):
         return (
             f"Order {self.order.id} | {self.from_status or 'N/A'} --> {self.to_status}"
         )
+
+
+class OrderToken(UUIDModel, TimeStampedModel):
+    order = models.ForeignKey(
+        Order, verbose_name=_("order"), related_name="tokens", on_delete=models.CASCADE,
+    )
+    token = models.CharField(verbose_name=_("token"), max_length=64, blank=True)
+    valid_until = models.DateTimeField(verbose_name=_("valid until"))
+    cancelled = models.BooleanField(verbose_name=_("cancelled"), default=False)
+
+    @property
+    def is_valid(self):
+        return not self.cancelled and now() < self.valid_until
