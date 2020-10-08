@@ -624,3 +624,74 @@ def test_duplicate_payments_tokens_cancelled(provider_base_config, order: Order)
     assert OrderToken.objects.count() == 3
     assert OrderToken.objects.filter(cancelled=True).count() == 2
     assert OrderToken.objects.filter(cancelled=False).count() == 1
+
+
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
+)
+@freeze_time("2019-01-14T08:00:00Z")
+def test_duplicate_payments_tokens_cancelled_notify_payment(
+    provider_base_config, order: Order
+):
+    # Fake the Payment initiate flow
+    order.status = OrderStatus.WAITING
+    order.order_number = "abc123"
+    order.save()
+
+    request = RequestFactory().request()
+    payment_provider = create_bambora_provider(provider_base_config, request)
+
+    assert OrderToken.objects.count() == 0
+
+    with mock.patch(
+        "payments.providers.bambora_payform.requests.post",
+        side_effect=mocked_response_create,
+    ) as mock_call:
+        payment_provider.initiate_payment(order)
+        assert OrderToken.objects.count() == 1
+        token = OrderToken.objects.first()
+
+        assert token.order == order
+        assert token.valid_until.isoformat() == "2019-01-20T21:59:59.999999+00:00"
+
+        # Try to pay again 7 days after the day when the payment was created
+        with freeze_time("2019-01-21T08:00:00Z"):
+            url = payment_provider.initiate_payment(order)
+
+        # Verify that the return URL passed includes the application language
+        assert order.lease.application.language in mock_call.call_args.kwargs.get(
+            "json"
+        ).get("payment_method").get("return_url")
+
+    assert OrderToken.objects.count() == 2
+
+    assert url.startswith(payment_provider.url_payment_api)
+    assert "token/abc123" in url
+
+    # Fake the part where Bambora notifies the success/failure
+    params = {
+        "VENE_UI_RETURN_URL": "http%3A%2F%2F127.0.0.1%3A8000%2Fv1",
+        "AUTHCODE": "905EDAC01C9E6921250C21BE23CDC53633A4D66BE7241A3B5DA1D2372234D462",
+        "RETURN_CODE": "1",
+        "ORDER_NUMBER": "abc123",
+    }
+    rf = RequestFactory()
+    request = rf.get("/payments/success/", params)
+    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider.handle_notify_request()
+
+    order_after = Order.objects.get(order_number=params.get("ORDER_NUMBER"))
+
+    assert all([token.cancelled for token in order_after.tokens.all()])
+
+    with mock.patch(
+        "payments.providers.bambora_payform.requests.post",
+        side_effect=mocked_response_create,
+    ):
+        with freeze_time("2019-01-31T08:00:00Z"):
+            payment_provider.initiate_payment(order)
+
+    # The last token shouldn't be cancelled
+    assert OrderToken.objects.count() == 3
+    assert OrderToken.objects.filter(cancelled=True).count() == 2
+    assert OrderToken.objects.filter(cancelled=False).count() == 1
