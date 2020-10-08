@@ -15,6 +15,7 @@ from ..models import (
     HarborChoice,
     WinterStorageApplication,
     WinterStorageAreaChoice,
+    BerthAssignmentPlan,
 )
 from ..schema import BerthSwitchType as OldBerthSwitchType
 
@@ -36,6 +37,12 @@ class HarborChoiceType(DjangoObjectType):
 
     def resolve_harbor_name(self, info, **kwargs):
         return self.harbor.safe_translation_getter("name")
+
+
+class BerthAssignmentPlanNode(DjangoObjectType):
+    class Meta:
+        model = BerthAssignmentPlan
+        interfaces = (graphene.relay.Node,)
 
 
 class BerthSwitchType(OldBerthSwitchType):

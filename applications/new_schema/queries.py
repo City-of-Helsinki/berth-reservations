@@ -5,18 +5,20 @@ from customers.models import CustomerProfile
 from leases.models import BerthLease, WinterStorageLease
 from users.decorators import view_permission_required
 
-from ..models import BerthApplication, WinterStorageApplication
+from ..models import BerthApplication, WinterStorageApplication, BerthAssignmentPlan
 from .types import (
     ApplicationAreaTypeEnum,
     ApplicationStatusEnum,
     BerthApplicationFilter,
     BerthApplicationNode,
+    BerthAssignmentPlanNode,
     WinterStorageApplicationFilter,
     WinterStorageApplicationNode,
 )
 
 
 class Query:
+    berth_assignment_plans = graphene.List(BerthAssignmentPlanNode)
     berth_application = graphene.relay.Node.Field(BerthApplicationNode)
     berth_applications = DjangoFilterConnectionField(
         BerthApplicationNode,
@@ -93,3 +95,6 @@ class Query:
             )
             .order_by("created_at")
         )
+
+    def resolve_berth_assignment_plans(self, info, **kwargs):
+        return BerthAssignmentPlan.objects.all()

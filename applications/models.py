@@ -6,6 +6,7 @@ from parler.models import TranslatableModel, TranslatedFields
 
 from customers.models import CustomerProfile
 from harbors.models import BoatType, Harbor, WinterStorageArea
+from resources.models import Berth
 
 from .enums import ApplicationAreaType, ApplicationStatus, WinterStorageMethod
 from .utils import localize_datetime
@@ -309,3 +310,8 @@ class WinterStorageApplication(BaseApplication):
             "area_choices": self.winterstorageareachoice_set.order_by("priority"),
             "application": self,
         }
+
+
+class BerthAssignmentPlan(models.Model):
+    application = models.OneToOneField(BerthApplication, on_delete=models.CASCADE)
+    berth = models.OneToOneField(Berth, on_delete=models.CASCADE)

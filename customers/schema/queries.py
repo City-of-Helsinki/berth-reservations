@@ -1,5 +1,8 @@
 import graphene
+from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+
+from munigeo.models import Municipality as MP
 
 from applications.models import BerthApplication
 from leases.models import BerthLease
@@ -8,8 +11,13 @@ from users.decorators import view_permission_required
 from ..models import CustomerProfile
 from .types import CustomerGroupEnum, InvoicingTypeEnum, ProfileFilterSet, ProfileNode
 
+class Municipality(DjangoObjectType):
+    class Meta:
+        model = MP
+        fields = "__all__"
 
 class Query:
+    municipalities = graphene.List(Municipality)
     berth_profile = graphene.relay.Node.Field(ProfileNode)
     berth_profiles = DjangoFilterConnectionField(
         ProfileNode,
@@ -48,3 +56,6 @@ class Query:
             "winter_storage_leases",
             "orders",
         )
+
+    def resolve_municipalities(self, info, **kwargs):
+        return MP.objects.all()
