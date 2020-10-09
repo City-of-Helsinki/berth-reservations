@@ -122,12 +122,8 @@ class Harbor(AbstractArea, TranslatableModel):
         on_delete=models.SET_NULL,
     )
 
-    image_file = models.ImageField(
-        upload_to=get_harbor_media_folder,
-        storage=OverwriteStorage(),
-        verbose_name=_("Image file"),
-        null=True,
-        blank=True,
+    image_file = models.CharField(
+        verbose_name=_("Image file"), max_length=400, null=True, blank=True
     )
 
     # Additional harbor services
@@ -208,12 +204,8 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
         related_name="harbors_area",
     )
 
-    image_file = models.ImageField(
-        upload_to=get_winter_area_media_folder,
-        storage=OverwriteStorage(),
-        verbose_name=_("Image file"),
-        null=True,
-        blank=True,
+    image_file = models.CharField(
+        verbose_name=_("Image file"), max_length=400, null=True, blank=True
     )
 
     # Additional winter storage area services

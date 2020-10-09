@@ -4,6 +4,8 @@ from graphene import relay
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
 
+from utils.urls import get_image_file_url
+
 from .models import AvailabilityLevel, BoatType, Harbor, WinterStorageArea
 
 
@@ -65,7 +67,7 @@ class HarborType(graphql_geojson.GeoJSONType):
 
     def resolve_image_file(self, info, **kwargs):
         if self.image_file:
-            return info.context.build_absolute_uri(self.image_file.url)
+            return get_image_file_url(self.image_file)
         else:
             return None
 
@@ -118,7 +120,7 @@ class WinterStorageAreaType(graphql_geojson.GeoJSONType):
 
     def resolve_image_file(self, info, **kwargs):
         if self.image_file:
-            return info.context.build_absolute_uri(self.image_file.url)
+            return get_image_file_url(self.image_file)
         else:
             return None
 

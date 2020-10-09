@@ -135,12 +135,8 @@ class Harbor(AbstractArea, TranslatableModel):
         on_delete=models.SET_NULL,
     )
 
-    image_file = models.ImageField(
-        upload_to=get_harbor_media_folder,
-        storage=FileSystemStorage(),
-        verbose_name=_("image file"),
-        null=True,
-        blank=True,
+    image_file = models.CharField(
+        verbose_name=_("Image file"), max_length=400, null=True, blank=True
     )
 
     availability_level = models.ForeignKey(
@@ -185,12 +181,8 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
         on_delete=models.SET_NULL,
     )
 
-    image_file = models.ImageField(
-        upload_to=get_winter_area_media_folder,
-        storage=FileSystemStorage(),
-        verbose_name=_("image file"),
-        null=True,
-        blank=True,
+    image_file = models.CharField(
+        verbose_name=_("Image file"), max_length=400, null=True, blank=True
     )
 
     availability_level = models.ForeignKey(

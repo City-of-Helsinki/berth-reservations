@@ -92,7 +92,7 @@ import them first:
     ./manage.py geo_import finland --municipalities
     ./manage.py geo_import helsinki --divisions
 
-Then you can load the fixtures with the following commands:
+Then load the fixtures with the following commands:
 
     ./manage.py loaddata helsinki-harbors.json
     ./manage.py loaddata helsinki-ws-resources.json
@@ -103,17 +103,18 @@ And assign the corresponding region to areas:
 
     ./manage.py assign_area_regions
     
-You can also import default images for Helsinki harbors / winter storage areas:
+Point harbor and ws images to customer ui images:
 
-    ./manage.py collectstatic  # make sure you have static files in place
+    ./manage.py harbors_add_helsinki_harbors_images
+    ./manage.py harbors_add_helsinki_winter_areas_images
     ./manage.py add_helsinki_harbors_images
     ./manage.py add_helsinki_winter_areas_images
     
-You can load the fixtures with reasons for berth switch with this command:
+Load the fixtures with reasons for berth switch:
 
     ./manage.py loaddata switch-reasons.json
 
-Lastly, you can load the User Groups:
+Lastly, load the User Groups:
 
     ./manage.py loaddata groups.json
 
