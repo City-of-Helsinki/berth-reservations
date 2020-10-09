@@ -581,11 +581,7 @@ class Order(UUIDModel, TimeStampedModel):
             return
 
         valid_status_changes = {
-            OrderStatus.WAITING: (
-                OrderStatus.PAID,
-                OrderStatus.REJECTED,
-                OrderStatus.EXPIRED,
-            ),
+            OrderStatus.WAITING: (OrderStatus.PAID, OrderStatus.EXPIRED,),
             OrderStatus.PAID: (OrderStatus.CANCELLED,),
             # In rare cases, Bambora Notify would notify that a previously failed payment
             # was later successful, we should allow this case.
