@@ -2,7 +2,6 @@ import random
 import uuid
 
 import pytest
-from django.core.files.uploadedfile import SimpleUploadedFile
 from graphql_relay import from_global_id, to_global_id
 
 from berth_reservations.tests.utils import (
@@ -16,7 +15,7 @@ from leases.enums import LeaseStatus
 from leases.tests.factories import BerthLeaseFactory
 
 from ..enums import BerthMooringType
-from ..models import Berth, BerthType, get_harbor_media_folder, Harbor, HarborMap, Pier
+from ..models import Berth, BerthType, Harbor, Pier
 from ..schema import BerthNode, HarborNode, PierNode
 from .factories import BerthTypeFactory
 
@@ -512,7 +511,6 @@ mutation CreateHarbor($input: CreateHarborMutationInput!) {
             properties {
                 name
                 servicemapId
-                imageFile
                 streetAddress
                 zipCode
                 availabilityLevel {
@@ -530,12 +528,7 @@ mutation CreateHarbor($input: CreateHarborMutationInput!) {
     "api_client", ["harbor_services", "berth_services"], indirect=True,
 )
 def test_create_harbor(api_client, availability_level, municipality):
-    image_file_name = "image.png"
-
     variables = {
-        "imageFile": SimpleUploadedFile(
-            name=image_file_name, content=None, content_type="image/png"
-        ),
         "availabilityLevelId": availability_level.id,
         "municipalityId": municipality.id,
         "name": "Foobarsatama",
@@ -552,9 +545,6 @@ def test_create_harbor(api_client, availability_level, municipality):
     assert Harbor.objects.count() == 1
 
     harbor_id = from_global_id(executed["data"]["createHarbor"]["harbor"].pop("id"))[1]
-    image_file = executed["data"]["createHarbor"]["harbor"]["properties"].pop(
-        "imageFile"
-    )
 
     assert harbor_id is not None
     assert executed["data"]["createHarbor"]["harbor"]["geometry"] == {
@@ -566,10 +556,6 @@ def test_create_harbor(api_client, availability_level, municipality):
         variables["location"]["coordinates"][1],
         variables["location"]["coordinates"][0],
         variables["location"]["coordinates"][1],
-    )
-    assert (
-        get_harbor_media_folder(Harbor.objects.get(pk=harbor_id), image_file_name)
-        in image_file
     )
     assert executed["data"]["createHarbor"]["harbor"]["properties"] == {
         "name": variables["name"],
@@ -722,10 +708,6 @@ mutation UpdateHarbor($input: UpdateHarborMutationInput!) {
             properties {
                 name
                 servicemapId
-                imageFile
-                maps {
-                    url
-                }
                 streetAddress
                 zipCode
                 availabilityLevel {
@@ -744,20 +726,9 @@ mutation UpdateHarbor($input: UpdateHarborMutationInput!) {
 )
 def test_update_harbor(api_client, harbor, availability_level, municipality):
     global_id = to_global_id(HarborNode._meta.name, str(harbor.id))
-    image_file_name = "image.png"
-    map_file_names = ["map1.pdf", "map2.pdf", "map3.pdf"]
 
     variables = {
         "id": global_id,
-        "imageFile": SimpleUploadedFile(
-            name=image_file_name, content=None, content_type="image/png"
-        ),
-        "addMapFiles": [
-            SimpleUploadedFile(
-                name=file_name, content=None, content_type="application/pdf"
-            )
-            for file_name in map_file_names
-        ],
         "availabilityLevelId": availability_level.id,
         "municipalityId": municipality.id,
         "name": "Uusi Foobarsatama",
@@ -771,11 +742,6 @@ def test_update_harbor(api_client, harbor, availability_level, municipality):
 
     executed = api_client.execute(UPDATE_HARBOR_MUTATION, input=variables)
 
-    image_file = executed["data"]["updateHarbor"]["harbor"]["properties"].pop(
-        "imageFile"
-    )
-    map_files = executed["data"]["updateHarbor"]["harbor"]["properties"].pop("maps")
-
     assert Harbor.objects.count() == 1
     assert executed["data"]["updateHarbor"]["harbor"]["id"] == global_id
     assert executed["data"]["updateHarbor"]["harbor"]["geometry"] == {
@@ -788,16 +754,6 @@ def test_update_harbor(api_client, harbor, availability_level, municipality):
         variables["location"]["coordinates"][0],
         variables["location"]["coordinates"][1],
     )
-    assert get_harbor_media_folder(harbor, image_file_name) in image_file
-
-    assert len(map_files) == 3
-
-    expected_urls = [
-        get_harbor_media_folder(harbor, file_name) for file_name in map_file_names
-    ]
-    # Test that all the expected files are in the instance map files
-    for file in map_files:
-        assert any([expected_url in file["url"] for expected_url in expected_urls])
 
     assert executed["data"]["updateHarbor"]["harbor"]["properties"] == {
         "name": variables["name"],
@@ -809,31 +765,33 @@ def test_update_harbor(api_client, harbor, availability_level, municipality):
     }
 
 
-@pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
-)
-def test_update_harbor_remove_map(api_client, harbor):
-    global_id = to_global_id(HarborNode._meta.name, str(harbor.id))
-    map_file_names = ["map1.pdf", "map2.pdf", "map3.pdf"]
-
-    # Create map objects and get only the IDs
-    map_files = [
-        HarborMap.objects.create(
-            map_file=SimpleUploadedFile(
-                name=file_name, content=None, content_type="application/pdf"
-            ),
-            harbor=harbor,
-        ).id
-        for file_name in map_file_names
-    ]
-
-    assert harbor.maps.count() == 3
-
-    variables = {"id": global_id, "removeMapFiles": map_files}
-
-    executed = api_client.execute(UPDATE_HARBOR_MUTATION, input=variables)
-
-    assert len(executed["data"]["updateHarbor"]["harbor"]["properties"]["maps"]) == 0
+# Handling map files is disabled
+#
+# @pytest.mark.parametrize(
+#     "api_client", ["harbor_services", "berth_services"], indirect=True,
+# )
+# def test_update_harbor_remove_map(api_client, harbor):
+#     global_id = to_global_id(HarborNode._meta.name, str(harbor.id))
+#     map_file_names = ["map1.pdf", "map2.pdf", "map3.pdf"]
+#
+#     # Create map objects and get only the IDs
+#     map_files = [
+#         HarborMap.objects.create(
+#             map_file=SimpleUploadedFile(
+#                 name=file_name, content=None, content_type="application/pdf"
+#             ),
+#             harbor=harbor,
+#         ).id
+#         for file_name in map_file_names
+#     ]
+#
+#     assert harbor.maps.count() == 3
+#
+#     variables = {"id": global_id, "removeMapFiles": map_files}
+#
+#     executed = api_client.execute(UPDATE_HARBOR_MUTATION, input=variables)
+#
+#     assert len(executed["data"]["updateHarbor"]["harbor"]["properties"]["maps"]) == 0
 
 
 def test_update_harbor_no_id(superuser_api_client, harbor):

@@ -28,6 +28,7 @@ from users.utils import user_has_view_permission
 from utils.enum import graphene_enum
 from utils.relay import get_node_from_global_id
 from utils.schema import CountConnection, update_object
+from utils.urls import get_image_file_url
 
 from .enums import BerthMooringType
 from .models import (
@@ -298,7 +299,7 @@ class HarborNode(graphql_geojson.GeoJSONType):
 
     def resolve_image_file(self, info, **kwargs):
         if self.image_file:
-            return info.context.build_absolute_uri(self.image_file.url)
+            return get_image_file_url(self.image_file)
         else:
             return None
 
@@ -439,7 +440,7 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
 
     def resolve_image_file(self, info, **kwargs):
         if self.image_file:
-            return info.context.build_absolute_uri(self.image_file.url)
+            return get_image_file_url(self.image_file)
         else:
             return None
 

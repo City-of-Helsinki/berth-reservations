@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-25 11:41+0300\n"
+"POT-Creation-Date: 2020-10-02 11:57+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,699 +17,725 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: applications/admin.py:31
+#: applications/admin.py:32
 msgid "Application type"
-msgstr ""
+msgstr "Hakemuksen tyyppi"
 
-#: applications/admin.py:36 applications/admin.py:151
+#: applications/admin.py:37 applications/admin.py:152
 msgid "Application"
-msgstr ""
+msgstr "Hakemus"
 
-#: applications/admin.py:36 applications/admin.py:151
+#: applications/admin.py:37 applications/admin.py:152
 msgid "Switch application"
-msgstr ""
+msgstr "Vaihda hakemusta"
 
-#: applications/admin.py:73 applications/admin.py:251
+#: applications/admin.py:74 applications/admin.py:252
 msgid "Contact information"
-msgstr ""
+msgstr "Yhteystiedot"
 
-#: applications/admin.py:89 applications/admin.py:267
+#: applications/admin.py:90 applications/admin.py:268
 msgid "Main boat information"
-msgstr ""
+msgstr "Pääveneen tiedot"
 
-#: applications/admin.py:105
+#: applications/admin.py:106
 msgid "Large vessel information"
-msgstr ""
+msgstr "Suuren aluksen tiedot"
 
-#: applications/admin.py:121
+#: applications/admin.py:122
 msgid "Switch berth information"
-msgstr ""
+msgstr "Vaihda venepaikan tiedot"
 
-#: applications/admin.py:132 applications/admin.py:280
+#: applications/admin.py:133 applications/admin.py:281
 msgid "Other information"
-msgstr ""
+msgstr "Muut tiedot"
 
-#: applications/admin.py:156
+#: applications/admin.py:157
 msgid "Harbor"
-msgstr ""
+msgstr "Satama"
 
-#: applications/admin.py:161
+#: applications/admin.py:162
 msgid "Pier"
-msgstr ""
+msgstr "Laituri"
 
-#: applications/admin.py:166
+#: applications/admin.py:167
 msgid "Berth number"
-msgstr ""
+msgstr "Venepaikkanumero"
 
-#: applications/admin.py:171
+#: applications/admin.py:172
 msgid "Reason"
-msgstr ""
+msgstr "Syy"
 
-#: applications/admin.py:188 applications/admin.py:312
+#: applications/admin.py:189 applications/admin.py:313
 msgid "Download list of chosen applications in Excel file"
-msgstr ""
+msgstr "Lataa luettelo valituista hakemuksista Excel-tiedostona"
 
-#: applications/admin.py:211
+#: applications/admin.py:212
 #, python-format
 msgid "Resent confirmation for %d berth application(s)"
-msgstr ""
+msgstr "Vahvistus %d venepaikkahakemukselle lähetetty uudelleen"
 
-#: applications/admin.py:216 applications/admin.py:341
+#: applications/admin.py:217 applications/admin.py:347
 msgid "Send confirmation again for chosen application"
-msgstr ""
+msgstr "Lähetä vahvistus valitulle hakemukselle uudelleen"
 
-#: applications/admin.py:335
+#: applications/admin.py:341
 #, python-format
 msgid "Resent confirmation for %d winter storage application(s)"
-msgstr ""
+msgstr "Vahvistus %d talvisäilytyspaikkahakemukselle lähetetty uudelleen"
 
 #: applications/enums.py:6
 msgid "On trestles"
-msgstr ""
+msgstr "Pukeilla"
 
 #: applications/enums.py:7
 msgid "On a trailer"
-msgstr ""
+msgstr "Trailerissa"
 
 #: applications/enums.py:8
 msgid "Under a tarp"
-msgstr ""
+msgstr "Suojapeitteen alla"
 
 #: applications/enums.py:12
 msgid "Pending"
-msgstr ""
+msgstr "Odottaa"
 
 #: applications/enums.py:13
 msgid "Offer generated"
-msgstr ""
+msgstr "Tarjous luotu"
 
 #: applications/enums.py:14
 msgid "Offer sent"
-msgstr ""
+msgstr "Tarjous lähetetty"
 
 #: applications/enums.py:15
 msgid "No suitable berths"
-msgstr ""
+msgstr "Ei soveltuvia venepaikkoja"
 
 #: applications/enums.py:18
 msgid "Notified that there are no suitable berths"
-msgstr ""
+msgstr "Ilmoitettu ettei soveltuvia venepaikkoja ole"
 
 #: applications/enums.py:20
 msgid "Handled"
-msgstr ""
+msgstr "Käsitelty"
 
 #: applications/enums.py:21 leases/enums.py:9 payments/enums.py:67
 msgid "Expired"
 msgstr "Vanhentunut"
 
-#: applications/models.py:17 applications/models.py:29
-msgid "priority"
+#: applications/enums.py:25
+msgid "Marked"
 msgstr ""
 
-#: applications/models.py:39 harbors/models.py:56 resources/models.py:71
-msgid "title"
+#: applications/enums.py:26
+msgid "Unmarked"
 msgstr ""
+
+#: applications/models.py:17 applications/models.py:29
+msgid "priority"
+msgstr "prioriteetti"
+
+#: applications/models.py:39 harbors/models.py:58 resources/models.py:71
+msgid "title"
+msgstr "nimike"
 
 #: applications/models.py:42
 msgid "Title of the berth switch reason"
-msgstr ""
+msgstr "Paikanvaihdon syyn nimike"
 
-#: applications/models.py:52 resources/models.py:460 resources/models.py:621
+#: applications/models.py:52 resources/models.py:467 resources/models.py:629
 msgid "pier"
-msgstr ""
+msgstr "laituri"
 
 #: applications/models.py:53
 msgid "berth number"
-msgstr ""
+msgstr "venepaikkanumero"
 
 #: applications/models.py:58
 msgid "berth switch reason"
-msgstr ""
+msgstr "paikanvaihdon syy"
 
 #: applications/models.py:64
 msgid "created at"
-msgstr ""
+msgstr "luotu"
 
 #: applications/models.py:68
 msgid "handling status"
-msgstr ""
+msgstr "käsittelyn tila"
 
 #: applications/models.py:74
 msgid "language"
-msgstr ""
+msgstr "kieli"
 
 #: applications/models.py:81
 msgid "first name"
-msgstr ""
+msgstr "etunimi"
 
 #: applications/models.py:82
 msgid "last name"
-msgstr ""
+msgstr "sukunimi"
 
 #: applications/models.py:83
 msgid "email address"
-msgstr ""
+msgstr "sähköpostiosoite"
 
 #: applications/models.py:84 resources/models.py:105
 msgid "phone number"
-msgstr ""
+msgstr "puhelinnumero"
 
-#: applications/models.py:85 customers/models.py:82
+#: applications/models.py:85 customers/models.py:292
 msgid "address"
-msgstr ""
+msgstr "osoite"
 
 #: applications/models.py:86
 msgid "zip code"
-msgstr ""
+msgstr "postinumero"
 
-#: applications/models.py:87 resources/models.py:126 resources/models.py:176
+#: applications/models.py:87 resources/models.py:133 resources/models.py:183
 msgid "municipality"
-msgstr ""
+msgstr "kunta"
 
 #: applications/models.py:91
 msgid "company name"
-msgstr ""
+msgstr "yrityksen nimi"
 
 #: applications/models.py:94
 msgid "business ID"
-msgstr ""
+msgstr "y-tunnus"
 
-#: applications/models.py:100 customers/models.py:117 harbors/models.py:20
+#: applications/models.py:100 customers/models.py:327 harbors/models.py:22
 #: resources/models.py:40
 msgid "boat type"
-msgstr ""
+msgstr "venetyyppi"
 
 #: applications/models.py:107
 msgid "boat registration number"
-msgstr ""
+msgstr "veneen rekisterinumero"
 
-#: applications/models.py:109 customers/models.py:126
+#: applications/models.py:109 customers/models.py:336
 msgid "boat name"
-msgstr ""
+msgstr "veneen nimi"
 
 #: applications/models.py:111
 msgid "boat model"
-msgstr ""
+msgstr "veneen malli"
 
 #: applications/models.py:114
 msgid "boat length"
-msgstr ""
+msgstr "veneen pituus"
 
 #: applications/models.py:117
 msgid "boat width"
-msgstr ""
+msgstr "veneen leveys"
 
 #: applications/models.py:121
 msgid "accept boating newsletter"
-msgstr ""
+msgstr "hyväksy veneilyuutiskirje"
 
 #: applications/models.py:124
 msgid "accept fitness news"
-msgstr ""
+msgstr "hyväksy kuntoilu-uutiset"
 
 #: applications/models.py:127
 msgid "accept library news"
-msgstr ""
+msgstr "hyväksy kirjastouutiset"
 
 #: applications/models.py:130
 msgid "accept other culture news"
-msgstr ""
+msgstr "hyväksy muut kulttuuriuutiset"
 
 #: applications/models.py:134
 msgid "information accuracy confirmed"
-msgstr ""
+msgstr "tietojen paikkansapitävyys vahvistettu"
 
 #: applications/models.py:137
 msgid "application code"
-msgstr ""
+msgstr "hakemuskoodi"
 
 #: applications/models.py:142
 msgid "Can resend confirmation for applications"
-msgstr ""
+msgstr "Vahvistus hakemuksille voidaan lähettää uudelleen"
 
 #: applications/models.py:159
 msgid "chosen harbors"
-msgstr ""
+msgstr "valitut satamat"
 
 #: applications/models.py:164
 msgid "berth switch"
-msgstr ""
+msgstr "paikanvaihto"
 
 #: applications/models.py:172
 msgid "boat draught"
-msgstr ""
+msgstr "veneen syväys"
 
 #: applications/models.py:179
 msgid "boat weight"
-msgstr ""
+msgstr "veneen paino"
 
 #: applications/models.py:187
 msgid "accessibility required"
-msgstr ""
+msgstr "esteettömyys vaaditaan"
 
 #: applications/models.py:192
 msgid "boat propulsion"
-msgstr ""
+msgstr "aluksen käyttövoima"
 
 #: applications/models.py:195
 msgid "boat hull material"
-msgstr ""
+msgstr "veneen runkomateriaali"
 
 #: applications/models.py:198
 msgid "boat intended use"
-msgstr ""
+msgstr "veneen käyttötarkoitus"
 
 #: applications/models.py:201
 msgid "renting period"
-msgstr ""
+msgstr "vuokra-aika"
 
 #: applications/models.py:203
 msgid "rent from"
-msgstr ""
+msgstr "vuokra voimassa alkaen"
 
 #: applications/models.py:204
 msgid "rent till"
-msgstr ""
+msgstr "vuokra päättyy"
 
 #: applications/models.py:206
 msgid "boat is inspected"
-msgstr ""
+msgstr "vene on tarkastettu"
 
 #: applications/models.py:209
 msgid "boat is insured"
-msgstr ""
+msgstr "vene on vakuutettu"
 
 #: applications/models.py:212
 msgid "agree to terms"
-msgstr ""
+msgstr "hyväksy ehdot"
 
 #: applications/models.py:240
 msgid "BerthApplication with no lease can only be "
-msgstr ""
+msgstr "Vuokraton paikkahakemus voi olla vain "
 
-#: applications/models.py:269
+#: applications/models.py:260
+#, fuzzy
+#| msgid "Application type"
+msgid "application area type"
+msgstr "Hakemuksen tyyppi"
+
+#: applications/models.py:276
 msgid "chosen winter storage areas"
-msgstr ""
+msgstr "valitut talvisäilytysalueet"
 
-#: applications/models.py:275
+#: applications/models.py:282
 msgid "storage method"
-msgstr ""
+msgstr "säilytystapa"
 
-#: applications/models.py:281
+#: applications/models.py:288
 msgid "trailer registration number"
-msgstr ""
+msgstr "trailerin rekisterinumero"
 
 #: applications/notifications.py:19
 msgid "Berth application created"
-msgstr ""
+msgstr "Venepaikkahakemus luotu"
 
 #: applications/notifications.py:23
 msgid "Winter storage application created"
-msgstr ""
+msgstr "Talvisäilytyshakemus luotu"
 
-#: berth_reservations/settings.py:106
+#: applications/notifications.py:27
+#, fuzzy
+#| msgid "Winter storage application created"
+msgid "Unmarked winter storage application created"
+msgstr "Talvisäilytyshakemus luotu"
+
+#: berth_reservations/settings.py:109
 msgid "Finnish"
-msgstr ""
+msgstr "Suomi"
 
-#: berth_reservations/settings.py:106
+#: berth_reservations/settings.py:109
 msgid "English"
-msgstr ""
+msgstr "Englanti"
 
-#: berth_reservations/settings.py:106
+#: berth_reservations/settings.py:109
 msgid "Swedish"
-msgstr ""
+msgstr "Ruotsi"
 
 #: customers/enums.py:6
 msgid "Online payment"
-msgstr ""
+msgstr "Verkkomaksu"
 
 #: customers/enums.py:7
 msgid "Digital invoice"
-msgstr ""
+msgstr "Sähköinen lasku"
 
 #: customers/enums.py:8
 msgid "Paper invoice"
-msgstr ""
+msgstr "Paperilasku"
 
 #: customers/enums.py:12
 msgid "Company"
-msgstr ""
+msgstr "Yritys"
 
 #: customers/enums.py:13
 msgid "Internal"
-msgstr ""
+msgstr "Sisäinen"
 
 #: customers/enums.py:14
 msgid "Non-billable"
-msgstr ""
+msgstr "Ei-laskutettava"
 
 #: customers/enums.py:15
 msgid "Other"
-msgstr ""
+msgstr "Muuta"
 
 #: customers/enums.py:19
 msgid "Inspection"
-msgstr ""
+msgstr "Tarkastus"
 
 #: customers/enums.py:20
 msgid "Insurance"
-msgstr ""
+msgstr "Vakuutus"
 
-#: customers/models.py:44
+#: customers/models.py:116
+#, fuzzy
+#| msgid "customer profile"
+msgid "No customer ID provided"
+msgstr "asiakasprofiili"
+
+#: customers/models.py:248
 msgid "invoicing type"
-msgstr ""
+msgstr "laskutustyyppi"
 
-#: customers/models.py:48 leases/models.py:48 resources/models.py:629
+#: customers/models.py:252 leases/models.py:48 resources/models.py:637
 msgid "comment"
-msgstr ""
+msgstr "kommentti"
 
-#: customers/models.py:53
+#: customers/models.py:257
 msgid "customer profile"
-msgstr ""
+msgstr "asiakasprofiili"
 
-#: customers/models.py:54
+#: customers/models.py:258
 msgid "customer profiles"
-msgstr ""
+msgstr "asiakasprofiilit"
 
-#: customers/models.py:69 leases/models.py:26 payments/models.py:237
+#: customers/models.py:279 leases/models.py:26 payments/models.py:243
 msgid "customer"
-msgstr ""
+msgstr "asiakas"
 
-#: customers/models.py:75
+#: customers/models.py:285
 msgid "organization type"
-msgstr ""
+msgstr "organisaation tyyppi"
 
-#: customers/models.py:79
+#: customers/models.py:289
 msgid "business id"
-msgstr ""
+msgstr "y-tunnus"
 
-#: customers/models.py:81 harbors/models.py:15 harbors/models.py:169
-#: harbors/models.py:263 resources/models.py:35 resources/models.py:150
-#: resources/models.py:222
+#: customers/models.py:291 harbors/models.py:17 harbors/models.py:171
+#: harbors/models.py:273 resources/models.py:35 resources/models.py:157
+#: resources/models.py:229
 msgid "name"
-msgstr ""
+msgstr "nimi"
 
-#: customers/models.py:84 resources/models.py:104
+#: customers/models.py:294 resources/models.py:104
 msgid "postal code"
-msgstr ""
+msgstr "postinumero"
 
-#: customers/models.py:86
+#: customers/models.py:296
 msgid "city"
-msgstr ""
+msgstr "kaupunki"
 
-#: customers/models.py:89
+#: customers/models.py:299
 msgid "organization"
-msgstr ""
+msgstr "organisaatio"
 
-#: customers/models.py:90
+#: customers/models.py:300
 msgid "organizations"
-msgstr ""
+msgstr "organisaatiot"
 
-#: customers/models.py:100
+#: customers/models.py:310
 msgid "A company must have a business id"
-msgstr ""
+msgstr "Yrityksellä tulee olla y-tunnus"
 
-#: customers/models.py:111
+#: customers/models.py:321
 msgid "owner"
-msgstr ""
+msgstr "omistaja"
 
-#: customers/models.py:124
+#: customers/models.py:334
 msgid "registration number"
-msgstr ""
+msgstr "rekisterinumero"
 
-#: customers/models.py:127
+#: customers/models.py:337
 msgid "model"
-msgstr ""
+msgstr "malli"
 
-#: customers/models.py:131 resources/models.py:517 resources/schema.py:190
-#: resources/schema.py:342 resources/schema.py:502 resources/schema.py:512
+#: customers/models.py:341 resources/models.py:524 resources/schema.py:190
+#: resources/schema.py:342 resources/schema.py:503 resources/schema.py:513
 msgid "length (m)"
-msgstr ""
+msgstr "pituus (m)"
 
-#: customers/models.py:137 resources/models.py:514 resources/schema.py:189
-#: resources/schema.py:341 resources/schema.py:501 resources/schema.py:511
+#: customers/models.py:347 resources/models.py:521 resources/schema.py:189
+#: resources/schema.py:341 resources/schema.py:502 resources/schema.py:512
 msgid "width (m)"
-msgstr ""
+msgstr "leveys (m)"
 
-#: customers/models.py:143
+#: customers/models.py:353
 msgid "draught (m)"
-msgstr ""
+msgstr "syväys (m)"
 
-#: customers/models.py:151
+#: customers/models.py:361
 msgid "weight (kg)"
-msgstr ""
+msgstr "paino (kg)"
 
-#: customers/models.py:156
+#: customers/models.py:366
 msgid "propulsion"
-msgstr ""
+msgstr "käyttövoima"
 
-#: customers/models.py:159
+#: customers/models.py:369
 msgid "hull material"
-msgstr ""
+msgstr "runkomateriaali"
 
-#: customers/models.py:161
+#: customers/models.py:371
 msgid "intended use"
-msgstr ""
+msgstr "käyttötarkoitus"
 
-#: customers/models.py:164 customers/models.py:183
+#: customers/models.py:374 customers/models.py:393
 msgid "boat"
-msgstr ""
+msgstr "vene"
 
-#: customers/models.py:165
+#: customers/models.py:375
 msgid "boats"
-msgstr ""
+msgstr "veneet"
 
-#: customers/models.py:196
+#: customers/models.py:406
 msgid "certificate type"
-msgstr ""
+msgstr "todistuksen tyyppi"
 
-#: customers/models.py:199
+#: customers/models.py:409
 msgid "valid until"
-msgstr ""
+msgstr "voimassa päivämäärään"
 
-#: customers/models.py:200
+#: customers/models.py:410
 msgid "checked at"
-msgstr ""
+msgstr "tarkistettu"
 
-#: customers/models.py:202
+#: customers/models.py:412
 msgid "checked by"
-msgstr ""
+msgstr "tarkistaja"
 
-#: customers/models.py:223
+#: customers/models.py:433
 msgid "Cannot change the boat assigned to this certificate"
-msgstr ""
+msgstr "Tähän todistukseen osoitettua venettä ei voida vaihtaa"
 
 #: customers/schema/mutations.py:248
 msgid "You cannot pass deleteOrganization: true and organization input"
-msgstr ""
+msgstr "Et voi ohittaa kohtia deleteOrganization: true ja organization input"
 
 #: customers/schema/mutations.py:252
 msgid "The passed Profile is not associated with an Organization"
-msgstr ""
+msgstr "Ohitettua profiilia ei ole liitetty mihinkään organisaatioon"
 
-#: harbors/models.py:15 resources/models.py:35
+#: harbors/models.py:17 resources/models.py:35
 msgid "Name of the boat type"
-msgstr ""
+msgstr "Venetyypin nimi"
 
-#: harbors/models.py:21 resources/models.py:41
+#: harbors/models.py:23 resources/models.py:41
 msgid "boat types"
-msgstr ""
+msgstr "venetyypit"
 
-#: harbors/models.py:59 resources/models.py:74
+#: harbors/models.py:61 resources/models.py:74
 msgid "Title of the availability level"
-msgstr ""
+msgstr "Saatavuustason nimike"
 
-#: harbors/models.py:62 resources/models.py:77
+#: harbors/models.py:64 resources/models.py:77
 msgid "description"
-msgstr ""
+msgstr "kuvaus"
 
-#: harbors/models.py:65 resources/models.py:80
+#: harbors/models.py:67 resources/models.py:80
 msgid "Description of the availability level"
-msgstr ""
+msgstr "Saatavuustason kuvaus"
 
-#: harbors/models.py:70 resources/models.py:85 resources/models.py:143
-#: resources/models.py:193
+#: harbors/models.py:72 resources/models.py:85 resources/models.py:150
+#: resources/models.py:200
 msgid "availability level"
-msgstr ""
+msgstr "saatavuustaso"
 
-#: harbors/models.py:71 resources/models.py:86
+#: harbors/models.py:73 resources/models.py:86
 msgid "availability levels"
-msgstr ""
+msgstr "saatavuustasot"
 
-#: harbors/models.py:81
+#: harbors/models.py:83
 msgid "Servicemap ID"
-msgstr ""
+msgstr "Palvelukartan tunnus"
 
-#: harbors/models.py:83 resources/models.py:98
+#: harbors/models.py:85 resources/models.py:98
 msgid "ID in the Servicemap system"
-msgstr ""
-
-#: harbors/models.py:89
-msgid "Disabled"
-msgstr ""
+msgstr "Tunnus palvelukarttajärjestelmässä"
 
 #: harbors/models.py:91
-msgid "Postal code"
-msgstr ""
-
-#: harbors/models.py:92
-msgid "Phone number"
-msgstr ""
+msgid "Disabled"
+msgstr "Ei käytössä"
 
 #: harbors/models.py:93
+msgid "Postal code"
+msgstr "Postinumero"
+
+#: harbors/models.py:94
+msgid "Phone number"
+msgstr "Puhelinnumero"
+
+#: harbors/models.py:95
 msgid "Email"
-msgstr ""
+msgstr "Sähköposti"
 
-#: harbors/models.py:94 resources/models.py:107
+#: harbors/models.py:96 resources/models.py:107
 msgid "WWW link"
-msgstr ""
+msgstr "WWW-linkki"
 
-#: harbors/models.py:97
+#: harbors/models.py:99
 msgid "Location"
-msgstr ""
+msgstr "Sijainti"
 
-#: harbors/models.py:101
+#: harbors/models.py:103
 msgid "Image link"
-msgstr ""
+msgstr "Kuvalinkki"
 
-#: harbors/models.py:105 payments/enums.py:7
+#: harbors/models.py:107 payments/enums.py:7
 msgid "Electricity"
 msgstr "Sähkö"
 
-#: harbors/models.py:106 payments/enums.py:8
+#: harbors/models.py:108 payments/enums.py:8
 msgid "Water"
 msgstr "Vesi"
 
-#: harbors/models.py:107 payments/enums.py:9
+#: harbors/models.py:109 payments/enums.py:9
 msgid "Gate"
 msgstr "Portti"
 
-#: harbors/models.py:118 harbors/models.py:196
+#: harbors/models.py:120 harbors/models.py:198
 msgid "Municipality"
-msgstr ""
+msgstr "Kunta"
 
-#: harbors/models.py:126 harbors/models.py:204
+#: harbors/models.py:128 harbors/models.py:214
 msgid "Image file"
-msgstr ""
+msgstr "Kuvatiedosto"
 
-#: harbors/models.py:132 payments/enums.py:10
+#: harbors/models.py:134 payments/enums.py:10
 msgid "Mooring"
 msgstr "Kiinnitystapa"
 
-#: harbors/models.py:134 payments/enums.py:11
+#: harbors/models.py:136 payments/enums.py:11
 msgid "Waste collection"
 msgstr "Jätehuolto"
 
-#: harbors/models.py:136 payments/enums.py:12
+#: harbors/models.py:138 payments/enums.py:12
 msgid "Lighting"
 msgstr "Valaistus"
 
-#: harbors/models.py:140
+#: harbors/models.py:142
 msgid "Suitable boat types"
-msgstr ""
+msgstr "Soveltuvat venetyypit"
 
-#: harbors/models.py:149 harbors/models.py:225
+#: harbors/models.py:151 harbors/models.py:235
 msgid "Availability level"
-msgstr ""
+msgstr "Saatavuustaso"
 
-#: harbors/models.py:155 resources/admin.py:61
+#: harbors/models.py:157 resources/admin.py:61
 msgid "Number of places"
-msgstr ""
+msgstr "Paikkojen määrä"
 
-#: harbors/models.py:158
+#: harbors/models.py:160
 msgid "Maximum berth width"
-msgstr ""
+msgstr "Venepaikan maksimileveys"
 
-#: harbors/models.py:161
+#: harbors/models.py:163
 msgid "Maximum berth length"
-msgstr ""
+msgstr "Venepaikan maksimipituus"
 
-#: harbors/models.py:164
+#: harbors/models.py:166
 msgid "Maximum berth depth"
-msgstr ""
+msgstr "Venepaikan maksimisyvyys"
 
-#: harbors/models.py:171 resources/models.py:152
+#: harbors/models.py:173 resources/models.py:159
 msgid "Name of the harbor"
-msgstr ""
+msgstr "Sataman nimi"
 
-#: harbors/models.py:175 harbors/models.py:269 resources/models.py:156
-#: resources/models.py:228
+#: harbors/models.py:177 harbors/models.py:279 resources/models.py:163
+#: resources/models.py:235
 msgid "street address"
-msgstr ""
+msgstr "katuosoite"
 
-#: harbors/models.py:177 resources/models.py:158
+#: harbors/models.py:179 resources/models.py:165
 msgid "Street address of the harbor"
-msgstr ""
+msgstr "Sataman katuosoite"
 
-#: harbors/models.py:183 payments/models.py:109 resources/models.py:164
-#: resources/models.py:258 resources/models.py:437
+#: harbors/models.py:185 payments/models.py:114 resources/models.py:171
+#: resources/models.py:265 resources/models.py:444
 msgid "harbor"
-msgstr ""
+msgstr "satama"
 
-#: harbors/models.py:184 resources/models.py:165
+#: harbors/models.py:186 resources/models.py:172
 msgid "harbors"
-msgstr ""
+msgstr "satamat"
 
-#: harbors/models.py:210
+#: harbors/models.py:220
 msgid "Repair area"
-msgstr ""
+msgstr "Korjausalue"
 
-#: harbors/models.py:212 payments/enums.py:17
+#: harbors/models.py:222 payments/enums.py:17
 msgid "Summer storage for docking equipment"
 msgstr "Telakointitarvikkeiden kesäsäilytys"
 
-#: harbors/models.py:215 payments/enums.py:21
+#: harbors/models.py:225 payments/enums.py:21
 msgid "Summer storage for trailers"
 msgstr "Trailerien kesäsäilytys"
 
-#: harbors/models.py:218
+#: harbors/models.py:228
 msgid "Summer storage for boats"
-msgstr ""
+msgstr "Veneiden kesäsäilytyspaikka"
 
-#: harbors/models.py:234 resources/admin.py:103
+#: harbors/models.py:244 resources/admin.py:103
 msgid "Number of marked places"
-msgstr ""
+msgstr "Merkittyjen paikkojen määrä"
 
-#: harbors/models.py:237
+#: harbors/models.py:247
 msgid "Maximum place width"
-msgstr ""
+msgstr "Paikan maksimileveys"
 
-#: harbors/models.py:240
+#: harbors/models.py:250
 msgid "Maximum place length"
-msgstr ""
-
-#: harbors/models.py:248
-msgid "Number of section places"
-msgstr ""
-
-#: harbors/models.py:251
-msgid "Maximum length of section spaces"
-msgstr ""
+msgstr "Paikan maksimipituus"
 
 #: harbors/models.py:258
+msgid "Number of section places"
+msgstr "Osa-aluepaikkojen määrä"
+
+#: harbors/models.py:261
+msgid "Maximum length of section spaces"
+msgstr "Osa-aluetilojen maksimipituus"
+
+#: harbors/models.py:268
 msgid "Number of unmarked places"
-msgstr ""
+msgstr "Merkitsemättömien paikkojen määrä"
 
-#: harbors/models.py:265 resources/models.py:224
+#: harbors/models.py:275 resources/models.py:231
 msgid "Name of the area"
-msgstr ""
+msgstr "Alueen nimi"
 
-#: harbors/models.py:271 resources/models.py:230
+#: harbors/models.py:281 resources/models.py:237
 msgid "Street address of the area"
-msgstr ""
+msgstr "Alueen katuosoite"
 
 #: leases/enums.py:6
 msgid "Drafted"
-msgstr ""
+msgstr "Luonnosteltu"
 
 #: leases/enums.py:7
 msgid "Offered"
-msgstr ""
+msgstr "Tarjottu"
 
 #: leases/enums.py:8
 msgid "Refused"
-msgstr ""
+msgstr "Hylätty"
 
 #: leases/enums.py:10 payments/enums.py:68
 msgid "Paid"
@@ -717,186 +743,199 @@ msgstr "Maksettu"
 
 #: leases/models.py:30
 msgid "customer's boat"
-msgstr ""
+msgstr "asiakkaan vene"
 
 #: leases/models.py:38
 msgid "lease status"
-msgstr ""
+msgstr "vuokrauksen tila"
 
 #: leases/models.py:60
 msgid "The boat should belong to the customer who is creating the lease"
-msgstr ""
+msgstr "Veneen tulee kuulua vuokrasopimuksen laativalle asiakkaalle"
 
 #: leases/models.py:63
 msgid "Lease start date cannot be after end date"
-msgstr ""
+msgstr "Vuokran alkamispäivä ei voi olla myöhemmin kuin päättymispäivä"
 
-#: leases/models.py:104 resources/models.py:637
+#: leases/models.py:104 resources/models.py:645
 msgid "berth"
-msgstr ""
+msgstr "venepaikka"
 
-#: leases/models.py:108 leases/models.py:214
+#: leases/models.py:108 leases/models.py:215
 msgid "application"
-msgstr ""
+msgstr "hakemus"
 
-#: leases/models.py:115 leases/models.py:221
+#: leases/models.py:115 leases/models.py:222
 msgid "start date"
-msgstr ""
+msgstr "alkamispäivä"
 
-#: leases/models.py:118 leases/models.py:224
+#: leases/models.py:118 leases/models.py:225
 msgid "end date"
-msgstr ""
+msgstr "päättymispäivä"
 
 #: leases/models.py:121
 msgid "renew automatically"
-msgstr ""
+msgstr "jatka automaattisesti"
 
 #: leases/models.py:126
 msgid "berth lease"
-msgstr ""
+msgstr "venepaikan vuokrasopimus"
 
 #: leases/models.py:127
 msgid "berth leases"
-msgstr ""
+msgstr "venepaikkojen vuokrasopimukset"
 
 #: leases/models.py:133
 msgid "BerthLease start and end year have to be the same"
 msgstr ""
+"Venepaikan vuokrasopimuksen alkamis- ja päättymisvuoden tulee olla sama"
 
-#: leases/models.py:146
+#: leases/models.py:147
 msgid "Cannot change the berth assigned to this lease"
-msgstr ""
+msgstr "Tähän vuokrasopimukseen liitettyä venepaikkaa ei voida vaihtaa"
 
-#: leases/models.py:156 leases/models.py:279
+#: leases/models.py:157 leases/models.py:282
 msgid "Cannot change the application to one which belongs to another customer"
-msgstr ""
+msgstr "Hakemusta ei voida vaihtaa toiselle asiakkaalle kuuluvaan"
 
-#: leases/models.py:161
+#: leases/models.py:162
 msgid "Berth already has a lease"
-msgstr ""
+msgstr "Venepaikalla on jo vuokrasopimus"
 
-#: leases/models.py:163
+#: leases/models.py:164
 msgid "Selected berth is not active"
-msgstr ""
+msgstr "Valittu venepaikka ei ole aktiivinen"
 
-#: leases/models.py:198
+#: leases/models.py:199
 msgid "place"
-msgstr ""
+msgstr "paikka"
 
-#: leases/models.py:206
-msgid "area"
-msgstr ""
-
-#: leases/models.py:229
-msgid "winter storage lease"
-msgstr ""
+#: leases/models.py:207
+#, fuzzy
+#| msgid "Inspection"
+msgid "section"
+msgstr "Tarkastus"
 
 #: leases/models.py:230
-msgid "winter storage leases"
-msgstr ""
+msgid "winter storage lease"
+msgstr "talvisäilytyspaikan vuokrasopimus"
 
-#: leases/models.py:237
-msgid "Lease cannot have both place and area assigned"
-msgstr ""
+#: leases/models.py:231
+msgid "winter storage leases"
+msgstr "talvisäilytyspaikkojen vuokrasopimukset"
 
 #: leases/models.py:239
-msgid "Lease must have either place or area assigned"
-msgstr ""
+#, fuzzy
+#| msgid "Lease cannot have both place and area assigned"
+msgid "Lease cannot have both place and section assigned"
+msgstr "Vuokrasopimukseen ei voida liittää sekä paikkaa että aluetta"
 
-#: leases/models.py:258
+#: leases/models.py:242
+#, fuzzy
+#| msgid "Lease must have either place or area assigned"
+msgid "Lease must have either place or section assigned"
+msgstr "Vuokrasopimukseen tulee olla liitettynä joko paikka tai alue"
+
+#: leases/models.py:261
 msgid "WinterStoragePlace already has a lease"
-msgstr ""
+msgstr "Talvisäilytyspaikalla on jo vuokrasopimus"
 
-#: leases/models.py:260
+#: leases/models.py:263
 msgid "Selected place is not active"
-msgstr ""
+msgstr "Valittu paikka ei ole aktiivinen"
 
-#: leases/models.py:266
+#: leases/models.py:269
 msgid "Cannot change the place assigned to this lease"
-msgstr ""
+msgstr "Tähän vuokrasopimukseen liitettyä paikkaa ei voida vaihtaa"
 
-#: leases/models.py:268
-msgid "Cannot change the area assigned to this lease"
-msgstr ""
+#: leases/models.py:271
+#, fuzzy
+#| msgid "Cannot change the berth assigned to this lease"
+msgid "Cannot change the section assigned to this lease"
+msgstr "Tähän vuokrasopimukseen liitettyä venepaikkaa ei voida vaihtaa"
 
-#: leases/models.py:290 utils/models.py:15
+#: leases/models.py:293 utils/models.py:15
 msgid "time created"
-msgstr ""
-
-#: leases/models.py:292
-msgid "from status"
-msgstr ""
+msgstr "aika luotu"
 
 #: leases/models.py:295
+msgid "from status"
+msgstr "tilasta"
+
+#: leases/models.py:298
 msgid "to status"
-msgstr ""
+msgstr "tilaan"
 
-#: leases/models.py:310 leases/models.py:323 payments/models.py:283
+#: leases/models.py:313 leases/models.py:326 payments/models.py:289
 msgid "lease"
-msgstr ""
+msgstr "vuokrasopimus"
 
-#: leases/models.py:316
+#: leases/models.py:319
 msgid "berth lease change"
-msgstr ""
+msgstr "venepaikan vuokrasopimuksen muutos"
 
-#: leases/models.py:317
+#: leases/models.py:320
 msgid "berth lease changes"
-msgstr ""
+msgstr "venepaikkojen vuokrasopimusten muutokset"
 
-#: leases/models.py:329
+#: leases/models.py:332
 msgid "winter storage lease change"
-msgstr ""
+msgstr "talvisäilytyspaikan vuokrasopimuksen muutos"
 
-#: leases/models.py:330
+#: leases/models.py:333
 msgid "winter storage lease changes"
-msgstr ""
+msgstr "talvisäilytyspaikkojen vuokrasopimusten muutokset"
 
-#: leases/schema/mutations.py:55 leases/schema/mutations.py:133
-#: leases/schema/mutations.py:215 leases/schema/mutations.py:296
+#: leases/schema/mutations.py:56 leases/schema/mutations.py:137
+#: leases/schema/mutations.py:219 leases/schema/mutations.py:304
 msgid "Application must be connected to an existing customer first"
-msgstr ""
+msgstr "Hakemuksen tulee ensin olla yhdistetty olemassa olevaan asiakkaaseen"
 
-#: leases/schema/mutations.py:75 leases/schema/mutations.py:147
-#: leases/schema/mutations.py:246 leases/schema/mutations.py:310
+#: leases/schema/mutations.py:76 leases/schema/mutations.py:151
+#: leases/schema/mutations.py:251 leases/schema/mutations.py:318
 msgid "Boat does not belong to the same customer as the Application"
-msgstr ""
+msgstr "Vene ei kuulu samalle asiakkaalle kuin hakemus"
 
-#: leases/schema/mutations.py:176 leases/schema/mutations.py:339
+#: leases/schema/mutations.py:180 leases/schema/mutations.py:347
 #, python-brace-format
 msgid "Lease object is not DRAFTED anymore: {lease.status}"
-msgstr ""
+msgstr "Vuokrasopimuksen kohde ei enää ole luonnosteltu: {lease.status}"
 
-#: leases/schema/mutations.py:203
-msgid "Cannot receive both Winter Storage Place and Area"
-msgstr ""
+#: leases/schema/mutations.py:207
+#, fuzzy
+#| msgid "Cannot receive both Winter Storage Place and Area"
+msgid "Cannot receive both Winter Storage Place and Section"
+msgstr "Ei voida hakea sekä talvisäilytyspaikkaa että -aluetta"
 
-#: leases/schema/mutations.py:231
-msgid "Either Winter Storage Place or Area are required"
-msgstr ""
+#: leases/schema/mutations.py:236
+#, fuzzy
+#| msgid "Either Winter Storage Place or Area are required"
+msgid "Either Winter Storage Place or Section are required"
+msgstr "Joko talvisäilytyspaikka tai -alue vaaditaan"
 
 #: payments/admin.py:38
 msgid "Berth types"
-msgstr ""
+msgstr "Venepaikkatyypit"
 
 #: payments/admin.py:55 payments/admin.py:72 payments/admin.py:117
 msgid "Pretax price"
-msgstr ""
+msgstr "Hinta ennen veroa"
 
 #: payments/admin.py:58
 msgid "Product type"
-msgstr ""
+msgstr "Tuotetyyppi"
 
 #: payments/admin.py:120
 msgid "Total order price"
-msgstr ""
+msgstr "Tilauksen kokonaishinta"
 
 #: payments/admin.py:123
 msgid "Total order pretax price"
-msgstr ""
+msgstr "Tilauksen kokonaishinta ennen veroa"
 
 #: payments/admin.py:126
 msgid "Total order tax percentage"
-msgstr ""
+msgstr "Tilauksen kokonaisveroprosentti"
 
 #: payments/enums.py:23
 msgid "Parking permit"
@@ -946,172 +985,240 @@ msgstr "Hylätty"
 msgid "Cancelled"
 msgstr "Peruutettu"
 
-#: payments/models.py:44 payments/models.py:248 payments/models.py:572
+#: payments/enums.py:72
+msgid "New berth order"
+msgstr ""
+
+#: payments/enums.py:73
+msgid "Renew berth order"
+msgstr ""
+
+#: payments/enums.py:74
+#, fuzzy
+#| msgid "berth switch reason"
+msgid "Berth switch order"
+msgstr "paikanvaihdon syy"
+
+#: payments/enums.py:75
+#, fuzzy
+#| msgid "winter storage area"
+msgid "Winter storage order"
+msgstr "talvisäilytysalue"
+
+#: payments/enums.py:78
+#, fuzzy
+#| msgid "winter storage area"
+msgid "Unmarked winter storage order"
+msgstr "talvisäilytysalue"
+
+#: payments/enums.py:80
+msgid "Invalid order"
+msgstr ""
+
+#: payments/models.py:49 payments/models.py:254 payments/models.py:657
 msgid "price"
-msgstr ""
+msgstr "hinta"
 
-#: payments/models.py:74
+#: payments/models.py:79
 msgid "berth price group name"
-msgstr ""
+msgstr "venepaikan hintaryhmän nimi"
 
-#: payments/models.py:89 payments/models.py:155 payments/models.py:255
-#: payments/models.py:579
+#: payments/models.py:94 payments/models.py:160 payments/models.py:261
+#: payments/models.py:664
 msgid "tax percentage"
-msgstr ""
+msgstr "veroprosentti"
 
-#: payments/models.py:104 resources/models.py:537
+#: payments/models.py:109 resources/models.py:544
 msgid "price group"
-msgstr ""
+msgstr "hintaryhmä"
 
-#: payments/models.py:130
+#: payments/models.py:135
 msgid "Berth product"
 msgstr "Venepaikka"
 
-#: payments/models.py:136 resources/models.py:236 resources/models.py:265
-#: resources/models.py:472
+#: payments/models.py:141 resources/models.py:243 resources/models.py:272
+#: resources/models.py:479
 msgid "winter storage area"
-msgstr ""
+msgstr "talvisäilytysalue"
 
-#: payments/models.py:146
+#: payments/models.py:151
 msgid "Winter Storage product"
 msgstr "Talvisäilytyspaikka"
 
-#: payments/models.py:151
+#: payments/models.py:156
 msgid "service"
-msgstr ""
+msgstr "palvelu"
 
-#: payments/models.py:183
+#: payments/models.py:188
 #, python-brace-format
 msgid "Fixed services must have VAT of {DEFAULT_TAX_PERCENTAGE}€"
-msgstr ""
+msgstr "Kiinteillä palveluilla tulee olla ALV {DEFAULT_TAX_PERCENTAGE}€"
 
-#: payments/models.py:186
+#: payments/models.py:191
 msgid "Fixed services are only valid for season"
-msgstr ""
+msgstr "Kiinteät palvelut ovat voimassa vain kaudella"
 
-#: payments/models.py:229
+#: payments/models.py:235
 msgid "order number"
-msgstr ""
+msgstr "tilausnumero"
 
-#: payments/models.py:262
+#: payments/models.py:268
 msgid "due date"
-msgstr ""
+msgstr "eräpäivä"
 
-#: payments/models.py:273 payments/models.py:562
+#: payments/models.py:279 payments/models.py:647
 msgid "product"
-msgstr ""
+msgstr "tuote"
 
-#: payments/models.py:326
+#: payments/models.py:389
 msgid "You cannot assign other types of products"
-msgstr ""
+msgstr "Et voi määrittää muita tuotetyyppejä"
 
-#: payments/models.py:331
+#: payments/models.py:394
 msgid "You cannot assign other types of leases"
-msgstr ""
+msgstr "Et voi määrittää muita vuokrasopimustyyppejä"
 
-#: payments/models.py:336
+#: payments/models.py:399
 msgid "The lease provided belongs to a different customer"
-msgstr ""
+msgstr "Annettu vuokrasopimus kuuluu toiselle asiakkaalle"
 
-#: payments/models.py:344
+#: payments/models.py:407
 msgid "A BerthProduct must be associated with a BerthLease"
-msgstr ""
+msgstr "Venepaikkatuotteen tulee olla liitetty venepaikan vuokrasopimukseen"
 
-#: payments/models.py:350
+#: payments/models.py:413
 msgid "A WinterStorageProduct must be associated with a WinterStorageLease"
 msgstr ""
+"Talvisäilytyspaikkatuotteen tulee olla liitetty talvisäilytyspaikan "
+"vuokrasopimukseen"
 
-#: payments/models.py:356
+#: payments/models.py:419
 msgid "Order must have either product object or price value"
-msgstr ""
+msgstr "Tilauksella tulee olla joko tuotekohde tai hinta-arvo"
 
-#: payments/models.py:361
+#: payments/models.py:424
 msgid "Cannot change the product assigned to this order"
-msgstr ""
+msgstr "Tähän tilaukseen liitettyä tuotetta ei voida vaihtaa"
 
-#: payments/models.py:366
+#: payments/models.py:429
 msgid "Cannot change the lease associated with this order"
-msgstr ""
+msgstr "Tähän tilaukseen liitettyä vuokrasopimusta ei voida vaihtaa"
 
-#: payments/models.py:417
+#: payments/models.py:480
 msgid "The product passed is not valid"
-msgstr ""
+msgstr "Ohitettu tuote ei ole voimassa"
 
-#: payments/models.py:432
+#: payments/models.py:495
 msgid "The lease passed is not valid"
-msgstr ""
+msgstr "Ohitettu vuokrasopimus ei ole voimassa"
 
-#: payments/models.py:556
+#: payments/models.py:641
 msgid "order"
-msgstr ""
+msgstr "tilaus"
 
-#: payments/models.py:569
+#: payments/models.py:654
 msgid "quantity"
-msgstr ""
+msgstr "määrä"
 
-#: payments/models.py:593
+#: payments/models.py:678
 msgid "Cannot change the order associated with this order line"
-msgstr ""
+msgstr "Tähän tilausriviin liitettyä tilausta ei voida vaihtaa"
 
-#: payments/models.py:599
+#: payments/models.py:684
 msgid "Cannot change the product assigned to this order line"
-msgstr ""
+msgstr "Tähän tilausriviin määritettyä tuotetta ei voida vaihtaa"
 
-#: payments/models.py:663
+#: payments/models.py:755
 msgid "order log entry"
-msgstr ""
+msgstr "tilauslokikirjaus"
 
-#: payments/models.py:672
+#: payments/models.py:764
 msgid "order log entries"
+msgstr "tilauslokikirjaukset"
+
+#: payments/notifications/types.py:8
+msgid "New berth order approved"
 msgstr ""
 
-#: payments/providers/bambora_payform.py:86
+#: payments/notifications/types.py:12
+msgid "Renew berth order approved"
+msgstr ""
+
+#: payments/notifications/types.py:16
+#, fuzzy
+#| msgid "berth switch reason"
+msgid "Berth switch order approved"
+msgstr "paikanvaihdon syy"
+
+#: payments/notifications/types.py:20
+#, fuzzy
+#| msgid "winter storage area"
+msgid "New winter storage order approved"
+msgstr "talvisäilytysalue"
+
+#: payments/notifications/types.py:24
+#, fuzzy
+#| msgid "winter storage area"
+msgid "Unmarked winter storage order approved"
+msgstr "talvisäilytysalue"
+
+#: payments/providers/bambora_payform.py:90
 msgid "Payment service is unreachable"
-msgstr ""
+msgstr "Maksupalvelu ei ole käytettävissä"
 
-#: payments/providers/bambora_payform.py:92
+#: payments/providers/bambora_payform.py:96
 msgid "Order has already expired"
-msgstr ""
+msgstr "Tilaus on jo vanhentunut"
 
-#: payments/providers/bambora_payform.py:102
+#: payments/providers/bambora_payform.py:106
 msgid "Order with the same ID already exists"
-msgstr ""
+msgstr "Toisella tilauksella on jo sama tunnus"
 
-#: payments/providers/bambora_payform.py:104
+#: payments/providers/bambora_payform.py:108
 msgid "Payment service is down for maintenance"
-msgstr ""
+msgstr "Maksupalvelu on poissa käytöstä huoltotoimien vuoksi"
 
-#: payments/providers/bambora_payform.py:159
+#: payments/providers/bambora_payform.py:172
 msgid "Order is not associated with a Lease"
-msgstr ""
+msgstr "Tilausta ei ole liitetty vuokrasopimukseen"
 
-#: payments/schema/mutations.py:316 payments/schema/mutations.py:357
+#: payments/schema/mutations.py:325 payments/schema/mutations.py:366
 msgid "Lease with the given ID does not exist"
-msgstr ""
+msgstr "Annetulla tunnuksella ei ole vuokrasopimusta"
 
-#: payments/schema/mutations.py:398
+#: payments/schema/mutations.py:407
 msgid "The order is not valid anymore"
+msgstr "Tilaus ei ole enää voimassa"
+
+#: payments/utils.py:252
+#, fuzzy
+#| msgid "The order is not valid anymore"
+msgid "Order does not have a valid type"
+msgstr "Tilaus ei ole enää voimassa"
+
+#: payments/utils.py:265
+msgid "Invalid order status"
 msgstr ""
 
 #: resources/admin.py:41
 msgid "Berth available"
-msgstr ""
+msgstr "Venepaikka saatavilla"
 
 #: resources/admin.py:67 resources/admin.py:109
 msgid "Maximum allowed width"
-msgstr ""
+msgstr "Suurin sallittu leveys"
 
 #: resources/admin.py:73 resources/admin.py:115
 msgid "Maximum allowed length"
-msgstr ""
+msgstr "Suurin sallittu pituus"
 
 #: resources/admin.py:79
 msgid "Maximum allowed depth"
-msgstr ""
+msgstr "Suurin sallittu syvyys"
 
 #: resources/enums.py:7
 msgid "No stern-to mooring"
-msgstr "Ilman peräkiinnitystä"
+msgstr "palvelukartan tunnus"
 
 #: resources/enums.py:9
 msgid "Single slip place"
@@ -1141,185 +1248,207 @@ msgstr "Poiju (merellä)"
 msgid "Trawler place"
 msgstr "Traileripaikka"
 
+#: resources/enums.py:27
+msgid "East"
+msgstr ""
+
+#: resources/enums.py:28
+msgid "West"
+msgstr ""
+
 #: resources/models.py:96
 msgid "servicemap ID"
-msgstr ""
+msgstr "palvelukartan tunnus"
 
 #: resources/models.py:106
 msgid "email"
-msgstr ""
+msgstr "sähköposti"
 
-#: resources/models.py:110 resources/models.py:289
+#: resources/models.py:110 resources/models.py:296
 msgid "location"
-msgstr ""
+msgstr "sijainti"
 
 #: resources/models.py:114
 msgid "image link"
+msgstr "kuvalinkki"
+
+#: resources/models.py:118
+msgid "area region"
 msgstr ""
 
-#: resources/models.py:134 resources/models.py:184
+#: resources/models.py:141 resources/models.py:191
 msgid "image file"
-msgstr ""
+msgstr "kuvatiedosto"
 
-#: resources/models.py:203
+#: resources/models.py:210
 msgid "estimated number of section places"
-msgstr ""
+msgstr "osa-aluepaikkojen arvioitu määrä"
 
-#: resources/models.py:208
+#: resources/models.py:215
 msgid "maximum length of section spaces"
-msgstr ""
+msgstr "osa-aluetilojen maksimipituus"
 
-#: resources/models.py:217
+#: resources/models.py:224
 msgid "estimated number of unmarked places"
-msgstr ""
+msgstr "merkitsemättömien paikkojen arvioitu määrä"
 
-#: resources/models.py:237
+#: resources/models.py:244
 msgid "winter storage areas"
-msgstr ""
+msgstr "talvisäilytysalueet"
 
-#: resources/models.py:247
+#: resources/models.py:254
 msgid "map file"
-msgstr ""
+msgstr "karttatiedosto"
 
-#: resources/models.py:281
+#: resources/models.py:288
 msgid "identifier"
-msgstr ""
+msgstr "tunnus"
 
-#: resources/models.py:282
+#: resources/models.py:289
 msgid "Identifier of the pier / section"
-msgstr ""
+msgstr "Laiturin/osa-alueen tunnus"
 
-#: resources/models.py:294
+#: resources/models.py:301
 msgid "electricity"
 msgstr "sähkö"
 
-#: resources/models.py:295
+#: resources/models.py:302
 msgid "water"
 msgstr "vesi"
 
-#: resources/models.py:296
+#: resources/models.py:303
 msgid "gate"
 msgstr "portti"
 
-#: resources/models.py:442
+#: resources/models.py:449
 msgid "suitable boat types"
-msgstr ""
+msgstr "soveltuvat venetyypit"
 
-#: resources/models.py:448
+#: resources/models.py:455
 msgid "mooring"
 msgstr "kiinnitystapa"
 
-#: resources/models.py:450
+#: resources/models.py:457
 msgid "waste collection"
 msgstr "jätehuolto"
 
-#: resources/models.py:452
+#: resources/models.py:459
 msgid "lighting"
 msgstr "valaistus"
 
-#: resources/models.py:454
-msgid "personal electricity contract"
-msgstr ""
-
 #: resources/models.py:461
+msgid "personal electricity contract"
+msgstr "henkilökohtainen sähkösopimus"
+
+#: resources/models.py:468
 msgid "piers"
-msgstr ""
+msgstr "laiturit"
 
-#: resources/models.py:478
+#: resources/models.py:485
 msgid "repair area"
-msgstr ""
+msgstr "korjausalue"
 
-#: resources/models.py:480
+#: resources/models.py:487
 msgid "summer storage for docking equipment"
 msgstr "telakointitarvikkeiden kesäsäilytys"
 
-#: resources/models.py:483
+#: resources/models.py:490
 msgid "summer storage for trailers"
 msgstr "trailerien kesäsäilytys"
 
-#: resources/models.py:486
-msgid "summer storage for boats"
-msgstr ""
-
-#: resources/models.py:492 resources/models.py:681
-msgid "winter storage section"
-msgstr ""
-
 #: resources/models.py:493
+msgid "summer storage for boats"
+msgstr "trailerien kesäsäilytys"
+
+#: resources/models.py:499 resources/models.py:691
+msgid "winter storage section"
+msgstr "talvisäilytyspaikan osa-alue"
+
+#: resources/models.py:500
 msgid "winter storage sections"
-msgstr ""
+msgstr "talvisäilytyspaikkojen osa-alueet"
 
-#: resources/models.py:526
+#: resources/models.py:533
 msgid "mooring type"
-msgstr ""
+msgstr "kiinnitystyyppi"
 
-#: resources/models.py:531 resources/schema.py:191 resources/schema.py:503
+#: resources/models.py:538 resources/schema.py:191 resources/schema.py:504
 msgid "depth (m)"
-msgstr ""
+msgstr "syvyys (m)"
 
-#: resources/models.py:544 resources/models.py:625
+#: resources/models.py:551 resources/models.py:633
 msgid "berth type"
-msgstr ""
+msgstr "venepaikan tyyppi"
 
-#: resources/models.py:545
+#: resources/models.py:552
 msgid "berth types"
-msgstr ""
+msgstr "venepaikkatyypit"
 
-#: resources/models.py:569
+#: resources/models.py:576
 msgid "winter storage place type"
-msgstr ""
+msgstr "talvisäilytyspaikan tyyppi"
 
-#: resources/models.py:570
+#: resources/models.py:577
 msgid "winter storage place types"
-msgstr ""
+msgstr "talvisäilytyspaikkatyypit"
 
-#: resources/models.py:579
-msgid "number"
-msgstr ""
-
-#: resources/models.py:580
+#: resources/models.py:586
 msgid "is active"
-msgstr ""
+msgstr "on aktiivinen"
 
-#: resources/models.py:631
+#: resources/models.py:626 resources/models.py:687
+msgid "number"
+msgstr "numero"
+
+#: resources/models.py:639
 msgid "is accessible"
-msgstr ""
+msgstr "on esteetön"
 
-#: resources/models.py:638
+#: resources/models.py:646
 msgid "berths"
-msgstr ""
+msgstr "venepaikat"
 
-#: resources/models.py:687
+#: resources/models.py:697
 msgid "place type"
-msgstr ""
+msgstr "paikan tyyppi"
 
-#: resources/models.py:694
+#: resources/models.py:704
 msgid "winter storage place"
-msgstr ""
+msgstr "talvisäilytyspaikka"
 
-#: resources/models.py:695
+#: resources/models.py:705
 msgid "winter storage places"
-msgstr ""
+msgstr "talvisäilytyspaikat"
 
 #: resources/schema.py:65
 msgid ""
 "You cannot filter by dimension (width, length) and application a the same "
 "time."
 msgstr ""
+"Et voi suodattaa mittojen (leveys, pituus) ja hakemuksen mukaan "
+"samanaikaisesti."
 
 #: resources/schema.py:84
 msgid "You do not have permission to perform this action"
-msgstr ""
+msgstr "Sinulla ei ole lupaa suorittaa tätä toimintoa"
 
 #: resources/schema.py:120
 #, python-brace-format
 msgid "Cannot delete {model_name} because it has some related leases"
 msgstr ""
+"Ei voida poistaa mallia {model_name}, sillä siihen on liitetty "
+"vuokrasopimuksia"
 
 #: utils/models.py:16
 msgid "time modified"
-msgstr ""
+msgstr "aika muokattu"
 
 #: utils/relay.py:96
 msgid "You do not have permission to perform this action."
-msgstr ""
+msgstr "Sinulla ei ole lupaa suorittaa tätä toimintoa."
+
+#~ msgid "area"
+#~ msgstr "alue"
+
+#~ msgid "Cannot change the area assigned to this lease"
+#~ msgstr "Tähän vuokrasopimukseen liitettyä aluetta ei voida vaihtaa"
