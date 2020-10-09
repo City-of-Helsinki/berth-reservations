@@ -7,11 +7,32 @@ include:
 # These variables are available for all stages
 variables:
   APP_MIGRATE_COMMAND: /app/.prod/on_deploy.sh
+  APP_INITIALIZE_COMMAND: /app/.prod/on_initialize.sh
   SERVICE_PORT: "8000"
 
 # Build stage must be included and it must extend .build.
 build:
   extends: .build
+
+test-codeanalysis:
+  # Tests should be run in the "test" stage.
+  stage: test
+  only:
+    refs:
+      - develop
+  # Pipeline will use official python image
+  # when running the tests.
+  image: python:3.8
+  variables:
+    DEBUG: 1
+  # Place here the tests commands
+  script:
+    - apt-get update
+    - pip install -U pip
+    - pip install -r requirements.txt -r requirements-dev.txt
+    - black --check .
+    - flake8
+    - isort . -c
 
 review:
   # These variables are available only for review env and are merged with the general variables defined above.
