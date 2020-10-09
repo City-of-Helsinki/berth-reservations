@@ -7,7 +7,7 @@ services:
             POSTGRES_PASSWORD: berth_reservations
             POSTGRES_DB: berth_reservations
         ports:
-            - "5445:5432"
+            - "5432:5432"
         volumes:
             - berth-postgres-data-volume:/var/lib/postgresql/data
         container_name: berth-db
@@ -15,17 +15,16 @@ services:
     django:
         build:
             context: ./
-            dockerfile: ./docker/django/Dockerfile
-        command: python manage.py runserver 0:8040
         env_file:
             - ./.env
         environment:
             DATABASE_URL: postgres://berth_reservations:berth_reservations@berth-db/berth_reservations
+            DATABASE_HOST: berth-db.helsinki
         volumes:
-            - .:/code
+            - .:/app
             - berth-django-media-volume:/var/media/
         ports:
-            - "8040:8040"
+            - "8000:8000"
         depends_on:
             - postgres
         container_name: berth

@@ -1,0 +1,77 @@
+# Mandatory include
+include:
+  - project: 'city-of-helsinki/kuva/ci-cd-config/ci-configuration'
+    ref: v2
+    file: '/.gitlab-ci-template.yml'
+
+# These variables are available for all stages
+variables:
+  APP_MIGRATE_COMMAND: /app/.prod/on_deploy.sh
+  APP_INITIALIZE_COMMAND: /app/.prod/on_initialize.sh
+  SERVICE_PORT: "8000"
+
+# Build stage must be included and it must extend .build.
+build:
+  extends: .build
+
+test-codeanalysis:
+  # Tests should be run in the "test" stage.
+  stage: test
+  only:
+    refs:
+      - develop
+  # Pipeline will use official python image
+  # when running the tests.
+  image: python:3.8
+  variables:
+    DEBUG: 1
+  # Place here the tests commands
+  script:
+    - apt-get update
+    - pip install -U pip
+    - pip install -r requirements.txt -r requirements-dev.txt
+    - black --check .
+    - flake8
+    - isort . -c
+
+review:
+  # These variables are available only for review env and are merged with the general variables defined above.
+  variables:
+    K8S_SECRET_ALLOWED_HOSTS: "*"
+    K8S_SECRET_DEBUG: 1
+    K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://tunnistamo.test.kuva.hel.ninja/openid"
+    K8S_SECRET_CORS_ORIGIN_ALLOW_ALL: 1
+
+    K8S_SECRET_VENE_UI_RETURN_URL: "https://venepaikat.hel.ninja/"
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_URL": "https://real-bambora-api-url/api",
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_KEY": "dummy-key",
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_SECRET": "dummy-secret",
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS": [ "dummy-bank" ]
+
+staging:
+  # By default the staging environment is created from the master-branch.
+  # Here we define that it should be created from the branch called "develop" instead.
+  only:
+    refs:
+      - develop
+  # These variables are available only for staging env and are merged with the general variables defined above.
+  variables:
+    K8S_SECRET_TIER: "stage"
+    K8S_SECRET_ALLOWED_HOSTS: "*"
+    K8S_SECRET_CORS_ORIGIN_ALLOW_ALL: 1
+    K8S_SECRET_SECRET_KEY: "$GL_QA_DJANGO_SECRET_KEY"
+    K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://tunnistamo.test.kuva.hel.ninja/openid"
+    K8S_SECRET_MAIL_MAILGUN_KEY: "$SECRET_MAILGUN_API_KEY"
+    K8S_SECRET_MAIL_MAILGUN_DOMAIN: "mail.hel.ninja"
+    K8S_SECRET_MAIL_MAILGUN_API: "https://api.eu.mailgun.net/v3"
+    K8S_SECRET_DEFAULT_FROM_EMAIL: "venepaikkavaraukset@hel.ninja"
+    K8S_SECRET_SENTRY_DSN: "$GL_SENTRY_DNS"
+    K8S_SECRET_SENTRY_ENVIRONMENT: "test"
+
+    K8S_SECRET_VENE_UI_RETURN_URL: "https://venepaikat.hel.ninja/"
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_URL": "https://real-bambora-api-url/api",
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_KEY": "dummy-key",
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_SECRET": "dummy-secret",
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS": [ "dummy-bank" ]
+
+
