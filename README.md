@@ -4,19 +4,28 @@
 
 ## Development with Docker
 
-1. Create `.env` environment file
+1. Create `.env` docker-compose environment file with default contents:
 
-2. Set the `DEBUG` environment variable to `1`
+```
+DEBUG=1
+APPLY_MIGRATIONS=1    
+ALLOWED_HOSTS=*
+CORS_ORIGIN_ALLOW_ALL=1
+VENE_PAYMENTS_BAMBORA_API_URL=https://fake-bambora-api-url/api
+VENE_PAYMENTS_BAMBORA_API_KEY=dummy-key
+VENE_PAYMENTS_BAMBORA_API_SECRET=dummy-secret
+VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS="dummy-bank"
+``
 
-3. Run `docker-compose up`
+2. Run `docker-compose up`
 
-4. Run migrations if needed: 
+3. Run migrations if needed: 
     * `docker exec berth python manage.py migrate`
 
-5. Create superuser if needed: 
+4. Create superuser if needed: 
     * `docker exec -it berth python manage.py createsuperuser`
 
-The project is now running at [localhost:8040](http://localhost:8040)
+The project is now running at [localhost:8000](http://localhost:8000)
 
 ## Development without Docker
 
