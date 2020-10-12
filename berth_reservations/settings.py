@@ -50,6 +50,7 @@ env = environ.Env(
     TOKEN_AUTH_REQUIRE_SCOPE_PREFIX=(bool, True),
     VENE_PAYMENTS_PROVIDER_CLASS=(str, "payments.providers.BamboraPayformProvider"),
     VENE_UI_RETURN_URL=(str, "https://venepaikat.hel.fi/"),
+    VENE_UI_URL=(str, "https://venepaikat.hel.fi"),
 )
 if os.path.exists(env_file):
     env.read_env(env_file)
@@ -222,6 +223,8 @@ LOGGING = {
 VENE_PAYMENTS_PROVIDER_CLASS = env("VENE_PAYMENTS_PROVIDER_CLASS")
 
 VENE_UI_RETURN_URL = env("VENE_UI_RETURN_URL")
+
+VENE_UI_URL = env("VENE_UI_URL")
 
 # local_settings.py can be used to override environment-specific settings
 # like database and email that differ between development and production.

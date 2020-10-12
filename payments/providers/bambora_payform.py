@@ -347,14 +347,8 @@ class BamboraPayformProvider(PaymentProvider):
             except OrderStatusTransitionError as oste:
                 logger.warning(oste)
         elif return_code == "1":
+            # Don't cancel the order
             logger.debug("Notify: Payment failed.")
-            try:
-                order.set_status(
-                    OrderStatus.REJECTED,
-                    "Code 1 (payment rejected) in Bambora Payform notify request.",
-                )
-            except OrderStatusTransitionError as oste:
-                logger.warning(oste)
         else:
             logger.debug('Notify: Incorrect RETURN_CODE "{}".'.format(return_code))
 
