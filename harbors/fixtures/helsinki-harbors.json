@@ -1885,6 +1885,7 @@
     "pk": 16,
     "fields": {
         "servicemap_id": "41454",
+        "disabled": true,
         "zip_code": "00530",
         "phone": "",
         "email": "",
@@ -1899,10 +1900,10 @@
         "waste_collection": true,
         "gate": true,
         "lighting": true,
-        "availability_level": 2,
-        "number_of_places": 31,
-        "maximum_width": 300,
-        "maximum_length": 900,
+        "availability_level": null,
+        "number_of_places": null,
+        "maximum_width": null,
+        "maximum_length": null,
         "maximum_depth": null,
         "suitable_boat_types": [
             2,
