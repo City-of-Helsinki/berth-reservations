@@ -43,10 +43,10 @@ review:
     K8S_SECRET_CORS_ORIGIN_ALLOW_ALL: 1
 
     K8S_SECRET_VENE_UI_RETURN_URL: "https://venepaikat.hel.ninja/"
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_URL": "https://real-bambora-api-url/api",
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_KEY": "dummy-key",
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_SECRET": "dummy-secret",
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS": [ "dummy-bank" ]
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_URL": "https://real-bambora-api-url/api"
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_KEY": "dummy-key"
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_SECRET": "dummy-secret"
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS": "dummy-bank"
 
 staging:
   # By default the staging environment is created from the master-branch.
@@ -69,9 +69,9 @@ staging:
     K8S_SECRET_SENTRY_ENVIRONMENT: "test"
 
     K8S_SECRET_VENE_UI_RETURN_URL: "https://venepaikat.hel.ninja/"
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_URL": "https://real-bambora-api-url/api",
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_KEY": "dummy-key",
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_SECRET": "dummy-secret",
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS": [ "dummy-bank" ]
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_URL": "https://real-bambora-api-url/api"
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_KEY": "dummy-key"
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_SECRET": "dummy-secret"
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS": "dummy-bank"
 
 
