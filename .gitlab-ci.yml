@@ -7,7 +7,7 @@ include:
 # These variables are available for all stages
 variables:
   APP_MIGRATE_COMMAND: /app/.prod/on_deploy.sh
-  APP_INITIALIZE_COMMAND: /app/.prod/on_initialize.sh
+  #APP_INITIALIZE_COMMAND: /app/.prod/on_initialize.sh
   SERVICE_PORT: "8000"
 
 # Build stage must be included and it must extend .build.
