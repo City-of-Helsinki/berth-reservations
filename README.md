@@ -2,7 +2,7 @@
 
 :boat: Bare-bones registration API for berth reservations :boat:
 
-## Development with Docker
+## Development with Dockerr
 
 1. Create `.env` docker-compose environment file with default contents:
 
