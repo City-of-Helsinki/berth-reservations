@@ -395,7 +395,6 @@ def test_handle_notify_request_order_not_found(provider_base_config, order):
     (
         (OrderStatus.WAITING, OrderStatus.PAID),
         (OrderStatus.PAID, OrderStatus.PAID),
-        (OrderStatus.REJECTED, OrderStatus.PAID),
         (OrderStatus.EXPIRED, OrderStatus.EXPIRED),
         (OrderStatus.CANCELLED, OrderStatus.CANCELLED),
     ),
