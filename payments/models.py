@@ -581,11 +581,12 @@ class Order(UUIDModel, TimeStampedModel):
             return
 
         valid_status_changes = {
-            OrderStatus.WAITING: (OrderStatus.PAID, OrderStatus.EXPIRED,),
+            OrderStatus.WAITING: (
+                OrderStatus.PAID,
+                OrderStatus.EXPIRED,
+                OrderStatus.REJECTED,
+            ),
             OrderStatus.PAID: (OrderStatus.CANCELLED,),
-            # In rare cases, Bambora Notify would notify that a previously failed payment
-            # was later successful, we should allow this case.
-            OrderStatus.REJECTED: (OrderStatus.PAID,),
         }
         valid_new_status = valid_status_changes.get(old_status, ())
 
@@ -597,15 +598,16 @@ class Order(UUIDModel, TimeStampedModel):
             )
 
         self.status = new_status
+        self.save(update_fields=["status"])
+
         self.lease.status = get_lease_status(new_status)
+        self.lease.save(update_fields=["status"])
 
         if new_status == OrderStatus.PAID:
             application = self.lease.application
             application.status = ApplicationStatus.HANDLED
             self.lease.application.save(update_fields=["status"])
 
-        self.lease.save(update_fields=["status"])
-        self.save(update_fields=["status"])
         self.create_log_entry(
             from_status=old_status, to_status=new_status, comment=comment
         )

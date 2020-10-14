@@ -13,6 +13,7 @@ from berth_reservations.tests.utils import (
     assert_not_enough_permissions,
 )
 from customers.schema import ProfileNode
+from leases.enums import LeaseStatus
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from leases.tests.factories import BerthLeaseFactory
 from leases.utils import calculate_season_start_date
@@ -1333,3 +1334,73 @@ def test_confirm_payment_invalid_status(old_schema_api_client, status):
     mock_call.assert_not_called()
     assert_in_errors("The order is not valid anymore", executed)
     assert_in_errors(status.label, executed)
+
+
+CANCEL_ORDER_MUTATION = """
+mutation CANCEL_ORDER_MUTATION($input: CancelOrderMutationInput!) {
+    cancelOrder(input: $input) {
+        __typename
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
+)
+def test_cancel_order(old_schema_api_client, order: Order):
+    order.status = OrderStatus.WAITING
+    order.save()
+    variables = {"orderNumber": order.order_number}
+
+    with mock.patch(
+        "payments.providers.bambora_payform.requests.post",
+        side_effect=mocked_response_create,
+    ):
+        old_schema_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
+
+    order.refresh_from_db()
+    order.lease.refresh_from_db()
+
+    assert order.status == OrderStatus.REJECTED
+    assert order.lease.status == LeaseStatus.REFUSED
+
+
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
+)
+@pytest.mark.parametrize(
+    "status",
+    [
+        OrderStatus.REJECTED,
+        OrderStatus.EXPIRED,
+        OrderStatus.CANCELLED,
+        OrderStatus.PAID,
+    ],
+)
+def test_cancel_order_invalid_status(
+    old_schema_api_client, order: Order, status: OrderStatus
+):
+    order.status = status
+    order.save()
+    variables = {"orderNumber": order.order_number}
+
+    with mock.patch(
+        "payments.providers.bambora_payform.requests.post",
+        side_effect=mocked_response_create,
+    ):
+        executed = old_schema_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
+
+    assert_in_errors(f"The order is not valid anymore: {status.label}", executed)
+
+
+def test_cancel_order_does_not_exist(old_schema_api_client):
+    variables = {"orderNumber": generate_order_number()}
+
+    with mock.patch(
+        "payments.providers.bambora_payform.requests.post",
+        side_effect=mocked_response_create,
+    ):
+        executed = old_schema_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
+
+    assert_doesnt_exist("Order", executed)
