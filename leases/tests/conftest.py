@@ -6,7 +6,13 @@ from customers.tests.conftest import *  # noqa
 from customers.tests.factories import BoatFactory
 from resources.tests.conftest import *  # noqa
 
+from ..stickers import create_ws_sticker_sequences
 from .factories import BerthLeaseFactory, WinterStorageLeaseFactory
+
+
+@pytest.fixture
+def sticker_sequences():
+    create_ws_sticker_sequences()
 
 
 @pytest.fixture

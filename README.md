@@ -15,7 +15,7 @@ VENE_PAYMENTS_BAMBORA_API_URL=https://fake-bambora-api-url/api
 VENE_PAYMENTS_BAMBORA_API_KEY=dummy-key
 VENE_PAYMENTS_BAMBORA_API_SECRET=dummy-secret
 VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS="dummy-bank"
-``
+```
 
 2. Run `docker-compose up`
 
@@ -111,6 +111,10 @@ Then load the fixtures with the following commands:
 And assign the corresponding region to areas:
 
     ./manage.py assign_area_regions
+
+Create WS sticker sequences:
+
+    ./manage.py create_ws_lease_sticker_sequences
     
 Point harbor and ws images to customer ui images:
 
