@@ -37,6 +37,7 @@ test-codeanalysis:
 review:
   # These variables are available only for review env and are merged with the general variables defined above.
   variables:
+    POSTGRES_ENABLED: 0
     K8S_SECRET_ALLOWED_HOSTS: "*"
     K8S_SECRET_DEBUG: 1
     K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://tunnistamo.test.kuva.hel.ninja/openid"
