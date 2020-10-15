@@ -144,8 +144,16 @@ class BerthApplicationAdmin(admin.ModelAdmin):
             },
         ),
     ]
-    list_display = ("created_at", "first_name", "last_name", "application_type")
-    list_filter = (ApplicationTypeFilter,)
+    list_display = (
+        "id",
+        "created_at",
+        "first_name",
+        "last_name",
+        "application_type",
+        "status",
+    )
+    list_filter = (ApplicationTypeFilter, "status")
+    search_fields = ("id", "first_name", "last_name")
     actions = ["export_applications", "resend_application_confirmation"]
 
     def application_type(self, obj):
@@ -232,9 +240,17 @@ class WinterStorageAreaChoiceInline(admin.TabularInline):
     max_num = 5
 
 
+class WinterStorageApplicationInline(admin.StackedInline):
+    model = WinterStorageApplication
+    extra = 0
+
+
 class WinterStorageApplicationAdmin(admin.ModelAdmin):
     inlines = [WinterStorageAreaChoiceInline]
-    readonly_fields = ["created_at"]
+    readonly_fields = [
+        "created_at",
+        "area_type",
+    ]
     fieldsets = [
         (
             None,
@@ -292,8 +308,17 @@ class WinterStorageApplicationAdmin(admin.ModelAdmin):
             },
         ),
     ]
-    list_display = ("created_at", "first_name", "last_name")
+    list_display = (
+        "id",
+        "created_at",
+        "first_name",
+        "last_name",
+        "area_type",
+        "status",
+    )
+    list_filter = ("area_type", "status")
     actions = ["export_applications", "resend_application_confirmation"]
+    search_fields = ("id", "first_name", "last_name")
 
     def export_applications(self, request, queryset):
         response = HttpResponse(
