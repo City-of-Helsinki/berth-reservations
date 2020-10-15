@@ -1,6 +1,7 @@
 import pytest
 
 from berth_reservations.tests.conftest import *  # noqa
+from berth_reservations.tests.factories import CustomerProfileFactory
 from harbors.tests.conftest import *  # noqa
 from harbors.tests.factories import HarborFactory
 from users.tests.conftest import *  # noqa
@@ -44,8 +45,22 @@ def berth_application():
 
 
 @pytest.fixture
+def berth_application_with_customer(berth_application):
+    berth_application.customer = CustomerProfileFactory()
+    berth_application.save()
+    return berth_application
+
+
+@pytest.fixture
 def winter_storage_application():
     winter_storage_application = WinterStorageApplicationFactory()
+    return winter_storage_application
+
+
+@pytest.fixture
+def winter_storage_application_with_customer(winter_storage_application):
+    winter_storage_application.customer = CustomerProfileFactory()
+    winter_storage_application.save()
     return winter_storage_application
 
 
