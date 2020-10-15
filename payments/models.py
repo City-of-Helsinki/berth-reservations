@@ -305,6 +305,7 @@ class Order(UUIDModel, TimeStampedModel):
         if not hasattr(self, "lease"):
             return OrderType.INVALID
 
+        # dummy commit
         # Check for application-specific fields:
         # - if it's a winter storage application:
         #   - return the type based on the area_type property
