@@ -7,7 +7,7 @@ include:
 # These variables are available for all stages
 variables:
   APP_MIGRATE_COMMAND: /app/.prod/on_deploy.sh
-  #APP_INITIALIZE_COMMAND: /app/.prod/on_initialize.sh
+  APP_INITIALIZE_COMMAND: /app/.prod/on_initialize.sh
   SERVICE_PORT: "8000"
 
 # Build stage must be included and it must extend .build.
@@ -39,6 +39,7 @@ review:
   variables:
     K8S_SECRET_ALLOWED_HOSTS: "*"
     K8S_SECRET_DEBUG: 1
+    K8S_SECRET_CREATE_SUPERUSER: 1
     K8S_SECRET_SECRET_KEY: "$GL_TEST_DJANGO_SECRET_KEY"
     K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://tunnistamo.test.kuva.hel.ninja/openid"
     K8S_SECRET_CORS_ORIGIN_ALLOW_ALL: 1
@@ -57,6 +58,7 @@ staging:
   # These variables are available only for staging env and are merged with the general variables defined above.
   variables:
     K8S_SECRET_TIER: "stage"
+    K8S_SECRET_SKIP_DATABASE_CHECK: 1
     K8S_SECRET_ALLOWED_HOSTS: "*"
     K8S_SECRET_CORS_ORIGIN_ALLOW_ALL: 1
     K8S_SECRET_SECRET_KEY: "$GL_QA_DJANGO_SECRET_KEY"
