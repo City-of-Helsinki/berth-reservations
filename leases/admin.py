@@ -50,6 +50,13 @@ class BerthLeaseAdmin(admin.ModelAdmin):
     raw_id_fields = ("berth", "application")
 
 
+class WinterStorageLeaseInline(admin.StackedInline):
+    model = WinterStorageLease
+    fk_name = "customer"
+    raw_id_fields = ("application",)
+    extra = 0
+
+
 class WinterStorageLeaseAdmin(admin.ModelAdmin):
     inlines = (WinterStorageLeaseChangeInline,)
     raw_id_fields = ("place", "application")
