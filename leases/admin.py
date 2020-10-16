@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.contrib.contenttypes.admin import GenericStackedInline
+
+from payments.models import Order
 
 from .models import (
     BerthLease,
@@ -45,14 +48,58 @@ class BerthLeaseInline(admin.StackedInline):
     extra = 0
 
 
-class BerthLeaseAdmin(admin.ModelAdmin):
-    inlines = (BerthLeaseChangeInline,)
+class BaseLeaseAdmin(admin.ModelAdmin):
+    def application_id(self, obj):
+        return obj.application.id
+
+    def first_name(self, obj):
+        return obj.application.first_name
+
+    def last_name(self, obj):
+        return obj.application.last_name
+
+    list_filter = ("status",)
+    list_display = (
+        "id",
+        "created_at",
+        "start_date",
+        "end_date",
+        "first_name",
+        "last_name",
+        "status",
+        "application_id",
+    )
+    search_fields = (
+        "id",
+        "application__id",
+        "application__first_name",
+        "application__last_name",
+    )
+
+
+class GenericOrderInline(GenericStackedInline):
+    ct_field = "_lease_content_type"
+    ct_fk_field = "_lease_object_id"
+    model = Order
+    extra = 0
+    exclude = ("_product_content_type", "_lease_content_type")
+
+
+class BerthLeaseAdmin(BaseLeaseAdmin):
+    inlines = (BerthLeaseChangeInline, GenericOrderInline)
     raw_id_fields = ("berth", "application")
 
 
-class WinterStorageLeaseAdmin(admin.ModelAdmin):
-    inlines = (WinterStorageLeaseChangeInline,)
-    raw_id_fields = ("place", "application")
+class WinterStorageLeaseInline(admin.StackedInline):
+    model = WinterStorageLease
+    fk_name = "customer"
+    raw_id_fields = ("application",)
+    extra = 0
+
+
+class WinterStorageLeaseAdmin(BaseLeaseAdmin):
+    inlines = (WinterStorageLeaseChangeInline, GenericOrderInline)
+    raw_id_fields = ("place", "section", "application")
 
 
 admin.site.register(BerthLease, BerthLeaseAdmin)
