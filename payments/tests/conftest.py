@@ -4,6 +4,7 @@ from django_ilmoitin.models import NotificationTemplate
 from factory.random import randgen
 from requests import RequestException
 
+from applications.enums import ApplicationAreaType
 from applications.tests.factories import (
     BerthApplicationFactory,
     WinterStorageApplicationFactory,
@@ -82,6 +83,17 @@ def _generate_order(order_type: str = None):
             product=WinterStorageProductFactory(),
             lease=WinterStorageLeaseFactory(
                 application=WinterStorageApplicationFactory(), customer=customer_profile
+            ),
+        )
+    elif order_type == "unmarked_winter_storage_order":
+        order = OrderFactory(
+            customer=customer_profile,
+            product=WinterStorageProductFactory(),
+            lease=WinterStorageLeaseFactory(
+                application=WinterStorageApplicationFactory(
+                    area_type=ApplicationAreaType.UNMARKED
+                ),
+                customer=customer_profile,
             ),
         )
     elif order_type == "empty_order":
