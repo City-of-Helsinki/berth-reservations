@@ -13,8 +13,10 @@ from users.decorators import (
 from utils.relay import get_node_from_global_id
 from utils.schema import update_object
 
+from ..constants import REJECT_BERTH_SENDER
 from ..enums import ApplicationStatus
 from ..models import BerthApplication, WinterStorageApplication
+from ..signals import application_rejected
 from .types import BerthApplicationNode, WinterStorageApplicationNode
 
 
@@ -70,6 +72,28 @@ class DeleteBerthApplicationMutation(graphene.ClientIDMutation):
         application.delete()
 
         return DeleteBerthApplicationMutation()
+
+
+class RejectBerthApplicationMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+
+    @classmethod
+    @change_permission_required(BerthApplication)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        application = get_node_from_global_id(
+            info, input.get("id"), only_type=BerthApplicationNode, nullable=False
+        )
+        if hasattr(application, "lease"):
+            raise VenepaikkaGraphQLError(_("Application has a lease"))
+
+        application.status = ApplicationStatus.NO_SUITABLE_BERTHS
+        application.save()
+
+        application_rejected.send(sender=REJECT_BERTH_SENDER, application=application)
+
+        return RejectBerthApplicationMutation()
 
 
 class WinterStorageApplicationInput:
@@ -133,6 +157,9 @@ class Mutation:
     update_berth_application = UpdateBerthApplication.Field()
     delete_berth_application = DeleteBerthApplicationMutation.Field(
         description="**Requires permissions** to delete applications."
+    )
+    reject_berth_application = RejectBerthApplicationMutation.Field(
+        description="**Requires permissions** to reject applications."
     )
 
     update_winter_storage_application = UpdateWinterStorageApplication.Field(
