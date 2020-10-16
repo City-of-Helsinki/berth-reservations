@@ -50,13 +50,13 @@ class BerthLeaseInline(admin.StackedInline):
 
 class BaseLeaseAdmin(admin.ModelAdmin):
     def application_id(self, obj):
-        return obj.application.id
+        return obj.application.id if obj.application else "-"
 
     def first_name(self, obj):
-        return obj.application.first_name
+        return obj.application.first_name if obj.application else "-"
 
     def last_name(self, obj):
-        return obj.application.last_name
+        return obj.application.last_name if obj.application else "-"
 
     list_filter = ("status",)
     list_display = (
