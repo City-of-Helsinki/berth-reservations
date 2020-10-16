@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         user = get_user_model()
-        if not user.objects.filter(username=kwargs["username"]).count():
+        if not user.objects.filter(username=kwargs["username"]).exists():
             user.objects.create_superuser(
                 kwargs["username"], kwargs["email"], kwargs["password"]
             )
