@@ -1060,6 +1060,24 @@
   }
 },
 {
+  "model": "resources.winterstoragesection",
+  "pk": "58c455ea-af34-470d-bcbb-f481ab256721",
+  "fields": {
+    "created_at": "2020-09-01T14:25:57.994Z",
+    "modified_at": "2020-09-02T14:29:23.426Z",
+    "identifier": "-",
+    "location": "SRID=4326;POINT (24.94499199999997 60.154316)",
+    "electricity": false,
+    "water": true,
+    "gate": false,
+    "area": "38955371-4dd2-4321-8994-f4b52c81aa41",
+    "repair_area": false,
+    "summer_storage_for_docking_equipment": true,
+    "summer_storage_for_trailers": false,
+    "summer_storage_for_boats": false
+  }
+},
+{
   "model": "resources.winterstorageplacetype",
   "pk": "2bd6cb8d-15ab-4cfe-bca2-37be3963d1a8",
   "fields": {

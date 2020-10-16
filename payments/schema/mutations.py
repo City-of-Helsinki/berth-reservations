@@ -416,6 +416,28 @@ class ConfirmPaymentMutation(graphene.ClientIDMutation):
         return ConfirmPaymentMutation(url=payment_url)
 
 
+class CancelOrderMutation(graphene.ClientIDMutation):
+    class Input:
+        order_number = graphene.String(required=True)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **input):
+        order_number = input.get("order_number", None)
+        try:
+            order = Order.objects.get(order_number=order_number)
+            if order.status != OrderStatus.WAITING:
+                raise VenepaikkaGraphQLError(
+                    _("The order is not valid anymore")
+                    + f": {OrderStatus(order.status).label}"
+                )
+            order.set_status(OrderStatus.REJECTED, _("Order rejected by customer"))
+            order.invalidate_tokens()
+        except (Order.DoesNotExist, ValidationError) as e:
+            raise VenepaikkaGraphQLError(e)
+
+        return CancelOrderMutation()
+
+
 class OrderLineInput:
     quantity = graphene.Int(description="Defaults to 1")
 
@@ -685,3 +707,4 @@ class Mutation:
 
 class OldAPIMutation:
     confirm_payment = ConfirmPaymentMutation.Field()
+    cancel_order = CancelOrderMutation.Field()
