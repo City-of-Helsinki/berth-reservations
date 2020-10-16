@@ -15,13 +15,13 @@ fi
 # Apply database migrations
 if [[ "$APPLY_MIGRATIONS" = "1" ]]; then
     echo "Applying database migrations..."
-    ./manage.py migrate --noinput
+    python ./manage.py migrate --noinput
 fi
 
 
 if [[ "$CREATE_SUPERUSER" = "1" ]]; then
-python ./manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(email='admin@example.com').delete(); User.objects.create_superuser('admin', 'admin@example.com', 'adminpass')"
- echo "Admin user created with credentials admin:adminpass (email: admin@example.com)"
+  python ./manage.py add_admin_user -u admin -p adminpass -e admin@example.com
+  echo "Admin user created with credentials admin:adminpass (email: admin@example.com)"
 fi
 
 # Start server
