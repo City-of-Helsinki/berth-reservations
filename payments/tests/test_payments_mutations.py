@@ -1367,7 +1367,9 @@ def test_cancel_order(old_schema_api_client, order: Order):
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order", "unmarked_winter_storage_order"],
+    indirect=True,
 )
 @pytest.mark.parametrize(
     "status",
@@ -1404,3 +1406,20 @@ def test_cancel_order_does_not_exist(old_schema_api_client):
         executed = old_schema_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
 
     assert_doesnt_exist("Order", executed)
+
+
+@pytest.mark.parametrize(
+    "order", ["unmarked_winter_storage_order"], indirect=True,
+)
+def test_cancel_unmarked_order_fails(old_schema_api_client, order: Order):
+    order.status = OrderStatus.WAITING
+    order.save()
+    variables = {"orderNumber": order.order_number}
+
+    with mock.patch(
+        "payments.providers.bambora_payform.requests.post",
+        side_effect=mocked_response_create,
+    ):
+        executed = old_schema_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
+
+    assert_in_errors("Cannot cancel Unmarked winter storage order", executed)
