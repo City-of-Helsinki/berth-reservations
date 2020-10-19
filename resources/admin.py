@@ -25,7 +25,7 @@ class CustomTranslatableAdmin(TranslatableAdmin):
 
     def get_queryset(self, request):
         language_code = self.get_queryset_language(request)
-        return super().get_queryset(request).translated(language_code)
+        return super().get_queryset(request).translated(language_code, "fi")
 
 
 class AvailabilityLevelAdmin(TranslatableAdmin):

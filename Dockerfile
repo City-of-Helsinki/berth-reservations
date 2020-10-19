@@ -28,6 +28,12 @@ RUN apt-install.sh \
 COPY --chown=appuser:appuser docker-entrypoint.sh /app
 ENTRYPOINT ["./docker-entrypoint.sh"]
 
+ENV STATIC_ROOT /var/berth/static
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+RUN mkdir -p /var/berth/static
+RUN chown appuser:appuser /var/berth/static
 
 # Build development image using the previous stage as base. This is used
 # for local development with docker-compose.

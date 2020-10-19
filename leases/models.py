@@ -224,6 +224,9 @@ class WinterStorageLease(AbstractLease):
     end_date = models.DateField(
         verbose_name=_("end date"), default=calculate_winter_storage_lease_end_date
     )
+    sticker_number = models.PositiveSmallIntegerField(
+        verbose_name=_("sticker number"), null=True, blank=True
+    )
     objects = WinterStorageLeaseManager()
 
     class Meta:

@@ -10,6 +10,7 @@ from utils.schema import CountConnection
 
 from ..enums import LeaseStatus
 from ..models import BerthLease, WinterStorageLease
+from ..stickers import get_ws_sticker_season
 
 LeaseStatusEnum = graphene.Enum.from_enum(LeaseStatus)
 
@@ -56,11 +57,16 @@ class WinterStorageLeaseNode(DjangoObjectType):
         "If the present date is during the season, a lease will be active if the "
         "dates `start date < today < end date`.",
     )
+    sticker_season = graphene.String()
 
     class Meta:
         model = WinterStorageLease
         interfaces = (graphene.relay.Node,)
         connection_class = CountConnection
+
+    def resolve_sticker_season(self, info, **kwargs):
+        season = get_ws_sticker_season(self.start_date)
+        return season.replace("_", "/")
 
     @classmethod
     @login_required

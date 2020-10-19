@@ -7,7 +7,8 @@ from django.http import HttpResponse, HttpResponseServerError
 from django.test.client import RequestFactory
 from freezegun import freeze_time
 
-from applications.enums import ApplicationStatus
+from applications.enums import ApplicationAreaType, ApplicationStatus
+from leases.stickers import create_ws_sticker_sequences
 from payments.enums import OrderStatus
 from payments.models import Order, OrderToken
 from payments.providers.bambora_payform import (
@@ -24,6 +25,14 @@ from payments.tests.conftest import (
 )
 from payments.tests.factories import BerthProductFactory, OrderFactory
 from payments.utils import get_talpa_product_id, price_as_fractional_int
+
+success_params = {
+    "VENE_UI_RETURN_URL": "http%3A%2F%2F127.0.0.1%3A8000%2Fv1",
+    "AUTHCODE": "DD789BA71ACD627892517745AF4C4CE2068F006C602CD54264E1FC5E4C2EE6CF",
+    "RETURN_CODE": "0",
+    "ORDER_NUMBER": "abc123-1602145394.662132",
+    "SETTLED": "1",
+}
 
 
 @pytest.mark.parametrize(
@@ -202,15 +211,8 @@ def test_calculate_auth_code_success(payment_provider):
 
 def test_check_new_payment_authcode_success(payment_provider):
     """Test the helper is able to extract necessary values from a request and compare authcodes"""
-    params = {
-        "VENE_UI_RETURN_URL": "http%3A%2F%2F127.0.0.1%3A8000%2Fv1",
-        "AUTHCODE": "DD789BA71ACD627892517745AF4C4CE2068F006C602CD54264E1FC5E4C2EE6CF",
-        "RETURN_CODE": "0",
-        "ORDER_NUMBER": "abc123-1602145394.662132",
-        "SETTLED": "1",
-    }
     rf = RequestFactory()
-    request = rf.get("/payments/success/", params)
+    request = rf.get("/payments/success/", success_params)
     assert payment_provider.check_new_payment_authcode(request)
 
 
@@ -273,23 +275,48 @@ def test_handle_success_request_success(provider_base_config, order: Order):
     order.order_number = "abc123"
     order.save()
 
-    params = {
-        "VENE_UI_RETURN_URL": "http%3A%2F%2F127.0.0.1%3A8000%2Fv1",
-        "AUTHCODE": "DD789BA71ACD627892517745AF4C4CE2068F006C602CD54264E1FC5E4C2EE6CF",
-        "RETURN_CODE": "0",
-        "ORDER_NUMBER": "abc123-1602145394.662132",
-        "SETTLED": "1",
-    }
     rf = RequestFactory()
-    request = rf.get("/payments/success/", params)
+    request = rf.get("/payments/success/", success_params)
     payment_provider = create_bambora_provider(provider_base_config, request)
     returned = payment_provider.handle_success_request()
 
     order_after = Order.objects.get(
-        order_number=params.get("ORDER_NUMBER").split("-")[0]
+        order_number=success_params.get("ORDER_NUMBER").split("-")[0]
     )
     assert order_after.status == OrderStatus.PAID
     assert order_after.lease.application.status == ApplicationStatus.HANDLED
+
+    assert isinstance(returned, HttpResponse)
+    url = returned.url
+    assert "/payment-result" in url
+    assert "payment_status=success" in url
+
+
+@pytest.mark.parametrize(
+    "order", ["winter_storage_order"], indirect=True,
+)
+def test_generate_sticker_number_for_ws_lease(provider_base_config, order: Order):
+    create_ws_sticker_sequences()
+
+    order.status = OrderStatus.WAITING
+    order.order_number = "abc123"
+    order.save()
+
+    application = order.lease.application
+    application.area_type = ApplicationAreaType.UNMARKED
+    application.save()
+
+    rf = RequestFactory()
+    request = rf.get("/payments/success/", success_params)
+    payment_provider = create_bambora_provider(provider_base_config, request)
+    returned = payment_provider.handle_success_request()
+
+    order_after = Order.objects.get(
+        order_number=success_params.get("ORDER_NUMBER").split("-")[0]
+    )
+    assert order_after.status == OrderStatus.PAID
+    assert order_after.lease.application.status == ApplicationStatus.HANDLED
+    assert order_after.lease.sticker_number == 1
 
     assert isinstance(returned, HttpResponse)
     url = returned.url
@@ -410,19 +437,12 @@ def test_handle_notify_request_success(
     berth_order.status = order_status
     berth_order.save()
 
-    params = {
-        "VENE_UI_RETURN_URL": "http%3A%2F%2F127.0.0.1%3A8000%2Fv1",
-        "AUTHCODE": "DD789BA71ACD627892517745AF4C4CE2068F006C602CD54264E1FC5E4C2EE6CF",
-        "RETURN_CODE": "0",
-        "ORDER_NUMBER": "abc123-1602145394.662132",
-        "SETTLED": "1",
-    }
     rf = RequestFactory()
-    request = rf.get("/payments/notify/", params)
+    request = rf.get("/payments/notify/", success_params)
     payment_provider = create_bambora_provider(provider_base_config, request)
     returned = payment_provider.handle_notify_request()
     order_after = Order.objects.get(
-        order_number=params.get("ORDER_NUMBER").split("-")[0]
+        order_number=success_params.get("ORDER_NUMBER").split("-")[0]
     )
     assert order_after.status == expected_order_status
     assert isinstance(returned, HttpResponse)

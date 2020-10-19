@@ -165,6 +165,12 @@ class OrderTokenAdmin(admin.ModelAdmin):
     invalidate_tokens.short_description = _("Invalidate selected tokens")
 
 
+class OrderInline(admin.StackedInline):
+    model = Order
+    extra = 0
+    exclude = ("_product_content_type", "_lease_content_type")
+
+
 admin.site.register([WinterStorageProduct, BerthProduct, OrderLine, OrderLogEntry])
 admin.site.register(AdditionalProduct, AdditionalProductAdmin)
 admin.site.register(BerthPriceGroup, BerthPriceGroupAdmin)

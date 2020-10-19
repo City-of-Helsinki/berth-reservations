@@ -13,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from applications.enums import ApplicationAreaType, ApplicationStatus
 from applications.models import BerthApplication, WinterStorageApplication
 from leases.models import BerthLease, WinterStorageLease
+from leases.stickers import get_next_sticker_number
 from utils.models import TimeStampedModel, UUIDModel
 from utils.numbers import rounded as rounded_decimal
 
@@ -607,6 +608,14 @@ class Order(UUIDModel, TimeStampedModel):
             application = self.lease.application
             application.status = ApplicationStatus.HANDLED
             self.lease.application.save(update_fields=["status"])
+
+            if (
+                isinstance(self.lease, WinterStorageLease)
+                and application.area_type == ApplicationAreaType.UNMARKED
+            ):
+                sticker_number = get_next_sticker_number(self.lease.start_date)
+                self.lease.sticker_number = sticker_number
+                self.lease.save(update_fields=["sticker_number"])
 
         self.create_log_entry(
             from_status=old_status, to_status=new_status, comment=comment
