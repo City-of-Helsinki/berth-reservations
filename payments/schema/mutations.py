@@ -8,7 +8,7 @@ from django.db import IntegrityError, transaction
 from django.utils.translation import gettext_lazy as _
 from django_ilmoitin.utils import send_notification
 
-from applications.enums import ApplicationStatus
+from applications.enums import ApplicationAreaType, ApplicationStatus
 from applications.models import BerthApplication, WinterStorageApplication
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.schema import ProfileNode
@@ -429,6 +429,14 @@ class CancelOrderMutation(graphene.ClientIDMutation):
                 raise VenepaikkaGraphQLError(
                     _("The order is not valid anymore")
                     + f": {OrderStatus(order.status).label}"
+                )
+            application = order.lease.application if order.lease else None
+            if (
+                isinstance(application, WinterStorageApplication)
+                and application.area_type == ApplicationAreaType.UNMARKED
+            ):
+                raise VenepaikkaGraphQLError(
+                    _("Cannot cancel Unmarked winter storage order")
                 )
             order.set_status(OrderStatus.REJECTED, _("Order rejected by customer"))
             order.invalidate_tokens()
