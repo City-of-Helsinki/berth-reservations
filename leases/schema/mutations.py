@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
-from applications.enums import ApplicationStatus
+from applications.enums import ApplicationAreaType, ApplicationStatus
 from applications.models import BerthApplication, WinterStorageApplication
 from applications.new_schema import BerthApplicationNode, WinterStorageApplicationNode
 from berth_reservations.exceptions import VenepaikkaGraphQLError
@@ -22,6 +22,7 @@ from utils.schema import update_object
 
 from ..enums import LeaseStatus
 from ..models import BerthLease, WinterStorageLease
+from ..stickers import get_next_sticker_number
 from .types import BerthLeaseNode, WinterStorageLeaseNode
 
 
@@ -356,6 +357,34 @@ class DeleteWinterStorageLeaseMutation(graphene.ClientIDMutation):
         return DeleteWinterStorageLeaseMutation()
 
 
+class AssignNewStickerNumberMutation(graphene.ClientIDMutation):
+    class Input:
+        lease_id = graphene.String(required=True)
+
+    sticker_number = graphene.Int()
+
+    @classmethod
+    @change_permission_required(WinterStorageLease)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        lease = get_node_from_global_id(
+            info,
+            input.pop("lease_id"),
+            only_type=WinterStorageLeaseNode,
+            nullable=False,
+        )
+        if lease.status != LeaseStatus.PAID:
+            raise VenepaikkaGraphQLError(_("Lease must be in PAID status"))
+        elif lease.application.area_type != ApplicationAreaType.UNMARKED:
+            raise VenepaikkaGraphQLError(_("Lease must refer to unmarked area"))
+
+        new_sticker_number = get_next_sticker_number(lease.start_date)
+        lease.sticker_number = new_sticker_number
+        lease.save()
+
+        return AssignNewStickerNumberMutation(sticker_number=new_sticker_number)
+
+
 class Mutation:
     create_berth_lease = CreateBerthLeaseMutation.Field(
         description="Creates a `BerthLease` associated with the `BerthApplication` and `Berth` passed. "
@@ -414,4 +443,7 @@ class Mutation:
         "\n\nErrors:"
         "\n* A winter storage lease that is not `DRAFTED` anymore is passed"
         "\n* The passed lease ID doesn't exist"
+    )
+    assign_new_sticker_number = AssignNewStickerNumberMutation.Field(
+        description="Assigns new sticker number for an unmarked WS lease"
     )

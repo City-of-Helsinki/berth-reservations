@@ -73,13 +73,22 @@ class BamboraPayformProvider(PaymentProvider):
             today() + relativedelta(days=6), datetime.max.time()
         )
 
-        order_token = order.tokens.order_by("-created_at").first()
+        order_token = (
+            order.tokens.exclude(token__isnull=True)
+            .exclude(token__iexact="")
+            .order_by("-created_at")
+            .first()
+        )
 
         # Check if there's a valid OrderToken for the current order to avoid
         # generating duplicate orders. If there's a token,
         if order_token and order_token.is_valid:
             return self.url_payment_token.format(token=order_token.token)
 
+        # If the token found already has a value for the token (i.e. not an empty token=""),
+        # it means that it's invalid and a new one should be generated.
+        # Otherwise, we invalidate the previous tokens and generate a new one.
+        order.invalidate_tokens()
         order_token = OrderToken.objects.create(
             order=order, valid_until=token_valid_until
         )
@@ -205,11 +214,11 @@ class BamboraPayformProvider(PaymentProvider):
 
         payload.update(
             {
-                "email": application.email,
+                "email": application.email.strip(),
                 "customer": {
                     "firstname": application.first_name.capitalize(),
                     "lastname": application.last_name.capitalize(),
-                    "email": application.email,
+                    "email": application.email.strip(),
                     "address_street": application.address,
                     "address_zip": application.zip_code,
                     "address_city": application.municipality.capitalize(),

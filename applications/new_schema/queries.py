@@ -90,6 +90,7 @@ class Query:
             .prefetch_related(
                 "winterstorageareachoice_set",
                 "winterstorageareachoice_set__winter_storage_area",
+                "lease",
             )
             .order_by("created_at")
         )

@@ -6,8 +6,9 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import path
 
-from applications.admin import BerthApplicationInline
-from leases.admin import BerthLeaseInline
+from applications.admin import BerthApplicationInline, WinterStorageApplicationInline
+from leases.admin import BerthLeaseInline, WinterStorageLeaseInline
+from payments.admin import OrderInline
 
 from .models import Boat, BoatCertificate, CustomerProfile, Organization
 
@@ -53,7 +54,15 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 
 class CustomerProfileAdmin(admin.ModelAdmin):
-    inlines = (BoatInline, OrganizationInline, BerthApplicationInline, BerthLeaseInline)
+    inlines = (
+        BoatInline,
+        OrganizationInline,
+        BerthApplicationInline,
+        BerthLeaseInline,
+        WinterStorageApplicationInline,
+        WinterStorageLeaseInline,
+        OrderInline,
+    )
 
     change_list_template = "admin/customers/profiles_changelist.html"
 

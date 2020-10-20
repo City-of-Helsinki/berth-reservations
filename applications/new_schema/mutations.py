@@ -1,6 +1,8 @@
 import graphene
 from django.db import transaction
+from django.utils.translation import gettext_lazy as _
 
+from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.models import CustomerProfile
 from leases.models import BerthLease, WinterStorageLease
 from users.decorators import (
@@ -11,13 +13,13 @@ from users.decorators import (
 from utils.relay import get_node_from_global_id
 from utils.schema import update_object
 
+from ..enums import ApplicationStatus
 from ..models import BerthApplication, WinterStorageApplication
 from .types import BerthApplicationNode, WinterStorageApplicationNode
 
 
 class BerthApplicationInput:
-    # TODO: the required has to be removed once more fields are added
-    customer_id = graphene.ID(required=True)
+    customer_id = graphene.ID()
 
 
 class UpdateBerthApplication(graphene.ClientIDMutation):
@@ -36,8 +38,16 @@ class UpdateBerthApplication(graphene.ClientIDMutation):
         application = get_node_from_global_id(
             info, input.pop("id"), only_type=BerthApplicationNode
         )
+
+        customer_id = input.get("customer_id")
+
+        if application.status != ApplicationStatus.PENDING and not customer_id:
+            raise VenepaikkaGraphQLError(
+                _("Customer cannot be disconnected from processed applications")
+            )
+
         input["customer"] = get_node_from_global_id(
-            info, input.pop("customer_id"), only_type=ProfileNode
+            info, customer_id, only_type=ProfileNode, nullable=True
         )
 
         update_object(application, input)
@@ -63,8 +73,7 @@ class DeleteBerthApplicationMutation(graphene.ClientIDMutation):
 
 
 class WinterStorageApplicationInput:
-    # TODO: the required has to be removed once more fields are added
-    customer_id = graphene.ID(required=True)
+    customer_id = graphene.ID()
 
 
 class UpdateWinterStorageApplication(graphene.ClientIDMutation):
@@ -83,8 +92,16 @@ class UpdateWinterStorageApplication(graphene.ClientIDMutation):
         application = get_node_from_global_id(
             info, input.pop("id"), only_type=WinterStorageApplicationNode
         )
+
+        customer_id = input.get("customer_id")
+
+        if application.status != ApplicationStatus.PENDING and not customer_id:
+            raise VenepaikkaGraphQLError(
+                _("Customer cannot be disconnected from processed applications")
+            )
+
         input["customer"] = get_node_from_global_id(
-            info, input.pop("customer_id"), only_type=ProfileNode
+            info, customer_id, only_type=ProfileNode, nullable=True
         )
 
         update_object(application, input)

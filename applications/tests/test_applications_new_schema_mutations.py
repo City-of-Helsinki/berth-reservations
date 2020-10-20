@@ -5,11 +5,14 @@ import pytest
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
     assert_field_missing,
+    assert_in_errors,
     assert_not_enough_permissions,
 )
 from customers.schema import ProfileNode
+from leases.tests.factories import BerthLeaseFactory
 from utils.relay import to_global_id
 
+from ..enums import ApplicationStatus
 from ..models import BerthApplication, WinterStorageApplication
 from ..new_schema import BerthApplicationNode
 from ..new_schema.types import WinterStorageApplicationNode
@@ -76,14 +79,34 @@ def test_update_berth_application_no_application_id(api_client, customer_profile
 @pytest.mark.parametrize(
     "api_client", ["berth_services"], indirect=True,
 )
-def test_update_berth_application_no_customer_id(api_client, berth_application):
+@pytest.mark.parametrize("status", ApplicationStatus.values)
+def test_update_berth_application_no_customer_id(
+    api_client, berth_application_with_customer, status
+):
+    berth_application_with_customer.lease = BerthLeaseFactory()
+    berth_application_with_customer.status = status
+    berth_application_with_customer.save()
+    application_id = to_global_id(
+        BerthApplicationNode, berth_application_with_customer.id
+    )
     variables = {
-        "id": to_global_id(BerthApplicationNode, berth_application.id),
+        "id": application_id,
     }
 
     executed = api_client.execute(UPDATE_BERTH_APPLICATION_MUTATION, input=variables)
 
-    assert_field_missing("customerId", executed)
+    if status == ApplicationStatus.PENDING:
+        assert executed == {
+            "data": {
+                "updateBerthApplication": {
+                    "berthApplication": {"id": application_id, "customer": None}
+                }
+            }
+        }
+    else:
+        assert_in_errors(
+            "Customer cannot be disconnected from processed applications", executed
+        )
 
 
 @pytest.mark.parametrize(
@@ -230,18 +253,38 @@ def test_update_winter_storage_application_no_application_id(
 @pytest.mark.parametrize(
     "api_client", ["berth_services"], indirect=True,
 )
+@pytest.mark.parametrize("status", ApplicationStatus.values)
 def test_update_winter_storage_application_no_customer_id(
-    api_client, winter_storage_application
+    api_client, winter_storage_application_with_customer, status
 ):
+    winter_storage_application_with_customer.status = status
+    winter_storage_application_with_customer.save()
+    application_id = to_global_id(
+        WinterStorageApplicationNode, winter_storage_application_with_customer.id
+    )
     variables = {
-        "id": to_global_id(WinterStorageApplicationNode, winter_storage_application.id),
+        "id": application_id,
     }
 
     executed = api_client.execute(
         UPDATE_WINTER_STORAGE_APPLICATION_MUTATION, input=variables
     )
 
-    assert_field_missing("customerId", executed)
+    if status == ApplicationStatus.PENDING:
+        assert executed == {
+            "data": {
+                "updateWinterStorageApplication": {
+                    "winterStorageApplication": {
+                        "id": application_id,
+                        "customer": None,
+                    }
+                }
+            }
+        }
+    else:
+        assert_in_errors(
+            "Customer cannot be disconnected from processed applications", executed
+        )
 
 
 @pytest.mark.parametrize(

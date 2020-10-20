@@ -39,14 +39,15 @@ review:
   variables:
     K8S_SECRET_ALLOWED_HOSTS: "*"
     K8S_SECRET_DEBUG: 1
+    K8S_SECRET_CREATE_SUPERUSER: 1
+    K8S_SECRET_SECRET_KEY: "$GL_TEST_DJANGO_SECRET_KEY"
     K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://tunnistamo.test.kuva.hel.ninja/openid"
     K8S_SECRET_CORS_ORIGIN_ALLOW_ALL: 1
-
     K8S_SECRET_VENE_UI_RETURN_URL: "https://venepaikat.hel.ninja/"
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_URL": "https://real-bambora-api-url/api"
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_KEY": "dummy-key"
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_SECRET": "dummy-secret"
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS": "dummy-bank"
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_URL: "https://real-bambora-api-url/api"
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_KEY: "dummy-key"
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_SECRET: "dummy-secret"
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS: "dummy-bank"
 
 staging:
   # By default the staging environment is created from the master-branch.
@@ -57,21 +58,26 @@ staging:
   # These variables are available only for staging env and are merged with the general variables defined above.
   variables:
     K8S_SECRET_TIER: "stage"
+    K8S_SECRET_SKIP_DATABASE_CHECK: 1
     K8S_SECRET_ALLOWED_HOSTS: "*"
     K8S_SECRET_CORS_ORIGIN_ALLOW_ALL: 1
     K8S_SECRET_SECRET_KEY: "$GL_QA_DJANGO_SECRET_KEY"
-    K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://tunnistamo.test.kuva.hel.ninja/openid"
-    K8S_SECRET_MAIL_MAILGUN_KEY: "$SECRET_MAILGUN_API_KEY"
+    K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://api.hel.fi/sso-test/openid"
+    K8S_SECRET_MAIL_MAILGUN_KEY: "$GL_QA_SECRET_MAILGUN_API_KEY"
     K8S_SECRET_MAIL_MAILGUN_DOMAIN: "mail.hel.ninja"
     K8S_SECRET_MAIL_MAILGUN_API: "https://api.eu.mailgun.net/v3"
-    K8S_SECRET_DEFAULT_FROM_EMAIL: "venepaikkavaraukset@hel.ninja"
-    K8S_SECRET_SENTRY_DSN: "$GL_SENTRY_DNS"
-    K8S_SECRET_SENTRY_ENVIRONMENT: "test"
-
-    K8S_SECRET_VENE_UI_RETURN_URL: "https://venepaikat.hel.ninja/"
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_URL": "https://real-bambora-api-url/api"
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_KEY": "dummy-key"
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_SECRET": "dummy-secret"
-    K8S_SECRET_VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS": "dummy-bank"
-
-
+    K8S_SECRET_MAILER_EMAIL_BACKEND: "anymail.backends.mailgun.EmailBackend"
+    K8S_SECRET_DEFAULT_FROM_EMAIL: "venepaikkavaraukset-testi@hel.ninja"
+    K8S_SECRET_NOTIFICATIONS_ENABLED: "true"
+    K8S_SECRET_SENTRY_DSN: "$GL_QA_SENTRY_DSN"
+    K8S_SECRET_SENTRY_ENVIRONMENT: "staging"
+    K8S_SECRET_VENE_UI_RETURN_URL: 'https://venepaikka.test.kuva.hel.ninja/{LANG}'
+    K8S_SECRET_VENE_UI_URL: "https://venepaikka.test.kuva.hel.ninja"
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_URL: "$GL_QA_BAMBORA_API_URL"
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_KEY: "$GL_QA_BAMBORA_API_KEY"
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_SECRET: "$GL_QA_BAMBORA_API_SECRET"
+    K8S_SECRET_VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS: "$GL_QA_BAMBORA_PAYMENT_METHODS"
+    K8S_SECRET_ELASTIC_APM_ENVIRONMENT: "test"
+    K8S_SECRET_ELASTIC_APM_SECRET_TOKEN: "$GL_QA_ELASTIC_APM_TOKEN"
+    K8S_SECRET_ELASTIC_APM_SERVER_URL: "$GL_QA_ELASTIC_APM_URL"
+    K8S_SECRET_ELASTIC_APM_SERVICE_NAME: "berths-backend"

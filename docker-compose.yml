@@ -18,6 +18,7 @@ services:
         env_file:
             - ./.env
         environment:
+            DEV_SERVER: 1
             DATABASE_URL: postgres://berth_reservations:berth_reservations@berth-db/berth_reservations
             DATABASE_HOST: berth-db.helsinki
         volumes:
