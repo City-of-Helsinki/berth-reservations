@@ -18,6 +18,7 @@ RUN apt-install.sh \
       build-essential \
       netcat \
       pkg-config \
+      postgresql-client \
     && pip install --no-cache-dir \
       -r /app/requirements.txt \
     && apt-cleanup.sh \
