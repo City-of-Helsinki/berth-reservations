@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-10-15 09:29+0000\n"
+"POT-Creation-Date: 2020-10-20 14:56+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,19 +21,19 @@ msgstr ""
 msgid "Application type"
 msgstr "Typ av ansökan"
 
-#: applications/admin.py:37 applications/admin.py:152
+#: applications/admin.py:37 applications/admin.py:160
 msgid "Application"
 msgstr "Ansökan"
 
-#: applications/admin.py:37 applications/admin.py:152
+#: applications/admin.py:37 applications/admin.py:160
 msgid "Switch application"
 msgstr "Byt ansökan"
 
-#: applications/admin.py:74 applications/admin.py:252
+#: applications/admin.py:74 applications/admin.py:268
 msgid "Contact information"
 msgstr "Kontaktuppgifter"
 
-#: applications/admin.py:90 applications/admin.py:268
+#: applications/admin.py:90 applications/admin.py:284
 msgid "Main boat information"
 msgstr "Basdata om båten"
 
@@ -45,40 +45,40 @@ msgstr "Information om stort fartyg"
 msgid "Switch berth information"
 msgstr "Byt båtplatsinformation"
 
-#: applications/admin.py:133 applications/admin.py:281
+#: applications/admin.py:133 applications/admin.py:297
 msgid "Other information"
 msgstr "Övrig information"
 
-#: applications/admin.py:157
+#: applications/admin.py:165
 msgid "Harbor"
 msgstr "Hamn"
 
-#: applications/admin.py:162
+#: applications/admin.py:170
 msgid "Pier"
 msgstr "Brygga"
 
-#: applications/admin.py:167
+#: applications/admin.py:175
 msgid "Berth number"
 msgstr "Båtplatsens nummer"
 
-#: applications/admin.py:172
+#: applications/admin.py:180
 msgid "Reason"
 msgstr "Orsak"
 
-#: applications/admin.py:189 applications/admin.py:313
+#: applications/admin.py:197 applications/admin.py:338
 msgid "Download list of chosen applications in Excel file"
 msgstr "Ladda ner en lista över de valda ansökningarna som Excel-fil"
 
-#: applications/admin.py:212
+#: applications/admin.py:220
 #, python-format
 msgid "Resent confirmation for %d berth application(s)"
 msgstr "Skickade bekräftelse för %d båtplatsansökning(ar) på nytt"
 
-#: applications/admin.py:217 applications/admin.py:347
+#: applications/admin.py:225 applications/admin.py:372
 msgid "Send confirmation again for chosen application"
 msgstr "Skicka en bekräftelse för den valda ansökningen på nytt"
 
-#: applications/admin.py:341
+#: applications/admin.py:366
 #, python-format
 msgid "Resent confirmation for %d winter storage application(s)"
 msgstr "Skickade bekräftelse av %d ansökning(ar) om vinteruppläggning på nytt"
@@ -119,7 +119,7 @@ msgstr ""
 msgid "Handled"
 msgstr ""
 
-#: applications/enums.py:21 leases/enums.py:9 payments/enums.py:67
+#: applications/enums.py:21 leases/enums.py:9 payments/enums.py:68
 msgid "Expired"
 msgstr "Utgången"
 
@@ -334,8 +334,8 @@ msgstr "uppläggningsmetod"
 msgid "trailer registration number"
 msgstr "trailerns registreringsnummer"
 
-#: applications/new_schema/mutations.py:44
-#: applications/new_schema/mutations.py:96
+#: applications/new_schema/mutations.py:46
+#: applications/new_schema/mutations.py:100
 msgid "Customer cannot be disconnected from processed applications"
 msgstr "Kunden kan inte kopplas bort från bearbetade applikationer"
 
@@ -423,7 +423,7 @@ msgstr "kundprofil"
 msgid "customer profiles"
 msgstr "kundprofiler"
 
-#: customers/models.py:279 leases/models.py:26 payments/models.py:243
+#: customers/models.py:279 leases/models.py:26 payments/models.py:244
 msgid "customer"
 msgstr "kund"
 
@@ -515,7 +515,7 @@ msgstr "båtar"
 msgid "certificate type"
 msgstr "typ av intyg"
 
-#: customers/models.py:409 payments/models.py:766
+#: customers/models.py:409 payments/models.py:775
 msgid "valid until"
 msgstr "giltig till"
 
@@ -674,7 +674,7 @@ msgstr "gatuadress"
 msgid "Street address of the harbor"
 msgstr "Hamnens gatuadress"
 
-#: harbors/models.py:181 payments/models.py:114 resources/models.py:167
+#: harbors/models.py:181 payments/models.py:115 resources/models.py:167
 #: resources/models.py:257 resources/models.py:436
 msgid "harbor"
 msgstr "hamn"
@@ -743,7 +743,7 @@ msgstr "Nekad"
 msgid "Refused"
 msgstr "Nekad"
 
-#: leases/enums.py:10 payments/enums.py:68
+#: leases/enums.py:10 payments/enums.py:69
 msgid "Paid"
 msgstr "Betald"
 
@@ -801,7 +801,7 @@ msgid "Cannot change the berth assigned to this lease"
 msgstr ""
 "Det går inte att byta ut båtplatsen som är anvisad för detta hyresavtal"
 
-#: leases/models.py:157 leases/models.py:282
+#: leases/models.py:157 leases/models.py:285
 msgid "Cannot change the application to one which belongs to another customer"
 msgstr "Det går inte att ändra ansökan till en som tillhör en annan kund"
 
@@ -823,105 +823,121 @@ msgstr "plats"
 msgid "section"
 msgstr "Inspektion"
 
-#: leases/models.py:230
+#: leases/models.py:228
+#, fuzzy
+#| msgid "order number"
+msgid "sticker number"
+msgstr "beställningsnummer"
+
+#: leases/models.py:233
 msgid "winter storage lease"
 msgstr "hyresavtal för vinteruppläggningsplats"
 
-#: leases/models.py:231
+#: leases/models.py:234
 msgid "winter storage leases"
 msgstr "hyresavtal för vinteruppläggningsplatser"
 
-#: leases/models.py:239
+#: leases/models.py:242
 #, fuzzy
 #| msgid "Lease cannot have both place and area assigned"
 msgid "Lease cannot have both place and section assigned"
 msgstr ""
 "Det går inte att anvisa både en plats och ett område för ett hyresavtal"
 
-#: leases/models.py:242
+#: leases/models.py:245
 #, fuzzy
 #| msgid "Lease must have either place or area assigned"
 msgid "Lease must have either place or section assigned"
 msgstr "Antingen en plats eller ett område ska anvisas för hyresavtalet"
 
-#: leases/models.py:261
+#: leases/models.py:264
 msgid "WinterStoragePlace already has a lease"
 msgstr "Det finns redan ett hyresavtal för vinteruppläggningsplatsen"
 
-#: leases/models.py:263
+#: leases/models.py:266
 msgid "Selected place is not active"
 msgstr "Den valda platsen är inte aktiv"
 
-#: leases/models.py:269
+#: leases/models.py:272
 msgid "Cannot change the place assigned to this lease"
 msgstr "Det går inte att byta ut platsen som är anvisad för detta hyresavtal"
 
-#: leases/models.py:271
+#: leases/models.py:274
 #, fuzzy
 #| msgid "Cannot change the berth assigned to this lease"
 msgid "Cannot change the section assigned to this lease"
 msgstr ""
 "Det går inte att byta ut båtplatsen som är anvisad för detta hyresavtal"
 
-#: leases/models.py:293 utils/models.py:15
+#: leases/models.py:296 utils/models.py:15
 msgid "time created"
 msgstr "tidpunkt för skapandet"
 
-#: leases/models.py:295
+#: leases/models.py:298
 msgid "from status"
 msgstr "från status"
 
-#: leases/models.py:298
+#: leases/models.py:301
 msgid "to status"
 msgstr "till status"
 
-#: leases/models.py:313 leases/models.py:326 payments/models.py:289
+#: leases/models.py:316 leases/models.py:329 payments/models.py:290
 msgid "lease"
 msgstr "hyresavtal"
 
-#: leases/models.py:319
+#: leases/models.py:322
 msgid "berth lease change"
 msgstr "ändring i hyresavtal för båtplats"
 
-#: leases/models.py:320
+#: leases/models.py:323
 msgid "berth lease changes"
 msgstr "ändringar i hyresavtal för båtplats"
 
-#: leases/models.py:332
+#: leases/models.py:335
 msgid "winter storage lease change"
 msgstr "ändring i hyresavtal för vinteruppläggningsplats"
 
-#: leases/models.py:333
+#: leases/models.py:336
 msgid "winter storage lease changes"
 msgstr "ändringar i hyresavtal för vinteruppläggningsplats"
 
-#: leases/schema/mutations.py:56 leases/schema/mutations.py:137
-#: leases/schema/mutations.py:219 leases/schema/mutations.py:304
+#: leases/schema/mutations.py:57 leases/schema/mutations.py:138
+#: leases/schema/mutations.py:220 leases/schema/mutations.py:305
 msgid "Application must be connected to an existing customer first"
 msgstr "Ansökan måste först kopplas till en existerande kund"
 
-#: leases/schema/mutations.py:76 leases/schema/mutations.py:151
-#: leases/schema/mutations.py:251 leases/schema/mutations.py:318
+#: leases/schema/mutations.py:77 leases/schema/mutations.py:152
+#: leases/schema/mutations.py:252 leases/schema/mutations.py:319
 msgid "Boat does not belong to the same customer as the Application"
 msgstr "Båten tillhör inte samma kund som ansökan"
 
-#: leases/schema/mutations.py:180 leases/schema/mutations.py:347
+#: leases/schema/mutations.py:181 leases/schema/mutations.py:348
 #, python-brace-format
 msgid "Lease object is not DRAFTED anymore: {lease.status}"
 msgstr "Hyresobjektet är inte längre ett UTKAST: {lease.status}"
 
-#: leases/schema/mutations.py:207
+#: leases/schema/mutations.py:208
 #, fuzzy
 #| msgid "Cannot receive both Winter Storage Place and Area"
 msgid "Cannot receive both Winter Storage Place and Section"
 msgstr ""
 "Det går inte att ta emot både en plats och ett område för vinteruppläggning"
 
-#: leases/schema/mutations.py:236
+#: leases/schema/mutations.py:237
 #, fuzzy
 #| msgid "Either Winter Storage Place or Area are required"
 msgid "Either Winter Storage Place or Section are required"
 msgstr "Antingen plats eller område för vinteruppläggning krävs"
+
+#: leases/schema/mutations.py:377
+msgid "Lease must be in PAID status"
+msgstr ""
+
+#: leases/schema/mutations.py:379
+#, fuzzy
+#| msgid "estimated number of unmarked places"
+msgid "Lease must refer to unmarked area"
+msgstr "uppskattat antal omärkta platser"
 
 #: payments/admin.py:39
 msgid "Berth types"
@@ -958,217 +974,221 @@ msgid "Invalidate selected tokens"
 msgstr ""
 
 #: payments/enums.py:23
+msgid "Storage on ice"
+msgstr "Lämnats i is"
+
+#: payments/enums.py:24
 msgid "Parking permit"
 msgstr "Parkeringstillstånd"
 
-#: payments/enums.py:24 resources/enums.py:19
+#: payments/enums.py:25 resources/enums.py:19
 msgid "Dinghy place"
 msgstr "Jolleplats"
 
-#: payments/enums.py:48
+#: payments/enums.py:49
 msgid "Fixed service"
 msgstr "Obligatorisk service"
 
-#: payments/enums.py:49
+#: payments/enums.py:50
 msgid "Optional service"
 msgstr "Valfri service"
 
-#: payments/enums.py:53
+#: payments/enums.py:54
 msgid "Year"
 msgstr "År"
 
-#: payments/enums.py:54
+#: payments/enums.py:55
 msgid "Season"
 msgstr "Säsong"
 
-#: payments/enums.py:55
+#: payments/enums.py:56
 msgid "Month"
 msgstr "Månad"
 
-#: payments/enums.py:59
+#: payments/enums.py:60
 msgid "Amount"
 msgstr "Värde"
 
-#: payments/enums.py:60
+#: payments/enums.py:61
 msgid "Percentage"
 msgstr "Procentvärde"
 
-#: payments/enums.py:64
+#: payments/enums.py:65
 msgid "Waiting"
 msgstr "Väntar"
 
-#: payments/enums.py:65
+#: payments/enums.py:66
 msgid "Rejected"
 msgstr "Avvisad"
 
-#: payments/enums.py:66
+#: payments/enums.py:67
 msgid "Cancelled"
 msgstr "Anullerad"
 
-#: payments/enums.py:72
+#: payments/enums.py:73
 msgid "New berth order"
 msgstr ""
 
-#: payments/enums.py:73
+#: payments/enums.py:74
 msgid "Renew berth order"
 msgstr ""
 
-#: payments/enums.py:74
+#: payments/enums.py:75
 #, fuzzy
 #| msgid "berth switch reason"
 msgid "Berth switch order"
 msgstr "orsak till byte av båtplats"
 
-#: payments/enums.py:75
+#: payments/enums.py:76
 #, fuzzy
 #| msgid "winter storage area"
 msgid "Winter storage order"
 msgstr "vinterupplagsområde"
 
-#: payments/enums.py:78
+#: payments/enums.py:79
 #, fuzzy
 #| msgid "winter storage area"
 msgid "Unmarked winter storage order"
 msgstr "vinterupplagsområde"
 
-#: payments/enums.py:80
+#: payments/enums.py:81
 msgid "Invalid order"
 msgstr ""
 
-#: payments/models.py:49 payments/models.py:254 payments/models.py:654
+#: payments/models.py:50 payments/models.py:255 payments/models.py:663
 msgid "price"
 msgstr "pris"
 
-#: payments/models.py:79
+#: payments/models.py:80
 msgid "berth price group name"
 msgstr "namn på båtplatsens prisgrupp"
 
-#: payments/models.py:94 payments/models.py:160 payments/models.py:261
-#: payments/models.py:661
+#: payments/models.py:95 payments/models.py:161 payments/models.py:262
+#: payments/models.py:670
 msgid "tax percentage"
 msgstr "vinterupplagsområde"
 
-#: payments/models.py:109 resources/models.py:536
+#: payments/models.py:110 resources/models.py:536
 msgid "price group"
 msgstr "prisgrupp"
 
-#: payments/models.py:135
+#: payments/models.py:136
 msgid "Berth product"
 msgstr "Båtplats"
 
-#: payments/models.py:141 resources/models.py:235 resources/models.py:264
+#: payments/models.py:142 resources/models.py:235 resources/models.py:264
 #: resources/models.py:471
 msgid "winter storage area"
 msgstr "vinterupplagsområde"
 
-#: payments/models.py:151
+#: payments/models.py:152
 msgid "Winter Storage product"
 msgstr "Vinteruppläggningsplats"
 
-#: payments/models.py:156
+#: payments/models.py:157
 msgid "service"
 msgstr "tjänst"
 
-#: payments/models.py:188
+#: payments/models.py:189
 #, python-brace-format
 msgid "Fixed services must have VAT of {DEFAULT_TAX_PERCENTAGE}€"
 msgstr "Fasta tjänster måste ha en moms på {DEFAULT_TAX_PERCENTAGE}€"
 
-#: payments/models.py:191
+#: payments/models.py:192
 msgid "Fixed services are only valid for season"
 msgstr "Fasta tjänster gäller endast för en säsong"
 
-#: payments/models.py:235
+#: payments/models.py:236
 msgid "order number"
 msgstr "beställningsnummer"
 
-#: payments/models.py:268
+#: payments/models.py:269
 msgid "due date"
 msgstr "förfallodatum"
 
-#: payments/models.py:279 payments/models.py:644
+#: payments/models.py:280 payments/models.py:653
 msgid "product"
 msgstr "produkt"
 
-#: payments/models.py:389
+#: payments/models.py:390
 msgid "You cannot assign other types of products"
 msgstr "Du kan inte anvisa andra typer av produkter"
 
-#: payments/models.py:394
+#: payments/models.py:395
 msgid "You cannot assign other types of leases"
 msgstr "Du kan inte anvisa andra typer av hyresavtal"
 
-#: payments/models.py:399
+#: payments/models.py:400
 msgid "The lease provided belongs to a different customer"
 msgstr "Det angivna hyresavtalet tillhör en annan kund"
 
-#: payments/models.py:407
+#: payments/models.py:408
 msgid "A BerthProduct must be associated with a BerthLease"
 msgstr ""
 "En båtplatsprodukt måste vara kopplad till ett hyresavtal för en båtplats"
 
-#: payments/models.py:413
+#: payments/models.py:414
 msgid "A WinterStorageProduct must be associated with a WinterStorageLease"
 msgstr ""
 "En vinteruppläggningsprodukt måste vara kopplad till ett hyresavtal för "
 "vinterförvaring"
 
-#: payments/models.py:419
+#: payments/models.py:420
 msgid "Order must have either product object or price value"
 msgstr ""
 "Beställningen måste innehålla antingen ett produktobjekt eller ett prisvärde"
 
-#: payments/models.py:424
+#: payments/models.py:425
 msgid "Cannot change the product assigned to this order"
 msgstr ""
 "Det går inte att byta ut produkten som är anvisad för denna beställning"
 
-#: payments/models.py:429
+#: payments/models.py:430
 msgid "Cannot change the lease associated with this order"
 msgstr ""
 "Det går inte att byta ut hyresavtalet som är kopplat till den här "
 "beställningen"
 
-#: payments/models.py:480
+#: payments/models.py:481
 msgid "The product passed is not valid"
 msgstr "Produkten är inte giltig"
 
-#: payments/models.py:495
+#: payments/models.py:496
 msgid "The lease passed is not valid"
 msgstr "Hyresavtalet är inte giltigt"
 
-#: payments/models.py:638 payments/models.py:763
+#: payments/models.py:647 payments/models.py:772
 msgid "order"
 msgstr "beställning"
 
-#: payments/models.py:651
+#: payments/models.py:660
 msgid "quantity"
 msgstr "antal"
 
-#: payments/models.py:675
+#: payments/models.py:684
 msgid "Cannot change the order associated with this order line"
 msgstr ""
 "Det går inte att byta ut beställningen som är kopplad till denna "
 "beställningsrad"
 
-#: payments/models.py:681
+#: payments/models.py:690
 msgid "Cannot change the product assigned to this order line"
 msgstr ""
 "Det går inte att byta ut produkten som är anvisad för denna beställningsrad"
 
-#: payments/models.py:744
+#: payments/models.py:753
 msgid "order log entry"
 msgstr "post i beställningshistorik"
 
-#: payments/models.py:753
+#: payments/models.py:762
 msgid "order log entries"
 msgstr "poster i beställningshistorik"
 
-#: payments/models.py:765
+#: payments/models.py:774
 msgid "token"
 msgstr ""
 
-#: payments/models.py:767
+#: payments/models.py:776
 #, fuzzy
 #| msgid "Cancelled"
 msgid "cancelled"
@@ -1200,23 +1220,23 @@ msgstr "vinterupplagsområde"
 msgid "Unmarked winter storage order approved"
 msgstr "vinterupplagsområde"
 
-#: payments/providers/bambora_payform.py:112
+#: payments/providers/bambora_payform.py:121
 msgid "Payment service is unreachable"
 msgstr "Betaltjänsten kan inte nås"
 
-#: payments/providers/bambora_payform.py:120
+#: payments/providers/bambora_payform.py:129
 msgid "Order has already expired"
 msgstr "Beställningen har redan förfallit"
 
-#: payments/providers/bambora_payform.py:136
+#: payments/providers/bambora_payform.py:145
 msgid "Order with the same ID already exists"
 msgstr "Det finns redan en beställning med samma ID"
 
-#: payments/providers/bambora_payform.py:138
+#: payments/providers/bambora_payform.py:147
 msgid "Payment service is down for maintenance"
 msgstr "Betaltjänsten är stängd för underhåll"
 
-#: payments/providers/bambora_payform.py:202
+#: payments/providers/bambora_payform.py:211
 msgid "Order is not associated with a Lease"
 msgstr "Beställningen är inte kopplad till ett hyresavtal"
 
@@ -1228,7 +1248,13 @@ msgstr "Det finns inget hyresavtal med den valda ID-koden"
 msgid "The order is not valid anymore"
 msgstr "Beställningen gäller inte längre"
 
-#: payments/schema/mutations.py:433
+#: payments/schema/mutations.py:439
+#, fuzzy
+#| msgid "winter storage area"
+msgid "Cannot cancel Unmarked winter storage order"
+msgstr "vinterupplagsområde"
+
+#: payments/schema/mutations.py:441
 msgid "Order rejected by customer"
 msgstr ""
 
