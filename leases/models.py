@@ -1,5 +1,6 @@
 from datetime import date
 
+from dateutil.relativedelta import relativedelta
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -61,6 +62,10 @@ class AbstractLease(TimeStampedModel, UUIDModel):
             )
         if self.start_date > self.end_date:
             raise ValidationError(_("Lease start date cannot be after end date"))
+
+        # Check that the lease ends less than a year after it started
+        if self.end_date > (self.start_date + relativedelta(years=1)):
+            raise ValidationError(_("Lease cannot last for more than a year"))
 
     def save(self, *args, **kwargs):
         # ensure full_clean is always ran
