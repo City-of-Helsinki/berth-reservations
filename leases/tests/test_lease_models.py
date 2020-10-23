@@ -482,3 +482,19 @@ def test_berth_lease_non_overlapping_leases(berth):
     BerthLeaseFactory(berth=berth, start_date="2020-01-01", end_date="2020-05-01")
 
     assert BerthLease.objects.count() == 2
+
+
+@freeze_time("2020-01-01T08:00:00Z")
+def test_winter_storage_lease_over_a_year_raise_error():
+    with pytest.raises(ValidationError) as exception:
+        WinterStorageLeaseFactory(start_date="2020-01-01", end_date="2022-01-21")
+
+    error_msg = str(exception.value)
+    assert "Lease cannot last for more than a year" in error_msg
+
+
+@freeze_time("2020-01-01T08:00:00Z")
+def test_winter_storage_lease_one_year_no_error():
+    WinterStorageLeaseFactory(start_date="2020-01-01", end_date="2021-01-01")
+
+    assert WinterStorageLease.objects.count() == 1

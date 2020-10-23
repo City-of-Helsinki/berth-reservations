@@ -2,6 +2,8 @@
 
 from django.db import migrations, models
 
+import payments
+
 
 class Migration(migrations.Migration):
 
@@ -32,6 +34,29 @@ class Migration(migrations.Migration):
                 ],
                 max_length=40,
                 verbose_name="service",
+            ),
+        ),
+        migrations.RemoveConstraint(
+            model_name="additionalproduct", name="optional_services_per_period",
+        ),
+        migrations.AddConstraint(
+            model_name="additionalproduct",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(
+                    service__in=[
+                        payments.enums.ProductServiceType(
+                            "summer_storage_for_docking_equipment"
+                        ),
+                        payments.enums.ProductServiceType(
+                            "summer_storage_for_trailers"
+                        ),
+                        payments.enums.ProductServiceType("storage_on_ice"),
+                        payments.enums.ProductServiceType("parking_permit"),
+                        payments.enums.ProductServiceType("dinghy_place"),
+                    ]
+                ),
+                fields=("service", "period"),
+                name="optional_services_per_period",
             ),
         ),
     ]
