@@ -18,6 +18,11 @@ if [[ "$APPLY_MIGRATIONS" = "1" ]]; then
     python ./manage.py migrate --noinput
 fi
 
+# Check that there are no pending migrations to generate
+if [[ "$CHECK_MIGRATIONS" = "1" ]]; then
+  echo "Checking database migrations..."
+  python ./manage.py makemigrations --verbosity 3 --dry-run --noinput --check
+fi
 
 if [[ "$CREATE_SUPERUSER" = "1" ]]; then
   python ./manage.py add_admin_user -u admin -p adminpass -e admin@example.com
