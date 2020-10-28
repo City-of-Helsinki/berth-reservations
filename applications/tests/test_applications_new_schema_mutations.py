@@ -173,6 +173,63 @@ def test_delete_berth_not_enough_permissions(api_client, berth_application):
     assert_not_enough_permissions(executed)
 
 
+REJECT_BERTH_APPLICATION_MUTATION = """
+mutation RejectBerthApplicationMutation($input: RejectBerthApplicationMutationInput!) {
+    rejectBerthApplication(input: $input) {
+        __typename
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+def test_reject_berth_application(api_client, berth_application, customer_profile):
+    variables = {
+        "id": to_global_id(BerthApplicationNode, berth_application.id),
+    }
+
+    assert (
+        BerthApplication.objects.filter(
+            status=ApplicationStatus.NO_SUITABLE_BERTHS
+        ).count()
+        == 0
+    )
+
+    api_client.execute(REJECT_BERTH_APPLICATION_MUTATION, input=variables)
+
+    assert (
+        BerthApplication.objects.filter(
+            status=ApplicationStatus.NO_SUITABLE_BERTHS
+        ).count()
+        == 1
+    )
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+def test_reject_berth_application_fails_for_lease(
+    api_client, berth_application, customer_profile
+):
+    variables = {
+        "id": to_global_id(BerthApplicationNode, berth_application.id),
+    }
+    BerthLeaseFactory(application=berth_application)
+
+    executed = api_client.execute(REJECT_BERTH_APPLICATION_MUTATION, input=variables)
+
+    assert_in_errors("Application has a lease", executed)
+
+    assert (
+        BerthApplication.objects.filter(
+            status=ApplicationStatus.NO_SUITABLE_BERTHS
+        ).count()
+        == 0
+    )
+
+
 def test_delete_berth_application_inexistent_application(superuser_api_client):
     variables = {
         "id": to_global_id(BerthApplicationNode, random.randint(0, 100)),

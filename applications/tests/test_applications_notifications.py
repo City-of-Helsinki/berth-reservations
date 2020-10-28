@@ -2,9 +2,9 @@ import pytest
 from django.core import mail
 from django_ilmoitin.models import NotificationTemplate
 
-from ..constants import MARKED_WS_SENDER, UNMARKED_WS_SENDER
+from ..constants import MARKED_WS_SENDER, REJECT_BERTH_SENDER, UNMARKED_WS_SENDER
 from ..notifications import NotificationType
-from ..signals import application_saved
+from ..signals import application_rejected, application_saved
 from .factories import BerthApplicationFactory, WinterStorageApplicationFactory
 
 
@@ -15,6 +15,16 @@ def notification_template_berth_application_created():
         subject="test berth application created subject, event: {{ application.first_name }}!",
         body_html="<b>test berth application created body HTML!</b>",
         body_text="test berth application created body text!",
+    )
+
+
+@pytest.fixture
+def notification_template_berth_application_rejected():
+    return NotificationTemplate.objects.language("fi").create(
+        type=NotificationType.BERTH_APPLICATION_REJECTED.value,
+        subject="test berth application rejected subject, event: {{ application.first_name }}!",
+        body_html="<b>test berth application rejected body HTML!</b>",
+        body_text="test berth application rejected body text!",
     )
 
 
@@ -47,6 +57,19 @@ def test_berth_application_created_notification_is_sent(
     assert len(mail.outbox) == 1
     msg = mail.outbox[0]
     assert msg.subject == "test berth application created subject, event: {}!".format(
+        application.first_name
+    )
+
+
+def test_berth_application_rejected_notification_is_sent(
+    notification_template_berth_application_rejected,
+):
+    application = BerthApplicationFactory()
+    application_rejected.send(sender=REJECT_BERTH_SENDER, application=application)
+
+    assert len(mail.outbox) == 1
+    msg = mail.outbox[0]
+    assert msg.subject == "test berth application rejected subject, event: {}!".format(
         application.first_name
     )
 

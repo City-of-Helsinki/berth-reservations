@@ -20,6 +20,7 @@ class ProductServiceType(TextChoices):
         "summer_storage_for_trailers",
         _("Summer storage for trailers"),
     )
+    STORAGE_ON_ICE = ("storage_on_ice", _("Storage on ice"))
     PARKING_PERMIT = "parking_permit", _("Parking permit")
     DINGHY_PLACE = "dinghy_place", _("Dinghy place")
 
@@ -27,20 +28,21 @@ class ProductServiceType(TextChoices):
     def FIXED_SERVICES():
         return [
             ProductServiceType.ELECTRICITY,
-            ProductServiceType.WATER,
             ProductServiceType.GATE,
+            ProductServiceType.LIGHTING,
             ProductServiceType.MOORING,
             ProductServiceType.WASTE_COLLECTION,
-            ProductServiceType.LIGHTING,
+            ProductServiceType.WATER,
         ]
 
     @staticmethod
     def OPTIONAL_SERVICES():
         return [
+            ProductServiceType.DINGHY_PLACE,
+            ProductServiceType.PARKING_PERMIT,
+            ProductServiceType.STORAGE_ON_ICE,
             ProductServiceType.SUMMER_STORAGE_FOR_DOCKING_EQUIPMENT,
             ProductServiceType.SUMMER_STORAGE_FOR_TRAILERS,
-            ProductServiceType.PARKING_PERMIT,
-            ProductServiceType.DINGHY_PLACE,
         ]
 
 

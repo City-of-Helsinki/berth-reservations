@@ -18,6 +18,10 @@ class NotificationType(TextChoices):
         "berth_application_created",
         _("Berth application created"),
     )
+    BERTH_APPLICATION_REJECTED = (
+        "berth_application_rejected",
+        _("Berth application rejected"),
+    )
     WINTER_STORAGE_APPLICATION_CREATED = (
         "winter_storage_application_created",
         _("Winter storage application created"),
@@ -31,6 +35,10 @@ class NotificationType(TextChoices):
 notifications.register(
     NotificationType.BERTH_APPLICATION_CREATED.value,
     NotificationType.BERTH_APPLICATION_CREATED.label,
+)
+notifications.register(
+    NotificationType.BERTH_APPLICATION_REJECTED.value,
+    NotificationType.BERTH_APPLICATION_REJECTED.label,
 )
 notifications.register(
     NotificationType.WINTER_STORAGE_APPLICATION_CREATED.value,
@@ -52,6 +60,10 @@ dummy_context.update(
     {
         COMMON_CONTEXT: {"created_at": localize_datetime(timezone.now())},
         NotificationType.BERTH_APPLICATION_CREATED: {
+            "application": berth_application,
+            "harbor_choices": sorted(harbor_choices, key=lambda c: c.priority),
+        },
+        NotificationType.BERTH_APPLICATION_REJECTED: {
             "application": berth_application,
             "harbor_choices": sorted(harbor_choices, key=lambda c: c.priority),
         },

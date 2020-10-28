@@ -229,6 +229,7 @@ class BerthApplication(BaseApplication):
         allowed_statuses_without_lease = [
             ApplicationStatus.PENDING,
             ApplicationStatus.EXPIRED,
+            ApplicationStatus.NO_SUITABLE_BERTHS,
         ]
 
         if (

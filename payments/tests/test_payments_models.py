@@ -93,10 +93,9 @@ def test_additional_product_product_type_optional():
     assert product.product_type == AdditionalProductType.OPTIONAL_SERVICE
 
 
-def test_additional_product_one_service_per_period():
-    service = random.choice(ProductServiceType.OPTIONAL_SERVICES())
-    period = random.choice(list(PeriodType))
-
+@pytest.mark.parametrize("service", ProductServiceType.OPTIONAL_SERVICES())
+@pytest.mark.parametrize("period", PeriodType.values)
+def test_additional_product_one_service_per_period(service, period):
     product = AdditionalProductFactory(service=service, period=period)
 
     with pytest.raises(IntegrityError) as exception:
