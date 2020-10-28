@@ -8,6 +8,19 @@
 ...
 </details>
 
+# rel/2020-10-28.1
+
+**Added:** 
+* CI config for the new production environment ([#347](https://github.com/City-of-Helsinki/berth-reservations/pull/347))
+* Check for pending migrations on the review stage ([#345](https://github.com/City-of-Helsinki/berth-reservations/pull/345))
+* Command to assign sticker numbers automatically ([#344](https://github.com/City-of-Helsinki/berth-reservations/pull/344))
+* `storage on ice` additional service ([#346](https://github.com/City-of-Helsinki/berth-reservations/pull/346), [#342](https://github.com/City-of-Helsinki/berth-reservations/pull/342))
+* Mutation to reject an application ([#335](https://github.com/City-of-Helsinki/berth-reservations/pull/335))
+
+**Fixed:**
+* Winter lease only allowed to last for a year ([#343](https://github.com/City-of-Helsinki/berth-reservations/pull/343))
+* Update the local Postgres version to 11 ([#339](https://github.com/City-of-Helsinki/berth-reservations/pull/339))
+
 # rel/2020-10-19.1
 
 **Added:**
