@@ -2,7 +2,6 @@ import pytest
 from django.conf import settings
 from django_ilmoitin.models import NotificationTemplate
 from factory.random import randgen
-from requests import RequestException
 
 from applications.enums import ApplicationAreaType
 from applications.tests.factories import (
@@ -10,6 +9,7 @@ from applications.tests.factories import (
     WinterStorageApplicationFactory,
 )
 from berth_reservations.tests.conftest import *  # noqa
+from berth_reservations.tests.utils import MockResponse
 from customers.tests.factories import CustomerProfileFactory
 from leases.tests.conftest import *  # noqa
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
@@ -187,22 +187,6 @@ def create_bambora_provider(provider_base_config, request):
 
 def mocked_response_create(*args, **kwargs):
     """Mock Bambora auth token responses based on provider url"""
-
-    class MockResponse:
-        def __init__(self, data, status_code=200):
-            self.json_data = data
-            self.status_code = status_code
-
-        def json(self):
-            return self.json_data
-
-        def raise_for_status(self):
-            if self.status_code != 200:
-                raise RequestException(
-                    "Mock request error with status_code {}.".format(self.status_code)
-                )
-            pass
-
     if args[0].startswith(FAKE_BAMBORA_API_URL):
         return MockResponse(data={}, status_code=500)
     else:
