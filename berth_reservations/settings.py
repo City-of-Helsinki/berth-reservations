@@ -51,6 +51,7 @@ env = environ.Env(
     VENE_PAYMENTS_PROVIDER_CLASS=(str, "payments.providers.BamboraPayformProvider"),
     VENE_UI_RETURN_URL=(str, "https://venepaikat.hel.fi/"),
     VENE_UI_URL=(str, "https://venepaikat.hel.fi"),
+    FORCE_SCRIPT_NAME=(str, ""),
 )
 if os.path.exists(env_file):
     env.read_env(env_file)
@@ -65,6 +66,9 @@ if DEBUG and not SECRET_KEY:
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 USE_X_FORWARDED_HOST = env.bool("USE_X_FORWARDED_HOST")
+
+if env.str("FORCE_SCRIPT_NAME"):
+    FORCE_SCRIPT_NAME = env.str("FORCE_SCRIPT_NAME")
 
 DATABASES = {"default": env.db()}
 # Ensure postgis engine
