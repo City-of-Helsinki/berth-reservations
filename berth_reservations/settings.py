@@ -26,7 +26,6 @@ env = environ.Env(
     MEDIA_URL=(str, "/media/"),
     STATIC_URL=(str, "/static/"),
     ALLOWED_HOSTS=(list, []),
-    USE_X_FORWARDED_HOST=(bool, False),
     DATABASE_URL=(
         str,
         "postgis://berth_reservations:berth_reservations@localhost/berth_reservations",
@@ -52,6 +51,14 @@ env = environ.Env(
     VENE_UI_RETURN_URL=(str, "https://venepaikat.hel.fi/"),
     VENE_UI_URL=(str, "https://venepaikat.hel.fi"),
     FORCE_SCRIPT_NAME=(str, ""),
+    CSRF_COOKIE_NAME=(str, ""),
+    CSRF_COOKIE_PATH=(str, ""),
+    CSRF_COOKIE_SECURE=(bool, None),
+    SESSION_COOKIE_NAME=(str, ""),
+    SESSION_COOKIE_PATH=(str, ""),
+    SESSION_COOKIE_SECURE=(bool, None),
+    USE_X_FORWARDED_HOST=(bool, False),
+    CSRF_TRUSTED_ORIGINS=(list, []),
 )
 if os.path.exists(env_file):
     env.read_env(env_file)
@@ -66,6 +73,9 @@ if DEBUG and not SECRET_KEY:
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 USE_X_FORWARDED_HOST = env.bool("USE_X_FORWARDED_HOST")
+
+if env("CSRF_TRUSTED_ORIGINS"):
+    CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")
 
 if env.str("FORCE_SCRIPT_NAME"):
     FORCE_SCRIPT_NAME = env.str("FORCE_SCRIPT_NAME")
@@ -229,6 +239,24 @@ VENE_PAYMENTS_PROVIDER_CLASS = env("VENE_PAYMENTS_PROVIDER_CLASS")
 VENE_UI_RETURN_URL = env("VENE_UI_RETURN_URL")
 
 VENE_UI_URL = env("VENE_UI_URL")
+
+if env("CSRF_COOKIE_NAME"):
+    CSRF_COOKIE_NAME = env.str("CSRF_COOKIE_NAME")
+
+if env("CSRF_COOKIE_PATH"):
+    CSRF_COOKIE_PATH = env.str("CSRF_COOKIE_PATH")
+
+if env("CSRF_COOKIE_SECURE") is not None:
+    CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE")
+
+if env("SESSION_COOKIE_NAME"):
+    SESSION_COOKIE_NAME = env.str("SESSION_COOKIE_NAME")
+
+if env("SESSION_COOKIE_PATH"):
+    SESSION_COOKIE_PATH = env.str("SESSION_COOKIE_PATH")
+
+if env("SESSION_COOKIE_SECURE") is not None:
+    SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE")
 
 # local_settings.py can be used to override environment-specific settings
 # like database and email that differ between development and production.
