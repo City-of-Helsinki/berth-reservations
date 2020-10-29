@@ -59,6 +59,7 @@ env = environ.Env(
     SESSION_COOKIE_SECURE=(bool, None),
     USE_X_FORWARDED_HOST=(bool, False),
     CSRF_TRUSTED_ORIGINS=(list, []),
+    FORCED_HOST=(str, None),
 )
 if os.path.exists(env_file):
     env.read_env(env_file)
@@ -239,6 +240,10 @@ VENE_PAYMENTS_PROVIDER_CLASS = env("VENE_PAYMENTS_PROVIDER_CLASS")
 VENE_UI_RETURN_URL = env("VENE_UI_RETURN_URL")
 
 VENE_UI_URL = env("VENE_UI_URL")
+
+if env("FORCED_HOST"):
+    FORCED_HOST = env("FORCED_HOST")
+    MIDDLEWARE.insert(0, "berth_reservations.middlewares.HostFixupMiddleware")
 
 if env("CSRF_COOKIE_NAME"):
     CSRF_COOKIE_NAME = env.str("CSRF_COOKIE_NAME")
