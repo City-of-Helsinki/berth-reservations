@@ -322,3 +322,63 @@ def test_query_berth_application_count_filtered(superuser_api_client, customer_p
     assert executed["data"] == {
         "berthApplications": {"count": customer_count, "totalCount": total_count}
     }
+
+
+BERTH_APPLICATIONS_WITH_NAME_FILTER_QUERY = """
+query APPLICATIONS {
+    berthApplications(name: "%s") {
+        edges {
+            node {
+                id
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_services", "berth_handler", "berth_supervisor"],
+    indirect=True,
+)
+@pytest.mark.parametrize(
+    "name_filter", ["John", "Doe", "John Doe", "Doe John", "Do Joh", "hn oe"]
+)
+def test_berth_applications_name_filter(berth_application, api_client, name_filter):
+    berth_application.first_name = "John"
+    berth_application.last_name = "Doe"
+    berth_application.save()
+
+    query = BERTH_APPLICATIONS_WITH_NAME_FILTER_QUERY % name_filter
+    executed = api_client.execute(query)
+
+    assert executed["data"] == {
+        "berthApplications": {
+            "edges": [
+                {
+                    "node": {
+                        "id": to_global_id(
+                            BerthApplicationNode._meta.name, berth_application.id
+                        ),
+                    }
+                }
+            ]
+        }
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_services", "berth_handler", "berth_supervisor"],
+    indirect=True,
+)
+def test_berth_applications_name_filter_no_matching(berth_application, api_client):
+    berth_application.first_name = "John"
+    berth_application.last_name = "Doe"
+    berth_application.save()
+
+    query = BERTH_APPLICATIONS_WITH_NAME_FILTER_QUERY % "nomatches"
+    executed = api_client.execute(query)
+
+    assert executed["data"] == {"berthApplications": {"edges": []}}

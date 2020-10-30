@@ -421,3 +421,64 @@ def test_query_with_area_type_filter(superuser_api_client):
     assert executed_unmarked["data"] == {
         "winterStorageApplications": {"count": 3, "totalCount": 8}
     }
+
+
+WS_APPLICATIONS_WITH_NAME_FILTER_QUERY = """
+query APPLICATIONS {
+    winterStorageApplications(name: "%s") {
+        edges {
+            node {
+                id
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_services", "berth_handler", "berth_supervisor"],
+    indirect=True,
+)
+@pytest.mark.parametrize(
+    "name_filter", ["John", "Doe", "John Doe", "Doe John", "Do Joh", "hn oe"]
+)
+def test_ws_applications_name_filter(handled_ws_application, api_client, name_filter):
+    handled_ws_application.first_name = "John"
+    handled_ws_application.last_name = "Doe"
+    handled_ws_application.save()
+
+    query = WS_APPLICATIONS_WITH_NAME_FILTER_QUERY % name_filter
+    executed = api_client.execute(query)
+
+    assert executed["data"] == {
+        "winterStorageApplications": {
+            "edges": [
+                {
+                    "node": {
+                        "id": to_global_id(
+                            WinterStorageApplicationNode._meta.name,
+                            handled_ws_application.id,
+                        ),
+                    }
+                }
+            ]
+        }
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_services", "berth_handler", "berth_supervisor"],
+    indirect=True,
+)
+def test_ws_applications_name_filter_no_matching(handled_ws_application, api_client):
+    handled_ws_application.first_name = "John"
+    handled_ws_application.last_name = "Doe"
+    handled_ws_application.save()
+
+    query = WS_APPLICATIONS_WITH_NAME_FILTER_QUERY % "nomatches"
+    executed = api_client.execute(query)
+
+    assert executed["data"] == {"winterStorageApplications": {"edges": []}}
