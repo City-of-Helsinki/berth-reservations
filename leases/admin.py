@@ -67,7 +67,6 @@ class BaseLeaseAdmin(admin.ModelAdmin):
         "first_name",
         "last_name",
         "status",
-        "application_id",
     )
     search_fields = (
         "id",
