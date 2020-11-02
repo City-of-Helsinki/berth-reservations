@@ -15,6 +15,7 @@ services:
     django:
         build:
             context: ./
+            target: development
         env_file:
             - ./.env
         environment:
