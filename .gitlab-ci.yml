@@ -31,12 +31,6 @@ review:
     K8S_SECRET_VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS: "dummy-bank"
 
 staging:
-  # By default the staging environment is created from the master-branch.
-  # Here we define that it should be created from the branch called "develop" instead.
-  only:
-    refs:
-      - develop
-  # These variables are available only for staging env and are merged with the general variables defined above.
   variables:
     K8S_SECRET_TIER: "stage"
     K8S_SECRET_SKIP_DATABASE_CHECK: 1
