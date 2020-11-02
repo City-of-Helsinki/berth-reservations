@@ -3,6 +3,7 @@ from os.path import devnull
 import pytest
 from django.contrib.auth.models import Group
 from django.core.management import call_command
+from django_ilmoitin.models import NotificationTemplate
 
 from customers.enums import OrganizationType
 from customers.tests.factories import OrganizationFactory
@@ -138,3 +139,22 @@ def non_billable_customer(customer_profile):
         customer=customer_profile, organization_type=OrganizationType.NON_BILLABLE
     )
     return customer_profile
+
+
+@pytest.fixture
+def notification_template_orders_approved():
+    from payments.notifications import NotificationType
+
+    for value in NotificationType.values:
+        notification = NotificationTemplate.objects.language("fi").create(
+            type=value,
+            subject="test order approved subject, event: {{ order.order_number }}!",
+            body_html="<b>{{ order.order_number }} {{ payment_url }}</b>",
+            body_text="{{ order.order_number }} {{ payment_url }}",
+        )
+        notification.create_translation(
+            "en",
+            subject="test order approved subject, event: {{ order.order_number }}!",
+            body_html="<b>{{ order.order_number }} {{ payment_url }}</b>",
+            body_text="{{ order.order_number }} {{ payment_url }}",
+        )

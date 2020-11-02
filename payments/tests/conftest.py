@@ -1,6 +1,5 @@
 import pytest
 from django.conf import settings
-from django_ilmoitin.models import NotificationTemplate
 from factory.random import randgen
 
 from applications.enums import ApplicationAreaType
@@ -192,23 +191,4 @@ def mocked_response_create(*args, **kwargs):
     else:
         return MockResponse(
             data={"result": 0, "token": "token123", "type": "e-payment"}
-        )
-
-
-@pytest.fixture
-def notification_template_orders_approved():
-    from ..notifications import NotificationType
-
-    for value in NotificationType.values:
-        notification = NotificationTemplate.objects.language("fi").create(
-            type=value,
-            subject="test order approved subject, event: {{ order.order_number }}!",
-            body_html="<b>{{ order.order_number }} {{ payment_url }}</b>",
-            body_text="{{ order.order_number }} {{ payment_url }}",
-        )
-        notification.create_translation(
-            "en",
-            subject="test order approved subject, event: {{ order.order_number }}!",
-            body_html="<b>{{ order.order_number }} {{ payment_url }}</b>",
-            body_text="{{ order.order_number }} {{ payment_url }}",
         )

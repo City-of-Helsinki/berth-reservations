@@ -156,8 +156,7 @@ def test_approve_order_anymail_error(
     }
 
     with patch(
-        "payments.schema.mutations.send_notification",
-        side_effect=AnymailError("Anymail error"),
+        "payments.utils.send_notification", side_effect=AnymailError("Anymail error"),
     ) as mock:
         executed = superuser_api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
     mock.assert_called_once()

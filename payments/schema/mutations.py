@@ -8,16 +8,14 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.utils.translation import gettext_lazy as _
-from django_ilmoitin.utils import send_notification
 
-from applications.enums import ApplicationAreaType, ApplicationStatus
+from applications.enums import ApplicationAreaType
 from applications.models import BerthApplication, WinterStorageApplication
 from berth_reservations.exceptions import (
     VenepaikkaGraphQLError,
     VenepaikkaGraphQLWarning,
 )
 from customers.schema import ProfileNode
-from leases.enums import LeaseStatus
 from leases.models import BerthLease, WinterStorageLease
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from resources.schema import HarborNode, WinterStorageAreaNode
@@ -30,7 +28,7 @@ from users.decorators import (
 from utils.relay import get_node_from_global_id
 from utils.schema import update_object
 
-from ..enums import OrderStatus, OrderType, ProductServiceType
+from ..enums import OrderType, ProductServiceType
 from ..models import (
     AdditionalProduct,
     BerthProduct,
@@ -39,7 +37,7 @@ from ..models import (
     WinterStorageProduct,
 )
 from ..providers import get_payment_provider
-from ..utils import get_order_notification_type
+from ..utils import approve_order
 from .types import (
     AdditionalProductNode,
     AdditionalProductTaxEnum,
@@ -605,43 +603,9 @@ class ApproveOrderMutation(graphene.ClientIDMutation):
                     order = get_node_from_global_id(
                         info, order_id, only_type=OrderNode, nullable=False,
                     )
-
-                    # Update due date
-                    order.due_date = due_date
-                    order.save()
-
-                    # Update application status
-                    order.lease.application.status = ApplicationStatus.OFFER_SENT
-                    order.lease.application.save()
-
-                    # Update lease status
-                    order.lease.status = LeaseStatus.OFFERED
-                    order.lease.save()
-
-                    # Get payment URL
-                    language = (
-                        order.lease.application.language or settings.LANGUAGE_CODE
-                    )
-                    payment_url = get_payment_provider(
-                        info.context, ui_return_url=settings.VENE_UI_RETURN_URL
-                    ).get_payment_email_url(order, lang=language)
-
-                    # Send email
                     email = order_input.get("email")
 
-                    context = {
-                        "order": order,
-                        "fixed_services": order.order_lines.filter(
-                            product__service__in=ProductServiceType.FIXED_SERVICES()
-                        ),
-                        "optional_services": order.order_lines.filter(
-                            product__service__in=ProductServiceType.OPTIONAL_SERVICES()
-                        ),
-                        "payment_url": payment_url,
-                    }
-
-                    notification_type = get_order_notification_type(order)
-                    send_notification(email, notification_type.value, context, language)
+                    approve_order(order, email, due_date, info.context)
             except (
                 AnymailError,
                 OSError,
