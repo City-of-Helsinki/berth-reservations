@@ -90,6 +90,10 @@ We follow the basic config, without any modifications. Basic `black` commands:
 * To let `black` do its magic: `black .`
 * To see which files `black` would change: `black --check .`
 
+## Releases
+
+This project is following [GitHub flow](https://guides.github.com/pdfs/githubflow-online.pdf).
+Release notes can be found from [GitHub tags/releases](https://github.com/City-of-Helsinki/berth-reservations/releases).
 
 ## Helsinki Harbors' data
 
