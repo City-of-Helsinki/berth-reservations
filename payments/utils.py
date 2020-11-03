@@ -252,7 +252,7 @@ def get_order_notification_type(order):
         return NotificationType.NEW_WINTER_STORAGE_ORDER_APPROVED
     elif order.lease_order_type == LeaseOrderType.UNMARKED_WINTER_STORAGE_ORDER:
         return NotificationType.UNMARKED_WINTER_STORAGE_ORDER_APPROVED
-    elif order.order_type == OrderType.RENEW_BERTH_ORDER:
+    elif order.lease_order_type == LeaseOrderType.RENEW_BERTH_ORDER:
         return NotificationType.RENEW_BERTH_ORDER_APPROVED
     else:
         raise ValidationError(_("Order does not have a valid type"))

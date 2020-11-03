@@ -16,6 +16,7 @@ from berth_reservations.exceptions import (
     VenepaikkaGraphQLWarning,
 )
 from customers.schema import ProfileNode
+from leases.enums import LeaseStatus
 from leases.models import BerthLease, WinterStorageLease
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from resources.schema import HarborNode, WinterStorageAreaNode
@@ -28,7 +29,7 @@ from users.decorators import (
 from utils.relay import get_node_from_global_id
 from utils.schema import update_object
 
-from ..enums import OrderType, ProductServiceType
+from ..enums import OrderStatus, OrderType, ProductServiceType
 from ..models import (
     AdditionalProduct,
     BerthProduct,
