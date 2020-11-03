@@ -1,5 +1,6 @@
 import django_filters
 import graphene
+from django.db.models import Q
 from graphene_django import DjangoObjectType
 from graphql_relay import to_global_id
 
@@ -64,6 +65,12 @@ class BerthApplicationFilter(django_filters.FilterSet):
         fields=(("created_at", "createdAt"),),
         label="Supports only `createdAt` and `-createdAt`.",
     )
+    name = django_filters.CharFilter(method="filter_name")
+
+    def filter_name(self, qs, name, value):
+        for part in value.split():
+            qs = qs.filter(Q(first_name__icontains=part) | Q(last_name__icontains=part))
+        return qs
 
     def filter_berth_switch(self, queryset, name, value):
         lookup = "__".join([name, "isnull"])
@@ -128,6 +135,12 @@ class WinterStorageApplicationFilter(django_filters.FilterSet):
         fields=(("created_at", "createdAt"),),
         label="Supports only `createdAt` and `-createdAt`.",
     )
+    name = django_filters.CharFilter(method="filter_name")
+
+    def filter_name(self, qs, name, value):
+        for part in value.split():
+            qs = qs.filter(Q(first_name__icontains=part) | Q(last_name__icontains=part))
+        return qs
 
 
 class WinterStorageApplicationNode(DjangoObjectType):
