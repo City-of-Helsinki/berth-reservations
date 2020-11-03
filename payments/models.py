@@ -585,6 +585,7 @@ class Order(UUIDModel, TimeStampedModel):
                 OrderStatus.PAID,
                 OrderStatus.EXPIRED,
                 OrderStatus.REJECTED,
+                OrderStatus.ERROR,
             ),
             OrderStatus.PAID: (OrderStatus.CANCELLED,),
         }

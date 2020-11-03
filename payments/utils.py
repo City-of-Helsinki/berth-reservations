@@ -267,6 +267,8 @@ def get_lease_status(new_status) -> LeaseStatus:
         return LeaseStatus.EXPIRED
     elif new_status == OrderStatus.WAITING:
         return LeaseStatus.OFFERED
+    elif new_status == OrderStatus.ERROR:
+        return LeaseStatus.ERROR
     else:
         raise ValidationError(_("Invalid order status"))
 

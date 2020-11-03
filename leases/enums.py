@@ -7,4 +7,5 @@ class LeaseStatus(TextChoices):
     OFFERED = "offered", _("Offered")
     REFUSED = "refused", _("Refused")
     EXPIRED = "expired", _("Expired")
+    ERROR = "error", _("Error")
     PAID = "paid", _("Paid")
