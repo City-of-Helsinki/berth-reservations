@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import graphene
 from anymail.exceptions import AnymailError
 from dateutil.relativedelta import relativedelta
@@ -25,7 +27,7 @@ from users.decorators import (
 from utils.relay import get_node_from_global_id
 from utils.schema import update_object
 
-from ..enums import OrderStatus, ProductServiceType
+from ..enums import OrderStatus, OrderType, ProductServiceType
 from ..models import (
     AdditionalProduct,
     BerthProduct,
@@ -330,6 +332,51 @@ class CreateOrderMutation(graphene.ClientIDMutation):
             order = Order.objects.create(**input)
         except (ValidationError, IntegrityError) as e:
             raise VenepaikkaGraphQLError(e)
+        return CreateOrderMutation(order=order)
+
+
+class CreateAdditionalProductOrderMutation(graphene.ClientIDMutation):
+    class Input:
+        customer_id = graphene.ID(required=True)
+        lease_id = graphene.ID(required=True)
+        additional_product_id = graphene.ID(required=True)
+
+    order = graphene.Field(OrderNode)
+
+    @classmethod
+    @add_permission_required(Order)
+    @view_permission_required(BerthLease, WinterStorageLease)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        customer_id = input.pop("customer_id")
+        customer = get_node_from_global_id(
+            info, customer_id, ProfileNode, nullable=False
+        )
+
+        additional_product_id = input.pop("additional_product_id", None)
+        additional_product = get_node_from_global_id(
+            info, additional_product_id, AdditionalProductNode, nullable=False
+        )
+
+        lease_id = input.pop("lease_id", None)
+        lease = get_node_from_global_id(info, lease_id, BerthLeaseNode, nullable=False)
+
+        if lease.status != LeaseStatus.PAID:
+            raise VenepaikkaGraphQLError(_("Lease must be in PAID status"))
+
+        try:
+            order = Order.objects.create(
+                order_type=OrderType.ADDITIONAL_PRODUCT_ORDER,
+                customer=customer,
+                lease=lease,
+                product=None,
+                price=Decimal("0.00"),
+                tax_percentage=Decimal("0.00"),
+            )
+            OrderLine.objects.create(order=order, product=additional_product)
+        except (ValidationError, IntegrityError) as e:
+            raise VenepaikkaGraphQLError(e)
+
         return CreateOrderMutation(order=order)
 
 
@@ -661,6 +708,9 @@ class Mutation:
         "\n* A `WinterStorageProduct` and a `BerthLease` are passed"
         "\n* The `lease` provided belongs to a different `customer`"
         "\n* An invalid `product` (neither `BerthProduct` nor `WinterStorageProduct`) is passed"
+    )
+    create_additional_product_order = CreateAdditionalProductOrderMutation.Field(
+        description="TBD"
     )
     update_order = UpdateOrderMutation.Field(
         description="Updates an `Order` object."

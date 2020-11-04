@@ -88,6 +88,14 @@ class AdditionalProductFactory(AbstractBaseProductFactory):
         django_get_or_create = ("service", "period")
 
 
+# This is used in test_create_additional_product_order to avoid random failures.
+# AdditionalProductFactory picks e.g. service sometimes randomly even when trying to
+# set and save the model afterwards.
+class PlainAdditionalProductFactory(AbstractBaseProductFactory):
+    class Meta:
+        model = AdditionalProduct
+
+
 class OrderFactory(factory.django.DjangoModelFactory):
     customer = factory.SubFactory(CustomerProfileFactory)
     product = factory.LazyFunction(

@@ -19,6 +19,7 @@ from utils.numbers import rounded as rounded_decimal
 
 from .enums import (
     AdditionalProductType,
+    LeaseOrderType,
     OrderStatus,
     OrderType,
     PeriodType,
@@ -239,6 +240,12 @@ class Order(UUIDModel, TimeStampedModel):
         editable=False,
         db_index=True,
     )
+    order_type = models.CharField(
+        choices=OrderType.choices,
+        verbose_name=_("order type"),
+        max_length=30,
+        default=OrderType.LEASE_ORDER,
+    )
     customer = models.ForeignKey(
         "customers.CustomerProfile",
         verbose_name=_("customer"),
@@ -291,20 +298,13 @@ class Order(UUIDModel, TimeStampedModel):
 
     objects = OrderManager()
 
-    class Meta:
-        constraints = [
-            UniqueConstraint(
-                fields=["_lease_content_type", "_lease_object_id"], name="unique_lease"
-            )
-        ]
-
     def __str__(self):
         return f"{self.product} [{self.status}]"
 
     @property
-    def order_type(self) -> OrderType:
+    def lease_order_type(self) -> LeaseOrderType:
         if not hasattr(self, "lease"):
-            return OrderType.INVALID
+            return LeaseOrderType.INVALID
 
         # Check for application-specific fields:
         # - if it's a winter storage application:
@@ -313,15 +313,15 @@ class Order(UUIDModel, TimeStampedModel):
         if hasattr(self.lease, "application"):
             if isinstance(self.lease.application, WinterStorageApplication):
                 return (
-                    OrderType.UNMARKED_WINTER_STORAGE_ORDER
+                    LeaseOrderType.UNMARKED_WINTER_STORAGE_ORDER
                     if self.lease.application.area_type == ApplicationAreaType.UNMARKED
-                    else OrderType.WINTER_STORAGE_ORDER
+                    else LeaseOrderType.WINTER_STORAGE_ORDER
                 )
             elif (
                 isinstance(self.lease.application, BerthApplication)
                 and self.lease.application.berth_switch
             ):
-                return OrderType.BERTH_SWITCH_ORDER
+                return LeaseOrderType.BERTH_SWITCH_ORDER
 
         # If it's a berth lease, check if it's a new lease or not
         if isinstance(self.lease, BerthLease):
@@ -337,14 +337,14 @@ class Order(UUIDModel, TimeStampedModel):
                 .exists()
             )
             if has_previous_lease:
-                return OrderType.RENEW_BERTH_ORDER
-            return OrderType.NEW_BERTH_ORDER
+                return LeaseOrderType.RENEW_BERTH_ORDER
+            return LeaseOrderType.NEW_BERTH_ORDER
 
         # Winter storage only has one type (unless it's unmarked)
         elif isinstance(self.lease, WinterStorageLease):
-            return OrderType.WINTER_STORAGE_ORDER
+            return LeaseOrderType.WINTER_STORAGE_ORDER
 
-        return OrderType.INVALID
+        return LeaseOrderType.INVALID
 
     @property
     @rounded
@@ -415,7 +415,7 @@ class Order(UUIDModel, TimeStampedModel):
             )
 
     def _check_product_or_price(self) -> None:
-        if all([not self.product, not self._product_object_id, not self.price]):
+        if all([not self.product, not self._product_object_id, self.price is None]):
             raise ValidationError(
                 _("Order must have either product object or price value")
             )
@@ -541,7 +541,6 @@ class Order(UUIDModel, TimeStampedModel):
                         )
                     price = price * place_sqm
 
-            # This self override capability seems to be needed for unit tests
             price_value = self.price or price
             tax_percentage_value = self.tax_percentage or tax_percentage
 
@@ -699,8 +698,14 @@ class OrderLine(UUIDModel, TimeStampedModel):
             unit = self.product.price_unit
 
             if unit == PriceUnits.PERCENTAGE:
-                price = calculate_product_percentage_price(
-                    self.order.price, self.product.price_value
+                price = (
+                    calculate_product_percentage_price(
+                        self.order.price, self.product.price_value
+                    )
+                    if self.order.order_type == OrderType.LEASE_ORDER
+                    else self._calculate_percentage_price_for_additional_prod_order(
+                        self.order.lease, self.product.price_value
+                    )
                 )
 
             if self.order.lease:
@@ -726,6 +731,18 @@ class OrderLine(UUIDModel, TimeStampedModel):
                 self.tax_percentage = self.product.tax_percentage
 
         super().save(*args, **kwargs)
+
+    @staticmethod
+    def _calculate_percentage_price_for_additional_prod_order(
+        lease: BerthLease, percentage
+    ):
+        lease_order = lease._orders_relation.filter(
+            status=OrderStatus.PAID, order_type=OrderType.LEASE_ORDER
+        ).first()
+
+        return calculate_product_percentage_price(
+            lease_order.fixed_price_total, percentage
+        )
 
     @property
     @rounded
