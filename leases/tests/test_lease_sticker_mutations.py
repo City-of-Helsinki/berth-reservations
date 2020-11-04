@@ -1,3 +1,5 @@
+from dateutil.utils import today
+
 from applications.enums import ApplicationAreaType
 from berth_reservations.tests.utils import assert_in_errors
 from utils.relay import to_global_id
@@ -53,6 +55,7 @@ query GetWinterStorageLease {
         id
         stickerNumber
         stickerSeason
+        stickerPosted
     }
 }
 """
@@ -84,3 +87,69 @@ def test_assign_new_sticker_number(
 
     sticker_season = executed["data"]["winterStorageLease"]["stickerSeason"]
     assert len(sticker_season) == 9
+
+
+def test_assign_new_sticker_number_resets_posted_date(
+    sticker_sequences,
+    superuser_api_client,
+    winter_storage_lease,
+    winter_storage_application,
+):
+    lease_id = to_global_id(WinterStorageLeaseNode, winter_storage_lease.id)
+    variables = {"leaseId": lease_id}
+    winter_storage_application.area_type = ApplicationAreaType.UNMARKED
+    winter_storage_application.save()
+
+    date_to_test = today()
+
+    winter_storage_lease.status = LeaseStatus.PAID
+    winter_storage_lease.application = winter_storage_application
+    winter_storage_lease.sticker_posted = date_to_test
+    winter_storage_lease.save()
+
+    executed = superuser_api_client.execute(QUERY_WINTER_STORAGE_LEASE % lease_id)
+    assert executed["data"]["winterStorageLease"]["stickerPosted"] == str(
+        date_to_test.date()
+    )
+
+    superuser_api_client.execute(CONFIRM_PAYMENT_MUTATION, input=variables)
+    executed = superuser_api_client.execute(QUERY_WINTER_STORAGE_LEASE % lease_id)
+    assert executed["data"]["winterStorageLease"]["stickerPosted"] is None
+
+
+SET_STICKERS_POSTED_MUTATION = """
+mutation NEW_STICKER_NUMBER($input: SetStickersPostedMutationInput!) {
+    setStickersPosted(input: $input) {
+        clientMutationId
+    }
+}
+"""
+
+
+def test_set_stickers_posted(superuser_api_client, winter_storage_lease):
+    lease_id = to_global_id(WinterStorageLeaseNode, winter_storage_lease.id)
+
+    winter_storage_lease.sticker_number = 1
+    winter_storage_lease.save()
+
+    variables = {"leaseIds": [lease_id], "date": today()}
+
+    superuser_api_client.execute(SET_STICKERS_POSTED_MUTATION, input=variables)
+    executed = superuser_api_client.execute(QUERY_WINTER_STORAGE_LEASE % lease_id)
+
+    assert executed["data"]["winterStorageLease"]["stickerPosted"] == str(
+        variables["date"].date()
+    )
+
+
+def test_set_stickers_posted_error_when_no_sticker_number(
+    superuser_api_client, winter_storage_lease
+):
+    lease_id = to_global_id(WinterStorageLeaseNode, winter_storage_lease.id)
+    variables = {"leaseIds": [lease_id], "date": today()}
+
+    executed = superuser_api_client.execute(
+        SET_STICKERS_POSTED_MUTATION, input=variables
+    )
+
+    assert_in_errors("All leases must have an assigned sticker number", executed)
