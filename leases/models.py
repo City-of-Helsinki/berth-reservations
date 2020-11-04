@@ -232,6 +232,9 @@ class WinterStorageLease(AbstractLease):
     sticker_number = models.PositiveSmallIntegerField(
         verbose_name=_("sticker number"), null=True, blank=True
     )
+    sticker_posted = models.DateField(
+        verbose_name=_("sticker posted"), null=True, blank=True
+    )
     objects = WinterStorageLeaseManager()
 
     class Meta:

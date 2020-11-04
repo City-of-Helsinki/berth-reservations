@@ -380,9 +380,35 @@ class AssignNewStickerNumberMutation(graphene.ClientIDMutation):
 
         new_sticker_number = get_next_sticker_number(lease.start_date)
         lease.sticker_number = new_sticker_number
+        lease.sticker_posted = None
         lease.save()
 
         return AssignNewStickerNumberMutation(sticker_number=new_sticker_number)
+
+
+class SetStickersPostedMutation(graphene.ClientIDMutation):
+    class Input:
+        lease_ids = graphene.List(graphene.NonNull(graphene.String), required=True)
+        date = graphene.Date(required=True)
+
+    @classmethod
+    @change_permission_required(WinterStorageLease)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        date = input.pop("date")
+        for lease_id in input.pop("lease_ids", []):
+            lease = get_node_from_global_id(
+                info, lease_id, only_type=WinterStorageLeaseNode, nullable=False
+            )
+            if lease.sticker_number:
+                lease.sticker_posted = date
+                lease.save()
+            else:
+                raise VenepaikkaGraphQLError(
+                    _("All leases must have an assigned sticker number")
+                )
+
+        return SetStickersPostedMutation()
 
 
 class Mutation:
@@ -446,4 +472,7 @@ class Mutation:
     )
     assign_new_sticker_number = AssignNewStickerNumberMutation.Field(
         description="Assigns new sticker number for an unmarked WS lease"
+    )
+    set_stickers_posted = SetStickersPostedMutation.Field(
+        description="Set posted dates for stickers of unmarked WS leases"
     )
