@@ -1,5 +1,11 @@
 # Berth reservations
 
+## :rotating_light: This branch is deprecated :rotating_light:
+From [release-1.0.4](https://github.com/City-of-Helsinki/berth-reservations/releases/tag/release-1.0.4) on,
+the project is changing to [github-flow](https://guides.github.com/introduction/flow/), so all the work is now done
+parting from the [`master branch`](https://github.com/City-of-Helsinki/berth-reservations/tree/master). Do not use
+this branch. It's just kept for archiving purposes.
+
 :boat: Bare-bones registration API for berth reservations :boat:
 
 ## Development with Docker
