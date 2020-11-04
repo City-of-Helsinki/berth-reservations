@@ -11,7 +11,7 @@ from django.http import HttpRequest, HttpResponse, HttpResponseServerError
 from django.utils.translation import gettext_lazy as _, override
 from requests.exceptions import RequestException
 
-from ..enums import OrderStatus
+from ..enums import OrderStatus, OrderType
 from ..exceptions import (
     DuplicateOrderError,
     ExpiredOrderError,
@@ -157,31 +157,28 @@ class BamboraPayformProvider(PaymentProvider):
         order_lines: [OrderLine] = OrderLine.objects.filter(order=order.id)
         items: [dict] = []
 
-        area = None
+        area = self.resolve_area(order)
 
-        if hasattr(order, "product"):
-            if isinstance(order.product, BerthProduct):
-                # If the product is the "default" product (applies to all areas)
-                area = order.product.harbor or order.lease.berth.pier.harbor
-            elif hasattr(order.product, "winter_storage_area"):
-                area = order.product.winter_storage_area
-
-        product = order.product
-        int_tax = int(order.tax_percentage)
-        assert int_tax == product.tax_percentage  # make sure the tax is a whole number
-        with override(language):
-            product_name = product.name
-        items.append(
-            {
-                "id": get_talpa_product_id(product.id, area),
-                "title": product_name,
-                "price": price_as_fractional_int(order.price),
-                "pretax_price": price_as_fractional_int(order.pretax_price),
-                "tax": int_tax,
-                "count": 1,
-                "type": 1,
-            }
-        )
+        # Additional product orders doesn't have berth product
+        if hasattr(order, "product") and order.product:
+            product = order.product
+            int_tax = int(order.tax_percentage)
+            assert (
+                int_tax == product.tax_percentage
+            )  # make sure the tax is a whole number
+            with override(language):
+                product_name = product.name
+            items.append(
+                {
+                    "id": get_talpa_product_id(product.id, area),
+                    "title": product_name,
+                    "price": price_as_fractional_int(order.price),
+                    "pretax_price": price_as_fractional_int(order.pretax_price),
+                    "tax": int_tax,
+                    "count": 1,
+                    "type": 1,
+                }
+            )
 
         for order_line in order_lines:
             product: AdditionalProduct = order_line.product
@@ -392,3 +389,19 @@ class BamboraPayformProvider(PaymentProvider):
             return HttpResponseServerError(
                 content="Payment failure and failed redirecting back to UI"
             )
+
+    @staticmethod
+    def resolve_area(order: Order):
+        lease_order = (
+            order
+            if order.order_type == OrderType.LEASE_ORDER
+            else order.lease._orders_relation.filter(
+                status=OrderStatus.PAID, order_type=OrderType.LEASE_ORDER
+            ).first()
+        )
+
+        if isinstance(lease_order.product, BerthProduct):
+            # If the product is the "default" product (applies to all areas)
+            return lease_order.product.harbor or order.lease.berth.pier.harbor
+        elif hasattr(lease_order.product, "winter_storage_area"):
+            return lease_order.product.winter_storage_area
