@@ -600,21 +600,8 @@ class Order(UUIDModel, TimeStampedModel):
         self.status = new_status
         self.save(update_fields=["status"])
 
-        self.lease.status = get_lease_status(new_status)
-        self.lease.save(update_fields=["status"])
-
-        if new_status == OrderStatus.PAID:
-            application = self.lease.application
-            application.status = ApplicationStatus.HANDLED
-            self.lease.application.save(update_fields=["status"])
-
-            if (
-                isinstance(self.lease, WinterStorageLease)
-                and application.area_type == ApplicationAreaType.UNMARKED
-            ):
-                sticker_number = get_next_sticker_number(self.lease.start_date)
-                self.lease.sticker_number = sticker_number
-                self.lease.save(update_fields=["sticker_number"])
+        if self.order_type == OrderType.LEASE_ORDER:
+            self.update_lease_and_application(new_status)
 
         self.create_log_entry(
             from_status=old_status, to_status=new_status, comment=comment
@@ -638,6 +625,23 @@ class Order(UUIDModel, TimeStampedModel):
         for token in tokens:
             token.cancelled = True
         self.tokens.bulk_update(tokens, ["cancelled"])
+
+    def update_lease_and_application(self, new_status):
+        self.lease.status = get_lease_status(new_status)
+        self.lease.save(update_fields=["status"])
+
+        if new_status == OrderStatus.PAID:
+            application = self.lease.application
+            application.status = ApplicationStatus.HANDLED
+            self.lease.application.save(update_fields=["status"])
+
+            if (
+                isinstance(self.lease, WinterStorageLease)
+                and application.area_type == ApplicationAreaType.UNMARKED
+            ):
+                sticker_number = get_next_sticker_number(self.lease.start_date)
+                self.lease.sticker_number = sticker_number
+                self.lease.save(update_fields=["sticker_number"])
 
 
 class OrderLine(UUIDModel, TimeStampedModel):

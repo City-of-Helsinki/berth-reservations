@@ -494,6 +494,30 @@ def test_handle_notify_request_success(
     assert returned.status_code == 204
 
 
+def test_handle_notify_request_success_for_ap_order(
+    provider_base_config, berth_order: Order,
+):
+    berth_order.order_number = "abc123"
+    berth_order.status = OrderStatus.WAITING
+    berth_order.order_type = OrderType.ADDITIONAL_PRODUCT_ORDER
+    berth_order.save()
+
+    rf = RequestFactory()
+    request = rf.get("/payments/notify/", success_params)
+    payment_provider = create_bambora_provider(provider_base_config, request)
+    returned = payment_provider.handle_notify_request()
+    order_after = Order.objects.get(
+        order_number=success_params.get("ORDER_NUMBER").split("-")[0]
+    )
+    assert order_after.status == OrderStatus.PAID
+    # it should not change the application and lease status in case of additional product order
+    assert order_after.lease.application.status == ApplicationStatus.PENDING
+    assert order_after.lease.status == LeaseStatus.DRAFTED
+
+    assert isinstance(returned, HttpResponse)
+    assert returned.status_code == 204
+
+
 @pytest.mark.parametrize(
     "order_status, expected_order_status",
     (
