@@ -18,7 +18,6 @@ RUN apt-install.sh \
       build-essential \
       netcat \
       pkg-config \
-      postgresql-client \
     && pip install --no-cache-dir \
       -r /app/requirements.txt \
     && apt-cleanup.sh \
@@ -43,7 +42,8 @@ FROM appbase as development
 # Install additional dependencies.
 COPY --chown=appuser:appuser requirements-dev.txt /app/requirements-dev.txt
 RUN pip install --no-cache-dir  -r /app/requirements-dev.txt \
-  && pip install --no-cache-dir prequ
+  && pip install --no-cache-dir prequ \
+  && apt-install.sh postgresql-client
 
 # Set environment variables for development.
 ENV DEV_SERVER=1
