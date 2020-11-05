@@ -17,13 +17,15 @@ from users.decorators import (
     delete_permission_required,
     view_permission_required,
 )
-from utils.relay import get_node_from_global_id
+from utils.relay import get_node_from_global_id, to_global_id
 from utils.schema import update_object
 
 from ..enums import LeaseStatus
 from ..models import BerthLease, WinterStorageLease
 from ..stickers import get_next_sticker_number
-from .types import BerthLeaseNode, WinterStorageLeaseNode
+from ..tasks import send_berth_invoices
+from .types import BerthLeaseNode, SendExistingInvoicesType, WinterStorageLeaseNode
+from .utils import parse_invoicing_result
 
 
 class AbstractLeaseInput:
@@ -411,6 +413,47 @@ class SetStickersPostedMutation(graphene.ClientIDMutation):
         return SetStickersPostedMutation()
 
 
+class SendExistingInvoicesInput:
+    due_date = graphene.Date(
+        description="Defaults to 14 days from the date when the mutation is executed."
+    )
+
+
+class SendExistingBerthInvoicesMutation(graphene.ClientIDMutation):
+    class Input(SendExistingInvoicesInput):
+        pass
+
+    result = graphene.Field(SendExistingInvoicesType)
+
+    @classmethod
+    @view_permission_required(CustomerProfile)
+    @change_permission_required(BerthLease, WinterStorageLease, Order)
+    def mutate_and_get_payload(cls, root, info, **input):
+        from payments.schema import OrderNode
+
+        result = send_berth_invoices(info.context, input.get("due_date"))
+
+        # Only need to parse the list of ids
+        successful_orders = [
+            to_global_id(OrderNode, id) for id in result.get("successful_orders")
+        ]
+        # Parse the failed object types
+        failed_leases = list(
+            map(parse_invoicing_result(BerthLeaseNode), result.get("failed_leases"))
+        )
+        failed_orders = list(
+            map(parse_invoicing_result(OrderNode), result.get("failed_orders"))
+        )
+
+        result_response = SendExistingInvoicesType(
+            successful_orders=successful_orders,
+            failed_orders=failed_orders,
+            failed_leases=failed_leases,
+        )
+
+        return SendExistingBerthInvoicesMutation(result=result_response)
+
+
 class Mutation:
     create_berth_lease = CreateBerthLeaseMutation.Field(
         description="Creates a `BerthLease` associated with the `BerthApplication` and `Berth` passed. "
@@ -476,3 +519,5 @@ class Mutation:
     set_stickers_posted = SetStickersPostedMutation.Field(
         description="Set posted dates for stickers of unmarked WS leases"
     )
+
+    send_existing_berth_invoices = SendExistingBerthInvoicesMutation.Field()

@@ -79,3 +79,14 @@ class WinterStorageLeaseNode(DjangoObjectType):
             WinterStorageApplication,
             CustomerProfile,
         )
+
+
+class FailedInstanceType(graphene.ObjectType):
+    id = graphene.ID(required=True)
+    error = graphene.String()
+
+
+class SendExistingInvoicesType(graphene.ObjectType):
+    successful_orders = graphene.List(graphene.ID)
+    failed_orders = graphene.List(FailedInstanceType)
+    failed_leases = graphene.List(FailedInstanceType)
