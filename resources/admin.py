@@ -34,12 +34,34 @@ class AvailabilityLevelAdmin(TranslatableAdmin):
 
 class BerthAdmin(admin.ModelAdmin):
     readonly_fields = ("is_available",)
+    list_display = (
+        "id",
+        "number",
+        "harbor",
+        "pier_identifier",
+        "is_active",
+        "is_available",
+    )
+    search_fields = (
+        "number",
+        "id",
+        "pier__id",
+        "pier__identifier",
+        "pier__harbor__translations__name",
+        "pier__harbor__id",
+    )
+    list_filter = ("is_active",)
 
     def is_available(self, obj):
         return obj.is_available
 
-    is_available.short_description = _("Berth available")
-    is_available.admin_order_field = "is_available"
+    def harbor(self, obj):
+        return obj.pier.harbor
+
+    def pier_identifier(self, obj):
+        return obj.pier.identifier
+
+    is_available.boolean = True
 
 
 class BoatTypeAdmin(TranslatableAdmin):
@@ -47,6 +69,11 @@ class BoatTypeAdmin(TranslatableAdmin):
 
 
 class HarborAdmin(CustomTranslatableAdmin, admin.OSMGeoAdmin):
+    list_display = (
+        "id",
+        "name",
+        "servicemap_id",
+    )
     ordering = ("translations__name",)
     readonly_fields = (
         "number_of_places",
@@ -54,6 +81,7 @@ class HarborAdmin(CustomTranslatableAdmin, admin.OSMGeoAdmin):
         "max_length",
         "max_depth",
     )
+    search_fields = ("id",)
 
     def number_of_places(self, obj):
         return obj.number_of_places
@@ -81,6 +109,20 @@ class HarborAdmin(CustomTranslatableAdmin, admin.OSMGeoAdmin):
 
 
 class PierAdmin(admin.OSMGeoAdmin):
+    list_display = (
+        "id",
+        "harbor",
+        "identifier",
+        "number_of_places",
+        "number_of_free_places",
+        "number_of_inactive_places",
+    )
+    search_fields = (
+        "id",
+        "identifier",
+        "harbor__translations__name",
+        "harbor__id",
+    )
     filter_horizontal = ("suitable_boat_types",)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -88,20 +130,30 @@ class PierAdmin(admin.OSMGeoAdmin):
             kwargs["queryset"] = Harbor.objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+    def number_of_places(self, obj):
+        return obj.number_of_places
+
+    def number_of_free_places(self, obj):
+        return obj.number_of_free_places
+
+    def number_of_inactive_places(self, obj):
+        return obj.number_of_inactive_places
+
 
 class WinterStorageAreaAdmin(CustomTranslatableAdmin, admin.OSMGeoAdmin):
+    list_display = (
+        "id",
+        "name",
+        "servicemap_id",
+        "estimated_number_of_unmarked_spaces",
+        "estimated_number_of_section_spaces",
+    )
     ordering = ("translations__name",)
     readonly_fields = (
-        "number_of_marked_places",
         "max_width",
         "max_length",
     )
-
-    def number_of_marked_places(self, obj):
-        return obj.number_of_marked_places
-
-    number_of_marked_places.short_description = _("Number of marked places")
-    number_of_marked_places.admin_order_field = "number_of_marked_places"
+    search_fields = ("id",)
 
     def max_width(self, obj):
         return obj.max_width
@@ -117,10 +169,66 @@ class WinterStorageAreaAdmin(CustomTranslatableAdmin, admin.OSMGeoAdmin):
 
 
 class WinterStorageSectionAdmin(admin.OSMGeoAdmin):
+    list_display = (
+        "id",
+        "area",
+        "identifier",
+        "number_of_places",
+        "number_of_free_places",
+        "number_of_inactive_places",
+    )
+    search_fields = (
+        "id",
+        "identifier",
+        "area__translations__name",
+        "area__id",
+    )
+
+    def number_of_places(self, obj):
+        return obj.number_of_places
+
+    def number_of_free_places(self, obj):
+        return obj.number_of_free_places
+
+    def number_of_inactive_places(self, obj):
+        return obj.number_of_inactive_places
+
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "area":
             kwargs["queryset"] = WinterStorageArea.objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+class WinterStoragePlaceAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "number",
+        "area",
+        "section_identifier",
+        "is_active",
+        "is_available",
+    )
+    search_fields = (
+        "id",
+        "identifier",
+        "winter_storage_section__area__translations__name",
+        "winter_storage_section__area__id",
+        "identifier",
+        "harbor__translations__name",
+        "harbor__id",
+    )
+    list_filter = ("is_active",)
+
+    def is_available(self, obj):
+        return obj.is_available
+
+    def area(self, obj):
+        return obj.winter_storage_section.area
+
+    def section_identifier(self, obj):
+        return obj.winter_storage_section.identifier
+
+    is_available.boolean = True
 
 
 admin.site.register(AvailabilityLevel, AvailabilityLevelAdmin)
@@ -132,6 +240,6 @@ admin.site.register(HarborMap)
 admin.site.register(Pier, PierAdmin)
 admin.site.register(WinterStorageArea, WinterStorageAreaAdmin)
 admin.site.register(WinterStorageAreaMap)
-admin.site.register(WinterStoragePlace)
 admin.site.register(WinterStoragePlaceType)
 admin.site.register(WinterStorageSection, WinterStorageSectionAdmin)
+admin.site.register(WinterStoragePlace, WinterStoragePlaceAdmin)
