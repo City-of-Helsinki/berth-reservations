@@ -1,5 +1,5 @@
 #!/bin/sh
-# Runs database initialization scripts on first install only
+# Runs database initialization scripts on first install only, disabled for now as staging and prod are already seeded
 python /app/manage.py migrate --noinput
 python /app/manage.py geo_import finland --municipalities
 python /app/manage.py geo_import helsinki --divisions
