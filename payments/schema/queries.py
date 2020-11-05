@@ -4,7 +4,7 @@ from graphene_django import DjangoConnectionField
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from leases.models import BerthLease, WinterStorageLease
 
-from ..enums import AdditionalProductType, ProductServiceType
+from ..enums import AdditionalProductType, OrderType, ProductServiceType
 from ..models import AdditionalProduct, BerthProduct, Order, WinterStorageProduct
 from .types import (
     AdditionalProductNode,
@@ -117,7 +117,9 @@ class OldAPIQuery:
             raise VenepaikkaGraphQLError(e)
 
         order_type = OrderTypeEnum.UNKNOWN
-        if order.product:
+        if order.order_type == OrderType.ADDITIONAL_PRODUCT_ORDER:
+            order_type = OrderTypeEnum.ADDITIONAL_PRODUCT
+        elif order.product:
             if isinstance(order.product, BerthProduct):
                 order_type = OrderTypeEnum.BERTH
             elif isinstance(order.product, WinterStorageProduct):

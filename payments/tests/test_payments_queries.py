@@ -12,7 +12,7 @@ from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from resources.schema import HarborNode, WinterStorageAreaNode
 from utils.relay import to_global_id
 
-from ..enums import OrderStatus, ProductServiceType
+from ..enums import OrderStatus, OrderType, ProductServiceType
 from ..models import BerthProduct, Order, WinterStorageProduct
 from ..schema.types import (
     AdditionalProductNode,
@@ -787,7 +787,9 @@ query ORDER_DETAILS {
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order", "empty_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order", "empty_order", "additional_product_order"],
+    indirect=True,
 )
 @pytest.mark.parametrize("status", OrderStatus.values)
 def test_get_order_status(old_schema_api_client, status, order: Order):
@@ -801,6 +803,8 @@ def test_get_order_status(old_schema_api_client, status, order: Order):
             order_type = OrderTypeEnum.BERTH
         elif isinstance(order.product, WinterStorageProduct):
             order_type = OrderTypeEnum.WINTER_STORAGE
+    elif order.order_type == OrderType.ADDITIONAL_PRODUCT_ORDER:
+        order_type = OrderTypeEnum.ADDITIONAL_PRODUCT
     else:
         order_type = OrderTypeEnum.UNKNOWN
 
