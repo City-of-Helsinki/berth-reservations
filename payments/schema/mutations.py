@@ -363,6 +363,8 @@ class CreateAdditionalProductOrderMutation(graphene.ClientIDMutation):
 
         if lease.status != LeaseStatus.PAID:
             raise VenepaikkaGraphQLError(_("Lease must be in PAID status"))
+        if additional_product.service != ProductServiceType.STORAGE_ON_ICE:
+            raise VenepaikkaGraphQLError(_("Only storage on ice supported"))
 
         try:
             order = Order.objects.create(
@@ -710,7 +712,7 @@ class Mutation:
         "\n* An invalid `product` (neither `BerthProduct` nor `WinterStorageProduct`) is passed"
     )
     create_additional_product_order = CreateAdditionalProductOrderMutation.Field(
-        description="TBD"
+        description="Creates an `Order` object and the `OrderLine`s for only one additional product."
     )
     update_order = UpdateOrderMutation.Field(
         description="Updates an `Order` object."
