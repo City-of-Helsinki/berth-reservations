@@ -353,12 +353,12 @@ class CreateAdditionalProductOrderMutation(graphene.ClientIDMutation):
             info, customer_id, ProfileNode, nullable=False
         )
 
-        additional_product_id = input.pop("additional_product_id", None)
+        additional_product_id = input.pop("additional_product_id")
         additional_product = get_node_from_global_id(
             info, additional_product_id, AdditionalProductNode, nullable=False
         )
 
-        lease_id = input.pop("lease_id", None)
+        lease_id = input.pop("lease_id")
         lease = get_node_from_global_id(info, lease_id, BerthLeaseNode, nullable=False)
 
         if lease.status != LeaseStatus.PAID:
