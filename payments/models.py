@@ -740,7 +740,7 @@ class OrderLine(UUIDModel, TimeStampedModel):
     def _calculate_percentage_price_for_additional_prod_order(
         lease: BerthLease, percentage
     ):
-        lease_order = lease._orders_relation.filter(
+        lease_order = lease.orders.filter(
             status=OrderStatus.PAID, order_type=OrderType.LEASE_ORDER
         ).first()
 
