@@ -13,6 +13,7 @@ from django.db.models import (
     UniqueConstraint,
     Value,
 )
+from django.db.models.expressions import RawSQL
 from django.db.models.functions import Coalesce
 from django.utils.translation import gettext_lazy as _
 from munigeo.models import Municipality
@@ -611,7 +612,19 @@ class BerthManager(models.Manager):
             | Q(in_last_season & auto_renew & paid_status)
         )
 
-        return super().get_queryset().annotate(is_available=~Exists(active_leases))
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                is_available=~Exists(active_leases),
+                _int_number=RawSQL(
+                    "CAST(substring(number FROM '^[0-9]+') AS INTEGER)",
+                    params=[],
+                    output_field=models.PositiveSmallIntegerField(),
+                ),
+            )
+            .order_by("_int_number")
+        )
 
 
 class Berth(AbstractBoatPlace):
@@ -636,7 +649,7 @@ class Berth(AbstractBoatPlace):
     class Meta:
         verbose_name = _("berth")
         verbose_name_plural = _("berths")
-        ordering = ("pier", "number")
+        ordering = ("pier",)
         unique_together = (("pier", "number"),)
 
     def __str__(self):
