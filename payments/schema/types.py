@@ -47,7 +47,12 @@ AdditionalProductTaxEnum = graphene.Enum(
 )
 OrderTypeEnum = graphene.Enum(
     "OrderTypeEnum",
-    [("BERTH", "BERTH"), ("WINTER_STORAGE", "WINTER_STORAGE"), ("UNKNOWN", "UNKNOWN")],
+    [
+        ("BERTH", "BERTH"),
+        ("WINTER_STORAGE", "WINTER_STORAGE"),
+        ("ADDITIONAL_PRODUCT", "ADDITIONAL_PRODUCT"),
+        ("UNKNOWN", "UNKNOWN"),
+    ],
 )
 
 

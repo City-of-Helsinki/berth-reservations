@@ -237,16 +237,16 @@ def get_talpa_product_id(
 
 
 def get_order_notification_type(order):
-    from .enums import OrderType
+    from .enums import LeaseOrderType
     from .notifications import NotificationType
 
-    if order.order_type == OrderType.NEW_BERTH_ORDER:
+    if order.lease_order_type == LeaseOrderType.NEW_BERTH_ORDER:
         return NotificationType.NEW_BERTH_ORDER_APPROVED
-    elif order.order_type == OrderType.BERTH_SWITCH_ORDER:
+    elif order.lease_order_type == LeaseOrderType.BERTH_SWITCH_ORDER:
         return NotificationType.BERTH_SWITCH_ORDER_APPROVED
-    elif order.order_type == OrderType.WINTER_STORAGE_ORDER:
+    elif order.lease_order_type == LeaseOrderType.WINTER_STORAGE_ORDER:
         return NotificationType.NEW_WINTER_STORAGE_ORDER_APPROVED
-    elif order.order_type == OrderType.UNMARKED_WINTER_STORAGE_ORDER:
+    elif order.lease_order_type == LeaseOrderType.UNMARKED_WINTER_STORAGE_ORDER:
         return NotificationType.UNMARKED_WINTER_STORAGE_ORDER_APPROVED
     else:
         raise ValidationError(_("Order does not have a valid type"))

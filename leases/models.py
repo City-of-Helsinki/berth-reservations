@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 
 from applications.models import BerthApplication, WinterStorageApplication
 from customers.models import Boat, CustomerProfile
+from payments.enums import OrderType
 from resources.models import Berth, WinterStoragePlace, WinterStorageSection
 from utils.models import TimeStampedModel, UUIDModel
 
@@ -40,7 +41,7 @@ class AbstractLease(TimeStampedModel, UUIDModel):
         max_length=30,
         default=LeaseStatus.DRAFTED,
     )
-    _orders_relation = GenericRelation(
+    orders = GenericRelation(
         "payments.Order",
         object_id_field="_lease_object_id",
         content_type_field="_lease_content_type",
@@ -53,7 +54,7 @@ class AbstractLease(TimeStampedModel, UUIDModel):
 
     @property
     def order(self):
-        return self._orders_relation.first()
+        return self.orders.filter(order_type=OrderType.LEASE_ORDER).first()
 
     def clean(self):
         if self.boat and self.boat.owner != self.customer:

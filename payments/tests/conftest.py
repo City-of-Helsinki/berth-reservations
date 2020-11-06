@@ -16,6 +16,7 @@ from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from resources.tests.conftest import *  # noqa
 from resources.tests.factories import BerthTypeFactory
 
+from ..enums import OrderType
 from ..providers import BamboraPayformProvider
 from .factories import (
     AdditionalProductFactory,
@@ -98,6 +99,15 @@ def _generate_order(order_type: str = None):
         )
     elif order_type == "empty_order":
         order = OrderFactory(
+            customer=customer_profile,
+            price=random_price(),
+            tax_percentage=random_tax(),
+            product=None,
+            lease=None,
+        )
+    elif order_type == "additional_product_order":
+        order = OrderFactory(
+            order_type=OrderType.ADDITIONAL_PRODUCT_ORDER,
             customer=customer_profile,
             price=random_price(),
             tax_percentage=random_tax(),

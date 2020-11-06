@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.forms import ChoiceField, UUIDField
 from django.utils.translation import gettext_lazy as _
 
+from .enums import LeaseOrderType
 from .models import (
     AdditionalProduct,
     BerthPriceGroup,
@@ -83,23 +84,25 @@ class OrderAdmin(admin.ModelAdmin):
         "total_tax_percentage",
         "total_price",
         "order_number",
+        "lease_order_type",
+        "order_type",
     )
     list_display = (
-        "name",
-        "total_price",
+        "id",
         "order_number",
+        "total_price",
         "status",
         "customer",
         "lease",
         "product",
+        "lease_order_type",
+        "order_type",
     )
-    list_filter = ("status",)
+    list_filter = ("status", "order_type")
     search_fields = ("order_number", "customer__id")
 
-    def name(self, obj):
-        return str(obj)
-
-    name.short_description = _("Order number")
+    def lease_order_type(self, obj):
+        return LeaseOrderType(obj.lease_order_type).label
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == "_product_object_id":
@@ -117,19 +120,35 @@ class OrderAdmin(admin.ModelAdmin):
 
     @currency
     def pretax_price(self, obj):
-        return obj.pretax_price if obj.price and obj.tax_percentage else None
+        return (
+            obj.pretax_price
+            if obj.price is not None and obj.tax_percentage is not None
+            else None
+        )
 
     @currency
     def total_price(self, obj):
-        return obj.total_price if obj.price and obj.tax_percentage else None
+        return (
+            obj.total_price
+            if obj.price is not None and obj.tax_percentage is not None
+            else None
+        )
 
     @currency
     def total_pretax_price(self, obj):
-        return obj.total_pretax_price if obj.price and obj.tax_percentage else None
+        return (
+            obj.total_pretax_price
+            if obj.price is not None and obj.tax_percentage is not None
+            else None
+        )
 
     @percentage
     def total_tax_percentage(self, obj):
-        return obj.total_tax_percentage if obj.price and obj.tax_percentage else None
+        return (
+            obj.total_tax_percentage
+            if obj.price is not None and obj.tax_percentage is not None
+            else None
+        )
 
     pretax_price.short_description = _("Pretax price")
     pretax_price.admin_order_field = "pretax_price"

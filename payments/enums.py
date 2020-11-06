@@ -71,6 +71,11 @@ class OrderStatus(TextChoices):
 
 
 class OrderType(TextChoices):
+    LEASE_ORDER = "lease_order", _("Lease order")
+    ADDITIONAL_PRODUCT_ORDER = "additional_product_order", _("Additional product order")
+
+
+class LeaseOrderType(TextChoices):
     NEW_BERTH_ORDER = "new_berth_order", _("New berth order")
     RENEW_BERTH_ORDER = "renew_berth_order", _("Renew berth order")
     BERTH_SWITCH_ORDER = "berth_switch_order", _("Berth switch order")

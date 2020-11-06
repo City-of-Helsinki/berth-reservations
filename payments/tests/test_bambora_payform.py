@@ -1,4 +1,5 @@
 import hmac
+from decimal import Decimal
 from unittest import mock
 
 import pytest
@@ -8,8 +9,9 @@ from django.test.client import RequestFactory
 from freezegun import freeze_time
 
 from applications.enums import ApplicationAreaType, ApplicationStatus
+from leases.enums import LeaseStatus
 from leases.stickers import create_ws_sticker_sequences
-from payments.enums import OrderStatus
+from payments.enums import OrderStatus, OrderType
 from payments.models import Order, OrderToken
 from payments.providers.bambora_payform import (
     DuplicateOrderError,
@@ -23,7 +25,7 @@ from payments.tests.conftest import (
     FAKE_BAMBORA_API_URL,
     mocked_response_create,
 )
-from payments.tests.factories import BerthProductFactory, OrderFactory
+from payments.tests.factories import BerthProductFactory, OrderFactory, OrderLineFactory
 from payments.utils import get_talpa_product_id, price_as_fractional_int
 
 success_params = {
@@ -152,6 +154,49 @@ def test_payload_add_product_default_berth_product(payment_provider, berth_lease
     assert payload.get("products")[0].get("id") == get_talpa_product_id(
         product.id, area=berth_lease.berth.pier.harbor
     )
+
+
+def test_payload_additional_product_order(
+    payment_provider, berth_lease, additional_product
+):
+    berth_product = BerthProductFactory(harbor=None)
+    OrderFactory(
+        customer=berth_lease.customer,
+        product=berth_product,
+        lease=berth_lease,
+        status=OrderStatus.PAID,
+    )
+    berth_lease.status = LeaseStatus.PAID
+    berth_lease.save()
+
+    additional_product_order = OrderFactory(
+        order_type=OrderType.ADDITIONAL_PRODUCT_ORDER,
+        customer=berth_lease.customer,
+        lease=berth_lease,
+        product=None,
+        price=Decimal("0.00"),
+        tax_percentage=Decimal("0.00"),
+    )
+    OrderLineFactory(
+        order=additional_product_order,
+        product=additional_product,
+        price=Decimal("15.00"),
+    )
+
+    payload = {}
+    payment_provider.payload_add_products(payload, additional_product_order, "fi")
+    assert payload["amount"] > 0
+
+    assert len(payload["products"]) == 1
+    product = payload["products"][0]
+    assert product["id"] == get_talpa_product_id(
+        additional_product.id, area=berth_lease.berth.pier.harbor
+    )
+    assert product["title"] is not None
+    assert product["price"] > 0
+    assert product["pretax_price"] > 0
+    assert product["tax"] > 0
+    assert product["count"] == 1
 
 
 @pytest.mark.parametrize(
@@ -445,6 +490,30 @@ def test_handle_notify_request_success(
         order_number=success_params.get("ORDER_NUMBER").split("-")[0]
     )
     assert order_after.status == expected_order_status
+    assert isinstance(returned, HttpResponse)
+    assert returned.status_code == 204
+
+
+def test_handle_notify_request_success_for_ap_order(
+    provider_base_config, berth_order: Order,
+):
+    berth_order.order_number = "abc123"
+    berth_order.status = OrderStatus.WAITING
+    berth_order.order_type = OrderType.ADDITIONAL_PRODUCT_ORDER
+    berth_order.save()
+
+    rf = RequestFactory()
+    request = rf.get("/payments/notify/", success_params)
+    payment_provider = create_bambora_provider(provider_base_config, request)
+    returned = payment_provider.handle_notify_request()
+    order_after = Order.objects.get(
+        order_number=success_params.get("ORDER_NUMBER").split("-")[0]
+    )
+    assert order_after.status == OrderStatus.PAID
+    # it should not change the application and lease status in case of additional product order
+    assert order_after.lease.application.status == ApplicationStatus.PENDING
+    assert order_after.lease.status == LeaseStatus.DRAFTED
+
     assert isinstance(returned, HttpResponse)
     assert returned.status_code == 204
 
