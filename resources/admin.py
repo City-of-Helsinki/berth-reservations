@@ -210,12 +210,12 @@ class WinterStoragePlaceAdmin(admin.ModelAdmin):
     )
     search_fields = (
         "id",
-        "identifier",
+        "number",
         "winter_storage_section__area__translations__name",
         "winter_storage_section__area__id",
-        "identifier",
-        "harbor__translations__name",
-        "harbor__id",
+        "winter_storage_section__identifier",
+        "winter_storage_section__area__translations__name",
+        "winter_storage_section__area__id",
     )
     list_filter = ("is_active",)
 
