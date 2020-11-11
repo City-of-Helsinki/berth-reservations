@@ -60,6 +60,7 @@ env = environ.Env(
     USE_X_FORWARDED_HOST=(bool, False),
     CSRF_TRUSTED_ORIGINS=(list, []),
     FORCED_HOST=(str, None),
+    ENABLE_APM_TOOLS=(bool, False),
 )
 if os.path.exists(env_file):
     env.read_env(env_file)
@@ -159,9 +160,6 @@ INSTALLED_APPS = [
     "payments",
 ]
 
-if TIER in ("stage", "prod"):
-    INSTALLED_APPS += ["elasticapm.contrib.django"]
-
 AUTH_USER_MODEL = "users.User"
 
 MIDDLEWARE = [
@@ -240,6 +238,9 @@ VENE_PAYMENTS_PROVIDER_CLASS = env("VENE_PAYMENTS_PROVIDER_CLASS")
 VENE_UI_RETURN_URL = env("VENE_UI_RETURN_URL")
 
 VENE_UI_URL = env("VENE_UI_URL")
+
+if env("ENABLE_APM_TOOLS"):
+    INSTALLED_APPS += ["elasticapm.contrib.django"]
 
 if env("FORCED_HOST"):
     FORCED_HOST = env("FORCED_HOST")
