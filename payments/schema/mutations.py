@@ -12,7 +12,10 @@ from django_ilmoitin.utils import send_notification
 
 from applications.enums import ApplicationAreaType, ApplicationStatus
 from applications.models import BerthApplication, WinterStorageApplication
-from berth_reservations.exceptions import VenepaikkaGraphQLError
+from berth_reservations.exceptions import (
+    VenepaikkaGraphQLError,
+    VenepaikkaGraphQLWarning,
+)
 from customers.schema import ProfileNode
 from leases.enums import LeaseStatus
 from leases.models import BerthLease, WinterStorageLease
@@ -225,6 +228,10 @@ class CreateAdditionalProductMutation(graphene.ClientIDMutation):
     @add_permission_required(AdditionalProduct)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
+        if AdditionalProduct.objects.filter(
+            service=input.get("service"), period=input.get("period")
+        ).exists():
+            raise VenepaikkaGraphQLWarning(_("Additional product already exists"))
         try:
             product = AdditionalProduct.objects.create(**input)
         except (ValidationError, IntegrityError) as e:
