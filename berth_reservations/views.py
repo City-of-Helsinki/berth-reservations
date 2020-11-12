@@ -3,10 +3,11 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from graphene_file_upload.django import FileUploadGraphQLView
 from graphql_jwt.exceptions import PermissionDenied as JwtPermissionDenied
 
-from .exceptions import VenepaikkaGraphQLError
+from .exceptions import VenepaikkaGraphQLError, VenepaikkaGraphQLWarning
 
 sentry_ignored_errors = (
     VenepaikkaGraphQLError,
+    VenepaikkaGraphQLWarning,
     ObjectDoesNotExist,
     JwtPermissionDenied,
     PermissionDenied,
