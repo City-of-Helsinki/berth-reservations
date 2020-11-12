@@ -50,6 +50,7 @@ ENV DEV_SERVER=1
 
 # Copy the application code.
 COPY --chown=appuser:appuser . /app/
+RUN django-admin compilemessages -l fi -l sv
 
 # Use a non-root user.
 USER appuser
@@ -65,6 +66,7 @@ FROM appbase as production
 
 # Copy application code.
 COPY --chown=appuser:appuser . /app/
+RUN django-admin compilemessages -l fi -l sv
 
 # Set user and document the port.
 USER appuser
