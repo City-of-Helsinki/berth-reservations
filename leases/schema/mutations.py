@@ -7,6 +7,7 @@ from applications.enums import ApplicationAreaType, ApplicationStatus
 from applications.models import BerthApplication, WinterStorageApplication
 from applications.new_schema import BerthApplicationNode, WinterStorageApplicationNode
 from berth_reservations.exceptions import VenepaikkaGraphQLError
+from contracts.services import get_contract_service
 from customers.models import CustomerProfile
 from payments.enums import OrderStatus
 from payments.models import BerthPriceGroup, BerthProduct, Order, WinterStorageProduct
@@ -99,6 +100,7 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
             order = Order.objects.create(
                 customer=input["customer"], lease=lease, product=product
             )
+            get_contract_service().create_berth_contract(lease)
         except BerthProduct.DoesNotExist as e:
             raise VenepaikkaGraphQLError(e)
         except ValidationError as e:
@@ -263,6 +265,7 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
             order = Order.objects.create(
                 customer=input["customer"], lease=lease, product=product
             )
+            get_contract_service().create_winter_storage_contract(lease)
         except WinterStorageProduct.DoesNotExist as e:
             raise VenepaikkaGraphQLError(e)
         except ValidationError as e:

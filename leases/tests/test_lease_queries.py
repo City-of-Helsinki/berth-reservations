@@ -8,6 +8,8 @@ from freezegun import freeze_time
 
 from applications.new_schema import BerthApplicationNode, WinterStorageApplicationNode
 from berth_reservations.tests.utils import assert_not_enough_permissions
+from contracts.schema.types import BerthContractNode, WinterStorageContractNode
+from contracts.tests.factories import BerthContractFactory, WinterStorageContractFactory
 from customers.schema import BoatNode, ProfileNode
 from payments.models import BerthPriceGroup
 from payments.schema import OrderNode
@@ -150,6 +152,9 @@ query GetBerthLease {
         order {
             id
         }
+        contract {
+            id
+        }
     }
 }
 """
@@ -165,6 +170,8 @@ def test_query_berth_lease(api_client, berth_lease, berth_application):
 
     berth_application.customer = berth_lease.customer
     berth_application.save()
+    berth_lease.contract = BerthContractFactory()
+    berth_lease.contract.save()
     berth_lease.application = berth_application
     berth_lease.save()
 
@@ -196,6 +203,7 @@ def test_query_berth_lease(api_client, berth_lease, berth_application):
             "number": berth_lease.berth.number,
         },
         "order": {"id": to_global_id(OrderNode, order.id)},
+        "contract": {"id": to_global_id(BerthContractNode, berth_lease.contract.id)},
     }
 
 
@@ -464,6 +472,9 @@ query GetWinterStorageLease {
         order {
             id
         }
+        contract {
+            id
+        }
     }
 }
 """
@@ -479,6 +490,8 @@ def test_query_winter_storage_lease(
 ):
     lease_id = to_global_id(WinterStorageLeaseNode, winter_storage_lease.id)
 
+    winter_storage_lease.contract = WinterStorageContractFactory()
+    winter_storage_lease.contract.save()
     winter_storage_application.customer = winter_storage_lease.customer
     winter_storage_application.save()
     winter_storage_lease.application = winter_storage_application
@@ -515,6 +528,11 @@ def test_query_winter_storage_lease(
             "id": to_global_id(WinterStoragePlaceNode, winter_storage_lease.place.id),
         },
         "order": {"id": to_global_id(OrderNode, order.id)},
+        "contract": {
+            "id": to_global_id(
+                WinterStorageContractNode, winter_storage_lease.contract.id
+            )
+        },
     }
 
 

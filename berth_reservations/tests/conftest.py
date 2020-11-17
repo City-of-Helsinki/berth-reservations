@@ -5,6 +5,7 @@ from django.contrib.auth.models import Group
 from django.core.management import call_command
 from django_ilmoitin.models import NotificationTemplate
 
+from contracts.tests.utils import TestContractService
 from customers.enums import OrganizationType
 from customers.tests.factories import OrganizationFactory
 
@@ -158,3 +159,10 @@ def notification_template_orders_approved():
             body_html="<b>{{ order.order_number }} {{ payment_url }}</b>",
             body_text="{{ order.order_number }} {{ payment_url }}",
         )
+
+
+@pytest.fixture(autouse=True)
+def patch_contract_service(monkeypatch):
+    monkeypatch.setattr(
+        "contracts.services.VismaContractService", lambda: TestContractService()
+    )
