@@ -2,6 +2,8 @@ import factory
 from django.contrib.gis.geos import Point
 from factory.random import randgen
 
+from payments.enums import PriceTier
+
 from ..enums import AreaRegion, BerthMooringType
 from ..models import (
     AvailabilityLevel,
@@ -71,6 +73,7 @@ class AbstractAreaSectionFactory(factory.django.DjangoModelFactory):
 class PierFactory(AbstractAreaSectionFactory):
     harbor = factory.SubFactory(HarborFactory)
     personal_electricity = factory.Faker("boolean")
+    price_tier = factory.Faker("random_element", elements=PriceTier.values)
 
     class Meta:
         model = Pier

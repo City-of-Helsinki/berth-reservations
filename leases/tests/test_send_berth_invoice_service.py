@@ -14,7 +14,7 @@ from berth_reservations.tests.factories import UserFactory
 from customers.schema import ProfileNode
 from customers.tests.conftest import mocked_response_profile
 from payments.enums import OrderStatus
-from payments.models import BerthPriceGroup, Order
+from payments.models import BerthProduct, Order
 from payments.tests.factories import BerthProductFactory
 from utils.relay import to_global_id
 
@@ -36,10 +36,10 @@ def test_send_berth_invoices(notification_template_orders_approved):
         end_date=calculate_season_end_date(today() - relativedelta(years=1)),
     )
     customer = lease.customer
-    price_group = BerthPriceGroup.objects.get_or_create_for_width(
-        lease.berth.berth_type.width
+    BerthProductFactory(
+        min_width=lease.berth.berth_type.width - 1,
+        max_width=lease.berth.berth_type.width + 1,
     )
-    BerthProductFactory(price_group=price_group, harbor=lease.berth.pier.harbor)
 
     user = UserFactory()
 
@@ -111,10 +111,10 @@ def test_use_berth_leases_from_last_season(notification_template_orders_approved
         end_date=calculate_season_end_date(today() - relativedelta(years=1)),
     )
     customer = lease.customer
-    price_group = BerthPriceGroup.objects.get_or_create_for_width(
-        lease.berth.berth_type.width
+    BerthProductFactory(
+        min_width=lease.berth.berth_type.width - 1,
+        max_width=lease.berth.berth_type.width + 1,
     )
-    BerthProductFactory(price_group=price_group, harbor=lease.berth.pier.harbor)
 
     user = UserFactory()
 
@@ -186,10 +186,10 @@ def test_use_berth_leases_from_current_season(notification_template_orders_appro
         end_date=calculate_season_end_date(today()),
     )
     customer = lease.customer
-    price_group = BerthPriceGroup.objects.get_or_create_for_width(
-        lease.berth.berth_type.width
+    BerthProductFactory(
+        min_width=lease.berth.berth_type.width - 1,
+        max_width=lease.berth.berth_type.width + 1,
     )
-    BerthProductFactory(price_group=price_group, harbor=lease.berth.pier.harbor)
 
     user = UserFactory()
 
@@ -243,7 +243,7 @@ def test_use_berth_leases_from_current_season(notification_template_orders_appro
 
 
 @freeze_time("2020-01-01T08:00:00Z")
-def test_berth_lease_harbor_product(notification_template_orders_approved):
+def test_berth_lease_berth_product(notification_template_orders_approved):
     lease = BerthLeaseFactory(
         renew_automatically=True,
         boat=None,
@@ -252,10 +252,10 @@ def test_berth_lease_harbor_product(notification_template_orders_approved):
         end_date=calculate_season_end_date(today() - relativedelta(years=1)),
     )
     customer = lease.customer
-    price_group = BerthPriceGroup.objects.get_or_create_for_width(
-        lease.berth.berth_type.width
+    BerthProductFactory(
+        min_width=lease.berth.berth_type.width - 1,
+        max_width=lease.berth.berth_type.width + 1,
     )
-    BerthProductFactory(price_group=price_group, harbor=lease.berth.pier.harbor)
 
     user = UserFactory()
 
@@ -287,55 +287,7 @@ def test_berth_lease_harbor_product(notification_template_orders_approved):
 
     order = Order.objects.first()
     assert order.id == successful_orders[0]
-    assert order.product.harbor == order.lease.berth.pier.harbor
-
-
-@freeze_time("2020-01-01T08:00:00Z")
-def test_berth_lease_default_product(notification_template_orders_approved):
-    lease = BerthLeaseFactory(
-        renew_automatically=True,
-        boat=None,
-        status=LeaseStatus.PAID,
-        start_date=calculate_season_start_date(today() - relativedelta(years=1)),
-        end_date=calculate_season_end_date(today() - relativedelta(years=1)),
-    )
-    customer = lease.customer
-    price_group = BerthPriceGroup.objects.get_or_create_for_width(
-        lease.berth.berth_type.width
-    )
-    BerthProductFactory(price_group=price_group, harbor=None)
-
-    user = UserFactory()
-
-    data = {
-        "id": to_global_id(ProfileNode, customer.id),
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "primary_email": {"email": user.email},
-    }
-
-    assert Order.objects.count() == 0
-
-    with mock.patch(
-        "customers.services.profile.requests.post",
-        side_effect=mocked_response_profile(count=0, data=data),
-    ):
-        result = BerthInvoicingService(
-            request=RequestFactory().request(), profile_token="token"
-        ).send_invoices()
-
-    successful_orders: List[UUID] = result.get("successful_orders")
-    failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
-    failed_leases: List[Dict[UUID, str]] = result.get("failed_leases")
-
-    assert len(successful_orders) == 1
-    assert len(failed_orders) == 0
-    assert len(failed_leases) == 0
-    assert Order.objects.count() == 1
-
-    order = Order.objects.first()
-    assert order.id == successful_orders[0]
-    assert order.product.harbor is None
+    assert isinstance(order.product, BerthProduct)
 
 
 @freeze_time("2020-01-01T08:00:00Z")
@@ -393,10 +345,10 @@ def test_send_berth_invoices_missing_email(notification_template_orders_approved
         end_date=today() + relativedelta(years=-1, months=5),
     )
     customer = lease.customer
-    price_group = BerthPriceGroup.objects.get_or_create_for_width(
-        lease.berth.berth_type.width
+    BerthProductFactory(
+        min_width=lease.berth.berth_type.width - 1,
+        max_width=lease.berth.berth_type.width + 1,
     )
-    BerthProductFactory(price_group=price_group, harbor=lease.berth.pier.harbor)
 
     user = UserFactory()
 
@@ -456,10 +408,10 @@ def test_send_berth_invoices_invalid_example_email(
         end_date=today() + relativedelta(years=-1, months=5),
     )
     customer = lease.customer
-    price_group = BerthPriceGroup.objects.get_or_create_for_width(
-        lease.berth.berth_type.width
+    BerthProductFactory(
+        min_width=lease.berth.berth_type.width - 1,
+        max_width=lease.berth.berth_type.width + 1,
     )
-    BerthProductFactory(price_group=price_group, harbor=lease.berth.pier.harbor)
 
     user = UserFactory()
 
@@ -517,10 +469,10 @@ def test_send_berth_invoices_send_error(notification_template_orders_approved):
         end_date=today() + relativedelta(years=-1, months=5),
     )
     customer = lease.customer
-    price_group = BerthPriceGroup.objects.get_or_create_for_width(
-        lease.berth.berth_type.width
+    BerthProductFactory(
+        min_width=lease.berth.berth_type.width - 1,
+        max_width=lease.berth.berth_type.width + 1,
     )
-    BerthProductFactory(price_group=price_group, harbor=lease.berth.pier.harbor)
 
     user = UserFactory()
 
@@ -607,10 +559,10 @@ def test_send_berth_invoices_only_not_renewed(notification_template_orders_appro
     )
 
     customer = valid_lease.customer
-    price_group = BerthPriceGroup.objects.get_or_create_for_width(
-        valid_lease.berth.berth_type.width
+    BerthProductFactory(
+        min_width=valid_lease.berth.berth_type.width - 1,
+        max_width=valid_lease.berth.berth_type.width + 1,
     )
-    BerthProductFactory(price_group=price_group, harbor=None)
 
     user = UserFactory()
 
@@ -680,10 +632,10 @@ def test_send_berth_invoices_invalid_limit_reached(
         end_date=today() + relativedelta(years=-1, months=5),
     )
     customer = first_lease.customer
-    price_group = BerthPriceGroup.objects.get_or_create_for_width(
-        first_lease.berth.berth_type.width
+    BerthProductFactory(
+        min_width=first_lease.berth.berth_type.width - 1,
+        max_width=first_lease.berth.berth_type.width + 1,
     )
-    BerthProductFactory(price_group=price_group, harbor=first_lease.berth.pier.harbor)
 
     user = UserFactory()
 

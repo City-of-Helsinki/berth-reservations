@@ -20,7 +20,7 @@ from customers.services import ProfileService
 from leases.enums import LeaseStatus
 from leases.models import BerthLease, WinterStorageLease
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
-from resources.schema import HarborNode, WinterStorageAreaNode
+from resources.schema import WinterStorageAreaNode
 from users.decorators import (
     add_permission_required,
     change_permission_required,
@@ -43,7 +43,6 @@ from ..utils import approve_order
 from .types import (
     AdditionalProductNode,
     AdditionalProductTaxEnum,
-    BerthPriceGroupNode,
     BerthProductNode,
     FailedOrderType,
     OrderLineNode,
@@ -58,9 +57,11 @@ from .types import (
 
 class CreateBerthProductMutation(graphene.ClientIDMutation):
     class Input:
-        price_value = graphene.Decimal(required=True)
-        price_group_id = graphene.ID(required=True)
-        harbor_id = graphene.ID()
+        min_width = graphene.Decimal(required=True)
+        max_width = graphene.Decimal(required=True)
+        tier_1_price = graphene.Decimal(required=True)
+        tier_2_price = graphene.Decimal(required=True)
+        tier_3_price = graphene.Decimal(required=True)
 
     berth_product = graphene.Field(BerthProductNode)
 
@@ -68,15 +69,6 @@ class CreateBerthProductMutation(graphene.ClientIDMutation):
     @add_permission_required(BerthProduct)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        input["harbor"] = get_node_from_global_id(
-            info, input.pop("harbor_id", None), only_type=HarborNode, nullable=True,
-        )
-        input["price_group"] = get_node_from_global_id(
-            info,
-            input.pop("price_group_id", None),
-            only_type=BerthPriceGroupNode,
-            nullable=False,
-        )
         try:
             product = BerthProduct.objects.create(**input)
         except (ValidationError, IntegrityError) as e:
@@ -88,9 +80,11 @@ class CreateBerthProductMutation(graphene.ClientIDMutation):
 class UpdateBerthProductMutation(graphene.ClientIDMutation):
     class Input:
         id = graphene.ID(required=True)
-        price_value = graphene.Decimal()
-        price_group_id = graphene.ID()
-        harbor_id = graphene.ID()
+        min_width = graphene.Decimal()
+        max_width = graphene.Decimal()
+        tier_1_price = graphene.Decimal()
+        tier_2_price = graphene.Decimal()
+        tier_3_price = graphene.Decimal()
 
     berth_product = graphene.Field(BerthProductNode)
 
@@ -101,17 +95,6 @@ class UpdateBerthProductMutation(graphene.ClientIDMutation):
         product = get_node_from_global_id(
             info, input.pop("id"), only_type=BerthProductNode, nullable=False
         )
-        if "harbor_id" in input:
-            input["harbor"] = get_node_from_global_id(
-                info, input.pop("harbor_id", None), only_type=HarborNode, nullable=True,
-            )
-        if "price_group_id" in input:
-            input["price_group"] = get_node_from_global_id(
-                info,
-                input.pop("price_group_id", None),
-                only_type=BerthPriceGroupNode,
-                nullable=False,
-            )
         try:
             update_object(product, input)
         except (ValidationError, IntegrityError) as e:
@@ -633,8 +616,6 @@ class Mutation:
     create_berth_product = CreateBerthProductMutation.Field(
         description="Creates a `BerthProduct` object."
         "\n\n**Requires permissions** to edit payments."
-        "\n\nErrors:"
-        "\n* A `BerthPriceGroup` is not passed"
     )
     update_berth_product = UpdateBerthProductMutation.Field(
         description="Updates a `BerthProduct` object."

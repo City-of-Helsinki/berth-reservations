@@ -57,6 +57,7 @@ class PierNode(graphql_geojson.GeoJSONType):
     max_width = graphene.Float()
     max_length = graphene.Float()
     max_depth = graphene.Float()
+    price_tier = graphene.Field("payments.schema.PriceTierEnum")
 
     class Meta:
         model = Pier

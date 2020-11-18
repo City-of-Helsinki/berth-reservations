@@ -27,7 +27,13 @@ from resources.tests.factories import (
 from utils.numbers import rounded
 
 from ..enums import AdditionalProductType, PeriodType, PriceUnits, ProductServiceType
-from ..models import AdditionalProduct, DEFAULT_TAX_PERCENTAGE, Order, OrderLine
+from ..models import (
+    AdditionalProduct,
+    BerthProduct,
+    DEFAULT_TAX_PERCENTAGE,
+    Order,
+    OrderLine,
+)
 from ..utils import (
     calculate_product_partial_month_price,
     calculate_product_partial_year_price,
@@ -220,9 +226,11 @@ def test_order_retrieves_winter_storage_lease(
 
 
 def test_order_berth_product_price(berth_product, customer_profile):
-    order = Order.objects.create(product=berth_product, customer=customer_profile)
+    order = OrderFactory(product=berth_product, customer=customer_profile)
     assert order.product == berth_product
-    assert order.price == berth_product.price_value
+    assert order.price == berth_product.price_for_tier(
+        order.lease.berth.pier.price_tier
+    )
     assert order.tax_percentage == berth_product.tax_percentage
 
 
@@ -287,8 +295,11 @@ def test_order_berth_lease_creates_pier_order_lines(harbor):
 
     pier = PierFactory(**services, harbor=harbor)
     lease = BerthLeaseFactory(berth=BerthFactory(pier=pier))
-    product = BerthProductFactory(harbor=harbor)
-    order = Order.objects.create(product=product, customer=lease.customer, lease=lease)
+    product = BerthProductFactory(
+        min_width=lease.berth.berth_type.width - 1,
+        max_width=lease.berth.berth_type.width + 1,
+    )
+    order = OrderFactory(product=product, lease=lease, customer=lease.customer)
 
     for service, created in services.items():
         if created:
@@ -313,8 +324,7 @@ def test_order_no_lease_no_order_lines(customer_profile, harbor):
         if create:
             AdditionalProductFactory(service=ProductServiceType(service))
 
-    PierFactory(**services, harbor=harbor)
-    product = BerthProductFactory(harbor=harbor)
+    product = BerthProductFactory()
     order = Order.objects.create(product=product, customer=customer_profile)
 
     # No OrderLines should be generated for Orders without lease
@@ -360,7 +370,10 @@ def test_order_berth_lease_right_price_for_full_season(harbor):
 
     pier = PierFactory(**services, harbor=harbor)
     lease = BerthLeaseFactory(berth=BerthFactory(pier=pier))
-    product = BerthProductFactory(harbor=harbor)
+    product = BerthProductFactory(
+        min_width=lease.berth.berth_type.width - 1,
+        max_width=lease.berth.berth_type.width + 1,
+    )
     order = Order.objects.create(product=product, customer=lease.customer, lease=lease)
 
     assert order.lease.start_date == calculate_berth_lease_start_date()
@@ -640,7 +653,10 @@ def test_order_assign_berth_lease_generate_order_lines(harbor):
 
     pier = PierFactory(**services, harbor=harbor)
     lease = BerthLeaseFactory(berth=BerthFactory(pier=pier))
-    product = BerthProductFactory(harbor=harbor)
+    product = BerthProductFactory(
+        min_width=lease.berth.berth_type.width - 1,
+        max_width=lease.berth.berth_type.width + 1,
+    )
     order = Order.objects.create(product=product, customer=lease.customer)
 
     assert OrderLine.objects.filter(order=order).count() == 0
@@ -839,7 +855,14 @@ def test_berth_season_price(berth):
     start_date = today()
     end_date = start_date + relativedelta(days=15)
 
-    product = BerthProductFactory(price_value=Decimal("10"))
+    price = Decimal("10")
+    product = BerthProductFactory(
+        tier_1_price=price,
+        tier_2_price=price,
+        tier_3_price=price,
+        min_width=berth.berth_type.width - 1,
+        max_width=berth.berth_type.width + 1,
+    )
     lease = BerthLeaseFactory(berth=berth, start_date=start_date, end_date=end_date)
     order = Order.objects.create(product=product, lease=lease, customer=lease.customer)
     assert order.price == Decimal("10.00")
@@ -987,3 +1010,15 @@ def test_order_line_product_price_for_non_billable(
 
     assert order_line.price == 0
     assert order_line.tax_percentage == 0
+
+
+def test_berth_product_range():
+    """Test the berth product boundaries"""
+    bp1 = BerthProductFactory(min_width=Decimal("0.00"), max_width=Decimal("2.00"))
+    bp2 = BerthProductFactory(min_width=Decimal("2.00"), max_width=Decimal("2.75"))
+    bp3 = BerthProductFactory(min_width=Decimal("2.75"), max_width=Decimal("3.00"))
+
+    assert BerthProduct.objects.get_in_range(width=2) == bp1
+    assert BerthProduct.objects.get_in_range(width=2.01) == bp2
+    assert BerthProduct.objects.get_in_range(width=2.75) == bp2
+    assert BerthProduct.objects.get_in_range(width=2.76) == bp3

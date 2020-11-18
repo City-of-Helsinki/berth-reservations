@@ -1,8 +1,9 @@
-from graphene import Field, List, Node, String
+from graphene import Decimal, Field, List, Node, String
 from graphene_django import DjangoConnectionField
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from leases.models import BerthLease, WinterStorageLease
+from users.decorators import view_permission_required
 
 from ..enums import AdditionalProductType, OrderType, ProductServiceType
 from ..models import AdditionalProduct, BerthProduct, Order, WinterStorageProduct
@@ -10,7 +11,6 @@ from .types import (
     AdditionalProductNode,
     AdditionalProductServiceNode,
     AdditionalProductTypeEnum,
-    BerthPriceGroupNode,
     BerthProductNode,
     OrderDetailsType,
     OrderNode,
@@ -21,18 +21,16 @@ from .types import (
 
 
 class Query:
-    berth_price_groups = DjangoConnectionField(
-        BerthPriceGroupNode, description="**Requires permissions** to access payments.",
-    )
-    berth_price_group = Node.Field(
-        BerthPriceGroupNode, description="**Requires permissions** to access payments.",
-    )
-
     berth_products = DjangoConnectionField(
         BerthProductNode, description="**Requires permissions** to access payments.",
     )
     berth_product = Node.Field(
         BerthProductNode, description="**Requires permissions** to access payments.",
+    )
+    berth_product_for_width = Field(
+        BerthProductNode,
+        width=Decimal(required=True),
+        description="**Requires permissions** to access payments.",
     )
 
     winter_storage_products = DjangoConnectionField(
@@ -66,6 +64,10 @@ class Query:
         order_type=OrderTypeEnum(),
         description="**Requires permissions** to access payments.",
     )
+
+    @view_permission_required(BerthProduct)
+    def resolve_berth_product_for_width(self, info, width, **kwargs):
+        return BerthProduct.objects.get_in_range(width)
 
     def resolve_additional_products(self, info, **kwargs):
         product_type = kwargs.get("product_type")

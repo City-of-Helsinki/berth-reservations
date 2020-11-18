@@ -7,7 +7,7 @@ from resources.tests.factories import HarborFactory, WinterStorageAreaFactory
 
 def test_berth_product_east():
     harbor = HarborFactory(region="east")
-    berth_product = BerthProductFactory(harbor=harbor)
+    berth_product = BerthProductFactory()
     assert (
         get_talpa_product_id(berth_product.id, harbor)
         == f"340100_2923301_2923301100_ _292015_44_{berth_product.id}"
@@ -16,18 +16,10 @@ def test_berth_product_east():
 
 def test_berth_product_west():
     harbor = HarborFactory(region="west")
-    berth_product = BerthProductFactory(harbor=harbor)
+    berth_product = BerthProductFactory()
     assert (
         get_talpa_product_id(berth_product.id, harbor)
         == f"340100_2923302_2923302200_ _292015_44_{berth_product.id}"
-    )
-
-
-def test_berth_product_no_harbor():
-    berth_product = BerthProductFactory(harbor=None)
-    assert (
-        get_talpa_product_id(berth_product.id, None)
-        == f"340100_ _ _ _ _44_{berth_product.id}"
     )
 
 

@@ -143,23 +143,13 @@ def test_payload_add_products_success(payment_provider, order_with_products: Ord
         assert "type" in product
 
 
-def test_payload_add_product_default_berth_product(payment_provider, berth_lease):
-    product = BerthProductFactory(harbor=None)
-    order = OrderFactory(
-        customer=berth_lease.customer, lease=berth_lease, product=product
-    )
-    payload = {}
-    payment_provider.payload_add_products(payload, order, "fi")
-    assert "amount" in payload
-    assert payload.get("products")[0].get("id") == get_talpa_product_id(
-        product.id, area=berth_lease.berth.pier.harbor
-    )
-
-
 def test_payload_additional_product_order(
     payment_provider, berth_lease, additional_product
 ):
-    berth_product = BerthProductFactory(harbor=None)
+    berth_product = BerthProductFactory(
+        min_width=berth_lease.berth.berth_type.width - 1,
+        max_width=berth_lease.berth.berth_type.width + 1,
+    )
     OrderFactory(
         customer=berth_lease.customer,
         product=berth_product,

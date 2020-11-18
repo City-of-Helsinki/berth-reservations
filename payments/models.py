@@ -1,5 +1,7 @@
+import logging
 from datetime import date
 from decimal import Decimal
+from typing import Union
 
 from dateutil.utils import today
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -24,6 +26,7 @@ from .enums import (
     OrderStatus,
     OrderType,
     PeriodType,
+    PriceTier,
     PriceUnits,
     ProductServiceType,
 )
@@ -47,6 +50,9 @@ ADDITIONAL_PRODUCT_TAX_PERCENTAGES = [Decimal(x) for x in ("24.00", "10.00")]
 DEFAULT_TAX_PERCENTAGE = Decimal("24.0")
 
 
+logger = logging.getLogger(__name__)
+
+
 class AbstractBaseProduct(TimeStampedModel, UUIDModel):
     price_value = models.DecimalField(
         verbose_name=_("price"),
@@ -66,33 +72,7 @@ class AbstractBaseProduct(TimeStampedModel, UUIDModel):
         super().save(*args, **kwargs)
 
 
-class BerthPriceGroupManager(models.Manager):
-    def get_for_width(self, width):
-        # One single common way to get a BPG based on the width
-        return self.get(name=f"{width}m")
-
-    def get_or_create_for_width(self, width):
-        # One single common way to get a BPG based on the width
-        price_group, _created = self.get_or_create(name=f"{rounded_decimal(width)}m")
-        return price_group
-
-
-class BerthPriceGroup(UUIDModel):
-    name = models.CharField(
-        verbose_name=_("berth price group name"), max_length=128, unique=True
-    )
-    objects = BerthPriceGroupManager()
-
-    def __str__(self):
-        return f"{self.name} ({self.id})"
-
-
-class AbstractPlaceProduct(AbstractBaseProduct):
-    price_unit = models.CharField(
-        choices=[(PriceUnits.AMOUNT, PriceUnits.AMOUNT.label)],
-        default=PriceUnits.AMOUNT,
-        max_length=10,
-    )
+class AbstractPlaceProduct(models.Model):
     tax_percentage = models.DecimalField(
         verbose_name=_("tax percentage"),
         max_digits=5,
@@ -105,45 +85,96 @@ class AbstractPlaceProduct(AbstractBaseProduct):
         abstract = True
 
 
-class BerthProduct(AbstractPlaceProduct):
-    price_group = models.ForeignKey(
-        BerthPriceGroup,
-        on_delete=models.CASCADE,
-        verbose_name=_("price group"),
-        related_name="products",
+class BerthProductManager(models.Manager):
+    def get_in_range(self, width: Union[Decimal, float, int]):
+        products = self.get_queryset().filter(min_width__lt=width, max_width__gte=width)
+        if len(products) != 1:
+            logger.error(f"Not only one berth product found: {width=}, {products=}")
+
+        return products.first()
+
+
+class BerthProduct(AbstractPlaceProduct, TimeStampedModel, UUIDModel):
+    """The range boundaries are (]"""
+
+    min_width = models.DecimalField(
+        verbose_name=_("minimum width"), max_digits=5, decimal_places=2,
     )
-    harbor = models.ForeignKey(
-        "resources.Harbor",
-        verbose_name=_("harbor"),
-        related_name="products",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
+    max_width = models.DecimalField(
+        verbose_name=_("maximum width"), max_digits=5, decimal_places=2,
     )
+    tier_1_price = models.DecimalField(
+        verbose_name=_("tier 1 price"),
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.00"))],
+    )
+    tier_2_price = models.DecimalField(
+        verbose_name=_("tier 2 price"),
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.00"))],
+    )
+    tier_3_price = models.DecimalField(
+        verbose_name=_("tier 3 price"),
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.00"))],
+    )
+    price_unit = models.CharField(
+        choices=[(PriceUnits.AMOUNT, PriceUnits.AMOUNT.label)],
+        default=PriceUnits.AMOUNT,
+        max_length=10,
+    )
+    objects = BerthProductManager()
 
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=["price_group", "harbor"],
-                name="unique_product_for_harbor_pricegroup",
-            ),
+                fields=("min_width", "max_width",), name="unique_width_range"
+            )
         ]
+        ordering = ["min_width"]
 
     def __str__(self):
-        harbor_name = str(self.harbor) + " " if self.harbor else ""
-        return f"{self.price_group.name} - {harbor_name}({self.price_value}€)"
+        return (
+            f"[{self.min_width}-{self.max_width}] "
+            f"T1:{self.tier_1_price}€, T2:{self.tier_2_price}€, T3: {self.tier_3_price}€"
+        )
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    @property
+    def display_dimensions(self):
+        return f"{self.min_width}m - {self.max_width}m"
 
     @property
     def name(self):
         return _("Berth product") + f": {self}"
 
+    def price_for_tier(self, tier: PriceTier) -> Decimal:
+        if tier == PriceTier.TIER_1:
+            return self.tier_1_price
+        elif tier == PriceTier.TIER_2:
+            return self.tier_2_price
+        elif tier == PriceTier.TIER_3:
+            return self.tier_3_price
+        raise ValueError(_("Tier not implemented"))
 
-class WinterStorageProduct(AbstractPlaceProduct):
+
+class WinterStorageProduct(AbstractPlaceProduct, AbstractBaseProduct):
     winter_storage_area = models.OneToOneField(
         "resources.WinterStorageArea",
         verbose_name=_("winter storage area"),
         related_name="product",
         on_delete=models.CASCADE,
+    )
+    price_unit = models.CharField(
+        choices=[(PriceUnits.AMOUNT, PriceUnits.AMOUNT.label)],
+        default=PriceUnits.AMOUNT,
+        max_length=10,
     )
 
     def __str__(self):
@@ -529,8 +560,12 @@ class Order(UUIDModel, TimeStampedModel):
         # If the product instance is being passed
         # Price has to be assigned before saving but only if creating
         if creating and self.product:
-            # Assign the price and tax from the product
-            price = self.product.price_value
+            price = (
+                self.product.price_value
+                if self.product and hasattr(self.product, "price_value")
+                else 0
+            )
+            # Assign the tax from the product
             tax_percentage = self.product.tax_percentage
 
             if self.lease:
@@ -540,6 +575,7 @@ class Order(UUIDModel, TimeStampedModel):
                 if isinstance(self.lease, WinterStorageLease) and isinstance(
                     self.product, WinterStorageProduct
                 ):
+                    price = self.product.price_value
                     if self.lease.place:
                         place_sqm = (
                             self.lease.place.place_type.width
@@ -557,6 +593,10 @@ class Order(UUIDModel, TimeStampedModel):
                             * self.lease.application.boat_length
                         )
                     price = price * place_sqm
+                else:
+                    price = self.product.price_for_tier(
+                        self.lease.berth.pier.price_tier
+                    )
 
             price_value = self.price or price
             tax_percentage_value = self.tax_percentage or tax_percentage

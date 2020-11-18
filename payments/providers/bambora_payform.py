@@ -410,8 +410,7 @@ class BamboraPayformProvider(PaymentProvider):
             ).first()
         )
 
-        if isinstance(lease_order.product, BerthProduct):
-            # If the product is the "default" product (applies to all areas)
-            return lease_order.product.harbor or order.lease.berth.pier.harbor
-        elif hasattr(lease_order.product, "winter_storage_area"):
+        if hasattr(lease_order.product, "winter_storage_area"):
             return lease_order.product.winter_storage_area
+        if isinstance(lease_order.product, BerthProduct):
+            return order.lease.berth.pier.harbor

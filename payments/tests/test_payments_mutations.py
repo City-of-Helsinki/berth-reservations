@@ -19,7 +19,7 @@ from leases.enums import LeaseStatus
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from leases.tests.factories import BerthLeaseFactory
 from leases.utils import calculate_season_start_date
-from resources.schema import HarborNode, WinterStorageAreaNode
+from resources.schema import WinterStorageAreaNode
 from utils.numbers import rounded
 from utils.relay import to_global_id
 
@@ -44,7 +44,6 @@ from ..schema.types import (
     AdditionalProductNode,
     AdditionalProductTaxEnum,
     AdditionalProductTypeEnum,
-    BerthPriceGroupNode,
     BerthProductNode,
     OrderLineNode,
     OrderNode,
@@ -71,15 +70,13 @@ mutation CREATE_BERTH_PRODUCT($input: CreateBerthProductMutationInput!) {
     createBerthProduct(input: $input) {
         berthProduct {
             id
-            priceValue
+            minWidth
+            maxWidth
+            tier1Price
+            tier2Price
+            tier3Price
             priceUnit
             taxPercentage
-            priceGroup {
-                name
-            }
-            harbor {
-                id
-            }
         }
     }
 }
@@ -89,11 +86,16 @@ mutation CREATE_BERTH_PRODUCT($input: CreateBerthProductMutationInput!) {
 @pytest.mark.parametrize(
     "api_client", ["berth_services"], indirect=True,
 )
-def test_create_berth_product(api_client, berth_price_group, harbor):
+def test_create_berth_product(api_client, harbor):
+    min_width = rounded(random.uniform(0, 5), round_to_nearest=0.05, as_string=True)
     variables = {
-        "priceValue": str(random_price()),
-        "priceGroupId": to_global_id(BerthPriceGroupNode, berth_price_group.id),
-        "harborId": to_global_id(HarborNode, harbor.id),
+        "minWidth": min_width,
+        "maxWidth": rounded(
+            random.uniform(float(min_width), 6), round_to_nearest=0.05, as_string=True
+        ),
+        "tier1Price": str(random_price()),
+        "tier2Price": str(random_price()),
+        "tier3Price": str(random_price()),
     }
 
     assert BerthProduct.objects.count() == 0
@@ -104,11 +106,13 @@ def test_create_berth_product(api_client, berth_price_group, harbor):
     assert executed["data"]["createBerthProduct"]["berthProduct"].pop("id") is not None
 
     assert executed["data"]["createBerthProduct"]["berthProduct"] == {
-        "priceValue": variables["priceValue"],
+        "minWidth": str(variables["minWidth"]),
+        "maxWidth": str(variables["maxWidth"]),
+        "tier1Price": variables["tier1Price"],
+        "tier2Price": variables["tier2Price"],
+        "tier3Price": variables["tier3Price"],
         "priceUnit": PriceUnitsEnum.AMOUNT.name,
-        "priceGroup": {"name": berth_price_group.name},
         "taxPercentage": PlaceProductTaxEnum.get(DEFAULT_TAX_PERCENTAGE).name,
-        "harbor": {"id": variables["harborId"]},
     }
 
 
@@ -119,8 +123,11 @@ def test_create_berth_product(api_client, berth_price_group, harbor):
 )
 def test_create_berth_product_not_enough_permissions(api_client):
     variables = {
-        "priceValue": "1.00",
-        "priceGroupId": to_global_id(BerthPriceGroupNode, uuid.uuid4()),
+        "minWidth": rounded(random.uniform(0, 5), round_to_nearest=0.05),
+        "maxWidth": rounded(random.uniform(0, 6), round_to_nearest=0.05),
+        "tier1Price": str(random_price()),
+        "tier2Price": str(random_price()),
+        "tier3Price": str(random_price()),
     }
 
     assert BerthProduct.objects.count() == 0
@@ -129,52 +136,6 @@ def test_create_berth_product_not_enough_permissions(api_client):
 
     assert BerthProduct.objects.count() == 0
     assert_not_enough_permissions(executed)
-
-
-def test_create_berth_product_no_price_group_id(superuser_api_client):
-    variables = {
-        "priceValue": "1.00",
-    }
-
-    assert BerthProduct.objects.count() == 0
-
-    executed = superuser_api_client.execute(
-        CREATE_BERTH_PRODUCT_MUTATION, input=variables
-    )
-
-    assert BerthProduct.objects.count() == 0
-    assert_field_missing("priceGroupId", executed)
-
-
-def test_create_berth_product_no_price_value(superuser_api_client):
-    variables = {
-        "priceGroupId": to_global_id(BerthPriceGroupNode, uuid.uuid4()),
-    }
-
-    assert BerthProduct.objects.count() == 0
-
-    executed = superuser_api_client.execute(
-        CREATE_BERTH_PRODUCT_MUTATION, input=variables
-    )
-
-    assert BerthProduct.objects.count() == 0
-    assert_field_missing("priceValue", executed)
-
-
-def test_create_berth_product_price_group_does_not_exist(superuser_api_client):
-    variables = {
-        "priceGroupId": to_global_id(BerthPriceGroupNode, uuid.uuid4()),
-        "priceValue": "1.00",
-    }
-
-    assert BerthProduct.objects.count() == 0
-
-    executed = superuser_api_client.execute(
-        CREATE_BERTH_PRODUCT_MUTATION, input=variables
-    )
-
-    assert BerthProduct.objects.count() == 0
-    assert_doesnt_exist("BerthPriceGroup", executed)
 
 
 DELETE_BERTH_PRODUCT_MUTATION = """
@@ -228,14 +189,13 @@ mutation UPDATE_BERTH_PRODUCT($input: UpdateBerthProductMutationInput!) {
     updateBerthProduct(input: $input) {
         berthProduct {
             id
-            priceValue
+            minWidth
+            maxWidth
+            tier1Price
+            tier2Price
+            tier3Price
             priceUnit
-            priceGroup {
-                name
-            }
-            harbor {
-                id
-            }
+            taxPercentage
         }
     }
 }
@@ -245,12 +205,18 @@ mutation UPDATE_BERTH_PRODUCT($input: UpdateBerthProductMutationInput!) {
 @pytest.mark.parametrize(
     "api_client", ["berth_services"], indirect=True,
 )
-def test_update_berth_product(api_client, berth_product, berth_price_group, harbor):
+def test_update_berth_product(api_client, berth_product, harbor):
     variables = {
         "id": to_global_id(BerthProductNode, berth_product.id),
-        "priceValue": str(random_price()),
-        "priceGroupId": to_global_id(BerthPriceGroupNode, berth_price_group.id),
-        "harborId": to_global_id(HarborNode, harbor.id),
+        "minWidth": rounded(
+            random.uniform(0, 5), round_to_nearest=0.05, as_string=True
+        ),
+        "maxWidth": rounded(
+            random.uniform(0, 6), round_to_nearest=0.05, as_string=True
+        ),
+        "tier1Price": str(random_price()),
+        "tier2Price": str(random_price()),
+        "tier3Price": str(random_price()),
     }
 
     assert BerthProduct.objects.count() == 1
@@ -261,10 +227,13 @@ def test_update_berth_product(api_client, berth_product, berth_price_group, harb
 
     assert executed["data"]["updateBerthProduct"]["berthProduct"] == {
         "id": variables["id"],
-        "priceValue": variables["priceValue"],
+        "minWidth": str(variables["minWidth"]),
+        "maxWidth": str(variables["maxWidth"]),
+        "tier1Price": variables["tier1Price"],
+        "tier2Price": variables["tier2Price"],
+        "tier3Price": variables["tier3Price"],
         "priceUnit": PriceUnitsEnum.AMOUNT.name,
-        "priceGroup": {"name": berth_price_group.name},
-        "harbor": {"id": variables["harborId"]},
+        "taxPercentage": PlaceProductTaxEnum.get(DEFAULT_TAX_PERCENTAGE).name,
     }
 
 
@@ -291,24 +260,6 @@ def test_update_berth_product_does_not_exist(superuser_api_client):
     )
 
     assert_doesnt_exist("BerthProduct", executed)
-
-
-def test_update_berth_product_price_group_does_not_exist(
-    superuser_api_client, berth_product
-):
-    variables = {
-        "id": to_global_id(BerthProductNode, berth_product.id),
-        "priceGroupId": to_global_id(BerthPriceGroupNode, uuid.uuid4()),
-    }
-
-    assert BerthProduct.objects.count() == 1
-
-    executed = superuser_api_client.execute(
-        UPDATE_BERTH_PRODUCT_MUTATION, input=variables
-    )
-
-    assert BerthProduct.objects.count() == 1
-    assert_doesnt_exist("BerthPriceGroup", executed)
 
 
 CREATE_WINTER_STORAGE_PRODUCT_MUTATION = """
@@ -787,7 +738,7 @@ def test_create_order_berth_product(api_client, berth_product):
     assert executed["data"]["createOrder"]["order"].pop("id") is not None
 
     assert executed["data"]["createOrder"]["order"] == {
-        "price": str(berth_product.price_value),
+        "price": str(berth_product.price_for_tier(berth_lease.berth.pier.price_tier)),
         "taxPercentage": str(berth_product.tax_percentage),
         "customer": {"id": variables["customerId"]},
         "product": {"id": variables["productId"]},
@@ -936,7 +887,7 @@ def test_update_order_berth_product(api_client, berth_product, berth_lease):
     assert executed["data"]["updateOrder"]["order"] == {
         "id": variables["id"],
         "comment": variables["comment"],
-        "price": str(berth_product.price_value),
+        "price": str(berth_product.price_for_tier(berth_lease.berth.pier.price_tier)),
         "taxPercentage": str(berth_product.tax_percentage),
         "dueDate": str(variables["dueDate"].date()),
         "status": variables["status"],

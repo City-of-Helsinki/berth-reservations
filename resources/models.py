@@ -25,6 +25,7 @@ from leases.utils import (
     calculate_berth_lease_end_date,
     calculate_winter_storage_lease_end_date,
 )
+from payments.enums import PriceTier
 from utils.models import TimeStampedModel, UUIDModel
 
 from .enums import AreaRegion, BerthMooringType
@@ -447,6 +448,9 @@ class Pier(AbstractAreaSection):
     personal_electricity = models.BooleanField(
         verbose_name=_("personal electricity contract"), default=False
     )
+    price_tier = models.PositiveSmallIntegerField(
+        choices=PriceTier.choices, verbose_name=_("price tier")
+    )
 
     objects = PierManager()
 
@@ -526,13 +530,6 @@ class BerthType(AbstractPlaceType):
         blank=True,
         null=True,
     )
-    price_group = models.ForeignKey(
-        "payments.BerthPriceGroup",
-        verbose_name=_("price group"),
-        related_name="berth_types",
-        null=True,
-        on_delete=models.SET_NULL,
-    )
 
     class Meta:
         verbose_name = _("berth type")
@@ -544,15 +541,6 @@ class BerthType(AbstractPlaceType):
                 name="unique_dimension",
             )
         ]
-
-    def save(self, *args, **kwargs):
-        from payments.models import BerthPriceGroup
-
-        if not self.price_group:
-            self.price_group = BerthPriceGroup.objects.get_or_create_for_width(
-                self.width
-            )
-        return super().save(*args, **kwargs)
 
     def __str__(self):
         return "{} x {} - {}".format(self.width, self.length, str(self.mooring_type))

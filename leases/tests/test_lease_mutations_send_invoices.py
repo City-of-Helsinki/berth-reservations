@@ -10,7 +10,7 @@ from berth_reservations.tests.factories import UserFactory
 from berth_reservations.tests.utils import assert_not_enough_permissions
 from customers.schema import ProfileNode
 from customers.tests.conftest import mocked_response_profile
-from payments.models import BerthPriceGroup, Order
+from payments.models import Order
 from payments.tests.factories import BerthProductFactory
 from utils.relay import to_global_id
 
@@ -50,10 +50,10 @@ def test_send_berth_invoices_success(api_client, notification_template_orders_ap
         end_date=calculate_season_end_date(today() - relativedelta(years=1)),
     )
     customer = lease.customer
-    price_group = BerthPriceGroup.objects.get_or_create_for_width(
-        lease.berth.berth_type.width
+    BerthProductFactory(
+        min_width=lease.berth.berth_type.width - 1,
+        max_width=lease.berth.berth_type.width + 1,
     )
-    BerthProductFactory(price_group=price_group, harbor=lease.berth.pier.harbor)
 
     user = UserFactory()
 
@@ -109,10 +109,10 @@ def test_send_berth_invoices_missing_email(
         end_date=calculate_season_end_date(today() - relativedelta(years=1)),
     )
     customer = lease.customer
-    price_group = BerthPriceGroup.objects.get_or_create_for_width(
-        lease.berth.berth_type.width
+    BerthProductFactory(
+        min_width=lease.berth.berth_type.width - 1,
+        max_width=lease.berth.berth_type.width + 1,
     )
-    BerthProductFactory(price_group=price_group, harbor=lease.berth.pier.harbor)
 
     user = UserFactory()
 

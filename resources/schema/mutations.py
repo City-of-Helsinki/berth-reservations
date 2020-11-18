@@ -460,11 +460,13 @@ class PierInput(AbstractAreaSectionInput):
     waste_collection = graphene.Boolean()
     lighting = graphene.Boolean()
     personal_electricity = graphene.Boolean()
+    price_tier = graphene.Field("payments.schema.PriceTierEnum")
 
 
 class CreatePierMutation(graphene.ClientIDMutation):
     class Input(PierInput):
         harbor_id = graphene.ID(required=True)
+        price_tier = graphene.Field("payments.schema.PriceTierEnum", required=True)
 
     pier = graphene.Field(PierNode)
 

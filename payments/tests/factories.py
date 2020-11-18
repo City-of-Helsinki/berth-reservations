@@ -4,15 +4,15 @@ import factory
 
 from berth_reservations.tests.factories import CustomerProfileFactory
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
-from resources.tests.factories import HarborFactory, WinterStorageAreaFactory
+from resources.tests.factories import WinterStorageAreaFactory
 from utils.numbers import rounded
 
 from ..enums import OrderStatus, PeriodType, PriceUnits, ProductServiceType
 from ..models import (
     AbstractBaseProduct,
+    AbstractPlaceProduct,
     ADDITIONAL_PRODUCT_TAX_PERCENTAGES,
     AdditionalProduct,
-    BerthPriceGroup,
     BerthProduct,
     DEFAULT_TAX_PERCENTAGE,
     Order,
@@ -36,30 +36,39 @@ class AbstractBaseProductFactory(factory.django.DjangoModelFactory):
         model = AbstractBaseProduct
 
 
-class BerthPriceGroupFactory(factory.django.DjangoModelFactory):
-    name = factory.LazyFunction(lambda: f"{rounded(random.uniform(0, 99))}m")
-
-    class Meta:
-        model = BerthPriceGroup
-        django_get_or_create = ("name",)
-
-
-class AbstractPlaceProductFactory(AbstractBaseProductFactory):
+class AbstractPlaceProductFactory(factory.django.DjangoModelFactory):
     price_unit = factory.LazyFunction(lambda: PriceUnits.AMOUNT)
     tax_percentage = factory.Faker(
         "random_element", elements=PLACE_PRODUCT_TAX_PERCENTAGES
     )
 
+    class Meta:
+        model = AbstractPlaceProduct
 
-class BerthProductFactory(AbstractPlaceProductFactory):
-    price_group = factory.SubFactory(BerthPriceGroupFactory)
-    harbor = factory.SubFactory(HarborFactory)
+
+class BerthProductFactory(factory.django.DjangoModelFactory):
+    min_width = factory.LazyFunction(
+        lambda: rounded(random.uniform(0, 8), round_to_nearest=0.05)
+    )
+    max_width = factory.LazyAttribute(
+        lambda o: rounded(random.uniform(float(o.min_width), 10), round_to_nearest=0.05)
+    )
+    tier_1_price = factory.LazyFunction(lambda: random_price(1, 100, decimals=0))
+    tier_2_price = factory.LazyFunction(lambda: random_price(1, 100, decimals=0))
+    tier_3_price = factory.LazyFunction(lambda: random_price(1, 100, decimals=0))
+    tax_percentage = factory.Faker(
+        "random_element", elements=PLACE_PRODUCT_TAX_PERCENTAGES
+    )
 
     class Meta:
         model = BerthProduct
+        django_get_or_create = ("min_width", "max_width")
 
 
-class WinterStorageProductFactory(AbstractPlaceProductFactory):
+class WinterStorageProductFactory(
+    AbstractBaseProductFactory, AbstractPlaceProductFactory
+):
+    price_unit = factory.LazyFunction(lambda: PriceUnits.AMOUNT)
     winter_storage_area = factory.SubFactory(WinterStorageAreaFactory)
 
     class Meta:
