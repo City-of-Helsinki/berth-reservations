@@ -386,7 +386,7 @@ class CreateAdditionalProductOrderMutation(graphene.ClientIDMutation):
         except (ValidationError, IntegrityError) as e:
             raise VenepaikkaGraphQLError(e)
 
-        return CreateOrderMutation(order=order)
+        return CreateAdditionalProductOrderMutation(order=order)
 
 
 class UpdateOrderMutation(graphene.ClientIDMutation):
