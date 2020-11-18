@@ -1674,7 +1674,7 @@
     "location": "SRID=4326;POINT (25.02156792855906 60.19045365285283)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/41189.jpg",
     "availability_level": null
   }
 },
@@ -1692,7 +1692,7 @@
     "location": "SRID=4326;POINT (25.14818799999996 60.20052999999999)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40800.jpg",
     "availability_level": null
   }
 },
@@ -1710,7 +1710,7 @@
     "location": "SRID=4326;POINT (24.92907700000001 60.16155199999997)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/41390.jpg",
     "availability_level": null
   }
 },
@@ -1728,7 +1728,7 @@
     "location": "SRID=4326;POINT (24.96115099999998 60.172394)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/41150.jpg",
     "availability_level": null
   }
 },
@@ -1746,7 +1746,7 @@
     "location": "SRID=4326;POINT (25.00117000000002 60.18107199999997)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40672.jpg",
     "availability_level": null
   }
 },
@@ -1764,7 +1764,7 @@
     "location": "SRID=4326;POINT (24.90518811639428 60.16102670629775)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/41472.jpg",
     "availability_level": null
   }
 },
@@ -1782,7 +1782,7 @@
     "location": "SRID=4326;POINT (24.94178200000002 60.17999999999999)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/39913.jpg",
     "availability_level": null
   }
 },
@@ -1800,7 +1800,7 @@
     "location": "SRID=4326;POINT (25.06585287235345 60.18815467436053)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40393.jpg",
     "availability_level": null
   }
 },
@@ -1818,7 +1818,7 @@
     "location": "SRID=4326;POINT (24.95591200000003 60.17663599999999)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40876.jpg",
     "availability_level": null
   }
 },
@@ -1836,7 +1836,7 @@
     "location": "SRID=4326;POINT (25.10433199999997 60.207024)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40897.jpg",
     "availability_level": null
   }
 },
@@ -1854,7 +1854,7 @@
     "location": "SRID=4326;POINT (24.91271000000004 60.161034)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40827.jpg",
     "availability_level": null
   }
 },
@@ -1872,7 +1872,7 @@
     "location": "SRID=4326;POINT (25.01650000000001 60.18398699999997)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/42130.jpg",
     "availability_level": null
   }
 },
@@ -1890,7 +1890,7 @@
     "location": "SRID=4326;POINT (25.05870200000003 60.16715999999997)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40166.jpg",
     "availability_level": null
   }
 },
@@ -1908,7 +1908,7 @@
     "location": "SRID=4326;POINT (25.01452799999996 60.15482999999995)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/41415.jpg",
     "availability_level": null
   }
 },
@@ -1926,7 +1926,7 @@
     "location": "SRID=4326;POINT (25.09772699999996 60.20078699999999)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/39950.jpg",
     "availability_level": null
   }
 },
@@ -1944,7 +1944,7 @@
     "location": "SRID=4326;POINT (24.43913699999998 59.981045)",
     "region": "west",
     "municipality": "kirkkonummi",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40290.jpg",
     "availability_level": null
   }
 },
@@ -1962,7 +1962,7 @@
     "location": "SRID=4326;POINT (24.99521236574618 60.18296813265754)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40359.jpg",
     "availability_level": null
   }
 },
@@ -1980,7 +1980,7 @@
     "location": "SRID=4326;POINT (24.946941 60.17735700000001)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/41669.jpg",
     "availability_level": null
   }
 },
@@ -1998,7 +1998,7 @@
     "location": "SRID=4326;POINT (24.90000199999996 60.16529500000001)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40535.jpg",
     "availability_level": null
   }
 },
@@ -2016,7 +2016,7 @@
     "location": "SRID=4326;POINT (25.14131499999998 60.19891000000001)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40590.jpg",
     "availability_level": null
   }
 },
@@ -2034,7 +2034,7 @@
     "location": "SRID=4326;POINT (25.14785400000001 60.20036299999999)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/41636.jpg",
     "availability_level": null
   }
 },
@@ -2052,7 +2052,7 @@
     "location": "SRID=4326;POINT (25.17723500000004 60.20771399999997)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40842.jpg",
     "availability_level": null
   }
 },
@@ -2070,7 +2070,7 @@
     "location": "SRID=4326;POINT (24.96585654232736 60.16959497046764)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/48272.jpg",
     "availability_level": null
   }
 },
@@ -2088,7 +2088,7 @@
     "location": "SRID=4326;POINT (25.02772281481857 60.18698499999979)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40864.jpg",
     "availability_level": null
   }
 },
@@ -2106,7 +2106,7 @@
     "location": "SRID=4326;POINT (24.94809499999996 60.15480999999998)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40948.jpg",
     "availability_level": null
   }
 },
@@ -2124,7 +2124,7 @@
     "location": "SRID=4326;POINT (24.959497 60.17813499999998)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/41454.jpg",
     "availability_level": null
   }
 },
@@ -2142,7 +2142,7 @@
     "location": "SRID=4326;POINT (24.91256300000001 60.16163299999998)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40310.jpg",
     "availability_level": null
   }
 },
@@ -2160,7 +2160,7 @@
     "location": "SRID=4326;POINT (25.01524699999996 60.182655)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/42225.jpg",
     "availability_level": null
   }
 },
@@ -2178,7 +2178,7 @@
     "location": "SRID=4326;POINT (24.88904799999996 60.15822599999999)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/41359.jpg",
     "availability_level": null
   }
 },
@@ -2196,7 +2196,7 @@
     "location": "SRID=4326;POINT (25.01592299999999 60.19148599999995)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40712.jpg",
     "availability_level": null
   }
 },
@@ -2214,7 +2214,7 @@
     "location": "SRID=4326;POINT (24.915993 60.16185799999999)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40203.jpg",
     "availability_level": null
   }
 },
@@ -2232,7 +2232,7 @@
     "location": "SRID=4326;POINT (24.94499199999997 60.154316)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/45995.jpg",
     "availability_level": null
   }
 },
@@ -2250,7 +2250,7 @@
     "location": "SRID=4326;POINT (24.88408300000004 60.19365299999998)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/41074.jpg",
     "availability_level": null
   }
 },
@@ -2268,7 +2268,7 @@
     "location": "SRID=4326;POINT (25.06527100000002 60.19763999999999)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/42276.jpg",
     "availability_level": null
   }
 },
@@ -2286,7 +2286,7 @@
     "location": "SRID=4326;POINT (24.90732199999999 60.15931299999999)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40627.jpg",
     "availability_level": null
   }
 },
@@ -2304,7 +2304,7 @@
     "location": "SRID=4326;POINT (25.18621999999997 60.21003700000001)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/41637.jpg",
     "availability_level": null
   }
 },
@@ -2322,7 +2322,7 @@
     "location": "SRID=4326;POINT (25.113478 60.20614000000001)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/41066.jpg",
     "availability_level": null
   }
 },
@@ -2340,7 +2340,7 @@
     "location": "SRID=4326;POINT (24.88216800000003 60.19230999999998)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/41857.jpg",
     "availability_level": null
   }
 },
@@ -2358,7 +2358,7 @@
     "location": "SRID=4326;POINT (24.96509200000001 60.17399199999996)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/42136.jpg",
     "availability_level": null
   }
 },
@@ -2376,7 +2376,7 @@
     "location": "SRID=4326;POINT (24.95324466270327 60.15452603410284)",
     "region": "west",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/40971.jpg",
     "availability_level": null
   }
 },
@@ -2394,7 +2394,7 @@
     "location": "SRID=4326;POINT (24.99573099999997 60.18447499999999)",
     "region": "east",
     "municipality": "helsinki",
-    "image_file": "",
+    "image_file": "/img/helsinki_harbors/41926.jpg",
     "availability_level": null
   }
 },
@@ -2414,6 +2414,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -2438,6 +2439,7 @@
     "waste_collection": false,
     "lighting": false,
     "personal_electricity": false,
+    "price_tier": 3,
     "suitable_boat_types": [
       2,
       3
@@ -2460,6 +2462,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 2,
     "suitable_boat_types": [
       1,
       2,
@@ -2486,6 +2489,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       3,
       4,
@@ -2510,6 +2514,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -2536,6 +2541,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -2561,6 +2567,7 @@
     "waste_collection": false,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 2,
     "suitable_boat_types": [
       3,
       4,
@@ -2585,6 +2592,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       1,
       2,
@@ -2611,6 +2619,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       1,
       2,
@@ -2623,11 +2632,31 @@
 },
 {
   "model": "resources.pier",
+  "pk": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
+  "fields": {
+    "created_at": "2020-11-18T12:22:14.638Z",
+    "modified_at": "2020-11-18T12:27:36.426Z",
+    "identifier": "032-075",
+    "location": "SRID=4326;POINT (24.90518811639429 60.16102670629776)",
+    "electricity": false,
+    "water": true,
+    "gate": false,
+    "harbor": "26ec853e-fa8e-484f-9b5d-ecac3ad3c51d",
+    "mooring": true,
+    "waste_collection": true,
+    "lighting": true,
+    "personal_electricity": false,
+    "price_tier": 1,
+    "suitable_boat_types": []
+  }
+},
+{
+  "model": "resources.pier",
   "pk": "204dfbfc-9bb5-429b-9c92-46953735d142",
   "fields": {
     "created_at": "2020-04-06T11:56:25.922Z",
-    "modified_at": "2020-04-06T11:56:25.944Z",
-    "identifier": "-",
+    "modified_at": "2020-11-18T12:22:29.941Z",
+    "identifier": "001-031",
     "location": "SRID=4326;POINT (24.90518811639428 60.16102670629775)",
     "electricity": false,
     "water": true,
@@ -2637,6 +2666,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 2,
     "suitable_boat_types": [
       3,
       4,
@@ -2661,6 +2691,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -2686,6 +2717,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -2710,6 +2742,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 2,
     "suitable_boat_types": [
       3,
       4,
@@ -2733,6 +2766,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -2757,6 +2791,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 2,
     "suitable_boat_types": [
       3,
       4,
@@ -2781,6 +2816,7 @@
     "waste_collection": false,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 2,
     "suitable_boat_types": [
       3,
       4,
@@ -2806,6 +2842,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -2830,6 +2867,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       1,
       2,
@@ -2856,6 +2894,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -2883,6 +2922,7 @@
     "waste_collection": false,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 3,
     "suitable_boat_types": [
       2,
       3,
@@ -2907,6 +2947,7 @@
     "waste_collection": false,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 3,
     "suitable_boat_types": [
       2,
       3,
@@ -2933,6 +2974,7 @@
     "waste_collection": true,
     "lighting": false,
     "personal_electricity": false,
+    "price_tier": 3,
     "suitable_boat_types": [
       2,
       3,
@@ -2958,6 +3000,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 2,
     "suitable_boat_types": [
       2,
       3,
@@ -2983,6 +3026,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3008,6 +3052,7 @@
     "waste_collection": false,
     "lighting": false,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3032,6 +3077,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       3,
       4,
@@ -3056,6 +3102,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       1,
       2,
@@ -3082,6 +3129,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3109,6 +3157,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3133,6 +3182,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3157,6 +3207,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3182,6 +3233,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3208,6 +3260,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3232,6 +3285,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       1,
       2,
@@ -3257,6 +3311,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3282,6 +3337,7 @@
     "waste_collection": false,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 3,
     "suitable_boat_types": [
       3,
       4,
@@ -3305,6 +3361,7 @@
     "waste_collection": true,
     "lighting": false,
     "personal_electricity": false,
+    "price_tier": 2,
     "suitable_boat_types": [
       2,
       3,
@@ -3330,6 +3387,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       1,
       2,
@@ -3356,6 +3414,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3381,6 +3440,7 @@
     "waste_collection": false,
     "lighting": false,
     "personal_electricity": false,
+    "price_tier": 3,
     "suitable_boat_types": [
       2,
       3
@@ -3403,6 +3463,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3427,6 +3488,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       1,
       2,
@@ -3452,6 +3514,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 2,
     "suitable_boat_types": [
       2,
       3,
@@ -3477,6 +3540,7 @@
     "waste_collection": true,
     "lighting": false,
     "personal_electricity": false,
+    "price_tier": 3,
     "suitable_boat_types": [
       2,
       3
@@ -3499,6 +3563,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 2,
     "suitable_boat_types": [
       3,
       4,
@@ -3524,6 +3589,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3550,6 +3616,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3575,6 +3642,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 2,
     "suitable_boat_types": [
       2,
       3,
@@ -3599,6 +3667,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3624,6 +3693,7 @@
     "waste_collection": true,
     "lighting": false,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3
@@ -3646,6 +3716,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3670,6 +3741,7 @@
     "waste_collection": false,
     "lighting": false,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": []
   }
 },
@@ -3689,6 +3761,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       1,
       2,
@@ -3715,6 +3788,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       1,
       2,
@@ -3741,6 +3815,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3768,6 +3843,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3793,6 +3869,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       3,
       4,
@@ -3817,6 +3894,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 2,
     "suitable_boat_types": [
       3,
       4,
@@ -3843,6 +3921,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3869,6 +3948,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3894,6 +3974,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3921,6 +4002,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 2,
     "suitable_boat_types": [
       3,
       4,
@@ -3945,6 +4027,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -3970,6 +4053,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       3,
       4,
@@ -3994,6 +4078,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -4018,6 +4103,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -4043,6 +4129,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       3,
       4,
@@ -4067,6 +4154,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       3,
       4,
@@ -4091,6 +4179,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       1,
       2,
@@ -4117,6 +4206,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -4142,6 +4232,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -4168,6 +4259,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -4192,6 +4284,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 2,
     "suitable_boat_types": [
       3,
       4,
@@ -4218,6 +4311,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -4243,6 +4337,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       1,
       2,
@@ -4269,6 +4364,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       1,
       2,
@@ -4295,6 +4391,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 2,
     "suitable_boat_types": [
       1,
       2,
@@ -4321,6 +4418,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -4345,6 +4443,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -4368,6 +4467,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       2,
       3,
@@ -4392,6 +4492,7 @@
     "waste_collection": true,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 1,
     "suitable_boat_types": [
       1,
       2,
@@ -4418,6 +4519,7 @@
     "waste_collection": false,
     "lighting": true,
     "personal_electricity": false,
+    "price_tier": 3,
     "suitable_boat_types": [
       2,
       3,
@@ -4435,8 +4537,7 @@
     "width": "7.00",
     "length": "15.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4448,8 +4549,7 @@
     "width": "2.50",
     "length": "8.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4461,8 +4561,7 @@
     "width": "2.50",
     "length": "10.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4474,8 +4573,7 @@
     "width": "3.00",
     "length": "12.00",
     "mooring_type": 6,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4487,8 +4585,7 @@
     "width": "2.00",
     "length": "5.00",
     "mooring_type": 1,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4500,8 +4597,7 @@
     "width": "3.50",
     "length": "11.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4513,8 +4609,7 @@
     "width": "2.50",
     "length": "5.00",
     "mooring_type": 2,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4526,8 +4621,7 @@
     "width": "4.50",
     "length": "18.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4539,8 +4633,7 @@
     "width": "2.60",
     "length": "5.00",
     "mooring_type": 2,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4552,8 +4645,7 @@
     "width": "2.75",
     "length": "6.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4565,8 +4657,7 @@
     "width": "3.00",
     "length": "9.00",
     "mooring_type": 2,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4578,8 +4669,7 @@
     "width": "3.50",
     "length": "13.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4591,8 +4681,7 @@
     "width": "5.00",
     "length": "17.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4604,8 +4693,7 @@
     "width": "3.50",
     "length": "17.50",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4617,8 +4705,7 @@
     "width": "2.75",
     "length": "10.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4630,8 +4717,7 @@
     "width": "2.00",
     "length": "8.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4643,8 +4729,7 @@
     "width": "5.00",
     "length": "15.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4656,8 +4741,7 @@
     "width": "3.00",
     "length": "10.00",
     "mooring_type": 6,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4669,8 +4753,7 @@
     "width": "5.00",
     "length": "9.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4682,8 +4765,7 @@
     "width": "5.00",
     "length": "20.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4695,8 +4777,7 @@
     "width": "3.00",
     "length": "8.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4708,8 +4789,7 @@
     "width": "2.00",
     "length": "7.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4721,8 +4801,7 @@
     "width": "4.00",
     "length": "16.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4734,8 +4813,7 @@
     "width": "3.50",
     "length": "8.00",
     "mooring_type": 3,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4747,8 +4825,7 @@
     "width": "2.00",
     "length": "6.00",
     "mooring_type": 2,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4760,8 +4837,7 @@
     "width": "3.00",
     "length": "12.50",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4773,8 +4849,7 @@
     "width": "2.50",
     "length": "13.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4786,8 +4861,7 @@
     "width": "3.50",
     "length": "12.00",
     "mooring_type": 8,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4799,8 +4873,7 @@
     "width": "1.50",
     "length": "4.00",
     "mooring_type": 7,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4812,8 +4885,7 @@
     "width": "3.50",
     "length": "14.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4825,8 +4897,7 @@
     "width": "4.50",
     "length": "19.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4838,8 +4909,7 @@
     "width": "4.50",
     "length": "22.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4851,8 +4921,7 @@
     "width": "4.50",
     "length": "14.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4864,8 +4933,7 @@
     "width": "3.00",
     "length": "8.00",
     "mooring_type": 6,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4877,8 +4945,7 @@
     "width": "3.00",
     "length": "5.00",
     "mooring_type": 2,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4890,8 +4957,7 @@
     "width": "6.00",
     "length": "14.00",
     "mooring_type": 3,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4903,8 +4969,7 @@
     "width": "3.50",
     "length": "12.50",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4916,8 +4981,7 @@
     "width": "2.00",
     "length": "4.00",
     "mooring_type": 2,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4929,8 +4993,7 @@
     "width": "4.00",
     "length": "17.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4942,8 +5005,7 @@
     "width": "2.50",
     "length": "20.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4955,8 +5017,7 @@
     "width": "3.00",
     "length": "12.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4968,8 +5029,7 @@
     "width": "6.00",
     "length": "20.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4981,8 +5041,7 @@
     "width": "2.50",
     "length": "9.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -4994,8 +5053,7 @@
     "width": "3.00",
     "length": "8.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5007,8 +5065,7 @@
     "width": "5.50",
     "length": "14.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5020,8 +5077,7 @@
     "width": "2.60",
     "length": "6.00",
     "mooring_type": 2,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5033,8 +5089,7 @@
     "width": "3.50",
     "length": "15.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5046,8 +5101,7 @@
     "width": "5.00",
     "length": "22.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5059,8 +5113,7 @@
     "width": "3.00",
     "length": "8.00",
     "mooring_type": 3,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5072,8 +5125,7 @@
     "width": "2.75",
     "length": "6.00",
     "mooring_type": 2,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5085,8 +5137,7 @@
     "width": "2.75",
     "length": "14.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5098,8 +5149,7 @@
     "width": "3.50",
     "length": "20.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5111,8 +5161,7 @@
     "width": "4.50",
     "length": "20.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5124,8 +5173,7 @@
     "width": "4.00",
     "length": "20.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5137,8 +5185,7 @@
     "width": "4.00",
     "length": "10.00",
     "mooring_type": 6,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5150,8 +5197,7 @@
     "width": "4.00",
     "length": "12.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5163,8 +5209,7 @@
     "width": "3.00",
     "length": "11.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5176,8 +5221,7 @@
     "width": "3.50",
     "length": "12.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5189,8 +5233,7 @@
     "width": "3.50",
     "length": "15.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5202,8 +5245,7 @@
     "width": "6.00",
     "length": "14.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5215,8 +5257,7 @@
     "width": "4.00",
     "length": "15.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5228,8 +5269,7 @@
     "width": "5.00",
     "length": "16.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5241,8 +5281,7 @@
     "width": "3.00",
     "length": "17.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5254,8 +5293,7 @@
     "width": "2.50",
     "length": "9.00",
     "mooring_type": 3,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5267,8 +5305,7 @@
     "width": "3.50",
     "length": "9.00",
     "mooring_type": 3,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5280,8 +5317,7 @@
     "width": "2.50",
     "length": "8.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5293,8 +5329,7 @@
     "width": "2.50",
     "length": "8.00",
     "mooring_type": 3,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5306,8 +5341,7 @@
     "width": "3.00",
     "length": "8.50",
     "mooring_type": 3,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5319,8 +5353,7 @@
     "width": "2.00",
     "length": "10.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5332,8 +5365,7 @@
     "width": "3.50",
     "length": "19.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5345,8 +5377,7 @@
     "width": "3.00",
     "length": "14.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5358,8 +5389,7 @@
     "width": "3.50",
     "length": "11.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5371,8 +5401,7 @@
     "width": "3.00",
     "length": "13.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5384,8 +5413,7 @@
     "width": "2.50",
     "length": "5.50",
     "mooring_type": 9,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5397,8 +5425,7 @@
     "width": "2.75",
     "length": "5.00",
     "mooring_type": 2,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5410,8 +5437,7 @@
     "width": "3.00",
     "length": "9.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5423,8 +5449,7 @@
     "width": "3.50",
     "length": "12.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5436,8 +5461,7 @@
     "width": "3.00",
     "length": "10.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5449,8 +5473,7 @@
     "width": "3.00",
     "length": "9.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5462,8 +5485,7 @@
     "width": "7.00",
     "length": "25.00",
     "mooring_type": 6,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5475,8 +5497,7 @@
     "width": "5.50",
     "length": "11.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5488,8 +5509,7 @@
     "width": "4.00",
     "length": "12.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5501,8 +5521,7 @@
     "width": "4.00",
     "length": "18.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5514,8 +5533,7 @@
     "width": "2.00",
     "length": "4.00",
     "mooring_type": 1,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5527,8 +5545,7 @@
     "width": "2.60",
     "length": "8.00",
     "mooring_type": 3,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5540,8 +5557,7 @@
     "width": "3.00",
     "length": "10.00",
     "mooring_type": 3,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5553,8 +5569,7 @@
     "width": "4.50",
     "length": "12.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5566,8 +5581,7 @@
     "width": "2.00",
     "length": "5.00",
     "mooring_type": 2,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5579,8 +5593,7 @@
     "width": "3.50",
     "length": "10.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5592,8 +5605,7 @@
     "width": "2.70",
     "length": "6.00",
     "mooring_type": 2,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5605,8 +5617,7 @@
     "width": "4.00",
     "length": "16.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5618,8 +5629,7 @@
     "width": "3.00",
     "length": "15.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5631,8 +5641,7 @@
     "width": "3.00",
     "length": "16.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5644,8 +5653,7 @@
     "width": "3.00",
     "length": "12.00",
     "mooring_type": 8,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5657,8 +5665,7 @@
     "width": "3.50",
     "length": "12.00",
     "mooring_type": 6,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5670,8 +5677,7 @@
     "width": "4.00",
     "length": "22.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5683,8 +5689,7 @@
     "width": "4.50",
     "length": "9.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5696,8 +5701,7 @@
     "width": "5.00",
     "length": "18.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5709,8 +5713,7 @@
     "width": "6.50",
     "length": "12.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5722,8 +5725,7 @@
     "width": "2.60",
     "length": "6.00",
     "mooring_type": 6,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5735,8 +5737,7 @@
     "width": "4.00",
     "length": "8.00",
     "mooring_type": 3,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5748,8 +5749,7 @@
     "width": "4.00",
     "length": "12.00",
     "mooring_type": 6,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5761,8 +5761,7 @@
     "width": "3.50",
     "length": "14.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5774,8 +5773,7 @@
     "width": "3.00",
     "length": "6.00",
     "mooring_type": 2,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5787,8 +5785,7 @@
     "width": "2.95",
     "length": "8.00",
     "mooring_type": 3,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5800,8 +5797,7 @@
     "width": "2.70",
     "length": "5.00",
     "mooring_type": 2,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5813,8 +5809,7 @@
     "width": "3.00",
     "length": "18.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5826,8 +5821,7 @@
     "width": "2.50",
     "length": "6.00",
     "mooring_type": 2,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5839,8 +5833,7 @@
     "width": "4.00",
     "length": "14.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5852,8 +5845,7 @@
     "width": "2.50",
     "length": "10.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5865,8 +5857,7 @@
     "width": "4.50",
     "length": "12.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5878,8 +5869,7 @@
     "width": "3.00",
     "length": "21.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5891,8 +5881,7 @@
     "width": "3.00",
     "length": "9.00",
     "mooring_type": 3,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5904,8 +5893,7 @@
     "width": "4.00",
     "length": "21.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5917,8 +5905,7 @@
     "width": "2.75",
     "length": "8.00",
     "mooring_type": 3,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5930,8 +5917,7 @@
     "width": "4.00",
     "length": "15.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5943,8 +5929,7 @@
     "width": "2.50",
     "length": "5.00",
     "mooring_type": 7,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5956,8 +5941,7 @@
     "width": "3.50",
     "length": "18.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5969,8 +5953,7 @@
     "width": "3.00",
     "length": "10.00",
     "mooring_type": 4,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -5982,8 +5965,7 @@
     "width": "7.00",
     "length": "14.00",
     "mooring_type": 5,
-    "depth": null,
-    "price_group": null
+    "depth": null
   }
 },
 {
@@ -6204,7 +6186,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "34",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4e5593b0-ee8f-4b4d-a129-1e46bc0167c0",
     "comment": "",
     "is_accessible": null
@@ -8094,7 +8076,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "38",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4e5593b0-ee8f-4b4d-a129-1e46bc0167c0",
     "comment": "",
     "is_accessible": null
@@ -9704,7 +9686,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "41",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4e5593b0-ee8f-4b4d-a129-1e46bc0167c0",
     "comment": "",
     "is_accessible": null
@@ -11566,7 +11548,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "39",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4e5593b0-ee8f-4b4d-a129-1e46bc0167c0",
     "comment": "",
     "is_accessible": null
@@ -11706,7 +11688,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "46",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "3f0164ad-6d0e-40e7-8a15-228da2d7c111",
     "comment": "",
     "is_accessible": null
@@ -12210,7 +12192,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "45",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4e5593b0-ee8f-4b4d-a129-1e46bc0167c0",
     "comment": "",
     "is_accessible": null
@@ -14450,7 +14432,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "61",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "f35622a6-dd83-4daf-bafc-9b6c6560a39d",
     "comment": "",
     "is_accessible": null
@@ -15332,7 +15314,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "37",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4e5593b0-ee8f-4b4d-a129-1e46bc0167c0",
     "comment": "",
     "is_accessible": null
@@ -15906,7 +15888,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "74",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "1f57d887-6cd3-432f-ad18-e5624388e78b",
     "comment": "",
     "is_accessible": null
@@ -17278,7 +17260,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "67",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4b132e6c-0e43-4375-8664-514057bdf436",
     "comment": "",
     "is_accessible": null
@@ -18132,7 +18114,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "35",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4e5593b0-ee8f-4b4d-a129-1e46bc0167c0",
     "comment": "",
     "is_accessible": null
@@ -18454,7 +18436,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "66",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4b132e6c-0e43-4375-8664-514057bdf436",
     "comment": "",
     "is_accessible": null
@@ -18664,7 +18646,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "36",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4e5593b0-ee8f-4b4d-a129-1e46bc0167c0",
     "comment": "",
     "is_accessible": null
@@ -18902,7 +18884,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "44",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4e5593b0-ee8f-4b4d-a129-1e46bc0167c0",
     "comment": "",
     "is_accessible": null
@@ -18986,7 +18968,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "43",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4e5593b0-ee8f-4b4d-a129-1e46bc0167c0",
     "comment": "",
     "is_accessible": null
@@ -19602,7 +19584,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "65",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4b132e6c-0e43-4375-8664-514057bdf436",
     "comment": "",
     "is_accessible": null
@@ -19742,7 +19724,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "59",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "f35622a6-dd83-4daf-bafc-9b6c6560a39d",
     "comment": "",
     "is_accessible": null
@@ -22780,7 +22762,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "33",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4e5593b0-ee8f-4b4d-a129-1e46bc0167c0",
     "comment": "",
     "is_accessible": null
@@ -23074,7 +23056,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "57",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "6d7aabc3-6710-469e-a1ee-75d81b72ce45",
     "comment": "",
     "is_accessible": null
@@ -23718,7 +23700,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "32",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4e5593b0-ee8f-4b4d-a129-1e46bc0167c0",
     "comment": "",
     "is_accessible": null
@@ -27302,7 +27284,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "47",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "3f0164ad-6d0e-40e7-8a15-228da2d7c111",
     "comment": "",
     "is_accessible": null
@@ -28352,7 +28334,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "56",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "6d7aabc3-6710-469e-a1ee-75d81b72ce45",
     "comment": "",
     "is_accessible": null
@@ -28856,7 +28838,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "52",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "3f0164ad-6d0e-40e7-8a15-228da2d7c111",
     "comment": "",
     "is_accessible": null
@@ -30746,7 +30728,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "62",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "f35622a6-dd83-4daf-bafc-9b6c6560a39d",
     "comment": "",
     "is_accessible": null
@@ -31026,7 +31008,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "54",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "3f0164ad-6d0e-40e7-8a15-228da2d7c111",
     "comment": "",
     "is_accessible": null
@@ -31810,7 +31792,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "58",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "f35622a6-dd83-4daf-bafc-9b6c6560a39d",
     "comment": "",
     "is_accessible": null
@@ -33518,7 +33500,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "64",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "f35622a6-dd83-4daf-bafc-9b6c6560a39d",
     "comment": "",
     "is_accessible": null
@@ -34624,7 +34606,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "70",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4b132e6c-0e43-4375-8664-514057bdf436",
     "comment": "",
     "is_accessible": null
@@ -37942,7 +37924,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "40",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4e5593b0-ee8f-4b4d-a129-1e46bc0167c0",
     "comment": "",
     "is_accessible": null
@@ -38432,7 +38414,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "72",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "1f57d887-6cd3-432f-ad18-e5624388e78b",
     "comment": "",
     "is_accessible": null
@@ -42688,7 +42670,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "50",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "3f0164ad-6d0e-40e7-8a15-228da2d7c111",
     "comment": "",
     "is_accessible": null
@@ -44326,7 +44308,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "42",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4e5593b0-ee8f-4b4d-a129-1e46bc0167c0",
     "comment": "",
     "is_accessible": null
@@ -45208,7 +45190,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "69",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4b132e6c-0e43-4375-8664-514057bdf436",
     "comment": "",
     "is_accessible": null
@@ -50010,7 +49992,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "51",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "3f0164ad-6d0e-40e7-8a15-228da2d7c111",
     "comment": "",
     "is_accessible": null
@@ -50696,7 +50678,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "49",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "3f0164ad-6d0e-40e7-8a15-228da2d7c111",
     "comment": "",
     "is_accessible": null
@@ -51634,7 +51616,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "53",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "3f0164ad-6d0e-40e7-8a15-228da2d7c111",
     "comment": "",
     "is_accessible": null
@@ -54630,7 +54612,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "73",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "1f57d887-6cd3-432f-ad18-e5624388e78b",
     "comment": "",
     "is_accessible": null
@@ -54770,7 +54752,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "75",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "1f57d887-6cd3-432f-ad18-e5624388e78b",
     "comment": "",
     "is_accessible": null
@@ -57136,7 +57118,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "71",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "1f57d887-6cd3-432f-ad18-e5624388e78b",
     "comment": "",
     "is_accessible": null
@@ -57668,7 +57650,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "68",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "4b132e6c-0e43-4375-8664-514057bdf436",
     "comment": "",
     "is_accessible": null
@@ -58550,7 +58532,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "63",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "f35622a6-dd83-4daf-bafc-9b6c6560a39d",
     "comment": "",
     "is_accessible": null
@@ -60370,7 +60352,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "48",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "3f0164ad-6d0e-40e7-8a15-228da2d7c111",
     "comment": "",
     "is_accessible": null
@@ -60608,7 +60590,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "55",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "3f0164ad-6d0e-40e7-8a15-228da2d7c111",
     "comment": "",
     "is_accessible": null
@@ -62610,7 +62592,7 @@
     "modified_at": "2020-04-06T11:56:25.766Z",
     "is_active": true,
     "number": "60",
-    "pier": "204dfbfc-9bb5-429b-9c92-46953735d142",
+    "pier": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
     "berth_type": "f35622a6-dd83-4daf-bafc-9b6c6560a39d",
     "comment": "",
     "is_accessible": null
