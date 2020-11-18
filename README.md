@@ -9,6 +9,7 @@
 * [Development without Docker](#development-without-docker)
   * [Database](#database)
   * [Daily running](#daily-running)
+  * [Install geospatial libraries](#install-geospatial-libraries)
 * [Keeping Python requirements up to date](#keeping-python-requirements-up-to-date)
 * [Code format](#code-format)
 * [Version Control](#version-control)
@@ -75,6 +76,16 @@ Create extensions in the database
 Allow user to create test database
 
     sudo -u postgres psql -c "ALTER USER berth_reservations CREATEDB;"
+
+<a name="install-geospatial-libraries"></a>
+### Install Geospatial libraries
+
+For Debian/Ubuntu:
+
+    apt-get install binutils libproj-dev gdal-bin
+
+For more information, see
+https://docs.djangoproject.com/en/3.1/ref/contrib/gis/install/geolibs/
 
 <a name="daily-running"></a>
 ### Daily running
