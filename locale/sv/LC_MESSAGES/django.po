@@ -937,25 +937,22 @@ msgid "cancelled"
 msgstr "Anullerad"
 
 msgid "New berth order approved"
-msgstr ""
+msgstr "Erbjudande om båtplats"
 
 msgid "Renew berth order approved"
-msgstr ""
+msgstr "Båtplatsfaktura"
 
-#, fuzzy
-#| msgid "berth switch reason"
+#: payments/notifications/types.py:16
 msgid "Berth switch order approved"
-msgstr "orsak till byte av båtplats"
+msgstr "Erbjudande om byte av båtplats"
 
-#, fuzzy
-#| msgid "winter storage area"
+#: payments/notifications/types.py:20
 msgid "New winter storage order approved"
-msgstr "vinterupplagsområde"
+msgstr "Faktura för vinteruppläggningsplats"
 
-#, fuzzy
-#| msgid "winter storage area"
+#: payments/notifications/types.py:24
 msgid "Unmarked winter storage order approved"
-msgstr "vinterupplagsområde"
+msgstr "Faktura för plats på upplagsområde som fylls i upptagningsordning"
 
 msgid "Payment service is unreachable"
 msgstr "Betaltjänsten kan inte nås"
