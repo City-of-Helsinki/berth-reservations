@@ -1,3 +1,4 @@
+import decimal
 import random
 import uuid
 
@@ -12,12 +13,29 @@ from berth_reservations.tests.utils import (
     assert_not_enough_permissions,
 )
 from leases.enums import LeaseStatus
-from leases.tests.factories import BerthLeaseFactory
+from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 
 from ..enums import BerthMooringType
-from ..models import Berth, BerthType, Harbor, Pier
-from ..schema import BerthNode, HarborNode, PierNode
-from .factories import BerthTypeFactory
+from ..models import (
+    Berth,
+    BerthType,
+    Harbor,
+    Pier,
+    WinterStorageArea,
+    WinterStoragePlace,
+    WinterStoragePlaceType,
+    WinterStorageSection,
+)
+from ..schema import (
+    BerthNode,
+    HarborNode,
+    PierNode,
+    WinterStorageAreaNode,
+    WinterStoragePlaceNode,
+    WinterStoragePlaceTypeNode,
+    WinterStorageSectionNode,
+)
+from .factories import BerthTypeFactory, WinterStoragePlaceFactory
 
 CREATE_BERTH_MUTATION = """
 mutation CreateBerth($input: CreateBerthMutationInput!) {
@@ -1162,3 +1180,1254 @@ def test_update_pier_harbor_doesnt_exist(superuser_api_client, pier):
 
     assert Pier.objects.count() == 1
     assert_doesnt_exist("Harbor", executed)
+
+
+CREATE_WINTER_STORAGE_AREA_MUTATION = """
+mutation CreateWinterStorageArea($input: CreateWinterStorageAreaMutationInput!) {
+    createWinterStorageArea(input: $input) {
+        winterStorageArea {
+            id
+            type
+            geometry {
+                type
+                coordinates
+            }
+            bbox
+            properties {
+                name
+                servicemapId
+                streetAddress
+                zipCode
+                availabilityLevel {
+                    id
+                }
+                municipality
+                estimatedNumberOfUnmarkedSpaces
+                maxLengthOfSectionSpaces
+                estimatedNumberOfSectionSpaces
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_create_winter_storage_area(pier, api_client, availability_level, municipality):
+    variables = {
+        "availabilityLevelId": availability_level.id,  # why not use to_global_id here?
+        "municipalityId": municipality.id,
+        "estimatedNumberOfSectionSpaces": 50,
+        "maxLengthOfSectionSpaces": "6.5",
+        "estimatedNumberOfUnmarkedSpaces": 10,
+        "name": "area 52",
+        "streetAddress": "Foobarstatmanrantatie 1234",
+        "servicemapId": "1",
+        "zipCode": "00100",
+        "location": {"type": "Point", "coordinates": [66.6, 99.9]},
+    }
+
+    assert WinterStorageArea.objects.count() == 0
+
+    executed = api_client.execute(CREATE_WINTER_STORAGE_AREA_MUTATION, input=variables)
+    assert WinterStorageArea.objects.count() == 1
+    area_id = from_global_id(
+        executed["data"]["createWinterStorageArea"]["winterStorageArea"].pop("id")
+    )[1]
+
+    assert area_id is not None
+
+    assert executed["data"]["createWinterStorageArea"]["winterStorageArea"][
+        "geometry"
+    ] == {
+        "type": variables["location"]["type"],
+        "coordinates": variables["location"]["coordinates"],
+    }
+    # bbox comes from GeoJSON
+    assert executed["data"]["createWinterStorageArea"]["winterStorageArea"]["bbox"] == (
+        variables["location"]["coordinates"][0],
+        variables["location"]["coordinates"][1],
+        variables["location"]["coordinates"][0],
+        variables["location"]["coordinates"][1],
+    )
+    assert executed["data"]["createWinterStorageArea"]["winterStorageArea"][
+        "properties"
+    ] == {
+        "name": variables["name"],
+        "servicemapId": variables["servicemapId"],
+        "streetAddress": variables["streetAddress"],
+        "zipCode": variables["zipCode"],
+        "availabilityLevel": {"id": str(availability_level.id)},
+        "estimatedNumberOfSectionSpaces": variables["estimatedNumberOfSectionSpaces"],
+        "maxLengthOfSectionSpaces": decimal.Decimal(
+            variables["maxLengthOfSectionSpaces"]
+        ),
+        "estimatedNumberOfUnmarkedSpaces": variables["estimatedNumberOfUnmarkedSpaces"],
+        "municipality": municipality.name,
+    }
+
+
+DELETE_WINTER_STORAGE_AREA_MUTATION = """
+mutation DeleteWinterStorageArea($input: DeleteWinterStorageAreaMutationInput!) {
+    deleteWinterStorageArea(input: $input) {
+        __typename
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_delete_winter_storage_area(api_client, winter_storage_area):
+    variables = {
+        "id": to_global_id(
+            WinterStorageAreaNode._meta.name, str(winter_storage_area.id)
+        ),
+    }
+
+    assert WinterStorageArea.objects.count() == 1
+
+    api_client.execute(DELETE_WINTER_STORAGE_AREA_MUTATION, input=variables)
+
+    assert WinterStorageArea.objects.count() == 0
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
+)
+def test_delete_winter_storage_area_not_enough_permissions(
+    api_client, winter_storage_area
+):
+    variables = {
+        "id": to_global_id(
+            WinterStorageAreaNode._meta.name, str(winter_storage_area.id)
+        ),
+    }
+
+    assert WinterStorageArea.objects.count() == 1
+
+    executed = api_client.execute(DELETE_WINTER_STORAGE_AREA_MUTATION, input=variables)
+
+    assert WinterStorageArea.objects.count() == 1
+    assert_not_enough_permissions(executed)
+
+
+def test_delete_winter_storage_area_inexistent_winter_storage_area(
+    superuser_api_client,
+):
+    variables = {
+        "id": to_global_id(WinterStorageAreaNode._meta.name, uuid.uuid4()),
+    }
+
+    executed = superuser_api_client.execute(
+        DELETE_WINTER_STORAGE_AREA_MUTATION, input=variables
+    )
+    assert_doesnt_exist("WinterStorageArea", executed)
+
+
+def test_delete_winter_storage_area_with_lease_at_place(
+    superuser_api_client, winter_storage_place
+):
+    """
+    WinterStorageLease can be associated with a WinterStorageArea either through a WinterStoragePlace,
+    or directly through WinterStorageSection.
+    """
+    winter_storage_lease = WinterStorageLeaseFactory(
+        place=winter_storage_place, status=LeaseStatus.DRAFTED
+    )
+    variables = {
+        "id": to_global_id(
+            WinterStorageAreaNode._meta.name,
+            winter_storage_lease.place.winter_storage_section.area.id,
+        ),
+    }
+
+    assert WinterStorageArea.objects.count() == 1
+
+    superuser_api_client.execute(DELETE_WINTER_STORAGE_AREA_MUTATION, input=variables)
+
+    assert WinterStorageArea.objects.count() == 0
+
+
+def test_delete_winter_storage_area_with_lease_at_section(
+    superuser_api_client, winter_storage_section
+):
+    winter_storage_lease = WinterStorageLeaseFactory(
+        section=winter_storage_section, place=None, status=LeaseStatus.DRAFTED
+    )
+    variables = {
+        "id": to_global_id(
+            WinterStorageAreaNode._meta.name, winter_storage_lease.section.area.id
+        ),
+    }
+
+    assert WinterStorageArea.objects.count() == 1
+
+    superuser_api_client.execute(DELETE_WINTER_STORAGE_AREA_MUTATION, input=variables)
+
+    assert WinterStorageArea.objects.count() == 0
+
+
+def test_delete_winter_storage_area_protected_with_lease_at_place(
+    superuser_api_client, winter_storage_place
+):
+    winter_storage_lease = WinterStorageLeaseFactory(
+        place=winter_storage_place, status=LeaseStatus.PAID
+    )
+    variables = {
+        "id": to_global_id(
+            WinterStorageAreaNode._meta.name,
+            winter_storage_lease.place.winter_storage_section.area.id,
+        ),
+    }
+
+    executed = superuser_api_client.execute(
+        DELETE_WINTER_STORAGE_AREA_MUTATION, input=variables
+    )
+
+    assert_in_errors(
+        "Cannot delete WinterStorageArea because it has some related leases", executed,
+    )
+
+
+def test_delete_winter_storage_area_protected_with_lease_at_section(
+    superuser_api_client, winter_storage_section
+):
+    winter_storage_lease = WinterStorageLeaseFactory(
+        section=winter_storage_section, place=None, status=LeaseStatus.PAID
+    )
+    variables = {
+        "id": to_global_id(
+            WinterStorageAreaNode._meta.name, winter_storage_lease.section.area.id
+        ),
+    }
+
+    executed = superuser_api_client.execute(
+        DELETE_WINTER_STORAGE_AREA_MUTATION, input=variables
+    )
+
+    assert_in_errors(
+        "Cannot delete WinterStorageArea because it has some related leases", executed,
+    )
+
+
+CREATE_WINTER_STORAGE_PLACE_TYPE_MUTATION = """
+mutation CreateWinterStoragePlaceType($input: CreateWinterStoragePlaceTypeMutationInput!) {
+    createWinterStoragePlaceType(input: $input) {
+        winterStoragePlaceType {
+            id
+            width
+            length
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_create_winter_storage_place_type(api_client):
+    variables = {
+        "width": "1.5",
+        "length": "5.5",
+    }
+
+    assert WinterStoragePlaceType.objects.count() == 0
+
+    executed = api_client.execute(
+        CREATE_WINTER_STORAGE_PLACE_TYPE_MUTATION, input=variables
+    )
+
+    assert WinterStoragePlaceType.objects.count() == 1
+    # Check that no more winterStoragePlaceType types were created
+    assert WinterStoragePlaceType.objects.count() == 1
+    assert (
+        executed["data"]["createWinterStoragePlaceType"]["winterStoragePlaceType"].pop(
+            "id"
+        )
+        is not None
+    )
+
+    assert executed["data"]["createWinterStoragePlaceType"][
+        "winterStoragePlaceType"
+    ] == {
+        "width": decimal.Decimal(variables["width"]),
+        "length": decimal.Decimal(variables["length"]),
+    }
+
+
+DELETE_WINTER_STORAGE_PLACE_TYPE_MUTATION = """
+mutation DeleteWinterStoragePlaceType($input: DeleteWinterStoragePlaceTypeMutationInput!) {
+    deleteWinterStoragePlaceType(input: $input) {
+        __typename
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_delete_winter_storage_place_type(api_client, winter_storage_place_type):
+    variables = {
+        "id": to_global_id(
+            WinterStoragePlaceTypeNode._meta.name, str(winter_storage_place_type.id)
+        ),
+    }
+
+    assert WinterStoragePlaceType.objects.count() == 1
+
+    api_client.execute(DELETE_WINTER_STORAGE_PLACE_TYPE_MUTATION, input=variables)
+
+    assert WinterStoragePlaceType.objects.count() == 0
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
+)
+def test_delete_winter_storage_place_type_not_enough_permissions(
+    api_client, winter_storage_place_type
+):
+    variables = {
+        "id": to_global_id(
+            WinterStoragePlaceTypeNode._meta.name, str(winter_storage_place_type.id)
+        ),
+    }
+
+    assert WinterStoragePlaceType.objects.count() == 1
+
+    executed = api_client.execute(
+        DELETE_WINTER_STORAGE_PLACE_TYPE_MUTATION, input=variables
+    )
+
+    assert WinterStoragePlaceType.objects.count() == 1
+    assert_not_enough_permissions(executed)
+
+
+def test_delete_winter_storage_place_type_nonexistent_object(superuser_api_client):
+    variables = {
+        "id": to_global_id(WinterStoragePlaceTypeNode._meta.name, uuid.uuid4()),
+    }
+
+    executed = superuser_api_client.execute(
+        DELETE_WINTER_STORAGE_PLACE_TYPE_MUTATION, input=variables
+    )
+
+    assert_doesnt_exist("WinterStoragePlaceType", executed)
+
+
+def test_delete_winter_storage_place_type_protected_with_places(
+    superuser_api_client, winter_storage_place_type
+):
+    place = WinterStoragePlaceFactory(place_type=winter_storage_place_type)
+    variables = {
+        "id": to_global_id(WinterStoragePlaceTypeNode._meta.name, place.place_type.id),
+    }
+
+    executed = superuser_api_client.execute(
+        DELETE_WINTER_STORAGE_PLACE_TYPE_MUTATION, input=variables
+    )
+    assert_in_errors(
+        "Cannot delete WinterStoragePlaceType because it has 1 related places",
+        executed,
+    )
+
+
+UPDATE_WINTER_STORAGE_PLACE_TYPE_MUTATION = """
+mutation UpdateWinterStoragePlaceType($input: UpdateWinterStoragePlaceTypeMutationInput!) {
+    updateWinterStoragePlaceType(input: $input) {
+        winterStoragePlaceType {
+            id
+            width
+            length
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_update_winter_storage_place_type(api_client, winter_storage_place_type):
+    global_id = to_global_id(
+        WinterStoragePlaceTypeNode._meta.name, str(winter_storage_place_type.id)
+    )
+
+    variables = {
+        "id": global_id,
+        "width": "3.3",
+        "length": "4.4",
+    }
+
+    assert WinterStoragePlaceType.objects.count() == 1
+
+    executed = api_client.execute(
+        UPDATE_WINTER_STORAGE_PLACE_TYPE_MUTATION, input=variables
+    )
+
+    assert "data" in executed
+    assert WinterStoragePlaceType.objects.count() == 1
+    assert executed["data"]["updateWinterStoragePlaceType"][
+        "winterStoragePlaceType"
+    ] == {"id": global_id, "width": 3.3, "length": 4.4}
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
+)
+def test_update_winter_storage_place_type_not_enough_permissions(
+    api_client, winter_storage_place_type
+):
+
+    variables = {
+        "id": to_global_id(
+            WinterStoragePlaceTypeNode._meta.name, str(winter_storage_place_type.id)
+        ),
+        "width": round(random.uniform(1.5, 99.0), 2),
+        "length": round(random.uniform(1.5, 99.0), 2),
+    }
+    assert WinterStoragePlaceType.objects.count() == 1
+
+    executed = api_client.execute(
+        UPDATE_WINTER_STORAGE_PLACE_TYPE_MUTATION, input=variables
+    )
+
+    assert WinterStoragePlaceType.objects.count() == 1
+    assert_not_enough_permissions(executed)
+
+
+CREATE_WINTER_STORAGE_SECTION_MUTATION = """
+mutation CreateWinterStorageSection($input: CreateWinterStorageSectionMutationInput!) {
+    createWinterStorageSection(input: $input) {
+        winterStorageSection {
+            id
+            bbox
+            geometry {
+                type
+                coordinates
+            }
+            properties {
+                area {
+                    id
+                }
+                identifier
+                electricity
+                water
+                gate
+                repairArea
+                summerStorageForDockingEquipment
+                summerStorageForTrailers
+                summerStorageForBoats
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_create_winter_storage_section_plain(api_client, winter_storage_area):
+    winter_storage_area_id = to_global_id(
+        WinterStorageAreaNode._meta.name, winter_storage_area.id
+    )
+
+    variables = {
+        "areaId": winter_storage_area_id,
+        "identifier": "foobar",
+        "location": {"type": "Point", "coordinates": [66.6, 77.7]},
+        "electricity": True,
+        "water": True,
+        "gate": True,
+        "repairArea": True,
+        "summerStorageForDockingEquipment": True,
+        "summerStorageForTrailers": True,
+        "summerStorageForBoats": True,
+    }
+    assert WinterStorageSection.objects.count() == 0
+
+    executed = api_client.execute(
+        CREATE_WINTER_STORAGE_SECTION_MUTATION, input=variables
+    )
+
+    assert "data" in executed
+    assert WinterStorageSection.objects.count() == 1
+    assert (
+        executed["data"]["createWinterStorageSection"]["winterStorageSection"]["id"]
+        is not None
+    )
+
+    assert executed["data"]["createWinterStorageSection"]["winterStorageSection"][
+        "geometry"
+    ] == {
+        "type": variables["location"]["type"],
+        "coordinates": variables["location"]["coordinates"],
+    }
+    assert executed["data"]["createWinterStorageSection"]["winterStorageSection"][
+        "bbox"
+    ] == (
+        variables["location"]["coordinates"][0],
+        variables["location"]["coordinates"][1],
+        variables["location"]["coordinates"][0],
+        variables["location"]["coordinates"][1],
+    )
+
+    assert executed["data"]["createWinterStorageSection"]["winterStorageSection"][
+        "properties"
+    ] == {
+        "area": {"id": winter_storage_area_id},
+        "identifier": variables["identifier"],
+        "electricity": variables["electricity"],
+        "gate": variables["gate"],
+        "water": variables["water"],
+        "repairArea": variables["repairArea"],
+        "summerStorageForDockingEquipment": variables[
+            "summerStorageForDockingEquipment"
+        ],
+        "summerStorageForTrailers": variables["summerStorageForTrailers"],
+        "summerStorageForBoats": variables["summerStorageForBoats"],
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
+)
+def test_create_winter_storage_section_not_enough_permissions(api_client):
+    variables = {"areaId": ""}
+
+    assert WinterStorageSection.objects.count() == 0
+
+    executed = api_client.execute(
+        CREATE_WINTER_STORAGE_SECTION_MUTATION, input=variables
+    )
+
+    assert WinterStorageSection.objects.count() == 0
+    assert_not_enough_permissions(executed)
+
+
+def test_create_winter_storage_section_winter_storage_area_doesnt_exist(
+    superuser_api_client,
+):
+    variables = {"areaId": to_global_id(WinterStorageAreaNode._meta.name, uuid.uuid4())}
+
+    assert WinterStorageSection.objects.count() == 0
+
+    executed = superuser_api_client.execute(
+        CREATE_WINTER_STORAGE_SECTION_MUTATION, input=variables
+    )
+
+    assert WinterStorageSection.objects.count() == 0
+
+    assert_doesnt_exist("WinterStorageArea", executed)
+
+
+def test_create_winter_storage_section_no_winter_storage_area(superuser_api_client):
+    variables = {"identifier": "foo"}
+
+    assert WinterStorageSection.objects.count() == 0
+
+    executed = superuser_api_client.execute(
+        CREATE_WINTER_STORAGE_SECTION_MUTATION, input=variables
+    )
+
+    assert WinterStorageSection.objects.count() == 0
+    assert_field_missing("area", executed)
+
+
+DELETE_WINTER_STORAGE_SECTION_MUTATION = """
+mutation DeleteWinterStorageSection($input: DeleteWinterStorageSectionMutationInput!) {
+    deleteWinterStorageSection(input: $input) {
+        __typename
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_delete_winter_storage_section(api_client, winter_storage_section):
+    variables = {
+        "id": to_global_id(
+            WinterStorageSectionNode._meta.name, str(winter_storage_section.id)
+        )
+    }
+
+    assert WinterStorageSection.objects.count() == 1
+
+    api_client.execute(
+        DELETE_WINTER_STORAGE_SECTION_MUTATION, input=variables,
+    )
+
+    assert WinterStorageSection.objects.count() == 0
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
+)
+def test_delete_winter_storage_section_not_enough_permissions(
+    api_client, winter_storage_section
+):
+    variables = {
+        "id": to_global_id(
+            WinterStorageSectionNode._meta.name, str(winter_storage_section.id)
+        )
+    }
+
+    assert WinterStorageSection.objects.count() == 1
+
+    executed = api_client.execute(
+        DELETE_WINTER_STORAGE_SECTION_MUTATION, input=variables
+    )
+
+    assert WinterStorageSection.objects.count() == 1
+    assert_not_enough_permissions(executed)
+
+
+def test_delete_winter_storage_section_nonexistent(superuser_api_client):
+    variables = {"id": to_global_id(WinterStorageSectionNode._meta.name, uuid.uuid4())}
+
+    executed = superuser_api_client.execute(
+        DELETE_WINTER_STORAGE_SECTION_MUTATION, input=variables
+    )
+
+    assert_doesnt_exist("WinterStorageSection", executed)
+
+
+def test_delete_winter_storage_section_with_lease(
+    superuser_api_client, winter_storage_place
+):
+    winter_storage_lease = WinterStorageLeaseFactory(
+        place=winter_storage_place, status=LeaseStatus.DRAFTED
+    )
+
+    variables = {
+        "id": to_global_id(
+            WinterStorageSectionNode._meta.name,
+            winter_storage_lease.place.winter_storage_section.id,
+        ),
+    }
+
+    assert WinterStorageSection.objects.count() == 1
+
+    superuser_api_client.execute(
+        DELETE_WINTER_STORAGE_SECTION_MUTATION, input=variables
+    )
+
+    assert WinterStorageSection.objects.count() == 0
+
+
+def test_delete_winter_storage_section_protected_with_lease(
+    superuser_api_client, winter_storage_place
+):
+    winter_storage_lease = WinterStorageLeaseFactory(
+        place=winter_storage_place, status=LeaseStatus.PAID
+    )
+
+    variables = {
+        "id": to_global_id(
+            WinterStorageSectionNode._meta.name,
+            winter_storage_lease.place.winter_storage_section.id,
+        ),
+    }
+
+    executed = superuser_api_client.execute(
+        DELETE_WINTER_STORAGE_SECTION_MUTATION, input=variables
+    )
+
+    assert_in_errors(
+        "Cannot delete WinterStorageSection because it has some related leases",
+        executed,
+    )
+
+
+UPDATE_WINTER_STORAGE_SECTION_MUTATION = """
+mutation UpdateWinterStorageSection($input: UpdateWinterStorageSectionMutationInput!) {
+    updateWinterStorageSection(input: $input) {
+        winterStorageSection {
+            id
+            geometry {
+                type
+                coordinates
+            }
+            bbox
+            properties {
+                area {
+                    id
+                }
+                identifier
+                electricity
+                water
+                gate
+                repairArea
+                summerStorageForDockingEquipment
+                summerStorageForTrailers
+                summerStorageForBoats
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_update_winter_storage_section(
+    api_client, winter_storage_section, winter_storage_area, boat_type
+):
+    global_id = to_global_id(
+        WinterStorageSectionNode._meta.name, str(winter_storage_section.id)
+    )
+    winter_storage_area_id = to_global_id(
+        WinterStorageAreaNode._meta.name, str(winter_storage_area.id)
+    )
+
+    variables = {
+        "id": global_id,
+        "areaId": winter_storage_area_id,
+        "identifier": "foobar",
+        "location": {"type": "Point", "coordinates": [66.6, 77.7]},
+        "electricity": True,
+        "water": True,
+        "gate": True,
+        "repairArea": True,
+        "summerStorageForDockingEquipment": True,
+        "summerStorageForTrailers": True,
+        "summerStorageForBoats": True,
+    }
+
+    assert WinterStorageSection.objects.count() == 1
+
+    executed = api_client.execute(
+        UPDATE_WINTER_STORAGE_SECTION_MUTATION, input=variables
+    )
+    assert WinterStorageSection.objects.count() == 1
+    assert (
+        executed["data"]["updateWinterStorageSection"]["winterStorageSection"]["id"]
+        == global_id
+    )
+    assert executed["data"]["updateWinterStorageSection"]["winterStorageSection"][
+        "geometry"
+    ] == {
+        "type": variables["location"]["type"],
+        "coordinates": variables["location"]["coordinates"],
+    }
+    assert executed["data"]["updateWinterStorageSection"]["winterStorageSection"][
+        "bbox"
+    ] == (
+        variables["location"]["coordinates"][0],
+        variables["location"]["coordinates"][1],
+        variables["location"]["coordinates"][0],
+        variables["location"]["coordinates"][1],
+    )
+    assert executed["data"]["updateWinterStorageSection"]["winterStorageSection"][
+        "properties"
+    ] == {
+        "area": {"id": winter_storage_area_id},
+        "identifier": variables["identifier"],
+        "electricity": variables["electricity"],
+        "water": variables["water"],
+        "gate": variables["gate"],
+        "repairArea": variables["repairArea"],
+        "summerStorageForDockingEquipment": variables[
+            "summerStorageForDockingEquipment"
+        ],
+        "summerStorageForTrailers": variables["summerStorageForTrailers"],
+        "summerStorageForBoats": variables["summerStorageForBoats"],
+    }
+
+
+def test_update_winter_storage_section_no_id(
+    superuser_api_client, winter_storage_section
+):
+    variables = {"water": False}
+
+    assert WinterStorageSection.objects.count() == 1
+
+    executed = superuser_api_client.execute(
+        UPDATE_WINTER_STORAGE_SECTION_MUTATION, input=variables
+    )
+
+    assert WinterStorageSection.objects.count() == 1
+    assert_field_missing("id", executed)
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
+)
+def test_update_winter_storage_section_not_enough_permissions(
+    api_client, winter_storage_section
+):
+    variables = {
+        "id": to_global_id(
+            WinterStorageSectionNode._meta.name, str(winter_storage_section.id)
+        )
+    }
+    assert WinterStorageSection.objects.count() == 1
+
+    executed = api_client.execute(
+        UPDATE_WINTER_STORAGE_SECTION_MUTATION, input=variables
+    )
+
+    assert WinterStorageSection.objects.count() == 1
+    assert_not_enough_permissions(executed)
+
+
+def test_update_winter_storage_section_winter_storage_area_doesnt_exist(
+    superuser_api_client, winter_storage_section
+):
+    variables = {
+        "id": to_global_id(
+            WinterStorageSectionNode._meta.name, winter_storage_section.id
+        ),
+        "areaId": to_global_id(WinterStorageAreaNode._meta.name, uuid.uuid4()),
+    }
+
+    assert WinterStorageSection.objects.count() == 1
+
+    executed = superuser_api_client.execute(
+        UPDATE_WINTER_STORAGE_SECTION_MUTATION, input=variables
+    )
+
+    assert WinterStorageSection.objects.count() == 1
+    assert_doesnt_exist("WinterStorageArea", executed)
+
+
+CREATE_WINTER_STORAGE_PLACE_MUTATION = """
+mutation CreateWinterStoragePlace($input: CreateWinterStoragePlaceMutationInput!) {
+    createWinterStoragePlace(input: $input) {
+        winterStoragePlace {
+            id
+            number
+            isActive
+            width
+            length
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_create_winter_storage_place(
+    winter_storage_section, api_client, winter_storage_place_type
+):
+    variables = {
+        "number": 123,
+        "winterStorageSectionId": to_global_id(
+            WinterStorageSectionNode._meta.name, str(winter_storage_section.id)
+        ),
+        "isActive": False,
+        "width": float(winter_storage_place_type.width),
+        "length": float(winter_storage_place_type.length),
+    }
+
+    assert WinterStoragePlace.objects.count() == 0
+    assert WinterStoragePlaceType.objects.count() == 1
+
+    executed = api_client.execute(CREATE_WINTER_STORAGE_PLACE_MUTATION, input=variables)
+    assert "data" in executed
+    assert WinterStoragePlace.objects.count() == 1
+    # Check that no more winter_storage_place types were created
+    assert WinterStoragePlaceType.objects.count() == 1
+    assert (
+        executed["data"]["createWinterStoragePlace"]["winterStoragePlace"].pop("id")
+        is not None
+    )
+
+    assert executed["data"]["createWinterStoragePlace"]["winterStoragePlace"] == {
+        "number": 123,
+        "isActive": False,
+        "width": variables["width"],
+        "length": variables["length"],
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_create_winter_storage_place_new_winter_storage_place_type(
+    winter_storage_section, api_client
+):
+    variables = {
+        "number": 1234,
+        "winterStorageSectionId": to_global_id(
+            WinterStorageSectionNode._meta.name, str(winter_storage_section.id)
+        ),
+        "isActive": False,
+        "width": round(random.uniform(1.5, 99.0), 2),
+        "length": round(random.uniform(1.5, 99.0), 2),
+    }
+
+    assert WinterStoragePlace.objects.count() == 0
+    assert WinterStoragePlaceType.objects.count() == 0
+
+    executed = api_client.execute(CREATE_WINTER_STORAGE_PLACE_MUTATION, input=variables)
+
+    assert WinterStoragePlace.objects.count() == 1
+    assert WinterStoragePlaceType.objects.count() == 1
+
+    assert (
+        executed["data"]["createWinterStoragePlace"]["winterStoragePlace"].pop("id")
+        is not None
+    )
+
+    assert executed["data"]["createWinterStoragePlace"]["winterStoragePlace"] == {
+        "number": 1234,
+        "isActive": False,
+        "width": variables["width"],
+        "length": variables["length"],
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
+)
+def test_create_winter_storage_place_not_enough_permissions(
+    api_client, winter_storage_section, winter_storage_place_type
+):
+    variables = {
+        "number": 213,
+        "winterStorageSectionId": to_global_id(
+            WinterStorageSectionNode._meta.name, str(winter_storage_section.id)
+        ),
+        "width": float(winter_storage_place_type.width),
+        "length": float(winter_storage_place_type.length),
+    }
+
+    assert WinterStoragePlace.objects.count() == 0
+
+    executed = api_client.execute(CREATE_WINTER_STORAGE_PLACE_MUTATION, input=variables)
+
+    assert WinterStoragePlace.objects.count() == 0
+    assert_not_enough_permissions(executed)
+
+
+def test_create_winter_storage_place_no_number(
+    winter_storage_section, superuser_api_client
+):
+    variables = {
+        "winterStorageSectionId": to_global_id(
+            WinterStorageSectionNode._meta.name, str(winter_storage_section.id)
+        ),
+    }
+
+    assert WinterStoragePlace.objects.count() == 0
+
+    executed = superuser_api_client.execute(
+        CREATE_WINTER_STORAGE_PLACE_MUTATION, input=variables
+    )
+
+    assert WinterStoragePlace.objects.count() == 0
+    assert_field_missing("number", executed)
+
+
+DELETE_WINTER_STORAGE_PLACE_MUTATION = """
+mutation DeleteWinterStoragePlace($input: DeleteWinterStoragePlaceMutationInput!) {
+    deleteWinterStoragePlace(input: $input) {
+        __typename
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_delete_winter_storage_place(api_client, winter_storage_place):
+    variables = {
+        "id": to_global_id(
+            WinterStoragePlaceNode._meta.name, str(winter_storage_place.id)
+        ),
+    }
+
+    assert WinterStoragePlace.objects.count() == 1
+
+    api_client.execute(DELETE_WINTER_STORAGE_PLACE_MUTATION, input=variables)
+
+    assert WinterStoragePlace.objects.count() == 0
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
+)
+def test_delete_winter_storage_place_not_enough_permissions(
+    api_client, winter_storage_place
+):
+    variables = {
+        "id": to_global_id(
+            WinterStoragePlaceNode._meta.name, str(winter_storage_place.id)
+        ),
+    }
+
+    assert WinterStoragePlace.objects.count() == 1
+
+    executed = api_client.execute(DELETE_WINTER_STORAGE_PLACE_MUTATION, input=variables)
+
+    assert WinterStoragePlace.objects.count() == 1
+    assert_not_enough_permissions(executed)
+
+
+def test_delete_winter_storage_place_inexistent_winter_storage_place(
+    superuser_api_client,
+):
+    variables = {
+        "id": to_global_id(WinterStoragePlaceNode._meta.name, uuid.uuid4()),
+    }
+
+    executed = superuser_api_client.execute(
+        DELETE_WINTER_STORAGE_PLACE_MUTATION, input=variables
+    )
+
+    assert_doesnt_exist("WinterStoragePlace", executed)
+
+
+def test_delete_winter_storage_place_with_lease(
+    superuser_api_client, winter_storage_place
+):
+    winter_storage_place_lease = WinterStorageLeaseFactory(
+        place=winter_storage_place, status=LeaseStatus.DRAFTED
+    )
+    variables = {
+        "id": to_global_id(
+            WinterStoragePlaceNode._meta.name, winter_storage_place_lease.place.id
+        ),
+    }
+
+    assert WinterStoragePlace.objects.count() == 1
+
+    superuser_api_client.execute(DELETE_WINTER_STORAGE_PLACE_MUTATION, input=variables)
+
+    assert WinterStoragePlace.objects.count() == 0
+
+
+def test_delete_winter_storage_place_protected_with_lease(
+    superuser_api_client, winter_storage_place
+):
+    winter_storage_place_lease = WinterStorageLeaseFactory(
+        place=winter_storage_place, status=LeaseStatus.PAID
+    )
+    variables = {
+        "id": to_global_id(
+            WinterStoragePlaceNode._meta.name, winter_storage_place_lease.place.id
+        ),
+    }
+
+    executed = superuser_api_client.execute(
+        DELETE_WINTER_STORAGE_PLACE_MUTATION, input=variables
+    )
+
+    assert_in_errors(
+        "Cannot delete WinterStoragePlace because it has some related leases", executed,
+    )
+
+
+UPDATE_WINTER_STORAGE_PLACE_MUTATION = """
+mutation UpdateWinterStoragePlace($input: UpdateWinterStoragePlaceMutationInput!) {
+    updateWinterStoragePlace(input: $input) {
+        winterStoragePlace {
+            id
+            number
+            isActive
+            winterStorageSection {
+                id
+            }
+            width
+            length
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_update_winter_storage_place(
+    winter_storage_place, winter_storage_section, api_client
+):
+    global_id = to_global_id(
+        WinterStoragePlaceNode._meta.name, str(winter_storage_place.id)
+    )
+    winter_storage_section_id = to_global_id(
+        WinterStorageSectionNode._meta.name, str(winter_storage_section.id)
+    )
+
+    variables = {
+        "id": global_id,
+        "number": 123,
+        "winterStorageSectionId": winter_storage_section_id,
+        "isActive": False,
+    }
+
+    assert WinterStoragePlace.objects.count() == 1
+
+    executed = api_client.execute(UPDATE_WINTER_STORAGE_PLACE_MUTATION, input=variables)
+
+    assert WinterStoragePlace.objects.count() == 1
+    assert executed["data"]["updateWinterStoragePlace"]["winterStoragePlace"] == {
+        "id": global_id,
+        "number": variables["number"],
+        "winterStorageSection": {"id": variables["winterStorageSectionId"]},
+        "isActive": variables["isActive"],
+        "width": float(winter_storage_place.place_type.width),
+        "length": float(winter_storage_place.place_type.length),
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_update_winter_storage_place_existing_winter_storage_place_type(
+    winter_storage_place, winter_storage_place_type, api_client
+):
+    global_id = to_global_id(
+        WinterStoragePlaceNode._meta.name, str(winter_storage_place.id)
+    )
+
+    variables = {
+        "id": global_id,
+        "number": 111,
+        "width": float(winter_storage_place_type.width),
+        "length": float(winter_storage_place_type.length),
+    }
+
+    assert winter_storage_place.place_type != winter_storage_place_type
+    assert WinterStoragePlace.objects.count() == 1
+    assert WinterStoragePlaceType.objects.count() == 2
+
+    executed = api_client.execute(UPDATE_WINTER_STORAGE_PLACE_MUTATION, input=variables)
+
+    assert WinterStoragePlace.objects.count() == 1
+    assert WinterStoragePlaceType.objects.count() == 2
+
+    assert executed["data"]["updateWinterStoragePlace"]["winterStoragePlace"] == {
+        "id": global_id,
+        "number": variables["number"],
+        "winterStorageSection": {
+            "id": to_global_id(
+                WinterStorageSectionNode._meta.name,
+                winter_storage_place.winter_storage_section.id,
+            )
+        },
+        "isActive": winter_storage_place.is_active,
+        "width": float(winter_storage_place_type.width),
+        "length": float(winter_storage_place_type.length),
+    }
+    assert (
+        WinterStoragePlace.objects.get(id=winter_storage_place.id).place_type
+        == winter_storage_place_type
+    )
+
+
+@pytest.mark.parametrize(
+    "api_client", ["harbor_services", "berth_services"], indirect=True,
+)
+def test_update_winter_storage_place_new_place_type(winter_storage_place, api_client):
+    global_id = to_global_id(
+        WinterStoragePlaceNode._meta.name, str(winter_storage_place.id)
+    )
+
+    variables = {
+        "id": global_id,
+        "width": round(random.uniform(1.5, 99.0), 2),
+        "length": round(random.uniform(1.5, 99.0), 2),
+    }
+
+    assert WinterStoragePlace.objects.count() == 1
+    assert WinterStoragePlaceType.objects.count() == 1
+
+    executed = api_client.execute(UPDATE_WINTER_STORAGE_PLACE_MUTATION, input=variables)
+
+    assert WinterStoragePlace.objects.count() == 1
+    assert WinterStoragePlaceType.objects.count() == 2
+
+    assert executed["data"]["updateWinterStoragePlace"]["winterStoragePlace"] == {
+        "id": global_id,
+        "number": winter_storage_place.number,
+        "winterStorageSection": {
+            "id": to_global_id(
+                WinterStorageSectionNode._meta.name,
+                winter_storage_place.winter_storage_section.id,
+            )
+        },
+        "isActive": winter_storage_place.is_active,
+        "width": float(variables["width"]),
+        "length": (variables["length"]),
+    }
+
+
+def test_update_winter_storage_place_no_id(
+    winter_storage_place, winter_storage_section, superuser_api_client
+):
+    winter_storage_section_id = to_global_id(
+        WinterStorageSectionNode._meta.name, str(winter_storage_section.id)
+    )
+
+    variables = {
+        "number": 123,
+        "winterStorageSectionId": winter_storage_section_id,
+    }
+
+    assert WinterStoragePlace.objects.count() == 1
+
+    executed = superuser_api_client.execute(
+        UPDATE_WINTER_STORAGE_PLACE_MUTATION, input=variables
+    )
+
+    assert WinterStoragePlace.objects.count() == 1
+    assert_field_missing("id", executed)
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
+)
+def test_update_winter_storage_place_not_enough_permissions(
+    api_client, winter_storage_place, winter_storage_section
+):
+    winter_storage_section_id = to_global_id(
+        WinterStorageSectionNode._meta.name, str(winter_storage_section.id)
+    )
+
+    variables = {
+        "id": to_global_id(
+            WinterStoragePlaceNode._meta.name, str(winter_storage_place.id)
+        ),
+        "number": 123,
+        "winterStorageSectionId": winter_storage_section_id,
+        "width": round(random.uniform(1.5, 99.0), 2),
+        "length": round(random.uniform(1.5, 99.0), 2),
+    }
+    assert WinterStoragePlace.objects.count() == 1
+
+    executed = api_client.execute(UPDATE_WINTER_STORAGE_PLACE_MUTATION, input=variables)
+
+    assert WinterStoragePlace.objects.count() == 1
+    assert_not_enough_permissions(executed)

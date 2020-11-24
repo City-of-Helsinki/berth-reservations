@@ -551,6 +551,38 @@ def test_get_winter_storage_place_with_leases_not_enough_permissions(
     assert_not_enough_permissions(executed)
 
 
+def test_get_winter_storage_place_types(api_client, winter_storage_place_type):
+    query = """
+        {
+            winterStoragePlaceTypes {
+                edges {
+                    node {
+                        width
+                        length
+                        createdAt
+                        modifiedAt
+                    }
+                }
+            }
+        }
+    """
+    executed = api_client.execute(query)
+    assert executed["data"] == {
+        "winterStoragePlaceTypes": {
+            "edges": [
+                {
+                    "node": {
+                        "width": float(winter_storage_place_type.width),
+                        "length": float(winter_storage_place_type.length),
+                        "createdAt": winter_storage_place_type.created_at.isoformat(),
+                        "modifiedAt": winter_storage_place_type.modified_at.isoformat(),
+                    }
+                }
+            ]
+        }
+    }
+
+
 @pytest.mark.parametrize(
     "api_client",
     ["berth_supervisor", "berth_handler", "berth_services"],

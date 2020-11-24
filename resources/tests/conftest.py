@@ -12,6 +12,7 @@ from .factories import (
     PierFactory,
     WinterStorageAreaFactory,
     WinterStoragePlaceFactory,
+    WinterStoragePlaceTypeFactory,
     WinterStorageSectionFactory,
 )
 
@@ -69,3 +70,9 @@ def winter_storage_section():
 def winter_storage_place():
     winter_storage_place = WinterStoragePlaceFactory()
     return winter_storage_place
+
+
+@pytest.fixture
+def winter_storage_place_type():
+    winter_storage_place_type = WinterStoragePlaceTypeFactory()
+    return winter_storage_place_type
