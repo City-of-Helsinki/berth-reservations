@@ -8,6 +8,8 @@ generated_path = os.path.join(os.getcwd(), 'generated')
 
 def get_template_for_message(filename):
     lang = filename.replace('.html', '')[-2:]
+    if lang != 'fi' and lang != 'sv' and lang != 'en':
+        lang = 'fi'
     template_filename = 'base_template_' + lang + '.html'
     template_path = os.path.join(os.getcwd(), template_filename)
     return open(template_path, 'r').read()
