@@ -26,7 +26,7 @@ from leases.utils import (
     calculate_winter_season_end_date,
     calculate_winter_season_start_date,
 )
-from payments.enums import OrderStatus, ProductServiceType
+from payments.enums import OrderStatus, OrderType, ProductServiceType
 from resources.enums import AreaRegion
 from resources.models import Harbor, WinterStorageArea
 from utils.numbers import rounded as rounded_decimal
@@ -244,7 +244,9 @@ def get_order_notification_type(order):
     from .enums import LeaseOrderType
     from .notifications import NotificationType
 
-    if order.lease_order_type == LeaseOrderType.NEW_BERTH_ORDER:
+    if order.order_type == OrderType.ADDITIONAL_PRODUCT_ORDER:
+        return NotificationType.ADDITIONAL_PRODUCT_ORDER_APPROVED
+    elif order.lease_order_type == LeaseOrderType.NEW_BERTH_ORDER:
         return NotificationType.NEW_BERTH_ORDER_APPROVED
     elif order.lease_order_type == LeaseOrderType.BERTH_SWITCH_ORDER:
         return NotificationType.BERTH_SWITCH_ORDER_APPROVED
@@ -282,7 +284,7 @@ def approve_order(order, email, due_date: date, request: HttpRequest) -> None:
 
     language = settings.LANGUAGE_CODE
 
-    if order.lease:
+    if order.lease and order.order_type == OrderType.LEASE_ORDER:
         # Update lease status
         order.lease.status = LeaseStatus.OFFERED
         order.lease.save()
