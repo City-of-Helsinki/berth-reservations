@@ -4,13 +4,14 @@ import re
 
 messages_path = os.path.join(os.getcwd(), 'messages')
 generated_path = os.path.join(os.getcwd(), 'generated')
+template_file_extension = '.html'
 
 
 def get_template_for_message(filename):
-    lang = filename.replace('.html', '')[-2:]
+    lang = filename.replace(template_file_extension, '')[-2:]
     if lang != 'fi' and lang != 'sv' and lang != 'en':
         lang = 'fi'
-    template_filename = 'base_template_' + lang + '.html'
+    template_filename = 'base_template_' + lang + template_file_extension
     template_path = os.path.join(os.getcwd(), template_filename)
     return open(template_path, 'r').read()
 
@@ -48,7 +49,7 @@ def generate_template(filename):
 
 
 def clear_generated_templates():
-    file_list = [f for f in os.listdir(generated_path) if f.endswith(".html")]
+    file_list = [f for f in os.listdir(generated_path) if f.endswith(template_file_extension)]
     for f in file_list:
         os.remove(os.path.join(generated_path, f))
 
