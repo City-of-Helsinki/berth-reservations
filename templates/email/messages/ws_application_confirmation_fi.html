@@ -1,28 +1,29 @@
-<h3>Hello {{ reservation.first_name }}!</h3>
+<h3>Hei {{ reservation.first_name }}!</h3>
 
-<p>Thank you, your application has been sent successfully.</p>
+<p>Kiitos, hakemuksesi on vastaanotettu.</p>
 
 <p>
-    You will be contacted via text message when a suitable winter storage
-    space becomes available.
+    Sinuun otetaan yhteyttä tekstiviestillä kun sopiva talvisäilytyspaikka
+    vapautuu.
 </p>
 
 <p>
-    If you wish to change or cancel your application or ask any questions
-    regarding your application, please e-mail venepaikkavaraukset@hel.fi.
+    Jos haluat muuttaa tai perua hakemuksesi tai tiedustella muuta
+    hakemukseesi liittyvää asiaa, lähetä sähköpostia osoitteeseen
+    venepaikkavaraukset@hel.fi.
 </p>
 
-<b>Time</b> {{ created_at }}<br/>
+<b>Aika</b> {{ created_at }}<br/>
 
-<b>Applicant</b> {{ reservation.first_name }} {{ reservation.last_name }}<br/>
+<b>Hakija</b> {{ reservation.first_name }} {{ reservation.last_name }}<br/>
 
 {% if reservation.company_name %}
-<b>Company</b> {{ reservation.company_name }} ({{ reservation.business_id }})<br/>
+<b>Yritys</b> {{ reservation.company_name }} ({{ reservation.business_id }})<br/>
 {% endif %}
 
 <hr/>
 
-<h4>Chosen areas</h4>
+<h4>Valitut säilytysalueet</h4>
 
 <table>
     <tbody>
@@ -36,7 +37,7 @@
 </table>
 
 {% if reservation.application_code %}
-<p><b>Application code:</b> {{reservation.application_code}}</p>
+<p><b>Hakukoodi:</b> {{reservation.application_code}}</p>
 {% endif %}
 
 <hr/>
@@ -47,7 +48,7 @@
 <table>
     <tbody>
     <tr>
-        <td><b>Registration number</b></td>
+        <td><b>Rekisterinumero</b></td>
         <td>{{ reservation.boat_registration_number }}</td>
     </tr>
     </tbody>
@@ -58,9 +59,9 @@
 <table>
     <tbody>
     <tr>
-        <td><b>Name</b></td>
+        <td><b>Nimi</b></td>
         <td>{{ reservation.boat_name }}</td>
-        <td><b>Model</b></td>
+        <td><b>Malli</b></td>
         <td>{{ reservation.boat_model }}</td>
     </tr>
     </tbody>
@@ -70,9 +71,9 @@
 <table>
     <tbody>
     <tr>
-        <td><b>Length</b></td>
+        <td><b>Pituus</b></td>
         <td>{{ reservation.boat_length }} m</td>
-        <td><b>Width</b></td>
+        <td><b>Leveys</b></td>
         <td>{{ reservation.boat_width }} m</td>
     </tr>
     </tbody>
@@ -80,7 +81,7 @@
 
 <hr/>
 
-<h4>Storage information</h4>
+<h4>Säilytys</h4>
 
 {{ reservation.storage_method }}
 
@@ -88,7 +89,7 @@
 <table>
     <tbody>
     <tr>
-        <td><b>Trailer's registration</b></td>
+        <td><b>Trailerin rekisterinumero</b></td>
         <td>{{ reservation.trailer_registration_number }} m</td>
     </tr>
     </tbody>
@@ -96,7 +97,6 @@
 {% endif %}
 
 <p>
-    Kind regards,<br/>
-    Helsingin kaupungin venepaikkavaraukset (Berth reservations of the City
-    of Helsinki)
+    Terveisin,<br/>
+    Helsingin kaupungin venepaikkavaraukset
 </p>
