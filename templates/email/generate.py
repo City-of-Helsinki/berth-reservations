@@ -48,6 +48,11 @@ def generate_template(filename):
     return generated_content
 
 
+def create_generated_folder():
+    if not os.path.exists(generated_path):
+        os.makedirs(generated_path)
+
+
 def clear_generated_templates():
     file_list = [f for f in os.listdir(generated_path) if f.endswith(template_file_extension)]
     for f in file_list:
@@ -60,6 +65,7 @@ def save_template(filename, content):
 
 
 if __name__ == "__main__":
+    create_generated_folder()
     clear_generated_templates()
     for message_filename in os.listdir(messages_path):
         generated_template = generate_template(message_filename)
