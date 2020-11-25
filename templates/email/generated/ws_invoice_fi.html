@@ -22,7 +22,7 @@
                              alt="Helsinki"
                              style="-ms-interpolation-mode:bicubic;clear:both;display:block;filter:invert(24%) sepia(95%) saturate(2026%) hue-rotate(189deg) brightness(95%) contrast(102%);height:48px;margin-bottom:56px;max-width:100%;outline:0;width:auto">
                         <h1 style="Margin:0;Margin-bottom:24px;color:inherit;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:36px;font-weight:700;line-height:1;margin:0;margin-bottom:24px;padding:0;text-align:left;word-wrap:normal">
-                            City of Helsinki / Boat berths</h1>
+                            Helsingin kaupunki / Venepaikat</h1>
                         <h2 style="Margin:0;Margin-bottom:24px;color:inherit;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:24px;font-weight:500;line-height:1;margin:0;margin-bottom:24px;padding:0;text-align:left;word-wrap:normal">
                             {{ subject }}</h2>
                         <hr class="rule-thick"
@@ -36,108 +36,111 @@
                 <tr style="font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;padding:0;text-align:left;vertical-align:top">
                     <td class="small-12 large-12 columns first last"
                         style="Margin:0 auto;color:#000;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:18px;font-weight:400;line-height:1.5;margin:0 auto;padding:0;padding-bottom:48px;padding-left:40px;padding-right:40px;text-align:left;width:560px">
-                        <h3>Hello {{ reservation.first_name }}!</h3>
-
-                        <p>Thank you, your application has been sent successfully.</p>
-
                         <p>
-                            You will be contacted via text message when a suitable winter storage
-                            space becomes available.
+                            Hyvä asiakas, tässä lasku talvisäilytyspaikasta. Voit maksaa sen klikkaamalla "siirry maksamaan" -painiketta
+                            alempana tässä viestissä.
                         </p>
 
+                        <h3>Laskun aiheena oleva talvisäilytyspaikka</h3>
+
                         <p>
-                            If you wish to change or cancel your application or ask any questions
-                            regarding your application, please e-mail venepaikkavaraukset@hel.fi.
+                            {{ harborName }}<br/>
+                            {{ harborAddress }}<br/>
+                            <br/>
+                            Paikka: {{ pierIdentifier }} {{ berthNumber }}
                         </p>
 
-                        <b>Time</b> {{ created_at }}<br/>
-
-                        <b>Applicant</b> {{ reservation.first_name }} {{ reservation.last_name }}<br/>
-
-                        {% if reservation.company_name %}
-                            <b>Company</b> {{ reservation.company_name }} ({{ reservation.business_id }})<br/>
-                        {% endif %}
-
-                        <hr/>
-
-                        <h4>Chosen areas</h4>
+                        <h3>Talvisäilytyspaikan hinta</h3>
 
                         <table>
-                            <tbody>
-                            {% for choice in area_choices %}
-                                <tr>
-                                    <td><b>{{ choice.priority }}</b></td>
-                                    <td>{{ choice.winter_storage_area.name }}</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-
-                        {% if reservation.application_code %}
-                            <p><b>Application code:</b> {{ reservation.application_code }}</p>
-                        {% endif %}
-
-                        <hr/>
-
-                        <h4>Boat information</h4>
-
-                        {% if reservation.boat_registration_number %}
-                            <table>
-                                <tbody>
-                                <tr>
-                                    <td><b>Registration number</b></td>
-                                    <td>{{ reservation.boat_registration_number }}</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        {% endif %}
-
-                        {% if reservation.boat_name %}
-                            <table>
-                                <tbody>
-                                <tr>
-                                    <td><b>Name</b></td>
-                                    <td>{{ reservation.boat_name }}</td>
-                                    <td><b>Model</b></td>
-                                    <td>{{ reservation.boat_model }}</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        {% endif %}
-
-                        <table>
-                            <tbody>
                             <tr>
-                                <td><b>Length</b></td>
-                                <td>{{ reservation.boat_length }} m</td>
-                                <td><b>Width</b></td>
-                                <td>{{ reservation.boat_width }} m</td>
+                                <td>
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                Perushinta (3,5 m):
+                                            </td>
+                                            <td>{{ invoice.basePrice }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                Talvisäilytyspaikka yhteensä:
+                                            </td>
+                                            <td>{{ invoice.winterStorageTotal }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2">
+                                                <hr/>
+                                            </td>
+                                        </tr>
+                                        {{% if parkingPermit %}}
+                                        <tr>
+                                            <td>
+                                                Pysäköintilupa:
+                                            </td>
+                                            <td>{{ invoice.parkingPermit }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2">
+                                                <hr/>
+                                            </td>
+                                        </tr>
+                                        {{% endif %}}
+                                        <tr>
+                                            <td>
+                                                YHTEENSÄ:
+                                            </td>
+                                            <td>{{ invoice.total }} / vuosi
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
                             </tr>
-                            </tbody>
                         </table>
 
-                        <hr/>
+                        <table style="margin: 32px 0; background-color: #9fc9eb;">
+                            <tr>
+                                <td style="padding: 32px 48px;">
+                                    <p>
+                                        Maksa lasku tämän linkin kautta ennen eräpäivää {{ dueDate }}:
+                                    </p>
 
-                        <h4>Storage information</h4>
+                                    <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
+                                       href="{{ paymentUrl }}">Siirry maksamaan {{ invoice.total }} &rarr;</a>
 
-                        {{ reservation.storage_method }}
-
-                        {% if reservation.trailer_registration_number %}
-                            <table>
-                                <tbody>
-                                <tr>
-                                    <td><b>Trailer's registration</b></td>
-                                    <td>{{ reservation.trailer_registration_number }} m</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        {% endif %}
+                                    <p>
+                                        Huomaathan, että laskun voi maksaa vain tämän linkin kautta. Muulla
+                                        tavoin maksettuja maksuja ei voida ottaa vastaan. Lisätietoja
+                                        asiakaspalvelustamme venepaikat@hel.fi.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
 
                         <p>
-                            Kind regards,<br/>
-                            Helsingin kaupungin venepaikkavaraukset (Berth reservations of the City
-                            of Helsinki)
+                            Helsingin kaupungin venepaikat vuokrataan asiakkaille toistaiseksi
+                            voimassa olevina ja niistä peritään vuosittain kulloinkin voimassa
+                            olevan hinnaston mukainen maksu. Jos laskua ei maksa eräpäivään
+                            mennessä, vuokrasopimus irtisanoutuu automaattisesti. Veneilykausi on
+                            10.6.-14.9., jona aikana venepaikalla saa pitää venettä.
                         </p>
+                        <p>
+                            Venepaikan vastaanottaminen edellyttää voimassa olevien venepaikan
+                            vuokrasopimusehtojen sekä venesatamasääntöjen hyväksymistä.
+                        </p>
+
+                        <table style="width: 100%; margin: 48px 0;">
+                            <tr>
+                                <td style="text-align: center;">
+                                    <a style="font-size: 16px; color: #0072C6;" href="https://venepaikat.hel.fi">
+                                        Helsingin kaupungin veneilypalvelut &rarr;
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
 
                     </td>
                 </tr>
@@ -162,7 +165,7 @@
                                         style="background:#b2b2b2;border:none;height:1px;margin-bottom:24px;margin-top:24px">
                                     <p class="text-sm"
                                        style="Margin:0;Margin-bottom:32px;color:#000;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:14px;font-weight:400;line-height:1.75;margin:0;margin-bottom:32px;padding:0;text-align:left">
-                                        &copy; Copyright 2020 &bull; All rights reserved &bull;</p>
+                                        &copy; Copyright 2020 &bull; Kaikki oikeudet pidätetään &bull;</p>
                                 </th>
                             </tr>
                         </table>

@@ -9,170 +9,169 @@
 </head>
 
 <body style="-moz-box-sizing: border-box; -ms-text-size-adjust: 100%; -webkit-box-sizing: border-box; -webkit-text-size-adjust: 100%; Margin: 0; box-sizing: border-box; font-size: 16px; font-weight: normal; line-height: 1.3; margin: 0; min-width: 100%; padding: 0; text-align: left; width: 100% !important; background:#f1f1f1;">
-    <center data-parsed="" style="min-width:600px;width:100%">
-        <table align="center" style="Margin:0 auto;background:#fff;border-collapse:collapse;border-spacing:0;float:none;margin:0 auto;padding:0;text-align:center;vertical-align:top;width:600px">
-            <tbody>
+<table align="center"
+       style="Margin:0 auto;background:#fff;border-collapse:collapse;border-spacing:0;float:none;margin:0 auto;padding:0;text-align:center;vertical-align:top;width:600px">
+    <tbody>
+    <tr style="padding:0;text-align:left;vertical-align:top">
+        <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#000;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:18px;font-weight:400;hyphens:auto;line-height:1.5;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word">
+            <table style="border-collapse:collapse;border-spacing:0;display:table;padding:0;position:relative;text-align:left;vertical-align:top;width:100%">
+                <tbody>
                 <tr style="padding:0;text-align:left;vertical-align:top">
-                    <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#000;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:18px;font-weight:400;hyphens:auto;line-height:1.5;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word">
-                        <table style="border-collapse:collapse;border-spacing:0;display:table;padding:0;position:relative;text-align:left;vertical-align:top;width:100%">
+                    <th style="Margin:0 auto;color:#000;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:18px;font-weight:400;line-height:1.5;margin:0 auto;padding:0;padding-bottom:24px;padding-left:40px;padding-right:40px;padding-top:48px;text-align:left;width:560px">
+                        <img src="https://hds.hel.fi/static/assets/logo/helsinki-sv.svg"
+                             alt="Helsinki"
+                             style="-ms-interpolation-mode:bicubic;clear:both;display:block;filter:invert(24%) sepia(95%) saturate(2026%) hue-rotate(189deg) brightness(95%) contrast(102%);height:48px;margin-bottom:56px;max-width:100%;outline:0;width:auto">
+                        <h1 style="Margin:0;Margin-bottom:24px;color:inherit;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:36px;font-weight:700;line-height:1;margin:0;margin-bottom:24px;padding:0;text-align:left;word-wrap:normal">
+                            Helsingfors stad / Båtplatser</h1>
+                        <h2 style="Margin:0;Margin-bottom:24px;color:inherit;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:24px;font-weight:500;line-height:1;margin:0;margin-bottom:24px;padding:0;text-align:left;word-wrap:normal">
+                            {{ subject }}</h2>
+                        <hr class="rule-thick"
+                            style="background:#0072c6;border:none;height:5px">
+                    </th>
+                </tr>
+                </tbody>
+            </table>
+            <table style="border-collapse:collapse;border-spacing:0;display:table;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;padding:0;position:relative;text-align:left;vertical-align:top;width:100%">
+                <tbody style="font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif">
+                <tr style="font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;padding:0;text-align:left;vertical-align:top">
+                    <td class="small-12 large-12 columns first last"
+                        style="Margin:0 auto;color:#000;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:18px;font-weight:400;line-height:1.5;margin:0 auto;padding:0;padding-bottom:48px;padding-left:40px;padding-right:40px;text-align:left;width:560px">
+                        <h3>Hej {{ reservation.first_name }}!</h3>
+
+                        <p>Tack, din ansökan har mottagits.</p>
+
+                        <p>
+                            Vi kontaktar dig per SMS när en lämplig vinteruppläggningsplats blir
+                            ledig.
+                        </p>
+
+                        <p>
+                            Om du vill ändra eller annullera din ansökan eller undrar om något som
+                            gäller ansökan, skicka e-post till venepaikkavaraukset@hel.fi.
+                        </p>
+
+                        <b>Tid</b> {{ created_at }}<br/>
+
+                        <b>Sökande</b> {{ reservation.first_name }} {{ reservation.last_name }}<br/>
+
+                        {% if reservation.company_name %}
+                            <b>Company</b> {{ reservation.company_name }} ({{ reservation.business_id }})<br/>
+                        {% endif %}
+
+                        <hr/>
+
+                        <h4>Valda platser</h4>
+
+                        <table>
                             <tbody>
-                                <tr style="padding:0;text-align:left;vertical-align:top">
-                                    <th style="Margin:0 auto;color:#000;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:18px;font-weight:400;line-height:1.5;margin:0 auto;padding:0;padding-bottom:24px;padding-left:40px;padding-right:40px;padding-top:48px;text-align:left;width:560px">
-                                        <img src="https://hds.hel.fi/static/assets/logo/helsinki-sv.svg"
-                                             alt="Helsinki"
-                                             style="-ms-interpolation-mode:bicubic;clear:both;display:block;filter:invert(24%) sepia(95%) saturate(2026%) hue-rotate(189deg) brightness(95%) contrast(102%);height:48px;margin-bottom:56px;max-width:100%;outline:0;width:auto">
-                                        <h1 style="Margin:0;Margin-bottom:24px;color:inherit;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:36px;font-weight:700;line-height:1;margin:0;margin-bottom:24px;padding:0;text-align:left;word-wrap:normal">
-                                            Helsingfors stad / Båtplatser</h1>
-                                        <h2 style="Margin:0;Margin-bottom:24px;color:inherit;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:24px;font-weight:500;line-height:1;margin:0;margin-bottom:24px;padding:0;text-align:left;word-wrap:normal">
-                                            {{ subject }}</h2>
-                                        <hr class="rule-thick"
-                                            style="background:#0072c6;border:none;height:5px">
-                                    </th>
+                            {% for choice in area_choices %}
+                                <tr>
+                                    <td><b>{{ choice.priority }}</b></td>
+                                    <td>{{ choice.winter_storage_area.name }}</td>
                                 </tr>
+                            {% endfor %}
                             </tbody>
                         </table>
-                        <table style="border-collapse:collapse;border-spacing:0;display:table;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;padding:0;position:relative;text-align:left;vertical-align:top;width:100%">
-                            <tbody style="font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif">
-                                <tr style="font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;padding:0;text-align:left;vertical-align:top">
-                                    <td class="small-12 large-12 columns first last"
-                                        style="Margin:0 auto;color:#000;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:18px;font-weight:400;line-height:1.5;margin:0 auto;padding:0;padding-bottom:48px;padding-left:40px;padding-right:40px;text-align:left;width:560px">
-                                        <h3>Hej {{ reservation.first_name }}!</h3>
 
-                                        <p>Tack, din ansökan har mottagits.</p>
+                        {% if reservation.application_code %}
+                            <p><b>Sökkod:</b> {{ reservation.application_code }}</p>
+                        {% endif %}
 
-                                        <p>
-                                            Vi kontaktar dig per SMS när en lämplig vinteruppläggningsplats blir
-                                            ledig.
-                                        </p>
+                        <hr/>
 
-                                        <p>
-                                            Om du vill ändra eller annullera din ansökan eller undrar om något som
-                                            gäller ansökan, skicka e-post till venepaikkavaraukset@hel.fi.
-                                        </p>
+                        <h4>Uppgifter om båt</h4>
 
-                                        <b>Tid</b> {{ created_at }}<br/>
-
-                                        <b>Sökande</b> {{ reservation.first_name }} {{ reservation.last_name }}<br/>
-
-                                        {% if reservation.company_name %}
-                                        <b>Company</b> {{ reservation.company_name }} ({{ reservation.business_id }})<br/>
-                                        {% endif %}
-
-                                        <hr/>
-
-                                        <h4>Valda platser</h4>
-
-                                        <table>
-                                            <tbody>
-                                            {% for choice in area_choices %}
-                                            <tr>
-                                                <td><b>{{ choice.priority }}</b></td>
-                                                <td>{{ choice.winter_storage_area.name }}</td>
-                                            </tr>
-                                            {% endfor %}
-                                            </tbody>
-                                        </table>
-
-                                        {% if reservation.application_code %}
-                                        <p><b>Sökkod:</b> {{reservation.application_code}}</p>
-                                        {% endif %}
-
-                                        <hr/>
-
-                                        <h4>Uppgifter om båt</h4>
-
-                                        {% if reservation.boat_registration_number %}
-                                        <table>
-                                            <tbody>
-                                            <tr>
-                                                <td><b>Registernummer</b></td>
-                                                <td>{{ reservation.boat_registration_number }}</td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                        {% endif %}
-
-                                        {% if reservation.boat_name %}
-                                        <table>
-                                            <tbody>
-                                            <tr>
-                                                <td><b>Namn</b></td>
-                                                <td>{{ reservation.boat_name }}</td>
-                                                <td><b>Modell</b></td>
-                                                <td>{{ reservation.boat_model }}</td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                        {% endif %}
-
-                                        <table>
-                                            <tbody>
-                                            <tr>
-                                                <td><b>Längd</b></td>
-                                                <td>{{ reservation.boat_length }} m</td>
-                                                <td><b>Bredd</b></td>
-                                                <td>{{ reservation.boat_width }} m</td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-
-                                        <hr/>
-
-                                        <h4>Uppläggningssätt</h4>
-
-                                        {{ reservation.storage_method }}
-
-                                        {% if reservation.trailer_registration_number %}
-                                        <table>
-                                            <tbody>
-                                            <tr>
-                                                <td><b>Trailer registernummer</b></td>
-                                                <td>{{ reservation.trailer_registration_number }} m</td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                        {% endif %}
-
-                                        <p>
-                                            Vänliga hälsningar,<br />
-                                            Helsingfors stads båtplatsbokningar
-                                        </p>
-
-                                    </td>
+                        {% if reservation.boat_registration_number %}
+                            <table>
+                                <tbody>
+                                <tr>
+                                    <td><b>Registernummer</b></td>
+                                    <td>{{ reservation.boat_registration_number }}</td>
                                 </tr>
-                            </tbody>
-                        </table>
-                        <table style="border-collapse:collapse;border-spacing:0;display:table;padding:0;position:relative;text-align:left;vertical-align:top;width:100%">
+                                </tbody>
+                            </table>
+                        {% endif %}
+
+                        {% if reservation.boat_name %}
+                            <table>
+                                <tbody>
+                                <tr>
+                                    <td><b>Namn</b></td>
+                                    <td>{{ reservation.boat_name }}</td>
+                                    <td><b>Modell</b></td>
+                                    <td>{{ reservation.boat_model }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        {% endif %}
+
+                        <table>
                             <tbody>
-                                <tr style="padding:0;text-align:left;vertical-align:top">
-                                    <th style="Margin:0 auto;background-color:#dedfe1;color:#000;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:18px;font-weight:400;line-height:1.5;margin:0 auto;padding:0;padding-bottom:24px;padding-left:40px;padding-right:40px;text-align:left;width:560px">
-                                        <table style="border-collapse:collapse;border-spacing:0;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;padding:0;text-align:left;vertical-align:top;width:100%">
-                                            <tr style="font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;padding:0;text-align:left;vertical-align:top">
-                                                <th style="Margin:0;color:#000;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:18px;font-weight:400;line-height:1.5;margin:0;padding:0;text-align:left">
-                                                    <img src="https://hds.hel.fi/static/assets/logo/helsinki-sv.svg"
-                                                         alt="Helsinki"
-                                                         style="-ms-interpolation-mode:bicubic;clear:both;display:block;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;height:4rem;margin-bottom:40px;margin-top:56px;max-width:100%;outline:0;text-decoration:none;width:auto">
-                                                    <p class="text-body"
-                                                       style="Margin:0;Margin-bottom:32px;color:#000;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:16px;font-weight:400;line-height:1.5;margin:0;margin-bottom:32px;padding:0;text-align:left">
-                                                        Venepaikkavaraukset<br>
-                                                        Fredriksberg A 1<br>
-                                                        00100 Helsinki</p>
-                                                    <hr class="rule-thin"
-                                                        style="background:#b2b2b2;border:none;height:1px;margin-bottom:24px;margin-top:24px">
-                                                    <p class="text-sm"
-                                                       style="Margin:0;Margin-bottom:32px;color:#000;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:14px;font-weight:400;line-height:1.75;margin:0;margin-bottom:32px;padding:0;text-align:left">
-                                                        &copy; Copyright 2020 &bull; Alla rättigheter förbehållna &bull;</p>
-                                                </th>
-                                            </tr>
-                                        </table>
-                                    </th>
-                                </tr>
+                            <tr>
+                                <td><b>Längd</b></td>
+                                <td>{{ reservation.boat_length }} m</td>
+                                <td><b>Bredd</b></td>
+                                <td>{{ reservation.boat_width }} m</td>
+                            </tr>
                             </tbody>
                         </table>
+
+                        <hr/>
+
+                        <h4>Uppläggningssätt</h4>
+
+                        {{ reservation.storage_method }}
+
+                        {% if reservation.trailer_registration_number %}
+                            <table>
+                                <tbody>
+                                <tr>
+                                    <td><b>Trailer registernummer</b></td>
+                                    <td>{{ reservation.trailer_registration_number }} m</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        {% endif %}
+
+                        <p>
+                            Vänliga hälsningar,<br/>
+                            Helsingfors stads båtplatsbokningar
+                        </p>
+
                     </td>
                 </tr>
-            </tbody>
-        </table>
-    </center>
+                </tbody>
+            </table>
+            <table style="border-collapse:collapse;border-spacing:0;display:table;padding:0;position:relative;text-align:left;vertical-align:top;width:100%">
+                <tbody>
+                <tr style="padding:0;text-align:left;vertical-align:top">
+                    <th style="Margin:0 auto;background-color:#dedfe1;color:#000;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:18px;font-weight:400;line-height:1.5;margin:0 auto;padding:0;padding-bottom:24px;padding-left:40px;padding-right:40px;text-align:left;width:560px">
+                        <table style="border-collapse:collapse;border-spacing:0;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;padding:0;text-align:left;vertical-align:top;width:100%">
+                            <tr style="font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;padding:0;text-align:left;vertical-align:top">
+                                <th style="Margin:0;color:#000;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:18px;font-weight:400;line-height:1.5;margin:0;padding:0;text-align:left">
+                                    <img src="https://hds.hel.fi/static/assets/logo/helsinki-sv.svg"
+                                         alt="Helsinki"
+                                         style="-ms-interpolation-mode:bicubic;clear:both;display:block;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;height:4rem;margin-bottom:40px;margin-top:56px;max-width:100%;outline:0;text-decoration:none;width:auto">
+                                    <p class="text-body"
+                                       style="Margin:0;Margin-bottom:32px;color:#000;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:16px;font-weight:400;line-height:1.5;margin:0;margin-bottom:32px;padding:0;text-align:left">
+                                        Venepaikkavaraukset<br>
+                                        Fredriksberg A 1<br>
+                                        00100 Helsinki</p>
+                                    <hr class="rule-thin"
+                                        style="background:#b2b2b2;border:none;height:1px;margin-bottom:24px;margin-top:24px">
+                                    <p class="text-sm"
+                                       style="Margin:0;Margin-bottom:32px;color:#000;font-family:HelsinkiGrotesk,Helvetica,Arial,sans-serif;font-size:14px;font-weight:400;line-height:1.75;margin:0;margin-bottom:32px;padding:0;text-align:left">
+                                        &copy; Copyright 2020 &bull; Alla rättigheter förbehållna &bull;</p>
+                                </th>
+                            </tr>
+                        </table>
+                    </th>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    </tbody>
+</table>
 </body>
 </html>

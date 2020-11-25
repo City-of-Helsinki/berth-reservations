@@ -18,7 +18,7 @@
 <b>Hakija</b> {{ reservation.first_name }} {{ reservation.last_name }}<br/>
 
 {% if reservation.company_name %}
-<b>Yritys</b> {{ reservation.company_name }} ({{ reservation.business_id }})<br/>
+    <b>Yritys</b> {{ reservation.company_name }} ({{ reservation.business_id }})<br/>
 {% endif %}
 
 <hr/>
@@ -28,16 +28,16 @@
 <table>
     <tbody>
     {% for choice in area_choices %}
-    <tr>
-        <td><b>{{ choice.priority }}</b></td>
-        <td>{{ choice.winter_storage_area.name }}</td>
-    </tr>
+        <tr>
+            <td><b>{{ choice.priority }}</b></td>
+            <td>{{ choice.winter_storage_area.name }}</td>
+        </tr>
     {% endfor %}
     </tbody>
 </table>
 
 {% if reservation.application_code %}
-<p><b>Hakukoodi:</b> {{reservation.application_code}}</p>
+    <p><b>Hakukoodi:</b> {{ reservation.application_code }}</p>
 {% endif %}
 
 <hr/>
@@ -45,27 +45,27 @@
 <h4>Boat information</h4>
 
 {% if reservation.boat_registration_number %}
-<table>
-    <tbody>
-    <tr>
-        <td><b>Rekisterinumero</b></td>
-        <td>{{ reservation.boat_registration_number }}</td>
-    </tr>
-    </tbody>
-</table>
+    <table>
+        <tbody>
+        <tr>
+            <td><b>Rekisterinumero</b></td>
+            <td>{{ reservation.boat_registration_number }}</td>
+        </tr>
+        </tbody>
+    </table>
 {% endif %}
 
 {% if reservation.boat_name %}
-<table>
-    <tbody>
-    <tr>
-        <td><b>Nimi</b></td>
-        <td>{{ reservation.boat_name }}</td>
-        <td><b>Malli</b></td>
-        <td>{{ reservation.boat_model }}</td>
-    </tr>
-    </tbody>
-</table>
+    <table>
+        <tbody>
+        <tr>
+            <td><b>Nimi</b></td>
+            <td>{{ reservation.boat_name }}</td>
+            <td><b>Malli</b></td>
+            <td>{{ reservation.boat_model }}</td>
+        </tr>
+        </tbody>
+    </table>
 {% endif %}
 
 <table>
@@ -86,14 +86,14 @@
 {{ reservation.storage_method }}
 
 {% if reservation.trailer_registration_number %}
-<table>
-    <tbody>
-    <tr>
-        <td><b>Trailerin rekisterinumero</b></td>
-        <td>{{ reservation.trailer_registration_number }} m</td>
-    </tr>
-    </tbody>
-</table>
+    <table>
+        <tbody>
+        <tr>
+            <td><b>Trailerin rekisterinumero</b></td>
+            <td>{{ reservation.trailer_registration_number }} m</td>
+        </tr>
+        </tbody>
+    </table>
 {% endif %}
 
 <p>
