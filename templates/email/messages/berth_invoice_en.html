@@ -1,0 +1,140 @@
+<p>
+    Dear customer, here is the invoice for your boat berth. You can pay it by clicking
+    the "make your payment" button below in this message.
+</p>
+
+<h3>Boat berth that the invoice concerns</h3>
+
+<p>
+    {{ harborName }}<br/>
+    {{ harborAddress }}<br/>
+    <br/>
+    Berth: {{ pierIdentifier }} {{ berthNumber }}
+</p>
+
+<h3>Price of the boat berth</h3>
+
+<table style="width: 100%">
+    <tr>
+        <td colspan="2">
+            Basic price (3,5 m):
+        </td>
+        <td>{{ invoice.basePrice }}</td>
+    </tr>
+    <tr>
+        <td>
+            Mooring:
+        </td>
+        <td>28 %</td>
+        <td>{{ invoice.mooring }}</td>
+    </tr>
+    <tr>
+        <td>
+            Electricity:
+        </td>
+        <td>12 %</td>
+        <td>{{ invoice.electricity }}</td>
+    </tr>
+    <tr>
+        <td>
+            Water:
+        </td>
+        <td>2 %</td>
+        <td>{{ invoice.water }}</td>
+    </tr>
+    <tr>
+        <td>
+            Waste management:
+        </td>
+        <td>8 %</td>
+        <td>{{ invoice.wasteManagement }}</td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            Gate:
+        </td>
+        <td>{{ invoice.gate }}</td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            Lighting:
+        </td>
+        <td>{{ invoice.lighting }}</td>
+    </tr>
+    <tr>
+        <td colspan="3">
+            <hr/>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            Berth in total:
+        </td>
+        <td>{{ invoice.berthTotal }}</td>
+    </tr>
+    <tr>
+        <td colspan="3">
+            Additional services:
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            Parking permit:
+        </td>
+        <td>{{ invoice.parkingPermit }}</td>
+    </tr>
+    <tr>
+        <td colspan="3">
+            <hr/>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            TOTAL:
+        </td>
+        <td>{{ invoice.total }} /
+            year
+        </td>
+    </tr>
+</table>
+
+<table style="margin: 32px 0; background-color: #9fc9eb;">
+    <tr>
+        <td style="padding: 32px 48px;">
+            <p>
+                Please pay the invoice via this link before the due date {{ dueDate }}:
+            </p>
+
+            <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
+               href="{{ paymentUrl }}">Make your payment {{ invoice.total }} &rarr;</a>
+
+            <p>
+                Please note that you can only pay the invoice via this link. We cannot accept
+                payments made through other means. For more information, please contact our
+                customer service department at venepaikat@hel.fi.
+            </p>
+        </td>
+    </tr>
+</table>
+
+<p>
+    The City of Helsinki’s boat berths are leased out to customers until further
+    notice, and an annual fee is charged for them in accordance with the currently
+    valid price list. If the invoice is not paid by the due date, the lease is
+    terminated automatically. The boating season is from 10 June to 14 September,
+    during which boats are allowed to be kept at berths.
+</p>
+<p>
+    In order to reserve a boat berth, the current boat berth lease agreement terms and
+    the harbour rules must be accepted.
+</p>
+
+<table style="width: 100%; margin: 48px 0;">
+    <tr>
+        <td style="text-align: center;">
+            <a style="font-size: 16px; color: #0072C6;" href="https://venepaikat.hel.fi">
+                City of Helsinki boating services &rarr;
+            </a>
+        </td>
+    </tr>
+</table>

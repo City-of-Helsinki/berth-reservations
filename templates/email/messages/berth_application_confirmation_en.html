@@ -1,0 +1,130 @@
+<h3>Hello, {{ reservation.first_name }}!</h3>
+
+<p>Thank you, your application has been sent successfully!</p>
+
+<p>
+    You will be contacted via text message when a suitable berth becomes
+    available.
+</p>
+
+<p>
+    If you wish to change or cancel your application or ask any questions
+    regarding your application, please e-mail venepaikkavaraukset@hel.fi.
+</p>
+
+<b>Time</b> {{ created_at }}<br/>
+
+<b>Applicant</b> {{ reservation.first_name }} {{ reservation.last_name }}<br/>
+
+{% if reservation.company_name %}
+    <b>Company</b> {{ reservation.company_name }} ({{ reservation.business_id }})<br/>
+{% endif %}
+
+{% if reservation.berth_switch %}
+    <hr/>
+    <h4>Exchange application: Current berth</h4>
+    <b>Harbour:</b> {{ reservation.berth_switch.harbor.name }}<br/>
+    <b>Pier ID:</b> {{ reservation.berth_switch.pier or "-" }}<br/>
+    <b>Berth number:</b> {{ reservation.berth_switch.berth_number }}<br/>
+    <b>Special request:</b> {{ reservation.berth_switch.reason.title }}<br/>
+{% endif %}
+
+<hr/>
+
+<h4>Chosen harbours</h4>
+
+<table>
+    <tbody>
+    {% for choice in harbor_choices %}
+        <tr>
+            <td><b>{{ choice.priority }}</b></td>
+            <td>{{ choice.harbor.name }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% if reservation.application_code %}
+    <br/>
+    <p><b>Application code:</b> {{ reservation.application_code }}</p>
+{% endif %}
+
+{% if reservation.accessibility_required %}
+    <p>Accessible berth</p>
+{% endif %}
+
+<hr/>
+
+<h4>Boat information</h4>
+
+<table>
+    <tbody>
+    {% if reservation.boat_registration_number %}
+        <tr>
+            <td><b>Registration number</b></td>
+            <td>{{ reservation.boat_registration_number }}</td>
+        </tr>
+    {% endif %}
+
+    {% if reservation.boat_name %}
+        <tr>
+            <td><b>Name</b></td>
+            <td>{{ reservation.boat_name }}</td>
+        </tr>
+        <tr>
+            <td><b>Model</b></td>
+            <td>{ reservation.boat_model }}</td>
+        </tr>
+    {% endif %}
+
+    <tr>
+        <td><b>Length</b></td>
+        <td>{{ reservation.boat_length }} m</td>
+    </tr>
+    <tr>
+        <td><b>Width</b></td>
+        <td>{{ reservation.boat_width }} m</td>
+    </tr>
+
+    {% if reservation.boat_draught %}
+        <tr>
+            <td><b>Draught</b></td>
+            <td>{{ reservation.boat_draught }} m</td>
+        </tr>
+        <tr>
+            <td><b>Weight</b></td>
+            <td>{{ reservation.boat_weight }} kg</td>
+        </tr>
+    {% endif %}
+    </tbody>
+</table>
+
+{% if reservation.boat_propulsion %}
+    <h4>Large boat information</h4>
+
+    <table>
+        <tbody>
+        <tr>
+            <td><b>Propulsion</b></td>
+            <td>{{ reservation.boat_propulsion }}</td>
+        </tr>
+        <tr>
+            <td><b>Hull material</b></td>
+            <td>{{ reservation.boat_hull_material }}</td>
+        </tr>
+        <tr>
+            <td><b>Intended use</b></td>
+            <td>{{ reservation.boat_intended_use }}</td>
+        </tr>
+        </tbody>
+    </table>
+{% endif %}
+
+<b>Rental period</b> {{ reservation.renting_period }}<br/>
+{{ reservation.rent_from }} - {{ reservation.rent_to }}
+
+<p>
+    Kind regards,<br/>
+    Helsingin kaupungin venepaikkavaraukset (Berth reservations of the City
+    of Helsinki)
+</p>

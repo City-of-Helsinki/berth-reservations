@@ -1,0 +1,139 @@
+<p>
+    Bästa kund, här är en faktura för din båtplats. Du kan betala den genom att klicka
+    på "Betala" längre ner i meddelandet.
+</p>
+
+<h3>Båtplats som fakturan gäller</h3>
+
+<p>
+    {{ harborName }}<br/>
+    {{ harborAddress }}<br/>
+    <br/>
+    Plats: {{ pierIdentifier }} {{ berthNumber }}
+</p>
+
+<h3>Båtplatsens pris</h3>
+
+<table style="width: 100%">
+    <tr>
+        <td colspan="2">
+            Grundavgift (3,5 m):
+        </td>
+        <td>{{ invoice.basePrice }}</td>
+    </tr>
+    <tr>
+        <td>
+            Förtöjning:
+        </td>
+        <td>28 %</td>
+        <td>{{ invoice.mooring }}</td>
+    </tr>
+    <tr>
+        <td>
+            El:
+        </td>
+        <td>12 %</td>
+        <td>{{ invoice.electricity }}</td>
+    </tr>
+    <tr>
+        <td>
+            Vatten:
+        </td>
+        <td>2 %</td>
+        <td>{{ invoice.water }}</td>
+    </tr>
+    <tr>
+        <td>
+            Avfallshantering:
+        </td>
+        <td>8 %</td>
+        <td>{{ invoice.wasteManagement }}</td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            Port:
+        </td>
+        <td>{{ invoice.gate }}</td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            Belysning:
+        </td>
+        <td>{{ invoice.lighting }}</td>
+    </tr>
+    <tr>
+        <td colspan="3">
+            <hr/>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            Båtplatsen totalt:
+        </td>
+        <td>{{ invoice.berthTotal }}</td>
+    </tr>
+    <tr>
+        <td colspan="3">
+            Tilläggstjänster:
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            Parkeringstillstånd:
+        </td>
+        <td>{{ invoice.parkingPermit }}</td>
+    </tr>
+    <tr>
+        <td colspan="3">
+            <hr/>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            TOTALT:
+        </td>
+        <td>{{ invoice.total }} /
+            år
+        </td>
+    </tr>
+</table>
+
+<table style="margin: 32px 0; background-color: #9fc9eb;">
+    <tr>
+        <td style="padding: 32px 48px;">
+            <p>
+                Betala fakturan via denna länk före förfallodatumet {{ dueDate }}:
+            </p>
+
+            <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
+               href="{{ paymentUrl }}">Betala {{ invoice.total }} &rarr;</a>
+
+            <p>
+                Observera att fakturan kan betalas endast via denna länk. Betalningar som gjorts på
+                annat sätt tas inte emot. För mer information, kontakta vår kundtjänst via
+                venepaikat@hel.fi.
+            </p>
+        </td>
+    </tr>
+</table>
+
+<p>
+    Helsingfors stads båtplatser hyrs ut till kunder tills vidare, och för dem
+    debiteras en årlig avgift enligt den gällande prislistan. Om fakturan inte betalas
+    senast på förfallodagen sägs hyresavtalet upp automatiskt. Båten får förvaras på
+    båtplatsen under båtsäsongen, som varar under perioden 10.6–14.9.
+</p>
+<p>
+    För att ta emot en båtplats måste du godkänna de gällande hyresavtalsvillkoren för
+    båtplatser och båthamnens regler.
+</p>
+
+<table style="width: 100%; margin: 48px 0;">
+    <tr>
+        <td style="text-align: center;">
+            <a style="font-size: 16px; color: #0072C6;" href="https://venepaikat.hel.fi">
+                Helsingfors stadens båtservicen &rarr;
+            </a>
+        </td>
+    </tr>
+</table>
