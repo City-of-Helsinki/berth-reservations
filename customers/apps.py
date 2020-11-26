@@ -6,3 +6,7 @@ class CustomersConfig(AppConfig):
 
     def ready(self):
         import customers.signals  # noqa
+
+        from .services import load_services_config
+
+        load_services_config()

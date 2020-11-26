@@ -67,6 +67,7 @@ class OrderStatus(TextChoices):
     REJECTED = "rejected", _("Rejected")
     CANCELLED = "cancelled", _("Cancelled")
     EXPIRED = "expired", _("Expired")
+    ERROR = "error", _("Error")
     PAID = "paid", _("Paid")
 
 

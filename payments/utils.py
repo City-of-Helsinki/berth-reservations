@@ -11,9 +11,13 @@ from uuid import UUID
 
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import MONTHLY, rrule
+from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
+from django_ilmoitin.utils import send_notification
 
+from applications.enums import ApplicationStatus
 from customers.enums import OrganizationType
 from leases.enums import LeaseStatus
 from leases.utils import (
@@ -22,7 +26,7 @@ from leases.utils import (
     calculate_winter_season_end_date,
     calculate_winter_season_start_date,
 )
-from payments.enums import OrderStatus
+from payments.enums import OrderStatus, ProductServiceType
 from resources.enums import AreaRegion
 from resources.models import Harbor, WinterStorageArea
 from utils.numbers import rounded as rounded_decimal
@@ -248,6 +252,8 @@ def get_order_notification_type(order):
         return NotificationType.NEW_WINTER_STORAGE_ORDER_APPROVED
     elif order.lease_order_type == LeaseOrderType.UNMARKED_WINTER_STORAGE_ORDER:
         return NotificationType.UNMARKED_WINTER_STORAGE_ORDER_APPROVED
+    elif order.lease_order_type == LeaseOrderType.RENEW_BERTH_ORDER:
+        return NotificationType.RENEW_BERTH_ORDER_APPROVED
     else:
         raise ValidationError(_("Order does not have a valid type"))
 
@@ -261,5 +267,49 @@ def get_lease_status(new_status) -> LeaseStatus:
         return LeaseStatus.EXPIRED
     elif new_status == OrderStatus.WAITING:
         return LeaseStatus.OFFERED
+    elif new_status == OrderStatus.ERROR:
+        return LeaseStatus.ERROR
     else:
         raise ValidationError(_("Invalid order status"))
+
+
+def approve_order(order, email, due_date: date, request: HttpRequest) -> None:
+    from payments.providers import get_payment_provider
+
+    # Update due date
+    order.due_date = due_date
+    order.save()
+
+    language = settings.LANGUAGE_CODE
+
+    if order.lease:
+        # Update lease status
+        order.lease.status = LeaseStatus.OFFERED
+        order.lease.save()
+
+        if order.lease.application:
+            # Update application status
+            order.lease.application.status = ApplicationStatus.OFFER_SENT
+            order.lease.application.save()
+
+            language = order.lease.application.language
+
+    # Get payment URL
+    payment_url = get_payment_provider(
+        request, ui_return_url=settings.VENE_UI_RETURN_URL
+    ).get_payment_email_url(order, lang=language)
+
+    # Send email
+    context = {
+        "order": order,
+        "fixed_services": order.order_lines.filter(
+            product__service__in=ProductServiceType.FIXED_SERVICES()
+        ),
+        "optional_services": order.order_lines.filter(
+            product__service__in=ProductServiceType.OPTIONAL_SERVICES()
+        ),
+        "payment_url": payment_url,
+    }
+
+    notification_type = get_order_notification_type(order)
+    send_notification(email, notification_type.value, context, language)
