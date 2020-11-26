@@ -24,7 +24,7 @@
 
 <h4>Valda platser</h4>
 
-<table>
+<table style="width: 100%">
     <tbody>
     {% for choice in area_choices %}
         <tr>
@@ -43,32 +43,24 @@
 
 <h4>Uppgifter om båt</h4>
 
-{% if reservation.boat_registration_number %}
-    <table>
-        <tbody>
+<table style="width: 100%">
+    <tbody>
+    {% if reservation.boat_registration_number %}
         <tr>
             <td><b>Registernummer</b></td>
             <td>{{ reservation.boat_registration_number }}</td>
         </tr>
-        </tbody>
-    </table>
-{% endif %}
+    {% endif %}
 
-{% if reservation.boat_name %}
-    <table>
-        <tbody>
+    {% if reservation.boat_name %}
         <tr>
             <td><b>Namn</b></td>
             <td>{{ reservation.boat_name }}</td>
             <td><b>Modell</b></td>
             <td>{{ reservation.boat_model }}</td>
         </tr>
-        </tbody>
-    </table>
-{% endif %}
+    {% endif %}
 
-<table>
-    <tbody>
     <tr>
         <td><b>Längd</b></td>
         <td>{{ reservation.boat_length }} m</td>
@@ -85,7 +77,7 @@
 {{ reservation.storage_method }}
 
 {% if reservation.trailer_registration_number %}
-    <table>
+    <table style="width: 100%">
         <tbody>
         <tr>
             <td><b>Trailer registernummer</b></td>

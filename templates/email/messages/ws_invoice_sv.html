@@ -14,56 +14,50 @@
 
 <h3>Vinteruppläggningsplatsens pris</h3>
 
-<table>
+<table style="width: 100%">
     <tr>
         <td>
-            <table>
-                <tr>
-                    <td>
-                        Grundavgift (3,5 m):
-                    </td>
-                    <td>{{ invoice.basePrice }}</td>
-                </tr>
-                <tr>
-                    <td colspan="2">&nbsp;</td>
-                </tr>
-                <tr>
-                    <td>
-                        Vinteruppläggningsplats totalt:
-                    </td>
-                    <td>{{ invoice.winterStorageTotal }}</td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <hr/>
-                    </td>
-                </tr>
-                {{% if parkingPermit %}}
-                <tr>
-                    <td>
-                        Parkeringstillstånd:
-                    </td>
-                    <td>{{ invoice.parkingPermit }}</td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <hr/>
-                    </td>
-                </tr>
-                {{% endif %}}
-                <tr>
-                    <td>
-                        TOTALT:
-                    </td>
-                    <td>{{ invoice.total }} / år
-                    </td>
-                </tr>
-            </table>
+            Grundavgift (3,5 m):
+        </td>
+        <td>{{ invoice.basePrice }}</td>
+    </tr>
+    <tr>
+        <td colspan="2">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>
+            Vinteruppläggningsplats totalt:
+        </td>
+        <td>{{ invoice.winterStorageTotal }}</td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <hr/>
+        </td>
+    </tr>
+    {{% if parkingPermit %}}
+    <tr>
+        <td>
+            Parkeringstillstånd:
+        </td>
+        <td>{{ invoice.parkingPermit }}</td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <hr/>
+        </td>
+    </tr>
+    {{% endif %}}
+    <tr>
+        <td>
+            TOTALT:
+        </td>
+        <td>{{ invoice.total }} / år
         </td>
     </tr>
 </table>
 
-<table style="margin: 32px 0; background-color: #9fc9eb;">
+<table style="width: 100%; margin: 32px 0; background-color: #9fc9eb;">
     <tr>
         <td style="padding: 32px 48px;">
             <p>
