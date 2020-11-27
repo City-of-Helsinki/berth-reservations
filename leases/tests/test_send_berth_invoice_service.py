@@ -15,7 +15,7 @@ from customers.schema import ProfileNode
 from customers.tests.conftest import mocked_response_profile
 from leases.enums import LeaseStatus
 from leases.models import BerthLease
-from leases.tasks import send_berth_invoices
+from leases.services import BerthInvoicingService
 from leases.tests.factories import BerthLeaseFactory
 from leases.utils import calculate_season_end_date, calculate_season_start_date
 from payments.enums import OrderStatus
@@ -59,7 +59,7 @@ def test_send_berth_invoices(notification_template_orders_approved):
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        result = send_berth_invoices(r)
+        result = BerthInvoicingService(request=r).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -135,7 +135,7 @@ def test_use_berth_leases_from_last_season(notification_template_orders_approved
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        result = send_berth_invoices(r)
+        result = BerthInvoicingService(request=r).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -211,7 +211,7 @@ def test_use_berth_leases_from_current_season(notification_template_orders_appro
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        result = send_berth_invoices(r)
+        result = BerthInvoicingService(request=r).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -278,7 +278,7 @@ def test_berth_lease_harbor_product(notification_template_orders_approved):
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        result = send_berth_invoices(r)
+        result = BerthInvoicingService(request=r).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -327,7 +327,7 @@ def test_berth_lease_default_product(notification_template_orders_approved):
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        result = send_berth_invoices(r)
+        result = BerthInvoicingService(request=r).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -372,7 +372,7 @@ def test_berth_lease_no_product():
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        result = send_berth_invoices(r)
+        result = BerthInvoicingService(request=r).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -422,7 +422,7 @@ def test_send_berth_invoices_missing_email(notification_template_orders_approved
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        result = send_berth_invoices(r)
+        result = BerthInvoicingService(request=r).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -436,6 +436,7 @@ def test_send_berth_invoices_missing_email(notification_template_orders_approved
     order = Order.objects.first()
 
     assert order.status == OrderStatus.ERROR
+    assert order.comment == "2020-01-01: Missing customer email"
     assert order.id in failed_orders[0].keys()
     assert failed_orders[0].get(order.id) == "Missing customer email"
 
@@ -445,6 +446,7 @@ def test_send_berth_invoices_missing_email(notification_template_orders_approved
     assert leases.count() == 1
     lease: BerthLease = leases.first()
     assert lease.status == LeaseStatus.ERROR
+    assert "Error with the order, check the order first" in lease.comment
     assert lease.start_date.isoformat() == "2020-06-10"
     assert lease.end_date.isoformat() == "2020-09-14"
 
@@ -484,7 +486,7 @@ def test_send_berth_invoices_invalid_example_email(
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        result = send_berth_invoices(r)
+        result = BerthInvoicingService(request=r).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -498,6 +500,7 @@ def test_send_berth_invoices_invalid_example_email(
     order = Order.objects.first()
 
     assert order.status == OrderStatus.ERROR
+    assert order.comment == "2020-01-01: Missing customer email"
     assert order.id in failed_orders[0].keys()
     assert failed_orders[0].get(order.id) == "Missing customer email"
 
@@ -507,6 +510,7 @@ def test_send_berth_invoices_invalid_example_email(
     assert leases.count() == 1
     lease: BerthLease = leases.first()
     assert lease.status == LeaseStatus.ERROR
+    assert "Error with the order, check the order first" in lease.comment
     assert lease.start_date.isoformat() == "2020-06-10"
     assert lease.end_date.isoformat() == "2020-09-14"
 
@@ -548,7 +552,7 @@ def test_send_berth_invoices_send_error(notification_template_orders_approved):
             "payments.utils.send_notification",
             side_effect=AnymailError("Anymail error"),
         ):
-            result = send_berth_invoices(r)
+            result = BerthInvoicingService(request=r).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -562,6 +566,7 @@ def test_send_berth_invoices_send_error(notification_template_orders_approved):
     order = Order.objects.first()
 
     assert order.id in failed_orders[0].keys()
+    assert order.comment == "2020-01-01: Anymail error"
     assert failed_orders[0].get(order.id) == "Anymail error"
 
     assert len(mail.outbox) == 0
@@ -570,6 +575,7 @@ def test_send_berth_invoices_send_error(notification_template_orders_approved):
     assert leases.count() == 1
     lease: BerthLease = leases.first()
     assert lease.status == LeaseStatus.ERROR
+    assert "Error with the order, check the order first" in lease.comment
     assert lease.start_date.isoformat() == "2020-06-10"
     assert lease.end_date.isoformat() == "2020-09-14"
 
@@ -633,7 +639,7 @@ def test_send_berth_invoices_only_not_renewed(notification_template_orders_appro
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        result = send_berth_invoices(r)
+        result = BerthInvoicingService(request=r).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
