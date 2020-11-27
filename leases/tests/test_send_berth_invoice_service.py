@@ -13,15 +13,17 @@ from freezegun import freeze_time
 from berth_reservations.tests.factories import UserFactory
 from customers.schema import ProfileNode
 from customers.tests.conftest import mocked_response_profile
-from leases.enums import LeaseStatus
-from leases.models import BerthLease
-from leases.services import BerthInvoicingService
-from leases.tests.factories import BerthLeaseFactory
-from leases.utils import calculate_season_end_date, calculate_season_start_date
 from payments.enums import OrderStatus
 from payments.models import BerthPriceGroup, Order
 from payments.tests.factories import BerthProductFactory
 from utils.relay import to_global_id
+
+from ..enums import LeaseStatus
+from ..exceptions import AutomaticInvoicingError
+from ..models import BerthLease
+from ..services import BerthInvoicingService
+from ..utils import calculate_season_end_date, calculate_season_start_date
+from .factories import BerthLeaseFactory
 
 PROFILE_TOKEN_SERVICE = "http://fake-profile-api.com"
 
@@ -669,3 +671,52 @@ def test_send_berth_invoices_only_not_renewed(notification_template_orders_appro
     assert order.lease == lease
     assert order.customer.id == customer.id
     assert order.status == OrderStatus.WAITING
+
+
+@freeze_time("2020-01-01T08:00:00Z")
+def test_send_berth_invoices_invalid_limit_reached(
+    notification_template_orders_approved,
+):
+    first_lease = BerthLeaseFactory(
+        renew_automatically=True,
+        boat=None,
+        status=LeaseStatus.PAID,
+        start_date=today() - relativedelta(years=1),
+        end_date=today() + relativedelta(years=-1, months=5),
+    )
+    BerthLeaseFactory(
+        renew_automatically=True,
+        boat=None,
+        status=LeaseStatus.PAID,
+        start_date=today() - relativedelta(years=1),
+        end_date=today() + relativedelta(years=-1, months=5),
+    )
+    customer = first_lease.customer
+    price_group = BerthPriceGroup.objects.get_or_create_for_width(
+        first_lease.berth.berth_type.width
+    )
+    BerthProductFactory(price_group=price_group, harbor=first_lease.berth.pier.harbor)
+
+    user = UserFactory()
+
+    r = RequestFactory().request(
+        HTTP_API_TOKENS=f'{{"{PROFILE_TOKEN_SERVICE}": "token"}}'
+    )
+    data = {
+        "id": to_global_id(ProfileNode, customer.id),
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "primary_email": {"email": "something@example.com"},
+    }
+
+    assert Order.objects.count() == 0
+
+    with mock.patch(
+        "customers.services.profile.requests.post",
+        side_effect=mocked_response_profile(count=1, data=data),
+    ), pytest.raises(AutomaticInvoicingError) as exception:
+        service = BerthInvoicingService(request=r)
+        service.MAXIMUM_FAILURES = 1
+        service.send_invoices()
+
+    assert "Limit of failures reached: 1 elements failed" in str(exception.value)

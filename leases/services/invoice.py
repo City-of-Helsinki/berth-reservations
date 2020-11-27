@@ -15,6 +15,7 @@ from django.utils.translation import gettext_lazy as _
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.services import ProfileService
 from leases.enums import LeaseStatus
+from leases.exceptions import AutomaticInvoicingError
 from leases.models import BerthLease, WinterStorageLease
 from leases.utils import calculate_season_end_date, calculate_season_start_date
 from payments.enums import OrderStatus
@@ -25,9 +26,12 @@ logger = logging.getLogger(__name__)
 
 
 class BaseInvoicingService:
+    MAXIMUM_FAILURES = 50
+
     successful_orders: List[UUID]
     failed_leases: List[Dict[UUID, str]]
     failed_orders: List[Dict[UUID, str]]
+    failure_count: int
 
     season_start: date
     season_end: date
@@ -89,6 +93,7 @@ class BaseInvoicingService:
 
         lease.save(update_fields=["status", "comment"])
         self.failed_leases.append({lease.id: message})
+        self.failure_count += 1
 
     def fail_order(self, order: Order, message: str,) -> None:
         """Set an order to ERROR status and append it to the failed_order list"""
@@ -96,6 +101,7 @@ class BaseInvoicingService:
         order.save(update_fields=["comment"])
         order.set_status(OrderStatus.ERROR, f"Lease renewing failed: {message}")
         self.failed_orders.append({order.id: message})
+        self.failure_count += 1
 
     def send_email(self, order, email):
         # If the profile doesn't have an associated email
@@ -120,6 +126,8 @@ class BaseInvoicingService:
         self.failed_orders = []
         self.failed_leases = []
 
+        self.failure_count = 0
+
         leases = self.get_valid_leases(self.season_start)
 
         # Fetch all the profiles from the Profile service
@@ -127,6 +135,13 @@ class BaseInvoicingService:
 
         for lease in leases:
             order = None
+            if self.failure_count >= self.MAXIMUM_FAILURES:
+                raise AutomaticInvoicingError(
+                    _(
+                        f"Limit of failures reached: {self.failure_count} elements failed"
+                    )
+                )
+
             try:
                 with transaction.atomic():
                     new_lease = self.create_new_lease(
