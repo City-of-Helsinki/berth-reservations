@@ -7,7 +7,7 @@ from customers.models import CustomerProfile
 from users.decorators import view_permission_required
 
 from ..models import BerthLease, WinterStorageLease
-from .types import BerthLeaseNode, WinterStorageLeaseNode
+from .types import BerthLeaseNode, LeaseStatusEnum, WinterStorageLeaseNode
 
 
 class AbstractLeaseNodeFilter(django_filters.FilterSet):
@@ -21,6 +21,8 @@ class Query:
     berth_lease = graphene.relay.Node.Field(BerthLeaseNode)
     berth_leases = DjangoFilterConnectionField(
         BerthLeaseNode,
+        statuses=graphene.List(LeaseStatusEnum),
+        start_year=graphene.Int(),
         filterset_class=AbstractLeaseNodeFilter,
         description="`BerthLeases` are ordered by `createdAt` in ascending order by default.",
     )
@@ -33,9 +35,15 @@ class Query:
     )
 
     @view_permission_required(BerthLease, BerthApplication, CustomerProfile)
-    def resolve_berth_leases(self, info, **kwargs):
+    def resolve_berth_leases(self, info, statuses=None, start_year=None, **kwargs):
+        qs = BerthLease.objects
+        if statuses:
+            qs = qs.filter(status__in=statuses)
+        if start_year:
+            qs = qs.filter(start_date__year=start_year)
+
         return (
-            BerthLease.objects.select_related(
+            qs.select_related(
                 "application",
                 "application__customer",
                 "berth",
