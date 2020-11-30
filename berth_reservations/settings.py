@@ -220,6 +220,7 @@ OIDC_AUTH = {"OIDC_LEEWAY": 60 * 60}
 GRAPHENE = {
     "SCHEMA": "berth_reservations.schema.schema",
     "MIDDLEWARE": ["graphql_jwt.middleware.JSONWebTokenMiddleware"],
+    "RELAY_CONNECTION_MAX_LIMIT": 5000,
 }
 
 GRAPHQL_JWT = {"JWT_AUTH_HEADER_PREFIX": "Bearer"}
