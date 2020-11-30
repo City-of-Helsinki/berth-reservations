@@ -1,5 +1,7 @@
 # Berth reservations
 
+![Continuous integration](https://github.com/City-of-Helsinki/berth-reservations/workflows/Continuous%20integration/badge.svg)
+
 :boat: Bare-bones registration API for berth reservations :boat:
 
 ## Development with Docker
