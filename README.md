@@ -13,10 +13,15 @@ DEBUG=1
 APPLY_MIGRATIONS=1
 ALLOWED_HOSTS=*
 CORS_ORIGIN_ALLOW_ALL=1
+NOTIFICATIONS_ENABLED=1
+
 VENE_PAYMENTS_BAMBORA_API_URL=https://fake-bambora-api-url/api
 VENE_PAYMENTS_BAMBORA_API_KEY=dummy-key
 VENE_PAYMENTS_BAMBORA_API_SECRET=dummy-secret
 VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS="dummy-bank"
+
+PROFILE_API_URL=https://profiili-api.test.kuva.hel.ninja/graphql/
+PROFILE_TOKEN_SERVICE=https://api.hel.fi/auth/helsinkiprofile
 ```
 
 2. Run `docker-compose up`
