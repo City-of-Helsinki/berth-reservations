@@ -303,7 +303,10 @@ class Order(UUIDModel, TimeStampedModel):
 
     @property
     def lease_order_type(self) -> LeaseOrderType:
-        if not hasattr(self, "lease"):
+        if (
+            not hasattr(self, "lease")
+            or self.order_type == OrderType.ADDITIONAL_PRODUCT_ORDER
+        ):
             return LeaseOrderType.INVALID
 
         # Check for application-specific fields:
