@@ -92,7 +92,23 @@ We follow the basic config, without any modifications. Basic `black` commands:
 * To let `black` do its magic: `black .`
 * To see which files `black` would change: `black --check .`
 
-## Releases
+The project also has [`pre-commit`](https://pre-commit.com/) setup with few hooks to avoid having "style fixing" commits.
+
+To install it, run:
+
+    pre-commit install
+
+This will setup three pre-commit hooks: `black`, `flake8`, and `isort`.
+
+## Version control
+### Commits and pull requests
+We try to keep a clean git commit history. For that:
+* Keep your commits as simple as possible
+* Always rebase your PRs, **don't merge** the latest `master` into your branch
+* Don't be afraid to `push --force` once you have fixed your commits 
+* Avoid using the GitHub merge/rebase buttons
+
+### Releases
 
 This project is following [GitHub flow](https://guides.github.com/pdfs/githubflow-online.pdf).
 Release notes can be found from [GitHub tags/releases](https://github.com/City-of-Helsinki/berth-reservations/releases).
