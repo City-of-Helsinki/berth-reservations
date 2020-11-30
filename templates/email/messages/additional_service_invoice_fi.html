@@ -1,0 +1,94 @@
+<p>Hyvä asiakas, tässä lasku lisäpalvelusta. Voit maksaa sen klikkaamalla "siirry maksamaan" -painiketta alempana tässä
+    viestissä.</p>
+
+<h3>Lasku</h3>
+
+<table style="width: 100%">
+    <tr>
+        <td>
+            Sopimus
+        </td>
+        <td>{{ contract.type }}</td>
+    </tr>
+    <tr>
+        <td colspan="2">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>
+            Venepaikka:
+        </td>
+        <td>{{ contract.berth }}</td>
+    </tr>
+    <tr>
+        <td>
+            Sopimuskausi:
+        </td>
+        <td>{{ contract.from }} - {{ contract.to }}</td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <hr/>
+        </td>
+    </tr>
+    {{% if storageInIce %}}
+    <tr>
+        <td>
+            Jäissä säilytys yhteensä:
+        </td>
+        <td>{{ invoice.storageInIce }}</td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <hr/>
+        </td>
+    </tr>
+    {{% endif %}}
+    <tr>
+        <td>
+            YHTEENSÄ:
+        </td>
+        <td>{{ invoice.total }} / vuosi
+        </td>
+    </tr>
+</table>
+
+<table style="width: 100%; margin: 32px 0; background-color: #9fc9eb;">
+    <tr>
+        <td style="padding: 32px 48px;">
+            <p>
+                Maksa lasku tämän linkin kautta ennen eräpäivää {{ dueDate }}:
+            </p>
+
+            <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
+               href="{{ paymentUrl }}">Siirry maksamaan {{ invoice.total }} &rarr;</a>
+
+            <p>
+                Huomaathan, että laskun voi maksaa vain tämän linkin kautta. Muulla
+                tavoin maksettuja maksuja ei voida ottaa vastaan. Lisätietoja
+                asiakaspalvelustamme venepaikat@hel.fi.
+            </p>
+        </td>
+    </tr>
+</table>
+
+<p>
+    Helsingin kaupungin venepaikat vuokrataan asiakkaille toistaiseksi
+    voimassa olevina ja niistä peritään vuosittain kulloinkin voimassa
+    olevan hinnaston mukainen maksu. Jos laskua ei maksa eräpäivään
+    mennessä, vuokrasopimus irtisanoutuu automaattisesti. Veneilykausi on
+    10.6.-14.9., jona aikana venepaikalla saa pitää venettä.
+</p>
+<p>
+    Venepaikan vastaanottaminen edellyttää voimassa olevien venepaikan
+    vuokrasopimusehtojen sekä venesatamasääntöjen hyväksymistä.
+</p>
+
+<table style="width: 100%; margin: 48px 0;">
+    <tr>
+        <td style="text-align: center;">
+            <a style="font-size: 16px; color: #0072C6;" href="https://venepaikat.hel.fi">
+                Helsingin kaupungin veneilypalvelut &rarr;
+            </a>
+        </td>
+    </tr>
+</table>
