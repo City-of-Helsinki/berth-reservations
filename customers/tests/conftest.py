@@ -10,6 +10,12 @@ from utils.relay import to_global_id
 
 from .factories import BoatCertificateFactory, BoatFactory, OrganizationFactory
 
+MOCK_HKI_PROFILE_ADDRESS: dict = {
+    "address": "Street 1",
+    "postal_code": "00100",
+    "city": "Helsinki",
+}
+
 
 @pytest.fixture
 def boat():
@@ -29,6 +35,11 @@ def organization():
     return organization
 
 
+@pytest.fixture
+def hki_profile_address() -> dict:
+    return MOCK_HKI_PROFILE_ADDRESS
+
+
 def mocked_response_profile(count=3, data=None, use_edges=True, *args, **kwargs):
     def wrapper(*args, **kwargs):
         profiles = []
@@ -40,6 +51,7 @@ def mocked_response_profile(count=3, data=None, use_edges=True, *args, **kwargs)
                     "first_name": profile.user.first_name,
                     "last_name": profile.user.last_name,
                     "primary_email": {"email": profile.user.email},
+                    "primary_address": MOCK_HKI_PROFILE_ADDRESS,
                 }
             )
         if data:

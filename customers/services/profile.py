@@ -18,6 +18,9 @@ class HelsinkiProfileUser:
     first_name: str = ""
     last_name: str = ""
     email: str = ""
+    address: str = ""
+    postal_code: str = ""
+    city: str = ""
 
 
 class ProfileService:
@@ -39,6 +42,11 @@ class ProfileService:
                         last_name: lastName
                         primary_email: primaryEmail {
                             email
+                        }
+                        primary_address: primaryAddress {
+                            address
+                            postal_code: postalCode
+                            city
                         }
                     }
                 }
@@ -117,6 +125,11 @@ class ProfileService:
                     primary_email: primaryEmail {{
                         email
                     }}
+                    primary_address: primaryAddress {{
+                        address
+                        postal_code: postalCode
+                        city
+                    }}
                 }}
             }}
         """
@@ -131,7 +144,20 @@ class ProfileService:
     def parse_user(self, profile: Dict[str, dict]) -> HelsinkiProfileUser:
         user_id = from_global_id(profile.pop("id"))
         email = (profile.pop("primary_email") or {}).get("email")
-        return HelsinkiProfileUser(UUID(user_id), email=email, **profile)
+
+        primary_address = profile.pop("primary_address", None)
+        address = (primary_address or {}).get("address")
+        postal_code = (primary_address or {}).get("postal_code")
+        city = (primary_address or {}).get("city")
+
+        return HelsinkiProfileUser(
+            UUID(user_id),
+            email=email,
+            address=address,
+            postal_code=postal_code,
+            city=city,
+            **profile,
+        )
 
     def query(self, query: str) -> Dict[str, dict]:
         query = {"query": query}
