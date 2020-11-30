@@ -443,7 +443,7 @@ class DeleteOrderMutation(graphene.ClientIDMutation):
 
         order.delete()
 
-        return DeleteBerthProductMutation()
+        return DeleteOrderMutation()
 
 
 class ConfirmPaymentMutation(graphene.ClientIDMutation):
