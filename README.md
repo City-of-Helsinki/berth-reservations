@@ -1,7 +1,24 @@
 # Berth reservations
 
+![Continuous integration](https://github.com/City-of-Helsinki/berth-reservations/workflows/Continuous%20integration/badge.svg)
+
 :boat: Bare-bones registration API for berth reservations :boat:
 
+**Contents**
+* [Development with Docker](#development-with-docker)
+* [Development without Docker](#development-without-docker)
+  * [Database](#database)
+  * [Daily running](#daily-running)
+* [Keeping Python requirements up to date](#keeping-python-requirements-up-to-date)
+* [Code format](#code-format)
+* [Version Control](#version-control)
+  * [Commits and pull requests](#commits-and-pull-requests)
+  * [Releases](#releases)
+* [Running tests](#running-tests)
+* [Helsinki Harbors' data](#helsinki-harbors-data)
+
+
+<a name="development-with-docker"></a>
 ## Development with Docker
 
 1. Create `.env` docker-compose environment file with default contents:
@@ -11,10 +28,15 @@ DEBUG=1
 APPLY_MIGRATIONS=1
 ALLOWED_HOSTS=*
 CORS_ORIGIN_ALLOW_ALL=1
+NOTIFICATIONS_ENABLED=1
+
 VENE_PAYMENTS_BAMBORA_API_URL=https://fake-bambora-api-url/api
 VENE_PAYMENTS_BAMBORA_API_KEY=dummy-key
 VENE_PAYMENTS_BAMBORA_API_SECRET=dummy-secret
 VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS="dummy-bank"
+
+PROFILE_API_URL=https://profiili-api.test.kuva.hel.ninja/graphql/
+PROFILE_TOKEN_SERVICE=https://api.hel.fi/auth/helsinkiprofile
 ```
 
 2. Run `docker-compose up`
@@ -27,14 +49,16 @@ VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS="dummy-bank"
 
 The project is now running at [localhost:8000](http://localhost:8000)
 
+<a name="development-without-docker"></a>
 ## Development without Docker
 
-Project uses following software verisons:
+Project uses following software versions:
 
-* Postgres 9.6
-* Postgis 2.4
+* Postgres 11
+* Postgis 2.5
 * Python 3.8
 
+<a name="database"></a>
 ### Database
 
 To setup a database compatible with default database settings:
@@ -52,6 +76,7 @@ Allow user to create test database
 
     sudo -u postgres psql -c "ALTER USER berth_reservations CREATEDB;"
 
+<a name="daily-running"></a>
 ### Daily running
 
 * Create `.env` file: `touch .env`
@@ -61,6 +86,7 @@ Allow user to create test database
 
 The project is now running at [localhost:8000](http://localhost:8000)
 
+<a name="keeping-python-requirements-up-to-date"></a>
 ## Keeping Python requirements up to date
 
 1. Install `pip-tools`:
@@ -82,6 +108,7 @@ The project is now running at [localhost:8000](http://localhost:8000)
 
     * `pip-sync requirements.txt`
 
+<a name="code-format"></a>
 ## Code format
 
 This project uses [`black`](https://github.com/ambv/black) for Python code formatting.
@@ -90,11 +117,38 @@ We follow the basic config, without any modifications. Basic `black` commands:
 * To let `black` do its magic: `black .`
 * To see which files `black` would change: `black --check .`
 
-## Releases
+The project also has [`pre-commit`](https://pre-commit.com/) setup with few hooks to avoid having "style fixing" commits.
+
+To install it, run:
+
+    pre-commit install
+
+This will setup three pre-commit hooks: `black`, `flake8`, and `isort`.
+
+<a name="version-control"></a>
+## Version control
+<a name="commits-and-pull-requests"></a>
+### Commits and pull requests
+We try to keep a clean git commit history. For that:
+* Keep your commits as simple as possible
+* Always rebase your PRs, **don't merge** the latest `master` into your branch
+* Don't be afraid to `push --force` once you have fixed your commits 
+* Avoid using the GitHub merge/rebase buttons
+
+<a name="releases"></a>
+### Releases
 
 This project is following [GitHub flow](https://guides.github.com/pdfs/githubflow-online.pdf).
 Release notes can be found from [GitHub tags/releases](https://github.com/City-of-Helsinki/berth-reservations/releases).
 
+<a name="running-tests"></a>
+## Running tests
+
+    pytest
+
+In order to successfully run tests in ```applications/tests/test_applications_notifications.py``` you need to set env variable ```NOTIFICATIONS_ENABLED=1```
+
+<a name="helsinki-harbors-data"></a>
 ## Helsinki Harbors' data
 
 There are some fixtures available, that contain basic data about public
@@ -138,9 +192,3 @@ Lastly, load the User Groups:
 And install the model permissions:
 
     ./manage.py set_group_model_permissions
-
-## Running tests
-
-    pytest
-    
-In order to successfully run tests in ```applications/tests/test_applications_notifications.py``` you need to set env variable ```NOTIFICATIONS_ENABLED=1```
