@@ -73,6 +73,7 @@ class OrderAdmin(admin.ModelAdmin):
     )
     list_display = (
         "id",
+        "created_at",
         "order_number",
         "total_price",
         "status",
