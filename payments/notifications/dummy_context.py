@@ -101,6 +101,26 @@ def _get_winter_storage_order_context():
     return _get_order_context(order, [], optional_services)
 
 
+def _get_additional_product_order_context():
+    customer = CustomerProfileFactory.build()
+    order = OrderFactory.build(
+        customer=customer,
+        lease=BerthLeaseFactory.build(customer=customer),
+        product=None,
+        price=Decimal("0.00"),
+        tax_percentage=Decimal("0.00"),
+    )
+    optional_services = [
+        OrderLineFactory.build(
+            order=order,
+            product__service=ProductServiceType.OPTIONAL_SERVICES()[0],
+            price=random_price(),
+        ),
+    ]
+
+    return _get_order_context(order, [], optional_services)
+
+
 def load_dummy_context():
     dummy_context.update(
         {
@@ -109,5 +129,6 @@ def load_dummy_context():
             NotificationType.BERTH_SWITCH_ORDER_APPROVED: _get_berth_order_context(),
             NotificationType.NEW_WINTER_STORAGE_ORDER_APPROVED: _get_winter_storage_order_context(),
             NotificationType.UNMARKED_WINTER_STORAGE_ORDER_APPROVED: _get_winter_storage_order_context(),
+            NotificationType.ADDITIONAL_PRODUCT_ORDER_APPROVED: _get_additional_product_order_context(),
         }
     )

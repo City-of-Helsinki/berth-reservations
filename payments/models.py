@@ -303,7 +303,10 @@ class Order(UUIDModel, TimeStampedModel):
 
     @property
     def lease_order_type(self) -> LeaseOrderType:
-        if not hasattr(self, "lease"):
+        if (
+            not hasattr(self, "lease")
+            or self.order_type == OrderType.ADDITIONAL_PRODUCT_ORDER
+        ):
             return LeaseOrderType.INVALID
 
         # Check for application-specific fields:
@@ -377,10 +380,14 @@ class Order(UUIDModel, TimeStampedModel):
 
     @property
     def total_tax_percentage(self):
-        return rounded_decimal(
-            ((self.total_price - self.total_pretax_price) / self.total_pretax_price)
-            * 100,
-            round_to_nearest=0.05,
+        return (
+            rounded_decimal(
+                ((self.total_price - self.total_pretax_price) / self.total_pretax_price)
+                * 100,
+                round_to_nearest=0.05,
+            )
+            if self.total_pretax_price != 0
+            else 0
         )
 
     def _check_valid_products(self) -> None:

@@ -7,7 +7,7 @@ from applications.tests.factories import (
     WinterStorageApplicationFactory,
 )
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
-from payments.enums import LeaseOrderType
+from payments.enums import LeaseOrderType, OrderType
 from payments.tests.factories import (
     BerthProductFactory,
     OrderFactory,
@@ -75,6 +75,22 @@ def test_order_type_unmarked_winter_storage_order(customer_profile):
         ),
     )
     assert order.lease_order_type == LeaseOrderType.UNMARKED_WINTER_STORAGE_ORDER
+
+
+def test_order_type_additional_product_order(berth, customer_profile):
+    lease = BerthLeaseFactory(
+        customer=customer_profile,
+        berth=berth,
+        start_date="2020-06-10",
+        end_date="2020-06-15",
+    )
+    order = OrderFactory(
+        order_type=OrderType.ADDITIONAL_PRODUCT_ORDER,
+        lease=lease,
+        customer=customer_profile,
+        product=BerthProductFactory(),
+    )
+    assert order.lease_order_type == LeaseOrderType.INVALID
 
 
 def test_order_type_invalid(customer_profile):

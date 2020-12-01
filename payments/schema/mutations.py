@@ -434,7 +434,7 @@ class DeleteOrderMutation(graphene.ClientIDMutation):
         id = graphene.ID(required=True)
 
     @classmethod
-    @delete_permission_required(BerthProduct)
+    @delete_permission_required(Order)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         order = get_node_from_global_id(
@@ -443,7 +443,7 @@ class DeleteOrderMutation(graphene.ClientIDMutation):
 
         order.delete()
 
-        return DeleteBerthProductMutation()
+        return DeleteOrderMutation()
 
 
 class ConfirmPaymentMutation(graphene.ClientIDMutation):

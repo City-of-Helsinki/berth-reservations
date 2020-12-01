@@ -39,7 +39,7 @@ def test_get_all_profiles():
         assert user_profile.email is not None
 
 
-def test_get_profile(customer_profile, user):
+def test_get_profile(customer_profile, user, hki_profile_address):
     r = RequestFactory().request(
         HTTP_API_TOKENS=f'{{"{PROFILE_TOKEN_SERVICE}": "token"}}'
     )
@@ -52,6 +52,7 @@ def test_get_profile(customer_profile, user):
                 "first_name": user.first_name,
                 "last_name": user.last_name,
                 "primary_email": {"email": user.email},
+                "primary_address": hki_profile_address,
             },
             use_edges=False,
         ),
@@ -62,9 +63,12 @@ def test_get_profile(customer_profile, user):
     assert profile.first_name == user.first_name
     assert profile.last_name == user.last_name
     assert profile.email == user.email
+    assert profile.address == hki_profile_address.get("address")
+    assert profile.postal_code == hki_profile_address.get("postal_code")
+    assert profile.city == hki_profile_address.get("city")
 
 
-def test_parse_user_edge():
+def test_parse_user_edge(hki_profile_address):
     faker = Faker()
     r = RequestFactory().request(
         HTTP_API_TOKENS=f'{{"{PROFILE_TOKEN_SERVICE}": "token"}}'
@@ -78,6 +82,7 @@ def test_parse_user_edge():
             "first_name": faker.first_name(),
             "last_name": faker.last_name(),
             "primary_email": {"email": email},
+            "primary_address": hki_profile_address,
         }
     }
 
@@ -86,3 +91,6 @@ def test_parse_user_edge():
     assert user.first_name == edge.get("node").get("first_name")
     assert user.last_name == edge.get("node").get("last_name")
     assert user.email == email
+    assert user.address == hki_profile_address.get("address")
+    assert user.postal_code == hki_profile_address.get("postal_code")
+    assert user.city == hki_profile_address.get("city")

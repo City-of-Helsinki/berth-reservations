@@ -23,3 +23,7 @@ class NotificationType(TextChoices):
         "unmarked_winter_storage_order_approved",
         _("Unmarked winter storage order approved"),
     )
+    ADDITIONAL_PRODUCT_ORDER_APPROVED = (
+        "additional_product_order_approved",
+        _("Additional product order approved"),
+    )

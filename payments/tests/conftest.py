@@ -111,7 +111,9 @@ def _generate_order(order_type: str = None):
             price=random_price(),
             tax_percentage=random_tax(),
             product=None,
-            lease=None,
+            lease=BerthLeaseFactory(
+                application=BerthApplicationFactory(), customer=customer_profile
+            ),
         )
     else:
         order = OrderFactory(customer=customer_profile)
