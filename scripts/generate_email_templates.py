@@ -1,9 +1,11 @@
 import os
 import re
 
-templates_path = os.path.join(os.getcwd(), "../templates/email")
-messages_path = os.path.join(os.getcwd(), "../templates/email/messages")
-generated_path = os.path.join(os.getcwd(), "../templates/email/generated")
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+templates_path = os.path.join(PROJECT_ROOT, "templates", "email")
+messages_path = os.path.join(PROJECT_ROOT, "templates", "email", "messages")
+generated_path = os.path.join(PROJECT_ROOT, "templates", "email", "generated")
 languages = ["fi", "sv", "en"]
 
 
