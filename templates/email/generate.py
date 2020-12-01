@@ -3,16 +3,18 @@ import re
 
 messages_path = os.path.join(os.getcwd(), "messages")
 generated_path = os.path.join(os.getcwd(), "generated")
-template_file_extension = ".html"
+languages = ["fi", "sv", "en"]
 
 
 def get_template_for_message(filename):
-    lang = filename.replace(template_file_extension, "")[-2:]
-    if lang != "fi" and lang != "sv" and lang != "en":
+    lang = filename.replace(".html", "")[-2:]
+    if lang not in languages:
         lang = "fi"
-    template_filename = "base_template_" + lang + template_file_extension
+    template_filename = f"base_template_{lang}.html"
     template_path = os.path.join(os.getcwd(), template_filename)
-    return open(template_path, "r").read()
+    with open(template_path, "r") as file:
+        template = file.read()
+    return template
 
 
 def get_content_tag_line(template):
@@ -28,22 +30,22 @@ def indent_content(content, indentation):
     indented_content = ""
     for line in content_lines:
         if len(line) > 0:
-            indented_content = indented_content + indentation * " " + line + "\n"
+            indented_content = indented_content + indentation * " " + line
         # if line is empty, don't indent
-        else:
-            indented_content = indented_content + "\n"
+        indented_content = f"{indented_content}\n"
     return indented_content
 
 
 def generate_template(filename):
-    message = open(os.path.join(messages_path, filename), "r").read()
+    with open(os.path.join(messages_path, filename), "r") as template_file:
+        message = template_file.read()
 
-    template = get_template_for_message(filename)
-    content_tag_line = get_content_tag_line(template)
-    indentation = get_indentation(content_tag_line)
-    indented_message_content = indent_content(message, indentation)
+        template = get_template_for_message(filename)
+        content_tag_line = get_content_tag_line(template)
+        indentation = get_indentation(content_tag_line)
+        indented_message_content = indent_content(message, indentation)
 
-    generated_content = template.replace(content_tag_line, indented_message_content)
+        generated_content = template.replace(content_tag_line, indented_message_content)
     return generated_content
 
 
@@ -53,11 +55,9 @@ def create_generated_folder():
 
 
 def clear_generated_templates():
-    file_list = [
-        f for f in os.listdir(generated_path) if f.endswith(template_file_extension)
-    ]
-    for f in file_list:
-        os.remove(os.path.join(generated_path, f))
+    for file_name in os.listdir(generated_path):
+        file_path = os.path.join(generated_path, file_name)
+        os.remove(file_path)
 
 
 def save_template(filename, content):
