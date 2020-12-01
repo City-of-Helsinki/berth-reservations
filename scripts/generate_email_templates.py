@@ -1,8 +1,9 @@
 import os
 import re
 
-messages_path = os.path.join(os.getcwd(), "messages")
-generated_path = os.path.join(os.getcwd(), "generated")
+templates_path = os.path.join(os.getcwd(), "../templates/email")
+messages_path = os.path.join(os.getcwd(), "../templates/email/messages")
+generated_path = os.path.join(os.getcwd(), "../templates/email/generated")
 languages = ["fi", "sv", "en"]
 
 
@@ -11,7 +12,7 @@ def get_template_for_message(filename):
     if lang not in languages:
         lang = "fi"
     template_filename = f"base_template_{lang}.html"
-    template_path = os.path.join(os.getcwd(), template_filename)
+    template_path = os.path.join(templates_path, template_filename)
     with open(template_path, "r") as file:
         template = file.read()
     return template
