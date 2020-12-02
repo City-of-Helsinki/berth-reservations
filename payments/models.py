@@ -1,6 +1,7 @@
 from datetime import date
 from decimal import Decimal
 
+from dateutil.utils import today
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
@@ -636,7 +637,17 @@ class Order(UUIDModel, TimeStampedModel):
 
     def update_lease_and_application(self, new_status):
         self.lease.status = get_lease_status(new_status)
-        self.lease.save(update_fields=["status"])
+
+        if new_status == OrderStatus.ERROR:
+            message = (
+                f"{today().date()}: {_('Error with the order, check the order first')}"
+            )
+            if len(self.lease.comment) > 0:
+                self.lease.comment += f"\n{message}"
+            else:
+                self.lease.comment = message
+
+        self.lease.save(update_fields=["status", "comment"])
 
         if new_status == OrderStatus.PAID:
             application = self.lease.application

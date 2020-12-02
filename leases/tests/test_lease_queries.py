@@ -20,6 +20,7 @@ from resources.tests.factories import (
 )
 from utils.relay import to_global_id
 
+from ..enums import LeaseStatus
 from ..schema import BerthLeaseNode, WinterStorageLeaseNode
 from .factories import BerthLeaseFactory, WinterStorageLeaseFactory
 
@@ -636,4 +637,40 @@ def test_query_winter_storage_lease_count(superuser_api_client):
     executed = superuser_api_client.execute(query)
     assert executed["data"] == {
         "winterStorageLeases": {"count": count, "totalCount": count}
+    }
+
+
+FILTERED_QUERY_BERTH_LEASES = """
+query GetBerthLeases {
+    berthLeases(statuses: [%s], startYear: %d) {
+        edges {
+            node {
+                id
+                status
+                startDate
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_services", "berth_handler", "berth_supervisor"],
+    indirect=True,
+)
+@freeze_time("2020-02-01")
+def test_query_berth_leases_filtered(api_client):
+    berth_lease = BerthLeaseFactory(status=LeaseStatus.DRAFTED)
+    query = FILTERED_QUERY_BERTH_LEASES % ("DRAFTED", 2020)
+
+    berth_lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
+
+    executed = api_client.execute(query)
+
+    assert executed["data"]["berthLeases"]["edges"][0]["node"] == {
+        "id": berth_lease_id,
+        "status": "DRAFTED",
+        "startDate": str(berth_lease.start_date),
     }

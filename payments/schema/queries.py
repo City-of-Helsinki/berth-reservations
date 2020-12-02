@@ -14,6 +14,7 @@ from .types import (
     BerthProductNode,
     OrderDetailsType,
     OrderNode,
+    OrderStatusEnum,
     OrderTypeEnum,
     WinterStorageProductNode,
 )
@@ -61,6 +62,7 @@ class Query:
     )
     orders = DjangoConnectionField(
         OrderNode,
+        statuses=List(OrderStatusEnum),
         order_type=OrderTypeEnum(),
         description="**Requires permissions** to access payments.",
     )
@@ -95,16 +97,17 @@ class Query:
             AdditionalProductServiceNode(service=service) for service in service_list
         ]
 
-    def resolve_orders(self, info, **kwargs):
-        order_type = kwargs.get("order_type")
-
+    def resolve_orders(self, info, order_type=None, statuses=None, **kwargs):
+        qs = Order.objects.all()
         if order_type:
             if order_type == "BERTH":
-                return Order.objects.berth_orders()
+                qs = Order.objects.berth_orders()
             else:
-                return Order.objects.winter_storage_orders()
+                qs = Order.objects.winter_storage_orders()
 
-        return Order.objects.all()
+        if statuses:
+            qs = qs.filter(status__in=statuses)
+        return qs
 
 
 class OldAPIQuery:

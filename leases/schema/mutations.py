@@ -21,9 +21,10 @@ from utils.relay import get_node_from_global_id, to_global_id
 from utils.schema import update_object
 
 from ..enums import LeaseStatus
+from ..exceptions import AutomaticInvoicingError
 from ..models import BerthLease, WinterStorageLease
+from ..services import BerthInvoicingService
 from ..stickers import get_next_sticker_number
-from ..tasks import send_berth_invoices
 from .types import BerthLeaseNode, SendExistingInvoicesType, WinterStorageLeaseNode
 from .utils import parse_invoicing_result
 
@@ -431,7 +432,12 @@ class SendExistingBerthInvoicesMutation(graphene.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         from payments.schema import OrderNode
 
-        result = send_berth_invoices(info.context, input.get("due_date"))
+        try:
+            result = BerthInvoicingService(
+                request=info.context, due_date=input.get("due_date")
+            ).send_invoices()
+        except AutomaticInvoicingError as e:
+            raise VenepaikkaGraphQLError(e)
 
         # Only need to parse the list of ids
         successful_orders = [

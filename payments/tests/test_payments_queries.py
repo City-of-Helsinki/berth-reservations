@@ -820,3 +820,36 @@ def test_get_order_status_order_does_not_exist(old_schema_api_client):
     )
 
     assert_doesnt_exist("Order", executed)
+
+
+ORDERS_FILTERED_STATUS_QUERY = """
+query ORDERS {
+    orders(statuses: [%s]) {
+        edges {
+            node {
+                id
+                status
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "order",
+    ["berth_order", "winter_storage_order", "empty_order", "additional_product_order"],
+    indirect=True,
+)
+@pytest.mark.parametrize("status", list(OrderStatus))
+def test_get_orders_filtered_statuses(superuser_api_client, order, status):
+    order.status = status
+    order.save(update_fields=["status"])
+
+    executed = superuser_api_client.execute(ORDERS_FILTERED_STATUS_QUERY % status.name)
+
+    assert len(executed["data"]["orders"]["edges"]) == 1
+    assert executed["data"]["orders"]["edges"][0]["node"] == {
+        "id": to_global_id(OrderNode, order.id),
+        "status": status.name,
+    }
