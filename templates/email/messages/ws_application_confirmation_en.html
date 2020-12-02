@@ -1,0 +1,89 @@
+<h3>Hello {{ application.first_name }}!</h3>
+
+<p>Thank you, your application has been sent successfully.</p>
+
+<p>
+    If you wish to change or cancel your application or ask any questions
+    regarding your application, please e-mail <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
+</p>
+
+<b>Time</b> {{ created_at }}<br/>
+
+<b>Applicant</b> {{ application.first_name }} {{ application.last_name }}<br/>
+
+{% if application.company_name %}
+    <b>Company</b> {{ application.company_name }} ({{ application.business_id }})<br/>
+{% endif %}
+
+<hr/>
+
+<h4>Chosen areas</h4>
+
+<table style="width: 100%">
+    <tbody>
+    {% for choice in area_choices %}
+        <tr>
+            <td><b>{{ choice.priority }}</b></td>
+            <td>{{ choice.winter_storage_area.name }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% if application.application_code %}
+    <p><b>Application code:</b> {{ application.application_code }}</p>
+{% endif %}
+
+<hr/>
+
+<h4>Boat information</h4>
+
+<table style="width: 100%">
+    <tbody>
+    {% if application.boat_registration_number %}
+        <tr>
+            <td><b>Registration number</b></td>
+            <td>{{ application.boat_registration_number }}</td>
+        </tr>
+    {% endif %}
+
+    {% if application.boat_name %}
+        <tr>
+            <td><b>Name</b></td>
+            <td>{{ application.boat_name }}</td>
+            <td><b>Model</b></td>
+            <td>{{ application.boat_model }}</td>
+        </tr>
+    {% endif %}
+
+    <tr>
+        <td><b>Length</b></td>
+        <td>{{ application.boat_length }} m</td>
+        <td><b>Width</b></td>
+        <td>{{ application.boat_width }} m</td>
+    </tr>
+    </tbody>
+</table>
+
+<hr/>
+
+<h4>Storage information</h4>
+
+{{ application.get_storage_method_display() }}
+
+{% if application.trailer_registration_number %}
+    <table style="width: 100%">
+        <tbody>
+        <tr>
+            <td><b>Trailer's registration</b></td>
+            <td>{{ application.trailer_registration_number }} m</td>
+        </tr>
+        </tbody>
+    </table>
+{% endif %}
+
+<p>
+    Kind regards,<br/>
+    Helsingin kaupungin venepaikkavaraukset (Berth applications of the City
+    of Helsinki)
+</p>

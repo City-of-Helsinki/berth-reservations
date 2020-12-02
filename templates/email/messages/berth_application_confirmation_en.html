@@ -1,0 +1,129 @@
+<h3>Hello, {{ application.first_name }}!</h3>
+
+<p>Thank you, your application has been sent successfully!</p>
+
+<p>
+    If you wish to change or cancel your application or ask any questions
+    regarding your application, please e-mail <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
+</p>
+
+<b>Time</b> {{ created_at }}<br/>
+
+<b>Applicant</b> {{ application.first_name }} {{ application.last_name }}<br/>
+
+{% if application.company_name %}
+    <b>Company</b> {{ application.company_name }} ({{ application.business_id }})<br/>
+{% endif %}
+
+{% if application.berth_switch %}
+    <hr/>
+    <h4>Exchange application: Current berth</h4>
+    <b>Harbor:</b> {{ application.berth_switch.harbor.name }}<br/>
+    <b>Pier ID:</b> {{ application.berth_switch.pier or "-" }}<br/>
+    <b>Berth number:</b> {{ application.berth_switch.berth_number }}<br/>
+    <b>Special request:</b> {{ application.berth_switch.reason.title }}<br/>
+{% endif %}
+
+<hr/>
+
+<h4>Chosen harbors</h4>
+
+<table>
+    <tbody>
+    {% for choice in harbor_choices %}
+        <tr>
+            <td><b>{{ choice.priority }}</b></td>
+            <td>{{ choice.harbor.name }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% if application.application_code %}
+    <br/>
+    <p><b>Application code:</b> {{ application.application_code }}</p>
+{% endif %}
+
+{% if application.accessibility_required %}
+    <p>Accessible berth</p>
+{% endif %}
+
+<hr/>
+
+<h4>Boat information</h4>
+
+<table>
+    <tbody>
+    {% if application.boat_registration_number %}
+        <tr>
+            <td><b>Registration number</b></td>
+            <td>{{ application.boat_registration_number }}</td>
+        </tr>
+    {% endif %}
+
+    {% if application.boat_name %}
+        <tr>
+            <td><b>Name</b></td>
+            <td>{{ application.boat_name }}</td>
+        </tr>
+        <tr>
+            <td><b>Model</b></td>
+            <td>{ application.boat_model }}</td>
+        </tr>
+    {% endif %}
+
+    <tr>
+        <td><b>Length</b></td>
+        <td>{{ application.boat_length }} m</td>
+    </tr>
+    <tr>
+        <td><b>Width</b></td>
+        <td>{{ application.boat_width }} m</td>
+    </tr>
+
+    {% if application.boat_draught %}
+        <tr>
+            <td><b>Draught</b></td>
+            <td>{{ application.boat_draught }} m</td>
+        </tr>
+    {% endif %}
+    {% if application.boat_weight %}
+        <tr>
+            <td><b>Weight</b></td>
+            <td>{{ application.boat_weight }} kg</td>
+        </tr>
+    {% endif %}
+    </tbody>
+</table>
+
+{% if application.boat_propulsion %}
+    <h4>Large boat information</h4>
+
+    <table>
+        <tbody>
+        <tr>
+            <td><b>Propulsion</b></td>
+            <td>{{ application.boat_propulsion }}</td>
+        </tr>
+        <tr>
+            <td><b>Hull material</b></td>
+            <td>{{ application.boat_hull_material }}</td>
+        </tr>
+        <tr>
+            <td><b>Intended use</b></td>
+            <td>{{ application.boat_intended_use }}</td>
+        </tr>
+        <tr>
+            <td><b>Rental period</b></td>
+            <td>{{ application.renting_period }}<br/>
+                {{ application.rent_from }} - {{ application.rent_till }}</td>
+        </tr>
+        </tbody>
+    </table>
+{% endif %}
+
+<p>
+    Kind regards,<br/>
+    Helsingin kaupungin venepaikkavaraukset (Berth applications of the City
+    of Helsinki)
+</p>

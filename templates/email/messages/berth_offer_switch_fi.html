@@ -1,0 +1,226 @@
+<p>
+    Hyvä asiakas, kiitos hakemuksestasi. Olemme käsitelleet sen ja tarjoamme
+    sinulle alla olevaa venepaikkaa. Jos haluat vastaanottaa sen, ilmoita siitä meille viestin lopussa olevalla
+    linkillä.
+</p>
+
+<h3>Tarjottava venepaikka</h3>
+
+<img src="{{ order.lease.berth.pier.harbor.image_file.url }}" alt="Sataman kuva"/>
+
+<h4>{{ order.lease.berth.pier.harbor.name }}</h4>
+
+<p style="margin-bottom: 16px;">
+    {{ order.lease.berth.pier.harbor.street_address }}
+</p>
+
+<p><a href="{{ order.lease.berth.pier.harbor.www_url }}">
+    Toimipisteen nettisivut
+</a></p>
+
+{% for harbor_map in order.lease.berth.pier.harbor.maps.all() %}
+    <p><a href="{{ harbor_map.map_file.url }}">
+        Satamakartta (PDF)
+    </a></p>
+{% endfor %}
+
+<table style="width: 100%; table-layout: fixed;">
+    <tr>
+        {% if order.lease.berth.pier.waste_collection %}
+            <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
+                <img src="https://venepaikat.hel.fi/img/email_assets/waste_management.png"
+                     alt="Jätehuolto" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
+                Jätehuolto
+            </th>
+        {% endif %}
+
+        {% if order.lease.berth.pier.gate %}
+            <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
+                <img src="https://venepaikat.hel.fi/img/email_assets/gate.png"
+                     alt="Portti" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
+                Portti
+            </th>
+        {% endif %}
+
+        {% if order.lease.berth.pier.electricity %}
+            <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
+                <img src="https://venepaikat.hel.fi/img/email_assets/electricity.png"
+                     alt="Sähkö" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
+                Sähkö
+            </th>
+        {% endif %}
+
+        {% if order.lease.berth.pier.lighting %}
+            <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
+                <img src="https://venepaikat.hel.fi/img/email_assets/lighting.png"
+                     alt="Valaistus" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
+                Valaistus
+            </th>
+        {% endif %}
+
+        {% if order.lease.berth.pier.water %}
+            <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
+                <img src="https://venepaikat.hel.fi/img/email_assets/water.png"
+                     alt="Vesi" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
+                Vesi
+            </th>
+        {% endif %}
+    </tr>
+</table>
+
+<table style="table-layout: fixed;">
+    <tbody>
+    <tr>
+        <td style="width: 20%;">
+            <b>
+                Laituri:
+            </b>
+        </td>
+        <td style="width: 30%;">
+            <b>{{ order.lease.berth.pier.identifier }}</b>
+        </td>
+        <td style="width: 20%;">
+            <b>
+                Paikka:
+            </b>
+        </td>
+        <td style="width: 30%;">
+            <b>{{ order.lease.berth.number }}</b>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<table style="table-layout: fixed;">
+    <tr>
+        <td style="width: 40%;">
+            Leveys:
+        </td>
+        <td style="width: 60%;">{{ order.lease.berth.berth_type.width }}</td>
+    </tr>
+    <tr>
+        <td style="width: 40%;">
+            Pituus:
+        </td>
+        <td style="width: 60%;">{{ order.lease.berth.berth_type.length }}</td>
+    </tr>
+    <tr>
+        <td style="width: 40%;">
+            Kiinnitystapa:
+        </td>
+        <td style="width: 60%;">{{ order.lease.berth.berth_type.get_mooring_type_display() }}</td>
+    </tr>
+</table>
+
+<h3>Venepaikan hinta</h3>
+
+<table style="width: 100%">
+    <tr>
+        <td colspan="2">
+            Perushinta ({{ order.product.price_group.name }}):
+        </td>
+        <td>{{ order.price }}&euro;</td>
+    </tr>
+    {% for order_line in fixed_services %}
+        <tr>
+            <td colspan="2">{{ order_line.product.get_service_display() }}:</td>
+            <td>{{ order_line.price }}&euro;</td>
+        </tr>
+    {% endfor %}
+    <tr>
+        <td colspan="3">
+            <hr/>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            Venepaikka yhteensä:
+        </td>
+        <td>{{ order.fixed_price_total }}&euro;</td>
+    </tr>
+
+    {% if optional_services %}
+        <tr>
+            <td colspan="3">
+                Lisäpalvelut:
+            </td>
+        </tr>
+    {% endif %}
+    {% for order_line in optional_services %}
+        <tr>
+            <td colspan="2">{{ order_line.product.get_service_display() }}:</td>
+            <td>{{ order_line.price }}&euro;</td>
+        </tr>
+    {% endfor %}
+
+    <tr>
+        <td colspan="3">
+            <hr/>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            YHTEENSÄ:
+        </td>
+        <td>{{ order.total_price }}&euro; /
+            vuosi
+        </td>
+    </tr>
+</table>
+
+<table style="margin: 32px 0; background-color: #9fc9eb;">
+    <tr>
+        <td style="padding: 48px;">
+            <b>Jos haluat vastaanottaa vaihtopaikan:</b>
+            <p>
+                1. Tutustu liitteenä oleviin venepaikan vuokrasopimusehtoihin ja
+                venesatamasääntöihin
+            </p>
+            <p>
+                2. Ilmoita meille että otat vaihtopaikan vastaan tämän linkin kautta:
+            </p>
+
+            <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
+               href="{{ accept_url }}">Kiitos, vaihdan tarjottuun paikkaan &rarr;</a>
+
+            <p>
+                Huomaathan, että jos vastaanotat vaihtopaikan, nykyinen paikkasi vapautuu. Emme peri tai hyvitä
+                vaihdosta
+                hinnan erotusta vaihtaessasi eri kokoiseen paikkaan. Lisätietoja asiakaspalvelustamme
+                <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
+            </p>
+            <b>Jos et halua vastaanottaa vaihtopaikkaa, mutta haluat, että hakemuksesi pysyy voimassa:</b>
+            <p>1. Ilmoita meille siitä tämän linkin kautta:</p>
+
+            <a style="display: block; padding: 16px; color: #0000BF; background-color: transparent; border: solid 2px #0000BF; text-align: center; text-decoration: none;"
+               href="{{ cancel_url }}">Ei kiitos, en halua tätä venepaikkaa &rarr;</a>
+
+            <p>
+                Huomaathan, että jos päätät olla vastaanottamatta vaihtopaikkaa, nykyinen venepaikkasi säilyy sinulla.
+                Hakemuksesi pysyy jonossa, jotta voimme koittaa antaa sinulle paikan seuraavassa jaossa.
+            </p>
+        </td>
+    </tr>
+</table>
+
+<p>
+    Helsingin kaupungin venepaikat vuokrataan asiakkaille toistaiseksi
+    voimassa olevina ja niistä peritään vuosittain kulloinkin voimassa
+    olevan hinnaston mukainen maksu. Jos laskua ei maksa eräpäivään
+    mennessä, vuokrasopimus irtisanoutuu automaattisesti. Veneilykausi on
+    10.6.-14.9., jona aikana venepaikalla saa pitää venettä.
+</p>
+<p>
+    Venepaikan vastaanottaminen edellyttää voimassa olevien venepaikan
+    vuokrasopimusehtojen sekä venesatamasääntöjen hyväksymistä.
+</p>
+
+<table style="width: 100%; margin: 48px 0;">
+    <tr>
+        <td style="text-align: center;">
+            <a style="font-size: 16px; color: #0072C6;" href="https://venepaikat.hel.fi">
+                Helsingin kaupungin veneilypalvelut &rarr;
+            </a>
+        </td>
+    </tr>
+</table>

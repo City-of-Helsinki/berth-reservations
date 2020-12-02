@@ -1,0 +1,128 @@
+<h3>Hej {{ application.first_name }}!</h3>
+
+<p>Tack, din ansökan har mottagits.</p>
+
+<p>
+    Om du vill ändra eller annullera din ansökan eller undrar om något som
+    gäller ansökan, skicka e-post till <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
+</p>
+
+<b>Tid</b> {{ created_at }}<br/>
+
+<b>Sökande</b> {{ application.first_name }} {{ application.last_name }}<br/>
+
+{% if application.company_name %}
+    <b>Företag</b> {{ application.company_name }} ({{ application.business_id }})<br/>
+{% endif %}
+
+{% if application.berth_switch %}
+    <hr/>
+    <h4>Ansökan om byte: Nuvarande platsen</h4>
+    <b>Nuvarande hamn:</b> {{ application.berth_switch.harbor.name }}<br/>
+    <b>Kajkod:</b> {{ application.berth_switch.pier or "-" }}<br/>
+    <b>Nummer:</b> {{ application.berth_switch.berth_number }}<br/>
+    <b>Särskilda önskemål:</b> {{ application.berth_switch.reason.title }}<br/>
+{% endif %}
+
+<hr/>
+
+<h4>Valda hamnar</h4>
+
+<table>
+    <tbody>
+    {% for choice in harbor_choices %}
+        <tr>
+            <td><b>{{ choice.priority }}</b></td>
+            <td>{{ choice.harbor.name }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% if application.application_code %}
+    <br/>
+    <p><b>Sökkod:</b> {{ application.application_code }}</p>
+{% endif %}
+
+{% if application.accessibility_required %}
+    <p>Tillgänglig plats</p>
+{% endif %}
+
+<hr/>
+
+<h4>Uppgifter om båt</h4>
+
+<table>
+    <tbody>
+    {% if application.boat_registration_number %}
+        <tr>
+            <td><b>Registernummer</b></td>
+            <td>{{ application.boat_registration_number }}</td>
+        </tr>
+    {% endif %}
+
+    {% if application.boat_name %}
+        <tr>
+            <td><b>Namn</b></td>
+            <td>{{ application.boat_name }}</td>
+        </tr>
+        <tr>
+            <td><b>Modell</b></td>
+            <td>{ application.boat_model }}</td>
+        </tr>
+    {% endif %}
+
+    <tr>
+        <td><b>Längd</b></td>
+        <td>{{ application.boat_length }} m</td>
+    </tr>
+    <tr>
+        <td><b>Bredd</b></td>
+        <td>{{ application.boat_width }} m</td>
+    </tr>
+
+    {% if application.boat_draught %}
+        <tr>
+            <td><b>Djup</b></td>
+            <td>{{ application.boat_draught }} m</td>
+        </tr>
+    {% endif %}
+    {% if application.boat_weight %}
+        <tr>
+            <td><b>Vikt</b></td>
+            <td>{{ application.boat_weight }} kg</td>
+        </tr>
+    {% endif %}
+    </tbody>
+</table>
+
+{% if application.boat_propulsion %}
+    <h4>Tilläggsuppgifter om stora fartyg</h4>
+
+    <table>
+        <tbody>
+        <tr>
+            <td><b>Drivkraft</b></td>
+            <td>{{ application.boat_propulsion }}</td>
+        </tr>
+        <tr>
+            <td><b>Skrovmaterial</b></td>
+            <td>{{ application.boat_hull_material }}</td>
+        </tr>
+        <tr>
+            <td><b>Användningsändamål</b></td>
+            <td>{{ application.boat_intended_use }}</td>
+        </tr>
+        <tr>
+            <td><b>Hyrestid</b></td>
+            <td>{{ application.renting_period }}<br/>
+                {{ application.rent_from }} - {{ application.rent_to }}</td>
+        </tr>
+        </tbody>
+    </table>
+{% endif %}
+
+<p>
+    Vänliga hälsningar,<br/>
+    Helsingfors stads båtplatsbokningar
+</p>

@@ -1,0 +1,89 @@
+<h3>Hei {{ application.first_name }}!</h3>
+
+<p>Kiitos, hakemuksesi on vastaanotettu.</p>
+
+<p>
+    Jos haluat muuttaa tai perua hakemuksesi tai tiedustella muuta
+    hakemukseesi liittyvää asiaa, lähetä sähköpostia osoitteeseen
+    <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
+</p>
+
+<b>Aika</b> {{ created_at }}<br/>
+
+<b>Hakija</b> {{ application.first_name }} {{ application.last_name }}<br/>
+
+{% if application.company_name %}
+    <b>Yritys</b> {{ application.company_name }} ({{ application.business_id }})<br/>
+{% endif %}
+
+<hr/>
+
+<h4>Valitut säilytysalueet</h4>
+
+<table style="width: 100%">
+    <tbody>
+    {% for choice in area_choices %}
+        <tr>
+            <td><b>{{ choice.priority }}</b></td>
+            <td>{{ choice.winter_storage_area.name }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% if application.application_code %}
+    <p><b>Hakukoodi:</b> {{ application.application_code }}</p>
+{% endif %}
+
+<hr/>
+
+<h4>Boat information</h4>
+
+<table style="width: 100%">
+    <tbody>
+    {% if application.boat_registration_number %}
+        <tr>
+            <td><b>Rekisterinumero</b></td>
+            <td>{{ application.boat_registration_number }}</td>
+        </tr>
+    {% endif %}
+
+    {% if application.boat_name %}
+        <tr>
+            <td><b>Nimi</b></td>
+            <td>{{ application.boat_name }}</td>
+            <td><b>Malli</b></td>
+            <td>{{ application.boat_model }}</td>
+        </tr>
+    {% endif %}
+
+    <tr>
+        <td><b>Pituus</b></td>
+        <td>{{ application.boat_length }} m</td>
+        <td><b>Leveys</b></td>
+        <td>{{ application.boat_width }} m</td>
+    </tr>
+    </tbody>
+</table>
+
+<hr/>
+
+<h4>Säilytys</h4>
+
+{{ application.get_storage_method_display() }}
+
+{% if application.trailer_registration_number %}
+    <table style="width: 100%">
+        <tbody>
+        <tr>
+            <td><b>Trailerin rekisterinumero</b></td>
+            <td>{{ application.trailer_registration_number }} m</td>
+        </tr>
+        </tbody>
+    </table>
+{% endif %}
+
+<p>
+    Terveisin,<br/>
+    Helsingin kaupungin venepaikkavaraukset
+</p>
