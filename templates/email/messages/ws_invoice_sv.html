@@ -19,7 +19,7 @@
         <td colspan="2">
             Grundavgift / m<sup>2</sup>:
         </td>
-        <td>{{ order.product.price_value }}</td>
+        <td>{{ order.product.price_value }}&euro;</td>
     </tr>
     <tr>
         <td colspan="3">
@@ -30,7 +30,7 @@
         <td colspan="2">
             Vinteruppläggningsplats totalt:
         </td>
-        <td>{{ order.fixed_price_total }}</td>
+        <td>{{ order.fixed_price_total }}&euro;</td>
     </tr>
 
     {% if optional_services %}

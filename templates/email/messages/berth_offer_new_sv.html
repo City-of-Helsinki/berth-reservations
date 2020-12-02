@@ -117,9 +117,9 @@
 <table style="width: 100%">
     <tr>
         <td colspan="2">
-            Grundavgift ({{ order.product.price_group.name }} m):
+            Grundavgift ({{ order.product.price_group.name }}):
         </td>
-        <td>{{ order.product.price_group.name }}</td>
+        <td>{{ order.price }}&euro;</td>
     </tr>
     {% for order_line in fixed_services %}
         <tr>
@@ -136,7 +136,7 @@
         <td colspan="2">
             Båtplatsen totalt:
         </td>
-        <td>{{ order.fixed_price_total }}</td>
+        <td>{{ order.fixed_price_total }}&euro;</td>
     </tr>
 
     {% if optional_services %}

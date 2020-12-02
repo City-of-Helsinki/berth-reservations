@@ -86,6 +86,8 @@
             <td><b>Syväys</b></td>
             <td>{{ application.boat_draught }} m</td>
         </tr>
+    {% endif %}
+    {% if application.boat_weight %}
         <tr>
             <td><b>Paino</b></td>
             <td>{{ application.boat_weight }} kg</td>
