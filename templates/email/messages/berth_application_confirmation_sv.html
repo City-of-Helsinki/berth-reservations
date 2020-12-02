@@ -3,13 +3,8 @@
 <p>Tack, din ansökan har mottagits.</p>
 
 <p>
-    You will be contacted via text message when a suitable berth becomes
-    available.
-</p>
-
-<p>
     Om du vill ändra eller annullera din ansökan eller undrar om något som
-    gäller ansökan, skicka e-post till venepaikkavaraukset@hel.fi.
+    gäller ansökan, skicka e-post till <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
 </p>
 
 <b>Tid</b> {{ created_at }}<br/>
@@ -116,12 +111,14 @@
             <td><b>Användningsändamål</b></td>
             <td>{{ reservation.boat_intended_use }}</td>
         </tr>
+        <tr>
+            <td><b>Hyrestid</b></td>
+            <td>{{ reservation.renting_period }}<br/>
+                {{ reservation.rent_from }} - {{ reservation.rent_to }}</td>
+        </tr>
         </tbody>
     </table>
 {% endif %}
-
-<b>Hyrestid</b> {{ reservation.renting_period }}<br/>
-{{ reservation.rent_from }} - {{ reservation.rent_to }}
 
 <p>
     Vänliga hälsningar,<br/>

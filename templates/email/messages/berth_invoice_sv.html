@@ -6,10 +6,10 @@
 <h3>Båtplats som fakturan gäller</h3>
 
 <p>
-    {{ harborName }}<br/>
-    {{ harborAddress }}<br/>
+    {{ order.lease.berth.pier.harbor.name }}<br/>
+    {{ order.lease.berth.pier.harbor.street_address }}<br/>
     <br/>
-    Plats: {{ pierIdentifier }} {{ berthNumber }}
+    Plats: {{ order.lease.berth.pier.identifier }} {{ order.lease.berth.number }}
 </p>
 
 <h3>Båtplatsens pris</h3>
@@ -17,50 +17,16 @@
 <table style="width: 100%">
     <tr>
         <td colspan="2">
-            Grundavgift (3,5 m):
+            Grundavgift ({{ order.product.price_group.name }} m):
         </td>
-        <td>{{ invoice.basePrice }}</td>
+        <td>{{ order.price }}</td>
     </tr>
-    <tr>
-        <td>
-            Förtöjning:
-        </td>
-        <td>28 %</td>
-        <td>{{ invoice.mooring }}</td>
-    </tr>
-    <tr>
-        <td>
-            El:
-        </td>
-        <td>12 %</td>
-        <td>{{ invoice.electricity }}</td>
-    </tr>
-    <tr>
-        <td>
-            Vatten:
-        </td>
-        <td>2 %</td>
-        <td>{{ invoice.water }}</td>
-    </tr>
-    <tr>
-        <td>
-            Avfallshantering:
-        </td>
-        <td>8 %</td>
-        <td>{{ invoice.wasteManagement }}</td>
-    </tr>
-    <tr>
-        <td colspan="2">
-            Port:
-        </td>
-        <td>{{ invoice.gate }}</td>
-    </tr>
-    <tr>
-        <td colspan="2">
-            Belysning:
-        </td>
-        <td>{{ invoice.lighting }}</td>
-    </tr>
+    {% for order_line in fixed_services %}
+        <tr>
+            <td colspan="2">{{ order_line.product.get_service_display() }}:</td>
+            <td>{{ order_line.price }}&euro;</td>
+        </tr>
+    {% endfor %}
     <tr>
         <td colspan="3">
             <hr/>
@@ -70,19 +36,21 @@
         <td colspan="2">
             Båtplatsen totalt:
         </td>
-        <td>{{ invoice.berthTotal }}</td>
+        <td>{{ order.fixed_price_total }}</td>
     </tr>
-    <tr>
-        <td colspan="3">
-            Tilläggstjänster:
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2">
-            Parkeringstillstånd:
-        </td>
-        <td>{{ invoice.parkingPermit }}</td>
-    </tr>
+    {% if optional_services %}
+        <tr>
+            <td colspan="3">
+                Tilläggstjänster:
+            </td>
+        </tr>
+    {% endif %}
+    {% for order_line in optional_services %}
+        <tr>
+            <td colspan="2">{{ order_line.product.get_service_display() }}:</td>
+            <td>{{ order_line.price }}&euro;</td>
+        </tr>
+    {% endfor %}
     <tr>
         <td colspan="3">
             <hr/>
@@ -92,7 +60,7 @@
         <td colspan="2">
             TOTALT:
         </td>
-        <td>{{ invoice.total }} /
+        <td>{{ order.total_price }}&euro; /
             år
         </td>
     </tr>
@@ -102,16 +70,16 @@
     <tr>
         <td style="padding: 32px 48px;">
             <p>
-                Betala fakturan via denna länk före förfallodatumet {{ dueDate }}:
+                Betala fakturan via denna länk före förfallodatumet {{ order.due_date }}:
             </p>
 
             <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
-               href="{{ paymentUrl }}">Betala {{ invoice.total }} &rarr;</a>
+               href="{{ payment_url }}">Betala {{ order.total_price }}&euro; &rarr;</a>
 
             <p>
                 Observera att fakturan kan betalas endast via denna länk. Betalningar som gjorts på
                 annat sätt tas inte emot. För mer information, kontakta vår kundtjänst via
-                venepaikkavaraukset@hel.fi.
+                <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
             </p>
         </td>
     </tr>

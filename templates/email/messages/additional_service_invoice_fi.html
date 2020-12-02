@@ -30,24 +30,17 @@
             <hr/>
         </td>
     </tr>
-    {{% if storageInIce %}}
-    <tr>
-        <td>
-            Jäissä säilytys yhteensä:
-        </td>
-        <td>{{ invoice.storageInIce }}</td>
-    </tr>
-    <tr>
-        <td colspan="2">
-            <hr/>
-        </td>
-    </tr>
-    {{% endif %}}
+    {% for order_line in optional_services %}
+        <tr>
+            <td colspan="2">{{ order_line.product.get_service_display() }}:</td>
+            <td>{{ order_line.price }}&euro;</td>
+        </tr>
+    {% endfor %}
     <tr>
         <td>
             YHTEENSÄ:
         </td>
-        <td>{{ invoice.total }} / vuosi
+        <td>{{ order.total }} / vuosi
         </td>
     </tr>
 </table>
@@ -56,16 +49,16 @@
     <tr>
         <td style="padding: 32px 48px;">
             <p>
-                Maksa lasku tämän linkin kautta ennen eräpäivää {{ dueDate }}:
+                Maksa lasku tämän linkin kautta ennen eräpäivää {{ due_date }}:
             </p>
 
             <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
-               href="{{ paymentUrl }}">Siirry maksamaan {{ invoice.total }} &rarr;</a>
+               href="{{ payment_url }}">Siirry maksamaan {{ order.total_price }}&euro; &rarr;</a>
 
             <p>
                 Huomaathan, että laskun voi maksaa vain tämän linkin kautta. Muulla
                 tavoin maksettuja maksuja ei voida ottaa vastaan. Lisätietoja
-                asiakaspalvelustamme venepaikkavaraukset@hel.fi.
+                asiakaspalvelustamme <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
             </p>
         </td>
     </tr>

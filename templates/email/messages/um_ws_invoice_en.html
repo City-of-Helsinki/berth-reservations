@@ -13,43 +13,52 @@
 
 <table style="width: 100%">
     <tr>
-        <td>
-            Basic price (3,5 m):
+        <td colspan="2">
+            Basic price / m<sup>2</sup>:
         </td>
-        <td>{{ invoice.basePrice }}</td>
+        <td>{{ order.product.price_value }}</td>
     </tr>
     <tr>
-        <td colspan="2">&nbsp;</td>
+        <td colspan="3">
+            <hr/>
+        </td>
     </tr>
     <tr>
-        <td>
+        <td colspan="2">
             Winter storage place in total:
         </td>
-        <td>{{ invoice.winterStorageTotal }}</td>
+        <td>{{ order.fixed_price_total }}</td>
     </tr>
+
+    {% if optional_services %}
+        <tr>
+            <td colspan="3">
+                <hr/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                Additional services:
+            </td>
+        </tr>
+    {% endif %}
+    {% for order_line in optional_services %}
+        <tr>
+            <td colspan="2">{{ order_line.product.get_service_display() }}:</td>
+            <td>{{ order_line.price }}&euro;</td>
+        </tr>
+    {% endfor %}
+
     <tr>
-        <td colspan="2">
+        <td colspan="3">
             <hr/>
         </td>
     </tr>
-    {{% if parkingPermit %}}
-    <tr>
-        <td>
-            Parking permit:
-        </td>
-        <td>{{ invoice.parkingPermit }}</td>
-    </tr>
     <tr>
         <td colspan="2">
-            <hr/>
-        </td>
-    </tr>
-    {{% endif %}}
-    <tr>
-        <td>
             TOTAL:
         </td>
-        <td>{{ invoice.total }} / year
+        <td>{{ order.total_price }}&euro; / year
         </td>
     </tr>
 </table>
@@ -58,16 +67,17 @@
     <tr>
         <td style="padding: 32px 48px;">
             <p>
-                Please pay the invoice via this link before the due date {{ dueDate }}:
+                Please pay the invoice via this link before the due date {{ order.due_date }}:
             </p>
 
             <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
-               href="{{ paymentUrl }}">Make your payment {{ invoice.total }} &rarr;</a>
+               href="{{ payment_url }}">Make your payment {{ order.total_price }}&euro; &rarr;</a>
 
             <p>
                 Please note that you can only pay the invoice via this link. We cannot accept
                 payments made through other means. For more information, please contact our
-                customer service department at venepaikkavaraukset@hel.fi.
+                customer service department at <a
+                    href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
             </p>
         </td>
     </tr>

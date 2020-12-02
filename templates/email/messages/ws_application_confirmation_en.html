@@ -1,23 +1,18 @@
-<h3>Hello {{ reservation.first_name }}!</h3>
+<h3>Hello {{ application.first_name }}!</h3>
 
 <p>Thank you, your application has been sent successfully.</p>
 
 <p>
-    You will be contacted via text message when a suitable winter storage
-    space becomes available.
-</p>
-
-<p>
     If you wish to change or cancel your application or ask any questions
-    regarding your application, please e-mail venepaikkavaraukset@hel.fi.
+    regarding your application, please e-mail <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
 </p>
 
 <b>Time</b> {{ created_at }}<br/>
 
-<b>Applicant</b> {{ reservation.first_name }} {{ reservation.last_name }}<br/>
+<b>Applicant</b> {{ application.first_name }} {{ application.last_name }}<br/>
 
-{% if reservation.company_name %}
-    <b>Company</b> {{ reservation.company_name }} ({{ reservation.business_id }})<br/>
+{% if application.company_name %}
+    <b>Company</b> {{ application.company_name }} ({{ application.business_id }})<br/>
 {% endif %}
 
 <hr/>
@@ -35,8 +30,8 @@
     </tbody>
 </table>
 
-{% if reservation.application_code %}
-    <p><b>Application code:</b> {{ reservation.application_code }}</p>
+{% if application.application_code %}
+    <p><b>Application code:</b> {{ application.application_code }}</p>
 {% endif %}
 
 <hr/>
@@ -45,27 +40,27 @@
 
 <table style="width: 100%">
     <tbody>
-    {% if reservation.boat_registration_number %}
+    {% if application.boat_registration_number %}
         <tr>
             <td><b>Registration number</b></td>
-            <td>{{ reservation.boat_registration_number }}</td>
+            <td>{{ application.boat_registration_number }}</td>
         </tr>
     {% endif %}
 
-    {% if reservation.boat_name %}
+    {% if application.boat_name %}
         <tr>
             <td><b>Name</b></td>
-            <td>{{ reservation.boat_name }}</td>
+            <td>{{ application.boat_name }}</td>
             <td><b>Model</b></td>
-            <td>{{ reservation.boat_model }}</td>
+            <td>{{ application.boat_model }}</td>
         </tr>
     {% endif %}
 
     <tr>
         <td><b>Length</b></td>
-        <td>{{ reservation.boat_length }} m</td>
+        <td>{{ application.boat_length }} m</td>
         <td><b>Width</b></td>
-        <td>{{ reservation.boat_width }} m</td>
+        <td>{{ application.boat_width }} m</td>
     </tr>
     </tbody>
 </table>
@@ -74,14 +69,14 @@
 
 <h4>Storage information</h4>
 
-{{ reservation.storage_method }}
+{{ application.get_storage_method_display() }}
 
-{% if reservation.trailer_registration_number %}
+{% if application.trailer_registration_number %}
     <table style="width: 100%">
         <tbody>
         <tr>
             <td><b>Trailer's registration</b></td>
-            <td>{{ reservation.trailer_registration_number }} m</td>
+            <td>{{ application.trailer_registration_number }} m</td>
         </tr>
         </tbody>
     </table>
@@ -89,6 +84,6 @@
 
 <p>
     Kind regards,<br/>
-    Helsingin kaupungin venepaikkavaraukset (Berth reservations of the City
+    Helsingin kaupungin venepaikkavaraukset (Berth applications of the City
     of Helsinki)
 </p>

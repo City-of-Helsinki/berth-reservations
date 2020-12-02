@@ -6,10 +6,10 @@
 <h3>Laskun aiheena oleva venepaikka</h3>
 
 <p>
-    {{ harborName }}<br/>
-    {{ harborAddress }}<br/>
+    {{ order.lease.berth.pier.harbor.name }}<br/>
+    {{ order.lease.berth.pier.harbor.street_address }}<br/>
     <br/>
-    Paikka: {{ pierIdentifier }} {{ berthNumber }}
+    Paikka: {{ order.lease.berth.pier.identifier }} {{ order.lease.berth.number }}
 </p>
 
 <h3>Venepaikan hinta</h3>
@@ -17,50 +17,16 @@
 <table style="width: 100%">
     <tr>
         <td colspan="2">
-            Perushinta (3,5 m):
+            Perushinta ({{ order.product.price_group.name }} m):
         </td>
-        <td>{{ invoice.basePrice }}</td>
+        <td>{{ order.price }}</td>
     </tr>
-    <tr>
-        <td>
-            Kiinnitys:
-        </td>
-        <td>28 %</td>
-        <td>{{ invoice.mooring }}</td>
-    </tr>
-    <tr>
-        <td>
-            Sähkö:
-        </td>
-        <td>12 %</td>
-        <td>{{ invoice.electricity }}</td>
-    </tr>
-    <tr>
-        <td>
-            Vesi:
-        </td>
-        <td>2 %</td>
-        <td>{{ invoice.water }}</td>
-    </tr>
-    <tr>
-        <td>
-            Jätehuolto:
-        </td>
-        <td>8 %</td>
-        <td>{{ invoice.wasteManagement }}</td>
-    </tr>
-    <tr>
-        <td colspan="2">
-            Portti:
-        </td>
-        <td>{{ invoice.gate }}</td>
-    </tr>
-    <tr>
-        <td colspan="2">
-            Valaistus:
-        </td>
-        <td>{{ invoice.lighting }}</td>
-    </tr>
+    {% for order_line in fixed_services %}
+        <tr>
+            <td colspan="2">{{ order_line.product.get_service_display() }}:</td>
+            <td>{{ order_line.price }}&euro;</td>
+        </tr>
+    {% endfor %}
     <tr>
         <td colspan="3">
             <hr/>
@@ -70,19 +36,21 @@
         <td colspan="2">
             Venepaikka yhteensä:
         </td>
-        <td>{{ invoice.berthTotal }}</td>
+        <td>{{ order.fixed_price_total }}</td>
     </tr>
-    <tr>
-        <td colspan="3">
-            Lisäpalvelut:
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2">
-            Pysäköintilupa:
-        </td>
-        <td>{{ invoice.parkingPermit }}</td>
-    </tr>
+    {% if optional_services %}
+        <tr>
+            <td colspan="3">
+                Lisäpalvelut:
+            </td>
+        </tr>
+    {% endif %}
+    {% for order_line in optional_services %}
+        <tr>
+            <td colspan="2">{{ order_line.product.get_service_display() }}:</td>
+            <td>{{ order_line.price }}&euro;</td>
+        </tr>
+    {% endfor %}
     <tr>
         <td colspan="3">
             <hr/>
@@ -92,7 +60,7 @@
         <td colspan="2">
             YHTEENSÄ:
         </td>
-        <td>{{ invoice.total }} /
+        <td>{{ order.total_price }}&euro; /
             vuosi
         </td>
     </tr>
@@ -102,16 +70,16 @@
     <tr>
         <td style="padding: 32px 48px;">
             <p>
-                Maksa lasku tämän linkin kautta ennen eräpäivää {{ dueDate }}:
+                Maksa lasku tämän linkin kautta ennen eräpäivää {{ order.due_date }}:
             </p>
 
             <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
-               href="{{ paymentUrl }}">Siirry maksamaan {{ invoice.total }} &rarr;</a>
+               href="{{ payment_url }}">Siirry maksamaan {{ order.total_price }}&euro; &rarr;</a>
 
             <p>
                 Huomaathan, että laskun voi maksaa vain tämän linkin kautta. Muulla
                 tavoin maksettuja maksuja ei voida ottaa vastaan. Lisätietoja
-                asiakaspalvelustamme venepaikkavaraukset@hel.fi.
+                asiakaspalvelustamme <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
             </p>
         </td>
     </tr>

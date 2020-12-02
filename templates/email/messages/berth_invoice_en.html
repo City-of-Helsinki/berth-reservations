@@ -6,10 +6,10 @@
 <h3>Boat berth that the invoice concerns</h3>
 
 <p>
-    {{ harborName }}<br/>
-    {{ harborAddress }}<br/>
+    {{ order.lease.berth.pier.harbor.name }}<br/>
+    {{ order.lease.berth.pier.harbor.street_address }}<br/>
     <br/>
-    Berth: {{ pierIdentifier }} {{ berthNumber }}
+    Berth: {{ order.lease.berth.pier.identifier }} {{ order.lease.berth.number }}
 </p>
 
 <h3>Price of the boat berth</h3>
@@ -17,50 +17,16 @@
 <table style="width: 100%">
     <tr>
         <td colspan="2">
-            Basic price (3,5 m):
+            Basic price ({{ order.product.price_group.name }} m):
         </td>
-        <td>{{ invoice.basePrice }}</td>
+        <td>{{ order.price }}</td>
     </tr>
-    <tr>
-        <td>
-            Mooring:
-        </td>
-        <td>28 %</td>
-        <td>{{ invoice.mooring }}</td>
-    </tr>
-    <tr>
-        <td>
-            Electricity:
-        </td>
-        <td>12 %</td>
-        <td>{{ invoice.electricity }}</td>
-    </tr>
-    <tr>
-        <td>
-            Water:
-        </td>
-        <td>2 %</td>
-        <td>{{ invoice.water }}</td>
-    </tr>
-    <tr>
-        <td>
-            Waste management:
-        </td>
-        <td>8 %</td>
-        <td>{{ invoice.wasteManagement }}</td>
-    </tr>
-    <tr>
-        <td colspan="2">
-            Gate:
-        </td>
-        <td>{{ invoice.gate }}</td>
-    </tr>
-    <tr>
-        <td colspan="2">
-            Lighting:
-        </td>
-        <td>{{ invoice.lighting }}</td>
-    </tr>
+    {% for order_line in fixed_services %}
+        <tr>
+            <td colspan="2">{{ order_line.product.get_service_display() }}:</td>
+            <td>{{ order_line.price }}&euro;</td>
+        </tr>
+    {% endfor %}
     <tr>
         <td colspan="3">
             <hr/>
@@ -70,19 +36,21 @@
         <td colspan="2">
             Berth in total:
         </td>
-        <td>{{ invoice.berthTotal }}</td>
+        <td>{{ order.fixed_price_total }}</td>
     </tr>
-    <tr>
-        <td colspan="3">
-            Additional services:
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2">
-            Parking permit:
-        </td>
-        <td>{{ invoice.parkingPermit }}</td>
-    </tr>
+    {% if optional_services %}
+        <tr>
+            <td colspan="3">
+                Additional services:
+            </td>
+        </tr>
+    {% endif %}
+    {% for order_line in optional_services %}
+        <tr>
+            <td colspan="2">{{ order_line.product.get_service_display() }}:</td>
+            <td>{{ order_line.price }}&euro;</td>
+        </tr>
+    {% endfor %}
     <tr>
         <td colspan="3">
             <hr/>
@@ -92,7 +60,7 @@
         <td colspan="2">
             TOTAL:
         </td>
-        <td>{{ invoice.total }} /
+        <td>{{ order.total_price }}&euro; /
             year
         </td>
     </tr>
@@ -102,16 +70,17 @@
     <tr>
         <td style="padding: 32px 48px;">
             <p>
-                Please pay the invoice via this link before the due date {{ dueDate }}:
+                Please pay the invoice via this link before the due date {{ order.due_date }}:
             </p>
 
             <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
-               href="{{ paymentUrl }}">Make your payment {{ invoice.total }} &rarr;</a>
+               href="{{ payment_url }}">Make your payment {{ order.total_price }}&euro; &rarr;</a>
 
             <p>
                 Please note that you can only pay the invoice via this link. We cannot accept
                 payments made through other means. For more information, please contact our
-                customer service department at venepaikkavaraukset@hel.fi.
+                customer service department at <a
+                    href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
             </p>
         </td>
     </tr>

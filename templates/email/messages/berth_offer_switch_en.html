@@ -6,25 +6,27 @@
 
 <h3>Boat berth offered</h3>
 
-<img src="{{ harborImage }}" alt="Harbor image"/>
+<img src="{{ order.lease.berth.pier.harbor.image_file.url }}" alt="Harbor image"/>
 
-<h4>{{ harborName }}</h4>
+<h4>{{ order.lease.berth.pier.harbor.name }}</h4>
 
 <p style="margin-bottom: 16px;">
-    {{ harborAddress }}
+    {{ order.lease.berth.pier.harbor.street_address }}
 </p>
 
-<p><a href="{{ harborWebAddress }}">
+<p><a href="{{ order.lease.berth.pier.harbor.www_url }}">
     Website
 </a></p>
 
-<p><a href="{{ harborMap }}">
-    Harbor map (PDF)
-</a></p>
+{% for harbor_map in order.lease.berth.pier.harbor.maps.all() %}
+    <p><a href="{{ harbor_map.map_file.url }}">
+        Harbor map (PDF)
+    </a></p>
+{% endfor %}
 
 <table style="width: 100%; table-layout: fixed;">
     <tr>
-        {% if wasteManagement %}
+        {% if order.lease.berth.pier.waste_collection %}
             <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
                 <img src="https://venepaikat.hel.fi/img/email_assets/waste_management.png"
                      alt="Waste management" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
@@ -32,7 +34,7 @@
             </th>
         {% endif %}
 
-        {% if gate %}
+        {% if order.lease.berth.pier.gate %}
             <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
                 <img src="https://venepaikat.hel.fi/img/email_assets/gate.png"
                      alt="Gate" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
@@ -40,7 +42,7 @@
             </th>
         {% endif %}
 
-        {% if electricity %}
+        {% if order.lease.berth.pier.electricity %}
             <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
                 <img src="https://venepaikat.hel.fi/img/email_assets/electricity.png"
                      alt="Electricity" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
@@ -48,7 +50,7 @@
             </th>
         {% endif %}
 
-        {% if lighting %}
+        {% if order.lease.berth.pier.lighting %}
             <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
                 <img src="https://venepaikat.hel.fi/img/email_assets/lighting.png"
                      alt="Lighting" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
@@ -56,7 +58,7 @@
             </th>
         {% endif %}
 
-        {% if water %}
+        {% if order.lease.berth.pier.water %}
             <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
                 <img src="https://venepaikat.hel.fi/img/email_assets/water.png"
                      alt="Water" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
@@ -75,7 +77,7 @@
             </b>
         </td>
         <td style="width: 30%;">
-            <b>{{ pierIdentifier }}</b>
+            <b>{{ order.lease.berth.pier.identifier }}</b>
         </td>
         <td style="width: 20%;">
             <b>
@@ -83,7 +85,7 @@
             </b>
         </td>
         <td style="width: 30%;">
-            <b>{{ berthNumber }}</b>
+            <b>{{ order.lease.berth.number }}</b>
         </td>
     </tr>
     </tbody>
@@ -94,19 +96,19 @@
         <td style="width: 40%;">
             Width:
         </td>
-        <td style="width: 60%;">{{ width }}</td>
+        <td style="width: 60%;">{{ order.lease.berth.berth_type.width }}</td>
     </tr>
     <tr>
         <td style="width: 40%;">
             Length:
         </td>
-        <td style="width: 60%;">{{ length }}</td>
+        <td style="width: 60%;">{{ order.lease.berth.berth_type.length }}</td>
     </tr>
     <tr>
         <td style="width: 40%;">
             Mooring type:
         </td>
-        <td style="width: 60%;">{{ mooringType }}</td>
+        <td style="width: 60%;">{{ order.lease.berth.berth_type.get_mooring_type_display() }}</td>
     </tr>
 </table>
 
@@ -115,50 +117,16 @@
 <table style="width: 100%">
     <tr>
         <td colspan="2">
-            Basic price (3,5 m):
+            Basic price ({{ order.product.price_group.name }} m):
         </td>
-        <td>{{ invoice.basePrice }}</td>
+        <td>{{ order.product.price_group.name }}</td>
     </tr>
-    <tr>
-        <td>
-            Mooring:
-        </td>
-        <td>28 %</td>
-        <td>{{ invoice.mooring }}</td>
-    </tr>
-    <tr>
-        <td>
-            Electricity:
-        </td>
-        <td>12 %</td>
-        <td>{{ invoice.electricity }}</td>
-    </tr>
-    <tr>
-        <td>
-            Water:
-        </td>
-        <td>2 %</td>
-        <td>{{ invoice.water }}</td>
-    </tr>
-    <tr>
-        <td>
-            Waste management:
-        </td>
-        <td>8 %</td>
-        <td>{{ invoice.wasteManagement }}</td>
-    </tr>
-    <tr>
-        <td colspan="2">
-            Gate:
-        </td>
-        <td>{{ invoice.gate }}</td>
-    </tr>
-    <tr>
-        <td colspan="2">
-            Lighting:
-        </td>
-        <td>{{ invoice.lighting }}</td>
-    </tr>
+    {% for order_line in fixed_services %}
+        <tr>
+            <td colspan="2">{{ order_line.product.get_service_display() }}:</td>
+            <td>{{ order_line.price }}&euro;</td>
+        </tr>
+    {% endfor %}
     <tr>
         <td colspan="3">
             <hr/>
@@ -168,19 +136,23 @@
         <td colspan="2">
             Berth in total:
         </td>
-        <td>{{ invoice.berthTotal }}</td>
+        <td>{{ order.fixed_price_total }}</td>
     </tr>
-    <tr>
-        <td colspan="3">
-            Additional services:
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2">
-            Parking permit:
-        </td>
-        <td>{{ invoice.parkingPermit }}</td>
-    </tr>
+
+    {% if optional_services %}
+        <tr>
+            <td colspan="3">
+                Additional services:
+            </td>
+        </tr>
+    {% endif %}
+    {% for order_line in optional_services %}
+        <tr>
+            <td colspan="2">{{ order_line.product.get_service_display() }}:</td>
+            <td>{{ order_line.price }}&euro;</td>
+        </tr>
+    {% endfor %}
+
     <tr>
         <td colspan="3">
             <hr/>
@@ -190,7 +162,7 @@
         <td colspan="2">
             TOTAL:
         </td>
-        <td>{{ invoice.total }} /
+        <td>{{ order.total_price }}&euro; /
             year
         </td>
     </tr>
@@ -208,20 +180,20 @@
             </p>
 
             <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
-               href="{{ acceptUrl }}">Thank you, I wish to change my boat berth to the berth offered &rarr;</a>
+               href="{{ accept_url }}">Thank you, I wish to change my boat berth to the berth offered &rarr;</a>
 
             <p>
                 Please note that if you accept the change, your current berth will become vacant.
                 We will not charge for or reimburse the price difference if you change to a berth
                 of a different size. For more information, please contact our customer service
-                department at venepaikkavaraukset@hel.fi.
+                department at <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
             </p>
             <b>If you do not wish to accept the boat berth change offered but want your
                 application to remain valid:</b>
             <p>1. Notify us via this link:</p>
 
             <a style="display: block; padding: 16px; color: #0000BF; background-color: transparent; border: solid 2px #0000BF; text-align: center; text-decoration: none;"
-               href="{{ cancelUrl }}">No thank you, I do not wish to reserve
+               href="{{ cancel_url }}">No thank you, I do not wish to reserve
                 this boat berth &rarr;</a>
 
             <p>

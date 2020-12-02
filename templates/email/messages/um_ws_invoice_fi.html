@@ -12,43 +12,52 @@
 
 <table style="width: 100%">
     <tr>
-        <td>
-            Perushinta (3,5 m):
+        <td colspan="2">
+            Perushinta / m<sup>2</sup>:
         </td>
-        <td>{{ invoice.basePrice }}</td>
+        <td>{{ order.product.price_value }}</td>
     </tr>
     <tr>
-        <td colspan="2">&nbsp;</td>
+        <td colspan="3">
+            <hr/>
+        </td>
     </tr>
     <tr>
-        <td>
+        <td colspan="2">
             Talvisäilytyspaikka yhteensä:
         </td>
-        <td>{{ invoice.winterStorageTotal }}</td>
+        <td>{{ order.fixed_price_total }}</td>
     </tr>
+
+    {% if optional_services %}
+        <tr>
+            <td colspan="3">
+                <hr/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                Lisäpalvelut:
+            </td>
+        </tr>
+    {% endif %}
+    {% for order_line in optional_services %}
+        <tr>
+            <td colspan="2">{{ order_line.product.get_service_display() }}:</td>
+            <td>{{ order_line.price }}&euro;</td>
+        </tr>
+    {% endfor %}
+
     <tr>
-        <td colspan="2">
+        <td colspan="3">
             <hr/>
         </td>
     </tr>
-    {{% if parkingPermit %}}
-    <tr>
-        <td>
-            Pysäköintilupa:
-        </td>
-        <td>{{ invoice.parkingPermit }}</td>
-    </tr>
     <tr>
         <td colspan="2">
-            <hr/>
-        </td>
-    </tr>
-    {{% endif %}}
-    <tr>
-        <td>
             YHTEENSÄ:
         </td>
-        <td>{{ invoice.total }} / vuosi
+        <td>{{ order.total_price }}&euro; / vuosi
         </td>
     </tr>
 </table>
@@ -57,16 +66,16 @@
     <tr>
         <td style="padding: 32px 48px;">
             <p>
-                Maksa lasku tämän linkin kautta ennen eräpäivää {{ dueDate }}:
+                Maksa lasku tämän linkin kautta ennen eräpäivää {{ order.due_date }}:
             </p>
 
             <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
-               href="{{ paymentUrl }}">Siirry maksamaan {{ invoice.total }} &rarr;</a>
+               href="{{ payment_url }}">Siirry maksamaan {{ order.total_price }}&euro; &rarr;</a>
 
             <p>
                 Huomaathan, että laskun voi maksaa vain tämän linkin kautta. Muulla
                 tavoin maksettuja maksuja ei voida ottaa vastaan. Lisätietoja
-                asiakaspalvelustamme venepaikkavaraukset@hel.fi.
+                asiakaspalvelustamme <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
             </p>
         </td>
     </tr>

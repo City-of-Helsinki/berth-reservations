@@ -13,43 +13,52 @@
 
 <table style="width: 100%">
     <tr>
-        <td>
-            Grundavgift (3,5 m):
+        <td colspan="2">
+            Grundavgift / m<sup>2</sup>:
         </td>
-        <td>{{ invoice.basePrice }}</td>
+        <td>{{ order.product.price_value }}</td>
     </tr>
     <tr>
-        <td colspan="2">&nbsp;</td>
+        <td colspan="3">
+            <hr/>
+        </td>
     </tr>
     <tr>
-        <td>
+        <td colspan="2">
             Vinteruppläggningsplats totalt:
         </td>
-        <td>{{ invoice.winterStorageTotal }}</td>
+        <td>{{ order.fixed_price_total }}</td>
     </tr>
+
+    {% if optional_services %}
+        <tr>
+            <td colspan="3">
+                <hr/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                Tilläggstjänster:
+            </td>
+        </tr>
+    {% endif %}
+    {% for order_line in optional_services %}
+        <tr>
+            <td colspan="2">{{ order_line.product.get_service_display() }}:</td>
+            <td>{{ order_line.price }}&euro;</td>
+        </tr>
+    {% endfor %}
+
     <tr>
-        <td colspan="2">
+        <td colspan="3">
             <hr/>
         </td>
     </tr>
-    {{% if parkingPermit %}}
-    <tr>
-        <td>
-            Parkeringstillstånd:
-        </td>
-        <td>{{ invoice.parkingPermit }}</td>
-    </tr>
     <tr>
         <td colspan="2">
-            <hr/>
-        </td>
-    </tr>
-    {{% endif %}}
-    <tr>
-        <td>
             TOTALT:
         </td>
-        <td>{{ invoice.total }} / år
+        <td>{{ order.total_price }}&euro; / år
         </td>
     </tr>
 </table>
@@ -58,16 +67,16 @@
     <tr>
         <td style="padding: 32px 48px;">
             <p>
-                Betala fakturan via denna länk före förfallodatumet {{ dueDate }}:
+                Betala fakturan via denna länk före förfallodatumet {{ order.due_date }}:
             </p>
 
             <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
-               href="{{ paymentUrl }}">Betala {{ invoice.total }} &rarr;</a>
+               href="{{ payment_url }}">Betala {{ order.total_price }}&euro; &rarr;</a>
 
             <p>
                 Observera att fakturan kan betalas endast via denna länk. Betalningar som gjorts på
                 annat sätt tas inte emot. För mer information, kontakta vår kundtjänst via
-                venepaikkavaraukset@hel.fi.
+                <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
             </p>
         </td>
     </tr>
