@@ -60,18 +60,22 @@ dummy_context.update(
     {
         COMMON_CONTEXT: {"created_at": localize_datetime(timezone.now())},
         NotificationType.BERTH_APPLICATION_CREATED: {
+            "subject": NotificationType.BERTH_APPLICATION_CREATED.label,
             "application": berth_application,
             "harbor_choices": sorted(harbor_choices, key=lambda c: c.priority),
         },
         NotificationType.BERTH_APPLICATION_REJECTED: {
+            "subject": NotificationType.BERTH_APPLICATION_REJECTED.label,
             "application": berth_application,
             "harbor_choices": sorted(harbor_choices, key=lambda c: c.priority),
         },
         NotificationType.WINTER_STORAGE_APPLICATION_CREATED: {
+            "subject": NotificationType.WINTER_STORAGE_APPLICATION_CREATED.label,
             "application": winter_storage_application,
             "area_choices": sorted(winter_area_choices, key=lambda c: c.priority),
         },
         NotificationType.UNMARKED_WINTER_STORAGE_APPLICATION_CREATED: {
+            "subject": NotificationType.UNMARKED_WINTER_STORAGE_APPLICATION_CREATED.label,
             "application": winter_storage_application,
             "area_choices": sorted(winter_area_choices, key=lambda c: c.priority),
         },

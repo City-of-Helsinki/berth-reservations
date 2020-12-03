@@ -316,7 +316,9 @@ def approve_order(
     ).get_payment_email_url(order, lang=language)
 
     # Send email
+    notification_type = get_order_notification_type(order)
     context = {
+        "subject": notification_type.label,
         "order": order,
         "fixed_services": order.order_lines.filter(
             product__service__in=ProductServiceType.FIXED_SERVICES()
@@ -327,5 +329,4 @@ def approve_order(
         "payment_url": payment_url,
     }
 
-    notification_type = get_order_notification_type(order)
     send_notification(email, notification_type.value, context, language)

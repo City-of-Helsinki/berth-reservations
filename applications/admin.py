@@ -200,11 +200,15 @@ class BerthApplicationAdmin(admin.ModelAdmin):
     def resend_application_confirmation(self, request, queryset):
         resent_count = 0
         for application in queryset:
+            context = {
+                "subject": NotificationType.BERTH_APPLICATION_CREATED.label,
+                **application.get_notification_context(),
+            }
             try:
                 send_notification(
                     application.email,
                     NotificationType.BERTH_APPLICATION_CREATED.value,
-                    application.get_notification_context(),
+                    context,
                     application.language,
                 )
                 resent_count += 1
@@ -343,14 +347,18 @@ class WinterStorageApplicationAdmin(admin.ModelAdmin):
         for application in queryset:
             try:
                 notification_type = (
-                    NotificationType.UNMARKED_WINTER_STORAGE_APPLICATION_CREATED.value
+                    NotificationType.UNMARKED_WINTER_STORAGE_APPLICATION_CREATED
                     if application.area_type == ApplicationAreaType.UNMARKED
-                    else NotificationType.WINTER_STORAGE_APPLICATION_CREATED.value
+                    else NotificationType.WINTER_STORAGE_APPLICATION_CREATED
                 )
+                context = {
+                    "subject": notification_type.label,
+                    **application.get_notification_context(),
+                }
                 send_notification(
                     application.email,
-                    notification_type,
-                    application.get_notification_context(),
+                    notification_type.value,
+                    context,
                     application.language,
                 )
                 resent_count += 1
