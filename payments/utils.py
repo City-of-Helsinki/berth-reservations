@@ -285,13 +285,13 @@ def approve_order(
 ) -> None:
     from payments.providers import get_payment_provider
 
-    # Update the order
-    order.customer_first_name = helsinki_profile_user.first_name
-    order.customer_last_name = helsinki_profile_user.last_name
-    order.customer_email = helsinki_profile_user.email
-    order.customer_address = helsinki_profile_user.address
-    order.customer_zip_code = helsinki_profile_user.postal_code
-    order.customer_city = helsinki_profile_user.city
+    if helsinki_profile_user:
+        order.customer_first_name = helsinki_profile_user.first_name
+        order.customer_last_name = helsinki_profile_user.last_name
+        order.customer_email = helsinki_profile_user.email
+        order.customer_address = helsinki_profile_user.address
+        order.customer_zip_code = helsinki_profile_user.postal_code
+        order.customer_city = helsinki_profile_user.city
 
     order.due_date = due_date
     order.save()

@@ -583,6 +583,9 @@ class ApproveOrderMutation(graphene.ClientIDMutation):
     class Input:
         orders = graphene.List(OrderApprovalInput, required=True)
         due_date = graphene.Date(description="Defaults to the Order due date")
+        profile_token = graphene.String(
+            required=False, description="API token for Helsinki profile GraphQL API",
+        )
 
     failed_orders = graphene.List(FailedOrderType, required=True)
 
@@ -597,6 +600,7 @@ class ApproveOrderMutation(graphene.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         failed_orders = []
         due_date = input.get("due_date", today().date() + relativedelta(weeks=2))
+        profile_token = input.get("profile_token", None)
 
         for order_input in input.get("orders"):
             order_id = order_input.get("order_id")
@@ -607,8 +611,10 @@ class ApproveOrderMutation(graphene.ClientIDMutation):
                     )
                     email = order_input.get("email")
 
-                    profile = ProfileService(info.context).get_profile(
-                        order.customer.id
+                    profile = (
+                        ProfileService(profile_token).get_profile(order.customer.id)
+                        if profile_token
+                        else None
                     )
                     approve_order(order, email, due_date, profile, info.context)
             except (

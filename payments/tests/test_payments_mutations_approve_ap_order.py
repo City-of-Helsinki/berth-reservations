@@ -7,7 +7,6 @@ from django.core import mail
 from freezegun import freeze_time
 
 from applications.enums import ApplicationStatus
-from berth_reservations.tests.constants import MOCK_PROFILE_TOKEN_SERVICE
 from customers.tests.conftest import MOCK_HKI_PROFILE_ADDRESS, mocked_response_profile
 from leases.enums import LeaseStatus
 from utils.relay import to_global_id
@@ -36,15 +35,12 @@ mutation APPROVE_ORDER_MUTATION($input: ApproveOrderMutationInput!) {
 def test_approve_ap_order(
     api_client, order: Order, payment_provider, notification_template_orders_approved,
 ):
-    api_client.execute_options["context"].META[
-        "HTTP_API_TOKENS"
-    ] = f'{{"{MOCK_PROFILE_TOKEN_SERVICE}": "token"}}'
-
     due_date = (today() + relativedelta(days=14)).date()
     email = "foo@bar.com"
     variables = {
-        "dueDate": due_date,
+        "dueDate": str(due_date),
         "orders": [{"orderId": to_global_id(OrderNode, order.id), "email": email}],
+        "profileToken": "mock_token",
     }
 
     with mock.patch(
