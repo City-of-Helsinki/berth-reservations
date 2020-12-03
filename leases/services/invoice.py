@@ -38,10 +38,12 @@ class BaseInvoicingService:
     due_date: date
 
     request: HttpRequest
+    profile_token: str
 
-    def __init__(self, request: HttpRequest, due_date: date = None):
+    def __init__(self, request: HttpRequest, profile_token: str, due_date: date = None):
         # Default the due date to 14 days from the date when the task is executed
         self.request = request
+        self.profile_token = profile_token
         self.due_date = due_date or (today() + relativedelta(days=14)).date()
 
     @staticmethod
@@ -131,7 +133,7 @@ class BaseInvoicingService:
         leases = self.get_valid_leases(self.season_start)
 
         # Fetch all the profiles from the Profile service
-        profiles = ProfileService(self.request).get_all_profiles()
+        profiles = ProfileService(self.profile_token).get_all_profiles()
 
         for lease in leases:
             order = None

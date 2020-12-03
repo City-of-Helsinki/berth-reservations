@@ -59,11 +59,6 @@ def test_send_berth_invoices_success(api_client, notification_template_orders_ap
 
     user = UserFactory()
 
-    # Add the tokens to the headers
-    api_client.execute_options["context"].META[
-        "HTTP_API_TOKENS"
-    ] = f'{{"{PROFILE_TOKEN_SERVICE}": "token"}}'
-
     data = {
         "id": to_global_id(ProfileNode, customer.id),
         "first_name": user.first_name,
@@ -73,13 +68,13 @@ def test_send_berth_invoices_success(api_client, notification_template_orders_ap
 
     assert Order.objects.count() == 0
 
-    variables = {"dueDate": "2020-01-31"}
+    variables = {"dueDate": "2020-01-31", "profileToken": "token"}
 
     with mock.patch(
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        executed = api_client.execute(SEND_EXISTING_INVOICES_MUTATION, input=variables,)
+        executed = api_client.execute(SEND_EXISTING_INVOICES_MUTATION, input=variables)
 
     result = executed["data"]["sendExistingBerthInvoices"]["result"]
     assert len(result.get("successful_orders")) == 1
@@ -97,9 +92,9 @@ def test_send_berth_invoices_success(api_client, notification_template_orders_ap
 def test_send_berth_invoices_not_enough_permissions(
     api_client, berth_application, berth
 ):
-    variables = {"dueDate": "2020-01-31"}
+    variables = {"dueDate": "2020-01-31", "profileToken": "token"}
 
-    executed = api_client.execute(SEND_EXISTING_INVOICES_MUTATION, input=variables,)
+    executed = api_client.execute(SEND_EXISTING_INVOICES_MUTATION, input=variables)
 
     assert_not_enough_permissions(executed)
 
@@ -123,11 +118,6 @@ def test_send_berth_invoices_missing_email(
 
     user = UserFactory()
 
-    # Add the tokens to the headers
-    superuser_api_client.execute_options["context"].META[
-        "HTTP_API_TOKENS"
-    ] = f'{{"{PROFILE_TOKEN_SERVICE}": "token"}}'
-
     data = {
         "id": to_global_id(ProfileNode, customer.id),
         "first_name": user.first_name,
@@ -137,7 +127,7 @@ def test_send_berth_invoices_missing_email(
 
     assert Order.objects.count() == 0
 
-    variables = {"dueDate": "2020-01-31"}
+    variables = {"dueDate": "2020-01-31", "profileToken": "token"}
 
     with mock.patch(
         "customers.services.profile.requests.post",
@@ -172,11 +162,6 @@ def test_send_berth_invoices_failed_lease(
 
     user = UserFactory()
 
-    # Add the tokens to the headers
-    superuser_api_client.execute_options["context"].META[
-        "HTTP_API_TOKENS"
-    ] = f'{{"{PROFILE_TOKEN_SERVICE}": "token"}}'
-
     data = {
         "id": to_global_id(ProfileNode, customer.id),
         "first_name": user.first_name,
@@ -186,7 +171,7 @@ def test_send_berth_invoices_failed_lease(
 
     assert Order.objects.count() == 0
 
-    variables = {"dueDate": "2020-01-31"}
+    variables = {"dueDate": "2020-01-31", "profileToken": "token"}
 
     with mock.patch(
         "customers.services.profile.requests.post",

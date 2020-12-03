@@ -1,10 +1,8 @@
-import json
 from dataclasses import dataclass
 from typing import Dict
 from uuid import UUID
 
 import requests
-from django.http import HttpRequest
 
 from utils.relay import from_global_id, to_global_id
 
@@ -26,7 +24,6 @@ class HelsinkiProfileUser:
 class ProfileService:
     profile_token: str
     api_url: str
-    token_service_name: str
 
     ALL_PROFILES_QUERY = """
         query GetProfiles {
@@ -54,32 +51,18 @@ class ProfileService:
         }
     """
 
-    def __init__(self, request, **kwargs):
+    def __init__(self, profile_token, **kwargs):
         if "config" in kwargs:
             self.config = kwargs.get("config")
 
         self.api_url = self.config.get(PROFILE_API_URL)
-        self.token_service_name = self.config.get(PROFILE_TOKEN_SERVICE)
-        self.profile_token = self._get_city_profile_token(request)
+        self.profile_token = profile_token
 
     @staticmethod
     def get_config_template():
         return {
             PROFILE_API_URL: str,
-            PROFILE_TOKEN_SERVICE: str,
         }
-
-    def _get_city_profile_token(self, request: HttpRequest):
-        api_tokens = request.META.get("HTTP_API_TOKENS")
-        if not api_tokens:
-            raise Exception("Missing tokens")
-
-        parsed_api_tokens = json.loads(api_tokens)
-        profile_token = parsed_api_tokens.get(self.token_service_name)
-        if not profile_token:
-            raise Exception("No token found in the request")
-
-        return profile_token
 
     def get_all_profiles(self) -> Dict[UUID, HelsinkiProfileUser]:
         def _exec_query(after=""):
