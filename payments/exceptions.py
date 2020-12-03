@@ -22,9 +22,5 @@ class UnknownReturnCodeError(VenepaikkaPaymentError):
     """If payment service returns a status code that is not recognized by the handler"""
 
 
-class MissingCustomerError(VenepaikkaPaymentError):
-    """If the Order does not have a Lease, we cannot get the customer data"""
-
-
 class ExpiredOrderError(VenepaikkaPaymentError):
     """If the Order is being paid after the due date"""
