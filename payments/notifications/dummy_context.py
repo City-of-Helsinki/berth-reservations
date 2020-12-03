@@ -52,24 +52,36 @@ def _get_berth_order_context():
     )
     fixed_services = [
         OrderLineFactory.build(
-            order=order, product__service=ProductServiceType.FIXED_SERVICES()[0]
+            order=order,
+            product__service=ProductServiceType.FIXED_SERVICES()[0],
+            price=random_price(),
         ),
         OrderLineFactory.build(
-            order=order, product__service=ProductServiceType.FIXED_SERVICES()[1]
+            order=order,
+            product__service=ProductServiceType.FIXED_SERVICES()[1],
+            price=random_price(),
         ),
         OrderLineFactory.build(
-            order=order, product__service=ProductServiceType.FIXED_SERVICES()[2]
+            order=order,
+            product__service=ProductServiceType.FIXED_SERVICES()[2],
+            price=random_price(),
         ),
         OrderLineFactory.build(
-            order=order, product__service=ProductServiceType.FIXED_SERVICES()[3]
+            order=order,
+            product__service=ProductServiceType.FIXED_SERVICES()[3],
+            price=random_price(),
         ),
     ]
     optional_services = [
         OrderLineFactory.build(
-            order=order, product__service=ProductServiceType.OPTIONAL_SERVICES()[0]
+            order=order,
+            product__service=ProductServiceType.OPTIONAL_SERVICES()[0],
+            price=random_price(),
         ),
         OrderLineFactory.build(
-            order=order, product__service=ProductServiceType.OPTIONAL_SERVICES()[1]
+            order=order,
+            product__service=ProductServiceType.OPTIONAL_SERVICES()[1],
+            price=random_price(),
         ),
     ]
 
