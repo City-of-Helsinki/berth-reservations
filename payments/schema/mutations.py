@@ -16,6 +16,7 @@ from berth_reservations.exceptions import (
     VenepaikkaGraphQLWarning,
 )
 from customers.schema import ProfileNode
+from customers.services import ProfileService
 from leases.enums import LeaseStatus
 from leases.models import BerthLease, WinterStorageLease
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
@@ -606,7 +607,10 @@ class ApproveOrderMutation(graphene.ClientIDMutation):
                     )
                     email = order_input.get("email")
 
-                    approve_order(order, email, due_date, info.context)
+                    profile = ProfileService(info.context).get_profile(
+                        order.customer.id
+                    )
+                    approve_order(order, email, due_date, profile, info.context)
             except (
                 AnymailError,
                 OSError,

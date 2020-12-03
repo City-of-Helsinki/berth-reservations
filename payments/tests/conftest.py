@@ -1,3 +1,5 @@
+from uuid import UUID
+
 import pytest
 from django.conf import settings
 from factory.random import randgen
@@ -9,6 +11,7 @@ from applications.tests.factories import (
 )
 from berth_reservations.tests.conftest import *  # noqa
 from berth_reservations.tests.utils import MockResponse
+from customers.services import HelsinkiProfileUser
 from customers.tests.factories import CustomerProfileFactory
 from leases.tests.conftest import *  # noqa
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
@@ -167,6 +170,19 @@ def order_log_entry():
 @pytest.fixture()
 def provider_base_config():
     return PROVIDER_BASE_CONFIG
+
+
+@pytest.fixture()
+def helsinki_profile_user():
+    return HelsinkiProfileUser(
+        id=UUID("28319ebc-5eaf-4285-a565-15848225614b"),
+        first_name="Matti",
+        last_name="Virtanen",
+        email="foo@bar.com",
+        address="Street 1",
+        postal_code="00100",
+        city="Helsinki",
+    )
 
 
 @pytest.fixture()

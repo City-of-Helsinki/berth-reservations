@@ -6,6 +6,7 @@ from dateutil.utils import today
 from freezegun import freeze_time
 from graphql_relay import from_global_id
 
+from berth_reservations.tests.constants import MOCK_PROFILE_TOKEN_SERVICE
 from berth_reservations.tests.factories import UserFactory
 from berth_reservations.tests.utils import assert_not_enough_permissions
 from customers.schema import ProfileNode
@@ -17,8 +18,6 @@ from utils.relay import to_global_id
 from ..enums import LeaseStatus
 from ..utils import calculate_season_end_date, calculate_season_start_date
 from .factories import BerthLeaseFactory
-
-PROFILE_TOKEN_SERVICE = "http://fake-profile-api.com"
 
 SEND_EXISTING_INVOICES_MUTATION = """
 mutation SendExistingBerthInvoices($input: SendExistingBerthInvoicesMutationInput!) {
@@ -58,6 +57,11 @@ def test_send_berth_invoices_success(api_client, notification_template_orders_ap
     BerthProductFactory(price_group=price_group, harbor=lease.berth.pier.harbor)
 
     user = UserFactory()
+
+    # Add the tokens to the headers
+    api_client.execute_options["context"].META[
+        "HTTP_API_TOKENS"
+    ] = f'{{"{MOCK_PROFILE_TOKEN_SERVICE}": "token"}}'
 
     data = {
         "id": to_global_id(ProfileNode, customer.id),
@@ -118,6 +122,11 @@ def test_send_berth_invoices_missing_email(
 
     user = UserFactory()
 
+    # Add the tokens to the headers
+    superuser_api_client.execute_options["context"].META[
+        "HTTP_API_TOKENS"
+    ] = f'{{"{MOCK_PROFILE_TOKEN_SERVICE}": "token"}}'
+
     data = {
         "id": to_global_id(ProfileNode, customer.id),
         "first_name": user.first_name,
@@ -161,6 +170,11 @@ def test_send_berth_invoices_failed_lease(
     customer = lease.customer
 
     user = UserFactory()
+
+    # Add the tokens to the headers
+    superuser_api_client.execute_options["context"].META[
+        "HTTP_API_TOKENS"
+    ] = f'{{"{MOCK_PROFILE_TOKEN_SERVICE}": "token"}}'
 
     data = {
         "id": to_global_id(ProfileNode, customer.id),

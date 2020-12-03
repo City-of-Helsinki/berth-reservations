@@ -10,6 +10,11 @@ from utils.relay import to_global_id
 from .conftest import mocked_response_profile
 
 
+def test_get_city_profile_token():
+    service = ProfileService(r)
+    assert service.profile_token == "token"
+
+
 def test_get_all_profiles():
     with mock.patch(
         "customers.services.profile.requests.post",
