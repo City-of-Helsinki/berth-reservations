@@ -235,7 +235,7 @@ def test_payload_add_customer_success(payment_provider, order_with_products: Ord
     )
 
 
-def test_payload_add_customer_success_ap_order(payment_provider, berth_order: Order):
+def test_payload_add_customer_no_application(payment_provider, berth_order: Order):
     berth_order.customer_email = "test@test.com"
     berth_order.customer_first_name = "Matti"
     berth_order.customer_last_name = "Virtanen"
