@@ -59,7 +59,7 @@ class BamboraPayformProvider(PaymentProvider):
         """Initiate payment by constructing the payload with necessary items"""
         language = (
             order.lease.application.language
-            if hasattr(order, "lease") and hasattr(order.lease, "application")
+            if hasattr(order, "lease") and order.lease.application
             else settings.LANGUAGE_CODE
         )
 
