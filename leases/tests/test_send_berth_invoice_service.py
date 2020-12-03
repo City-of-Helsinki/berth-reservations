@@ -45,9 +45,6 @@ def test_send_berth_invoices(notification_template_orders_approved):
 
     user = UserFactory()
 
-    r = RequestFactory().request(
-        HTTP_API_TOKENS=f'{{"{PROFILE_TOKEN_SERVICE}": "token"}}'
-    )
     data = {
         "id": to_global_id(ProfileNode, customer.id),
         "first_name": user.first_name,
@@ -61,7 +58,9 @@ def test_send_berth_invoices(notification_template_orders_approved):
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        result = BerthInvoicingService(request=r).send_invoices()
+        result = BerthInvoicingService(
+            request=RequestFactory().request(), profile_token="token"
+        ).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -121,9 +120,6 @@ def test_use_berth_leases_from_last_season(notification_template_orders_approved
 
     user = UserFactory()
 
-    r = RequestFactory().request(
-        HTTP_API_TOKENS=f'{{"{PROFILE_TOKEN_SERVICE}": "token"}}'
-    )
     data = {
         "id": to_global_id(ProfileNode, customer.id),
         "first_name": user.first_name,
@@ -137,7 +133,9 @@ def test_use_berth_leases_from_last_season(notification_template_orders_approved
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        result = BerthInvoicingService(request=r).send_invoices()
+        result = BerthInvoicingService(
+            request=RequestFactory().request(), profile_token="token"
+        ).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -197,9 +195,6 @@ def test_use_berth_leases_from_current_season(notification_template_orders_appro
 
     user = UserFactory()
 
-    r = RequestFactory().request(
-        HTTP_API_TOKENS=f'{{"{PROFILE_TOKEN_SERVICE}": "token"}}'
-    )
     data = {
         "id": to_global_id(ProfileNode, customer.id),
         "first_name": user.first_name,
@@ -213,7 +208,9 @@ def test_use_berth_leases_from_current_season(notification_template_orders_appro
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        result = BerthInvoicingService(request=r).send_invoices()
+        result = BerthInvoicingService(
+            request=RequestFactory().request(), profile_token="token"
+        ).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -264,9 +261,6 @@ def test_berth_lease_harbor_product(notification_template_orders_approved):
 
     user = UserFactory()
 
-    r = RequestFactory().request(
-        HTTP_API_TOKENS=f'{{"{PROFILE_TOKEN_SERVICE}": "token"}}'
-    )
     data = {
         "id": to_global_id(ProfileNode, customer.id),
         "first_name": user.first_name,
@@ -280,7 +274,9 @@ def test_berth_lease_harbor_product(notification_template_orders_approved):
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        result = BerthInvoicingService(request=r).send_invoices()
+        result = BerthInvoicingService(
+            request=RequestFactory().request(), profile_token="token"
+        ).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -313,9 +309,6 @@ def test_berth_lease_default_product(notification_template_orders_approved):
 
     user = UserFactory()
 
-    r = RequestFactory().request(
-        HTTP_API_TOKENS=f'{{"{PROFILE_TOKEN_SERVICE}": "token"}}'
-    )
     data = {
         "id": to_global_id(ProfileNode, customer.id),
         "first_name": user.first_name,
@@ -329,7 +322,9 @@ def test_berth_lease_default_product(notification_template_orders_approved):
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        result = BerthInvoicingService(request=r).send_invoices()
+        result = BerthInvoicingService(
+            request=RequestFactory().request(), profile_token="token"
+        ).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -358,9 +353,6 @@ def test_berth_lease_no_product():
 
     user = UserFactory()
 
-    r = RequestFactory().request(
-        HTTP_API_TOKENS=f'{{"{PROFILE_TOKEN_SERVICE}": "token"}}'
-    )
     data = {
         "id": to_global_id(ProfileNode, customer.id),
         "first_name": user.first_name,
@@ -374,7 +366,9 @@ def test_berth_lease_no_product():
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        result = BerthInvoicingService(request=r).send_invoices()
+        result = BerthInvoicingService(
+            request=RequestFactory().request(), profile_token="token"
+        ).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -408,9 +402,6 @@ def test_send_berth_invoices_missing_email(notification_template_orders_approved
 
     user = UserFactory()
 
-    r = RequestFactory().request(
-        HTTP_API_TOKENS=f'{{"{PROFILE_TOKEN_SERVICE}": "token"}}'
-    )
     data = {
         "id": to_global_id(ProfileNode, customer.id),
         "first_name": user.first_name,
@@ -424,7 +415,9 @@ def test_send_berth_invoices_missing_email(notification_template_orders_approved
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        result = BerthInvoicingService(request=r).send_invoices()
+        result = BerthInvoicingService(
+            request=RequestFactory().request(), profile_token="token"
+        ).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -472,9 +465,6 @@ def test_send_berth_invoices_invalid_example_email(
 
     user = UserFactory()
 
-    r = RequestFactory().request(
-        HTTP_API_TOKENS=f'{{"{PROFILE_TOKEN_SERVICE}": "token"}}'
-    )
     data = {
         "id": to_global_id(ProfileNode, customer.id),
         "first_name": user.first_name,
@@ -488,7 +478,9 @@ def test_send_berth_invoices_invalid_example_email(
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        result = BerthInvoicingService(request=r).send_invoices()
+        result = BerthInvoicingService(
+            request=RequestFactory().request(), profile_token="token"
+        ).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -534,9 +526,6 @@ def test_send_berth_invoices_send_error(notification_template_orders_approved):
 
     user = UserFactory()
 
-    r = RequestFactory().request(
-        HTTP_API_TOKENS=f'{{"{PROFILE_TOKEN_SERVICE}": "token"}}'
-    )
     data = {
         "id": to_global_id(ProfileNode, customer.id),
         "first_name": user.first_name,
@@ -554,7 +543,9 @@ def test_send_berth_invoices_send_error(notification_template_orders_approved):
             "payments.utils.send_notification",
             side_effect=AnymailError("Anymail error"),
         ):
-            result = BerthInvoicingService(request=r).send_invoices()
+            result = BerthInvoicingService(
+                request=RequestFactory().request(), profile_token="token"
+            ).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -625,9 +616,6 @@ def test_send_berth_invoices_only_not_renewed(notification_template_orders_appro
 
     user = UserFactory()
 
-    r = RequestFactory().request(
-        HTTP_API_TOKENS=f'{{"{PROFILE_TOKEN_SERVICE}": "token"}}'
-    )
     data = {
         "id": to_global_id(ProfileNode, customer.id),
         "first_name": user.first_name,
@@ -641,7 +629,9 @@ def test_send_berth_invoices_only_not_renewed(notification_template_orders_appro
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
-        result = BerthInvoicingService(request=r).send_invoices()
+        result = BerthInvoicingService(
+            request=RequestFactory().request(), profile_token="token"
+        ).send_invoices()
 
     successful_orders: List[UUID] = result.get("successful_orders")
     failed_orders: List[Dict[UUID, str]] = result.get("failed_orders")
@@ -699,9 +689,6 @@ def test_send_berth_invoices_invalid_limit_reached(
 
     user = UserFactory()
 
-    r = RequestFactory().request(
-        HTTP_API_TOKENS=f'{{"{PROFILE_TOKEN_SERVICE}": "token"}}'
-    )
     data = {
         "id": to_global_id(ProfileNode, customer.id),
         "first_name": user.first_name,
@@ -715,7 +702,9 @@ def test_send_berth_invoices_invalid_limit_reached(
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=1, data=data),
     ), pytest.raises(AutomaticInvoicingError) as exception:
-        service = BerthInvoicingService(request=r)
+        service = BerthInvoicingService(
+            request=RequestFactory().request(), profile_token="token"
+        )
         service.MAXIMUM_FAILURES = 1
         service.send_invoices()
 

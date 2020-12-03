@@ -422,19 +422,23 @@ class SendExistingInvoicesInput:
 
 class SendExistingBerthInvoicesMutation(graphene.ClientIDMutation):
     class Input(SendExistingInvoicesInput):
-        pass
+        profile_token = graphene.String(
+            required=True, description="API token for Helsinki profile GraphQL API",
+        )
 
     result = graphene.Field(SendExistingInvoicesType)
 
     @classmethod
     @view_permission_required(CustomerProfile)
     @change_permission_required(BerthLease, WinterStorageLease, Order)
-    def mutate_and_get_payload(cls, root, info, **input):
+    def mutate_and_get_payload(cls, root, info, profile_token, **input):
         from payments.schema import OrderNode
 
         try:
             result = BerthInvoicingService(
-                request=info.context, due_date=input.get("due_date")
+                request=info.context,
+                profile_token=profile_token,
+                due_date=input.get("due_date"),
             ).send_invoices()
         except AutomaticInvoicingError as e:
             raise VenepaikkaGraphQLError(e)
