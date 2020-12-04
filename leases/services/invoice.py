@@ -106,7 +106,7 @@ class BaseInvoicingService:
         self.failure_count += 1
 
     def send_email(self, order, helsinki_profile_user: HelsinkiProfileUser):
-        email = helsinki_profile_user.email
+        email = helsinki_profile_user.email if helsinki_profile_user else None
 
         # If the profile doesn't have an associated email
         # or if it has an example.com address, set it as failed
@@ -147,6 +147,12 @@ class BaseInvoicingService:
                         f"Limit of failures reached: {self.failure_count} elements failed"
                     )
                 )
+
+            if lease.customer.id not in profiles:
+                self.fail_lease(
+                    lease, _("The application is not connected to a customer")
+                )
+                continue
 
             try:
                 with transaction.atomic():
