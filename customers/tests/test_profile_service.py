@@ -74,3 +74,28 @@ def test_parse_user_edge(hki_profile_address):
     assert user.address == hki_profile_address.get("address")
     assert user.postal_code == hki_profile_address.get("postal_code")
     assert user.city == hki_profile_address.get("city")
+
+
+def test_parse_user_edge_no_address():
+    faker = Faker()
+
+    user_id = uuid4()
+    email = faker.email()
+    edge = {
+        "node": {
+            "id": to_global_id(ProfileNode, user_id),
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "primary_email": {"email": email},
+            "primary_address": None,
+        }
+    }
+
+    user = ProfileService(profile_token="token").parse_user_edge(edge)
+    assert user.id == user_id
+    assert user.first_name == edge.get("node").get("first_name")
+    assert user.last_name == edge.get("node").get("last_name")
+    assert user.email == email
+    assert user.address is None
+    assert user.postal_code is None
+    assert user.city is None

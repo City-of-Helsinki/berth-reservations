@@ -128,7 +128,7 @@ class ProfileService:
         user_id = from_global_id(profile.pop("id"))
         email = (profile.pop("primary_email") or {}).get("email")
 
-        primary_address = profile.pop("primary_address", {})
+        primary_address = profile.pop("primary_address", {}) or {}
         address = primary_address.get("address")
         postal_code = primary_address.get("postal_code")
         city = primary_address.get("city")
