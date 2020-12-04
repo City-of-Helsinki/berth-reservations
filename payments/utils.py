@@ -19,6 +19,7 @@ from django_ilmoitin.utils import send_notification
 
 from applications.enums import ApplicationStatus
 from customers.enums import OrganizationType
+from customers.services import HelsinkiProfileUser
 from leases.enums import LeaseStatus
 from leases.utils import (
     calculate_season_end_date,
@@ -275,10 +276,23 @@ def get_lease_status(new_status) -> LeaseStatus:
         raise ValidationError(_("Invalid order status"))
 
 
-def approve_order(order, email, due_date: date, request: HttpRequest) -> None:
+def approve_order(
+    order,
+    email,
+    due_date: date,
+    helsinki_profile_user: HelsinkiProfileUser,
+    request: HttpRequest,
+) -> None:
     from payments.providers import get_payment_provider
 
-    # Update due date
+    if helsinki_profile_user:
+        order.customer_first_name = helsinki_profile_user.first_name
+        order.customer_last_name = helsinki_profile_user.last_name
+        order.customer_email = helsinki_profile_user.email
+        order.customer_address = helsinki_profile_user.address
+        order.customer_zip_code = helsinki_profile_user.postal_code
+        order.customer_city = helsinki_profile_user.city
+
     order.due_date = due_date
     order.save()
 

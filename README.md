@@ -37,7 +37,6 @@ VENE_PAYMENTS_BAMBORA_API_SECRET=dummy-secret
 VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS="dummy-bank"
 
 PROFILE_API_URL=https://profiili-api.test.kuva.hel.ninja/graphql/
-PROFILE_TOKEN_SERVICE=https://api.hel.fi/auth/helsinkiprofile
 ```
 
 2. Run `docker-compose up`

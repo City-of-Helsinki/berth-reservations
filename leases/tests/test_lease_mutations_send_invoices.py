@@ -18,8 +18,6 @@ from ..enums import LeaseStatus
 from ..utils import calculate_season_end_date, calculate_season_start_date
 from .factories import BerthLeaseFactory
 
-PROFILE_TOKEN_SERVICE = "http://fake-profile-api.com"
-
 SEND_EXISTING_INVOICES_MUTATION = """
 mutation SendExistingBerthInvoices($input: SendExistingBerthInvoicesMutationInput!) {
     sendExistingBerthInvoices(input: $input) {

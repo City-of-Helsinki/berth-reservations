@@ -204,6 +204,10 @@ def test_payload_additional_product_order(
 )
 def test_payload_add_customer_success(payment_provider, order_with_products: Order):
     """Test the customer data from order is added correctly into payload"""
+
+    # it should not use this value if application is present
+    order_with_products.customer_first_name = "first_name"
+
     payload = {}
     payment_provider.payload_add_customer(payload, order_with_products)
 
@@ -229,6 +233,30 @@ def test_payload_add_customer_success(payment_provider, order_with_products: Ord
         customer.get("address_city")
         == order_with_products.lease.application.municipality.capitalize()
     )
+
+
+def test_payload_add_customer_no_application(payment_provider, berth_order: Order):
+    berth_order.customer_email = "test@test.com"
+    berth_order.customer_first_name = "Matti"
+    berth_order.customer_last_name = "Virtanen"
+    berth_order.customer_address = "Street 1"
+    berth_order.customer_zip_code = "33100"
+    berth_order.customer_city = "Tampere"
+    berth_order.lease.application = None
+
+    payload = {}
+    payment_provider.payload_add_customer(payload, berth_order)
+
+    assert payload.get("email") == berth_order.customer_email
+
+    customer = payload.get("customer")
+
+    assert customer.get("firstname") == berth_order.customer_first_name.capitalize()
+    assert customer.get("lastname") == berth_order.customer_last_name.capitalize()
+    assert customer.get("email") == berth_order.customer_email
+    assert customer.get("address_street") == berth_order.customer_address
+    assert customer.get("address_zip") == berth_order.customer_zip_code
+    assert customer.get("address_city") == berth_order.customer_city.capitalize()
 
 
 def test_payload_add_auth_code_success(payment_provider, order):

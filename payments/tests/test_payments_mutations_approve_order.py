@@ -1,4 +1,5 @@
 import uuid
+from unittest import mock
 from unittest.mock import patch
 
 import pytest
@@ -10,6 +11,7 @@ from freezegun import freeze_time
 
 from applications.enums import ApplicationStatus
 from berth_reservations.tests.utils import assert_not_enough_permissions
+from customers.tests.conftest import mocked_response_profile
 from leases.enums import LeaseStatus
 from utils.relay import to_global_id
 
@@ -47,7 +49,13 @@ def test_approve_order(
             }
         ],
     }
-    executed = api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
+
+    with mock.patch(
+        "customers.services.profile.requests.post",
+        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+    ):
+        executed = api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
+
     payment_url = payment_provider.get_payment_email_url(
         order, lang=order.lease.application.language
     )
@@ -96,7 +104,11 @@ def test_approve_order_default_due_date(
     expected_due_date = today().date() + relativedelta(weeks=2)
     assert order.due_date != expected_due_date
 
-    api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
+    with mock.patch(
+        "customers.services.profile.requests.post",
+        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+    ):
+        api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
 
     order = Order.objects.get(id=order.id)
 
@@ -128,7 +140,12 @@ def test_approve_order_does_not_exist(
         "orders": [{"orderId": order_id, "email": "foo@bar.com"}],
     }
 
-    executed = superuser_api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
+    with mock.patch(
+        "customers.services.profile.requests.post",
+        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+    ):
+        executed = superuser_api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
+
     assert len(executed["data"]["approveOrders"]["failedOrders"]) == 1
     assert executed["data"]["approveOrders"]["failedOrders"][0] == {
         "id": order_id,
@@ -156,9 +173,17 @@ def test_approve_order_anymail_error(
     }
 
     with patch(
-        "payments.utils.send_notification", side_effect=AnymailError("Anymail error"),
-    ) as mock:
-        executed = superuser_api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
+        "customers.services.profile.requests.post",
+        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+    ):
+        with patch(
+            "payments.utils.send_notification",
+            side_effect=AnymailError("Anymail error"),
+        ) as mock:
+            executed = superuser_api_client.execute(
+                APPROVE_ORDER_MUTATION, input=variables
+            )
+
     mock.assert_called_once()
 
     assert len(executed["data"]["approveOrders"]["failedOrders"]) == 1
@@ -197,7 +222,13 @@ def test_approve_order_one_success_one_failure(
             },
         ],
     }
-    executed = superuser_api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
+
+    with mock.patch(
+        "customers.services.profile.requests.post",
+        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+    ):
+        executed = superuser_api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
+
     payment_url = payment_provider.get_payment_email_url(
         order, lang=order.lease.application.language
     )

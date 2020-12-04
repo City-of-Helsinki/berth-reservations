@@ -25,8 +25,6 @@ from ..services import BerthInvoicingService
 from ..utils import calculate_season_end_date, calculate_season_start_date
 from .factories import BerthLeaseFactory
 
-PROFILE_TOKEN_SERVICE = "http://fake-profile-api.com"
-
 
 @freeze_time("2020-01-01T08:00:00Z")
 def test_send_berth_invoices(notification_template_orders_approved):

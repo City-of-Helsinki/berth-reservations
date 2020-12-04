@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
@@ -5,6 +7,7 @@ from django.core import mail
 from freezegun import freeze_time
 
 from applications.enums import ApplicationStatus
+from customers.tests.conftest import MOCK_HKI_PROFILE_ADDRESS, mocked_response_profile
 from leases.enums import LeaseStatus
 from utils.relay import to_global_id
 
@@ -35,10 +38,17 @@ def test_approve_ap_order(
     due_date = (today() + relativedelta(days=14)).date()
     email = "foo@bar.com"
     variables = {
-        "dueDate": due_date,
+        "dueDate": str(due_date),
         "orders": [{"orderId": to_global_id(OrderNode, order.id), "email": email}],
+        "profileToken": "mock_token",
     }
-    executed = api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
+
+    with mock.patch(
+        "customers.services.profile.requests.post",
+        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+    ):
+        executed = api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
+
     payment_url = payment_provider.get_payment_email_url(order, lang="en")
 
     order = Order.objects.get(id=order.id)
@@ -48,6 +58,14 @@ def test_approve_ap_order(
     # approving additional product order should not touch the lease
     assert order.lease.status != LeaseStatus.OFFERED
     assert order.lease.application.status != ApplicationStatus.OFFER_SENT
+
+    # customer data should be filled
+    assert len(order.customer_first_name) > 0
+    assert len(order.customer_last_name) > 0
+    assert len(order.customer_email) > 0
+    assert order.customer_address == MOCK_HKI_PROFILE_ADDRESS.get("address")
+    assert order.customer_zip_code == MOCK_HKI_PROFILE_ADDRESS.get("postal_code")
+    assert order.customer_city == MOCK_HKI_PROFILE_ADDRESS.get("city")
 
     assert len(executed["data"]["approveOrders"]["failedOrders"]) == 0
     assert len(mail.outbox) == 1

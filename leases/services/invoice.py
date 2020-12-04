@@ -13,7 +13,7 @@ from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
-from customers.services import ProfileService
+from customers.services import HelsinkiProfileUser, ProfileService
 from leases.enums import LeaseStatus
 from leases.exceptions import AutomaticInvoicingError
 from leases.models import BerthLease, WinterStorageLease
@@ -105,12 +105,16 @@ class BaseInvoicingService:
         self.failed_orders.append({order.id: message})
         self.failure_count += 1
 
-    def send_email(self, order, email):
+    def send_email(self, order, helsinki_profile_user: HelsinkiProfileUser):
+        email = helsinki_profile_user.email
+
         # If the profile doesn't have an associated email
         # or if it has an example.com address, set it as failed
         if email and "example.com" not in email:
             try:
-                approve_order(order, email, self.due_date, self.request)
+                approve_order(
+                    order, email, self.due_date, helsinki_profile_user, self.request
+                )
                 self.successful_orders.append(order.id)
             except (
                 AnymailError,
@@ -164,9 +168,8 @@ class BaseInvoicingService:
                             customer=customer, lease=new_lease, product=product
                         )
 
-                        self.send_email(
-                            order, profiles.get(customer.id).email,
-                        )
+                        helsinki_profile_user = profiles.get(customer.id)
+                        self.send_email(order, helsinki_profile_user)
                     except ValidationError as e:
                         logger.exception(e)
                         self.fail_lease(new_lease, str(e))

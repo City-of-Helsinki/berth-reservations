@@ -15,7 +15,6 @@ from ..enums import OrderStatus, OrderType
 from ..exceptions import (
     DuplicateOrderError,
     ExpiredOrderError,
-    MissingCustomerError,
     OrderStatusTransitionError,
     PayloadValidationError,
     ServiceUnavailableError,
@@ -60,7 +59,7 @@ class BamboraPayformProvider(PaymentProvider):
         """Initiate payment by constructing the payload with necessary items"""
         language = (
             order.lease.application.language
-            if hasattr(order, "lease") and hasattr(order.lease, "application")
+            if hasattr(order, "lease") and order.lease.application
             else settings.LANGUAGE_CODE
         )
 
@@ -204,24 +203,35 @@ class BamboraPayformProvider(PaymentProvider):
 
     def payload_add_customer(self, payload: dict, order: Order):
         """Attach customer data to payload"""
-        if not order.lease or order.lease and not order.lease.application:
-            raise MissingCustomerError(_("Order is not associated with a Lease"))
-
-        application = order.lease.application
-
-        payload.update(
-            {
-                "email": application.email.strip(),
-                "customer": {
-                    "firstname": application.first_name.capitalize(),
-                    "lastname": application.last_name.capitalize(),
+        if hasattr(order, "lease") and order.lease.application:
+            application = order.lease.application
+            payload.update(
+                {
                     "email": application.email.strip(),
-                    "address_street": application.address,
-                    "address_zip": application.zip_code,
-                    "address_city": application.municipality.capitalize(),
-                },
-            }
-        )
+                    "customer": {
+                        "firstname": application.first_name.capitalize(),
+                        "lastname": application.last_name.capitalize(),
+                        "email": application.email.strip(),
+                        "address_street": application.address,
+                        "address_zip": application.zip_code,
+                        "address_city": application.municipality.capitalize(),
+                    },
+                }
+            )
+        else:
+            payload.update(
+                {
+                    "email": order.customer_email.strip(),
+                    "customer": {
+                        "firstname": order.customer_first_name.capitalize(),
+                        "lastname": order.customer_last_name.capitalize(),
+                        "email": order.customer_email.strip(),
+                        "address_street": order.customer_address,
+                        "address_zip": order.customer_zip_code,
+                        "address_city": order.customer_city.capitalize(),
+                    },
+                }
+            )
 
     def payload_add_auth_code(self, payload: dict):
         """Construct auth code string and hash it into payload"""

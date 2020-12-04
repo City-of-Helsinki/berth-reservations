@@ -11,7 +11,6 @@ env:
   ELASTIC_APM_DISABLE_SEND: 1
   NOTIFICATIONS_ENABLED: 1
   PROFILE_API_URL: http://fake-profile-api.com
-  PROFILE_TOKEN_SERVICE: http://fake-profile-api.com
   TIER: test
   VENE_PAYMENTS_BAMBORA_API_KEY: dummy-bambora-api-key
   VENE_PAYMENTS_BAMBORA_API_SECRET: dummy-bambora-secret
