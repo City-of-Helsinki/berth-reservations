@@ -7,7 +7,6 @@ import requests
 from utils.relay import from_global_id, to_global_id
 
 PROFILE_API_URL = "PROFILE_API_URL"
-PROFILE_TOKEN_SERVICE = "PROFILE_TOKEN_SERVICE"
 
 
 @dataclass
