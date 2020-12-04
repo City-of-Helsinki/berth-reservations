@@ -1,5 +1,6 @@
 <p>Hyvä asiakas, tässä lasku lisäpalvelusta. Voit maksaa sen klikkaamalla "siirry maksamaan" -painiketta alempana tässä
     viestissä.</p>
+<br/>
 
 <h3>Lasku</h3>
 
@@ -9,9 +10,6 @@
             Sopimus
         </td>
         <td>{{ contract.type }}</td>
-    </tr>
-    <tr>
-        <td colspan="2">&nbsp;</td>
     </tr>
     <tr>
         <td>
@@ -27,15 +25,45 @@
     </tr>
     <tr>
         <td colspan="2">
+           &nbsp;
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
             <hr/>
         </td>
     </tr>
-    {% for order_line in optional_services %}
-        <tr>
-            <td>{{ order_line.product.get_service_display() }}:</td>
-            <td>{{ order_line.price }}&euro;</td>
-        </tr>
-    {% endfor %}
+    <tr>
+        <td colspan="2">
+            &nbsp;
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Laskun aihe:
+        </td>
+        <td>{{ order.product.get_service_display() }}</td>
+    </tr>
+    <tr>
+        <td>
+            Sopimuskausi:
+        </td>
+        <td>{{ contract.from }} - {{ contract.to }}</td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            &nbsp;
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <hr/>
+        </td>
+    </tr>
+    <tr>
+        <td>{{ order.product.get_service_display() }} yhteensä:</td>
+        <td>{{ order.price }}&euro;</td>
+    </tr>
     <tr>
         <td>
             YHTEENSÄ:
