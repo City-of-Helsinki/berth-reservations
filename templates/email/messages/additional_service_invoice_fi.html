@@ -32,7 +32,7 @@
     </tr>
     {% for order_line in optional_services %}
         <tr>
-            <td colspan="2">{{ order_line.product.get_service_display() }}:</td>
+            <td>{{ order_line.product.get_service_display() }}:</td>
             <td>{{ order_line.price }}&euro;</td>
         </tr>
     {% endfor %}
