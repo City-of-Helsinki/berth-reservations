@@ -68,9 +68,13 @@ def save_template(filename, content):
         f.write(content)
 
 
-if __name__ == "__main__":
+def generate_templates():
     create_generated_folder()
     clear_generated_templates()
     for message_filename in os.listdir(messages_path):
         generated_template = generate_template(message_filename)
         save_template(message_filename, generated_template)
+
+
+if __name__ == "__main__":
+    generate_templates()

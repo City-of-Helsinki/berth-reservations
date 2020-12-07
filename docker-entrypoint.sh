@@ -29,6 +29,11 @@ if [[ "$CREATE_SUPERUSER" = "1" ]]; then
   echo "Admin user created with credentials admin:adminpass (email: admin@example.com)"
 fi
 
+if [[ "$LOAD_TEMPLATES" = "1" ]]; then
+  python ./scripts/load_notification_templates.py
+  echo "Notification templates loaded"
+fi
+
 # Start server
 if [[ ! -z "$@" ]]; then
     "$@"

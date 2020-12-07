@@ -12,22 +12,21 @@ application_rejected = Signal(providing_args=["application"])
 
 
 def application_notification_handler(sender, application, **kwargs):
-    notification_type = NotificationType.BERTH_APPLICATION_CREATED.value
+    notification_type = NotificationType.BERTH_APPLICATION_CREATED
     if sender == MARKED_WS_SENDER:
-        notification_type = NotificationType.WINTER_STORAGE_APPLICATION_CREATED.value
+        notification_type = NotificationType.WINTER_STORAGE_APPLICATION_CREATED
     elif sender == UNMARKED_WS_SENDER:
-        notification_type = (
-            NotificationType.UNMARKED_WINTER_STORAGE_APPLICATION_CREATED.value
-        )
+        notification_type = NotificationType.UNMARKED_WINTER_STORAGE_APPLICATION_CREATED
     elif sender == REJECT_BERTH_SENDER:
-        notification_type = NotificationType.BERTH_APPLICATION_REJECTED.value
+        notification_type = NotificationType.BERTH_APPLICATION_REJECTED
 
+    context = {
+        "subject": notification_type.label,
+        **application.get_notification_context(),
+    }
     try:
         send_notification(
-            application.email,
-            notification_type,
-            application.get_notification_context(),
-            application.language,
+            application.email, notification_type.value, context, application.language,
         )
     except (OSError, AnymailError) as e:
         capture_exception(e)

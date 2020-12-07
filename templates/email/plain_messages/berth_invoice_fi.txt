@@ -1,0 +1,46 @@
+Helsingin kaupunki / venepaikat
+Venepaikkalasku
+
+Hyvä asiakas, tässä lasku venepaikasta. Voit maksaa sen alla olevasta linkistä.
+
+
+Venepaikka
+{{ order.lease.berth.pier.harbor.name }}
+{{ order.lease.berth.pier.identifier }} {{ order.lease.berth.number }}
+{{ order.lease.berth.pier.harbor.street_address }}
+
+Hinta
+Perushinta: {{ order.price }}€
+{% for order_line in fixed_services %}
+{{ order_line.product.get_service_display() }}: {{ order_line.price }}€
+{% endfor %}
+
+Venepaikka yhteensä: {{ order.fixed_price_total }}€
+
+{% if optional_services %}
+Lisäpalvelut:
+
+{% for order_line in optional_services %}
+{{ order_line.product.get_service_display() }}: {{ order_line.price }}€
+{% endfor %}
+{% endif %}
+
+Yhteensä: {{ order.total_price }}€ / vuosi
+
+Eräpäivä: {{ order.due_date }}
+
+Linkki maksamiseen: {{ payment_url }}
+
+Huom! Laskun voi maksaa vain tämän linkin kautta. Muulla tavoin maksettuja maksuja ei voida ottaa vastaan.
+Lisätietoja: venepaikkavaraukset@hel.fi
+
+
+Helsingin kaupungin venepaikat vuokrataan asiakkaille toistaiseksi voimassa olevina ja niistä peritään vuosittain kulloinkin voimassa olevan hinnaston mukainen maksu. Jos laskua ei maksa eräpäivään mennessä, vuokrasopimus irtisanoutuu automaattisesti. Purjehduskausi on 10.6. - 14.9.
+
+Venepaikan maksaminen edellyttää voimassa olevien venepaikan vuokrasopimusehtojen ja venesatamasääntöjen hyväksymistä.
+
+Venepaikkavaraukset
+Fredriksberg A 1
+00100 Helsinki
+
+Kaikki oikeudet pidätetään

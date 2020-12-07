@@ -925,25 +925,22 @@ msgid "cancelled"
 msgstr "Peruutettu"
 
 msgid "New berth order approved"
-msgstr ""
+msgstr "Venepaikkatarjous"
 
 msgid "Renew berth order approved"
-msgstr ""
+msgstr "Venepaikkalasku"
 
-#, fuzzy
-#| msgid "berth switch reason"
+#: payments/notifications/types.py:16
 msgid "Berth switch order approved"
-msgstr "paikanvaihdon syy"
+msgstr "Venepaikan vaihtotarjous"
 
-#, fuzzy
-#| msgid "winter storage area"
+#: payments/notifications/types.py:20
 msgid "New winter storage order approved"
-msgstr "talvisäilytysalue"
+msgstr "Talvisäilytyspaikkalasku"
 
-#, fuzzy
-#| msgid "winter storage area"
+#: payments/notifications/types.py:24
 msgid "Unmarked winter storage order approved"
-msgstr "talvisäilytysalue"
+msgstr "Nostojärjestyspaikkalasku"
 
 msgid "Payment service is unreachable"
 msgstr "Maksupalvelu ei ole käytettävissä"
