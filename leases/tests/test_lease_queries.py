@@ -2,11 +2,14 @@ import random
 
 import pytest
 from dateutil.parser import isoparse
+from dateutil.relativedelta import relativedelta
+from dateutil.utils import today
 from freezegun import freeze_time
 
 from applications.new_schema import BerthApplicationNode, WinterStorageApplicationNode
 from berth_reservations.tests.utils import assert_not_enough_permissions
 from customers.schema import BoatNode, ProfileNode
+from payments.models import BerthPriceGroup
 from payments.schema import OrderNode
 from payments.tests.factories import (
     BerthProductFactory,
@@ -22,6 +25,7 @@ from utils.relay import to_global_id
 
 from ..enums import LeaseStatus
 from ..schema import BerthLeaseNode, WinterStorageLeaseNode
+from ..utils import calculate_season_end_date, calculate_season_start_date
 from .factories import BerthLeaseFactory, WinterStorageLeaseFactory
 
 QUERY_BERTH_LEASES = """
@@ -674,3 +678,43 @@ def test_query_berth_leases_filtered(api_client):
         "status": "DRAFTED",
         "startDate": str(berth_lease.start_date),
     }
+
+
+QUERY_SEND_BERTH_INVOICE_PREVIEW = """
+query SendBerthInvoicePreview {
+    sendBerthInvoicePreview {
+        expectedLeases
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_services", "berth_handler", "berth_supervisor"],
+    indirect=True,
+)
+@freeze_time("2020-02-01")
+def test_query_send_berth_invoice_preview(api_client):
+    lease = BerthLeaseFactory(
+        renew_automatically=True,
+        boat=None,
+        status=LeaseStatus.PAID,
+        start_date=calculate_season_start_date(today() - relativedelta(years=1)),
+        end_date=calculate_season_end_date(today() - relativedelta(years=1)),
+    )
+    BerthLeaseFactory(
+        renew_automatically=True,
+        boat=None,
+        status=LeaseStatus.REFUSED,
+        start_date=calculate_season_start_date(today() - relativedelta(years=1)),
+        end_date=calculate_season_end_date(today() - relativedelta(years=1)),
+    )
+    price_group = BerthPriceGroup.objects.get_or_create_for_width(
+        lease.berth.berth_type.width
+    )
+    BerthProductFactory(price_group=price_group, harbor=lease.berth.pier.harbor)
+
+    executed = api_client.execute(QUERY_SEND_BERTH_INVOICE_PREVIEW)
+
+    assert executed["data"]["sendBerthInvoicePreview"] == {"expectedLeases": 1}

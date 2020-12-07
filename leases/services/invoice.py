@@ -8,7 +8,7 @@ from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from django.core.exceptions import ValidationError
 from django.db import DataError, IntegrityError, transaction
-from django.db.models import Exists, OuterRef, QuerySet
+from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
@@ -227,36 +227,4 @@ class BerthInvoicingService(BaseInvoicingService):
 
     @staticmethod
     def get_valid_leases(season_start: date) -> QuerySet:
-        """
-        Get the leases that were active last year
-        If today is:
-          (1) before season: leases from last year
-          (2) during or after season: leases from this year
-        """
-
-        current_date = today().date()
-        # If today is before the season starts but during the same year (1)
-        if current_date < season_start and current_date.year == season_start.year:
-            lease_year = current_date.year - 1
-        else:  # (2)
-            lease_year = current_date.year
-
-        # Filter leases from the upcoming season
-        future_leases = BerthLease.objects.filter(
-            start_date__year__gt=lease_year,
-            berth=OuterRef("berth"),
-            customer=OuterRef("customer"),
-        )
-
-        # Exclude leases that have already been assigned to the same customer and berth on the future
-        leases: QuerySet = BerthLease.objects.exclude(
-            Exists(future_leases.values("pk"))
-        ).filter(
-            # Only allow leases that are auto-renewing and have been paid
-            renew_automatically=True,
-            status=LeaseStatus.PAID,
-            start_date__year=lease_year,
-            end_date__year=lease_year,
-        )
-
-        return leases
+        return BerthLease.objects.get_renewable_leases(season_start=season_start)
