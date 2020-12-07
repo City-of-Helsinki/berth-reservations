@@ -78,6 +78,10 @@ if __name__ == "__main__":
             "html": "um_ws_invoice_{lang}.html",
             "plain": None,
         },
+        PaymentNotificationType.ADDITIONAL_PRODUCT_ORDER_APPROVED: {
+            "html": "additional_service_invoice_{lang}.html",
+            "plain": None,
+        },
     }
 
     from scripts.generate_email_templates import generate_templates

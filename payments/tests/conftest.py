@@ -1,3 +1,4 @@
+from decimal import Decimal
 from uuid import UUID
 
 import pytest
@@ -18,7 +19,7 @@ from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from resources.tests.conftest import *  # noqa
 from resources.tests.factories import BerthTypeFactory
 
-from ..enums import OrderType
+from ..enums import OrderStatus, OrderType, PeriodType, PriceUnits, ProductServiceType
 from ..providers import BamboraPayformProvider
 from .factories import (
     AdditionalProductFactory,
@@ -26,6 +27,7 @@ from .factories import (
     OrderFactory,
     OrderLineFactory,
     OrderLogEntryFactory,
+    PlainAdditionalProductFactory,
     WinterStorageProductFactory,
 )
 from .utils import random_price, random_tax
@@ -118,6 +120,35 @@ def _generate_order(order_type: str = None):
                 application=BerthApplicationFactory(), customer=customer_profile
             ),
         )
+    elif order_type == "additional_product_order_with_lease_order":
+        lease = BerthLeaseFactory(
+            application=BerthApplicationFactory(), customer=customer_profile
+        )
+        OrderFactory(
+            order_type=OrderType.LEASE_ORDER,
+            customer=customer_profile,
+            price=random_price(),
+            tax_percentage=random_tax(),
+            product=BerthProductFactory(),
+            lease=lease,
+            status=OrderStatus.PAID,
+        )
+        order = OrderFactory(
+            order_type=OrderType.ADDITIONAL_PRODUCT_ORDER,
+            customer=customer_profile,
+            price=random_price(),
+            tax_percentage=random_tax(),
+            product=None,
+            lease=lease,
+        )
+        storage_on_ice = PlainAdditionalProductFactory(
+            service=ProductServiceType.STORAGE_ON_ICE,
+            period=PeriodType.SEASON,
+            tax_percentage=Decimal("24.00"),
+            price_value=Decimal("60.00"),
+            price_unit=PriceUnits.PERCENTAGE,
+        )
+        OrderLineFactory(order=order, product=storage_on_ice, price=Decimal("15.00"))
     else:
         order = OrderFactory(customer=customer_profile)
     return order

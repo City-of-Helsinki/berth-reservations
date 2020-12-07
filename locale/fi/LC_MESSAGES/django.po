@@ -942,6 +942,9 @@ msgstr "Talvisäilytyspaikkalasku"
 msgid "Unmarked winter storage order approved"
 msgstr "Nostojärjestyspaikkalasku"
 
+msgid "Additional product order approved"
+msgstr "Lisäpalvelulasku"
+
 msgid "Payment service is unreachable"
 msgstr "Maksupalvelu ei ole käytettävissä"
 

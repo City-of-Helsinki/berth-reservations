@@ -1,6 +1,7 @@
 from decimal import Decimal
 from typing import Dict, List
 
+from dateutil.utils import today
 from django.conf import settings
 from django_ilmoitin.dummy_context import dummy_context
 
@@ -118,23 +119,20 @@ def _get_winter_storage_order_context(subject: str = "Winter storage order"):
 
 
 def _get_additional_product_order_context(subject: str = "Additional product order"):
-    customer = CustomerProfileFactory.build()
-    order = OrderFactory.build(
-        customer=customer,
-        lease=BerthLeaseFactory.build(customer=customer),
-        product=None,
-        price=Decimal("0.00"),
-        tax_percentage=Decimal("0.00"),
-    )
-    optional_services = [
-        OrderLineFactory.build(
-            order=order,
-            product__service=ProductServiceType.OPTIONAL_SERVICES()[0],
-            price=random_price(),
-        ),
-    ]
-
-    return _get_order_context(subject, order, [], optional_services)
+    return {
+        "subject": subject,
+        "order": {
+            "lease": {
+                "start_date": today().date(),
+                "end_date": today().date(),
+                "berth": {"pier": {"harbor": {"name": "Satama"}}},
+            },
+            "total_price": Decimal("100.00"),
+        },
+        "additional_product": {"name": "Product name", "season": "2020 - 2021"},
+        "payment_url": "http://foo.com",
+        "due_date": today().date(),
+    }
 
 
 def load_dummy_context():

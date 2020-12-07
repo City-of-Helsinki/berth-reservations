@@ -9,19 +9,19 @@
         <td>
             Sopimus
         </td>
-        <td>{{ contract.type }}</td>
+        <td>Venepaikka</td>
     </tr>
     <tr>
         <td>
             Venepaikka:
         </td>
-        <td>{{ contract.berth }}</td>
+        <td>{{ order.lease.berth.pier.harbor.name }}</td>
     </tr>
     <tr>
         <td>
             Sopimuskausi:
         </td>
-        <td>{{ contract.from }} - {{ contract.to }}</td>
+        <td>{{ order.lease.start_date }} - {{ order.lease.end_date }}</td>
     </tr>
     <tr>
         <td colspan="2">
@@ -42,13 +42,13 @@
         <td>
             Laskun aihe:
         </td>
-        <td>{{ order.product.get_service_display() }}</td>
+        <td>{{ additional_product.name }}</td>
     </tr>
     <tr>
         <td>
             Sopimuskausi:
         </td>
-        <td>{{ contract.from }} - {{ contract.to }}</td>
+        <td>Talvi {{ additional_product.season }}</td>
     </tr>
     <tr>
         <td colspan="2">
@@ -61,14 +61,14 @@
         </td>
     </tr>
     <tr>
-        <td>{{ order.product.get_service_display() }} yhteensä:</td>
-        <td>{{ order.price }}&euro;</td>
+        <td>{{ additional_product.name }} yhteensä:</td>
+        <td>{{ order.total_price }}&euro;</td>
     </tr>
     <tr>
         <td>
             YHTEENSÄ:
         </td>
-        <td>{{ order.total }} / vuosi
+        <td>{{ order.total_price }}&euro;
         </td>
     </tr>
 </table>

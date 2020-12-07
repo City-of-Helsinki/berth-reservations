@@ -317,16 +317,37 @@ def approve_order(
 
     # Send email
     notification_type = get_order_notification_type(order)
-    context = {
-        "subject": notification_type.label,
-        "order": order,
-        "fixed_services": order.order_lines.filter(
-            product__service__in=ProductServiceType.FIXED_SERVICES()
-        ),
-        "optional_services": order.order_lines.filter(
-            product__service__in=ProductServiceType.OPTIONAL_SERVICES()
-        ),
-        "payment_url": payment_url,
-    }
-
+    context = get_context(order, payment_url, notification_type)
     send_notification(email, notification_type.value, context, language)
+
+
+def get_context(order, payment_url, notification_type):
+    if order.order_type == OrderType.LEASE_ORDER:
+        return {
+            "subject": notification_type.label,
+            "order": order,
+            "fixed_services": order.order_lines.filter(
+                product__service__in=ProductServiceType.FIXED_SERVICES()
+            ),
+            "optional_services": order.order_lines.filter(
+                product__service__in=ProductServiceType.OPTIONAL_SERVICES()
+            ),
+            "payment_url": payment_url,
+        }
+    else:
+        # We currently support only STORAGE_ON_ICE additional product orders,
+        # so this is very specific implementation for now
+        start_date = calculate_winter_season_start_date(order.lease.end_date)
+        start_year = start_date.year
+        end_year = start_year + 1
+        season = "{} - {}".format(start_year, end_year)
+        additional_product_name = (
+            order.order_lines.first().product.get_service_display()
+        )
+
+        return {
+            "subject": notification_type.label,
+            "order": order,
+            "additional_product": {"name": additional_product_name, "season": season},
+            "payment_url": payment_url,
+        }
