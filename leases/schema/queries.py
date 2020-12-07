@@ -7,7 +7,12 @@ from customers.models import CustomerProfile
 from users.decorators import view_permission_required
 
 from ..models import BerthLease, WinterStorageLease
-from .types import BerthLeaseNode, LeaseStatusEnum, WinterStorageLeaseNode
+from .types import (
+    BerthLeaseNode,
+    LeaseStatusEnum,
+    SendExistingInvoicesPreviewType,
+    WinterStorageLeaseNode,
+)
 
 
 class AbstractLeaseNodeFilter(django_filters.FilterSet):
@@ -33,6 +38,8 @@ class Query:
         filterset_class=AbstractLeaseNodeFilter,
         description="`WinterStorageLeases` are ordered by `createdAt` in ascending order by default.",
     )
+
+    send_berth_invoice_preview = graphene.Field(SendExistingInvoicesPreviewType)
 
     @view_permission_required(BerthLease, BerthApplication, CustomerProfile)
     def resolve_berth_leases(self, info, statuses=None, start_year=None, **kwargs):
@@ -69,3 +76,8 @@ class Query:
             .prefetch_related("application__customer__boats")
             .order_by("created_at")
         )
+
+    @view_permission_required(BerthLease)
+    def resolve_send_berth_invoice_preview(self, info, **kwargs):
+        count = BerthLease.objects.get_renewable_leases().count()
+        return SendExistingInvoicesPreviewType(expected_leases=count)

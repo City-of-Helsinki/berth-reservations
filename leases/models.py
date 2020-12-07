@@ -1,10 +1,11 @@
 from datetime import date
 
 from dateutil.relativedelta import relativedelta
+from dateutil.utils import today
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import ExpressionWrapper, Q
+from django.db.models import Exists, ExpressionWrapper, OuterRef, Q, QuerySet
 from django.utils.translation import gettext_lazy as _
 
 from applications.models import BerthApplication, WinterStorageApplication
@@ -18,6 +19,7 @@ from .enums import LeaseStatus
 from .utils import (
     calculate_berth_lease_end_date,
     calculate_berth_lease_start_date,
+    calculate_season_start_date,
     calculate_winter_storage_lease_end_date,
     calculate_winter_storage_lease_start_date,
 )
@@ -103,6 +105,44 @@ class BerthLeaseManager(models.Manager):
                 )
             )
         )
+
+    def get_renewable_leases(self, season_start: date = None) -> QuerySet:
+        """
+        Get the leases that were active last year
+        If today is:
+          (1) before season: leases from last year
+          (2) during or after season: leases from this year
+        """
+        qs = self.get_queryset()
+
+        # Default the season start to the default season start date
+        if not season_start:
+            season_start = calculate_season_start_date()
+
+        current_date = today().date()
+        # If today is before the season starts but during the same year (1)
+        if current_date < season_start and current_date.year == season_start.year:
+            lease_year = current_date.year - 1
+        else:  # (2)
+            lease_year = current_date.year
+
+        # Filter leases from the upcoming season
+        future_leases = qs.filter(
+            start_date__year__gt=lease_year,
+            berth=OuterRef("berth"),
+            customer=OuterRef("customer"),
+        )
+
+        # Exclude leases that have already been assigned to the same customer and berth on the future
+        leases: QuerySet = qs.exclude(Exists(future_leases.values("pk"))).filter(
+            # Only allow leases that are auto-renewing and have been paid
+            renew_automatically=True,
+            status=LeaseStatus.PAID,
+            start_date__year=lease_year,
+            end_date__year=lease_year,
+        )
+
+        return leases
 
 
 class BerthLease(AbstractLease):
