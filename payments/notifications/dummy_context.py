@@ -128,10 +128,10 @@ def _get_additional_product_order_context(subject: str = "Additional product ord
                 "berth": {"pier": {"harbor": {"name": "Satama"}}},
             },
             "total_price": Decimal("100.00"),
+            "due_date": today().date(),
         },
         "additional_product": {"name": "Product name", "season": "2020 - 2021"},
         "payment_url": "http://foo.com",
-        "due_date": today().date(),
     }
 
 
