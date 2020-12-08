@@ -29,7 +29,7 @@ mutation APPROVE_ORDER_MUTATION($input: ApproveOrderMutationInput!) {
     "api_client", ["berth_services"], indirect=True,
 )
 @pytest.mark.parametrize(
-    "order", ["additional_product_order"], indirect=True,
+    "order", ["additional_product_order_with_lease_order"], indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_ap_order(
