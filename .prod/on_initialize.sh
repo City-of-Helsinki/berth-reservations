@@ -11,3 +11,4 @@ python /app/manage.py assign_area_regions
 python /app/manage.py loaddata switch-reasons.json
 python /app/manage.py loaddata groups.json
 python /app/manage.py set_group_model_permissions
+python /app/manage.py loaddata berth_products.json
