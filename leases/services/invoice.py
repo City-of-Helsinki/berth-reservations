@@ -73,6 +73,9 @@ class BaseInvoicingService:
         lease.start_date = start_date
         lease.end_date = end_date
 
+        # Set correct status
+        lease.status = LeaseStatus.DRAFTED
+
         # If the previous lease has an application attached,
         # it will fail since it is a OneToOne field
         lease.application = None
