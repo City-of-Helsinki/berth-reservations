@@ -204,6 +204,9 @@ class HarborNode(graphql_geojson.GeoJSONType):
         "\n * Filter `forApplication` combined with either dimension (width, length) filter",
     )
 
+    def resolve_image_file(self, info, **kwargs):
+        return self.image_file_url
+
     def resolve_maps(self, info, **kwargs):
         return self.maps.all()
 
@@ -360,6 +363,9 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
     number_of_places = graphene.Int(required=True)
     number_of_free_places = graphene.Int(required=True)
     number_of_inactive_places = graphene.Int(required=True)
+
+    def resolve_image_file(self, info, **kwargs):
+        return self.image_file_url
 
     def resolve_maps(self, info, **kwargs):
         return self.maps.all()
