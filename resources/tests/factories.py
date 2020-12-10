@@ -33,7 +33,7 @@ class BoatTypeFactory(factory.django.DjangoModelFactory):
 
 
 class AbstractAreaFactory(factory.django.DjangoModelFactory):
-    servicemap_id = factory.LazyFunction(lambda: str(randgen.randint(1, 99999)))
+    servicemap_id = factory.LazyFunction(lambda: str(randgen.randint(39000, 42000)))
     zip_code = factory.Faker("postcode", locale="fi_FI")
     name = factory.Faker("word")
     street_address = factory.Faker("address")
@@ -46,6 +46,10 @@ class AbstractAreaFactory(factory.django.DjangoModelFactory):
 
 
 class HarborFactory(AbstractAreaFactory):
+    image_file = factory.LazyAttribute(
+        lambda h: f"/img/helsinki_harbors/{h.servicemap_id}.jpg"
+    )
+
     class Meta:
         model = Harbor
 
