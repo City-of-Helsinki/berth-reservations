@@ -111,8 +111,8 @@ class AbstractArea(TimeStampedModel, UUIDModel):
         verbose_name=_("location"), blank=True, null=True, srid=settings.DEFAULT_SRID
     )
 
-    image_link = models.URLField(
-        verbose_name=_("image link"), max_length=400, blank=True
+    image_file = models.CharField(
+        verbose_name=_("Image file"), max_length=400, null=True, blank=True
     )
     region = models.CharField(
         choices=AreaRegion.choices,
@@ -121,6 +121,10 @@ class AbstractArea(TimeStampedModel, UUIDModel):
         blank=True,
         null=True,
     )
+
+    @property
+    def image_file_url(self) -> str:
+        return settings.VENE_UI_URL + self.image_file if self.image_file else None
 
     class Meta:
         abstract = True
@@ -135,11 +139,6 @@ class Harbor(AbstractArea, TranslatableModel):
         related_name="harbors",
         on_delete=models.SET_NULL,
     )
-
-    image_file = models.CharField(
-        verbose_name=_("Image file"), max_length=400, null=True, blank=True
-    )
-
     availability_level = models.ForeignKey(
         AvailabilityLevel,
         null=True,
@@ -181,11 +180,6 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
         related_name="winter_storage_areas",
         on_delete=models.SET_NULL,
     )
-
-    image_file = models.CharField(
-        verbose_name=_("Image file"), max_length=400, null=True, blank=True
-    )
-
     availability_level = models.ForeignKey(
         AvailabilityLevel,
         null=True,

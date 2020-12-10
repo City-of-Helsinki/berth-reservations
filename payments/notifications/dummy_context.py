@@ -51,7 +51,11 @@ def _get_berth_order_context(subject: str = "Berth order"):
     order = OrderFactory.build(
         customer=customer,
         product=BerthProductFactory.build(),
-        lease=BerthLeaseFactory.build(customer=customer),
+        lease=BerthLeaseFactory.build(
+            customer=customer,
+            # Fixed to a harbor with a real image
+            berth__pier__harbor__image_file="/img/helsinki_harbors/41189.jpg",
+        ),
         price=Decimal("100"),
         tax_percentage=Decimal("24.00"),
     )
