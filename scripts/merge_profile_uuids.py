@@ -108,29 +108,36 @@ they will be dumped as a list into "customers_missing_uuids.txt" and displayed
 as the standard error output of this script.
 """
 
+import argparse
 import json
 import sys
+import traceback
 
 
-def do_merge():
-    profile_stubs = {}
+def do_merge(berth_profile_file, profile_uuid_mapping_files):
+
     profile_uuids = {}
     customers_missing_uuids = []
 
-    with open("berth_profile_stubs.json", "r") as stubs_json_file:
-        profile_stubs = json.load(stubs_json_file)
+    with open(berth_profile_file, "r") as stubs_json_file:
+        berth_profiles = json.load(stubs_json_file)
 
     # We have ten files from profile import
-    for file_index in range(1, 11):
-        with open(f"berth_profile_uuids_{file_index}.json", "r") as uuids_json_file:
-            uuids_from_json = json.load(uuids_json_file)
+    if not profile_uuid_mapping_files:
+        for file_index in range(1, 11):
+            profile_uuid_mapping_files.append(f"berth_profile_uuids_{file_index}.json")
+
+    for uuids_json_file in profile_uuid_mapping_files:
+        with open(uuids_json_file, "r", encoding="utf-8") as mapping_file:
+            uuids_from_json = json.loads(mapping_file.read())
             profile_uuids.update(uuids_from_json)
 
     # Save the timmi_id: our_id map as one file
     with open("berth_profiles_uuids.json", "w") as json_file:
         json.dump(profile_uuids, json_file, ensure_ascii=False, indent=2)
 
-    for customer_id, profile_stub in profile_stubs.items():
+    for profile_stub in berth_profiles:
+        customer_id = profile_stub["customer_id"]
         profile_uuid = profile_uuids.get(customer_id)
         if profile_uuid:
             profile_stub["id"] = profile_uuid
@@ -141,7 +148,6 @@ def do_merge():
     # to avoid having too big files, as those might get
     # dropped by the backend midway
     objects_per_file = 300
-    berth_profiles = list(profile_stubs.values())
 
     for file_index in range(1, (len(berth_profiles) // objects_per_file) + 2):
         end_index = objects_per_file * file_index
@@ -165,4 +171,30 @@ def do_merge():
 
 
 if __name__ == "__main__":
-    do_merge()
+    if __name__ == "__main__":
+        parser = argparse.ArgumentParser(description=__doc__)
+
+        parser.add_argument(
+            "-b",
+            dest="berth_profile_file",
+            type=str,
+            default="berth_profile_stubs.json",
+            help="berth profile stub (file containing berth profile data, except the proper city profile UUID)",
+        )
+        parser.add_argument(
+            "-m",
+            type=str,
+            dest="profile_uuid_mapping_files",
+            nargs="*",
+            help="Output file(s) from Helsinki city profile service data import that maps (customer_id -> UUID)",
+        )
+
+        args = parser.parse_args()
+
+        try:
+            do_merge(args.berth_profile_file, args.profile_uuid_mapping_files)
+        except Exception:
+            traceback.print_exc()
+            import pdb
+
+            pdb.post_mortem()
