@@ -11,6 +11,7 @@ VISMA_SIGN_SERVICE_CONFIG = {
     "VISMASIGN_CLIENT_IDENTIFIER": "dummy-identifier",
     "VISMASIGN_SECRET": base64.b64encode("dummy-secret".encode("utf8")).decode("utf8"),
     "VISMASIGN_API_URL": "https://dummy-api-url",
+    "VISMASIGN_TEST_SSN": "dummy-ssn",
 }
 
 

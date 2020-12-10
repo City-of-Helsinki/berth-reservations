@@ -52,6 +52,7 @@ PROFILE_TOKEN_SERVICE=https://api.hel.fi/auth/helsinkiprofile
 VISMASIGN_API_URL=http://fake-vismasign-api.com
 VISMASIGN_CLIENT_IDENTIFIER=dummy-vismasign-client-identifier
 VISMASIGN_SECRET=dummy-vismasign-secret
+VISMASIGN_TEST_SSN=dummy-vismasign-test-ssn
 
 NOTIFICATION_SERVICE_API_URL=http://fake-notification-api.example.com/v1
 NOTIFICATION_SERVICE_TOKEN=dummy-notification-token
