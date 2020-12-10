@@ -48,6 +48,7 @@ env = environ.Env(
     TOKEN_AUTH_FIELD_FOR_CONSENTS=(str, "https://api.hel.fi/auth"),
     TOKEN_AUTH_REQUIRE_SCOPE_PREFIX=(bool, True),
     VENE_PAYMENTS_PROVIDER_CLASS=(str, "payments.providers.BamboraPayformProvider"),
+    VENE_CONTRACTS_SERVICE_CLASS=(str, "contracts.services.VismaContractService"),
     VENE_UI_RETURN_URL=(str, "https://venepaikat.hel.fi/"),
     VENE_UI_URL=(str, "https://venepaikat.hel.fi"),
     FORCE_SCRIPT_NAME=(str, ""),
@@ -158,6 +159,7 @@ INSTALLED_APPS = [
     "resources",
     "leases",
     "payments",
+    "contracts",
 ]
 
 AUTH_USER_MODEL = "users.User"
@@ -235,6 +237,8 @@ LOGGING = {
 # Dotted path to the active payment provider class, see payments.providers init.
 # Example value: 'payments.providers.BamboraPayformProvider'
 VENE_PAYMENTS_PROVIDER_CLASS = env("VENE_PAYMENTS_PROVIDER_CLASS")
+
+VENE_CONTRACTS_SERVICE_CLASS = env("VENE_CONTRACTS_SERVICE_CLASS")
 
 VENE_UI_RETURN_URL = env("VENE_UI_RETURN_URL")
 

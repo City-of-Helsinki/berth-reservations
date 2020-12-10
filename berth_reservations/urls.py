@@ -5,7 +5,9 @@ from django.urls import include, path
 from django.views.decorators.csrf import csrf_exempt
 from helusers.admin_site import admin
 
+from contracts.services import get_contract_service
 from payments import urls as payment_urls
+from payments.models import Order
 
 from .new_schema import new_schema
 from .views import SentryGraphQLView
@@ -38,4 +40,23 @@ def readiness(*args, **kwargs):
 urlpatterns += [
     path("healthz", healthz),
     path("readiness", readiness),
+]
+
+
+#
+# Contracts integration: endpoint for downloading documents
+#
+def download_contract_document(request, order_number):
+    try:
+        order = Order.objects.get(order_number=order_number)
+    except Order.DoesNotExist:
+        return HttpResponse(status=404)
+
+    document = get_contract_service().get_document(order.lease.contract)
+
+    return HttpResponse(document, content_type="application/pdf")
+
+
+urlpatterns += [
+    path("contract_document/<str:order_number>", download_contract_document)
 ]

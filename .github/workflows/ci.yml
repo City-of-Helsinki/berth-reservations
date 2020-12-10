@@ -16,6 +16,9 @@ env:
   VENE_PAYMENTS_BAMBORA_API_SECRET: dummy-bambora-secret
   VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS: dummy-bank
   VENE_UI_RETURN_URL: http://fake-vene-ui.com
+  VISMASIGN_API_URL: http://fake-vismasign-api.com
+  VISMASIGN_CLIENT_IDENTIFIER: dummy-vismasign-client-identifier
+  VISMASIGN_SECRET: dummy-vismasign-secret
 
 jobs:
   test:

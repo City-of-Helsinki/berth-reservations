@@ -3,6 +3,8 @@ from graphene_django import DjangoObjectType
 from graphql_jwt.decorators import login_required
 
 from applications.models import BerthApplication, WinterStorageApplication
+from contracts.schema import WinterStorageContractNode
+from contracts.schema.types import BerthContractNode
 from customers.models import CustomerProfile
 from resources.schema import BerthNode, WinterStoragePlaceNode, WinterStorageSectionNode
 from utils.relay import return_node_if_user_has_permissions
@@ -20,6 +22,7 @@ class BerthLeaseNode(DjangoObjectType):
     status = LeaseStatusEnum(required=True)
     customer = graphene.Field("customers.schema.ProfileNode", required=True)
     order = graphene.Field("payments.schema.OrderNode")
+    contract = graphene.Field(BerthContractNode)
     is_active = graphene.Boolean(
         required=True,
         description="For a Lease to be active, it has to have `status == PAID`. "
@@ -49,6 +52,7 @@ class WinterStorageLeaseNode(DjangoObjectType):
     status = LeaseStatusEnum(required=True)
     customer = graphene.Field("customers.schema.ProfileNode", required=True)
     order = graphene.Field("payments.schema.OrderNode")
+    contract = graphene.Field(WinterStorageContractNode)
     is_active = graphene.Boolean(
         required=True,
         description="For a Lease to be active, it has to have `status == PAID`. "
