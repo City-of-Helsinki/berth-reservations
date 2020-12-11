@@ -500,21 +500,6 @@ class Order(UUIDModel, TimeStampedModel):
             # If the lease is being changed
             self._check_same_lease(old_instance)
 
-    def _create_order_lines(self, section):
-        for service in ProductServiceType.FIXED_SERVICES():
-            # If the section has the service (prop) and it's valid (True)
-            if hasattr(section, service.name.lower()) and getattr(
-                section, service.name.lower()
-            ):
-                # Retrieve the product for that service
-                product = AdditionalProduct.objects.get(
-                    service=service, period=PeriodType.SEASON
-                )
-
-                OrderLine.objects.create(
-                    order=self, product=product,
-                )
-
     def _assign_product_from_object_id(self):
         # Try to get a BerthProduct (BP)
         product = BerthProduct.objects.filter(id=self._product_object_id).first()
@@ -614,23 +599,7 @@ class Order(UUIDModel, TimeStampedModel):
                 self.price = rounded_decimal(price_value)
                 self.tax_percentage = tax_percentage_value
 
-        old_instance = Order.objects.filter(id=self.id).first()
-        # Save before adding additional products to have access to self
         super().save(*args, **kwargs)
-
-        # Create OrderLines for the corresponding services only:
-        #   - If it's creating the order
-        #   - If the previous lease value was None (setting a lease)
-        #   - If the order is associated with a product, otherwise (when only receiving a price),
-        #     it should not generate the order lines since they can't be added to the price
-        # For now, it only applies BerthLeases, since WinterStorageLeases include the
-        # services on the m2 price.
-        if (
-            (creating or (old_instance and not old_instance.lease))
-            and isinstance(self.lease, BerthLease)
-            and self.product
-        ):
-            self._create_order_lines(self.lease.berth.pier)
 
     def set_status(self, new_status: OrderStatus, comment: str = None) -> None:
         old_status = self.status

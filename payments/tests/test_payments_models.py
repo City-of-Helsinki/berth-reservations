@@ -18,8 +18,6 @@ from leases.utils import (
     calculate_winter_storage_lease_start_date,
 )
 from resources.tests.factories import (
-    BerthFactory,
-    PierFactory,
     WinterStoragePlaceFactory,
     WinterStoragePlaceTypeFactory,
     WinterStorageSectionFactory,
@@ -280,96 +278,8 @@ def test_order_raise_error_winter_storage_lease_and_different_customer(
     assert "The lease provided belongs to a different customer" in errors
 
 
-def test_order_berth_lease_creates_pier_order_lines(harbor):
-    services = {
-        "mooring": random_bool(),
-        "waste_collection": random_bool(),
-        "lighting": random_bool(),
-        "electricity": random_bool(),
-        "water": random_bool(),
-        "gate": random_bool(),
-    }
-    for service, create in services.items():
-        if create:
-            AdditionalProductFactory(service=ProductServiceType(service))
-
-    pier = PierFactory(**services, harbor=harbor)
-    lease = BerthLeaseFactory(berth=BerthFactory(pier=pier))
-    product = BerthProductFactory(
-        min_width=lease.berth.berth_type.width - 1,
-        max_width=lease.berth.berth_type.width + 1,
-    )
-    order = OrderFactory(product=product, lease=lease, customer=lease.customer)
-
-    for service, created in services.items():
-        if created:
-            assert (
-                OrderLine.objects.filter(
-                    order=order, product__service=ProductServiceType(service)
-                ).count()
-                == 1
-            )
-
-
-def test_order_no_lease_no_order_lines(customer_profile, harbor):
-    services = {
-        "mooring": random_bool(),
-        "waste_collection": random_bool(),
-        "lighting": random_bool(),
-        "electricity": random_bool(),
-        "water": random_bool(),
-        "gate": random_bool(),
-    }
-    for service, create in services.items():
-        if create:
-            AdditionalProductFactory(service=ProductServiceType(service))
-
-    product = BerthProductFactory()
-    order = Order.objects.create(product=product, customer=customer_profile)
-
-    # No OrderLines should be generated for Orders without lease
-    assert OrderLine.objects.filter(order=order).count() == 0
-
-
-def test_order_winter_storage_lease_no_lines(winter_storage_area):
-    services = {
-        "electricity": random_bool(),
-        "water": random_bool(),
-        "gate": random_bool(),
-    }
-    for service, create in services.items():
-        if create:
-            AdditionalProductFactory(service=ProductServiceType(service))
-
-    ws_section = WinterStorageSectionFactory(**services, area=winter_storage_area)
-    lease = WinterStorageLeaseFactory(
-        place=WinterStoragePlaceFactory(winter_storage_section=ws_section)
-    )
-    product = WinterStorageProductFactory(winter_storage_area=winter_storage_area)
-    order = Order.objects.create(product=product, customer=lease.customer, lease=lease)
-
-    # No OrderLines should be generated for WS Orders
-    assert OrderLine.objects.filter(order=order).count() == 0
-
-
-def test_order_berth_lease_right_price_for_full_season(harbor):
-    services = {
-        "mooring": random_bool(),
-        "waste_collection": random_bool(),
-        "lighting": random_bool(),
-        "electricity": random_bool(),
-        "water": random_bool(),
-        "gate": random_bool(),
-    }
-    for service, create in services.items():
-        if create:
-            # Using PriceUnits.AMOUNT to simplify testing
-            AdditionalProductFactory(
-                service=ProductServiceType(service), price_unit=PriceUnits.AMOUNT
-            )
-
-    pier = PierFactory(**services, harbor=harbor)
-    lease = BerthLeaseFactory(berth=BerthFactory(pier=pier))
+def test_order_berth_lease_right_price_for_full_season(berth):
+    lease = BerthLeaseFactory(berth=berth)
     product = BerthProductFactory(
         min_width=lease.berth.berth_type.width - 1,
         max_width=lease.berth.berth_type.width + 1,
@@ -378,14 +288,6 @@ def test_order_berth_lease_right_price_for_full_season(harbor):
 
     assert order.lease.start_date == calculate_berth_lease_start_date()
     assert order.lease.end_date == calculate_berth_lease_end_date()
-    for service, created in services.items():
-        if created:
-            order_line = OrderLine.objects.filter(
-                order=order, product__service=ProductServiceType(service)
-            ).first()
-            product_price = order_line.product.price_value
-            order_price = order_line.price
-            assert product_price == order_price
 
 
 @freeze_time("2020-06-11T08:00:00Z")
@@ -636,70 +538,6 @@ def test_order_cannot_change_winter_storage_lease(winter_storage_lease):
 
     errors = str(exception.value)
     assert "Cannot change the lease associated with this order" in errors
-
-
-def test_order_assign_berth_lease_generate_order_lines(harbor):
-    services = {
-        "mooring": random_bool(),
-        "waste_collection": random_bool(),
-        "lighting": random_bool(),
-        "electricity": random_bool(),
-        "water": random_bool(),
-        "gate": random_bool(),
-    }
-    for service, create in services.items():
-        if create:
-            AdditionalProductFactory(service=ProductServiceType(service))
-
-    pier = PierFactory(**services, harbor=harbor)
-    lease = BerthLeaseFactory(berth=BerthFactory(pier=pier))
-    product = BerthProductFactory(
-        min_width=lease.berth.berth_type.width - 1,
-        max_width=lease.berth.berth_type.width + 1,
-    )
-    order = Order.objects.create(product=product, customer=lease.customer)
-
-    assert OrderLine.objects.filter(order=order).count() == 0
-
-    order.lease = lease
-    order.save()
-
-    for service, created in services.items():
-        if created:
-            assert (
-                OrderLine.objects.filter(
-                    order=order, product__service=ProductServiceType(service)
-                ).count()
-                == 1
-            )
-
-
-def test_order_assign_winter_storage_lease_doesnt_generate_order_lines(
-    winter_storage_area,
-):
-    services = {
-        "electricity": random_bool(),
-        "water": random_bool(),
-        "gate": random_bool(),
-    }
-    for service, create in services.items():
-        if create:
-            AdditionalProductFactory(service=ProductServiceType(service))
-
-    ws_section = WinterStorageSectionFactory(**services, area=winter_storage_area)
-    lease = WinterStorageLeaseFactory(
-        place=WinterStoragePlaceFactory(winter_storage_section=ws_section)
-    )
-    product = WinterStorageProductFactory(winter_storage_area=winter_storage_area)
-    order = Order.objects.create(product=product, customer=lease.customer)
-
-    assert OrderLine.objects.filter(order=order).count() == 0
-
-    order.lease = lease
-    order.save()
-
-    # No OrderLines should be generated for WS Orders
-    assert OrderLine.objects.filter(order=order).count() == 0
 
 
 def test_order_berth_lease_can_change_price(berth_lease):
