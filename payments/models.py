@@ -668,17 +668,18 @@ class Order(UUIDModel, TimeStampedModel):
         self.lease.save(update_fields=["status", "comment"])
 
         if new_status == OrderStatus.PAID:
-            application = self.lease.application
-            application.status = ApplicationStatus.HANDLED
-            self.lease.application.save(update_fields=["status"])
+            if self.lease.application:
+                application = self.lease.application
+                application.status = ApplicationStatus.HANDLED
+                self.lease.application.save(update_fields=["status"])
 
-            if (
-                isinstance(self.lease, WinterStorageLease)
-                and application.area_type == ApplicationAreaType.UNMARKED
-            ):
-                sticker_number = get_next_sticker_number(self.lease.start_date)
-                self.lease.sticker_number = sticker_number
-                self.lease.save(update_fields=["sticker_number"])
+                if (
+                    isinstance(self.lease, WinterStorageLease)
+                    and application.area_type == ApplicationAreaType.UNMARKED
+                ):
+                    sticker_number = get_next_sticker_number(self.lease.start_date)
+                    self.lease.sticker_number = sticker_number
+                    self.lease.save(update_fields=["sticker_number"])
 
 
 class OrderLine(UUIDModel, TimeStampedModel):
