@@ -1,6 +1,9 @@
 # Berth reservations
 
+![Version](https://img.shields.io/github/v/release/City-of-Helsinki/berth-reservations?label=version&logo=github)
 ![Continuous integration](https://github.com/City-of-Helsinki/berth-reservations/workflows/Continuous%20integration/badge.svg)
+![Coverage](https://codecov.io/gh/City-of-Helsinki/berth-reservations/branch/master/graph/badge.svg)
+![License](https://img.shields.io/github/license/City-of-Helsinki/berth-reservations)
 
 :boat: Bare-bones registration API for berth reservations :boat:
 
@@ -16,7 +19,13 @@
   * [Commits and pull requests](#commits-and-pull-requests)
   * [Releases](#releases)
 * [Running tests](#running-tests)
-* [Helsinki Harbors' data](#helsinki-harbors-data)
+* [Fixtures](#fixtures)
+  * [Municipalities](#municipalities)
+  * [Resources](#resources)
+  * [Berth switch reasons](#berth-switch-reasons)
+  * [Stickers](#stickers)
+  * [User groups and permissions](#user-groups-and-permissions)
+  * [Products](#products)
 
 
 <a name="development-with-docker"></a>
@@ -163,9 +172,11 @@ Release notes can be found from [GitHub tags/releases](https://github.com/City-o
 
 In order to successfully run tests in ```applications/tests/test_applications_notifications.py``` you need to set env variable ```NOTIFICATIONS_ENABLED=1```
 
-<a name="helsinki-harbors-data"></a>
-## Helsinki Harbors' data
+<a name="fixtures"></a>
+## Fixtures
 
+<a name="municipalities"></a>
+### Municipalities
 There are some fixtures available, that contain basic data about public
 harbors and winter areas of the City of Helsinki. If you don't have divisions of Helsinki 
 imported yet through [`django-munigeo`](https://github.com/City-of-Helsinki/django-munigeo),
@@ -174,6 +185,8 @@ import them first:
     ./manage.py geo_import finland --municipalities
     ./manage.py geo_import helsinki --divisions
 
+<a name="resources"></a>
+### Resources
 Then load the fixtures with the following commands:
 
     ./manage.py loaddata helsinki-harbors.json
@@ -185,25 +198,38 @@ And assign the corresponding region to areas:
 
     ./manage.py assign_area_regions
 
-Create WS sticker sequences:
-
-    ./manage.py create_ws_lease_sticker_sequences
-    
 Point harbor and ws images to customer ui images:
 
     ./manage.py harbors_add_helsinki_harbors_images
     ./manage.py harbors_add_helsinki_winter_areas_images
     ./manage.py add_helsinki_harbors_images
     ./manage.py add_helsinki_winter_areas_images
-    
+
+<a name="berth-switch-reasons"></a>
+### Berth switch reasons
 Load the fixtures with reasons for berth switch:
 
     ./manage.py loaddata switch-reasons.json
 
-Lastly, load the User Groups:
+<a name="stickers"></a>
+### Stickers
+Create WS sticker sequences:
+
+    ./manage.py create_ws_lease_sticker_sequences
+    
+<a name="user-groups-and-permissions"></a>
+### User groups and permissions
+Load the User Groups:
 
     ./manage.py loaddata groups.json
 
 And install the model permissions:
 
     ./manage.py set_group_model_permissions
+
+<a name="products"></a>
+### Products
+There are fixtures for the pre-defined berth products.
+They are the products defined by the Boat Office, so they are the same for the production env. 
+
+    ./manage.py loaddata berth_products.json

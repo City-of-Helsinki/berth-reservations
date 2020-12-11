@@ -19,7 +19,7 @@ from leases.exceptions import AutomaticInvoicingError
 from leases.models import BerthLease, WinterStorageLease
 from leases.utils import calculate_season_end_date, calculate_season_start_date
 from payments.enums import OrderStatus
-from payments.models import BerthPriceGroup, BerthProduct, Order, WinterStorageProduct
+from payments.models import BerthProduct, Order, WinterStorageProduct
 from payments.utils import approve_order
 
 logger = logging.getLogger(__name__)
@@ -208,25 +208,8 @@ class BerthInvoicingService(BaseInvoicingService):
 
     @staticmethod
     def get_product(lease: BerthLease) -> BerthProduct:
-        # Many pre-imported leases don't have a boat associated, so we try to get the
-        # width based on the berth_type.
-        width = lease.boat.width if lease.boat else lease.berth.berth_type.width
-
-        products_for_pricegroup = BerthProduct.objects.filter(
-            price_group=BerthPriceGroup.objects.get_for_width(width),
-        )
-
-        # Get the product for the associated Harbor
-        if harbor_product := products_for_pricegroup.filter(
-            harbor=lease.berth.pier.harbor
-        ).first():
-            product = harbor_product
-
-        # If there's no Harbor-specific product, try with the "default" product
-        else:
-            product = products_for_pricegroup.filter(harbor__isnull=True).first()
-
-        return product
+        # The berth product is determined by the width of the berth of the lease
+        return BerthProduct.objects.get_in_range(width=lease.berth.berth_type.width)
 
     @staticmethod
     def get_valid_leases(season_start: date) -> QuerySet:

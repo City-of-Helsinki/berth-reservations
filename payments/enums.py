@@ -1,4 +1,4 @@
-from django.db.models import TextChoices
+from django.db.models import IntegerChoices, TextChoices
 from django.utils.translation import gettext_lazy as _
 
 
@@ -86,3 +86,9 @@ class LeaseOrderType(TextChoices):
         _("Unmarked winter storage order"),
     )
     INVALID = "invalid_order", _("Invalid order")
+
+
+class PriceTier(IntegerChoices):
+    TIER_1 = 1, _("Tier 1")
+    TIER_2 = 2, _("Tier 2")
+    TIER_3 = 3, _("Tier 3")

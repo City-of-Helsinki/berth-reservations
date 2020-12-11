@@ -10,7 +10,7 @@ from berth_reservations.exceptions import VenepaikkaGraphQLError
 from contracts.services import get_contract_service
 from customers.models import CustomerProfile
 from payments.enums import OrderStatus
-from payments.models import BerthPriceGroup, BerthProduct, Order, WinterStorageProduct
+from payments.models import BerthProduct, Order, WinterStorageProduct
 from resources.schema import BerthNode, WinterStoragePlaceNode, WinterStorageSectionNode
 from users.decorators import (
     add_permission_required,
@@ -85,17 +85,7 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
 
         try:
             lease = BerthLease.objects.create(**input)
-            price_group = BerthPriceGroup.objects.get_or_create_for_width(
-                berth.berth_type.width
-            )
-            price_group_products = BerthProduct.objects.filter(price_group=price_group)
-            harbor_product = price_group_products.filter(harbor=berth.pier.harbor)
-
-            product = (
-                harbor_product.first()
-                if harbor_product
-                else price_group_products.get(harbor__isnull=True)
-            )
+            product = BerthProduct.objects.get_in_range(width=berth.berth_type.width)
 
             order = Order.objects.create(
                 customer=input["customer"], lease=lease, product=product

@@ -41,6 +41,8 @@ class BerthAdmin(admin.ModelAdmin):
         "pier_identifier",
         "is_active",
         "is_available",
+        "berth_width",
+        "berth_length",
     )
     search_fields = (
         "number",
@@ -60,6 +62,12 @@ class BerthAdmin(admin.ModelAdmin):
 
     def pier_identifier(self, obj):
         return obj.pier.identifier
+
+    def berth_width(self, obj):
+        return obj.berth_type.width
+
+    def berth_length(self, obj):
+        return obj.berth_type.length
 
     is_available.boolean = True
 
@@ -116,6 +124,7 @@ class PierAdmin(admin.OSMGeoAdmin):
         "number_of_places",
         "number_of_free_places",
         "number_of_inactive_places",
+        "price_tier",
     )
     search_fields = (
         "id",
@@ -124,6 +133,7 @@ class PierAdmin(admin.OSMGeoAdmin):
         "harbor__id",
     )
     filter_horizontal = ("suitable_boat_types",)
+    list_filter = ("price_tier",)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "harbor":

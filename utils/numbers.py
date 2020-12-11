@@ -25,7 +25,7 @@ def rounded(
     if round_to_nearest:
         correction = Decimal(0.5 if value >= 0 else -0.5)
         value = Decimal(
-            int(value / Decimal(round_to_nearest) + correction)
+            int(Decimal(value) / Decimal(round_to_nearest) + correction)
             * Decimal(round_to_nearest)
         )
 

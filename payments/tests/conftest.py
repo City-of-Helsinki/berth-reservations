@@ -3,7 +3,6 @@ from uuid import UUID
 
 import pytest
 from django.conf import settings
-from factory.random import randgen
 
 from applications.enums import ApplicationAreaType
 from applications.tests.factories import (
@@ -17,7 +16,6 @@ from customers.tests.factories import CustomerProfileFactory
 from leases.tests.conftest import *  # noqa
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from resources.tests.conftest import *  # noqa
-from resources.tests.factories import BerthTypeFactory
 
 from ..enums import OrderStatus, OrderType, PeriodType, PriceUnits, ProductServiceType
 from ..providers import BamboraPayformProvider
@@ -39,19 +37,6 @@ PROVIDER_BASE_CONFIG = {
     "VENE_PAYMENTS_BAMBORA_API_SECRET": "dummy-secret",
     "VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS": ["dummy-bank"],
 }
-
-
-@pytest.fixture
-def berth_price_group():
-    # The BerthType (BT) save automatically creates a BerthPriceGroup (BPG) with the width
-    # of the BT as name of the BPG. The BPG Factory assigns a random word as name, so, to avoid
-    # hacky solutions, we instead create first the BT that are going to be assigned to the BPG
-    # (all with the same width to have a single BPG) and then return the BPG associated to those BTs.
-    width = randgen.uniform(1, 999)
-    bt = BerthTypeFactory.create_batch(randgen.randint(1, 10), width=width)[0]
-
-    berth_price_group = bt.price_group
-    return berth_price_group
 
 
 @pytest.fixture

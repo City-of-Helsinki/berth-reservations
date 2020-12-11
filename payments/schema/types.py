@@ -3,7 +3,7 @@ from graphene_django import DjangoConnectionField, DjangoObjectType
 
 from customers.schema import ProfileNode
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
-from resources.schema import HarborNode, WinterStorageAreaNode
+from resources.schema import WinterStorageAreaNode
 from users.decorators import view_permission_required
 from utils.schema import CountConnection
 
@@ -11,13 +11,13 @@ from ..enums import (
     AdditionalProductType,
     OrderStatus,
     PeriodType,
+    PriceTier,
     PriceUnits,
     ProductServiceType,
 )
 from ..models import (
     ADDITIONAL_PRODUCT_TAX_PERCENTAGES,
     AdditionalProduct,
-    BerthPriceGroup,
     BerthProduct,
     Order,
     OrderLine,
@@ -27,6 +27,7 @@ from ..models import (
 )
 
 PriceUnitsEnum = graphene.Enum.from_enum(PriceUnits)
+PriceTierEnum = graphene.Enum.from_enum(PriceTier)
 AdditionalProductTypeEnum = graphene.Enum.from_enum(AdditionalProductType)
 ProductServiceTypeEnum = graphene.Enum.from_enum(ProductServiceType)
 PeriodTypeEnum = graphene.Enum.from_enum(PeriodType)
@@ -56,29 +57,6 @@ OrderTypeEnum = graphene.Enum(
 )
 
 
-class BerthPriceGroupNode(DjangoObjectType):
-    name = graphene.String(required=True)
-    products = DjangoConnectionField("payments.schema.BerthProductNode", required=True)
-    default_product = graphene.Field(
-        "payments.schema.BerthProductNode",
-        description="Returns the first product associated to the price group "
-        "that does not belong to any specific `Harbor`.",
-    )
-
-    class Meta:
-        model = BerthPriceGroup
-        interfaces = (graphene.relay.Node,)
-        connection_class = CountConnection
-
-    @classmethod
-    @view_permission_required(BerthPriceGroup)
-    def get_queryset(cls, queryset, info):
-        return super().get_queryset(queryset, info)
-
-    def resolve_default_product(self, info):
-        return self.products.filter(harbor__isnull=True).first()
-
-
 class AbstractPlaceProductNode:
     price_value = graphene.Decimal(required=True)
     price_unit = PriceUnitsEnum(
@@ -87,14 +65,22 @@ class AbstractPlaceProductNode:
     tax_percentage = PlaceProductTaxEnum(required=True)
 
 
-class BerthProductNode(DjangoObjectType, AbstractPlaceProductNode):
-    price_group = graphene.Field(BerthPriceGroupNode, required=True)
-    harbor = graphene.Field(HarborNode)
+class BerthProductNode(DjangoObjectType):
+    min_width = graphene.Decimal(required=True, description="Excluded from the range")
+    max_width = graphene.Decimal(required=True, description="Included in the range")
+    tier_1_price = graphene.Decimal(required=True)
+    tier_2_price = graphene.Decimal(required=True)
+    tier_3_price = graphene.Decimal(required=True)
+    tax_percentage = PlaceProductTaxEnum(required=True)
+    price_unit = PriceUnitsEnum(
+        required=True, description="`Fixed to PriceUnit.AMOUNT`"
+    )
 
     class Meta:
         model = BerthProduct
         interfaces = (graphene.relay.Node,)
         connection_class = CountConnection
+        description = "The width range excludes the min width and includes the max width, i.e. `(min, max]`"
 
     @classmethod
     @view_permission_required(BerthProduct)

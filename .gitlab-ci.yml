@@ -17,6 +17,7 @@ build:
 review:
   # These variables are available only for review env and are merged with the general variables defined above.
   variables:
+    APP_INITIALIZE_COMMAND: /app/.prod/on_initialize.sh
     K8S_SECRET_ALLOWED_HOSTS: "*"
     K8S_SECRET_DEBUG: 1
     K8S_SECRET_CREATE_SUPERUSER: 1

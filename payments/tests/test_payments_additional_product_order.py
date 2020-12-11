@@ -64,14 +64,20 @@ mutation CREATE_ADDITIONAL_PRODUCT_ORDER($input: CreateAdditionalProductOrderMut
     "api_client", ["berth_services"], indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
-def test_create_additional_product_order(api_client):
+def test_create_additional_product_order(api_client, berth_lease):
     # Setup the existing order and lease
-    berth_product = BerthProductFactory()
-    berth_product.price_unit = PriceUnits.AMOUNT
-    berth_product.price_value = Decimal("200.00")
-    berth_product.tax_percentage = Decimal("24.00")
-    berth_product.save()
-    order = OrderFactory(product=berth_product)
+    berth_product = BerthProductFactory(
+        min_width=berth_lease.berth.berth_type.width - 1,
+        max_width=berth_lease.berth.berth_type.width + 1,
+        tier_1_price=Decimal("200.00"),
+        tier_2_price=Decimal("200.00"),
+        tier_3_price=Decimal("200.00"),
+        price_unit=PriceUnits.AMOUNT,
+        tax_percentage=Decimal("24.00"),
+    )
+    order = OrderFactory(
+        product=berth_product, lease=berth_lease, customer=berth_lease.customer
+    )
     order.status = OrderStatus.PAID
     order.save()
     lease = order.lease

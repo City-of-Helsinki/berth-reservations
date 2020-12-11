@@ -59,22 +59,6 @@ class BaseLeaseAdmin(admin.ModelAdmin):
         return obj.application.last_name if obj.application else "-"
 
     list_filter = ("status",)
-    list_display = (
-        "id",
-        "created_at",
-        "start_date",
-        "end_date",
-        "first_name",
-        "last_name",
-        "status",
-        "application_id",
-    )
-    search_fields = (
-        "id",
-        "application__id",
-        "application__first_name",
-        "application__last_name",
-    )
 
 
 class GenericOrderInline(GenericStackedInline):
@@ -88,6 +72,47 @@ class GenericOrderInline(GenericStackedInline):
 class BerthLeaseAdmin(BaseLeaseAdmin):
     inlines = (BerthLeaseChangeInline, GenericOrderInline)
     raw_id_fields = ("berth", "application")
+    list_display = (
+        "id",
+        "created_at",
+        "harbor",
+        "pier",
+        "berth_number",
+        "start_date",
+        "end_date",
+        "first_name",
+        "last_name",
+        "application_id",
+        "status",
+    )
+    search_fields = (
+        "id",
+        "application__id",
+        "application__first_name",
+        "application__last_name",
+        "customer__id",
+        "berth__pier__harbor__translations__name",
+        "berth__pier__identifier",
+        "berth__number",
+    )
+
+    def harbor(self, obj):
+        return obj.berth.pier.harbor
+
+    def pier(self, obj):
+        return obj.berth.pier.identifier
+
+    def berth_number(self, obj):
+        return obj.berth.number
+
+
+class GenericOrderInline(GenericStackedInline):
+    readonly_fields = ("pk",)
+    ct_field = "_lease_content_type"
+    ct_fk_field = "_lease_object_id"
+    model = Order
+    extra = 0
+    exclude = ("_product_content_type", "_lease_content_type")
 
 
 class WinterStorageLeaseInline(admin.StackedInline):
@@ -100,6 +125,41 @@ class WinterStorageLeaseInline(admin.StackedInline):
 class WinterStorageLeaseAdmin(BaseLeaseAdmin):
     inlines = (WinterStorageLeaseChangeInline, GenericOrderInline)
     raw_id_fields = ("place", "section", "application")
+    list_display = (
+        "id",
+        "created_at",
+        "area",
+        "section",
+        "place_number",
+        "start_date",
+        "end_date",
+        "first_name",
+        "last_name",
+        "application_id",
+        "status",
+    )
+    search_fields = (
+        "id",
+        "application__id",
+        "application__first_name",
+        "application__last_name",
+        "customer__id",
+        "place__winter_storage_section__area__translations__name",
+        "place__winter_storage_section__identifier",
+        "place__number",
+        "section__identifier",
+    )
+
+    def area(self, obj):
+        section = obj.section or obj.place.winter_storage_section
+        return section.area
+
+    def section(self, obj):
+        section = obj.section or obj.place.winter_storage_section
+        return section.identifier
+
+    def place_number(self, obj):
+        return obj.place.number if obj.place else None
 
 
 admin.site.register(BerthLease, BerthLeaseAdmin)

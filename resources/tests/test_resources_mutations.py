@@ -14,6 +14,7 @@ from berth_reservations.tests.utils import (
 )
 from leases.enums import LeaseStatus
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
+from payments.enums import PriceTier
 
 from ..enums import BerthMooringType
 from ..models import (
@@ -887,6 +888,7 @@ mutation CreatePier($input: CreatePierMutationInput!) {
                 suitableBoatTypes {
                     id
                 }
+                priceTier
             }
         }
     }
@@ -912,6 +914,7 @@ def test_create_pier(api_client, harbor, boat_type):
         "water": True,
         "electricity": True,
         "gate": True,
+        "priceTier": PriceTier.TIER_1.name,
     }
     assert Pier.objects.count() == 0
 
@@ -929,6 +932,7 @@ def test_create_pier(api_client, harbor, boat_type):
         "water": variables["water"],
         "wasteCollection": variables["wasteCollection"],
         "suitableBoatTypes": [{"id": str(boat_type.id)}],
+        "priceTier": PriceTier.TIER_1.name,
     }
 
 
@@ -938,7 +942,7 @@ def test_create_pier(api_client, harbor, boat_type):
     indirect=True,
 )
 def test_create_pier_not_enough_permissions(api_client):
-    variables = {"harborId": ""}
+    variables = {"harborId": "", "priceTier": PriceTier.TIER_1.name}
 
     assert Pier.objects.count() == 0
 
@@ -949,7 +953,10 @@ def test_create_pier_not_enough_permissions(api_client):
 
 
 def test_create_pier_harbor_doesnt_exist(superuser_api_client):
-    variables = {"harborId": to_global_id(HarborNode._meta.name, uuid.uuid4())}
+    variables = {
+        "harborId": to_global_id(HarborNode._meta.name, uuid.uuid4()),
+        "priceTier": PriceTier.TIER_1.name,
+    }
 
     assert Pier.objects.count() == 0
 

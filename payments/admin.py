@@ -5,7 +5,6 @@ from django.utils.translation import gettext_lazy as _
 from .enums import LeaseOrderType
 from .models import (
     AdditionalProduct,
-    BerthPriceGroup,
     BerthProduct,
     Order,
     OrderLine,
@@ -14,31 +13,6 @@ from .models import (
     WinterStorageProduct,
 )
 from .utils import currency, percentage
-
-
-class BerthPriceGroupAdmin(admin.ModelAdmin):
-    readonly_fields = ("berth_types",)
-
-    def get_queryset(self, request):
-        return (
-            super()
-            .get_queryset(request)
-            .order_by("berth_types__width", "name")
-            .distinct()
-        )
-
-    def berth_types(self, obj):
-        return "\n".join(
-            [
-                str(bt)
-                for bt in obj.berth_types.all().order_by(
-                    "width", "length", "depth", "mooring_type"
-                )
-            ]
-        )
-
-    berth_types.short_description = _("Berth types")
-    berth_types.admin_order_field = "berth_types"
 
 
 class AdditionalProductAdmin(admin.ModelAdmin):
@@ -59,6 +33,16 @@ class AdditionalProductAdmin(admin.ModelAdmin):
 
     product_type.short_description = _("Product type")
     product_type.admin_order_field = "product_type"
+
+
+class BerthProductAdmin(admin.ModelAdmin):
+    list_display = (
+        "min_width",
+        "max_width",
+        "tier_1_price",
+        "tier_2_price",
+        "tier_3_price",
+    )
 
 
 class OrderLineInline(admin.StackedInline):
@@ -89,6 +73,7 @@ class OrderAdmin(admin.ModelAdmin):
     )
     list_display = (
         "id",
+        "created_at",
         "order_number",
         "total_price",
         "status",
@@ -190,8 +175,8 @@ class OrderInline(admin.StackedInline):
     exclude = ("_product_content_type", "_lease_content_type")
 
 
-admin.site.register([WinterStorageProduct, BerthProduct, OrderLine, OrderLogEntry])
+admin.site.register([WinterStorageProduct, OrderLine, OrderLogEntry])
+admin.site.register(BerthProduct, BerthProductAdmin)
 admin.site.register(AdditionalProduct, AdditionalProductAdmin)
-admin.site.register(BerthPriceGroup, BerthPriceGroupAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderToken, OrderTokenAdmin)

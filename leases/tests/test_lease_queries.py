@@ -11,7 +11,6 @@ from berth_reservations.tests.utils import assert_not_enough_permissions
 from contracts.schema.types import BerthContractNode, WinterStorageContractNode
 from contracts.tests.factories import BerthContractFactory, WinterStorageContractFactory
 from customers.schema import BoatNode, ProfileNode
-from payments.models import BerthPriceGroup
 from payments.schema import OrderNode
 from payments.tests.factories import (
     BerthProductFactory,
@@ -728,10 +727,10 @@ def test_query_send_berth_invoice_preview(api_client):
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),
         end_date=calculate_season_end_date(today() - relativedelta(years=1)),
     )
-    price_group = BerthPriceGroup.objects.get_or_create_for_width(
-        lease.berth.berth_type.width
+    BerthProductFactory(
+        min_width=lease.berth.berth_type.width - 1,
+        max_width=lease.berth.berth_type.width + 1,
     )
-    BerthProductFactory(price_group=price_group, harbor=lease.berth.pier.harbor)
 
     executed = api_client.execute(QUERY_SEND_BERTH_INVOICE_PREVIEW)
 
