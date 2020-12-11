@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.forms import ChoiceField, UUIDField
 from django.utils.translation import gettext_lazy as _
 
+from leases.models import BerthLease, WinterStorageLease
+
 from .enums import LeaseOrderType
 from .models import (
     AdditionalProduct,
@@ -70,6 +72,7 @@ class OrderAdmin(admin.ModelAdmin):
         "order_number",
         "lease_order_type",
         "order_type",
+        "place",
     )
     list_display = (
         "id",
@@ -78,7 +81,8 @@ class OrderAdmin(admin.ModelAdmin):
         "total_price",
         "status",
         "customer",
-        "lease",
+        "lease_id",
+        "place",
         "product",
         "lease_order_type",
         "order_type",
@@ -135,6 +139,17 @@ class OrderAdmin(admin.ModelAdmin):
             else None
         )
 
+    def lease_id(self, obj):
+        return obj.lease.id if obj.lease else None
+
+    def place(self, obj):
+        if obj.lease:
+            if isinstance(obj.lease, BerthLease):
+                return obj.lease.berth
+            elif isinstance(obj.lease, WinterStorageLease):
+                return obj.lease.place or obj.lease.section
+        return None
+
     pretax_price.short_description = _("Pretax price")
     pretax_price.admin_order_field = "pretax_price"
 
@@ -146,6 +161,9 @@ class OrderAdmin(admin.ModelAdmin):
 
     total_tax_percentage.short_description = _("Total order tax percentage")
     total_tax_percentage.admin_order_field = "total_tax_percentage"
+
+    place.short_description = _("Place")
+    place.admin_order_field = "place"
 
 
 class OrderTokenAdmin(admin.ModelAdmin):
