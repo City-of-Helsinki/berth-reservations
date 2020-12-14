@@ -1,0 +1,10 @@
+Hei! Seuraavan kauden laskut lähetetty
+
+Laskun lähetys onnistui: {{ successful_orders }}
+Laskun lähetys epäonnistui: {{ failed_orders }}
+
+Täältä voit korjata mahdolliset puutteet:
+https://venepaikka-admin.hel.fi/recurring-invoices
+
+
+Love, the developers <3

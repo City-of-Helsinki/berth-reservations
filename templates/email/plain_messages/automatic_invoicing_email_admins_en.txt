@@ -1,0 +1,10 @@
+Hei! The invoicing ended successfully
+
+Invoices sent successfully: {{ successful_orders }}
+Invoices failed to send: {{ failed_orders }}
+
+Here you can check the failed ones:
+https://venepaikka-admin.hel.fi/recurring-invoices
+
+
+Love, the developers <3

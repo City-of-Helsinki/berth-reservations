@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-12 16:01+0200\n"
+"POT-Creation-Date: 2020-12-14 18:30+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -566,6 +566,9 @@ msgstr "Tarjottu"
 msgid "Refused"
 msgstr "Hylätty"
 
+msgid "Error"
+msgstr "Virhe"
+
 msgid "Paid"
 msgstr "Maksettu"
 
@@ -693,6 +696,9 @@ msgstr "talvisäilytyspaikan vuokrasopimuksen muutos"
 msgid "winter storage lease changes"
 msgstr "talvisäilytyspaikkojen vuokrasopimusten muutokset"
 
+msgid "Next season invoices sent"
+msgstr "Kausilaskujen lähetys valmis"
+
 msgid "Application must be connected to an existing customer first"
 msgstr "Hakemuksen tulee ensin olla yhdistetty olemassa olevaan asiakkaaseen"
 
@@ -724,8 +730,22 @@ msgstr "merkitsemättömien paikkojen arvioitu määrä"
 msgid "All leases must have an assigned sticker number"
 msgstr ""
 
-msgid "Berth types"
-msgstr "Venepaikkatyypit"
+msgid "Missing customer email"
+msgstr "Asiakkaan sähköpostiosoite puuttuu"
+
+#, python-brace-format
+msgid "Limit of failures reached: {self.failure_count} elements failed"
+msgstr "Virhetilanteiden maksimimäärä saavutettu: {self.failure_count} kohdetta epäonnistui"
+
+#, fuzzy
+#| msgid "Application must be connected to an existing customer first"
+msgid "The application is not connected to a customer"
+msgstr "Hakemuksen tulee ensin olla yhdistetty olemassa olevaan asiakkaaseen"
+
+#, fuzzy
+#| msgid "No suitable berths"
+msgid "No suitable product found"
+msgstr "Ei soveltuvia tuotteita"
 
 msgid "Pretax price"
 msgstr "Hinta ennen veroa"
@@ -742,10 +762,11 @@ msgstr "Tilauksen kokonaishinta ennen veroa"
 msgid "Total order tax percentage"
 msgstr "Tilauksen kokonaisveroprosentti"
 
-#, fuzzy
-#| msgid "order number"
+msgid "Place"
+msgstr "Paikka"
+
 msgid "Order number"
-msgstr "tilausnumero"
+msgstr "Tilausnumero"
 
 msgid "Invalidate selected tokens"
 msgstr ""
@@ -786,9 +807,6 @@ msgstr "Odottaa käsittelyä"
 msgid "Rejected"
 msgstr "Hylätty"
 
-msgid "Cancelled"
-msgstr "Peruutettu"
-
 #, fuzzy
 #| msgid "order"
 msgid "Lease order"
@@ -821,17 +839,35 @@ msgstr "talvisäilytysalue"
 msgid "Invalid order"
 msgstr ""
 
+msgid "Tier 1"
+msgstr "Maksuluokka 1"
+
+msgid "Tier 2"
+msgstr "Maksuluokka 2"
+
+msgid "Tier 3"
+msgstr "Maksuluokka 3"
+
 msgid "price"
 msgstr "hinta"
-
-msgid "berth price group name"
-msgstr "venepaikan hintaryhmän nimi"
 
 msgid "tax percentage"
 msgstr "veroprosentti"
 
-msgid "price group"
-msgstr "hintaryhmä"
+msgid "minimum width"
+msgstr "maksimileveys"
+
+msgid "maximum width"
+msgstr "maksimileveys"
+
+msgid "tier 1 price"
+msgstr "maksuluokka 1:n hinta"
+
+msgid "tier 2 price"
+msgstr "maksuluokka 2:n hinta"
+
+msgid "tier 3 price"
+msgstr "maksuluokka 3:n hinta"
 
 msgid "Berth product"
 msgstr "Venepaikka"
@@ -930,15 +966,12 @@ msgstr "Venepaikkatarjous"
 msgid "Renew berth order approved"
 msgstr "Venepaikkalasku"
 
-#: payments/notifications/types.py:16
 msgid "Berth switch order approved"
 msgstr "Venepaikan vaihtotarjous"
 
-#: payments/notifications/types.py:20
 msgid "New winter storage order approved"
 msgstr "Talvisäilytyspaikkalasku"
 
-#: payments/notifications/types.py:24
 msgid "Unmarked winter storage order approved"
 msgstr "Nostojärjestyspaikkalasku"
 
@@ -956,9 +989,6 @@ msgstr "Toisella tilauksella on jo sama tunnus"
 
 msgid "Payment service is down for maintenance"
 msgstr "Maksupalvelu on poissa käytöstä huoltotoimien vuoksi"
-
-msgid "Order is not associated with a Lease"
-msgstr "Tilausta ei ole liitetty vuokrasopimukseen"
 
 msgid "Additional product already exists"
 msgstr "Lisäpalvelu on jo olemassa"
@@ -1038,9 +1068,6 @@ msgstr "sähköposti"
 msgid "location"
 msgstr "sijainti"
 
-msgid "image link"
-msgstr "kuvalinkki"
-
 msgid "area region"
 msgstr ""
 
@@ -1088,6 +1115,9 @@ msgstr "valaistus"
 
 msgid "personal electricity contract"
 msgstr "henkilökohtainen sähkösopimus"
+
+msgid "price tier"
+msgstr "maksuluokka"
 
 msgid "piers"
 msgstr "laiturit"
@@ -1158,12 +1188,6 @@ msgstr ""
 
 msgid "You do not have permission to perform this action"
 msgstr "Sinulla ei ole lupaa suorittaa tätä toimintoa"
-
-#, python-brace-format
-msgid "Cannot delete {model_name} because it has some related leases"
-msgstr ""
-"Ei voida poistaa mallia {model_name}, sillä siihen on liitetty "
-"vuokrasopimuksia"
 
 msgid "time modified"
 msgstr "aika muokattu"
