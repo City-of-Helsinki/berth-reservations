@@ -90,11 +90,5 @@ class FailedInstanceType(graphene.ObjectType):
     error = graphene.String()
 
 
-class SendExistingInvoicesType(graphene.ObjectType):
-    successful_orders = graphene.List(graphene.ID)
-    failed_orders = graphene.List(FailedInstanceType)
-    failed_leases = graphene.List(FailedInstanceType)
-
-
 class SendExistingInvoicesPreviewType(graphene.ObjectType):
     expected_leases = graphene.Int(required=True)

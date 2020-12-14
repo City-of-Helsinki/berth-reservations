@@ -1,3 +1,5 @@
+import threading
+
 import graphene
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -18,16 +20,14 @@ from users.decorators import (
     delete_permission_required,
     view_permission_required,
 )
-from utils.relay import get_node_from_global_id, to_global_id
+from utils.relay import get_node_from_global_id
 from utils.schema import update_object
 
 from ..enums import LeaseStatus
-from ..exceptions import AutomaticInvoicingError
 from ..models import BerthLease, WinterStorageLease
 from ..services import BerthInvoicingService
 from ..stickers import get_next_sticker_number
-from .types import BerthLeaseNode, SendExistingInvoicesType, WinterStorageLeaseNode
-from .utils import parse_invoicing_result
+from .types import BerthLeaseNode, WinterStorageLeaseNode
 
 
 class AbstractLeaseInput:
@@ -419,42 +419,21 @@ class SendExistingBerthInvoicesMutation(graphene.ClientIDMutation):
             required=True, description="API token for Helsinki profile GraphQL API",
         )
 
-    result = graphene.Field(SendExistingInvoicesType)
+    ok = graphene.Boolean(required=True)
 
     @classmethod
     @view_permission_required(CustomerProfile)
     @change_permission_required(BerthLease, WinterStorageLease, Order)
     def mutate_and_get_payload(cls, root, info, profile_token, **input):
-        from payments.schema import OrderNode
-
-        try:
-            result = BerthInvoicingService(
-                request=info.context,
-                profile_token=profile_token,
-                due_date=input.get("due_date"),
-            ).send_invoices()
-        except AutomaticInvoicingError as e:
-            raise VenepaikkaGraphQLError(e)
-
-        # Only need to parse the list of ids
-        successful_orders = [
-            to_global_id(OrderNode, id) for id in result.get("successful_orders")
-        ]
-        # Parse the failed object types
-        failed_leases = list(
-            map(parse_invoicing_result(BerthLeaseNode), result.get("failed_leases"))
+        service = BerthInvoicingService(
+            request=info.context,
+            profile_token=profile_token,
+            due_date=input.get("due_date"),
         )
-        failed_orders = list(
-            map(parse_invoicing_result(OrderNode), result.get("failed_orders"))
-        )
+        t1 = threading.Thread(target=service.send_invoices, args=[])
+        t1.start()
 
-        result_response = SendExistingInvoicesType(
-            successful_orders=successful_orders,
-            failed_orders=failed_orders,
-            failed_leases=failed_leases,
-        )
-
-        return SendExistingBerthInvoicesMutation(result=result_response)
+        return SendExistingBerthInvoicesMutation(ok=True)
 
 
 class Mutation:

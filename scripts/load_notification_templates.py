@@ -39,6 +39,7 @@ if __name__ == "__main__":
     from applications.notifications import (
         NotificationType as ApplicationNotificationType,
     )
+    from leases.notifications import NotificationType as LeaseNotificationType
     from payments.notifications import NotificationType as PaymentNotificationType
 
     notifications = {
@@ -81,6 +82,10 @@ if __name__ == "__main__":
         PaymentNotificationType.ADDITIONAL_PRODUCT_ORDER_APPROVED: {
             "html": "additional_service_invoice_{lang}.html",
             "plain": None,
+        },
+        LeaseNotificationType.AUTOMATIC_INVOICING_EMAIL_ADMINS: {
+            "html": "automatic_invoicing_email_admins_{lang}.html",
+            "plain": "automatic_invoicing_email_admins_{lang}.txt",
         },
     }
 

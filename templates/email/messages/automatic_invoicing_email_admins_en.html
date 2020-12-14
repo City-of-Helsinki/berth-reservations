@@ -1,0 +1,25 @@
+<p>Hei! The invoicing ended successfully.</p>
+
+<table style="width: 100%">
+    <tr>
+        <td>
+            <strong>Successful invoices sent:</strong>
+        </td>
+        <td>{{ successful_orders }}</td>
+    </tr>
+    <tr>
+        <td>
+            <strong>Failed invoices (not sent):</strong>
+        </td>
+        <td>{{ failed_orders }}</td>
+    </tr>
+</table>
+
+<p>Here you can check the failed ones:<br/>
+    <a href="https://venepaikka-admin.hel.fi/recurring-invoices">
+        https://venepaikka-admin.hel.fi/recurring-invoices
+    </a>
+</p>
+
+
+<p>Love, the developers <3</p>
