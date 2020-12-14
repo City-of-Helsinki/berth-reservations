@@ -10,6 +10,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from freezegun import freeze_time
 
+from leases.enums import LeaseStatus
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from leases.utils import (
     calculate_berth_lease_end_date,
@@ -24,7 +25,13 @@ from resources.tests.factories import (
 )
 from utils.numbers import rounded
 
-from ..enums import AdditionalProductType, PeriodType, PriceUnits, ProductServiceType
+from ..enums import (
+    AdditionalProductType,
+    OrderStatus,
+    PeriodType,
+    PriceUnits,
+    ProductServiceType,
+)
 from ..models import (
     AdditionalProduct,
     BerthProduct,
@@ -860,3 +867,21 @@ def test_berth_product_range():
     assert BerthProduct.objects.get_in_range(width=2.01) == bp2
     assert BerthProduct.objects.get_in_range(width=2.75) == bp2
     assert BerthProduct.objects.get_in_range(width=2.76) == bp3
+
+
+def test_order_set_status_no_application(berth):
+    lease = BerthLeaseFactory(berth=berth, application=None, status=LeaseStatus.OFFERED)
+    product = BerthProductFactory(
+        min_width=lease.berth.berth_type.width - 1,
+        max_width=lease.berth.berth_type.width + 1,
+    )
+    order = OrderFactory(
+        product=product,
+        customer=lease.customer,
+        lease=lease,
+        status=OrderStatus.WAITING,
+    )
+
+    order.set_status(OrderStatus.PAID)
+    assert order.status == OrderStatus.PAID
+    assert order.lease.status == LeaseStatus.PAID
