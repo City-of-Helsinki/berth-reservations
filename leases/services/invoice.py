@@ -6,11 +6,13 @@ from uuid import UUID
 from anymail.exceptions import AnymailError
 from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import DataError, IntegrityError, transaction
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
+from django_ilmoitin.utils import send_notification
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.services import HelsinkiProfileUser, ProfileService
@@ -21,6 +23,8 @@ from leases.utils import calculate_season_end_date, calculate_season_start_date
 from payments.enums import OrderStatus
 from payments.models import BerthProduct, Order, WinterStorageProduct
 from payments.utils import approve_order
+
+from ..notifications import NotificationType as LeaseNotificationType
 
 logger = logging.getLogger(__name__)
 
@@ -99,6 +103,7 @@ class BaseInvoicingService:
         lease.save(update_fields=["status", "comment"])
         self.failed_leases.append({lease.id: message})
         self.failure_count += 1
+        logger.debug(f"Lease failed [{lease.id}]: {message}")
 
     def fail_order(self, order: Order, message: str,) -> None:
         """Set an order to ERROR status and append it to the failed_order list"""
@@ -107,6 +112,7 @@ class BaseInvoicingService:
         order.set_status(OrderStatus.ERROR, f"Lease renewing failed: {message}")
         self.failed_orders.append({order.id: message})
         self.failure_count += 1
+        logger.debug(f"Lease order [{order.id}]: {message}")
 
     def send_email(self, order, helsinki_profile_user: HelsinkiProfileUser):
         email = helsinki_profile_user.email if helsinki_profile_user else None
@@ -130,7 +136,30 @@ class BaseInvoicingService:
         else:
             self.fail_order(order, _("Missing customer email"))
 
-    def send_invoices(self) -> Dict[str, List]:  # noqa: C901
+    def email_admins(self):
+        logger.debug("Emailing admins")
+        context = {
+            "subject": LeaseNotificationType.AUTOMATIC_INVOICING_EMAIL_ADMINS.label,
+            "successful_orders": len(self.successful_orders),
+            "failed_orders": len(self.failed_orders),
+            "failed_leases": len(self.failed_leases),
+        }
+        admins = (
+            get_user_model()
+            .objects.exclude(email="")
+            .exclude(email__icontains="@example.com")
+            .filter(Q(is_superuser=True) | Q(is_staff=True))
+        )
+        for admin in admins:
+            send_notification(
+                admin.email,
+                LeaseNotificationType.AUTOMATIC_INVOICING_EMAIL_ADMINS,
+                context,
+            )
+
+    def send_invoices(self) -> None:  # noqa: C901
+        logger.debug("Starting batch invoice sending")
+
         self.successful_orders = []
         self.failed_orders = []
         self.failed_leases = []
@@ -138,18 +167,22 @@ class BaseInvoicingService:
         self.failure_count = 0
 
         leases = self.get_valid_leases(self.season_start)
+        logger.debug(f"Leases fetched: {len(leases)}")
 
+        logger.debug("Fetching profiles")
         # Fetch all the profiles from the Profile service
         profiles = ProfileService(self.profile_token).get_all_profiles()
+
+        logger.debug(f"Profiles fetched: {len(profiles)}")
 
         for lease in leases:
             order = None
             if self.failure_count >= self.MAXIMUM_FAILURES:
-                raise AutomaticInvoicingError(
-                    _(
-                        f"Limit of failures reached: {self.failure_count} elements failed"
-                    )
+                error_message = _(
+                    f"Limit of failures reached: {self.failure_count} elements failed"
                 )
+                logger.error(error_message)
+                raise AutomaticInvoicingError(error_message)
 
             if lease.customer.id not in profiles:
                 self.fail_lease(
@@ -193,11 +226,7 @@ class BaseInvoicingService:
             except Exception as e:
                 logger.exception(e)
 
-        return {
-            "successful_orders": self.successful_orders,
-            "failed_orders": self.failed_orders,
-            "failed_leases": self.failed_leases,
-        }
+        self.email_admins()
 
 
 class BerthInvoicingService(BaseInvoicingService):
