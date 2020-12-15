@@ -89,7 +89,7 @@ class BaseInvoicingService:
             lease.contract.pk = None
             lease.contract.save()
 
-        lease.save(update_fields=["start_date", "end_date", "application", "contract"])
+        lease.save(update_fields=["start_date", "end_date", "application"])
 
         return lease
 
@@ -197,9 +197,14 @@ class BaseInvoicingService:
 
             try:
                 with transaction.atomic():
-                    new_lease = self.create_new_lease(
-                        lease, self.season_start, self.season_end
-                    )
+                    try:
+                        new_lease = self.create_new_lease(
+                            lease, self.season_start, self.season_end
+                        )
+                    except (ValueError, IntegrityError) as e:
+                        logger.exception(e)
+                        self.fail_lease(lease, str(e))
+                        continue
                     customer = new_lease.customer
 
                     # Get the associated product
