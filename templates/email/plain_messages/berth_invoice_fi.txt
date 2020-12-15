@@ -10,7 +10,7 @@ Venepaikka
 {{ order.lease.berth.pier.harbor.street_address }}
 
 Hinta
-Perushinta  ({{ order.product.display_dimensions }}): {{ order.price }}€
+Perushinta ({{ order.product.display_dimensions }}): {{ order.price }}€
 {% for order_line in fixed_services %}
 {{ order_line.product.get_service_display() }}: {{ order_line.price }}€
 {% endfor %}

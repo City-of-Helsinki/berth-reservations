@@ -1,0 +1,46 @@
+City of Helsinki / boat berths
+Boat berth invoice
+
+Dear customer, this is the invoice for your boat berth. You can pay the invoice via the link below.
+
+
+Berth
+{{ order.lease.berth.pier.harbor.name }}
+{{ order.lease.berth.pier.identifier }} {{ order.lease.berth.number }}
+{{ order.lease.berth.pier.harbor.street_address }}
+
+Price of the boat berth
+Base price ({{ order.product.display_dimensions }}): {{ order.price }}€
+{% for order_line in fixed_services %}
+{{ order_line.product.get_service_display() }}: {{ order_line.price }}€
+{% endfor %}
+
+Berth in total: {{ order.fixed_price_total }}€
+
+{% if optional_services %}
+Additional services:
+
+{% for order_line in optional_services %}
+{{ order_line.product.get_service_display() }}: {{ order_line.price }}€
+{% endfor %}
+{% endif %}
+
+Total: {{ order.total_price }}€ / year
+
+Due date: {{ order.due_date }}
+
+Payment link: {{ payment_url }}
+
+Please note! You can only pay the invoice via this link. We cannot accept payments made through other means.
+Further information: venepaikkavaraukset@hel.fi
+
+
+The City of Helsinki’s boat berths are leased out to customers until further notice, and an annual fee is charged for them in accordance with the currently valid price list. If the invoice is not paid by the due date, the lease is terminated automatically. The boating season is from 10 June to 14 September.
+
+To pay the berth fee, you must accept the valid boat berth lease agreement terms and the boat harbour rules.
+
+Berth reservations
+Fredriksberg A 1
+00100 Helsinki
+
+All rights reserved.
