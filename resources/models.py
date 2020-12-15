@@ -449,7 +449,9 @@ class Pier(AbstractAreaSection):
         verbose_name=_("personal electricity contract"), default=False
     )
     price_tier = models.PositiveSmallIntegerField(
-        choices=PriceTier.choices, verbose_name=_("price tier")
+        choices=PriceTier.choices,
+        verbose_name=_("price tier"),
+        default=PriceTier.TIER_1,
     )
 
     objects = PierManager()

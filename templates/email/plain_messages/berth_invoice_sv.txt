@@ -1,0 +1,46 @@
+Helsingfors stad/båtplatser
+Båtplatsfaktura
+
+Bästa kund, här är fakturan för din båtplats. Du kan betala den via länken nedan.
+
+
+Båtplats som fakturan gäller
+{{ order.lease.berth.pier.harbor.name }}
+{{ order.lease.berth.pier.identifier }} {{ order.lease.berth.number }}
+{{ order.lease.berth.pier.harbor.street_address }}
+
+Båtplatsens pris
+Grundavgift ({{ order.product.display_dimensions }}): {{ order.price }}€
+{% for order_line in fixed_services %}
+{{ order_line.product.get_service_display() }}: {{ order_line.price }}€
+{% endfor %}
+
+Båtplatsen totalt: {{ order.fixed_price_total }}€
+
+{% if optional_services %}
+Tilläggstjänster:
+
+{% for order_line in optional_services %}
+{{ order_line.product.get_service_display() }}: {{ order_line.price }}€
+{% endfor %}
+{% endif %}
+
+Totalt: {{ order.total_price }}€ / år
+
+Förfallodatum: {{ order.due_date }}
+
+Betalningslänk: {{ payment_url }}
+
+Obs! Fakturan kan endast betalas via denna länk. Betalningar på annat sätt accepteras inte.
+Mer information: venepaikkavaraukset@hel.fi
+
+
+Helsingfors stads båtplatser hyrs ut till kunder tills vidare, och för platserna debiteras en årlig avgift enligt gällande prislista. Om fakturan inte betalas senast på förfallodagen sägs hyresavtalet upp automatiskt. Båtsäsongen pågår från den 10 juni till den 14 september.
+
+Betalningen av båtplatsen förutsätter att gällande avtalsvillkor för uthyrning av båtplats respektive regler för småbåtshamnen godkänns.
+
+Båtplatsreserveringen
+Fredriksberg A 1
+00100 Helsingfors
+
+All rätt till ändringar förbehålls.
