@@ -1,7 +1,6 @@
 from django.core.management import BaseCommand
 
 from contracts.services import get_contract_service
-from leases.enums import LeaseStatus
 from leases.models import BerthLease, WinterStorageLease
 
 
@@ -9,12 +8,8 @@ class Command(BaseCommand):
     help = "Generate contracts for leases in status DRAFTED and OFFERED, which are missing contracts"
 
     def handle(self, *args, **options):
-        winter_storage_leases = WinterStorageLease.objects.filter(
-            status__in=[LeaseStatus.DRAFTED, LeaseStatus.OFFERED], contract=None
-        )
-        berth_leases = BerthLease.objects.filter(
-            status__in=[LeaseStatus.DRAFTED, LeaseStatus.OFFERED], contract=None
-        )
+        winter_storage_leases = WinterStorageLease.objects.filter(contract=None)
+        berth_leases = BerthLease.objects.filter(contract=None)
 
         failed = []
         success_count = 0
