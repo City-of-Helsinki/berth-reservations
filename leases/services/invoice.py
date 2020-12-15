@@ -84,7 +84,12 @@ class BaseInvoicingService:
         # it will fail since it is a OneToOne field
         lease.application = None
 
-        lease.save(update_fields=["start_date", "end_date", "application"])
+        # Make copy of attached contract, if one exists
+        if hasattr(lease, "contract") and lease.contract is not None:
+            lease.contract.pk = None
+            lease.contract.save()
+
+        lease.save(update_fields=["start_date", "end_date", "application", "contract"])
 
         return lease
 
