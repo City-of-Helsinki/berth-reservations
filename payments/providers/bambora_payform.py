@@ -166,7 +166,17 @@ class BamboraPayformProvider(PaymentProvider):
                 int_tax == product.tax_percentage
             )  # make sure the tax is a whole number
             with override(language):
-                product_name = product.name
+                lease = order.lease
+                place = (
+                    lease.berth
+                    if hasattr(lease, "berth")
+                    else lease.place
+                    if hasattr(lease, "place") and lease.place
+                    else lease.section
+                    if hasattr(lease, "section") and lease.section
+                    else area
+                )
+                product_name = f"{product.name}: {place}"
             items.append(
                 {
                     "id": get_talpa_product_id(product.id, area),

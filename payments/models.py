@@ -152,7 +152,7 @@ class BerthProduct(AbstractPlaceProduct, TimeStampedModel, UUIDModel):
 
     @property
     def name(self):
-        return _("Berth product") + f": {self}"
+        return _("Berth product")
 
     def price_for_tier(self, tier: PriceTier) -> Decimal:
         if tier == PriceTier.TIER_1:
@@ -182,7 +182,7 @@ class WinterStorageProduct(AbstractPlaceProduct, AbstractBaseProduct):
 
     @property
     def name(self):
-        return _("Winter Storage product") + f": {self}"
+        return _("Winter Storage product")
 
 
 class AdditionalProduct(AbstractBaseProduct):
