@@ -466,7 +466,6 @@ class PierInput(AbstractAreaSectionInput):
 class CreatePierMutation(graphene.ClientIDMutation):
     class Input(PierInput):
         harbor_id = graphene.ID(required=True)
-        price_tier = graphene.Field("payments.schema.PriceTierEnum", required=True)
 
     pier = graphene.Field(PierNode)
 
