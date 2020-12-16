@@ -18,6 +18,7 @@ from ..tests.factories import (
     WinterStorageProductFactory,
 )
 from ..tests.utils import random_price
+from ..utils import get_email_subject
 from .types import NotificationType
 
 provider = BamboraPayformProvider(
@@ -32,16 +33,12 @@ provider = BamboraPayformProvider(
 
 
 def _get_order_context(
-    subject: str,
-    order: Order,
-    fixed_services: List[OrderLine],
-    optional_services: List[OrderLine],
+    subject: str, order: Order, optional_services: List[OrderLine],
 ) -> Dict:
     return {
         "subject": subject,
         "order": order,
         "payment_url": provider.get_payment_email_url(order, settings.LANGUAGE_CODE),
-        "fixed_services": fixed_services,
         "optional_services": optional_services,
     }
 
@@ -59,28 +56,6 @@ def _get_berth_order_context(subject: str = "Berth order"):
         price=Decimal("100"),
         tax_percentage=Decimal("24.00"),
     )
-    fixed_services = [
-        OrderLineFactory.build(
-            order=order,
-            product__service=ProductServiceType.FIXED_SERVICES()[0],
-            price=random_price(),
-        ),
-        OrderLineFactory.build(
-            order=order,
-            product__service=ProductServiceType.FIXED_SERVICES()[1],
-            price=random_price(),
-        ),
-        OrderLineFactory.build(
-            order=order,
-            product__service=ProductServiceType.FIXED_SERVICES()[2],
-            price=random_price(),
-        ),
-        OrderLineFactory.build(
-            order=order,
-            product__service=ProductServiceType.FIXED_SERVICES()[3],
-            price=random_price(),
-        ),
-    ]
     optional_services = [
         OrderLineFactory.build(
             order=order,
@@ -94,7 +69,7 @@ def _get_berth_order_context(subject: str = "Berth order"):
         ),
     ]
 
-    return _get_order_context(subject, order, fixed_services, optional_services)
+    return _get_order_context(subject, order, optional_services)
 
 
 def _get_winter_storage_order_context(subject: str = "Winter storage order"):
@@ -119,7 +94,7 @@ def _get_winter_storage_order_context(subject: str = "Winter storage order"):
         ),
     ]
 
-    return _get_order_context(subject, order, [], optional_services)
+    return _get_order_context(subject, order, optional_services)
 
 
 def _get_additional_product_order_context(subject: str = "Additional product order"):
@@ -143,22 +118,24 @@ def load_dummy_context():
     dummy_context.update(
         {
             NotificationType.NEW_BERTH_ORDER_APPROVED: _get_berth_order_context(
-                NotificationType.NEW_BERTH_ORDER_APPROVED.label
+                get_email_subject(NotificationType.NEW_BERTH_ORDER_APPROVED)
             ),
             NotificationType.RENEW_BERTH_ORDER_APPROVED: _get_berth_order_context(
-                NotificationType.NEW_BERTH_ORDER_APPROVED.label
+                get_email_subject(NotificationType.RENEW_BERTH_ORDER_APPROVED)
             ),
             NotificationType.BERTH_SWITCH_ORDER_APPROVED: _get_berth_order_context(
-                NotificationType.BERTH_SWITCH_ORDER_APPROVED.label
+                get_email_subject(NotificationType.BERTH_SWITCH_ORDER_APPROVED)
             ),
             NotificationType.NEW_WINTER_STORAGE_ORDER_APPROVED: _get_winter_storage_order_context(
-                NotificationType.NEW_WINTER_STORAGE_ORDER_APPROVED.label
+                get_email_subject(NotificationType.NEW_WINTER_STORAGE_ORDER_APPROVED)
             ),
             NotificationType.UNMARKED_WINTER_STORAGE_ORDER_APPROVED: _get_winter_storage_order_context(
-                NotificationType.UNMARKED_WINTER_STORAGE_ORDER_APPROVED.label
+                get_email_subject(
+                    NotificationType.UNMARKED_WINTER_STORAGE_ORDER_APPROVED
+                )
             ),
             NotificationType.ADDITIONAL_PRODUCT_ORDER_APPROVED: _get_additional_product_order_context(
-                NotificationType.ADDITIONAL_PRODUCT_ORDER_APPROVED.label
+                get_email_subject(NotificationType.ADDITIONAL_PRODUCT_ORDER_APPROVED)
             ),
         }
     )

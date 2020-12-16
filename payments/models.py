@@ -431,6 +431,10 @@ class Order(UUIDModel, TimeStampedModel):
             else 0
         )
 
+    @property
+    def total_tax_value(self):
+        return self.total_price - self.total_pretax_price
+
     def _check_valid_products(self) -> None:
         if self.product and not isinstance(
             self.product, (BerthProduct, WinterStorageProduct)
