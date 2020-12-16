@@ -13,6 +13,7 @@ class Command(BaseCommand):
 
         failed = []
         success_count = 0
+        fail_count = 0
 
         for winter_storage_lease in winter_storage_leases:
             try:
@@ -21,8 +22,14 @@ class Command(BaseCommand):
                 )
                 success_count += 1
             except Exception as e:
+                fail_count += 1
+                self.stdout.write(
+                    self.style.ERROR(
+                        f"Failed to generate contract for ws lease: {winter_storage_lease.id}, exception: {str(e)}"
+                    )
+                )
                 failed.append(
-                    f"berth_lease_id: {winter_storage_lease.id}, exception: {str(e)}"
+                    f"winter storage lease: {winter_storage_lease.id}, exception: {str(e)}"
                 )
 
         for berth_lease in berth_leases:
@@ -30,7 +37,13 @@ class Command(BaseCommand):
                 get_contract_service().create_berth_contract(berth_lease)
                 success_count += 1
             except Exception as e:
-                failed.append(f"berth_lease_id: {berth_lease.id}, exception: {str(e)}")
+                fail_count += 1
+                self.stdout.write(
+                    self.style.ERROR(
+                        f"Failed to generate contract for berth lease: {berth_lease.id}, exception: {str(e)}"
+                    )
+                )
+                failed.append(f"berth lease: {berth_lease.id}, exception: {str(e)}")
 
         if not failed:
             self.stdout.write(
@@ -39,7 +52,7 @@ class Command(BaseCommand):
         else:
             self.stdout.write(
                 self.style.ERROR(
-                    "Failed to generate contracts for the following leases:"
+                    f"Failed to generate contracts for the following {fail_count} leases:"
                 )
             )
             self.stdout.writelines(failed)
