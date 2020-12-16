@@ -7,9 +7,10 @@ from anymail.exceptions import AnymailError
 from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.db import DataError, IntegrityError, transaction
-from django.db.models import Q, QuerySet
+from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 from django_ilmoitin.utils import send_notification
@@ -31,6 +32,8 @@ logger = logging.getLogger(__name__)
 
 class BaseInvoicingService:
     MAXIMUM_FAILURES = 50
+
+    ADMIN_EMAIL_NOTIFICATION_GROUP_NAME = "Berth services"
 
     successful_orders: List[UUID]
     failed_leases: List[Dict[UUID, str]]
@@ -151,9 +154,11 @@ class BaseInvoicingService:
         }
         admins = (
             get_user_model()
-            .objects.exclude(email="")
+            .objects.filter(
+                groups=Group.objects.get(name=self.ADMIN_EMAIL_NOTIFICATION_GROUP_NAME)
+            )
+            .exclude(email="")
             .exclude(email__icontains="@example.com")
-            .filter(Q(is_superuser=True) | Q(is_staff=True))
         )
         for admin in admins:
             send_notification(
