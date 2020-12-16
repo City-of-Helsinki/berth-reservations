@@ -21,24 +21,12 @@
         </td>
         <td>{{ order.price }}&euro;</td>
     </tr>
-    {% for order_line in fixed_services %}
-        <tr>
-            <td colspan="2">{{ order_line.product.get_service_display() }}:</td>
-            <td>{{ order_line.price }}&euro;</td>
-        </tr>
-    {% endfor %}
-    <tr>
-        <td colspan="3">
-            <hr/>
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2">
-            Berth in total:
-        </td>
-        <td>{{ order.fixed_price_total }}&euro;</td>
-    </tr>
     {% if optional_services %}
+        <tr>
+            <td colspan="3">
+                <hr/>
+            </td>
+        </tr>
         <tr>
             <td colspan="3">
                 Additional services:
@@ -55,6 +43,18 @@
         <td colspan="3">
             <hr/>
         </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            NET PRICE:
+        </td>
+        <td>{{ order.total_pretax_price }}&euro;</td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            VAT:
+        </td>
+        <td>{{ order.total_tax_value }}&euro; ({{ order.tax_percentage }}%)</td>
     </tr>
     <tr>
         <td colspan="2">

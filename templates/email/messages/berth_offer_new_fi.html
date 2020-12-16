@@ -121,25 +121,12 @@
         </td>
         <td>{{ order.price }}&euro;</td>
     </tr>
-    {% for order_line in fixed_services %}
-        <tr>
-            <td colspan="2">{{ order_line.product.get_service_display() }}:</td>
-            <td>{{ order_line.price }}&euro;</td>
-        </tr>
-    {% endfor %}
-    <tr>
-        <td colspan="3">
-            <hr/>
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2">
-            Venepaikka yhteensä:
-        </td>
-        <td>{{ order.fixed_price_total }}&euro;</td>
-    </tr>
-
     {% if optional_services %}
+        <tr>
+            <td colspan="3">
+                <hr/>
+            </td>
+        </tr>
         <tr>
             <td colspan="3">
                 Lisäpalvelut:
@@ -157,6 +144,18 @@
         <td colspan="3">
             <hr/>
         </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            NETTOHINTA:
+        </td>
+        <td>{{ order.total_pretax_price }}&euro;</td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            ALV:
+        </td>
+        <td>{{ order.total_tax_value }}&euro; ({{ order.tax_percentage }}%)</td>
     </tr>
     <tr>
         <td colspan="2">

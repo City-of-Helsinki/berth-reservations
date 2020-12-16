@@ -11,11 +11,6 @@ Båtplats som fakturan gäller
 
 Båtplatsens pris
 Grundavgift ({{ order.product.display_dimensions }}): {{ order.price }}€
-{% for order_line in fixed_services %}
-{{ order_line.product.get_service_display() }}: {{ order_line.price }}€
-{% endfor %}
-
-Båtplatsen totalt: {{ order.fixed_price_total }}€
 
 {% if optional_services %}
 Tilläggstjänster:
@@ -25,6 +20,8 @@ Tilläggstjänster:
 {% endfor %}
 {% endif %}
 
+Nettopris: {{ order.total_pretax_price }}€
+MOMS: {{ order.total_tax_value }}€ ({{ order.tax_percentage }}%)
 Totalt: {{ order.total_price }}€ / år
 
 Förfallodatum: {{ order.due_date }}

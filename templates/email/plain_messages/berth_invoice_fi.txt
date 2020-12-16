@@ -11,11 +11,6 @@ Venepaikka
 
 Hinta
 Perushinta ({{ order.product.display_dimensions }}): {{ order.price }}€
-{% for order_line in fixed_services %}
-{{ order_line.product.get_service_display() }}: {{ order_line.price }}€
-{% endfor %}
-
-Venepaikka yhteensä: {{ order.fixed_price_total }}€
 
 {% if optional_services %}
 Lisäpalvelut:
@@ -25,6 +20,8 @@ Lisäpalvelut:
 {% endfor %}
 {% endif %}
 
+Nettohinta: {{ order.total_pretax_price }}€
+ALV: {{ order.total_tax_value }}€ ({{ order.tax_percentage }}%)
 Yhteensä: {{ order.total_price }}€ / vuosi
 
 Eräpäivä: {{ order.due_date }}

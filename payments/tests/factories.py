@@ -138,6 +138,9 @@ class OrderFactory(factory.django.DjangoModelFactory):
 class OrderLineFactory(factory.django.DjangoModelFactory):
     order = factory.SubFactory(OrderFactory)
     product = factory.SubFactory(AdditionalProductFactory)
+    tax_percentage = factory.Faker(
+        "random_element", elements=ADDITIONAL_PRODUCT_TAX_PERCENTAGES
+    )
 
     class Meta:
         model = OrderLine
