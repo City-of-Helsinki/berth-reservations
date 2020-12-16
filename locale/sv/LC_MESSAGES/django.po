@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-12 16:01+0200\n"
+"POT-Creation-Date: 2020-12-16 10:44+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -566,6 +566,9 @@ msgstr "Nekad"
 msgid "Refused"
 msgstr "Nekad"
 
+msgid "Error"
+msgstr ""
+
 msgid "Paid"
 msgstr "Betald"
 
@@ -696,6 +699,9 @@ msgstr "ändring i hyresavtal för vinteruppläggningsplats"
 msgid "winter storage lease changes"
 msgstr "ändringar i hyresavtal för vinteruppläggningsplats"
 
+msgid "Next season invoices sent"
+msgstr ""
+
 msgid "Application must be connected to an existing customer first"
 msgstr "Ansökan måste först kopplas till en existerande kund"
 
@@ -728,8 +734,10 @@ msgstr "uppskattat antal omärkta platser"
 msgid "All leases must have an assigned sticker number"
 msgstr ""
 
-msgid "Berth types"
-msgstr "Båtplatstyper"
+#, fuzzy
+#| msgid "Application must be connected to an existing customer first"
+msgid "The application is not connected to a customer"
+msgstr "Ansökan måste först kopplas till en existerande kund"
 
 msgid "Pretax price"
 msgstr "Pris före skatt"
@@ -745,6 +753,9 @@ msgstr "Beställningens totala pris före skatt"
 
 msgid "Total order tax percentage"
 msgstr "Skatteprocent för hela beställningen"
+
+msgid "Place"
+msgstr "Plats"
 
 #, fuzzy
 #| msgid "order number"
@@ -790,9 +801,6 @@ msgstr "Väntar"
 msgid "Rejected"
 msgstr "Avvisad"
 
-msgid "Cancelled"
-msgstr "Anullerad"
-
 #, fuzzy
 #| msgid "order"
 msgid "Lease order"
@@ -827,9 +835,6 @@ msgstr ""
 
 msgid "price"
 msgstr "pris"
-
-msgid "berth price group name"
-msgstr "namn på båtplatsens prisgrupp"
 
 msgid "tax percentage"
 msgstr "vinterupplagsområde"
@@ -942,15 +947,12 @@ msgstr "Erbjudande om båtplats"
 msgid "Renew berth order approved"
 msgstr "Båtplatsfaktura"
 
-#: payments/notifications/types.py:16
 msgid "Berth switch order approved"
 msgstr "Erbjudande om byte av båtplats"
 
-#: payments/notifications/types.py:20
 msgid "New winter storage order approved"
 msgstr "Faktura för vinteruppläggningsplats"
 
-#: payments/notifications/types.py:24
 msgid "Unmarked winter storage order approved"
 msgstr "Faktura för plats på upplagsområde som fylls i upptagningsordning"
 
@@ -965,9 +967,6 @@ msgstr "Det finns redan en beställning med samma ID"
 
 msgid "Payment service is down for maintenance"
 msgstr "Betaltjänsten är stängd för underhåll"
-
-msgid "Order is not associated with a Lease"
-msgstr "Beställningen är inte kopplad till ett hyresavtal"
 
 msgid "Additional product already exists"
 msgstr "Ytterligare tjänster finns redan"
@@ -998,6 +997,9 @@ msgstr "Beställningen gäller inte längre"
 
 msgid "Invalid order status"
 msgstr ""
+
+msgid "Boat berth invoice"
+msgstr "Båtplatsfaktura"
 
 msgid "Maximum allowed width"
 msgstr "Maximala tillåtna bredd"
@@ -1046,9 +1048,6 @@ msgstr "e-post"
 
 msgid "location"
 msgstr "läge"
-
-msgid "image link"
-msgstr "bildlänk"
 
 msgid "area region"
 msgstr ""
@@ -1167,11 +1166,6 @@ msgstr ""
 
 msgid "You do not have permission to perform this action"
 msgstr "Du har inte tillstånd att utföra denna åtgärd"
-
-#, python-brace-format
-msgid "Cannot delete {model_name} because it has some related leases"
-msgstr ""
-"Det går inte att radera {model_name} eftersom det finns relaterade hyresavtal"
 
 msgid "time modified"
 msgstr "tidpunkt för redigering"

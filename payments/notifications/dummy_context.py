@@ -18,6 +18,7 @@ from ..tests.factories import (
     WinterStorageProductFactory,
 )
 from ..tests.utils import random_price
+from ..utils import get_email_subject
 from .types import NotificationType
 
 provider = BamboraPayformProvider(
@@ -143,22 +144,24 @@ def load_dummy_context():
     dummy_context.update(
         {
             NotificationType.NEW_BERTH_ORDER_APPROVED: _get_berth_order_context(
-                NotificationType.NEW_BERTH_ORDER_APPROVED.label
+                get_email_subject(NotificationType.NEW_BERTH_ORDER_APPROVED)
             ),
             NotificationType.RENEW_BERTH_ORDER_APPROVED: _get_berth_order_context(
-                NotificationType.NEW_BERTH_ORDER_APPROVED.label
+                get_email_subject(NotificationType.RENEW_BERTH_ORDER_APPROVED)
             ),
             NotificationType.BERTH_SWITCH_ORDER_APPROVED: _get_berth_order_context(
-                NotificationType.BERTH_SWITCH_ORDER_APPROVED.label
+                get_email_subject(NotificationType.BERTH_SWITCH_ORDER_APPROVED)
             ),
             NotificationType.NEW_WINTER_STORAGE_ORDER_APPROVED: _get_winter_storage_order_context(
-                NotificationType.NEW_WINTER_STORAGE_ORDER_APPROVED.label
+                get_email_subject(NotificationType.NEW_WINTER_STORAGE_ORDER_APPROVED)
             ),
             NotificationType.UNMARKED_WINTER_STORAGE_ORDER_APPROVED: _get_winter_storage_order_context(
-                NotificationType.UNMARKED_WINTER_STORAGE_ORDER_APPROVED.label
+                get_email_subject(
+                    NotificationType.UNMARKED_WINTER_STORAGE_ORDER_APPROVED
+                )
             ),
             NotificationType.ADDITIONAL_PRODUCT_ORDER_APPROVED: _get_additional_product_order_context(
-                NotificationType.ADDITIONAL_PRODUCT_ORDER_APPROVED.label
+                get_email_subject(NotificationType.ADDITIONAL_PRODUCT_ORDER_APPROVED)
             ),
         }
     )

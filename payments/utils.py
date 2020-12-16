@@ -27,10 +27,11 @@ from leases.utils import (
     calculate_winter_season_end_date,
     calculate_winter_season_start_date,
 )
-from payments.enums import OrderStatus, OrderType, ProductServiceType
 from resources.enums import AreaRegion
 from resources.models import Harbor, WinterStorageArea
 from utils.numbers import rounded as rounded_decimal
+
+from .enums import OrderStatus, OrderType, ProductServiceType
 
 
 def rounded(func):
@@ -321,10 +322,21 @@ def approve_order(
     send_notification(email, notification_type.value, context, language)
 
 
+def get_email_subject(notification_type):
+    from .notifications import NotificationType
+
+    if (
+        notification_type == NotificationType.NEW_BERTH_ORDER_APPROVED
+        or notification_type == NotificationType.RENEW_BERTH_ORDER_APPROVED
+    ):
+        return _("Boat berth invoice")
+    return notification_type.label
+
+
 def get_context(order, payment_url, notification_type):
     if order.order_type == OrderType.LEASE_ORDER:
         return {
-            "subject": notification_type.label,
+            "subject": get_email_subject(notification_type),
             "order": order,
             "fixed_services": order.order_lines.filter(
                 product__service__in=ProductServiceType.FIXED_SERVICES()
@@ -346,7 +358,7 @@ def get_context(order, payment_url, notification_type):
         )
 
         return {
-            "subject": notification_type.label,
+            "subject": get_email_subject(notification_type),
             "order": order,
             "additional_product": {"name": additional_product_name, "season": season},
             "payment_url": payment_url,
