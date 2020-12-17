@@ -696,6 +696,7 @@ def test_winter_season_price():
     assert order.price == Decimal("10.00")
 
 
+@freeze_time("2020-10-01T08:00:00Z")
 def test_berth_season_price(berth):
     start_date = today()
     end_date = start_date + relativedelta(days=15)
