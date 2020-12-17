@@ -720,6 +720,8 @@ def test_query_send_berth_invoice_preview(api_client):
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),
         end_date=calculate_season_end_date(today() - relativedelta(years=1)),
     )
+    lease.contract = BerthContractFactory()
+    lease.contract.save()
     BerthLeaseFactory(
         renew_automatically=True,
         boat=None,

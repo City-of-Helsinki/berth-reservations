@@ -141,6 +141,7 @@ class BerthLeaseManager(models.Manager):
             status=LeaseStatus.PAID,
             start_date__year=lease_year,
             end_date__year=lease_year,
+            contract__isnull=False,
         )
 
         return leases
