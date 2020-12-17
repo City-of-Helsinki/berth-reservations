@@ -14,6 +14,8 @@ class Command(BaseCommand):
             status=LeaseStatus.PAID, start_date__year=2021, contract__isnull=False
         )
 
+        count = 0
+
         for paid_renewed_lease in paid_renewed_leases:
 
             if paid_renewed_lease.contract.status != ContractStatus.SIGNED:
@@ -47,9 +49,12 @@ class Command(BaseCommand):
 
                 try:
                     send_mail(email_subject, email_content, email_address)
+                    count += 1
                 except Exception as e:
                     self.stdout.write(
                         self.style.ERROR(
                             f"Failed to send email to address {email_address}: {str(e)}"
                         )
                     )
+
+        self.stdout.write(self.style.SUCCESS(f"{count} contract emails sent"))
