@@ -89,10 +89,14 @@ class BaseInvoicingService:
 
         # Make copy of attached contract, if one exists
         if hasattr(lease, "contract") and lease.contract is not None:
-            lease.contract.pk = None
-            lease.contract.save()
+            new_contract = lease.contract
+            new_contract.pk = None
+            new_contract.lease = None
+            new_contract.save()
+            lease.contract = new_contract
 
-        lease.save(update_fields=["start_date", "end_date", "application"])
+        lease.save()
+        lease.refresh_from_db()
 
         return lease
 
