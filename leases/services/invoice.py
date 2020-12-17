@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 class BaseInvoicingService:
-    MAXIMUM_FAILURES = 50
+    MAXIMUM_FAILURES = 100
 
     ADMIN_EMAIL_NOTIFICATION_GROUP_NAME = "Berth services"
 
