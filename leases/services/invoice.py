@@ -16,6 +16,7 @@ from django.utils.translation import gettext_lazy as _
 from django_ilmoitin.utils import send_notification
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
+from contracts.models import VismaBerthContract, VismaWinterStorageContract
 from customers.services import HelsinkiProfileUser, ProfileService
 from leases.enums import LeaseStatus
 from leases.exceptions import AutomaticInvoicingError
@@ -88,14 +89,28 @@ class BaseInvoicingService:
         lease.application = None
 
         # Make copy of attached contract, if one exists
+        contract = None
         if hasattr(lease, "contract") and lease.contract is not None:
-            new_contract = lease.contract
-            new_contract.pk = None
-            new_contract.lease = None
-            new_contract.save()
-            lease.contract = new_contract
+            contract = lease.contract
 
         lease.save()
+
+        if contract:
+            if isinstance(lease, BerthLease):
+                VismaBerthContract.objects.create(
+                    lease=lease,
+                    document_id=lease.contract.document_id,
+                    invitation_id=lease.contract.invitation_id,
+                    passphrase=lease.contract.passphrase,
+                )
+            elif isinstance(lease, WinterStorageLease):
+                VismaWinterStorageContract.objects.create(
+                    lease=lease,
+                    document_id=lease.contract.document_id,
+                    invitation_id=lease.contract.invitation_id,
+                    passphrase=lease.contract.passphrase,
+                )
+
         lease.refresh_from_db()
 
         return lease
