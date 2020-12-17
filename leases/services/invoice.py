@@ -97,7 +97,10 @@ class BaseInvoicingService:
         return lease
 
     def fail_lease(
-        self, lease: Union[BerthLease, WinterStorageLease], message: str
+        self,
+        lease: Union[BerthLease, WinterStorageLease],
+        message: str,
+        dont_count: bool = False,
     ) -> None:
         """Set a lease to ERROR status and append it to the failed_lease list"""
         lease.status = LeaseStatus.ERROR
@@ -110,16 +113,16 @@ class BaseInvoicingService:
 
         lease.save(update_fields=["status", "comment"])
         self.failed_leases.append({lease.id: message})
-        self.failure_count += 1
+        self.failure_count += 1 if not dont_count else 0
         logger.debug(f"Lease failed [{lease.id}]: {message}")
 
-    def fail_order(self, order: Order, message: str,) -> None:
+    def fail_order(self, order: Order, message: str, dont_count: bool = False) -> None:
         """Set an order to ERROR status and append it to the failed_order list"""
         order.comment = f"{today().date()}: {message}"
         order.save(update_fields=["comment"])
         order.set_status(OrderStatus.ERROR, f"Lease renewing failed: {message}")
         self.failed_orders.append({order.id: message})
-        self.failure_count += 1
+        self.failure_count += 1 if not dont_count else 0
         logger.debug(f"Lease order [{order.id}]: {message}")
 
     def send_email(self, order, helsinki_profile_user: HelsinkiProfileUser):
@@ -142,7 +145,8 @@ class BaseInvoicingService:
                 logger.exception(e)
                 self.fail_order(order, str(e))
         else:
-            self.fail_order(order, _("Missing customer email"))
+            self.fail_lease(order.lease, _("Missing customer email"), dont_count=True)
+            self.fail_order(order, _("Missing customer email"), dont_count=True)
 
     def email_admins(self):
         logger.debug("Emailing admins")
