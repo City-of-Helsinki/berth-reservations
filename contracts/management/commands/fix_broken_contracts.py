@@ -10,6 +10,7 @@ class Command(BaseCommand):
     help = "Fixes broken renewed lease contracts"
 
     def handle(self, *args, **options):
+        count = 0
         try:
             with transaction.atomic():
                 future_leases = BerthLease.objects.filter(
@@ -24,9 +25,10 @@ class Command(BaseCommand):
                 ).filter(start_date__year=2020, end_date__year=2020,)
 
                 for old_lease in renewed_leases:
-                    new_lease = future_leases.get(
+                    new_lease = BerthLease.objects.get(
                         customer=old_lease.customer,
                         boat=old_lease.boat,
+                        berth=old_lease.berth,
                         start_date__year=2021,
                     )
 
@@ -36,6 +38,7 @@ class Command(BaseCommand):
 
                     new_lease.contract = contract_copy
                     new_lease.save()
+                    count += 1
 
         except Exception as e:
             self.stdout.write(
@@ -43,3 +46,4 @@ class Command(BaseCommand):
                     f"Failed to fix contracts for renewed leases: {str(e)}"
                 )
             )
+        self.stdout.write(self.style.SUCCESS(f"Successfully fixed {count} contracts"))
