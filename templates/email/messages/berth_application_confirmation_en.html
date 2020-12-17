@@ -21,7 +21,7 @@
     <b>Harbor:</b> {{ application.berth_switch.harbor.name }}<br/>
     <b>Pier ID:</b> {{ application.berth_switch.pier or "-" }}<br/>
     <b>Berth number:</b> {{ application.berth_switch.berth_number }}<br/>
-    <b>Special request:</b> {{ application.berth_switch.reason.title }}<br/>
+    <b>Special request:</b> {% if application.berth_switch.reason %}{{ application.berth_switch.reason.title }}{% else %}-{% endif %}<br/>
 {% endif %}
 
 <hr/>
