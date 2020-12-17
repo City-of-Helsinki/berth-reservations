@@ -1,4 +1,8 @@
-<p>Hei! Seuraavan kauden laskut lähetetty</p>
+{% if exited_with_errors %}
+<p>Hei! Laskujen lähetys pysäytettiin koska 100 virheen raja ylittyi.</p>
+{% else %}
+<p>Hei! Seuraavan kauden laskut lähetetty.</p>
+{% endif %}
 
 <table style="width: 100%">
     <tr>

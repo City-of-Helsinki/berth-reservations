@@ -1,4 +1,8 @@
-Hei! Seuraavan kauden laskut lähetetty
+{% if exited_with_errors %}
+Hei! Laskujen lähetys pysäytettiin koska 100 virheen raja ylittyi.
+{% else %}
+Hei! Seuraavan kauden laskut lähetetty.
+{% endif %}
 
 Laskun lähetys onnistui: {{ successful_orders }}
 Laskun lähetys epäonnistui: {{ failed_orders }}

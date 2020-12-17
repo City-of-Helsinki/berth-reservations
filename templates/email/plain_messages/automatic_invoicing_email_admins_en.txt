@@ -1,4 +1,8 @@
-Hei! The invoicing ended successfully
+{% if exited_with_errors %}
+Hei! The invoicing exceeded the limit of 100 errors so it stopped.
+{% else %}
+Hei! The invoicing ended successfully.
+{% endif %}
 
 Invoices sent successfully: {{ successful_orders }}
 Invoices failed to send: {{ failed_orders }}
