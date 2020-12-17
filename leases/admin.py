@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericStackedInline
 
+from contracts.models import VismaBerthContract, VismaWinterStorageContract
 from payments.models import Order
 
 from .models import (
@@ -58,6 +59,11 @@ class BaseLeaseAdmin(admin.ModelAdmin):
     def last_name(self, obj):
         return obj.application.last_name if obj.application else "-"
 
+    def has_contract(self, obj):
+        return obj.contract is not None
+
+    has_contract.boolean = True
+
     list_filter = ("status",)
 
 
@@ -69,8 +75,12 @@ class GenericOrderInline(GenericStackedInline):
     exclude = ("_product_content_type", "_lease_content_type")
 
 
+class VismaBerthContractInline(admin.StackedInline):
+    model = VismaBerthContract
+
+
 class BerthLeaseAdmin(BaseLeaseAdmin):
-    inlines = (BerthLeaseChangeInline, GenericOrderInline)
+    inlines = (BerthLeaseChangeInline, GenericOrderInline, VismaBerthContractInline)
     raw_id_fields = ("berth", "application")
     list_display = (
         "id",
@@ -84,6 +94,7 @@ class BerthLeaseAdmin(BaseLeaseAdmin):
         "last_name",
         "application_id",
         "status",
+        "has_contract",
     )
     search_fields = (
         "id",
@@ -122,8 +133,16 @@ class WinterStorageLeaseInline(admin.StackedInline):
     extra = 0
 
 
+class VismaWinterStorageContractInline(admin.StackedInline):
+    model = VismaWinterStorageContract
+
+
 class WinterStorageLeaseAdmin(BaseLeaseAdmin):
-    inlines = (WinterStorageLeaseChangeInline, GenericOrderInline)
+    inlines = (
+        WinterStorageLeaseChangeInline,
+        GenericOrderInline,
+        VismaWinterStorageContractInline,
+    )
     raw_id_fields = ("place", "section", "application")
     list_display = (
         "id",
@@ -137,6 +156,7 @@ class WinterStorageLeaseAdmin(BaseLeaseAdmin):
         "last_name",
         "application_id",
         "status",
+        "has_contract",
     )
     search_fields = (
         "id",
