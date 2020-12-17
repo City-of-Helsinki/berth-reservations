@@ -233,12 +233,18 @@ class BamboraPayformProvider(PaymentProvider):
                 {
                     "email": order.customer_email.strip(),
                     "customer": {
-                        "firstname": order.customer_first_name.capitalize(),
-                        "lastname": order.customer_last_name.capitalize(),
+                        "firstname": order.customer_first_name.capitalize()
+                        if order.customer_first_name
+                        else "",
+                        "lastname": order.customer_last_name.capitalize()
+                        if order.customer_last_name
+                        else "",
                         "email": order.customer_email.strip(),
                         "address_street": order.customer_address,
                         "address_zip": order.customer_zip_code,
-                        "address_city": order.customer_city.capitalize(),
+                        "address_city": order.customer_city.capitalize()
+                        if order.customer_city
+                        else "",
                     },
                 }
             )
