@@ -1,4 +1,8 @@
+{% if exited_with_errors %}
+<p>Hei! The invoicing exceeded the limit of 100 errors so it stopped.</p>
+{% else %}
 <p>Hei! The invoicing ended successfully.</p>
+{% endif %}
 
 <table style="width: 100%">
     <tr>

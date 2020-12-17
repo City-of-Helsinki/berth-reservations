@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 class BaseInvoicingService:
-    MAXIMUM_FAILURES = 50
+    MAXIMUM_FAILURES = 100
 
     ADMIN_EMAIL_NOTIFICATION_GROUP_NAME = "Berth services"
 
@@ -97,7 +97,10 @@ class BaseInvoicingService:
         return lease
 
     def fail_lease(
-        self, lease: Union[BerthLease, WinterStorageLease], message: str
+        self,
+        lease: Union[BerthLease, WinterStorageLease],
+        message: str,
+        dont_count: bool = False,
     ) -> None:
         """Set a lease to ERROR status and append it to the failed_lease list"""
         lease.status = LeaseStatus.ERROR
@@ -110,16 +113,16 @@ class BaseInvoicingService:
 
         lease.save(update_fields=["status", "comment"])
         self.failed_leases.append({lease.id: message})
-        self.failure_count += 1
+        self.failure_count += 1 if not dont_count else 0
         logger.debug(f"Lease failed [{lease.id}]: {message}")
 
-    def fail_order(self, order: Order, message: str,) -> None:
+    def fail_order(self, order: Order, message: str, dont_count: bool = False) -> None:
         """Set an order to ERROR status and append it to the failed_order list"""
         order.comment = f"{today().date()}: {message}"
         order.save(update_fields=["comment"])
         order.set_status(OrderStatus.ERROR, f"Lease renewing failed: {message}")
         self.failed_orders.append({order.id: message})
-        self.failure_count += 1
+        self.failure_count += 1 if not dont_count else 0
         logger.debug(f"Lease order [{order.id}]: {message}")
 
     def send_email(self, order, helsinki_profile_user: HelsinkiProfileUser):
@@ -142,15 +145,16 @@ class BaseInvoicingService:
                 logger.exception(e)
                 self.fail_order(order, str(e))
         else:
-            self.fail_order(order, _("Missing customer email"))
+            self.fail_lease(order.lease, _("Missing customer email"), dont_count=True)
+            self.fail_order(order, _("Missing customer email"), dont_count=True)
 
-    def email_admins(self):
+    def email_admins(self, exited_with_errors: bool = False):
         logger.debug("Emailing admins")
         context = {
             "subject": LeaseNotificationType.AUTOMATIC_INVOICING_EMAIL_ADMINS.label,
+            "exited_with_errors": exited_with_errors,
             "successful_orders": len(self.successful_orders),
-            "failed_orders": len(self.failed_orders),
-            "failed_leases": len(self.failed_leases),
+            "failed_orders": len(self.failed_orders) + len(self.failed_leases),
         }
         admins = (
             get_user_model()
@@ -185,63 +189,67 @@ class BaseInvoicingService:
 
         logger.debug(f"Profiles fetched: {len(profiles)}")
 
-        for lease in leases:
-            order = None
-            if self.failure_count >= self.MAXIMUM_FAILURES:
-                error_message = _(
-                    f"Limit of failures reached: {self.failure_count} elements failed"
-                )
-                logger.error(error_message)
-                raise AutomaticInvoicingError(error_message)
+        exited_with_errors = False
+        try:
+            for lease in leases:
+                order = None
+                if self.failure_count >= self.MAXIMUM_FAILURES:
+                    error_message = _(
+                        f"Limit of failures reached: {self.failure_count} elements failed"
+                    )
+                    logger.error(error_message)
+                    raise AutomaticInvoicingError(error_message)
 
-            if lease.customer.id not in profiles:
-                self.fail_lease(
-                    lease, _("The application is not connected to a customer")
-                )
-                continue
+                if lease.customer.id not in profiles:
+                    self.fail_lease(
+                        lease, _("The application is not connected to a customer")
+                    )
+                    continue
 
-            try:
-                with transaction.atomic():
-                    try:
-                        new_lease = self.create_new_lease(
-                            lease, self.season_start, self.season_end
-                        )
-                    except (ValueError, IntegrityError) as e:
-                        logger.exception(e)
-                        self.fail_lease(lease, str(e))
-                        continue
-                    customer = new_lease.customer
+                try:
+                    with transaction.atomic():
+                        try:
+                            new_lease = self.create_new_lease(
+                                lease, self.season_start, self.season_end
+                            )
+                        except (ValueError, IntegrityError) as e:
+                            logger.exception(e)
+                            self.fail_lease(lease, str(e))
+                            continue
+                        customer = new_lease.customer
 
-                    # Get the associated product
-                    product = self.get_product(new_lease)
+                        # Get the associated product
+                        product = self.get_product(new_lease)
 
-                    # If no product is found, the billing can't be done
-                    if not product:
-                        self.fail_lease(new_lease, _("No suitable product found"))
-                        continue
+                        # If no product is found, the billing can't be done
+                        if not product:
+                            self.fail_lease(new_lease, _("No suitable product found"))
+                            continue
 
-                    try:
-                        order = Order.objects.create(
-                            customer=customer, lease=new_lease, product=product
-                        )
+                        try:
+                            order = Order.objects.create(
+                                customer=customer, lease=new_lease, product=product
+                            )
 
-                        helsinki_profile_user = profiles.get(customer.id)
-                        self.send_email(order, helsinki_profile_user)
-                    except ValidationError as e:
-                        logger.exception(e)
-                        self.fail_lease(new_lease, str(e))
-            except (IntegrityError, DataError) as e:
-                logger.exception(e)
-                lease.refresh_from_db()
-                self.fail_lease(lease, str(e))
-                if order:
-                    self.fail_order(order, str(e))
-                pass
-            # Catch any other problem that could come up to avoid breaking the task
-            except Exception as e:
-                logger.exception(e)
-
-        self.email_admins()
+                            helsinki_profile_user = profiles.get(customer.id)
+                            self.send_email(order, helsinki_profile_user)
+                        except ValidationError as e:
+                            logger.exception(e)
+                            self.fail_lease(new_lease, str(e))
+                except (IntegrityError, DataError) as e:
+                    logger.exception(e)
+                    lease.refresh_from_db()
+                    self.fail_lease(lease, str(e))
+                    if order:
+                        self.fail_order(order, str(e))
+                    pass
+                # Catch any other problem that could come up to avoid breaking the task
+                except Exception as e:
+                    logger.exception(e)
+        except AutomaticInvoicingError:
+            exited_with_errors = True
+        finally:
+            self.email_admins(exited_with_errors)
 
 
 class BerthInvoicingService(BaseInvoicingService):
