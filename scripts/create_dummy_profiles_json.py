@@ -307,6 +307,8 @@ def get_berth_data(api_url, cache_file_name=None):
                     bt["name"]
                     for bt in pier_data["node"]["properties"]["suitableBoatTypes"]
                 ]
+                if not berth["pier_suitable_boat_types"]:
+                    continue
                 berths.append(berth)
     if not berths:
         raise Exception("No berths found")
