@@ -49,6 +49,7 @@ class BaseInvoicingService:
     ADMIN_EMAIL_NOTIFICATION_GROUP_NAME = "Berth services"
 
     successful_orders: List[UUID]
+    processed_leases: List[UUID]
     failed_leases: List[Dict[UUID, str]]
     failed_orders: List[Dict[UUID, str]]
     failure_count: int
@@ -187,13 +188,19 @@ class BaseInvoicingService:
             self.fail_lease(order.lease, _("Missing customer email"), dont_count=True)
             self.fail_order(order, _("Missing customer email"), dont_count=True)
 
+    @property
+    def number_of_failed_orders(self):
+        # for every lease, an order needs to be created. If lease processing does not
+        # end with a successful order, then it's a failure.
+        return len(self.processed_leases) - len(self.successful_orders)
+
     def email_admins(self, exited_with_errors: bool = False):
         logger.debug("Emailing admins")
         context = {
             "subject": LeaseNotificationType.AUTOMATIC_INVOICING_EMAIL_ADMINS.label,
             "exited_with_errors": exited_with_errors,
             "successful_orders": len(self.successful_orders),
-            "failed_orders": len(self.failed_orders) + len(self.failed_leases),
+            "failed_orders": self.number_of_failed_orders,
         }
         admins = (
             get_user_model()
@@ -216,6 +223,7 @@ class BaseInvoicingService:
         self.successful_orders = []
         self.failed_orders = []
         self.failed_leases = []
+        self.processed_leases = []
 
         self.failure_count = 0
 
@@ -240,6 +248,8 @@ class BaseInvoicingService:
                     )
                     logger.error(error_message)
                     raise AutomaticInvoicingError(error_message)
+
+                self.processed_leases.append(lease.id)
 
                 if lease.customer.id not in profiles:
                     self.fail_lease(
