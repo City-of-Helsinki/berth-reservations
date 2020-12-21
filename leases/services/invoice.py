@@ -71,6 +71,11 @@ class BaseInvoicingService:
     ) -> Union[BerthLease, WinterStorageLease]:
         """Create a new lease instance"""
 
+        # Make copy of attached contract, if one exists
+        contract = None
+        if hasattr(lease, "contract") and lease.contract is not None:
+            contract = lease.contract
+
         # Blank the PK to signal that a new instance has to be created
         lease.pk = None
 
@@ -88,27 +93,22 @@ class BaseInvoicingService:
         # it will fail since it is a OneToOne field
         lease.application = None
 
-        # Make copy of attached contract, if one exists
-        contract = None
-        if hasattr(lease, "contract") and lease.contract is not None:
-            contract = lease.contract
-
         lease.save()
 
         if contract:
             if isinstance(lease, BerthLease):
                 VismaBerthContract.objects.create(
                     lease=lease,
-                    document_id=lease.contract.document_id,
-                    invitation_id=lease.contract.invitation_id,
-                    passphrase=lease.contract.passphrase,
+                    document_id=contract.document_id,
+                    invitation_id=contract.invitation_id,
+                    passphrase=contract.passphrase,
                 )
             elif isinstance(lease, WinterStorageLease):
                 VismaWinterStorageContract.objects.create(
                     lease=lease,
-                    document_id=lease.contract.document_id,
-                    invitation_id=lease.contract.invitation_id,
-                    passphrase=lease.contract.passphrase,
+                    document_id=contract.document_id,
+                    invitation_id=contract.invitation_id,
+                    passphrase=contract.passphrase,
                 )
 
         lease.refresh_from_db()
