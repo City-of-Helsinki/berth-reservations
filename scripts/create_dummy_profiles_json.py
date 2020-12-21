@@ -108,11 +108,19 @@ LEASE_TEMPLATE = {
     "boat_index": lambda: template_context["boat_index"],
 }
 
+
+def _order_created_at():
+    return fake.date_between_dates(
+        datetime.date(template_context["season_year"], 1, 1),
+        calculate_season_end_date(datetime.date(template_context["season_year"], 1, 1)),
+    ).isoformat()
+
+
 ORDER_TEMPLATE = {
     "order_sum": lambda: str(random_price()),
     "vat_percentage": "24.0",
     "is_paid": lambda: random_bool(),
-    "created_at": lambda: datetime.date.today().isoformat(),
+    "created_at": _order_created_at,
     "berth": {
         "harbor_servicemap_id": lambda: template_context["berth"][
             "harbor_servicemap_id"
@@ -260,7 +268,6 @@ BERTH_QUERY_HEADERS = {"Accept-Language": "fi"}
 
 
 def query_berth_data(api_url):
-
     transport = RequestsHTTPTransport(url=api_url, headers=BERTH_QUERY_HEADERS)
 
     # Create a GraphQL client using the defined transport
@@ -300,6 +307,8 @@ def get_berth_data(api_url, cache_file_name=None):
                     bt["name"]
                     for bt in pier_data["node"]["properties"]["suitableBoatTypes"]
                 ]
+                if not berth["pier_suitable_boat_types"]:
+                    continue
                 berths.append(berth)
     if not berths:
         raise Exception("No berths found")
