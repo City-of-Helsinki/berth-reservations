@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.forms import ChoiceField, UUIDField
+from django.forms import TypedChoiceField, UUIDField
 from django.utils.translation import gettext_lazy as _
 
 from leases.models import BerthLease, WinterStorageLease
@@ -61,8 +61,15 @@ class OrderLineInline(admin.StackedInline):
     pretax_price.admin_order_field = "pretax_price"
 
 
+class OrderLogEntryInline(admin.StackedInline):
+    model = OrderLogEntry
+    fk_name = "order"
+    extra = 0
+    readonly_fields = ("created_at",)
+
+
 class OrderAdmin(admin.ModelAdmin):
-    inlines = (OrderLineInline,)
+    inlines = (OrderLineInline, OrderLogEntryInline)
     exclude = ("_product_content_type", "_lease_content_type")
     readonly_fields = (
         "pretax_price",
@@ -80,6 +87,7 @@ class OrderAdmin(admin.ModelAdmin):
         "order_number",
         "total_price",
         "status",
+        "customer_name",
         "customer",
         "lease_id",
         "place",
@@ -88,7 +96,13 @@ class OrderAdmin(admin.ModelAdmin):
         "order_type",
     )
     list_filter = ("status", "order_type")
-    search_fields = ("order_number", "customer__id")
+    search_fields = (
+        "order_number",
+        "customer__id",
+        "customer_first_name",
+        "customer_last_name",
+        "customer_email",
+    )
 
     def lease_order_type(self, obj):
         return LeaseOrderType(obj.lease_order_type).label
@@ -102,7 +116,12 @@ class OrderAdmin(admin.ModelAdmin):
                 *[(product.id, str(product)) for product in list(bp_qs) + list(wsp_qs)],
             ]
 
-            return ChoiceField(choices=choices, label=db_field.verbose_name.title())
+            return TypedChoiceField(
+                choices=choices,
+                label=db_field.verbose_name.title(),
+                required=False,
+                empty_value=None,
+            )
         if db_field.name == "_lease_object_id":
             kwargs["form_class"] = UUIDField
         return super().formfield_for_dbfield(db_field, request, **kwargs)
@@ -150,6 +169,10 @@ class OrderAdmin(admin.ModelAdmin):
                 return obj.lease.place or obj.lease.section
         return None
 
+    def customer_name(self, obj):
+        if obj.customer_first_name or obj.customer_last_name:
+            return f"{obj.customer_first_name or ''} {obj.customer_last_name or ''}"
+
     pretax_price.short_description = _("Pretax price")
     pretax_price.admin_order_field = "pretax_price"
 
@@ -193,8 +216,19 @@ class OrderInline(admin.StackedInline):
     exclude = ("_product_content_type", "_lease_content_type")
 
 
-admin.site.register([WinterStorageProduct, OrderLine, OrderLogEntry])
+class OrderLogEntryAdmin(admin.ModelAdmin):
+    list_display = ("id", "order_id", "from_status", "to_status", "created_at")
+    list_filter = ("from_status", "to_status")
+    search_fields = ("order__id",)
+    readonly_fields = ("created_at",)
+
+    def order_id(self, obj):
+        return obj.order.id
+
+
+admin.site.register([WinterStorageProduct, OrderLine])
 admin.site.register(BerthProduct, BerthProductAdmin)
 admin.site.register(AdditionalProduct, AdditionalProductAdmin)
 admin.site.register(Order, OrderAdmin)
+admin.site.register(OrderLogEntry, OrderLogEntryAdmin)
 admin.site.register(OrderToken, OrderTokenAdmin)

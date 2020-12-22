@@ -1,7 +1,7 @@
 import logging
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
-from typing import Union
+from typing import Optional, Union
 
 from dateutil.utils import today
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -340,7 +340,7 @@ class Order(UUIDModel, TimeStampedModel):
     objects = OrderManager()
 
     def __str__(self):
-        return f"{self.product} [{self.status}]"
+        return f"{self.id} [{self.status}]"
 
     @property
     def lease_order_type(self) -> LeaseOrderType:
@@ -434,6 +434,14 @@ class Order(UUIDModel, TimeStampedModel):
     @property
     def total_tax_value(self):
         return self.total_price - self.total_pretax_price
+
+    @property
+    def paid_at(self) -> Optional[datetime]:
+        paid = self.log_entries.filter(to_status=OrderStatus.PAID)
+        if paid.exists():
+            return paid.first().created_at
+
+        return None
 
     def _check_valid_products(self) -> None:
         if self.product and not isinstance(
@@ -813,7 +821,7 @@ class OrderLine(UUIDModel, TimeStampedModel):
 class OrderLogEntry(UUIDModel, TimeStampedModel):
     order = models.ForeignKey(
         Order,
-        verbose_name=_("order log entry"),
+        verbose_name=_("order"),
         related_name="log_entries",
         on_delete=models.CASCADE,
     )
