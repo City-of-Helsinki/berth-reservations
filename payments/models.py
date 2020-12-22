@@ -340,7 +340,7 @@ class Order(UUIDModel, TimeStampedModel):
     objects = OrderManager()
 
     def __str__(self):
-        return f"{self.product} [{self.status}]"
+        return f"{self.id} [{self.status}]"
 
     @property
     def lease_order_type(self) -> LeaseOrderType:
