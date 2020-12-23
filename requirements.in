@@ -21,3 +21,5 @@ psycopg2-binary
 sentry-sdk
 uwsgi
 xlsxwriter
+json_log_formatter
+ujson

@@ -174,6 +174,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "berth_reservations.logging.RequestLogger",
 ]
 
 TEMPLATES = [
@@ -230,8 +231,27 @@ GRAPHQL_JWT = {"JWT_AUTH_HEADER_PREFIX": "Bearer"}
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "handlers": {"console": {"class": "logging.StreamHandler"}},
-    "loggers": {"django": {"handlers": ["console"], "level": "ERROR"}},
+    "filters": {"django_server": {"()": "berth_reservations.logging.LogRequestFilter"}},
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "plain",
+            "filters": ["django_server"],
+        },
+        "json": {"class": "logging.StreamHandler", "formatter": "json"},
+    },
+    "formatters": {
+        "json": {"()": "json_log_formatter.JSONFormatter"},
+        "plain": {
+            "()": "django.utils.log.ServerFormatter",
+            "format": "[{server_time}] {message}",
+            "style": "{",
+        },
+    },
+    "loggers": {
+        "requests": {"handlers": ["json"], "level": "INFO"},
+        "django": {"handlers": ["console"], "level": "INFO"},
+    },
 }
 
 # Dotted path to the active payment provider class, see payments.providers init.
