@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 
@@ -28,13 +29,18 @@ class RequestLogger:
             path = request.get_full_path()
             status = response.status_code
             method = request.method
+            body = request.body.decode(request.encoding or "utf-8")
+            try:
+                body = json.loads(body)
+            except json.JSONDecodeError:
+                pass
 
             message = f"{method} {path} {status}"
             context = {
                 "host": request.get_host(),
                 "method": method,
                 "agent": request.headers.get("USER_AGENT", ""),
-                "body": request.body.decode(request.encoding or "utf-8"),
+                "body": body,
                 "path": path,
                 "status": status,
                 "exec_time": exec_time,
