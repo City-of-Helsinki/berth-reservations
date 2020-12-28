@@ -1,5 +1,8 @@
+import json
 import logging
 import time
+
+from django.conf import settings
 
 logger = logging.getLogger("requests")
 
@@ -28,19 +31,26 @@ class RequestLogger:
             path = request.get_full_path()
             status = response.status_code
             method = request.method
+            body = request.body.decode(request.encoding or "utf-8")
+            try:
+                body = json.loads(body)
+            except json.JSONDecodeError:
+                pass
 
             message = f"{method} {path} {status}"
             context = {
                 "host": request.get_host(),
                 "method": method,
                 "agent": request.headers.get("USER_AGENT", ""),
-                "body": request.body.decode(request.encoding or "utf-8"),
+                "body": body,
                 "path": path,
                 "status": status,
                 "exec_time": exec_time,
             }
             level = logging.INFO
-            if 400 >= status > 500:
+            if path in settings.REQUEST_LOGGER_IGNORE_PATHS:
+                level = logging.DEBUG
+            elif 400 >= status > 500:
                 level = logging.WARNING
             elif status >= 500:
                 level = logging.ERROR
