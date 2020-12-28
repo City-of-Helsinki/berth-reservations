@@ -316,9 +316,13 @@ def approve_order(
         request, ui_return_url=settings.VENE_UI_RETURN_URL
     ).get_payment_email_url(order, lang=language)
 
+    cancel_url = get_payment_provider(
+        request, ui_return_url=settings.VENE_UI_RETURN_URL
+    ).get_cancellation_email_url(order, lang=language)
+
     # Send email
     notification_type = get_order_notification_type(order)
-    context = get_context(order, payment_url, notification_type)
+    context = get_context(order, payment_url, cancel_url, notification_type)
     send_notification(email, notification_type.value, context, language)
 
 
@@ -333,7 +337,7 @@ def get_email_subject(notification_type):
     return notification_type.label
 
 
-def get_context(order, payment_url, notification_type):
+def get_context(order, payment_url, cancel_url, notification_type):
     if order.order_type == OrderType.LEASE_ORDER:
         return {
             "subject": get_email_subject(notification_type),
@@ -345,6 +349,7 @@ def get_context(order, payment_url, notification_type):
                 product__service__in=ProductServiceType.OPTIONAL_SERVICES()
             ),
             "payment_url": payment_url,
+            "cancel_url": cancel_url,
         }
     else:
         # We currently support only STORAGE_ON_ICE additional product orders,

@@ -128,3 +128,8 @@ class PaymentProvider:
 
     def get_payment_email_url(self, order: Order, lang: str = settings.LANGUAGE_CODE):
         return f"{self.ui_return_url.format(LANG=lang)}/payment?order_number={order.order_number}"
+
+    def get_cancellation_email_url(
+        self, order: Order, lang: str = settings.LANGUAGE_CODE
+    ):
+        return f"{self.ui_return_url.format(LANG=lang)}/cancel-order?order_number={order.order_number}"
