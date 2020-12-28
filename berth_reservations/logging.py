@@ -2,6 +2,8 @@ import json
 import logging
 import time
 
+from django.conf import settings
+
 logger = logging.getLogger("requests")
 
 
@@ -46,7 +48,9 @@ class RequestLogger:
                 "exec_time": exec_time,
             }
             level = logging.INFO
-            if 400 >= status > 500:
+            if path in settings.REQUEST_LOGGER_IGNORE_PATHS:
+                level = logging.DEBUG
+            elif 400 >= status > 500:
                 level = logging.WARNING
             elif status >= 500:
                 level = logging.ERROR

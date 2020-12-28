@@ -132,6 +132,8 @@ USE_TZ = True
 
 LOCALE_PATHS = (os.path.join(BASE_DIR, "locale"),)
 
+REQUEST_LOGGER_IGNORE_PATHS = ("/healthz", "/readiness")
+
 INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
