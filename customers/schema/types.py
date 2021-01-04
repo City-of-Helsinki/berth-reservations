@@ -69,8 +69,7 @@ class OrganizationNode(DjangoObjectType):
 
 class BerthApplicationFilter(django_filters.FilterSet):
     order_by = django_filters.OrderingFilter(
-        fields=(("created_at", "createdAt"),),
-        label="Supports `createdAt` and `-createdAt`.",
+        fields=("created_at",), label="Supports `createdAt` and `-createdAt`.",
     )
 
 

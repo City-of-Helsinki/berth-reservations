@@ -62,8 +62,7 @@ class BerthApplicationFilter(django_filters.FilterSet):
         field_name="customer", lookup_expr="isnull"
     )
     order_by = django_filters.OrderingFilter(
-        fields=(("created_at", "createdAt"),),
-        label="Supports only `createdAt` and `-createdAt`.",
+        fields=("created_at",), label="Supports only `createdAt` and `-createdAt`.",
     )
     name = django_filters.CharFilter(method="filter_name")
 
@@ -132,8 +131,7 @@ class WinterStorageApplicationFilter(django_filters.FilterSet):
         field_name="customer", lookup_expr="isnull"
     )
     order_by = django_filters.OrderingFilter(
-        fields=(("created_at", "createdAt"),),
-        label="Supports only `createdAt` and `-createdAt`.",
+        fields=("created_at",), label="Supports only `createdAt` and `-createdAt`.",
     )
     name = django_filters.CharFilter(method="filter_name")
 
