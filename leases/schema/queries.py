@@ -17,8 +17,7 @@ from .types import (
 
 class AbstractLeaseNodeFilter(django_filters.FilterSet):
     order_by = django_filters.OrderingFilter(
-        fields=(("created_at", "createdAt"),),
-        label="Supports only `createdAt` and `-createdAt`.",
+        fields=("created_at",), label="Supports only `createdAt` and `-createdAt`.",
     )
 
 

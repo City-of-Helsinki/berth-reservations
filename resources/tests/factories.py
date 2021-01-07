@@ -35,7 +35,7 @@ class BoatTypeFactory(factory.django.DjangoModelFactory):
 
 
 class AbstractAreaFactory(factory.django.DjangoModelFactory):
-    servicemap_id = factory.LazyFunction(lambda: str(randgen.randint(39000, 42000)))
+    servicemap_id = factory.Sequence(lambda n: f"{randgen.randint(39000, 42000)}{n}")
     zip_code = factory.Faker("postcode", locale="fi_FI")
     name = factory.Faker("word")
     street_address = factory.Faker("address")

@@ -1227,7 +1227,7 @@ def test_create_winter_storage_area(pier, api_client, availability_level, munici
         "availabilityLevelId": availability_level.id,  # why not use to_global_id here?
         "municipalityId": municipality.id,
         "estimatedNumberOfSectionSpaces": 50,
-        "maxLengthOfSectionSpaces": "6.5",
+        "maxLengthOfSectionSpaces": decimal.Decimal("6.5"),
         "estimatedNumberOfUnmarkedSpaces": 10,
         "name": "area 52",
         "streetAddress": "Foobarstatmanrantatie 1234",
@@ -1268,9 +1268,7 @@ def test_create_winter_storage_area(pier, api_client, availability_level, munici
         "zipCode": variables["zipCode"],
         "availabilityLevel": {"id": str(availability_level.id)},
         "estimatedNumberOfSectionSpaces": variables["estimatedNumberOfSectionSpaces"],
-        "maxLengthOfSectionSpaces": decimal.Decimal(
-            variables["maxLengthOfSectionSpaces"]
-        ),
+        "maxLengthOfSectionSpaces": str(variables["maxLengthOfSectionSpaces"]),
         "estimatedNumberOfUnmarkedSpaces": variables["estimatedNumberOfUnmarkedSpaces"],
         "municipality": municipality.name,
     }
@@ -1441,8 +1439,8 @@ mutation CreateWinterStoragePlaceType($input: CreateWinterStoragePlaceTypeMutati
 )
 def test_create_winter_storage_place_type(api_client):
     variables = {
-        "width": "1.5",
-        "length": "5.5",
+        "width": decimal.Decimal("1.5"),
+        "length": decimal.Decimal("5.5"),
     }
 
     assert WinterStoragePlaceType.objects.count() == 0
@@ -1463,10 +1461,7 @@ def test_create_winter_storage_place_type(api_client):
 
     assert executed["data"]["createWinterStoragePlaceType"][
         "winterStoragePlaceType"
-    ] == {
-        "width": decimal.Decimal(variables["width"]),
-        "length": decimal.Decimal(variables["length"]),
-    }
+    ] == {"width": variables["width"], "length": variables["length"]}
 
 
 DELETE_WINTER_STORAGE_PLACE_TYPE_MUTATION = """
@@ -2320,8 +2315,8 @@ def test_update_winter_storage_place_existing_winter_storage_place_type(
     variables = {
         "id": global_id,
         "number": 111,
-        "width": float(winter_storage_place_type.width),
-        "length": float(winter_storage_place_type.length),
+        "width": decimal.Decimal(winter_storage_place_type.width),
+        "length": decimal.Decimal(winter_storage_place_type.length),
     }
 
     assert winter_storage_place.place_type != winter_storage_place_type
