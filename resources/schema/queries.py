@@ -35,7 +35,9 @@ class Query:
     berth = relay.Node.Field(BerthNode)
     berths = DjangoFilterConnectionField(
         BerthNode,
-        description="**Requires permissions** to query `leases` field. "
+        description="If filtering by both pier and harbor and the pier does not belong to the given harbor, "
+        "will return an empty list of edges."
+        "\n\n**Requires permissions** to query `leases` field. "
         "Otherwise, everything is available",
     )
 
