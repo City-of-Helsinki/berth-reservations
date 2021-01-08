@@ -77,11 +77,20 @@ if DEBUG and not SECRET_KEY:
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 USE_X_FORWARDED_HOST = env.bool("USE_X_FORWARDED_HOST")
 
+REQUEST_LOGGER_IGNORE_PATHS = (
+    "/healthz",
+    "/readiness",
+    "/static",
+)
+
 if env("CSRF_TRUSTED_ORIGINS"):
     CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")
 
 if env.str("FORCE_SCRIPT_NAME"):
     FORCE_SCRIPT_NAME = env.str("FORCE_SCRIPT_NAME")
+    REQUEST_LOGGER_IGNORE_PATHS = tuple(
+        f"{FORCE_SCRIPT_NAME}{path}" for path in REQUEST_LOGGER_IGNORE_PATHS
+    )
 
 DATABASES = {"default": env.db()}
 # Ensure postgis engine
@@ -131,8 +140,6 @@ USE_L10N = True
 USE_TZ = True
 
 LOCALE_PATHS = (os.path.join(BASE_DIR, "locale"),)
-
-REQUEST_LOGGER_IGNORE_PATHS = ("/healthz", "/readiness", "/static")
 
 INSTALLED_APPS = [
     "django.contrib.auth",
