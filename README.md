@@ -12,6 +12,7 @@
 * [Development without Docker](#development-without-docker)
   * [Database](#database)
   * [Daily running](#daily-running)
+  * [Profiling](#profiling)  
   * [Install geospatial libraries](#install-geospatial-libraries)
 * [Keeping Python requirements up to date](#keeping-python-requirements-up-to-date)
 * [Code format](#code-format)
@@ -109,6 +110,27 @@ https://docs.djangoproject.com/en/3.1/ref/contrib/gis/install/geolibs/
 * Run `python manage.py runserver 0:8000`
 
 The project is now running at [localhost:8000](http://localhost:8000)
+
+<a name="profiling"></a>
+### Profiling
+
+Setting BERTH_PROFILING_ENABLED environment variable to 1 enables profiling support, for example:
+
+`BERTH_PROFILING_ENABLED=1 python manage.py runserver`
+
+After a http request is completed, profiling statistics is printed to stderr, including
+time spent calling different functions.
+
+The output can be configured by setting additional environment variables:
+
+* PROFILE_MIN_DURATION_SECONDS: by default, `0`. Only output profiling info for requests taking longer than
+  this threshold.
+* PROFILE_SORT: by default, `cumulative`. Other useful values include `time` and `calls`.
+  See also [cProfile module docs](https://docs.python.org/3/library/profile.html).
+* PROFILE_RESULTS: by default, `100`. controls the number of results shown
+* DUMP_PROFILING_RESULTS: if set to `1`, save every profile result to /tmp/ for further processing.
+
+
 
 <a name="keeping-python-requirements-up-to-date"></a>
 ## Keeping Python requirements up to date

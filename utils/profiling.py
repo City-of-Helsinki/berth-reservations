@@ -69,7 +69,8 @@ def dump_profiling_results(profile, identifier=None):
     if identifier is None:
         identifier = ""
 
-    profile.dump_stats(f"/tmp/profile-{time.time()}-{identifier}")
+    if os.getenv("DUMP_PROFILING_RESULTS") == "1":
+        profile.dump_stats(f"/tmp/profile-{time.time()}-{identifier}")
 
 
 class ProfiledThread(threading.Thread):
@@ -96,7 +97,9 @@ def get_profile_flag():
 
 class ProfilingMiddleware:
 
-    PROFILE_MIN_DURATION_SECONDS = 2
+    PROFILE_MIN_DURATION_SECONDS = float(
+        os.getenv("PROFILE_MIN_DURATION_SECONDS", "0.0")
+    )
 
     def __init__(self, get_response):
         self.get_response = get_response
