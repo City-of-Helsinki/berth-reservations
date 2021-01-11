@@ -563,7 +563,7 @@ class Order(UUIDModel, TimeStampedModel):
 
         self.lease = lease
 
-    def save(self, *args, **kwargs):
+    def save(self, update_price=False, *args, **kwargs):  # noqa: C901
         self.full_clean()
 
         # If the product is being added from the admin (only the ID is passed)
@@ -575,9 +575,21 @@ class Order(UUIDModel, TimeStampedModel):
             self._assign_lease_from_object_id()
 
         creating = self._state.adding
+
+        # Update the associated product for recomputing the price
+        if self.product and self.lease and update_price:
+            if isinstance(self.lease, BerthLease):
+                width = self.lease.berth.berth_type.width
+                self.product = BerthProduct.objects.get_in_range(width=width)
+            elif isinstance(self.lease, WinterStorageLease):
+                area = self.lease.section.area
+                self.product = WinterStorageProduct.objects.get(
+                    winter_storage_area=area
+                )
+
         # If the product instance is being passed
-        # Price has to be assigned before saving but only if creating
-        if creating and self.product:
+        # Price has to be assigned before saving if creating
+        if self.product and (creating or update_price):
             price = (
                 self.product.price_value
                 if self.product and hasattr(self.product, "price_value")
@@ -616,7 +628,7 @@ class Order(UUIDModel, TimeStampedModel):
                         self.lease.berth.pier.price_tier
                     )
 
-            price_value = self.price or price
+            price_value = price
             tax_percentage_value = self.tax_percentage or tax_percentage
 
             if hasattr(self.customer, "organization"):

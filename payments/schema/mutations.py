@@ -39,7 +39,11 @@ from ..models import (
     WinterStorageProduct,
 )
 from ..providers import get_payment_provider
-from ..utils import approve_order, send_cancellation_notice
+from ..utils import (
+    approve_order,
+    send_cancellation_notice,
+    resend_order
+)
 from .types import (
     AdditionalProductNode,
     AdditionalProductTaxEnum,
@@ -614,6 +618,39 @@ class ApproveOrderMutation(graphene.ClientIDMutation):
         return ApproveOrderMutation(failed_orders=failed_orders)
 
 
+class ResendOrderMutation(graphene.ClientIDMutation):
+    class Input:
+        order_id = graphene.ID(required=True)
+        due_date = graphene.Date(required=True)
+        profile_token = graphene.String(
+            required=True, description="API token for Helsinki profile GraphQL API",
+        )
+
+    order = graphene.Field(OrderNode)
+
+    @classmethod
+    @change_permission_required(Order)
+    def mutate_and_get_payload(cls, root, info, **input):
+        order = get_node_from_global_id(
+            info, input.pop("order_id"), only_type=OrderNode, nullable=False
+        )
+
+        if order.lease.status != LeaseStatus.OFFERED:
+            VenepaikkaGraphQLError(
+                _("Cannot resend an invoice for a lease that is not currently offered.")
+            )
+
+        due_date = input.pop("due_date")
+        profile = ProfileService(input.pop("profile_token")).get_profile(
+            order.customer.id
+        )
+
+        with transaction.atomic():
+            resend_order(order, due_date, profile, info.context)
+
+        return ResendOrderMutation(order=order)
+
+
 class Mutation:
     create_berth_product = CreateBerthProductMutation.Field(
         description="Creates a `BerthProduct` object."
@@ -727,6 +764,16 @@ class Mutation:
         "\n* The passed `order` does not exist"
         "\n* An `order.lease` or `order.lease.application` have an invalid status transition"
         "\n* There's an error when sending the email"
+    )
+
+    resend_order = ResendOrderMutation.Field(
+        description="Resends the specified order."
+        "\n\nUpdates order due date and price, if the underlying product has been changed "
+        "and resends the payment email to the customer."
+        "\n\nIt returns the possibly updated order."
+        "\n\n**Requires permissions** to update orders."
+        "\n\nErrors:"
+        "\n* The passed order must have a lease in status OFFERED"
     )
 
 

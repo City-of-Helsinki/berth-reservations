@@ -348,6 +348,43 @@ def send_cancellation_notice(order):
     send_notification(email, notification_type.value, context, language)
 
 
+def resend_order(
+    order, due_date: date, profile: HelsinkiProfileUser, request: HttpRequest
+) -> None:
+    from payments.providers import get_payment_provider
+
+    if order.lease.status != LeaseStatus.OFFERED:
+        raise ValueError(_("Cannot resend an order for a lease not in status OFFERED"))
+
+    order.customer_first_name = profile.first_name
+    order.customer_last_name = profile.last_name
+    order.customer_email = profile.email
+    order.customer_address = profile.address
+    order.customer_zip_code = profile.postal_code
+    order.customer_city = profile.city
+
+    order.due_date = due_date
+
+    order.save(update_price=True)
+
+    language = get_notification_language(order)
+
+    payment_url = get_payment_provider(
+        request, ui_return_url=settings.VENE_UI_RETURN_URL
+    ).get_payment_email_url(order, lang=language)
+
+    notification_type = get_order_notification_type(order)
+    context = get_context(order, payment_url, notification_type)
+    send_notification(order.customer_email, notification_type.value, context, language)
+
+
+def get_notification_language(order):
+    language = settings.LANGUAGE_CODE
+    if order.lease and order.lease.application:
+        language = order.lease.application.language
+    return language
+
+
 def get_email_subject(notification_type):
     from .notifications import NotificationType
 
