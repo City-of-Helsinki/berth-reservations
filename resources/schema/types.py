@@ -4,7 +4,7 @@ import graphql_geojson
 from django.utils.translation import gettext_lazy as _
 from graphene import relay
 from graphene_django.fields import DjangoConnectionField
-from graphene_django.filter import DjangoFilterConnectionField
+from graphene_django.filter import DjangoFilterConnectionField, GlobalIDFilter
 from graphene_django.types import DjangoObjectType
 
 from applications.models import BerthApplication, WinterStorageApplication
@@ -69,6 +69,7 @@ class PierNode(graphql_geojson.GeoJSONType):
             "gate",
             "lighting",
             "suitable_boat_types",
+            "harbor",
         ]
         geojson_field = "location"
         interfaces = (relay.Node,)
@@ -83,6 +84,8 @@ class BerthNodeFilterSet(django_filters.FilterSet):
         field_name="berth_type__length", lookup_expr="gte"
     )
     is_available = django_filters.BooleanFilter()
+    harbor = GlobalIDFilter(field_name="pier__harbor", lookup_expr="id")
+    pier = GlobalIDFilter(field_name="pier", lookup_expr="id")
 
     class Meta:
         model = Berth

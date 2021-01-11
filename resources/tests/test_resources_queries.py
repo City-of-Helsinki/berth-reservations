@@ -1080,3 +1080,99 @@ def test_get_winter_storage_place_count(api_client):
     assert executed["data"] == {
         "winterStoragePlaces": {"count": count, "totalCount": count}
     }
+
+
+def test_berth_filtering_by_pier(api_client):
+    for _i in range(10):
+        BerthFactory()
+
+    berth = BerthFactory()
+
+    query = """
+        {
+            berths(pier: "%s") {
+                count
+                totalCount
+            }
+        }
+    """ % to_global_id(
+        PierNode._meta.name, berth.pier.id
+    )
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {"berths": {"count": 1, "totalCount": 11}}
+
+
+def test_berth_filtering_by_harbor(api_client):
+    for _i in range(10):
+        BerthFactory()
+
+    berth = BerthFactory()
+
+    query = """
+        {
+            berths(harbor: "%s") {
+                count
+                totalCount
+            }
+        }
+    """ % to_global_id(
+        HarborNode._meta.name, berth.pier.harbor.id
+    )
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {"berths": {"count": 1, "totalCount": 11}}
+
+
+def test_berth_filtering_by_pier_and_harbor(api_client):
+    berth = BerthFactory()
+
+    base_query = """
+        {
+            berths(harbor: "%s", pier: "%s") {
+                count
+            }
+        }
+    """
+
+    executed = api_client.execute(
+        base_query
+        % (
+            to_global_id(HarborNode._meta.name, berth.pier.harbor.id),
+            to_global_id(PierNode._meta.name, berth.pier.id),
+        )
+    )
+    assert executed["data"] == {"berths": {"count": 1}}
+
+    harbor = HarborFactory()
+    pier = PierFactory()
+
+    executed = api_client.execute(
+        base_query
+        % (
+            to_global_id(HarborNode._meta.name, harbor.id),
+            to_global_id(PierNode._meta.name, pier.id),
+        )
+    )
+    assert executed["data"] == {"berths": {"count": 0}}
+
+
+def test_pier_filtering_by_harbor(api_client):
+    for _i in range(10):
+        PierFactory()
+
+    pier = PierFactory()
+
+    query = """
+        {
+            piers(harbor: "%s") {
+                count
+                totalCount
+            }
+        }
+    """ % to_global_id(
+        HarborNode._meta.name, pier.harbor.id
+    )
+
+    executed = api_client.execute(query)
+    assert executed["data"] == {"piers": {"count": 1, "totalCount": 11}}
