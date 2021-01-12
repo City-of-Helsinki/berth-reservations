@@ -1,7 +1,7 @@
 import logging
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal
-from typing import Optional, Union
+from typing import Union
 
 from dateutil.utils import today
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -9,7 +9,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Q, UniqueConstraint
+from django.db.models import Max, OuterRef, Q, Subquery, UniqueConstraint, Value
+from django.db.models.functions import Coalesce
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
@@ -262,6 +263,33 @@ class OrderManager(models.Manager):
 
         return too_old_waiting_orders.count()
 
+    def get_queryset(self):
+        def status_qs(status: OrderStatus):
+            return (
+                OrderLogEntry.objects.filter(order=OuterRef("pk"), to_status=status)
+                .order_by("-created_at")
+                .values("order__pk")
+                .annotate(prop=Coalesce(Max("created_at"), Value(None)))
+                .values("prop")
+            )
+
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                paid_at=Subquery(
+                    status_qs(OrderStatus.PAID), output_field=models.DateTimeField()
+                ),
+                rejected_at=Subquery(
+                    status_qs(OrderStatus.REJECTED), output_field=models.DateTimeField()
+                ),
+                cancelled_at=Subquery(
+                    status_qs(OrderStatus.CANCELLED),
+                    output_field=models.DateTimeField(),
+                ),
+            )
+        )
+
 
 class Order(UUIDModel, TimeStampedModel):
     order_number = models.CharField(
@@ -434,14 +462,6 @@ class Order(UUIDModel, TimeStampedModel):
     @property
     def total_tax_value(self):
         return self.total_price - self.total_pretax_price
-
-    @property
-    def paid_at(self) -> Optional[datetime]:
-        paid = self.log_entries.filter(to_status=OrderStatus.PAID)
-        if paid.exists():
-            return paid.first().created_at
-
-        return None
 
     def _check_valid_products(self) -> None:
         if self.product and not isinstance(

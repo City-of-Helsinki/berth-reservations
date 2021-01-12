@@ -8,6 +8,7 @@ from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.utils.timezone import now
 from freezegun import freeze_time
 
 from leases.enums import LeaseStatus
@@ -886,3 +887,55 @@ def test_order_set_status_no_application(berth):
     order.set_status(OrderStatus.PAID)
     assert order.status == OrderStatus.PAID
     assert order.lease.status == LeaseStatus.PAID
+
+
+@pytest.mark.parametrize(
+    "order",
+    ["berth_order", "winter_storage_order", "additional_product_order"],
+    indirect=True,
+)
+@pytest.mark.parametrize(
+    "from_status,to_status",
+    [
+        (OrderStatus.WAITING, OrderStatus.PAID),
+        (OrderStatus.WAITING, OrderStatus.REJECTED),
+        (OrderStatus.PAID, OrderStatus.CANCELLED),
+    ],
+)
+@freeze_time("2020-01-01T08:00:00Z")
+def test_order_status_dates(order, from_status, to_status):
+    order.status = from_status
+    order.save()
+
+    order.set_status(to_status)
+    assert order.status == to_status
+
+    order = Order.objects.get(id=order.id)
+    if to_status == OrderStatus.PAID:
+        assert order.paid_at == now()
+        assert order.rejected_at is None
+        assert order.cancelled_at is None
+    elif to_status == OrderStatus.REJECTED:
+        assert order.rejected_at == now()
+        assert order.paid_at is None
+        assert order.cancelled_at is None
+    elif to_status == OrderStatus.CANCELLED:
+        assert order.cancelled_at == now()
+        assert order.paid_at is None
+        assert order.rejected_at is None
+
+
+@pytest.mark.parametrize(
+    "order",
+    ["berth_order", "winter_storage_order", "additional_product_order"],
+    indirect=True,
+)
+@freeze_time("2020-01-01T08:00:00Z")
+def test_order_status_dates_no_transitions(order):
+    order.status = OrderStatus.WAITING
+    order.save()
+
+    order = Order.objects.get(id=order.id)
+    assert order.paid_at is None
+    assert order.rejected_at is None
+    assert order.cancelled_at is None

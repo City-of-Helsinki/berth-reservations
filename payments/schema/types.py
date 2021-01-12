@@ -198,6 +198,7 @@ class OrderNode(DjangoObjectType):
     order_lines = DjangoConnectionField(OrderLineNode, required=True)
     log_entries = DjangoConnectionField(OrderLogEntryNode, required=True)
     paid_at = graphene.DateTime()
+    cancelled_at = graphene.DateTime()
 
     class Meta:
         model = Order
