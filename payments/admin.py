@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.forms import TypedChoiceField, UUIDField
+from django.utils import timezone
+from django.utils.datetime_safe import strftime
 from django.utils.translation import gettext_lazy as _
 
 from leases.models import BerthLease, WinterStorageLease
@@ -80,6 +82,9 @@ class OrderAdmin(admin.ModelAdmin):
         "lease_order_type",
         "order_type",
         "place",
+        "paid_at",
+        "rejected_at",
+        "cancelled_at",
     )
     list_display = (
         "id",
@@ -172,6 +177,15 @@ class OrderAdmin(admin.ModelAdmin):
     def customer_name(self, obj):
         if obj.customer_first_name or obj.customer_last_name:
             return f"{obj.customer_first_name or ''} {obj.customer_last_name or ''}"
+
+    def paid_at(self, obj):
+        return strftime(timezone.localtime(obj.paid_at), "%d-%m-%Y %H:%M:%S",)
+
+    def cancelled_at(self, obj):
+        return strftime(timezone.localtime(obj.cancelled_at), "%d-%m-%Y %H:%M:%S",)
+
+    def rejected_at(self, obj):
+        return strftime(timezone.localtime(obj.rejected), "%d-%m-%Y %H:%M:%S",)
 
     pretax_price.short_description = _("Pretax price")
     pretax_price.admin_order_field = "pretax_price"
