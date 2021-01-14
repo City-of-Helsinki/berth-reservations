@@ -10,6 +10,7 @@ django-helusers
 django-ilmoitin[graphql_api]
 django-mailer
 django-parler
+django-silk
 elastic-apm
 factory-boy
 git+https://github.com/a-rmz/django-munigeo.git@0.4.0-beta#egg=django-munigeo
