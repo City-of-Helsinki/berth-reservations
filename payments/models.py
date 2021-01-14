@@ -1,5 +1,5 @@
 import logging
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from typing import Union
 
@@ -251,17 +251,40 @@ class OrderManager(models.Manager):
             Q(Q(_product_content_type=product_ct) | Q(_lease_content_type=lease_ct))
         )
 
-    def update_expired(self) -> int:
+    def expire_too_old_unpaid_orders(self, older_than_days, dry_run=False) -> int:
+        # Check all orders that are in WAITING status, and if there is
+        # {older_than_days} full days elapsed after the order's due_date, then
+        # set the order status to EXPIRED.
+        # Example:
+        # * There's an order with due_date=1.1.2021 and status=WAITING.
+        # * Calling expire_too_old_unpaid_orders(older_than_days=7) on 9.1.2021 will set the status to EXPIRED.
+        # * But calling the function on 8.1.2021 would not change the order.
+
+        expire_before_date = date.today() - timedelta(days=older_than_days)
         too_old_waiting_orders = self.get_queryset().filter(
-            status=OrderStatus.WAITING, due_date__lt=date.today()
+            status=OrderStatus.WAITING, due_date__lt=expire_before_date,
         )
-
+        num_expired = 0
         for order in too_old_waiting_orders:
-            order.set_status(
-                OrderStatus.EXPIRED, comment=f"{_('Order expired at')} {order.due_date}"
-            )
+            if order.order_type == OrderType.LEASE_ORDER and not order.lease:
+                logger.info(
+                    f"Lease missing from lease order, skip invalid order {order}"
+                )
+                continue
+            if order._product_object_id and not order._get_product_from_object_id():
+                # _product_object_id contains an UUID to a product that no longer exists.
+                # set_status() will fail in this case, and instead of EXPIRED these
+                # should be set to ERROR.
+                logger.info(f"Product missing from order, skip invalid order {order}")
+                continue
 
-        return too_old_waiting_orders.count()
+            if not dry_run:
+                order.set_status(
+                    OrderStatus.EXPIRED,
+                    comment=f"{_('Order expired at')} {expire_before_date}",
+                )
+            num_expired += 1
+        return num_expired
 
     def get_queryset(self):
         def status_qs(status: OrderStatus):
@@ -515,6 +538,13 @@ class Order(UUIDModel, TimeStampedModel):
                 _("Cannot change the lease associated with this order")
             )
 
+    def _check_due_date(self, old_instance) -> None:
+        if (
+            old_instance.due_date != self.due_date
+            and old_instance.status == OrderStatus.EXPIRED
+        ):
+            raise ValidationError(_("Cannot change due date of this order"))
+
     def clean(self):
         # Check that only Berth or Winter products are passed (not other models)
         self._check_valid_products()
@@ -538,7 +568,18 @@ class Order(UUIDModel, TimeStampedModel):
             # If the lease is being changed
             self._check_same_lease(old_instance)
 
+            # if due_date change is allowed
+            self._check_due_date(old_instance)
+
     def _assign_product_from_object_id(self):
+        # If for some reason neither was found (shouldn't be the case), raise an error
+        product = self._get_product_from_object_id()
+        if not product:
+            raise ValidationError(_("The product passed is not valid"))
+
+        self.product = product
+
+    def _get_product_from_object_id(self):
         # Try to get a BerthProduct (BP)
         product = BerthProduct.objects.filter(id=self._product_object_id).first()
         # If the BP was not found, try getting a WinterStorageProduct
@@ -547,11 +588,7 @@ class Order(UUIDModel, TimeStampedModel):
             if product
             else WinterStorageProduct.objects.filter(id=self._product_object_id).first()
         )
-        # If for some reason neither was found (shouldn't be the case), raise an error
-        if not product:
-            raise ValidationError(_("The product passed is not valid"))
-
-        self.product = product
+        return product
 
     def _assign_lease_from_object_id(self):
         # Try to get a BerthLease (BL)
