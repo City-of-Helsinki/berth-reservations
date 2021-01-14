@@ -3,6 +3,7 @@ black
 flake8
 flake8-print
 freezegun
+gql
 ipython
 isort
 pre-commit
@@ -10,4 +11,3 @@ pytest
 pytest-cov
 pytest-django
 xlrd
-gql
