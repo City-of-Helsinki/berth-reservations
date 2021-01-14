@@ -1,5 +1,6 @@
 import logging
-from datetime import date, datetime
+import sys
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 from typing import Optional, Union
 
@@ -250,15 +251,18 @@ class OrderManager(models.Manager):
             Q(Q(_product_content_type=product_ct) | Q(_lease_content_type=lease_ct))
         )
 
-    def update_expired(self) -> int:
+    def expire_too_old_unpaid_orders(self, older_than_days) -> int:
+
         too_old_waiting_orders = self.get_queryset().filter(
-            status=OrderStatus.WAITING, due_date__lt=date.today()
+            status=OrderStatus.WAITING,
+            due_date__lt=date.today() - timedelta(days=older_than_days),
         )
 
         for order in too_old_waiting_orders:
-            order.set_status(
-                OrderStatus.EXPIRED, comment=f"{_('Order expired at')} {order.due_date}"
-            )
+            sys.stdout.write(f"{order}")
+            # order.set_status(
+            #    OrderStatus.EXPIRED, comment=f"{_('Order expired at')} {order.due_date}"
+            # )
 
         return too_old_waiting_orders.count()
 

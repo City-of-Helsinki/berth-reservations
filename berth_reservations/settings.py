@@ -298,6 +298,8 @@ if env("SESSION_COOKIE_PATH"):
 if env("SESSION_COOKIE_SECURE") is not None:
     SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE")
 
+EXPIRE_WAITING_ORDERS_OLDER_THAN_DAYS = 7
+
 # local_settings.py can be used to override environment-specific settings
 # like database and email that differ between development and production.
 local_settings_path = os.path.join(checkout_dir(), "local_settings.py")

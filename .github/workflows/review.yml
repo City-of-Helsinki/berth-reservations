@@ -61,3 +61,12 @@ jobs:
           K8S_SECRET_VISMASIGN_CLIENT_IDENTIFIER: ${{ secrets.GH_TEST_VISMASIGN_CLIENT_IDENTIFIER }}
           K8S_SECRET_VISMASIGN_SECRET: ${{ secrets.GH_TEST_VISMASIGN_SECRET }}
           
+      - name: Deploy Cronjob
+        uses: City-of-Helsinki/setup-cronjob-action@feat/DEVOPS-149_cronjobs
+        with:
+          image_repository: curlimages/curl
+          kubeconfig_raw: ${{ env.KUBECONFIG_RAW}}
+          target_namespace: ${{ env.K8S_NAMESPACE }}
+          schedule: '* * * * *'
+          command: "{bin/sh}"
+          args: "{-c,cd /app && /usr/bin/timeout --kill-after=15m 14m python manage.py expire_too_old_unpaid_orders expire_too_old_unpaid_orders >>/tmp/cron_test_out 2>&1"
