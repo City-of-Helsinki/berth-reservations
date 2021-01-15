@@ -1124,9 +1124,7 @@ def test_berth_filtering_by_harbor(api_client):
     assert executed["data"] == {"berths": {"count": 1, "totalCount": 11}}
 
 
-def test_berth_filtering_by_pier_and_harbor(api_client):
-    berth = BerthFactory()
-
+def test_berth_filtering_by_pier_and_harbor(api_client, berth):
     base_query = """
         {
             berths(harbor: "%s", pier: "%s") {
@@ -1142,19 +1140,7 @@ def test_berth_filtering_by_pier_and_harbor(api_client):
             to_global_id(PierNode._meta.name, berth.pier.id),
         )
     )
-    assert executed["data"] == {"berths": {"count": 1}}
-
-    harbor = HarborFactory()
-    pier = PierFactory()
-
-    executed = api_client.execute(
-        base_query
-        % (
-            to_global_id(HarborNode._meta.name, harbor.id),
-            to_global_id(PierNode._meta.name, pier.id),
-        )
-    )
-    assert executed["data"] == {"berths": {"count": 0}}
+    assert_in_errors("Cannot pass both pier and harbor filters", executed)
 
 
 def test_pier_filtering_by_harbor(api_client):
