@@ -9,7 +9,9 @@ from django.db.models import (
     OuterRef,
     PositiveIntegerField,
     Q,
+    SmallIntegerField,
     Subquery,
+    Sum,
     UniqueConstraint,
     Value,
 )
@@ -131,6 +133,42 @@ class AbstractArea(TimeStampedModel, UUIDModel):
         abstract = True
 
 
+class HarborManager(models.Manager):
+    def get_queryset(self):
+        pier_qs = Pier.objects.filter(harbor=OuterRef("pk")).values("harbor__pk")
+        width_qs = pier_qs.annotate(max=Max("max_width")).values("max")
+        length_qs = pier_qs.annotate(max=Max("max_length")).values("max")
+        depth_qs = pier_qs.annotate(max=Max("max_depth")).values("max")
+        number_of_free_places_qs = pier_qs.annotate(
+            count=Sum("number_of_free_places")
+        ).values("count")
+        number_of_inactive_places_qs = pier_qs.annotate(
+            count=Sum("number_of_inactive_places")
+        ).values("count")
+        number_of_places_qs = pier_qs.annotate(count=Sum("number_of_places")).values(
+            "count"
+        )
+
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                max_width=Subquery(width_qs, output_field=DecimalField()),
+                max_length=Subquery(length_qs, output_field=DecimalField()),
+                max_depth=Subquery(depth_qs, output_field=DecimalField()),
+                number_of_free_places=Subquery(
+                    number_of_free_places_qs, output_field=SmallIntegerField()
+                ),
+                number_of_inactive_places=Subquery(
+                    number_of_inactive_places_qs, output_field=SmallIntegerField()
+                ),
+                number_of_places=Subquery(
+                    number_of_places_qs, output_field=SmallIntegerField()
+                ),
+            )
+        )
+
+
 class Harbor(AbstractArea, TranslatableModel):
     municipality = models.ForeignKey(
         Municipality,
@@ -163,6 +201,8 @@ class Harbor(AbstractArea, TranslatableModel):
             blank=True,
         ),
     )
+
+    objects = HarborManager()
 
     class Meta:
         verbose_name = _("harbor")

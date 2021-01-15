@@ -223,28 +223,22 @@ class HarborNode(graphql_geojson.GeoJSONType):
         return resolve_piers(info, **kwargs).filter(harbor_id=self.id)
 
     def resolve_max_width(self, info, **kwargs):
-        return (
-            max([pier.max_width or 0 for pier in self.piers.all()], default=0) or None
-        )
+        return self.max_width or 0
 
     def resolve_max_length(self, info, **kwargs):
-        return (
-            max([pier.max_length or 0 for pier in self.piers.all()], default=0) or None
-        )
+        return self.max_length or 0
 
     def resolve_max_depth(self, info, **kwargs):
-        return (
-            max([pier.max_depth or 0 for pier in self.piers.all()], default=0) or None
-        )
+        return self.max_depth or 0
 
     def resolve_number_of_free_places(self, info, **kwargs):
-        return sum([pier.number_of_free_places or 0 for pier in self.piers.all()])
+        return self.number_of_free_places or 0
 
     def resolve_number_of_inactive_places(self, info, **kwargs):
-        return sum([pier.number_of_inactive_places or 0 for pier in self.piers.all()])
+        return self.number_of_inactive_places or 0
 
     def resolve_number_of_places(self, info, **kwargs):
-        return sum([pier.number_of_places or 0 for pier in self.piers.all()])
+        return self.number_of_places or 0
 
 
 class WinterStoragePlaceNode(DjangoObjectType):
