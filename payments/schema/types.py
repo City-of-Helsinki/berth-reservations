@@ -197,8 +197,15 @@ class OrderNode(DjangoObjectType):
     due_date = graphene.Date(required=True)
     order_lines = DjangoConnectionField(OrderLineNode, required=True)
     log_entries = DjangoConnectionField(OrderLogEntryNode, required=True)
-    paid_at = graphene.DateTime()
-    cancelled_at = graphene.DateTime()
+    paid_at = graphene.DateTime(
+        description="Date when the order was paid (if it has been paid)"
+    )
+    cancelled_at = graphene.DateTime(
+        description="Date when the order was cancelled by the admins"
+    )
+    rejected_at = graphene.DateTime(
+        description="Date when the order was rejected by the customer"
+    )
 
     class Meta:
         model = Order
