@@ -1,3 +1,4 @@
+from .loaders import CustomerProfileLoader
 from .mutations import Mutation
 from .queries import Query
 from .types import (
@@ -14,6 +15,7 @@ __all__ = [
     "BoatCertificateNode",
     "BoatCertificateTypeEnum",
     "BoatNode",
+    "CustomerProfileLoader",
     "InvoicingTypeEnum",
     "Mutation",
     "OrganizationNode",
