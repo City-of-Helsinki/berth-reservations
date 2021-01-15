@@ -1,4 +1,5 @@
 import graphene
+from django.db.models import QuerySet
 
 
 def update_object(instance, input):
@@ -23,7 +24,19 @@ class CountConnection(graphene.Connection):
     )
 
     def resolve_count(self, info):
-        return self.iterable.distinct().count()
+        if isinstance(self.iterable, QuerySet):
+            return self.iterable.distinct().count()
+
+        return len(set(self.iterable))
 
     def resolve_total_count(self, info, **kwargs):
-        return self.iterable.model.objects.count()
+        if isinstance(self.iterable, QuerySet):
+            return self.iterable.model.objects.count()
+
+        # Because the DataLoader patter returns only a list of items rather than a QuerySet,
+        # it's not possible to get the model from the iterable, so we try to get the model based
+        # on the connection node.
+        if model := getattr(self._meta.node._meta, "model", None):
+            return model.objects.count()
+
+        return len(self.iterable)
