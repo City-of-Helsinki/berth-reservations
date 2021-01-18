@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-16 10:44+0200\n"
+"POT-Creation-Date: 2021-01-18 11:24+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -955,6 +955,9 @@ msgstr "Faktura för vinteruppläggningsplats"
 
 msgid "Unmarked winter storage order approved"
 msgstr "Faktura för plats på upplagsområde som fylls i upptagningsordning"
+
+msgid "Confirmation"
+msgstr "Bekräftelse"
 
 msgid "Payment service is unreachable"
 msgstr "Betaltjänsten kan inte nås"

@@ -1,6 +1,7 @@
 from decimal import Decimal
 from typing import Dict, List
 
+import factory
 from dateutil.utils import today
 from django.conf import settings
 from django_ilmoitin.dummy_context import dummy_context
@@ -8,7 +9,7 @@ from django_ilmoitin.dummy_context import dummy_context
 from berth_reservations.tests.factories import CustomerProfileFactory
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 
-from ..enums import ProductServiceType
+from ..enums import OrderStatus, ProductServiceType
 from ..models import Order, OrderLine
 from ..providers import BamboraPayformProvider
 from ..tests.factories import (
@@ -114,6 +115,29 @@ def _get_additional_product_order_context(subject: str = "Additional product ord
     }
 
 
+def _get_cancelled_order_context(subject: str = "Order cancelled"):
+    customer = CustomerProfileFactory.build()
+    # The rejected_at field relies on an annotated field from the database, so since we can't
+    # query here as the objects are not saved on the db, we manually add the rejected_at.
+
+    return {
+        "subject": subject,
+        "order": {
+            **factory.build(
+                dict,
+                FACTORY_CLASS=OrderFactory,
+                customer=customer,
+                status=OrderStatus.WAITING,
+                product=BerthProductFactory.build(),
+                lease=BerthLeaseFactory.build(customer=customer),
+                price=Decimal("100"),
+                tax_percentage=Decimal("24.00"),
+            ),
+            "rejected_at": today().date(),
+        },
+    }
+
+
 def load_dummy_context():
     dummy_context.update(
         {
@@ -136,6 +160,9 @@ def load_dummy_context():
             ),
             NotificationType.ADDITIONAL_PRODUCT_ORDER_APPROVED: _get_additional_product_order_context(
                 get_email_subject(NotificationType.ADDITIONAL_PRODUCT_ORDER_APPROVED)
+            ),
+            NotificationType.ORDER_CANCELLED: _get_cancelled_order_context(
+                get_email_subject(NotificationType.ORDER_CANCELLED)
             ),
         }
     )
