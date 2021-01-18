@@ -1,8 +1,14 @@
+from decimal import Decimal
+
 import graphene
-from django.db.models import Prefetch
-from graphene import relay
+from django.db.models import Prefetch, Q
+from django.utils.translation import gettext_lazy as _
+from graphene import GlobalID, relay
 from graphene_django.fields import DjangoConnectionField, DjangoListField
 from graphene_django.filter import DjangoFilterConnectionField
+
+from berth_reservations.exceptions import VenepaikkaGraphQLError
+from utils.relay import from_global_id
 
 from ..models import (
     AvailabilityLevel,
@@ -33,8 +39,13 @@ class Query:
     boat_types = DjangoListField(BoatTypeType)
 
     berth = relay.Node.Field(BerthNode)
-    berths = DjangoFilterConnectionField(
+    berths = DjangoConnectionField(
         BerthNode,
+        harbor=graphene.ID(),
+        pier=graphene.ID(),
+        min_width=graphene.Float(),
+        min_length=graphene.Float(),
+        is_available=graphene.Boolean(),
         description="If filtering by both pier and harbor and the pier does not belong to the given harbor, "
         "will return an empty list of edges."
         "\n\n**Requires permissions** to query `leases` field. "
@@ -86,17 +97,32 @@ class Query:
     def resolve_boat_types(self, info, **kwargs):
         return BoatType.objects.all()
 
-    def resolve_berths(self, info, **kwargs):
-        return Berth.objects.prefetch_related(
-            "pier__suitable_boat_types",
-            "pier__harbor__translations",
-            "pier__harbor__availability_level__translations",
-            "pier__harbor__municipality__translations",
-        ).select_related(
-            "pier",
-            "pier__harbor",
-            "pier__harbor__availability_level",
-            "pier__harbor__municipality",
+    def resolve_berths(
+        self,
+        info,
+        harbor: GlobalID = None,
+        pier: GlobalID = None,
+        min_width: Decimal = 0,
+        min_length: Decimal = 0,
+        **kwargs
+    ):
+        if pier and harbor:
+            raise VenepaikkaGraphQLError(_("Cannot pass both pier and harbor filters"))
+
+        filters = Q()
+        if harbor:
+            filters &= Q(pier__harbor_id=from_global_id(harbor, HarborNode))
+        if pier:
+            filters &= Q(pier_id=from_global_id(pier, PierNode))
+        if min_width:
+            filters &= Q(berth_type__width__gte=min_width)
+        if min_length:
+            filters &= Q(berth_type__length__gte=min_length)
+        if "is_available" in kwargs:
+            filters &= Q(is_available=kwargs.get("is_available"))
+
+        return info.context.berth_loader.load_many(
+            keys=Berth.objects.filter(filters).values_list("id", flat=True)
         )
 
     def resolve_piers(self, info, **kwargs):

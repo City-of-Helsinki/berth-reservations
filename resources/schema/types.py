@@ -1,10 +1,11 @@
 import django_filters
 import graphene
 import graphql_geojson
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from graphene import relay
 from graphene_django.fields import DjangoConnectionField
-from graphene_django.filter import DjangoFilterConnectionField, GlobalIDFilter
+from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
 
 from applications.models import BerthApplication, WinterStorageApplication
@@ -58,6 +59,10 @@ class PierNode(graphql_geojson.GeoJSONType):
     max_length = graphene.Float()
     max_depth = graphene.Float()
     price_tier = graphene.Field("payments.schema.PriceTierEnum")
+    suitable_boat_types = graphene.List("resources.schema.BoatTypeType")
+    berths = DjangoConnectionField(
+        "resources.schema.BerthNode", is_available=graphene.Boolean(),
+    )
 
     class Meta:
         model = Pier
@@ -75,21 +80,19 @@ class PierNode(graphql_geojson.GeoJSONType):
         interfaces = (relay.Node,)
         connection_class = CountConnection
 
+    def resolve_berths(self, info, **kwargs):
+        filters = Q()
+        if "is_available" in kwargs:
+            filters &= Q(is_available=kwargs.get("is_available"))
 
-class BerthNodeFilterSet(django_filters.FilterSet):
-    min_width = django_filters.NumberFilter(
-        field_name="berth_type__width", lookup_expr="gte"
-    )
-    min_length = django_filters.NumberFilter(
-        field_name="berth_type__length", lookup_expr="gte"
-    )
-    is_available = django_filters.BooleanFilter()
-    harbor = GlobalIDFilter(field_name="pier__harbor", lookup_expr="id")
-    pier = GlobalIDFilter(field_name="pier", lookup_expr="id")
+        return info.context.berth_loader.load_many(
+            keys=self.berths.filter(filters).values_list("id", flat=True)
+        )
 
-    class Meta:
-        model = Berth
-        fields = ["min_width", "min_length"]
+    def resolve_suitable_boat_types(self, info, **kwargs):
+        return info.context.suitable_boat_type_loader.load_many(
+            keys=self.suitable_boat_types.values_list("id", flat=True)
+        )
 
 
 class BerthNode(DjangoObjectType):
@@ -116,12 +119,14 @@ class BerthNode(DjangoObjectType):
             "modified_at",
         )
         interfaces = (relay.Node,)
-        filterset_class = BerthNodeFilterSet
         connection_class = CountConnection
 
     @view_permission_required(BerthLease, BerthApplication, CustomerProfile)
     def resolve_leases(self, info, **kwargs):
-        return self.leases.all()
+        return info.context.leases_for_berth_loader.load(self.id)
+
+    def resolve_pier(self, info, **kwargs):
+        return info.context.pier_loader.load(self.pier_id)
 
     def resolve_width(self, info, **kwargs):
         return self.berth_type.width
@@ -218,28 +223,22 @@ class HarborNode(graphql_geojson.GeoJSONType):
         return resolve_piers(info, **kwargs).filter(harbor_id=self.id)
 
     def resolve_max_width(self, info, **kwargs):
-        return (
-            max([pier.max_width or 0 for pier in self.piers.all()], default=0) or None
-        )
+        return self.max_width or 0
 
     def resolve_max_length(self, info, **kwargs):
-        return (
-            max([pier.max_length or 0 for pier in self.piers.all()], default=0) or None
-        )
+        return self.max_length or 0
 
     def resolve_max_depth(self, info, **kwargs):
-        return (
-            max([pier.max_depth or 0 for pier in self.piers.all()], default=0) or None
-        )
+        return self.max_depth or 0
 
     def resolve_number_of_free_places(self, info, **kwargs):
-        return sum([pier.number_of_free_places or 0 for pier in self.piers.all()])
+        return self.number_of_free_places or 0
 
     def resolve_number_of_inactive_places(self, info, **kwargs):
-        return sum([pier.number_of_inactive_places or 0 for pier in self.piers.all()])
+        return self.number_of_inactive_places or 0
 
     def resolve_number_of_places(self, info, **kwargs):
-        return sum([pier.number_of_places or 0 for pier in self.piers.all()])
+        return self.number_of_places or 0
 
 
 class WinterStoragePlaceNode(DjangoObjectType):

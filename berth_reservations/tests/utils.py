@@ -3,6 +3,7 @@ from django.test import RequestFactory
 from graphene.test import Client as GrapheneClient
 from requests import RequestException
 
+from ..middlewares import GQLDataLoaders
 from ..new_schema import new_schema
 from ..schema import schema
 
@@ -22,7 +23,7 @@ class ApiClient(GrapheneClient):
                 "variables" not in kwargs
             ), 'Do not pass both "variables" and "input" at the same time'
             kwargs["variables"] = {"input": input}
-        return super().execute(*args, **kwargs)
+        return super().execute(*args, middleware=[GQLDataLoaders()], **kwargs)
 
 
 def create_api_client(user=None, graphql_v2=True):

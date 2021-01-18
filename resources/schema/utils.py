@@ -14,6 +14,7 @@ def resolve_piers(info, **kwargs):
     min_width = kwargs.get("min_berth_width", 0)
     min_length = kwargs.get("min_berth_length", 0)
     application_global_id = kwargs.get("for_application")
+    harbor_id = kwargs.get("harbor_id")
 
     # Filter out piers with no berths that fit the
     # passed dimensions only if the dimensions were given.
@@ -47,6 +48,11 @@ def resolve_piers(info, **kwargs):
                 _("You do not have permission to perform this action")
             )
 
+    if harbor_id:
+        query = Pier.objects.filter(harbor_id=harbor_id)
+    else:
+        query = Pier.objects.all()
+
     suitable_berth_types = BerthType.objects.filter(
         width__gte=min_width, length__gte=min_length
     )
@@ -54,7 +60,7 @@ def resolve_piers(info, **kwargs):
         berth_type__in=suitable_berth_types
     )
 
-    query = Pier.objects.prefetch_related(
+    query = query.prefetch_related(
         Prefetch("berths", queryset=berth_queryset),
         "suitable_boat_types",
         "harbor__translations",

@@ -45,6 +45,9 @@ class BerthLeaseNode(DjangoObjectType):
             node, info.context.user, BerthLease, BerthApplication, CustomerProfile
         )
 
+    def resolve_customer(self, info, **kwargs):
+        return info.context.customer_loader.load(self.customer_id)
+
 
 class WinterStorageLeaseNode(DjangoObjectType):
     place = graphene.Field(WinterStoragePlaceNode)

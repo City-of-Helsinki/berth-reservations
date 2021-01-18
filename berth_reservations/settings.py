@@ -62,6 +62,7 @@ env = environ.Env(
     CSRF_TRUSTED_ORIGINS=(list, []),
     FORCED_HOST=(str, None),
     ENABLE_APM_TOOLS=(bool, False),
+    ENABLE_PROFILING_TOOLS=(bool, False),
 )
 if os.path.exists(env_file):
     env.read_env(env_file)
@@ -160,6 +161,7 @@ INSTALLED_APPS = [
     "mailer",
     "graphene_django",
     "django_ilmoitin",
+    "silk",
     # Local apps
     "users",
     "customers",
@@ -231,7 +233,10 @@ OIDC_AUTH = {"OIDC_LEEWAY": 60 * 60}
 
 GRAPHENE = {
     "SCHEMA": "berth_reservations.schema.schema",
-    "MIDDLEWARE": ["graphql_jwt.middleware.JSONWebTokenMiddleware"],
+    "MIDDLEWARE": [
+        "graphql_jwt.middleware.JSONWebTokenMiddleware",
+        "berth_reservations.middlewares.GQLDataLoaders",
+    ],
     "RELAY_CONNECTION_MAX_LIMIT": 5000,
 }
 
@@ -263,6 +268,10 @@ LOGGING = {
     },
 }
 
+ENABLE_PROFILING_TOOLS = env("ENABLE_PROFILING_TOOLS")
+
+SILKY_AUTHENTICATION = True
+
 # Dotted path to the active payment provider class, see payments.providers init.
 # Example value: 'payments.providers.BamboraPayformProvider'
 VENE_PAYMENTS_PROVIDER_CLASS = env("VENE_PAYMENTS_PROVIDER_CLASS")
@@ -275,6 +284,11 @@ VENE_UI_URL = env("VENE_UI_URL")
 
 if env("ENABLE_APM_TOOLS"):
     INSTALLED_APPS += ["elasticapm.contrib.django"]
+
+if env("ENABLE_PROFILING_TOOLS"):
+    MIDDLEWARE += [
+        "silk.middleware.SilkyMiddleware",
+    ]
 
 if env("FORCED_HOST"):
     FORCED_HOST = env("FORCED_HOST")
