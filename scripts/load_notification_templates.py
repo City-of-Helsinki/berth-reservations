@@ -83,6 +83,10 @@ if __name__ == "__main__":
             "html": "additional_service_invoice_{lang}.html",
             "plain": None,
         },
+        PaymentNotificationType.ORDER_CANCELLED: {
+            "html": "order_cancelled_{lang}.html",
+            "plain": None,
+        },
         LeaseNotificationType.AUTOMATIC_INVOICING_EMAIL_ADMINS: {
             "html": "automatic_invoicing_email_admins_{lang}.html",
             "plain": "automatic_invoicing_email_admins_{lang}.txt",
