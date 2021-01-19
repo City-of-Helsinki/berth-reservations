@@ -27,4 +27,4 @@ class NotificationType(TextChoices):
         "additional_product_order_approved",
         _("Additional product order approved"),
     )
-    ORDER_CANCELLED = ("order_cancelled", _("Confirmation"))
+    ORDER_CANCELLED = ("order_cancelled", _("Order cancelled"))

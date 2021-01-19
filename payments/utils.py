@@ -18,6 +18,7 @@ from django.utils.translation import gettext_lazy as _
 from django_ilmoitin.utils import send_notification
 
 from applications.enums import ApplicationStatus
+from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.enums import OrganizationType
 from customers.services import HelsinkiProfileUser
 from leases.enums import LeaseStatus
@@ -326,6 +327,26 @@ def approve_order(
     send_notification(email, notification_type.value, context, language)
 
 
+def send_cancellation_notice(order):
+    from .notifications import NotificationType
+
+    language = (
+        order.lease.application.language
+        if order.lease and order.lease.application
+        else settings.LANGUAGE_CODE
+    )
+    notification_type = NotificationType.ORDER_CANCELLED
+    context = {"order": order, "subject": get_email_subject(notification_type)}
+    email = order.customer_email
+    if not email:
+        if order.lease and order.lease.application:
+            email = order.lease.application.email
+        else:
+            raise VenepaikkaGraphQLError(_("No email was found"))
+
+    send_notification(email, notification_type.value, context, language)
+
+
 def get_email_subject(notification_type):
     from .notifications import NotificationType
 
@@ -334,6 +355,8 @@ def get_email_subject(notification_type):
         or notification_type == NotificationType.RENEW_BERTH_ORDER_APPROVED
     ):
         return _("Boat berth invoice")
+    if notification_type == NotificationType.ORDER_CANCELLED:
+        return _("Confirmation")
     return notification_type.label
 
 

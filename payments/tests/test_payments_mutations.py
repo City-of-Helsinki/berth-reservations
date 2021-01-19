@@ -5,6 +5,7 @@ from unittest import mock
 import pytest
 from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
+from django.core import mail
 from django.utils.timezone import now
 from freezegun import freeze_time
 
@@ -1325,7 +1326,9 @@ mutation CANCEL_ORDER_MUTATION($input: CancelOrderMutationInput!) {
 @pytest.mark.parametrize(
     "order", ["berth_order", "winter_storage_order"], indirect=True,
 )
-def test_cancel_order(old_schema_api_client, order: Order):
+def test_cancel_order(
+    old_schema_api_client, order: Order, notification_template_order_cancelled
+):
     order.status = OrderStatus.WAITING
     order.save()
     variables = {"orderNumber": order.order_number}
@@ -1341,6 +1344,17 @@ def test_cancel_order(old_schema_api_client, order: Order):
 
     assert order.status == OrderStatus.REJECTED
     assert order.lease.status == LeaseStatus.REFUSED
+
+    assert len(mail.outbox) == 1
+    assert (
+        mail.outbox[0].subject == f"test order cancelled subject: {order.order_number}!"
+    )
+    assert mail.outbox[0].body == f"{ order.order_number }"
+    assert mail.outbox[0].to == [order.lease.application.email]
+
+    assert mail.outbox[0].alternatives == [
+        (f"<b>{ order.order_number }</b>", "text/html")
+    ]
 
 
 @pytest.mark.parametrize(

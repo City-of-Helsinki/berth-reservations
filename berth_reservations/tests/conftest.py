@@ -161,6 +161,25 @@ def notification_template_orders_approved():
         )
 
 
+@pytest.fixture
+def notification_template_order_cancelled():
+    from payments.notifications import NotificationType
+
+    for value in NotificationType.values:
+        notification = NotificationTemplate.objects.language("fi").create(
+            type=value,
+            subject="test order cancelled subject: {{ order.order_number }}!",
+            body_html="<b>{{ order.order_number }}</b>",
+            body_text="{{ order.order_number }}",
+        )
+        notification.create_translation(
+            "en",
+            subject="test order cancelled subject: {{ order.order_number }}!",
+            body_html="<b>{{ order.order_number }}</b>",
+            body_text="{{ order.order_number }}",
+        )
+
+
 @pytest.fixture(autouse=True)
 def patch_contract_service(monkeypatch):
     monkeypatch.setattr(
