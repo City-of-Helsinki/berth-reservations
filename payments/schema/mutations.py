@@ -39,7 +39,7 @@ from ..models import (
     WinterStorageProduct,
 )
 from ..providers import get_payment_provider
-from ..utils import approve_order
+from ..utils import approve_order, send_cancellation_notice
 from .types import (
     AdditionalProductNode,
     AdditionalProductTaxEnum,
@@ -479,7 +479,9 @@ class CancelOrderMutation(graphene.ClientIDMutation):
                 )
             order.set_status(OrderStatus.REJECTED, _("Order rejected by customer"))
             order.invalidate_tokens()
-        except (Order.DoesNotExist, ValidationError) as e:
+
+            send_cancellation_notice(order)
+        except (Order.DoesNotExist, ValidationError, AnymailError, OSError,) as e:
             raise VenepaikkaGraphQLError(e)
 
         return CancelOrderMutation()
