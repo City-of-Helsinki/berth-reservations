@@ -19,6 +19,7 @@ from django.db.models.expressions import RawSQL
 from django.db.models.functions import Coalesce
 from django.utils.translation import gettext_lazy as _
 from munigeo.models import Municipality
+from parler.managers import TranslatableManager
 from parler.models import TranslatableModel, TranslatedFields
 
 from leases.consts import ACTIVE_LEASE_STATUSES
@@ -133,7 +134,7 @@ class AbstractArea(TimeStampedModel, UUIDModel):
         abstract = True
 
 
-class HarborManager(models.Manager):
+class HarborManager(TranslatableManager):
     def get_queryset(self):
         pier_qs = Pier.objects.filter(harbor=OuterRef("pk")).values("harbor__pk")
         width_qs = pier_qs.annotate(max=Max("max_width")).values("max")

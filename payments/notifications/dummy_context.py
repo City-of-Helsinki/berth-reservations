@@ -40,6 +40,9 @@ def _get_order_context(
         "subject": subject,
         "order": order,
         "payment_url": provider.get_payment_email_url(order, settings.LANGUAGE_CODE),
+        "cancel_url": provider.get_cancellation_email_url(
+            order, settings.LANGUAGE_CODE
+        ),
         "optional_services": optional_services,
     }
 
