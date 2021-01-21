@@ -291,6 +291,7 @@ def approve_order(
         order.customer_first_name = helsinki_profile_user.first_name
         order.customer_last_name = helsinki_profile_user.last_name
         order.customer_email = helsinki_profile_user.email
+        order.customer_phone = helsinki_profile_user.phone
         order.customer_address = helsinki_profile_user.address
         order.customer_zip_code = helsinki_profile_user.postal_code
         order.customer_city = helsinki_profile_user.city

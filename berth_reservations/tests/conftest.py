@@ -37,6 +37,7 @@ def force_settings(settings):
     settings.DEFAULT_FROM_EMAIL = "noreply@foo.bar"
     settings.LANGUAGE_CODE = "en"
     settings.VENE_UI_RETURN_URL = "https://front-end-url/{LANG}"
+    settings.NOTIFICATION_SERVICE_TOKEN = "fake_token"
 
 
 @pytest.fixture

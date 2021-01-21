@@ -1,4 +1,5 @@
 import pytest
+from faker import Faker
 
 from berth_reservations.tests.conftest import *  # noqa
 from berth_reservations.tests.factories import CustomerProfileFactory
@@ -42,7 +43,9 @@ def hki_profile_address() -> dict:
 
 def mocked_response_profile(count=3, data=None, use_edges=True, *args, **kwargs):
     def wrapper(*args, **kwargs):
+        faker = Faker()
         profiles = []
+
         for _i in range(0, count):
             profile = CustomerProfileFactory()
             profiles.append(
@@ -51,6 +54,7 @@ def mocked_response_profile(count=3, data=None, use_edges=True, *args, **kwargs)
                     "first_name": profile.user.first_name,
                     "last_name": profile.user.last_name,
                     "primary_email": {"email": profile.user.email},
+                    "primary_phone": {"phone": faker.phone_number()},
                     "primary_address": MOCK_HKI_PROFILE_ADDRESS,
                 }
             )
