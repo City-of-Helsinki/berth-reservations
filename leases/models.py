@@ -285,6 +285,14 @@ class WinterStorageLease(AbstractLease):
         verbose_name_plural = _("winter storage leases")
         default_related_name = "winter_storage_leases"
 
+    def get_winter_storage_area(self):
+        if self.place:
+            return self.place.winter_storage_section.area
+        elif self.section:
+            return self.section.area
+        else:
+            raise Exception(f"WinterStorageLease {self} has no place or section")
+
     def clean(self):
         creating = self._state.adding
 

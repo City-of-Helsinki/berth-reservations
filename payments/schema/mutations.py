@@ -41,8 +41,10 @@ from ..models import (
 from ..providers import get_payment_provider
 from ..utils import (
     approve_order,
+    fetch_order_profile,
+    resend_order,
     send_cancellation_notice,
-    resend_order
+    update_order_from_profile,
 )
 from .types import (
     AdditionalProductNode,
@@ -620,35 +622,67 @@ class ApproveOrderMutation(graphene.ClientIDMutation):
 
 class ResendOrderMutation(graphene.ClientIDMutation):
     class Input:
-        order_id = graphene.ID(required=True)
-        due_date = graphene.Date(required=True)
+        orders = graphene.List(graphene.NonNull(graphene.ID))
+        due_date = graphene.Date(description="Defaults to the Order due date")
         profile_token = graphene.String(
-            required=True, description="API token for Helsinki profile GraphQL API",
+            required=False, description="API token for Helsinki profile GraphQL API",
         )
 
-    order = graphene.Field(OrderNode)
+    sent_orders = graphene.List(graphene.NonNull(graphene.ID), required=True)
+    failed_orders = graphene.List(graphene.NonNull(FailedOrderType), required=True)
 
     @classmethod
     @change_permission_required(Order)
     def mutate_and_get_payload(cls, root, info, **input):
-        order = get_node_from_global_id(
-            info, input.pop("order_id"), only_type=OrderNode, nullable=False
-        )
 
-        if order.lease.status != LeaseStatus.OFFERED:
-            VenepaikkaGraphQLError(
-                _("Cannot resend an invoice for a lease that is not currently offered.")
+        orders = []
+        due_date = input.pop("due_date", None)
+        for order_id in input["orders"]:
+            order = get_node_from_global_id(
+                info, order_id, only_type=OrderNode, nullable=False
             )
+            orders.append(order)
 
-        due_date = input.pop("due_date")
-        profile = ProfileService(input.pop("profile_token")).get_profile(
-            order.customer.id
-        )
+            if order.lease.status != LeaseStatus.OFFERED:
+                VenepaikkaGraphQLError(
+                    _(
+                        "Cannot resend an invoice for a lease that is not currently offered."
+                    )
+                )
 
-        with transaction.atomic():
-            resend_order(order, due_date, profile, info.context)
+        failed_orders = []
+        sent_orders = []
 
-        return ResendOrderMutation(order=order)
+        for order in orders:
+            if not order.customer_email and not order.customer_phone:
+                if not input.get("profile_token"):
+                    failed_orders.append(
+                        FailedOrderType(
+                            id=order_id,
+                            error=_(
+                                "Profile token is required if an order does not previously have email or phone."
+                            ),
+                        )
+                    )
+                    continue
+                profile = fetch_order_profile(order, input["profile_token"])
+                update_order_from_profile(order, profile)
+
+            try:
+                with transaction.atomic():
+                    resend_order(order, due_date, info.context)
+            except (
+                AnymailError,
+                OSError,
+                Order.DoesNotExist,
+                ValidationError,
+                VenepaikkaGraphQLError,
+            ) as e:
+                failed_orders.append(FailedOrderType(id=order_id, error=str(e)))
+            else:
+                sent_orders.append(order.id)
+
+        return ResendOrderMutation(sent_orders=sent_orders, failed_orders=failed_orders)
 
 
 class Mutation:
@@ -767,10 +801,10 @@ class Mutation:
     )
 
     resend_order = ResendOrderMutation.Field(
-        description="Resends the specified order."
-        "\n\nUpdates order due date and price, if the underlying product has been changed "
+        description="Resends the specified order notice."
+        "\n\nUpdates order due date and price if the underlying product has been changed, "
         "and resends the payment email to the customer."
-        "\n\nIt returns the possibly updated order."
+        "\n\nIt returns the updated order."
         "\n\n**Requires permissions** to update orders."
         "\n\nErrors:"
         "\n* The passed order must have a lease in status OFFERED"

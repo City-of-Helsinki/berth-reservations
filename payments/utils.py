@@ -20,7 +20,7 @@ from django_ilmoitin.utils import send_notification
 from applications.enums import ApplicationStatus
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.enums import OrganizationType
-from customers.services import HelsinkiProfileUser
+from customers.services import HelsinkiProfileUser, ProfileService
 from leases.enums import LeaseStatus
 from leases.utils import (
     calculate_season_end_date,
@@ -33,6 +33,23 @@ from resources.models import Harbor, WinterStorageArea
 from utils.numbers import rounded as rounded_decimal
 
 from .enums import OrderStatus, OrderType, ProductServiceType
+
+
+def fetch_order_profile(order, profile_token):
+    profile = ProfileService(profile_token=profile_token).get_profile(order.customer.id)
+    return profile
+
+
+def update_order_from_profile(order, profile):
+    order.customer_first_name = profile.first_name
+    order.customer_last_name = profile.first_name
+    order.customer_email = profile.email
+    order.customer_phone = profile.phone
+    order.customer_address = profile.address
+    order.customer_zip_code = profile.postal_code
+    order.customer_city = profile.city
+    order.save()
+    return profile
 
 
 def rounded(func):
@@ -285,8 +302,6 @@ def approve_order(
     helsinki_profile_user: HelsinkiProfileUser,
     request: HttpRequest,
 ) -> None:
-    from payments.providers import get_payment_provider
-
     if helsinki_profile_user:
         order.customer_first_name = helsinki_profile_user.first_name
         order.customer_last_name = helsinki_profile_user.last_name
@@ -299,8 +314,6 @@ def approve_order(
     order.due_date = due_date
     order.save()
 
-    language = settings.LANGUAGE_CODE
-
     if order.lease and order.order_type == OrderType.LEASE_ORDER:
         # Update lease status
         order.lease.status = LeaseStatus.OFFERED
@@ -311,21 +324,7 @@ def approve_order(
             order.lease.application.status = ApplicationStatus.OFFER_SENT
             order.lease.application.save()
 
-            language = order.lease.application.language
-
-    # Get payment URL
-    payment_url = get_payment_provider(
-        request, ui_return_url=settings.VENE_UI_RETURN_URL
-    ).get_payment_email_url(order, lang=language)
-
-    cancel_url = get_payment_provider(
-        request, ui_return_url=settings.VENE_UI_RETURN_URL
-    ).get_cancellation_email_url(order, lang=language)
-
-    # Send email
-    notification_type = get_order_notification_type(order)
-    context = get_context(order, payment_url, cancel_url, notification_type)
-    send_notification(email, notification_type.value, context, language)
+    send_payment_notification(order, request, email)
 
 
 def send_cancellation_notice(order):
@@ -348,34 +347,37 @@ def send_cancellation_notice(order):
     send_notification(email, notification_type.value, context, language)
 
 
-def resend_order(
-    order, due_date: date, profile: HelsinkiProfileUser, request: HttpRequest
-) -> None:
-    from payments.providers import get_payment_provider
-
+def resend_order(order, due_date: date, request: HttpRequest) -> None:
     if order.lease.status != LeaseStatus.OFFERED:
         raise ValueError(_("Cannot resend an order for a lease not in status OFFERED"))
 
-    order.customer_first_name = profile.first_name
-    order.customer_last_name = profile.last_name
-    order.customer_email = profile.email
-    order.customer_address = profile.address
-    order.customer_zip_code = profile.postal_code
-    order.customer_city = profile.city
+    if due_date:
+        order.due_date = due_date
 
-    order.due_date = due_date
+    order.recalculate_price()
+    order.save()
 
-    order.save(update_price=True)
+    send_payment_notification(order, request)
+
+
+def send_payment_notification(order, request, email=None):
+    from payments.providers import get_payment_provider
+
+    if email is None:
+        email = order.customer_email
 
     language = get_notification_language(order)
-
     payment_url = get_payment_provider(
         request, ui_return_url=settings.VENE_UI_RETURN_URL
     ).get_payment_email_url(order, lang=language)
 
+    cancel_url = get_payment_provider(
+        request, ui_return_url=settings.VENE_UI_RETURN_URL
+    ).get_cancellation_email_url(order, lang=language)
+
     notification_type = get_order_notification_type(order)
-    context = get_context(order, payment_url, notification_type)
-    send_notification(order.customer_email, notification_type.value, context, language)
+    context = get_context(order, payment_url, cancel_url, notification_type)
+    send_notification(email, notification_type.value, context, language)
 
 
 def get_notification_language(order):

@@ -15,6 +15,7 @@
 *.spec
 *.stTheme.cache
 *.sublime-workspace
+*.swp
 *.tmlanguage.cache
 *.tmPreferences.cache
 ._*
