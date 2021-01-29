@@ -17,7 +17,7 @@ class SMSNotificationService:
 
         self.api_url = self.config.get(NOTIFICATION_SERVICE_API_URL)
         self.sender_name = self.config.get(NOTIFICATION_SERVICE_SENDER_NAME)
-        self.token = self.config.get(NOTIFICATION_SERVICE_TOKEN)
+        self.token = kwargs.get("token") or self.config.get(NOTIFICATION_SERVICE_TOKEN)
         assert self.token
 
     @staticmethod

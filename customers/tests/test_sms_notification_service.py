@@ -26,9 +26,8 @@ def test_send_message():
         "customers.services.profile.requests.post",
         side_effect=lambda *args, **kwargs: MockResponse(mock_response),
     ) as mock_exec:
-        response = SMSNotificationService(token="fake_token").send(
-            phone_number=phone, message=message
-        )
+        notification_service = SMSNotificationService(token="fake_token")
+        response = notification_service.send(phone_number=phone, message=message)
 
         params = {
             "json": {
@@ -39,8 +38,7 @@ def test_send_message():
             "headers": {"Authorization": "Token fake_token"},
         }
         mock_exec.assert_called_with(
-            "https://notification-service-api.test.kuva.hel.ninja/v1/message/send",
-            **params
+            notification_service.api_url + "/message/send", **params
         )
 
     assert response.json() == mock_response
