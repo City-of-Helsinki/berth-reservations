@@ -2,6 +2,18 @@ import environ
 from django.conf import settings
 
 from .profile import HelsinkiProfileUser, ProfileService
+from .sms_notification_service import SMSNotificationService
+
+
+def _load_config(template: dict) -> dict:
+    config = {}
+    env = environ.Env(**template)
+    for key in template.keys():
+        if hasattr(settings, key):
+            config[key] = getattr(settings, key)
+        else:
+            config[key] = env(key)
+    return config
 
 
 def load_services_config():
@@ -10,17 +22,13 @@ def load_services_config():
 
     # The service tells what keys and types it requires for configuration
     # and the corresponding data has to be set in .env
-    template = ProfileService.get_config_template()
-    env = environ.Env(**template)
 
-    config = {}
-    for key in template.keys():
-        if hasattr(settings, key):
-            config[key] = getattr(settings, key)
-        else:
-            config[key] = env(key)
-
-    ProfileService.config = config
+    for service in [
+        ProfileService,
+        SMSNotificationService,
+    ]:
+        template = service.get_config_template()
+        service.config = _load_config(template)
 
 
 __all__ = [

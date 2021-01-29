@@ -60,4 +60,7 @@ jobs:
           K8S_SECRET_VISMASIGN_API_URL: ${{ secrets.GH_TEST_VISMASIGN_API_URL }}
           K8S_SECRET_VISMASIGN_CLIENT_IDENTIFIER: ${{ secrets.GH_TEST_VISMASIGN_CLIENT_IDENTIFIER }}
           K8S_SECRET_VISMASIGN_SECRET: ${{ secrets.GH_TEST_VISMASIGN_SECRET }}
-          
+          K8S_SECRET_NOTIFICATION_SERVICE_API_URL: "http://fake-notification-api.example.com/v1"
+          K8S_SECRET_NOTIFICATION_SERVICE_TOKEN: "dummy-notification-token"
+          K8S_SECRET_NOTIFICATION_SERVICE_SENDER_NAME: "Hel.fi"
+

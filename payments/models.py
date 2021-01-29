@@ -323,6 +323,7 @@ class Order(UUIDModel, TimeStampedModel):
     customer_first_name = models.TextField(blank=True, null=True)
     customer_last_name = models.TextField(blank=True, null=True)
     customer_email = models.TextField(blank=True, null=True)
+    customer_phone = models.TextField(blank=True, null=True)
     customer_address = models.TextField(blank=True, null=True)
     customer_zip_code = models.TextField(blank=True, null=True)
     customer_city = models.TextField(blank=True, null=True)
