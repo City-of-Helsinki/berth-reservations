@@ -1,4 +1,5 @@
 import logging
+import traceback
 
 import requests
 from django.conf import settings
@@ -131,6 +132,7 @@ class Command(BaseCommand):
                     customer = profile_service.get_profile(order.customer.id)
                 except Exception:
                     no_customer_phone.append(f"{order.id};{order.customer.id}\n")
+                    traceback.print_exc()
                     continue
 
                 # If the customer doesn't have a phone in Profiili, add it to the failures
