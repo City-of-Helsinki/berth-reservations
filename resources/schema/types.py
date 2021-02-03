@@ -59,9 +59,11 @@ class PierNode(graphql_geojson.GeoJSONType):
     max_length = graphene.Float()
     max_depth = graphene.Float()
     price_tier = graphene.Field("payments.schema.PriceTierEnum")
-    suitable_boat_types = graphene.List("resources.schema.BoatTypeType")
+    suitable_boat_types = graphene.NonNull(
+        graphene.List(graphene.NonNull("resources.schema.BoatTypeType"))
+    )
     berths = DjangoConnectionField(
-        "resources.schema.BerthNode", is_available=graphene.Boolean(),
+        "resources.schema.BerthNode", is_available=graphene.Boolean(), required=True
     )
 
     class Meta:
