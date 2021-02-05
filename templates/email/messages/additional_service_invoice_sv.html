@@ -1,25 +1,25 @@
-<p>Hyvä asiakas, tässä lasku lisäpalvelusta. Voit maksaa sen klikkaamalla "siirry maksamaan" -painiketta alempana tässä
-    viestissä.</p>
+<p>Bästa kund, här är en faktura för din tilläggstjänst. Du kan betala den genom att klicka
+    på "Betala" längre ner i meddelandet.</p>
 <br/>
 
-<h3>Lasku</h3>
+<h3>Faktura</h3>
 
 <table style="width: 100%">
     <tr>
         <td>
-            Sopimus
+            Avtal
         </td>
-        <td>Venepaikka</td>
+        <td>Båtplats</td>
     </tr>
     <tr>
         <td>
-            Venepaikka:
+            Båtplats:
         </td>
         <td>{{ order.lease.berth.pier.harbor.name }}</td>
     </tr>
     <tr>
         <td>
-            Sopimuskausi:
+            Avtalsperiod:
         </td>
         <td>{{ order.lease.start_date }} - {{ order.lease.end_date }}</td>
     </tr>
@@ -40,15 +40,15 @@
     </tr>
     <tr>
         <td>
-            Laskun aihe:
+            Tilläggstjänst som fakturan gäller:
         </td>
         <td>{{ additional_product.name }}</td>
     </tr>
     <tr>
         <td>
-            Sopimuskausi:
+            Avtalsperiod:
         </td>
-        <td>Talvi {{ additional_product.season }}</td>
+        <td>Vinter {{ additional_product.season }}</td>
     </tr>
     <tr>
         <td colspan="2">
@@ -61,12 +61,12 @@
         </td>
     </tr>
     <tr>
-        <td>{{ additional_product.name }} yhteensä:</td>
+        <td>{{ additional_product.name }} totalt:</td>
         <td>{{ order.total_price }}&euro;</td>
     </tr>
     <tr>
         <td>
-            YHTEENSÄ:
+            TOTALT:
         </td>
         <td>{{ order.total_price }}&euro;
         </td>
@@ -77,38 +77,37 @@
     <tr>
         <td style="padding: 32px 48px;">
             <p>
-                Maksa lasku tämän linkin kautta ennen eräpäivää {{ order.due_date }}:
+                Betala fakturan via denna länk före förfallodatumet {{ order.due_date }}:
             </p>
 
             <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
-               href="{{ payment_url }}">Siirry maksamaan {{ order.total_price }}&euro; &rarr;</a>
+               href="{{ payment_url }}">Betala {{ order.total_price }}&euro; &rarr;</a>
 
             <p>
-                Huomaathan, että laskun voi maksaa vain tämän linkin kautta. Muulla
-                tavoin maksettuja maksuja ei voida ottaa vastaan. Lisätietoja
-                asiakaspalvelustamme <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
+                Observera att fakturan kan betalas endast via denna länk. Betalningar som gjorts på
+                annat sätt tas inte emot. För mer information, kontakta vår kundtjänst via
+                <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
             </p>
         </td>
     </tr>
 </table>
 
 <p>
-    Helsingin kaupungin venepaikat vuokrataan asiakkaille toistaiseksi
-    voimassa olevina ja niistä peritään vuosittain kulloinkin voimassa
-    olevan hinnaston mukainen maksu. Jos laskua ei maksa eräpäivään
-    mennessä, vuokrasopimus irtisanoutuu automaattisesti. Veneilykausi on
-    10.6.-14.9., jona aikana venepaikalla saa pitää venettä.
+    Helsingfors stads båtplatser hyrs ut till kunder tills vidare, och för dem
+    debiteras en årlig avgift enligt den gällande prislistan. Om fakturan inte betalas
+    senast på förfallodagen sägs hyresavtalet upp automatiskt. Båten får förvaras på
+    båtplatsen under båtsäsongen, som varar under perioden 10.6–14.9.
 </p>
 <p>
-    Venepaikan vastaanottaminen edellyttää voimassa olevien venepaikan
-    vuokrasopimusehtojen sekä venesatamasääntöjen hyväksymistä.
+    För att ta emot en båtplats måste du godkänna de gällande hyresavtalsvillkoren för
+    båtplatser och båthamnens regler.
 </p>
 
 <table style="width: 100%; margin: 48px 0;">
     <tr>
         <td style="text-align: center;">
             <a style="font-size: 16px; color: #0072C6;" href="https://venepaikat.hel.fi">
-                Helsingin kaupungin veneilypalvelut &rarr;
+                Helsingfors stadens båtservicen &rarr;
             </a>
         </td>
     </tr>

@@ -1,25 +1,25 @@
-<p>Hyvä asiakas, tässä lasku lisäpalvelusta. Voit maksaa sen klikkaamalla "siirry maksamaan" -painiketta alempana tässä
-    viestissä.</p>
+<p>Dear customer, here is the invoice for your additional service. You can pay it by clicking
+    the "make your payment" button below in this message.</p>
 <br/>
 
-<h3>Lasku</h3>
+<h3>Invoice</h3>
 
 <table style="width: 100%">
     <tr>
         <td>
-            Sopimus
+            Contract
         </td>
-        <td>Venepaikka</td>
+        <td>Berth</td>
     </tr>
     <tr>
         <td>
-            Venepaikka:
+            Berth:
         </td>
         <td>{{ order.lease.berth.pier.harbor.name }}</td>
     </tr>
     <tr>
         <td>
-            Sopimuskausi:
+            Contract season:
         </td>
         <td>{{ order.lease.start_date }} - {{ order.lease.end_date }}</td>
     </tr>
@@ -40,15 +40,15 @@
     </tr>
     <tr>
         <td>
-            Laskun aihe:
+            Service that the invoice concerns:
         </td>
         <td>{{ additional_product.name }}</td>
     </tr>
     <tr>
         <td>
-            Sopimuskausi:
+            Contract season:
         </td>
-        <td>Talvi {{ additional_product.season }}</td>
+        <td>Winter {{ additional_product.season }}</td>
     </tr>
     <tr>
         <td colspan="2">
@@ -61,12 +61,12 @@
         </td>
     </tr>
     <tr>
-        <td>{{ additional_product.name }} yhteensä:</td>
+        <td>{{ additional_product.name }} total:</td>
         <td>{{ order.total_price }}&euro;</td>
     </tr>
     <tr>
         <td>
-            YHTEENSÄ:
+            TOTAL:
         </td>
         <td>{{ order.total_price }}&euro;
         </td>
@@ -77,38 +77,39 @@
     <tr>
         <td style="padding: 32px 48px;">
             <p>
-                Maksa lasku tämän linkin kautta ennen eräpäivää {{ order.due_date }}:
+                Please pay the invoice via this link before the due date {{ order.due_date }}:
             </p>
 
             <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
-               href="{{ payment_url }}">Siirry maksamaan {{ order.total_price }}&euro; &rarr;</a>
+               href="{{ payment_url }}">Make your payment {{ order.total_price }}&euro; &rarr;</a>
 
             <p>
-                Huomaathan, että laskun voi maksaa vain tämän linkin kautta. Muulla
-                tavoin maksettuja maksuja ei voida ottaa vastaan. Lisätietoja
-                asiakaspalvelustamme <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
+                Please note that you can only pay the invoice via this link. We cannot accept
+                payments made through other means. For more information, please contact our
+                customer service department at <a
+                    href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
             </p>
         </td>
     </tr>
 </table>
 
 <p>
-    Helsingin kaupungin venepaikat vuokrataan asiakkaille toistaiseksi
-    voimassa olevina ja niistä peritään vuosittain kulloinkin voimassa
-    olevan hinnaston mukainen maksu. Jos laskua ei maksa eräpäivään
-    mennessä, vuokrasopimus irtisanoutuu automaattisesti. Veneilykausi on
-    10.6.-14.9., jona aikana venepaikalla saa pitää venettä.
+    The City of Helsinki’s boat berths are leased out to customers until further
+    notice, and an annual fee is charged for them in accordance with the currently
+    valid price list. If the invoice is not paid by the due date, the lease is
+    terminated automatically. The boating season is from 10 June to 14 September,
+    during which boats are allowed to be kept at berths.
 </p>
 <p>
-    Venepaikan vastaanottaminen edellyttää voimassa olevien venepaikan
-    vuokrasopimusehtojen sekä venesatamasääntöjen hyväksymistä.
+    In order to reserve a boat berth, the current boat berth lease agreement terms and
+    the harbor rules must be accepted.
 </p>
 
 <table style="width: 100%; margin: 48px 0;">
     <tr>
         <td style="text-align: center;">
             <a style="font-size: 16px; color: #0072C6;" href="https://venepaikat.hel.fi">
-                Helsingin kaupungin veneilypalvelut &rarr;
+                City of Helsinki boating services &rarr;
             </a>
         </td>
     </tr>
