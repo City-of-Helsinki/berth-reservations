@@ -498,9 +498,31 @@ def test_order_winter_storage_lease_right_price_for_partial_year(winter_storage_
             assert partial_product_price == order_price
 
 
-def test_order_cannot_change_berth_product(customer_profile):
+def test_order_change_berth_product(customer_profile):
     order = Order.objects.create(
-        product=BerthProductFactory(), customer=customer_profile
+        product=BerthProductFactory(),
+        customer=customer_profile,
+        status=OrderStatus.WAITING,
+    )
+    new_product = BerthProductFactory()
+    order.product = new_product
+    order.save()
+    assert order.product == new_product
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        OrderStatus.EXPIRED,
+        OrderStatus.CANCELLED,
+        OrderStatus.PAID,
+        OrderStatus.REJECTED,
+        OrderStatus.ERROR,
+    ],
+)
+def test_order_cannot_change_berth_product(status, customer_profile):
+    order = Order.objects.create(
+        product=BerthProductFactory(), customer=customer_profile, status=status
     )
     with pytest.raises(ValidationError) as exception:
         order.product = BerthProductFactory()
@@ -512,7 +534,9 @@ def test_order_cannot_change_berth_product(customer_profile):
 
 def test_order_cannot_change_winter_storage_product(customer_profile):
     order = Order.objects.create(
-        product=WinterStorageProductFactory(), customer=customer_profile
+        product=WinterStorageProductFactory(),
+        customer=customer_profile,
+        status=OrderStatus.PAID,
     )
     with pytest.raises(ValidationError) as exception:
         order.product = WinterStorageProductFactory()

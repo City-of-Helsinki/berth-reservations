@@ -49,7 +49,9 @@ def test_approve_ap_order(
     ):
         executed = api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
 
-    payment_url = payment_provider.get_payment_email_url(order, lang="en")
+    payment_url = payment_provider.get_payment_email_url(
+        order, lang=order.lease.application.language
+    )
 
     order = Order.objects.get(id=order.id)
 

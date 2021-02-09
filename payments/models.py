@@ -502,7 +502,11 @@ class Order(UUIDModel, TimeStampedModel):
             )
 
     def _check_same_product(self, old_instance) -> None:
-        if old_instance.product and self.product != old_instance.product:
+        if (
+            self.status != OrderStatus.WAITING
+            and old_instance.product
+            and self.product != old_instance.product
+        ):
             raise ValidationError(_("Cannot change the product assigned to this order"))
 
     def _check_same_lease(self, old_instance) -> None:
@@ -527,6 +531,7 @@ class Order(UUIDModel, TimeStampedModel):
 
         if not self._state.adding:
             old_instance = Order.objects.get(id=self.id)
+
             # If the product is being changed
             self._check_same_product(old_instance)
 
@@ -563,6 +568,79 @@ class Order(UUIDModel, TimeStampedModel):
 
         self.lease = lease
 
+    def recalculate_price(self):
+        # Setting self.price to None forces _update_price to save the recalculated price, using the
+        # same logic as creating a new Order.
+        if self.status == OrderStatus.WAITING:
+            self.price = None
+            # Update the associated product for recomputing the price
+            self._update_product()
+        self._update_price()
+        for order_line in self.order_lines.all():
+            order_line.recalculate_price()
+            order_line.save()
+
+    def _update_product(self):
+        if self.product and self.lease:
+            if isinstance(self.lease, BerthLease):
+                width = self.lease.berth.berth_type.width
+                self.product = BerthProduct.objects.get_in_range(width=width)
+            elif isinstance(self.lease, WinterStorageLease):
+                self.product = WinterStorageProduct.objects.get(
+                    winter_storage_area=self.lease.get_winter_storage_area()
+                )
+
+    def _update_price(self):
+        price = (
+            self.product.price_value
+            if self.product and hasattr(self.product, "price_value")
+            else 0
+        )
+        # Assign the tax from the product
+        tax_percentage = self.product.tax_percentage
+
+        if self.lease:
+            # If the order is for a winter product with a lease, the price
+            # has to be calculated based on the dimensions of the place associated
+            # to the lease
+            if isinstance(self.lease, WinterStorageLease) and isinstance(
+                self.product, WinterStorageProduct
+            ):
+                price = self.product.price_value
+                if self.lease.place:
+                    place_sqm = (
+                        self.lease.place.place_type.width
+                        * self.lease.place.place_type.length
+                    )
+                elif self.lease.boat:
+                    # If the lease is only associated to an section,
+                    # calculate the price based on the boat dimensions
+                    place_sqm = self.lease.boat.width * self.lease.boat.length
+                else:
+                    # If the lease is not associated to a boat object,
+                    # take the values set by the user on the application
+                    place_sqm = (
+                        self.lease.application.boat_width
+                        * self.lease.application.boat_length
+                    )
+                price = price * place_sqm
+            else:
+                price = self.product.price_for_tier(self.lease.berth.pier.price_tier)
+
+        price_value = self.price or price
+        tax_percentage_value = self.tax_percentage or tax_percentage
+
+        if hasattr(self.customer, "organization"):
+            organization_type = self.customer.organization.organization_type
+
+            self.price = calculate_organization_price(price_value, organization_type)
+            self.tax_percentage = calculate_organization_tax_percentage(
+                tax_percentage_value, organization_type
+            )
+        else:
+            self.price = rounded_decimal(price_value)
+            self.tax_percentage = tax_percentage_value
+
     def save(self, *args, **kwargs):
         self.full_clean()
 
@@ -575,62 +653,11 @@ class Order(UUIDModel, TimeStampedModel):
             self._assign_lease_from_object_id()
 
         creating = self._state.adding
+
         # If the product instance is being passed
-        # Price has to be assigned before saving but only if creating
+        # Price has to be assigned before saving if creating
         if creating and self.product:
-            price = (
-                self.product.price_value
-                if self.product and hasattr(self.product, "price_value")
-                else 0
-            )
-            # Assign the tax from the product
-            tax_percentage = self.product.tax_percentage
-
-            if self.lease:
-                # If the order is for a winter product with a lease, the price
-                # has to be calculated based on the dimensions of the place associated
-                # to the lease
-                if isinstance(self.lease, WinterStorageLease) and isinstance(
-                    self.product, WinterStorageProduct
-                ):
-                    price = self.product.price_value
-                    if self.lease.place:
-                        place_sqm = (
-                            self.lease.place.place_type.width
-                            * self.lease.place.place_type.length
-                        )
-                    elif self.lease.boat:
-                        # If the lease is only associated to an section,
-                        # calculate the price based on the boat dimensions
-                        place_sqm = self.lease.boat.width * self.lease.boat.length
-                    else:
-                        # If the lease is not associated to a boat object,
-                        # take the values set by the user on the application
-                        place_sqm = (
-                            self.lease.application.boat_width
-                            * self.lease.application.boat_length
-                        )
-                    price = price * place_sqm
-                else:
-                    price = self.product.price_for_tier(
-                        self.lease.berth.pier.price_tier
-                    )
-
-            price_value = self.price or price
-            tax_percentage_value = self.tax_percentage or tax_percentage
-
-            if hasattr(self.customer, "organization"):
-                organization_type = self.customer.organization.organization_type
-
-                self.price = calculate_organization_price(
-                    price_value, organization_type
-                )
-                self.tax_percentage = calculate_organization_tax_percentage(
-                    tax_percentage_value, organization_type
-                )
-            else:
-                self.price = rounded_decimal(price_value)
-                self.tax_percentage = tax_percentage_value
+            self._update_price()
 
         super().save(*args, **kwargs)
 
@@ -769,43 +796,43 @@ class OrderLine(UUIDModel, TimeStampedModel):
 
         creating = self._state.adding
         if creating and self.product:
-            price = self.product.price_value
-            unit = self.product.price_unit
-
-            if unit == PriceUnits.PERCENTAGE:
-                price = (
-                    calculate_product_percentage_price(
-                        self.order.price, self.product.price_value
-                    )
-                    if self.order.order_type == OrderType.LEASE_ORDER
-                    else self._calculate_percentage_price_for_additional_prod_order(
-                        self.order.lease, self.product.price_value
-                    )
-                )
-
-            if self.order.lease:
-                if self.product.period == PeriodType.MONTH:
-                    price = calculate_product_partial_month_price(
-                        price, self.order.lease.start_date, self.order.lease.end_date,
-                    )
-                elif self.product.period == PeriodType.YEAR:
-                    price = calculate_product_partial_year_price(
-                        price, self.order.lease.start_date, self.order.lease.end_date,
-                    )
-                # The price for season products should always be full
-
-            if hasattr(self.order.customer, "organization"):
-                organization_type = self.order.customer.organization.organization_type
-
-                self.price = calculate_organization_price(price, organization_type)
-                self.tax_percentage = calculate_organization_tax_percentage(
-                    self.product.tax_percentage, organization_type,
-                )
-            else:
-                self.price = rounded_decimal(price)
-                self.tax_percentage = self.product.tax_percentage
+            self.recalculate_price()
 
         super().save(*args, **kwargs)
+
+    def recalculate_price(self):
+        price = self.product.price_value
+        unit = self.product.price_unit
+        if unit == PriceUnits.PERCENTAGE:
+            price = (
+                calculate_product_percentage_price(
+                    self.order.price, self.product.price_value
+                )
+                if self.order.order_type == OrderType.LEASE_ORDER
+                else self._calculate_percentage_price_for_additional_prod_order(
+                    self.order.lease, self.product.price_value
+                )
+            )
+        if self.order.lease:
+            if self.product.period == PeriodType.MONTH:
+                price = calculate_product_partial_month_price(
+                    price, self.order.lease.start_date, self.order.lease.end_date,
+                )
+            elif self.product.period == PeriodType.YEAR:
+                price = calculate_product_partial_year_price(
+                    price, self.order.lease.start_date, self.order.lease.end_date,
+                )
+            # The price for season products should always be full
+        if hasattr(self.order.customer, "organization"):
+            organization_type = self.order.customer.organization.organization_type
+
+            self.price = calculate_organization_price(price, organization_type)
+            self.tax_percentage = calculate_organization_tax_percentage(
+                self.product.tax_percentage, organization_type,
+            )
+        else:
+            self.price = rounded_decimal(price)
+            self.tax_percentage = self.product.tax_percentage
 
     @staticmethod
     def _calculate_percentage_price_for_additional_prod_order(
