@@ -35,6 +35,11 @@ def rounded(
 
 
 def random_decimal(
-    min: float = 0, max: float = 100, decimals: int = 2, as_string: bool = False
+    min: Union[float, Decimal] = 0,
+    max: Union[float, Decimal] = 100,
+    decimals: int = 2,
+    as_string: bool = False,
 ) -> DecimalString:
-    return rounded(uniform(min, max), decimals=decimals, as_string=as_string)
+    return rounded(
+        uniform(float(min), float(max)), decimals=decimals, as_string=as_string
+    )
