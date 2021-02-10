@@ -363,12 +363,10 @@ def resend_order(order, due_date: date, request: HttpRequest) -> None:
 def send_payment_notification(order, request, email=None):
     from payments.providers import get_payment_provider
 
-    if email is None:
-        email = order.customer_email
-        if order_email := order.customer_email:
-            email = order_email
-        else:
-            raise ValidationError(_("Missing customer email"))
+    order_email = email or order.customer_email
+
+    if not order_email:
+        raise ValidationError(_("Missing customer email"))
 
     language = get_notification_language(order)
     payment_url = get_payment_provider(
@@ -381,7 +379,7 @@ def send_payment_notification(order, request, email=None):
 
     notification_type = get_order_notification_type(order)
     context = get_context(order, payment_url, cancel_url, notification_type)
-    send_notification(email, notification_type.value, context, language)
+    send_notification(order_email, notification_type.value, context, language)
 
 
 def get_notification_language(order):
