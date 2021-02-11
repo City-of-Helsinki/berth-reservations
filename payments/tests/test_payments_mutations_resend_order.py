@@ -125,14 +125,16 @@ def test_resend_order(
         )
         assert order.order_number in mail.outbox[0].body
 
-        if order_has_contact_info:
-            assert mail.outbox[0].to == [order_original_email]
-        else:
+        if request_has_profile_token:
+            # always when profile_token is supplied, fetch customer info from profile
             assert mail.outbox[0].to == [order.lease.application.email]
+        else:
+            assert mail.outbox[0].to == [order_original_email]
 
         assert order.order_number in mail.outbox[0].alternatives[0][0]
         assert mail.outbox[0].alternatives[0][1] == "text/html"
     else:
+        # no profile_token and no contact info
         assert len(executed["data"]["resendOrder"]["failedOrders"]) == 1
         assert (
             "Profile token is required"
