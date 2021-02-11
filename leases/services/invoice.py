@@ -3,15 +3,18 @@ from datetime import date
 from typing import Dict, List, Union
 from uuid import UUID
 
+import pytz
 from anymail.exceptions import AnymailError
 from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.db import DataError, IntegrityError, transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django_ilmoitin.utils import send_notification
 
@@ -29,6 +32,14 @@ from payments.utils import approve_order
 from ..notifications import NotificationType as LeaseNotificationType
 
 logger = logging.getLogger(__name__)
+
+
+def get_ts() -> str:
+    return (
+        now()
+        .astimezone(pytz.timezone(settings.TIME_ZONE))
+        .strftime("%d-%m-%Y %H:%M:%S")
+    )
 
 
 class BaseInvoicingService:
@@ -123,7 +134,7 @@ class BaseInvoicingService:
     ) -> None:
         """Set a lease to ERROR status and append it to the failed_lease list"""
         lease.status = LeaseStatus.ERROR
-        comment = f"{today().date()}: {message}"
+        comment = f"{get_ts()}: {message}"
 
         if len(lease.comment) > 0:
             lease.comment += f"\n{comment}"
@@ -137,7 +148,7 @@ class BaseInvoicingService:
 
     def fail_order(self, order: Order, message: str, dont_count: bool = False) -> None:
         """Set an order to ERROR status and append it to the failed_order list"""
-        order.comment = f"{today().date()}: {message}"
+        order.comment = f"{get_ts()}: {message}"
         order.save(update_fields=["comment"])
         order.set_status(OrderStatus.ERROR, f"Lease renewing failed: {message}")
         self.failed_orders.append({order.id: message})
