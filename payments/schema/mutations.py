@@ -654,8 +654,13 @@ class ResendOrderMutation(graphene.ClientIDMutation):
         sent_orders = []
 
         for order in orders:
-            if not order.customer_email and not order.customer_phone:
-                if not input.get("profile_token"):
+            if input.get("profile_token"):
+                # order.customer_email and order.customer_phone could be stale, if contact
+                # info in profile service has been changed.
+                profile = fetch_order_profile(order, input["profile_token"])
+                update_order_from_profile(order, profile)
+            else:
+                if not order.customer_email and not order.customer_phone:
                     failed_orders.append(
                         FailedOrderType(
                             id=order_id,
@@ -665,8 +670,6 @@ class ResendOrderMutation(graphene.ClientIDMutation):
                         )
                     )
                     continue
-                profile = fetch_order_profile(order, input["profile_token"])
-                update_order_from_profile(order, profile)
 
             try:
                 with transaction.atomic():

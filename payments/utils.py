@@ -365,6 +365,10 @@ def send_payment_notification(order, request, email=None):
 
     if email is None:
         email = order.customer_email
+        if order_email := order.customer_email:
+            email = order_email
+        else:
+            raise ValidationError(_("Missing customer email"))
 
     language = get_notification_language(order)
     payment_url = get_payment_provider(
