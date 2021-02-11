@@ -27,7 +27,7 @@ from leases.models import BerthLease, WinterStorageLease
 from leases.utils import calculate_season_end_date, calculate_season_start_date
 from payments.enums import OrderStatus
 from payments.models import BerthProduct, Order, WinterStorageProduct
-from payments.utils import approve_order
+from payments.utils import approve_order, resend_order, update_order_from_profile
 
 from ..notifications import NotificationType as LeaseNotificationType
 
@@ -74,6 +74,10 @@ class BaseInvoicingService:
 
     @staticmethod
     def get_valid_leases(season_start: date) -> QuerySet:
+        raise NotImplementedError
+
+    @staticmethod
+    def get_failed_orders(season_start: date) -> QuerySet:
         raise NotImplementedError
 
     @staticmethod
@@ -219,6 +223,8 @@ class BaseInvoicingService:
 
         logger.debug(f"Profiles fetched: {len(profiles)}")
 
+        self.resend_failed_invoices(profiles)
+
         exited_with_errors = False
         try:
             for lease in leases:
@@ -281,6 +287,30 @@ class BaseInvoicingService:
         finally:
             self.email_admins(exited_with_errors)
 
+    def resend_failed_invoices(self, profiles: dict) -> None:
+        logger.debug("Resending failed invoices")
+        orders = self.get_failed_orders(self.season_start)
+
+        for order in orders:
+            order.set_status(
+                OrderStatus.WAITING,
+                comment=f"{get_ts()}: {_('Cleanup the invoice to attempt resending')}\n",
+            )
+
+            update_order_from_profile(order, profiles[order.customer.id])
+
+            try:
+                resend_order(order, self.due_date, self.request)
+                self.successful_orders.append(order.id)
+            except (
+                AnymailError,
+                OSError,
+                Order.DoesNotExist,
+                ValidationError,
+                VenepaikkaGraphQLError,
+            ) as e:
+                self.fail_order(order, f'{_("Failed resending invoice")} ({e})')
+
 
 class BerthInvoicingService(BaseInvoicingService):
     def __init__(self, *args, **kwargs):
@@ -296,3 +326,13 @@ class BerthInvoicingService(BaseInvoicingService):
     @staticmethod
     def get_valid_leases(season_start: date) -> QuerySet:
         return BerthLease.objects.get_renewable_leases(season_start=season_start)
+
+    @staticmethod
+    def get_failed_orders(season_start: date) -> QuerySet:
+        leases = BerthLease.objects.filter(
+            start_date__year=season_start.year
+        ).values_list("id")
+
+        return Order.objects.filter(
+            _lease_object_id__in=leases, status=OrderStatus.ERROR
+        )
