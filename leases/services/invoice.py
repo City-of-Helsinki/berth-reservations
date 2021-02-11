@@ -3,15 +3,18 @@ from datetime import date
 from typing import Dict, List, Union
 from uuid import UUID
 
+import pytz
 from anymail.exceptions import AnymailError
 from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.db import DataError, IntegrityError, transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django_ilmoitin.utils import send_notification
 
@@ -24,11 +27,19 @@ from leases.models import BerthLease, WinterStorageLease
 from leases.utils import calculate_season_end_date, calculate_season_start_date
 from payments.enums import OrderStatus
 from payments.models import BerthProduct, Order, WinterStorageProduct
-from payments.utils import approve_order
+from payments.utils import approve_order, resend_order, update_order_from_profile
 
 from ..notifications import NotificationType as LeaseNotificationType
 
 logger = logging.getLogger(__name__)
+
+
+def get_ts() -> str:
+    return (
+        now()
+        .astimezone(pytz.timezone(settings.TIME_ZONE))
+        .strftime("%d-%m-%Y %H:%M:%S")
+    )
 
 
 class BaseInvoicingService:
@@ -63,6 +74,10 @@ class BaseInvoicingService:
 
     @staticmethod
     def get_valid_leases(season_start: date) -> QuerySet:
+        raise NotImplementedError
+
+    @staticmethod
+    def get_failed_orders(season_start: date) -> QuerySet:
         raise NotImplementedError
 
     @staticmethod
@@ -123,7 +138,7 @@ class BaseInvoicingService:
     ) -> None:
         """Set a lease to ERROR status and append it to the failed_lease list"""
         lease.status = LeaseStatus.ERROR
-        comment = f"{today().date()}: {message}"
+        comment = f"{get_ts()}: {message}"
 
         if len(lease.comment) > 0:
             lease.comment += f"\n{comment}"
@@ -137,7 +152,7 @@ class BaseInvoicingService:
 
     def fail_order(self, order: Order, message: str, dont_count: bool = False) -> None:
         """Set an order to ERROR status and append it to the failed_order list"""
-        order.comment = f"{today().date()}: {message}"
+        order.comment = f"{get_ts()}: {message}"
         order.save(update_fields=["comment"])
         order.set_status(OrderStatus.ERROR, f"Lease renewing failed: {message}")
         self.failed_orders.append({order.id: message})
@@ -208,6 +223,8 @@ class BaseInvoicingService:
 
         logger.debug(f"Profiles fetched: {len(profiles)}")
 
+        self.resend_failed_invoices(profiles)
+
         exited_with_errors = False
         try:
             for lease in leases:
@@ -270,6 +287,30 @@ class BaseInvoicingService:
         finally:
             self.email_admins(exited_with_errors)
 
+    def resend_failed_invoices(self, profiles: dict) -> None:
+        logger.debug("Resending failed invoices")
+        orders = self.get_failed_orders(self.season_start)
+
+        for order in orders:
+            order.set_status(
+                OrderStatus.WAITING,
+                comment=f"{get_ts()}: {_('Cleanup the invoice to attempt resending')}\n",
+            )
+
+            update_order_from_profile(order, profiles[order.customer.id])
+
+            try:
+                resend_order(order, self.due_date, self.request)
+                self.successful_orders.append(order.id)
+            except (
+                AnymailError,
+                OSError,
+                Order.DoesNotExist,
+                ValidationError,
+                VenepaikkaGraphQLError,
+            ) as e:
+                self.fail_order(order, f'{_("Failed resending invoice")} ({e})')
+
 
 class BerthInvoicingService(BaseInvoicingService):
     def __init__(self, *args, **kwargs):
@@ -285,3 +326,13 @@ class BerthInvoicingService(BaseInvoicingService):
     @staticmethod
     def get_valid_leases(season_start: date) -> QuerySet:
         return BerthLease.objects.get_renewable_leases(season_start=season_start)
+
+    @staticmethod
+    def get_failed_orders(season_start: date) -> QuerySet:
+        leases = BerthLease.objects.filter(
+            start_date__year=season_start.year
+        ).values_list("id")
+
+        return Order.objects.filter(
+            _lease_object_id__in=leases, status=OrderStatus.ERROR
+        )
