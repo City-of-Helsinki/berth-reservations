@@ -141,3 +141,82 @@ def test_resend_order(
             in executed["data"]["resendOrder"]["failedOrders"][0]["error"]
         )
         assert executed["data"]["resendOrder"]["sentOrders"] == []
+
+
+@pytest.mark.parametrize(
+    "order", ["berth_order"], indirect=True,
+)
+def test_resend_order_in_error(
+    order: Order, superuser_api_client, notification_template_orders_approved,
+):
+    order.customer_email = "foo@email.com"
+    order.status = OrderStatus.ERROR
+    order.lease.status = LeaseStatus.ERROR
+    order.lease.save()
+    order.save()
+
+    variables = {"orders": [to_global_id(OrderNode, order.id)]}
+    executed = superuser_api_client.execute(RESEND_ORDER_MUTATION, input=variables)
+
+    order.refresh_from_db()
+    order.lease.refresh_from_db()
+
+    assert executed["data"]["resendOrder"]["sentOrders"] == [str(order.id)]
+
+    assert order.lease.status == LeaseStatus.OFFERED
+    assert order.status == OrderStatus.WAITING
+
+    assert len(mail.outbox) == 1
+    assert (
+        mail.outbox[0].subject
+        == f"test order approved subject, event: {order.order_number}!"
+    )
+    assert order.order_number in mail.outbox[0].body
+
+    assert mail.outbox[0].to == ["foo@email.com"]
+
+    assert order.order_number in mail.outbox[0].alternatives[0][0]
+    assert mail.outbox[0].alternatives[0][1] == "text/html"
+
+
+@pytest.mark.parametrize(
+    "order", ["berth_order"], indirect=True,
+)
+def test_resend_order_not_fixed_in_error(
+    order: Order, superuser_api_client, notification_template_orders_approved,
+):
+    order.status = OrderStatus.ERROR
+    order.lease.status = LeaseStatus.ERROR
+    order.lease.save()
+    order.save()
+
+    profile_data = {
+        "id": to_global_id(ProfileNode, order.customer.id),
+        "first_name": "Foo",
+        "last_name": "Bar",
+        "primary_email": {"email": None},
+        "primary_phone": {"phone": None},
+    }
+    variables = {"orders": [to_global_id(OrderNode, order.id)], "profileToken": "token"}
+
+    with mock.patch(
+        "requests.post",
+        side_effect=mocked_response_profile(
+            count=0, data=profile_data, use_edges=False
+        ),
+    ):
+        executed = superuser_api_client.execute(RESEND_ORDER_MUTATION, input=variables)
+
+    order.refresh_from_db()
+    order.lease.refresh_from_db()
+
+    assert len(executed["data"]["resendOrder"]["failedOrders"]) == 1
+    failed_order = executed["data"]["resendOrder"]["failedOrders"][0]
+
+    assert failed_order["id"] == to_global_id(OrderNode, order.id)
+    assert "Missing customer email" in str(failed_order["error"])
+
+    assert order.lease.status == LeaseStatus.ERROR
+    assert order.status == OrderStatus.ERROR
+
+    assert len(mail.outbox) == 0

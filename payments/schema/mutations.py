@@ -633,46 +633,53 @@ class ResendOrderMutation(graphene.ClientIDMutation):
 
     @classmethod
     @change_permission_required(Order)
-    def mutate_and_get_payload(cls, root, info, **input):
-
-        orders = []
+    def mutate_and_get_payload(cls, root, info, orders, **input):
         due_date = input.pop("due_date", None)
-        for order_id in input["orders"]:
-            order = get_node_from_global_id(
-                info, order_id, only_type=OrderNode, nullable=False
-            )
-            orders.append(order)
-
-            if order.lease.status != LeaseStatus.OFFERED:
-                VenepaikkaGraphQLError(
-                    _(
-                        "Cannot resend an invoice for a lease that is not currently offered."
-                    )
-                )
 
         failed_orders = []
         sent_orders = []
 
-        for order in orders:
-            if input.get("profile_token"):
-                # order.customer_email and order.customer_phone could be stale, if contact
-                # info in profile service has been changed.
-                profile = fetch_order_profile(order, input["profile_token"])
-                update_order_from_profile(order, profile)
-            else:
-                if not order.customer_email and not order.customer_phone:
-                    failed_orders.append(
-                        FailedOrderType(
-                            id=order_id,
-                            error=_(
-                                "Profile token is required if an order does not previously have email or phone."
-                            ),
-                        )
-                    )
-                    continue
+        profile_token = input.get("profile_token")
+
+        for order_id in orders:
+            order = get_node_from_global_id(
+                info, order_id, only_type=OrderNode, nullable=False
+            )
 
             try:
                 with transaction.atomic():
+                    if (
+                        order.status == OrderStatus.ERROR
+                        or order.lease.status == LeaseStatus.ERROR
+                    ):
+                        order.set_status(
+                            OrderStatus.WAITING,
+                            comment=f"{today()}: {_('Cleanup the invoice to attempt resending')}\n",
+                        )
+
+                    if order.lease.status != LeaseStatus.OFFERED:
+                        raise ValidationError(
+                            _(
+                                "Cannot resend an invoice for a lease that is not currently offered."
+                            )
+                        )
+
+                    if profile_token:
+                        # order.customer_email and order.customer_phone could be stale, if contact
+                        # info in profile service has been changed.
+                        profile = fetch_order_profile(order, profile_token)
+                        update_order_from_profile(order, profile)
+
+                    elif not order.customer_email and not order.customer_phone:
+                        failed_orders.append(
+                            FailedOrderType(
+                                id=order_id,
+                                error=_(
+                                    "Profile token is required if an order does not previously have email or phone."
+                                ),
+                            )
+                        )
+                        continue
                     resend_order(order, due_date, info.context)
             except (
                 AnymailError,

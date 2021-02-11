@@ -674,6 +674,7 @@ class Order(UUIDModel, TimeStampedModel):
                 OrderStatus.ERROR,
             ),
             OrderStatus.PAID: (OrderStatus.CANCELLED,),
+            OrderStatus.ERROR: (OrderStatus.WAITING,),
         }
         valid_new_status = valid_status_changes.get(old_status, ())
 
