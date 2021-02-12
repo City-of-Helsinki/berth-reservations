@@ -28,6 +28,7 @@ from leases.utils import calculate_season_end_date, calculate_season_start_date
 from payments.enums import OrderStatus
 from payments.models import BerthProduct, Order, WinterStorageProduct
 from payments.utils import approve_order, resend_order, update_order_from_profile
+from utils.email import is_valid_email
 
 from ..notifications import NotificationType as LeaseNotificationType
 
@@ -164,7 +165,7 @@ class BaseInvoicingService:
 
         # If the profile doesn't have an associated email
         # or if it has an example.com address, set it as failed
-        if email and "example.com" not in email:
+        if is_valid_email(email):
             try:
                 approve_order(
                     order, email, self.due_date, helsinki_profile_user, self.request

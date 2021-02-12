@@ -30,6 +30,7 @@ from leases.utils import (
 )
 from resources.enums import AreaRegion
 from resources.models import Harbor, WinterStorageArea
+from utils.email import is_valid_email
 from utils.numbers import rounded as rounded_decimal
 
 from .enums import OrderStatus, OrderType, ProductServiceType
@@ -365,7 +366,7 @@ def send_payment_notification(order, request, email=None):
 
     order_email = email or order.customer_email
 
-    if not order_email:
+    if not is_valid_email(order_email):
         raise ValidationError(_("Missing customer email"))
 
     language = get_notification_language(order)
