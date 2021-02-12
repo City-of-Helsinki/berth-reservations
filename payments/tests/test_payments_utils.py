@@ -1,12 +1,13 @@
 import pytest
 from dateutil.utils import today
 from django.core import mail
+from django.core.exceptions import ValidationError
 from django.test import RequestFactory
 
 from applications.enums import ApplicationStatus
 from leases.enums import LeaseStatus
 from payments.models import Order
-from payments.utils import approve_order
+from payments.utils import approve_order, send_payment_notification
 
 
 @pytest.mark.parametrize(
@@ -52,3 +53,15 @@ def test_approve_order(
     assert mail.outbox[0].alternatives == [
         (f"<b>{ order.order_number } { payment_url }</b>", "text/html")
     ]
+
+
+@pytest.mark.parametrize(
+    "order", ["berth_order"], indirect=True,
+)
+def test_send_payment_notification_example_email(order: Order):
+    order.customer_email = "foo@example.com"
+
+    with pytest.raises(ValidationError) as exception:
+        send_payment_notification(order, RequestFactory().request())
+
+    assert "Missing customer email" in str(exception)
