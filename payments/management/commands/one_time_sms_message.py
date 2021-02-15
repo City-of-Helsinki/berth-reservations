@@ -150,7 +150,7 @@ class Command(BaseCommand):
             )
 
             try:
-                result = sms_service.send(order.customer_phone, message)
+                result = sms_service.send_plain_text(order.customer_phone, message)
                 if result.status_code == 200:
                     # Keep track of the successful orders, in case there needs to be any follow-up
                     sent.append(f"{order.id}\n")
