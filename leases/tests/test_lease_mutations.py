@@ -1251,7 +1251,7 @@ def test_create_berth_lease_for_non_billable_customer(
         "berth": {"id": variables["berthId"]},
         "order": {
             "price": "0.00",
-            "status": "PAID",
+            "status": "PAID_MANUALLY",
             "customer": {"id": to_global_id(ProfileNode, non_billable_customer.id)},
             "product": {
                 "minWidth": rounded(
@@ -1320,7 +1320,7 @@ def test_create_winter_storage_lease_for_non_billable_customer(
         "place": {"id": variables["placeId"]},
         "order": {
             "price": "0.00",
-            "status": "PAID",
+            "status": "PAID_MANUALLY",
             "customer": {"id": to_global_id(ProfileNode, non_billable_customer.id)},
             "product": {
                 "priceUnit": product.price_unit.name,

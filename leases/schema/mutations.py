@@ -102,7 +102,7 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
         application.save()
 
         if order.customer.is_non_billable_customer():
-            order.set_status(OrderStatus.PAID, "Non-billable customer.")
+            order.set_status(OrderStatus.PAID_MANUALLY, "Non-billable customer.")
 
         return CreateBerthLeaseMutation(berth_lease=lease)
 
@@ -267,7 +267,7 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
         application.save()
 
         if order.customer.is_non_billable_customer():
-            order.set_status(OrderStatus.PAID, "Non-billable customer.")
+            order.set_status(OrderStatus.PAID_MANUALLY, "Non-billable customer.")
 
         return CreateWinterStorageLeaseMutation(winter_storage_lease=lease)
 

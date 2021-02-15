@@ -282,7 +282,7 @@ def get_order_notification_type(order):
 
 
 def get_lease_status(new_status) -> LeaseStatus:
-    if new_status == OrderStatus.PAID:
+    if new_status in OrderStatus.get_paid_statuses():
         return LeaseStatus.PAID
     elif new_status in (OrderStatus.REJECTED, OrderStatus.CANCELLED):
         return LeaseStatus.REFUSED

@@ -69,6 +69,11 @@ class OrderStatus(TextChoices):
     EXPIRED = "expired", _("Expired")
     ERROR = "error", _("Error")
     PAID = "paid", _("Paid")
+    PAID_MANUALLY = "paid_man", _("Paid manually")  # max 9 chars
+
+    @classmethod
+    def get_paid_statuses(cls):
+        return (cls.PAID, cls.PAID_MANUALLY)
 
 
 class OrderType(TextChoices):

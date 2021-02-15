@@ -516,6 +516,7 @@ def test_order_change_berth_product(customer_profile):
         OrderStatus.EXPIRED,
         OrderStatus.CANCELLED,
         OrderStatus.PAID,
+        OrderStatus.PAID_MANUALLY,
         OrderStatus.REJECTED,
         OrderStatus.ERROR,
     ],
@@ -922,8 +923,10 @@ def test_order_set_status_no_application(berth):
     "from_status,to_status",
     [
         (OrderStatus.WAITING, OrderStatus.PAID),
+        (OrderStatus.WAITING, OrderStatus.PAID_MANUALLY),
         (OrderStatus.WAITING, OrderStatus.REJECTED),
         (OrderStatus.PAID, OrderStatus.CANCELLED),
+        (OrderStatus.PAID_MANUALLY, OrderStatus.CANCELLED),
     ],
 )
 @freeze_time("2020-01-01T08:00:00Z")
@@ -935,7 +938,7 @@ def test_order_status_dates(order, from_status, to_status):
     assert order.status == to_status
 
     order = Order.objects.get(id=order.id)
-    if to_status == OrderStatus.PAID:
+    if to_status in OrderStatus.get_paid_statuses():
         assert order.paid_at == now()
         assert order.rejected_at is None
         assert order.cancelled_at is None

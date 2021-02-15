@@ -422,7 +422,8 @@ class BamboraPayformProvider(PaymentProvider):
             order
             if order.order_type == OrderType.LEASE_ORDER
             else order.lease.orders.filter(
-                status=OrderStatus.PAID, order_type=OrderType.LEASE_ORDER
+                status__in=OrderStatus.get_paid_statuses(),
+                order_type=OrderType.LEASE_ORDER,
             ).first()
         )
 

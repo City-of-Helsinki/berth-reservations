@@ -287,9 +287,15 @@ class OrderManager(models.Manager):
         return num_expired
 
     def get_queryset(self):
-        def status_qs(status: OrderStatus):
+        def status_qs(statuses):
+            if len(statuses) == 1:
+                filter_kw = {"to_status": statuses[0]}
+            elif len(statuses) > 1:
+                filter_kw = {"to_status__in": statuses}
+            else:
+                raise ValueError("no statuses specified")
             return (
-                OrderLogEntry.objects.filter(order=OuterRef("pk"), to_status=status)
+                OrderLogEntry.objects.filter(order=OuterRef("pk"), **filter_kw)
                 .order_by("-created_at")
                 .values("order__pk")
                 .annotate(prop=Coalesce(Max("created_at"), Value(None)))
@@ -301,13 +307,15 @@ class OrderManager(models.Manager):
             .get_queryset()
             .annotate(
                 paid_at=Subquery(
-                    status_qs(OrderStatus.PAID), output_field=models.DateTimeField()
+                    status_qs([OrderStatus.PAID, OrderStatus.PAID_MANUALLY]),
+                    output_field=models.DateTimeField(),
                 ),
                 rejected_at=Subquery(
-                    status_qs(OrderStatus.REJECTED), output_field=models.DateTimeField()
+                    status_qs([OrderStatus.REJECTED]),
+                    output_field=models.DateTimeField(),
                 ),
                 cancelled_at=Subquery(
-                    status_qs(OrderStatus.CANCELLED),
+                    status_qs([OrderStatus.CANCELLED]),
                     output_field=models.DateTimeField(),
                 ),
             )
@@ -706,11 +714,13 @@ class Order(UUIDModel, TimeStampedModel):
         valid_status_changes = {
             OrderStatus.WAITING: (
                 OrderStatus.PAID,
+                OrderStatus.PAID_MANUALLY,
                 OrderStatus.EXPIRED,
                 OrderStatus.REJECTED,
                 OrderStatus.ERROR,
             ),
             OrderStatus.PAID: (OrderStatus.CANCELLED,),
+            OrderStatus.PAID_MANUALLY: (OrderStatus.CANCELLED,),
             OrderStatus.ERROR: (OrderStatus.WAITING,),
         }
         valid_new_status = valid_status_changes.get(old_status, ())
@@ -765,7 +775,7 @@ class Order(UUIDModel, TimeStampedModel):
 
         self.lease.save(update_fields=["status", "comment"])
 
-        if new_status == OrderStatus.PAID:
+        if new_status in OrderStatus.get_paid_statuses():
             if self.lease.application:
                 application = self.lease.application
                 application.status = ApplicationStatus.HANDLED
@@ -877,7 +887,7 @@ class OrderLine(UUIDModel, TimeStampedModel):
         lease: BerthLease, percentage
     ):
         lease_order = lease.orders.filter(
-            status=OrderStatus.PAID, order_type=OrderType.LEASE_ORDER
+            status__in=OrderStatus.get_paid_statuses(), order_type=OrderType.LEASE_ORDER
         ).first()
 
         return calculate_product_percentage_price(
