@@ -7,7 +7,6 @@ from django_ilmoitin.models import NotificationTemplate
 
 from contracts.tests.utils import TestContractService
 from customers.enums import OrganizationType
-from customers.tests.conftest import notification_template_sms_invoice_notice  # noqa
 from customers.tests.factories import OrganizationFactory
 
 from .factories import CustomerProfileFactory, MunicipalityFactory, UserFactory

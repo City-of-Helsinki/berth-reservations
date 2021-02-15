@@ -7,15 +7,18 @@ from anymail.exceptions import AnymailError
 from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from django.core import mail
+from faker import Faker
 from freezegun import freeze_time
 
 from applications.enums import ApplicationStatus
 from berth_reservations.tests.utils import assert_not_enough_permissions
+from customers.services import SMSNotificationService
 from customers.tests.conftest import mocked_response_profile
 from leases.enums import LeaseStatus
 from utils.relay import to_global_id
 
 from ..models import Order
+from ..notifications import NotificationType
 from ..schema.types import OrderNode
 
 APPROVE_ORDER_MUTATION = """
@@ -49,11 +52,16 @@ def test_approve_order(
             }
         ],
     }
+    phone = Faker(["fi_FI"]).phone_number()
+    order.customer_phone = phone
+    order.save()
 
     with mock.patch(
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
-    ):
+    ), mock.patch.object(
+        SMSNotificationService, "send", return_value=None
+    ) as mock_send_sms:
         executed = api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
 
     payment_url = payment_provider.get_payment_email_url(
@@ -78,6 +86,56 @@ def test_approve_order(
     assert mail.outbox[0].alternatives == [
         (f"<b>{ order.order_number } { payment_url }</b>", "text/html")
     ]
+
+    # Assert that the SMS is being sent
+    sms_context = {
+        "product_name": order.product.name,
+        "due_date": due_date,
+        "payment_url": payment_url,
+    }
+
+    mock_send_sms.assert_called_with(
+        NotificationType.SMS_INVOICE_NOTICE,
+        sms_context,
+        phone,
+        language=order.lease.application.language,
+    )
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
+)
+@freeze_time("2020-01-01T08:00:00Z")
+def test_approve_order_sms_not_sent(
+    api_client, order: Order, payment_provider, notification_template_orders_approved,
+):
+    order.customer_phone = None
+    order.save()
+
+    due_date = (today() + relativedelta(days=14)).date()
+    variables = {
+        "dueDate": due_date,
+        "orders": [
+            {
+                "orderId": to_global_id(OrderNode, order.id),
+                "email": order.lease.application.email,
+            }
+        ],
+    }
+
+    with mock.patch(
+        "customers.services.profile.requests.post",
+        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+    ), mock.patch.object(
+        SMSNotificationService, "send", return_value=None
+    ) as mock_send_sms:
+        api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
+
+    # Assert that the SMS is not sent
+    mock_send_sms.assert_not_called()
 
 
 @pytest.mark.parametrize(

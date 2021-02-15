@@ -34,5 +34,6 @@ def load_services_config():
 __all__ = [
     "HelsinkiProfileUser",
     "ProfileService",
+    "SMSNotificationService",
     "load_services_config",
 ]

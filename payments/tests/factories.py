@@ -107,6 +107,7 @@ class PlainAdditionalProductFactory(AbstractBaseProductFactory):
 
 class OrderFactory(factory.django.DjangoModelFactory):
     customer = factory.SubFactory(CustomerProfileFactory)
+    customer_phone = factory.Faker("phone_number", locale="fi_FI")
     product = factory.LazyFunction(
         lambda: BerthProductFactory()
         if random_bool()
