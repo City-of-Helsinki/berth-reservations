@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 import pytest
 from anymail.exceptions import AnymailError
+from babel.dates import format_date
 from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from django.core import mail
@@ -90,7 +91,9 @@ def test_approve_order(
     # Assert that the SMS is being sent
     sms_context = {
         "product_name": order.product.name,
-        "due_date": due_date,
+        "due_date": format_date(
+            order.due_date, locale=order.lease.application.language
+        ),
         "payment_url": payment_url,
     }
 

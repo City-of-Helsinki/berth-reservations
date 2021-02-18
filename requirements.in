@@ -1,4 +1,5 @@
 Django
+Babel
 coreapi
 django-anymail
 django-cors-headers

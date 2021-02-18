@@ -9,6 +9,7 @@ from functools import wraps
 from typing import Callable, Optional, Union
 from uuid import UUID
 
+from babel.dates import format_date
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import MONTHLY, rrule
 from django.conf import settings
@@ -402,7 +403,7 @@ def send_payment_notification(order, request, email=None, phone_number=None):
 
         sms_context = {
             "product_name": product_name,
-            "due_date": order.due_date,
+            "due_date": format_date(order.due_date, locale=language),
             "payment_url": payment_url,
         }
         sms_service = SMSNotificationService()
