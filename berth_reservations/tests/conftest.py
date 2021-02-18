@@ -148,18 +148,26 @@ def notification_template_orders_approved():
     from payments.notifications import NotificationType
 
     for value in NotificationType.values:
-        notification = NotificationTemplate.objects.language("fi").create(
-            type=value,
-            subject="test order approved subject, event: {{ order.order_number }}!",
-            body_html="<b>{{ order.order_number }} {{ payment_url }}</b>",
-            body_text="{{ order.order_number }} {{ payment_url }}",
-        )
-        notification.create_translation(
-            "en",
-            subject="test order approved subject, event: {{ order.order_number }}!",
-            body_html="<b>{{ order.order_number }} {{ payment_url }}</b>",
-            body_text="{{ order.order_number }} {{ payment_url }}",
-        )
+        if not value.startswith("sms"):
+            notification = NotificationTemplate.objects.language("fi").create(
+                type=value,
+                subject="test order approved subject, event: {{ order.order_number }}!",
+                body_html="<b>{{ order.order_number }} {{ payment_url }}</b>",
+                body_text="{{ order.order_number }} {{ payment_url }}",
+            )
+            notification.create_translation(
+                "en",
+                subject="test order approved subject, event: {{ order.order_number }}!",
+                body_html="<b>{{ order.order_number }} {{ payment_url }}</b>",
+                body_text="{{ order.order_number }} {{ payment_url }}",
+            )
+
+    NotificationTemplate.objects.language("fi").create(
+        type=NotificationType.SMS_INVOICE_NOTICE.value,
+        subject="SMS invoice notice",
+        body_html="Remember to pay your invoice {{ product_name }} by {{ due_date }}",
+        body_text="Remember to pay your invoice {{ product_name }} by {{ due_date }}",
+    )
 
 
 @pytest.fixture

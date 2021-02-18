@@ -7,6 +7,7 @@ from freezegun import freeze_time
 
 from berth_reservations.tests.factories import CustomerProfileFactory
 from customers.schema import ProfileNode
+from customers.services import SMSNotificationService
 from customers.tests.conftest import mocked_response_profile
 from leases.enums import LeaseStatus
 from leases.models import WinterStorageLease
@@ -14,6 +15,7 @@ from payments.enums import OrderStatus, OrderType
 from utils.relay import to_global_id
 
 from ..models import Order
+from ..notifications import NotificationType
 from ..schema.types import OrderNode
 
 RESEND_ORDER_MUTATION = """
@@ -50,6 +52,7 @@ def test_resend_order(
     notification_template_orders_approved,
     berth_product,
     winter_storage_product,
+    payment_provider,
 ):
     order.status = OrderStatus.WAITING
     order.order_type = OrderType.LEASE_ORDER.value
@@ -103,7 +106,9 @@ def test_resend_order(
         side_effect=mocked_response_profile(
             count=0, data=profile_data, use_edges=False
         ),
-    ):
+    ), mock.patch.object(
+        SMSNotificationService, "send", return_value=None
+    ) as mock_send_sms:
         executed = api_client.execute(RESEND_ORDER_MUTATION, input=variables)
 
     if request_has_profile_token or order_has_contact_info:
@@ -133,6 +138,23 @@ def test_resend_order(
 
         assert order.order_number in mail.outbox[0].alternatives[0][0]
         assert mail.outbox[0].alternatives[0][1] == "text/html"
+
+        # Assert that the SMS is being sent
+        payment_url = payment_provider.get_payment_email_url(
+            order, lang=order.lease.application.language
+        )
+        sms_context = {
+            "product_name": order.product.name,
+            "due_date": order.due_date,
+            "payment_url": payment_url,
+        }
+
+        mock_send_sms.assert_called_with(
+            NotificationType.SMS_INVOICE_NOTICE,
+            sms_context,
+            order.customer_phone,
+            language=order.lease.application.language,
+        )
     else:
         # no profile_token and no contact info
         assert len(executed["data"]["resendOrder"]["failedOrders"]) == 1
@@ -141,13 +163,18 @@ def test_resend_order(
             in executed["data"]["resendOrder"]["failedOrders"][0]["error"]
         )
         assert executed["data"]["resendOrder"]["sentOrders"] == []
+        # Assert that the SMS is not sent
+        mock_send_sms.assert_not_called()
 
 
 @pytest.mark.parametrize(
     "order", ["berth_order"], indirect=True,
 )
 def test_resend_order_in_error(
-    order: Order, superuser_api_client, notification_template_orders_approved,
+    order: Order,
+    superuser_api_client,
+    notification_template_orders_approved,
+    payment_provider,
 ):
     order.customer_email = "foo@email.com"
     order.status = OrderStatus.ERROR
@@ -155,8 +182,24 @@ def test_resend_order_in_error(
     order.lease.save()
     order.save()
 
+    profile_data = {
+        "id": to_global_id(ProfileNode, order.customer.id),
+        "first_name": order.lease.application.first_name,
+        "last_name": order.lease.application.last_name,
+        "primary_email": {"email": order.lease.application.email},
+        "primary_phone": {"phone": order.lease.application.phone_number},
+    }
     variables = {"orders": [to_global_id(OrderNode, order.id)]}
-    executed = superuser_api_client.execute(RESEND_ORDER_MUTATION, input=variables)
+
+    with mock.patch(
+        "requests.post",
+        side_effect=mocked_response_profile(
+            count=0, data=profile_data, use_edges=False
+        ),
+    ), mock.patch.object(
+        SMSNotificationService, "send", return_value=None
+    ) as mock_send_sms:
+        executed = superuser_api_client.execute(RESEND_ORDER_MUTATION, input=variables)
 
     order.refresh_from_db()
     order.lease.refresh_from_db()
@@ -177,6 +220,23 @@ def test_resend_order_in_error(
 
     assert order.order_number in mail.outbox[0].alternatives[0][0]
     assert mail.outbox[0].alternatives[0][1] == "text/html"
+
+    # Assert that the SMS is being sent
+    payment_url = payment_provider.get_payment_email_url(
+        order, lang=order.lease.application.language
+    )
+    sms_context = {
+        "product_name": order.product.name,
+        "due_date": order.due_date,
+        "payment_url": payment_url,
+    }
+
+    mock_send_sms.assert_called_with(
+        NotificationType.SMS_INVOICE_NOTICE,
+        sms_context,
+        order.customer_phone,
+        language=order.lease.application.language,
+    )
 
 
 @pytest.mark.parametrize(

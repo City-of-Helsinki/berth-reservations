@@ -1,0 +1,2 @@
+Kära kund. Här är en länk för att betala för eller avbryta {{ product_name }} för nästa säsong. Vänligen betala räkningen senast {{ due_date }}.
+{{ payment_url }}

@@ -20,7 +20,11 @@ from django_ilmoitin.utils import send_notification
 from applications.enums import ApplicationStatus
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.enums import OrganizationType
-from customers.services import HelsinkiProfileUser, ProfileService
+from customers.services import (
+    HelsinkiProfileUser,
+    ProfileService,
+    SMSNotificationService,
+)
 from leases.enums import LeaseStatus
 from leases.utils import (
     calculate_season_end_date,
@@ -325,7 +329,7 @@ def approve_order(
             order.lease.application.status = ApplicationStatus.OFFER_SENT
             order.lease.application.save()
 
-    send_payment_notification(order, request, email)
+    send_payment_notification(order, request, email, phone_number=order.customer_phone)
 
 
 def send_cancellation_notice(order):
@@ -361,10 +365,13 @@ def resend_order(order, due_date: date, request: HttpRequest) -> None:
     send_payment_notification(order, request)
 
 
-def send_payment_notification(order, request, email=None):
+def send_payment_notification(order, request, email=None, phone_number=None):
     from payments.providers import get_payment_provider
 
+    from .notifications import NotificationType
+
     order_email = email or order.customer_email
+    order_phone = phone_number or order.customer_phone
 
     if not is_valid_email(order_email):
         raise ValidationError(_("Missing customer email"))
@@ -381,6 +388,30 @@ def send_payment_notification(order, request, email=None):
     notification_type = get_order_notification_type(order)
     context = get_context(order, payment_url, cancel_url, notification_type)
     send_notification(order_email, notification_type.value, context, language)
+
+    if order_phone and notification_type != NotificationType.ORDER_CANCELLED:
+        if hasattr(order, "product") and order.product:
+            product_name = order.product.name
+        else:
+            product_name = ", ".join(
+                [
+                    str(ProductServiceType(order_line.product.service).label)
+                    for order_line in order.order_lines.all()
+                ]
+            )
+
+        sms_context = {
+            "product_name": product_name,
+            "due_date": order.due_date,
+            "payment_url": payment_url,
+        }
+        sms_service = SMSNotificationService()
+        sms_service.send(
+            NotificationType.SMS_INVOICE_NOTICE,
+            sms_context,
+            order_phone,
+            language=language,
+        )
 
 
 def get_notification_language(order):

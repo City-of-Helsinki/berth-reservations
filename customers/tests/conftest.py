@@ -1,10 +1,12 @@
 import pytest
+from django_ilmoitin.models import NotificationTemplate
 from faker import Faker
 
 from berth_reservations.tests.conftest import *  # noqa
 from berth_reservations.tests.factories import CustomerProfileFactory
 from berth_reservations.tests.utils import MockResponse
 from customers.schema import ProfileNode
+from payments.notifications import NotificationType
 from resources.tests.conftest import berth, boat_type  # noqa
 from users.tests.conftest import user  # noqa
 from utils.relay import to_global_id
@@ -76,3 +78,13 @@ def mocked_response_profile(count=3, data=None, use_edges=True, *args, **kwargs)
         return MockResponse(data={"data": profiles})
 
     return wrapper
+
+
+@pytest.fixture
+def notification_template_sms_invoice_notice():
+    return NotificationTemplate.objects.language("fi").create(
+        type=NotificationType.SMS_INVOICE_NOTICE.value,
+        subject="SMS invoice notice",
+        body_html="Remember to pay your invoice {{ product_name }} by {{ due_date }}",
+        body_text="Remember to pay your invoice {{ product_name }} by {{ due_date }}",
+    )

@@ -16,31 +16,8 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(PROJECT_ROOT)
 
 
-if "DJANGO_SETTINGS_MODULE" not in env:
-    from berth_reservations import settings
-
-    env.setdefault("DJANGO_SETTINGS_MODULE", settings.__name__)
-
-if __name__ == "__main__":
-    # Setup django
-    import django
-
-    django.setup()
-
-    from django.conf import settings
-
-    languages = settings.LANGUAGES
-
-    # The rest of the imports that depend on Django
-    from django.utils.translation import override
-    from django_ilmoitin.models import NotificationTemplate
-    from parler.utils.context import switch_language
-
-    from applications.notifications import (
-        NotificationType as ApplicationNotificationType,
-    )
-    from leases.notifications import NotificationType as LeaseNotificationType
-    from payments.notifications import NotificationType as PaymentNotificationType
+def load_email_templates():
+    logger.info("Writing email templates")
 
     notifications = {
         ApplicationNotificationType.BERTH_APPLICATION_CREATED: {
@@ -93,12 +70,6 @@ if __name__ == "__main__":
         },
     }
 
-    from scripts.generate_email_templates import generate_templates
-
-    generate_templates()
-    delete_result = NotificationTemplate.objects.all().delete()
-    logger.info(f"Deleted: {delete_result}")
-
     for notification_index, (notification_type, templates) in enumerate(
         notifications.items()
     ):
@@ -106,9 +77,6 @@ if __name__ == "__main__":
             id=notification_index, type=notification_type.value,
         )
         for (lang, _name) in languages:
-            full_html_path = None
-            full_plain_path = None
-
             with override(lang), switch_language(template, lang):
                 template.subject = notification_type.label
 
@@ -133,3 +101,73 @@ if __name__ == "__main__":
                 template.save()
 
         logger.info(f"Written template: {template}")
+
+
+def load_sms_templates(offset):
+    logger.info("Writing SMS templates")
+
+    sms_notifications = {
+        PaymentNotificationType.SMS_INVOICE_NOTICE: "invoice_notice_{lang}.txt",
+    }
+
+    for notification_index, (notification_type, template_path) in enumerate(
+        sms_notifications.items()
+    ):
+        template = NotificationTemplate.objects.create(
+            id=notification_index + offset, type=notification_type.value,
+        )
+        for (lang, _name) in languages:
+            with override(lang), switch_language(template, lang):
+                template.subject = notification_type.label
+                full_path = os.path.join(
+                    PROJECT_ROOT, "templates", "sms", template_path
+                ).format(lang=lang)
+
+                # Check that the path for the specified language exists
+                if os.path.isfile(full_path):
+                    with open(full_path, "r") as template_file:
+                        body = str(template_file.read())
+                        # The HTML body works just to test the rendered message, it won't be used
+                        template.body_html = body
+                        template.body_text = body
+
+                template.save()
+
+        logger.info(f"Written template: {template}")
+
+
+if "DJANGO_SETTINGS_MODULE" not in env:
+    from berth_reservations import settings
+
+    env.setdefault("DJANGO_SETTINGS_MODULE", settings.__name__)
+
+if __name__ == "__main__":
+    # Setup django
+    import django
+
+    django.setup()
+
+    from django.conf import settings
+
+    languages = settings.LANGUAGES
+
+    # The rest of the imports that depend on Django
+    from django.utils.translation import override
+    from django_ilmoitin.models import NotificationTemplate
+    from parler.utils.context import switch_language
+
+    from applications.notifications import (
+        NotificationType as ApplicationNotificationType,
+    )
+    from leases.notifications import NotificationType as LeaseNotificationType
+    from payments.notifications import NotificationType as PaymentNotificationType
+    from scripts.generate_email_templates import generate_templates
+
+    generate_templates()
+
+    logger.info("Cleaning existing notifications")
+    delete_result = NotificationTemplate.objects.all().delete()
+    logger.info(f"Deleted: {delete_result}")
+
+    load_email_templates()
+    load_sms_templates(NotificationTemplate.objects.count())

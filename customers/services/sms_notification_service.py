@@ -1,8 +1,14 @@
 import requests
+from django.conf import settings
+from django_ilmoitin.models import NotificationTemplate
+from django_ilmoitin.utils import render_notification_template
 
 NOTIFICATION_SERVICE_API_URL = "NOTIFICATION_SERVICE_API_URL"
 NOTIFICATION_SERVICE_SENDER_NAME = "NOTIFICATION_SERVICE_SENDER_NAME"
 NOTIFICATION_SERVICE_TOKEN = "NOTIFICATION_SERVICE_TOKEN"
+
+
+DEFAULT_LANGUAGE = settings.LANGUAGE_CODE
 
 
 class SMSNotificationService:
@@ -28,7 +34,18 @@ class SMSNotificationService:
             NOTIFICATION_SERVICE_TOKEN: str,
         }
 
-    def send(self, phone_number: str, message: str):
+    def send(
+        self,
+        notification_type: str,
+        context: dict,
+        phone_number: str,
+        language=DEFAULT_LANGUAGE,
+    ):
+        template = NotificationTemplate.objects.get(type=notification_type)
+        message = render_notification_template(template, context, language).body_text
+        return self.send_plain_text(phone_number, message)
+
+    def send_plain_text(self, phone_number: str, message: str):
         data = {
             "sender": self.sender_name,
             "to": [{"destination": phone_number, "format": "MOBILE"}],

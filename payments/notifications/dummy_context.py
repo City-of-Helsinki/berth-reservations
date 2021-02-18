@@ -167,5 +167,10 @@ def load_dummy_context():
             NotificationType.ORDER_CANCELLED: _get_cancelled_order_context(
                 get_email_subject(NotificationType.ORDER_CANCELLED)
             ),
+            NotificationType.SMS_INVOICE_NOTICE: {
+                "product_name": "Berth",
+                "due_date": str(today()),
+                "payment_url": "https://foo.bar/payment",
+            },
         }
     )

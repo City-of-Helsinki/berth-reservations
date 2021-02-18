@@ -7,11 +7,14 @@ from django.core import mail
 from freezegun import freeze_time
 
 from applications.enums import ApplicationStatus
+from customers.services import SMSNotificationService
 from customers.tests.conftest import MOCK_HKI_PROFILE_ADDRESS, mocked_response_profile
 from leases.enums import LeaseStatus
 from utils.relay import to_global_id
 
+from ..enums import ProductServiceType
 from ..models import Order
+from ..notifications import NotificationType
 from ..schema.types import OrderNode
 
 APPROVE_ORDER_MUTATION = """
@@ -46,7 +49,9 @@ def test_approve_ap_order(
     with mock.patch(
         "customers.services.profile.requests.post",
         side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
-    ):
+    ), mock.patch.object(
+        SMSNotificationService, "send", return_value=None
+    ) as mock_send_sms:
         executed = api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
 
     payment_url = payment_provider.get_payment_email_url(
@@ -81,3 +86,22 @@ def test_approve_ap_order(
     assert mail.outbox[0].alternatives == [
         (f"<b>{ order.order_number } { payment_url }</b>", "text/html")
     ]
+    product_name = ", ".join(
+        [
+            str(ProductServiceType(order_line.product.service).label)
+            for order_line in order.order_lines.all()
+        ]
+    )
+    # Assert that the SMS is being sent
+    sms_context = {
+        "product_name": product_name,
+        "due_date": due_date,
+        "payment_url": payment_url,
+    }
+
+    mock_send_sms.assert_called_with(
+        NotificationType.SMS_INVOICE_NOTICE,
+        sms_context,
+        order.customer_phone,
+        language=order.lease.application.language,
+    )

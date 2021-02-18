@@ -1,0 +1,2 @@
+Dear Customer. Here's a link to pay or cancel {{ product_name }} for the next season. Please pay the bill by {{ due_date }}.
+{{ payment_url }}
