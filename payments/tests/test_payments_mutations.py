@@ -1,8 +1,10 @@
+import datetime
 import random
 import uuid
 from unittest import mock
 
 import pytest
+from babel.dates import format_date
 from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from django.core import mail
@@ -1295,6 +1297,7 @@ mutation CONFIRM_PAYMENT_MUTATION($input: ConfirmPaymentMutationInput!) {
 """
 
 
+@freeze_time("2020-01-31T08:00:00Z")
 @pytest.mark.parametrize(
     "order", ["berth_order", "winter_storage_order"], indirect=True,
 )
@@ -1407,11 +1410,17 @@ def test_cancel_order(
     assert (
         mail.outbox[0].subject == f"test order cancelled subject: {order.order_number}!"
     )
-    assert mail.outbox[0].body == f"{ order.order_number }"
+    assert (
+        mail.outbox[0].body
+        == f"{ order.order_number } {format_date(datetime.date.today(), locale='fi')}"
+    )
     assert mail.outbox[0].to == [order.lease.application.email]
 
     assert mail.outbox[0].alternatives == [
-        (f"<b>{ order.order_number }</b>", "text/html")
+        (
+            f"<b>{ order.order_number } {format_date(datetime.date.today(), locale='fi')}</b>",
+            "text/html",
+        )
     ]
 
 

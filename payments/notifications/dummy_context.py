@@ -1,3 +1,4 @@
+import datetime
 from decimal import Decimal
 from typing import Dict, List
 
@@ -120,9 +121,6 @@ def _get_additional_product_order_context(subject: str = "Additional product ord
 
 def _get_cancelled_order_context(subject: str = "Order cancelled"):
     customer = CustomerProfileFactory.build()
-    # The rejected_at field relies on an annotated field from the database, so since we can't
-    # query here as the objects are not saved on the db, we manually add the rejected_at.
-
     return {
         "subject": subject,
         "order": {
@@ -136,8 +134,10 @@ def _get_cancelled_order_context(subject: str = "Order cancelled"):
                 price=Decimal("100"),
                 tax_percentage=Decimal("24.00"),
             ),
-            "rejected_at": today().date(),
         },
+        "rejected_at": str(
+            datetime.date.today()
+        ),  # language not known at this point, default to ISO format
     }
 
 
