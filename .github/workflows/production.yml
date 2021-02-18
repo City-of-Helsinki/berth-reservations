@@ -95,3 +95,16 @@ jobs:
           K8S_SECRET_NOTIFICATION_SERVICE_API_URL: "https://api.hel.fi/notification-service/v1"
           K8S_SECRET_NOTIFICATION_SERVICE_SENDER_NAME: "Hel.fi"
           K8S_SECRET_NOTIFICATION_SERVICE_TOKEN: ${{ secrets.GH_PROD_SECRET_NOTIFICATION_SERVICE_TOKEN }}
+          K8S_SECRET_ORDER_EXPIRATION_CRONJOB_ENABLED: "false"
+
+      - name: Deploy Order Expiration Cronjob
+        uses: City-of-Helsinki/setup-cronjob-action@main
+        with:
+          image_repository: ghcr.io/city-of-helsinki/${{ github.event.repository.name }}
+          image_tag:  ${{ github.sha }}
+          secret_name: TO_BE_DEFINED_LATER_SEE_JIRA_VEN_1076
+          kubeconfig_raw: ${{ env.KUBECONFIG_RAW}}
+          target_namespace: ${{ env.K8S_NAMESPACE }}
+          schedule: '30 4 * * *'
+          command: "{/bin/sh}"
+          args: "{-c,cd /app && /usr/bin/timeout --kill-after=20m 19m python manage.py expire_too_old_unpaid_orders 2>&1}"

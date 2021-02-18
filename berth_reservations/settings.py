@@ -42,6 +42,7 @@ env = environ.Env(
     CORS_ORIGIN_WHITELIST=(list, []),
     CORS_ORIGIN_ALLOW_ALL=(bool, False),
     NOTIFICATIONS_ENABLED=(bool, False),
+    ORDER_EXPIRATION_CRONJOB_ENABLED=(bool, False),
     TOKEN_AUTH_ACCEPTED_AUDIENCE=(str, "https://api.hel.fi/auth/berths"),
     TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX=(str, "berths"),
     TOKEN_AUTH_AUTHSERVER_URL=(str, ""),
@@ -113,7 +114,9 @@ EMAIL_BACKEND = "mailer.backend.DbBackend"
 MAILER_EMAIL_BACKEND = env.str("MAILER_EMAIL_BACKEND")
 
 try:
-    version = subprocess.check_output(["git", "describe"]).strip()
+    version = subprocess.check_output(
+        ["git", "describe"], stderr=subprocess.STDOUT
+    ).strip()
 except Exception:
     version = "n/a"
 
@@ -214,6 +217,7 @@ SITE_ID = 1
 DEFAULT_SRID = 4326
 
 NOTIFICATIONS_ENABLED = env("NOTIFICATIONS_ENABLED")
+ORDER_EXPIRATION_CRONJOB_ENABLED = env("ORDER_EXPIRATION_CRONJOB_ENABLED")
 
 PARLER_LANGUAGES = {SITE_ID: ({"code": "fi"}, {"code": "en"}, {"code": "sv"})}
 PARLER_DEFAULT_ACTIVATE = True
@@ -311,6 +315,8 @@ if env("SESSION_COOKIE_PATH"):
 
 if env("SESSION_COOKIE_SECURE") is not None:
     SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE")
+
+EXPIRE_WAITING_ORDERS_OLDER_THAN_DAYS = 7
 
 # local_settings.py can be used to override environment-specific settings
 # like database and email that differ between development and production.
