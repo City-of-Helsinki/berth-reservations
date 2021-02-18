@@ -413,7 +413,14 @@ class UpdateOrderMutation(graphene.ClientIDMutation):
                 input["lease"] = lease
 
         try:
+            # handle case where input has both lease and status.
+            # set order status only after changing the lease, because setting order status
+            # usually triggers a change in lease status.
+            new_status = input.pop("status", None)
             update_object(order, input)
+            if new_status:
+                order.set_status(new_status, _("Manually updated by admin"))
+
         except (ValidationError, IntegrityError) as e:
             raise VenepaikkaGraphQLError(e)
         return UpdateOrderMutation(order=order)

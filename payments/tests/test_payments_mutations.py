@@ -867,16 +867,27 @@ mutation UPDATE_ORDER($input: UpdateOrderMutationInput!) {
 @freeze_time("2020-01-01T08:00:00Z")
 def test_update_order_berth_product(api_client, berth_product, berth_lease):
     order = OrderFactory(
-        product=berth_product, lease=berth_lease, customer=berth_lease.customer
+        product=berth_product,
+        lease=berth_lease,
+        customer=berth_lease.customer,
+        status=OrderStatus.WAITING,
     )
 
     global_id = to_global_id(OrderNode, order.id)
 
+    # only valid state transitions
+    status_choices = [
+        OrderStatus.PAID,
+        OrderStatus.PAID_MANUALLY,
+        OrderStatus.EXPIRED,
+        OrderStatus.REJECTED,
+        OrderStatus.ERROR,
+    ]
     variables = {
         "id": global_id,
         "comment": "foobar",
         "dueDate": today(),
-        "status": OrderStatusEnum.get(random.choice(OrderStatus.values)).name,
+        "status": OrderStatusEnum.get(random.choice(status_choices).value).name,
     }
 
     assert Order.objects.count() == 1
@@ -896,6 +907,50 @@ def test_update_order_berth_product(api_client, berth_product, berth_lease):
         "product": {"id": to_global_id(BerthProductNode, order.product.id)},
         "lease": {"id": to_global_id(BerthLeaseNode, berth_lease.id)},
     }
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+@freeze_time("2020-01-01T08:00:00Z")
+def test_set_order_status_to_paid_manually(api_client, berth_product, berth_lease):
+    order = OrderFactory(
+        product=berth_product,
+        lease=berth_lease,
+        customer=berth_lease.customer,
+        status=OrderStatus.WAITING,
+    )
+    assert order.status == OrderStatus.WAITING
+    global_id = to_global_id(OrderNode, order.id)
+    variables = {
+        "id": global_id,
+        "status": OrderStatusEnum.get(OrderStatus.PAID_MANUALLY).name,
+    }
+
+    assert Order.objects.count() == 1
+
+    executed = api_client.execute(UPDATE_ORDER_MUTATION, input=variables)
+
+    assert Order.objects.count() == 1
+
+    assert executed["data"]["updateOrder"]["order"] == {
+        "id": variables["id"],
+        "comment": order.comment,
+        "price": str(berth_product.price_for_tier(berth_lease.berth.pier.price_tier)),
+        "taxPercentage": str(berth_product.tax_percentage),
+        "status": OrderStatus.PAID_MANUALLY.name,
+        "dueDate": str(order.due_date),
+        "customer": {"id": to_global_id(ProfileNode, order.customer.id)},
+        "product": {"id": to_global_id(BerthProductNode, order.product.id)},
+        "lease": {"id": to_global_id(BerthLeaseNode, berth_lease.id)},
+    }
+    order.refresh_from_db()
+    order.lease.refresh_from_db()
+    assert order.log_entries.count() == 1
+    log_entry = order.log_entries.first()
+    assert log_entry.to_status == OrderStatus.PAID_MANUALLY
+    assert "Manually updated by admin" in log_entry.comment
+    assert order.lease.status == LeaseStatus.PAID
 
 
 @pytest.mark.parametrize(
