@@ -7,6 +7,7 @@
 aniso8601==7.0.0          # via graphene
 asgiref==3.2.10           # via django
 autopep8==1.5.4           # via django-silk
+babel==2.9.0              # via -r requirements.in
 certifi==2020.12.5        # via elastic-apm, requests, sentry-sdk
 chardet==3.0.4            # via requests
 coreapi==2.3.3            # via -r requirements.in
@@ -58,7 +59,7 @@ pyjwkest==1.4.2           # via drf-oidc-auth
 pyjwt==1.7.1              # via django-graphql-jwt
 python-dateutil==2.8.1    # via django-silk, faker
 python-jose==3.2.0        # via django-helusers
-pytz==2020.1              # via django, django-silk
+pytz==2020.1              # via babel, django, django-silk
 pyyaml==5.3.1             # via django-munigeo
 requests-cache==0.5.2     # via django-munigeo
 requests==2.24.0          # via coreapi, django-anymail, django-helusers, django-munigeo, django-silk, pyjwkest, requests-cache
