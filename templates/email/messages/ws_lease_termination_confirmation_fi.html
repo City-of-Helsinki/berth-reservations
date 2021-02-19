@@ -1,0 +1,27 @@
+<p>Hyvä asiakas, olemme vastaanottaneet peruutuksen. Lasku, hakemus ja sopimus liittyen paikkaan on
+    peruttu {{ cancellation_date }} alkaen.</p>
+
+<h3>Kohde</h3>
+
+{% if lease.place %}
+<b>{{ lease.place.winter_storage_section.area.name }}</b>
+<p>{{ lease.place.winter_storage_section.area.street_address }}</p>
+<p>Paikka: {{ lease.place.winter_storage_section.identifier }} {{ lease.place.number }}</p>
+{% else %}
+<b>{{ lease.section.area.name }}</b>
+<p>{{ lease.section.area.street_address }}</p>
+<p>Paikka: {{ lease.section.identifier }}</p>
+{% endif %}
+<br/>
+
+<p>Kysymykset ja lisätiedot: <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a></p>
+
+<table style="width: 100%; margin: 48px 0;">
+    <tr>
+        <td style="text-align: center;">
+            <a style="font-size: 16px; color: #0072C6;" href="https://venepaikat.hel.fi">
+                Helsingin kaupungin veneilypalvelut &rarr;
+            </a>
+        </td>
+    </tr>
+</table>

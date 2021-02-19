@@ -72,6 +72,10 @@ def load_email_templates():
             "html": "berth_lease_termination_confirmation_{lang}.html",
             "plain": None,
         },
+        LeaseNotificationType.WINTER_STORAGE_LEASE_TERMINATED_LEASE_NOTICE: {
+            "html": "ws_lease_termination_confirmation_{lang}.html",
+            "plain": None,
+        },
     }
 
     for notification_index, (notification_type, templates) in enumerate(
