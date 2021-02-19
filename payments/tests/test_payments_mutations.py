@@ -912,15 +912,18 @@ def test_update_order_berth_product(api_client, berth_product, berth_lease):
 @pytest.mark.parametrize(
     "api_client", ["berth_services"], indirect=True,
 )
+@pytest.mark.parametrize("initial_status", [OrderStatus.WAITING, OrderStatus.ERROR])
 @freeze_time("2020-01-01T08:00:00Z")
-def test_set_order_status_to_paid_manually(api_client, berth_product, berth_lease):
+def test_set_order_status_to_paid_manually(
+    api_client, initial_status, berth_product, berth_lease
+):
     order = OrderFactory(
         product=berth_product,
         lease=berth_lease,
         customer=berth_lease.customer,
-        status=OrderStatus.WAITING,
+        status=initial_status,
     )
-    assert order.status == OrderStatus.WAITING
+    assert order.status == initial_status
     global_id = to_global_id(OrderNode, order.id)
     variables = {
         "id": global_id,
