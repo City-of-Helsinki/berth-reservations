@@ -89,7 +89,7 @@ jobs:
         with:
           image_repository: ghcr.io/city-of-helsinki/${{ github.event.repository.name }}
           image_tag:  ${{ github.sha }}
-          secret_name: qa-staging-i09m9b-staging-secret
+          secret_name: project-staging-berth-reservations-secret
           kubeconfig_raw: ${{ env.KUBECONFIG_RAW}}
           target_namespace: ${{ env.K8S_NAMESPACE }}
           schedule: '30 1 * * *'
