@@ -68,6 +68,10 @@ def load_email_templates():
             "html": "automatic_invoicing_email_admins_{lang}.html",
             "plain": "automatic_invoicing_email_admins_{lang}.txt",
         },
+        LeaseNotificationType.BERTH_LEASE_TERMINATED_LEASE_NOTICE: {
+            "html": "berth_lease_termination_confirmation_{lang}.html",
+            "plain": None,
+        },
     }
 
     for notification_index, (notification_type, templates) in enumerate(

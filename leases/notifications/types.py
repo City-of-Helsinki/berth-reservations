@@ -7,3 +7,7 @@ class NotificationType(TextChoices):
         "automatic_invoicing_email_admins",
         _("Next season invoices sent"),
     )
+    BERTH_LEASE_TERMINATED_LEASE_NOTICE = (
+        "berth_lease_terminated_lease_notice",
+        _("Terminated berth lease"),
+    )

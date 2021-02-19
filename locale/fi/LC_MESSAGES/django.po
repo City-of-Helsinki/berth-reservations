@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-01-18 11:24+0200\n"
+"POT-Creation-Date: 2021-02-22 13:36+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -698,6 +698,9 @@ msgstr "talvisäilytyspaikkojen vuokrasopimusten muutokset"
 
 msgid "Next season invoices sent"
 msgstr "Kausilaskujen lähetys valmis"
+
+msgid "Terminated berth lease"
+msgstr "Venepaikka irtisanottu"
 
 msgid "Application must be connected to an existing customer first"
 msgstr "Hakemuksen tulee ensin olla yhdistetty olemassa olevaan asiakkaaseen"
