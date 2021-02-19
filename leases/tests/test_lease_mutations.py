@@ -1,13 +1,17 @@
 import uuid
 from random import randint
+from unittest import mock
 
 import pytest
+from babel.dates import format_date
 from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
+from django.core import mail
 from freezegun import freeze_time
 
 from applications.enums import ApplicationStatus
 from applications.new_schema import BerthApplicationNode, WinterStorageApplicationNode
+from applications.tests.factories import BerthApplicationFactory
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
     assert_field_missing,
@@ -16,6 +20,7 @@ from berth_reservations.tests.utils import (
 )
 from contracts.models import BerthContract, WinterStorageContract
 from customers.schema import BoatNode, ProfileNode
+from customers.tests.conftest import mocked_response_profile
 from payments.models import Order
 from payments.schema import PlaceProductTaxEnum
 from payments.tests.factories import BerthProductFactory, WinterStorageProductFactory
@@ -1395,3 +1400,184 @@ def test_create_winter_storage_lease_creates_contract(
     contract = lease.contract
 
     assert isinstance(contract, WinterStorageContract)
+
+
+TERMINATE_BERTH_LEASE_MUTATION = """
+mutation TERMINATE_BERTH_LEASE($input: TerminateBerthLeaseMutationInput!) {
+    terminateBerthLease(input: $input) {
+        berthLease {
+            status
+            endDate
+        }
+    }
+}
+"""
+
+
+@freeze_time("2020-05-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_terminate_berth_lease_with_application(
+    api_client, notification_template_berth_lease_terminated
+):
+    berth_lease = BerthLeaseFactory(
+        start_date=today() - relativedelta(weeks=1),
+        end_date=today() + relativedelta(weeks=1),
+        status=LeaseStatus.PAID,
+        application=BerthApplicationFactory(email="foo@email.com", language="fi"),
+    )
+
+    end_date = today().date()
+    variables = {
+        "id": to_global_id(BerthLeaseNode, berth_lease.id),
+    }
+
+    executed = api_client.execute(TERMINATE_BERTH_LEASE_MUTATION, input=variables)
+
+    assert executed["data"]["terminateBerthLease"]["berthLease"] == {
+        "status": LeaseStatus.TERMINATED.name,
+        "endDate": str(end_date),
+    }
+    assert len(mail.outbox) == 1
+    assert mail.outbox[0].subject == "test berth lease rejected subject"
+    assert (
+        mail.outbox[0].body
+        == f"test berth lease terminated { format_date(end_date, locale='fi') } { berth_lease.id }"
+    )
+    assert mail.outbox[0].to == ["foo@email.com"]
+
+    assert mail.outbox[0].alternatives == [
+        (
+            f"<b>test berth lease terminated</b> "
+            f"{ format_date(end_date, locale='fi') } { berth_lease.id }",
+            "text/html",
+        )
+    ]
+
+
+@freeze_time("2020-05-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_terminate_berth_lease_without_application(
+    api_client, notification_template_berth_lease_terminated
+):
+    berth_lease = BerthLeaseFactory(
+        start_date=today() - relativedelta(weeks=1),
+        end_date=today() + relativedelta(weeks=1),
+        status=LeaseStatus.PAID,
+        application=None,
+    )
+
+    end_date = today().date()
+    variables = {
+        "id": to_global_id(BerthLeaseNode, berth_lease.id),
+        "profileToken": "profile_token",
+    }
+    data = {
+        "id": to_global_id(ProfileNode, berth_lease.customer.id),
+        "primary_email": {"email": "foo@email.com"},
+        "primary_phone": {},
+    }
+
+    with mock.patch(
+        "customers.services.profile.requests.post",
+        side_effect=mocked_response_profile(count=0, data=data, use_edges=False),
+    ):
+        executed = api_client.execute(TERMINATE_BERTH_LEASE_MUTATION, input=variables)
+
+    assert executed["data"]["terminateBerthLease"]["berthLease"] == {
+        "status": LeaseStatus.TERMINATED.name,
+        "endDate": str(end_date),
+    }
+    assert len(mail.outbox) == 1
+    assert mail.outbox[0].subject == "test berth lease rejected subject"
+    assert (
+        mail.outbox[0].body
+        == f"test berth lease terminated { format_date(end_date, locale='fi') } { berth_lease.id }"
+    )
+    assert mail.outbox[0].to == ["foo@email.com"]
+
+    assert mail.outbox[0].alternatives == [
+        (
+            f"<b>test berth lease terminated</b> "
+            f"{ format_date(end_date, locale='fi') } { berth_lease.id }",
+            "text/html",
+        )
+    ]
+
+
+@freeze_time("2020-05-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_terminate_berth_lease_with_end_date(api_client):
+    berth_lease = BerthLeaseFactory(
+        start_date=today() - relativedelta(weeks=1),
+        end_date=today() + relativedelta(weeks=1),
+        status=LeaseStatus.PAID,
+        application=BerthApplicationFactory(email="foo@email.com", language="fi"),
+    )
+
+    variables = {
+        "id": to_global_id(BerthLeaseNode, berth_lease.id),
+        "endDate": today() + relativedelta(days=1),
+    }
+
+    executed = api_client.execute(TERMINATE_BERTH_LEASE_MUTATION, input=variables)
+
+    assert executed["data"]["terminateBerthLease"]["berthLease"] == {
+        "status": LeaseStatus.TERMINATED.name,
+        "endDate": str(variables["endDate"].date()),
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "harbor_services", "berth_supervisor"],
+    indirect=True,
+)
+def test_terminate_berth_lease_not_enough_permissions(api_client, berth_lease):
+    variables = {
+        "id": to_global_id(BerthLeaseNode, berth_lease.id),
+    }
+
+    executed = api_client.execute(TERMINATE_BERTH_LEASE_MUTATION, input=variables)
+
+    assert_not_enough_permissions(executed)
+
+
+def test_terminate_berth_lease_doesnt_exist(superuser_api_client):
+    variables = {
+        "id": to_global_id(BerthLeaseNode, uuid.uuid4()),
+    }
+
+    executed = superuser_api_client.execute(
+        TERMINATE_BERTH_LEASE_MUTATION, input=variables,
+    )
+
+    assert_doesnt_exist("BerthLease", executed)
+
+
+@freeze_time("2020-05-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_terminate_berth_lease_no_email_no_token(api_client):
+    berth_lease = BerthLeaseFactory(
+        start_date=today() - relativedelta(weeks=1),
+        end_date=today() + relativedelta(weeks=1),
+        status=LeaseStatus.PAID,
+        application=None,
+    )
+
+    variables = {
+        "id": to_global_id(BerthLeaseNode, berth_lease.id),
+        "endDate": today() + relativedelta(days=1),
+    }
+
+    executed = api_client.execute(TERMINATE_BERTH_LEASE_MUTATION, input=variables)
+    assert_in_errors(
+        "The lease has no email and no profile token was provided", executed
+    )

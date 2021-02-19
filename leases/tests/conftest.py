@@ -1,4 +1,5 @@
 import pytest
+from django_ilmoitin.models import NotificationTemplate
 
 from applications.tests.conftest import *  # noqa
 from berth_reservations.tests.conftest import *  # noqa
@@ -6,6 +7,7 @@ from customers.tests.conftest import *  # noqa
 from customers.tests.factories import BoatFactory
 from resources.tests.conftest import *  # noqa
 
+from ..notifications import NotificationType
 from ..stickers import create_ws_sticker_sequences
 from .factories import BerthLeaseFactory, WinterStorageLeaseFactory
 
@@ -25,3 +27,13 @@ def berth_lease():
 def winter_storage_lease():
     boat = BoatFactory()
     return WinterStorageLeaseFactory(customer=boat.owner, boat=boat)
+
+
+@pytest.fixture
+def notification_template_berth_lease_terminated():
+    return NotificationTemplate.objects.language("fi").create(
+        type=NotificationType.BERTH_LEASE_TERMINATED_LEASE_NOTICE,
+        subject="test berth lease rejected subject",
+        body_html="<b>test berth lease terminated</b> {{ cancelled_at }} {{ lease.id }}",
+        body_text="test berth lease terminated {{ cancelled_at }} {{ lease.id }}",
+    )
