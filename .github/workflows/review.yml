@@ -74,9 +74,9 @@ jobs:
         with:
           image_repository: ghcr.io/city-of-helsinki/${{ github.event.repository.name }}
           image_tag:  ${{ github.sha }}
-          secret_name: ven-783-invalidate-expired-pay-review-berth-reserv-4d-secret
           kubeconfig_raw: ${{ env.KUBECONFIG_RAW}}
           target_namespace: ${{ env.K8S_NAMESPACE }}
-          schedule: '*/5 * * * *'
+          single_run: true
+          secret_name: "-secret"
           command: "{/bin/sh}"
           args: "{-c,cd /app && /usr/bin/timeout --kill-after=20m 19m python manage.py expire_too_old_unpaid_orders 2>&1}"
