@@ -1,9 +1,14 @@
 import threading
 
 import graphene
+from anymail.exceptions import AnymailError
+from babel.dates import format_date
+from dateutil.utils import today
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
+from django_ilmoitin.utils import send_notification
 
 from applications.enums import ApplicationAreaType, ApplicationStatus
 from applications.models import BerthApplication, WinterStorageApplication
@@ -11,6 +16,7 @@ from applications.new_schema import BerthApplicationNode, WinterStorageApplicati
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from contracts.services import get_contract_service
 from customers.models import CustomerProfile
+from customers.services import ProfileService
 from payments.enums import OrderStatus
 from payments.models import BerthProduct, Order, WinterStorageProduct
 from resources.schema import BerthNode, WinterStoragePlaceNode, WinterStorageSectionNode
@@ -20,11 +26,13 @@ from users.decorators import (
     delete_permission_required,
     view_permission_required,
 )
+from utils.email import is_valid_email
 from utils.relay import get_node_from_global_id
 from utils.schema import update_object
 
 from ..enums import LeaseStatus
 from ..models import BerthLease, WinterStorageLease
+from ..notifications import NotificationType
 from ..services import BerthInvoicingService
 from ..stickers import get_next_sticker_number
 from .types import BerthLeaseNode, WinterStorageLeaseNode
@@ -353,6 +361,77 @@ class DeleteWinterStorageLeaseMutation(graphene.ClientIDMutation):
         return DeleteWinterStorageLeaseMutation()
 
 
+class TerminateBerthLeaseMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+        end_date = graphene.Date(
+            description="The date which will mark the end of the lease. If none is provided, "
+            "it will default to the day when the mutation is called"
+        )
+        profile_token = graphene.String(
+            description="To fetch the email the from Profile service in case the lease doesn't have an application"
+        )
+
+    berth_lease = graphene.Field(BerthLeaseNode)
+
+    @classmethod
+    @change_permission_required(BerthLease)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        lease: BerthLease = get_node_from_global_id(
+            info, input.pop("id"), only_type=BerthLeaseNode, nullable=False,
+        )
+
+        if lease.status != LeaseStatus.PAID:
+            raise VenepaikkaGraphQLError(_(f"Lease is not paid: {lease.status}"))
+
+        lease.status = LeaseStatus.TERMINATED
+
+        end_date = input.get("end_date", today())
+        lease.end_date = end_date
+
+        language = (
+            lease.application.language
+            if lease.application
+            else settings.LANGUAGES[0][0]
+        )
+
+        # Always try to retrieve the email from Profile if the token is passed
+        if profile_token := input.get("profile_token"):
+            profile_service = ProfileService(profile_token=profile_token)
+            profile = profile_service.get_profile(lease.customer.id)
+            email = profile.email
+        # If the profile token is not passed, try to get the email from the application
+        elif lease.application:
+            email = lease.application.email
+        else:
+            raise VenepaikkaGraphQLError(
+                _("The lease has no email and no profile token was provided")
+            )
+
+        if not is_valid_email(email):
+            raise VenepaikkaGraphQLError(_("Missing customer email"))
+
+        try:
+            lease.save()
+            send_notification(
+                email,
+                NotificationType.BERTH_LEASE_TERMINATED_LEASE_NOTICE,
+                {
+                    "subject": NotificationType.BERTH_LEASE_TERMINATED_LEASE_NOTICE.label,
+                    "cancelled_at": format_date(today(), locale=language),
+                    "lease": lease,
+                },
+                language=language,
+            )
+        except (AnymailError, OSError, ValidationError, VenepaikkaGraphQLError,) as e:
+            # Flatten all the error messages on a single list
+            errors = sum(e.message_dict.values(), [])
+            raise VenepaikkaGraphQLError(errors)
+
+        return TerminateBerthLeaseMutation(berth_lease=lease)
+
+
 class AssignNewStickerNumberMutation(graphene.ClientIDMutation):
     class Input:
         lease_id = graphene.String(required=True)
@@ -465,6 +544,15 @@ class Mutation:
         "\n\n**Requires permissions** to access leases."
         "\n\nErrors:"
         "\n* A berth lease that is not `DRAFTED` anymore is passed"
+        "\n* The passed lease ID doesn't exist"
+    )
+    terminate_berth_lease = TerminateBerthLeaseMutation.Field(
+        description="Marks a `BerthLease` as terminated."
+        "\n\nIt **only** works for leases that have been paid. "
+        "It receives an optional date for when the lease should end."
+        "\n\n**Requires permissions** to edit leases."
+        "\n\nErrors:"
+        "\n* A berth lease that is not `PAID` is passed"
         "\n* The passed lease ID doesn't exist"
     )
 

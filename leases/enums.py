@@ -9,3 +9,4 @@ class LeaseStatus(TextChoices):
     EXPIRED = "expired", _("Expired")
     ERROR = "error", _("Error")
     PAID = "paid", _("Paid")
+    TERMINATED = "terminated", _("Terminated")
