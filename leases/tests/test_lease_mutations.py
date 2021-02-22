@@ -11,7 +11,10 @@ from freezegun import freeze_time
 
 from applications.enums import ApplicationStatus
 from applications.new_schema import BerthApplicationNode, WinterStorageApplicationNode
-from applications.tests.factories import BerthApplicationFactory
+from applications.tests.factories import (
+    BerthApplicationFactory,
+    WinterStorageApplicationFactory,
+)
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
     assert_field_missing,
@@ -1578,6 +1581,201 @@ def test_terminate_berth_lease_no_email_no_token(api_client):
     }
 
     executed = api_client.execute(TERMINATE_BERTH_LEASE_MUTATION, input=variables)
+    assert_in_errors(
+        "The lease has no email and no profile token was provided", executed
+    )
+
+
+TERMINATE_WINTER_STORAGE_LEASE_MUTATION = """
+mutation TERMINATE_WINTER_STORAGE_LEASE_MUTATION($input: TerminateWinterStorageLeaseMutationInput!) {
+    terminateWinterStorageLease(input: $input) {
+        winterStorageLease {
+            status
+            endDate
+        }
+    }
+}
+"""
+
+
+@freeze_time("2020-05-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_terminate_ws_lease_with_application(
+    api_client, notification_template_ws_lease_terminated
+):
+    ws_lease = WinterStorageLeaseFactory(
+        start_date=today() - relativedelta(weeks=1),
+        end_date=today() + relativedelta(weeks=1),
+        status=LeaseStatus.PAID,
+        application=WinterStorageApplicationFactory(
+            email="foo@email.com", language="fi"
+        ),
+    )
+
+    end_date = today().date()
+    variables = {
+        "id": to_global_id(WinterStorageLeaseNode, ws_lease.id),
+    }
+
+    executed = api_client.execute(
+        TERMINATE_WINTER_STORAGE_LEASE_MUTATION, input=variables
+    )
+
+    assert executed["data"]["terminateWinterStorageLease"]["winterStorageLease"] == {
+        "status": LeaseStatus.TERMINATED.name,
+        "endDate": str(end_date),
+    }
+    assert len(mail.outbox) == 1
+    assert mail.outbox[0].subject == "test ws lease rejected subject"
+    assert (
+        mail.outbox[0].body
+        == f"test ws lease terminated { format_date(end_date, locale='fi') } { ws_lease.id }"
+    )
+    assert mail.outbox[0].to == ["foo@email.com"]
+
+    assert mail.outbox[0].alternatives == [
+        (
+            f"<b>test ws lease terminated</b> "
+            f"{ format_date(end_date, locale='fi') } { ws_lease.id }",
+            "text/html",
+        )
+    ]
+
+
+@freeze_time("2020-05-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_terminate_ws_lease_without_application(
+    api_client, notification_template_ws_lease_terminated
+):
+    ws_lease = WinterStorageLeaseFactory(
+        start_date=today() - relativedelta(weeks=1),
+        end_date=today() + relativedelta(weeks=1),
+        status=LeaseStatus.PAID,
+        application=None,
+    )
+
+    end_date = today().date()
+    variables = {
+        "id": to_global_id(WinterStorageLeaseNode, ws_lease.id),
+        "profileToken": "profile_token",
+    }
+    data = {
+        "id": to_global_id(ProfileNode, ws_lease.customer.id),
+        "primary_email": {"email": "foo@email.com"},
+        "primary_phone": {},
+    }
+
+    with mock.patch(
+        "customers.services.profile.requests.post",
+        side_effect=mocked_response_profile(count=0, data=data, use_edges=False),
+    ):
+        executed = api_client.execute(
+            TERMINATE_WINTER_STORAGE_LEASE_MUTATION, input=variables
+        )
+
+    assert executed["data"]["terminateWinterStorageLease"]["winterStorageLease"] == {
+        "status": LeaseStatus.TERMINATED.name,
+        "endDate": str(end_date),
+    }
+    assert len(mail.outbox) == 1
+    assert mail.outbox[0].subject == "test ws lease rejected subject"
+    assert (
+        mail.outbox[0].body
+        == f"test ws lease terminated { format_date(end_date, locale='fi') } { ws_lease.id }"
+    )
+    assert mail.outbox[0].to == ["foo@email.com"]
+
+    assert mail.outbox[0].alternatives == [
+        (
+            f"<b>test ws lease terminated</b> "
+            f"{ format_date(end_date, locale='fi') } { ws_lease.id }",
+            "text/html",
+        )
+    ]
+
+
+@freeze_time("2020-05-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_terminate_ws_lease_with_end_date(api_client):
+    ws_lease = WinterStorageLeaseFactory(
+        start_date=today() - relativedelta(weeks=1),
+        end_date=today() + relativedelta(weeks=1),
+        status=LeaseStatus.PAID,
+        application=WinterStorageApplicationFactory(
+            email="foo@email.com", language="fi"
+        ),
+    )
+
+    variables = {
+        "id": to_global_id(WinterStorageLeaseNode, ws_lease.id),
+        "endDate": today() + relativedelta(days=1),
+    }
+
+    executed = api_client.execute(
+        TERMINATE_WINTER_STORAGE_LEASE_MUTATION, input=variables
+    )
+
+    assert executed["data"]["terminateWinterStorageLease"]["winterStorageLease"] == {
+        "status": LeaseStatus.TERMINATED.name,
+        "endDate": str(variables["endDate"].date()),
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "harbor_services", "berth_supervisor"],
+    indirect=True,
+)
+def test_terminate_ws_lease_not_enough_permissions(api_client, winter_storage_lease):
+    variables = {
+        "id": to_global_id(WinterStorageLeaseNode, winter_storage_lease.id),
+    }
+
+    executed = api_client.execute(
+        TERMINATE_WINTER_STORAGE_LEASE_MUTATION, input=variables
+    )
+
+    assert_not_enough_permissions(executed)
+
+
+def test_terminate_ws_lease_doesnt_exist(superuser_api_client):
+    variables = {
+        "id": to_global_id(WinterStorageLeaseNode, uuid.uuid4()),
+    }
+
+    executed = superuser_api_client.execute(
+        TERMINATE_WINTER_STORAGE_LEASE_MUTATION, input=variables,
+    )
+
+    assert_doesnt_exist("WinterStorageLease", executed)
+
+
+@freeze_time("2020-05-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_terminate_ws_lease_no_email_no_token(api_client):
+    ws_lease = WinterStorageLeaseFactory(
+        start_date=today() - relativedelta(weeks=1),
+        end_date=today() + relativedelta(weeks=1),
+        status=LeaseStatus.PAID,
+        application=None,
+    )
+
+    variables = {
+        "id": to_global_id(WinterStorageLeaseNode, ws_lease.id),
+        "endDate": today() + relativedelta(days=1),
+    }
+
+    executed = api_client.execute(
+        TERMINATE_WINTER_STORAGE_LEASE_MUTATION, input=variables
+    )
     assert_in_errors(
         "The lease has no email and no profile token was provided", executed
     )

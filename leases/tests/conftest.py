@@ -37,3 +37,13 @@ def notification_template_berth_lease_terminated():
         body_html="<b>test berth lease terminated</b> {{ cancelled_at }} {{ lease.id }}",
         body_text="test berth lease terminated {{ cancelled_at }} {{ lease.id }}",
     )
+
+
+@pytest.fixture
+def notification_template_ws_lease_terminated():
+    return NotificationTemplate.objects.language("fi").create(
+        type=NotificationType.WINTER_STORAGE_LEASE_TERMINATED_LEASE_NOTICE,
+        subject="test ws lease rejected subject",
+        body_html="<b>test ws lease terminated</b> {{ cancelled_at }} {{ lease.id }}",
+        body_text="test ws lease terminated {{ cancelled_at }} {{ lease.id }}",
+    )
