@@ -492,7 +492,9 @@ class CancelOrderMutation(graphene.ClientIDMutation):
                 )
             order.set_status(OrderStatus.REJECTED, _("Order rejected by customer"))
             order.invalidate_tokens()
-
+            # annotations aren’t reloaded if using refresh_from_db, so use get() since we need
+            # to have the updated value of rejected_at in the notice
+            order = Order.objects.get(pk=order.pk)
             send_cancellation_notice(order)
         except (Order.DoesNotExist, ValidationError, AnymailError, OSError,) as e:
             raise VenepaikkaGraphQLError(e)

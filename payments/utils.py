@@ -342,7 +342,13 @@ def send_cancellation_notice(order):
         else settings.LANGUAGE_CODE
     )
     notification_type = NotificationType.ORDER_CANCELLED
-    context = {"order": order, "subject": get_email_subject(notification_type)}
+    if rejected_at := getattr(order, "rejected_at", None):
+        rejected_at = format_date(rejected_at, locale=language)
+    context = {
+        "order": order,
+        "rejected_at": rejected_at,
+        "subject": get_email_subject(notification_type),
+    }
     email = order.customer_email
     if not email:
         if order.lease and order.lease.application:

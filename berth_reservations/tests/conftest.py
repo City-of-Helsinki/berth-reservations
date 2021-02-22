@@ -178,14 +178,14 @@ def notification_template_order_cancelled():
         notification = NotificationTemplate.objects.language("fi").create(
             type=value,
             subject="test order cancelled subject: {{ order.order_number }}!",
-            body_html="<b>{{ order.order_number }}</b>",
-            body_text="{{ order.order_number }}",
+            body_html="<b>{{ order.order_number }} {{ rejected_at }}</b>",
+            body_text="{{ order.order_number }} {{ rejected_at }}",
         )
         notification.create_translation(
             "en",
             subject="test order cancelled subject: {{ order.order_number }}!",
-            body_html="<b>{{ order.order_number }}</b>",
-            body_text="{{ order.order_number }}",
+            body_html="<b>{{ order.order_number }} {{ rejected_at }}</b>",
+            body_text="{{ order.order_number }} {{ rejected_at }}",
         )
 
 
