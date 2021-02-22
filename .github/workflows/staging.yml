@@ -90,8 +90,8 @@ jobs:
           image_repository: ghcr.io/city-of-helsinki/${{ github.event.repository.name }}
           image_tag:  ${{ github.sha }}
           secret_name: project-staging-berth-reservations-secret
-          kubeconfig_raw: ${{ env.KUBECONFIG_RAW}}
-          target_namespace: ${{ env.K8S_NAMESPACE }}
+          kubeconfig_raw: ${{ secrets.KUBECONFIG_RAW_STAGING}}
+          target_namespace: ${{ secrets.K8S_NAMESPACE_STAGING }}
           schedule: '30 1 * * *'
           command: "{/bin/sh}"
           args: "{-c,cd /app && /usr/bin/timeout --kill-after=20m 19m python manage.py expire_too_old_unpaid_orders 2>&1}"
