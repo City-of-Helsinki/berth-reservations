@@ -11,3 +11,7 @@ class NotificationType(TextChoices):
         "berth_lease_terminated_lease_notice",
         _("Terminated berth lease"),
     )
+    WINTER_STORAGE_LEASE_TERMINATED_LEASE_NOTICE = (
+        "ws_lease_terminated_lease_notice",
+        _("Terminated winter storage lease"),
+    )
