@@ -924,9 +924,10 @@ def test_order_set_status_no_application(berth):
     [
         (OrderStatus.WAITING, OrderStatus.PAID),
         (OrderStatus.WAITING, OrderStatus.PAID_MANUALLY),
+        (OrderStatus.ERROR, OrderStatus.PAID_MANUALLY),
         (OrderStatus.WAITING, OrderStatus.REJECTED),
-        (OrderStatus.PAID, OrderStatus.CANCELLED),
-        (OrderStatus.PAID_MANUALLY, OrderStatus.CANCELLED),
+        (OrderStatus.ERROR, OrderStatus.CANCELLED),
+        (OrderStatus.WAITING, OrderStatus.CANCELLED),
     ],
 )
 @freeze_time("2020-01-01T08:00:00Z")

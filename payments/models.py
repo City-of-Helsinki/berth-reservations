@@ -718,10 +718,15 @@ class Order(UUIDModel, TimeStampedModel):
                 OrderStatus.EXPIRED,
                 OrderStatus.REJECTED,
                 OrderStatus.ERROR,
+                OrderStatus.CANCELLED,
             ),
-            OrderStatus.PAID: (OrderStatus.CANCELLED,),
-            OrderStatus.PAID_MANUALLY: (OrderStatus.CANCELLED,),
-            OrderStatus.ERROR: (OrderStatus.WAITING, OrderStatus.PAID_MANUALLY),
+            OrderStatus.PAID: (),
+            OrderStatus.PAID_MANUALLY: (),
+            OrderStatus.ERROR: (
+                OrderStatus.WAITING,
+                OrderStatus.PAID_MANUALLY,
+                OrderStatus.CANCELLED,
+            ),
         }
         valid_new_status = valid_status_changes.get(old_status, ())
 
@@ -762,7 +767,8 @@ class Order(UUIDModel, TimeStampedModel):
         self.tokens.bulk_update(tokens, ["cancelled"])
 
     def update_lease_and_application(self, new_status):
-        self.lease.status = get_lease_status(new_status)
+        if lease_status := get_lease_status(new_status):
+            self.lease.status = lease_status
 
         if new_status == OrderStatus.ERROR:
             message = (
