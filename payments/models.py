@@ -14,7 +14,7 @@ from django.db.models.functions import Coalesce
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
-from applications.enums import ApplicationAreaType, ApplicationStatus
+from applications.enums import ApplicationAreaType
 from applications.models import BerthApplication, WinterStorageApplication
 from leases.models import BerthLease, WinterStorageLease
 from leases.stickers import get_next_sticker_number
@@ -41,6 +41,7 @@ from .utils import (
     calculate_product_percentage_price,
     convert_aftertax_to_pretax,
     generate_order_number,
+    get_application_status,
     get_lease_status,
     rounded,
 )
@@ -742,6 +743,7 @@ class Order(UUIDModel, TimeStampedModel):
 
         if self.order_type == OrderType.LEASE_ORDER:
             self.update_lease_and_application(new_status)
+            self.update_sticker_number_if_needed()
 
         self.create_log_entry(
             from_status=old_status, to_status=new_status, comment=comment
@@ -781,19 +783,21 @@ class Order(UUIDModel, TimeStampedModel):
 
         self.lease.save(update_fields=["status", "comment"])
 
-        if new_status in OrderStatus.get_paid_statuses():
-            if self.lease.application:
-                application = self.lease.application
-                application.status = ApplicationStatus.HANDLED
-                self.lease.application.save(update_fields=["status"])
+        if application := self.lease.application:
+            if new_application_status := get_application_status(new_status):
+                application.status = new_application_status
+                application.save(update_fields=["status"])
 
-                if (
-                    isinstance(self.lease, WinterStorageLease)
-                    and application.area_type == ApplicationAreaType.UNMARKED
-                ):
-                    sticker_number = get_next_sticker_number(self.lease.start_date)
-                    self.lease.sticker_number = sticker_number
-                    self.lease.save(update_fields=["sticker_number"])
+    def update_sticker_number_if_needed(self):
+        if (
+            self.status in OrderStatus.get_paid_statuses()
+            and (application := self.lease.application)
+            and isinstance(self.lease, WinterStorageLease)
+            and application.area_type == ApplicationAreaType.UNMARKED
+        ):
+            sticker_number = get_next_sticker_number(self.lease.start_date)
+            self.lease.sticker_number = sticker_number
+            self.lease.save(update_fields=["sticker_number"])
 
 
 class OrderLine(UUIDModel, TimeStampedModel):
