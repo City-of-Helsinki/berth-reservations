@@ -71,6 +71,7 @@ class OrderLogEntryInline(admin.StackedInline):
 
 
 class OrderAdmin(admin.ModelAdmin):
+    date_hierarchy = "due_date"
     inlines = (OrderLineInline, OrderLogEntryInline)
     exclude = ("_product_content_type", "_lease_content_type")
     readonly_fields = (

@@ -66,6 +66,8 @@ class BaseLeaseAdmin(admin.ModelAdmin):
 
     list_filter = ("status",)
 
+    date_hierarchy = "start_date"
+
 
 class GenericOrderInline(GenericStackedInline):
     ct_field = "_lease_content_type"
