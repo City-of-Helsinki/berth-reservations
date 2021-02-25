@@ -11,6 +11,7 @@ from django.core import mail
 from django.utils.timezone import now
 from freezegun import freeze_time
 
+from applications.enums import ApplicationStatus
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
     assert_field_missing,
@@ -1454,6 +1455,7 @@ def test_cancel_order(
 
     assert order.status == OrderStatus.REJECTED
     assert order.lease.status == LeaseStatus.REFUSED
+    assert order.lease.application.status == ApplicationStatus.REJECTED
 
     assert len(mail.outbox) == 1
     assert (

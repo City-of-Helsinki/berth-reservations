@@ -304,6 +304,16 @@ def get_lease_status(new_status) -> LeaseStatus:
         raise ValidationError(_("Invalid order status"))
 
 
+def get_application_status(new_status) -> ApplicationStatus:
+    # return None if application status need not be changed
+    if new_status == OrderStatus.REJECTED:
+        return ApplicationStatus.REJECTED
+    elif new_status in OrderStatus.get_paid_statuses():
+        return ApplicationStatus.HANDLED
+    else:
+        return None
+
+
 def approve_order(
     order,
     email,

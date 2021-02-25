@@ -18,6 +18,7 @@ class ApplicationStatus(TextChoices):
         _("Notified that there are no suitable berths"),
     )
     HANDLED = "handled", _("Handled")
+    REJECTED = "rejected", _("Rejected")
     EXPIRED = "expired", _("Expired")
 
 
