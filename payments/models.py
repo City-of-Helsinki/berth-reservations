@@ -896,13 +896,14 @@ class OrderLine(UUIDModel, TimeStampedModel):
     def _calculate_percentage_price_for_additional_prod_order(
         lease: BerthLease, percentage
     ):
-        lease_order = lease.orders.filter(
+        if lease_order := lease.orders.filter(
             status__in=OrderStatus.get_paid_statuses(), order_type=OrderType.LEASE_ORDER
-        ).first()
-
-        return calculate_product_percentage_price(
-            lease_order.fixed_price_total, percentage
-        )
+        ).first():
+            return calculate_product_percentage_price(
+                lease_order.fixed_price_total, percentage
+            )
+        else:
+            raise ValidationError(_("Lease must have a paid order"))
 
     @property
     @rounded
