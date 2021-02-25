@@ -287,9 +287,10 @@ def get_order_notification_type(order):
 
 
 def get_lease_status(new_status) -> LeaseStatus:
+    # return None if lease status need not be changed
     if new_status in OrderStatus.get_paid_statuses():
         return LeaseStatus.PAID
-    elif new_status in (OrderStatus.REJECTED, OrderStatus.CANCELLED):
+    elif new_status == OrderStatus.REJECTED:
         return LeaseStatus.REFUSED
     elif new_status == OrderStatus.EXPIRED:
         return LeaseStatus.EXPIRED
@@ -297,6 +298,8 @@ def get_lease_status(new_status) -> LeaseStatus:
         return LeaseStatus.OFFERED
     elif new_status == OrderStatus.ERROR:
         return LeaseStatus.ERROR
+    elif new_status == OrderStatus.CANCELLED:
+        return None
     else:
         raise ValidationError(_("Invalid order status"))
 

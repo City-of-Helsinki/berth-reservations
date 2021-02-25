@@ -959,6 +959,55 @@ def test_set_order_status_to_paid_manually(
 
 
 @pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+@pytest.mark.parametrize("initial_status", [OrderStatus.WAITING, OrderStatus.ERROR])
+@freeze_time("2020-01-01T08:00:00Z")
+def test_set_order_status_to_cancelled(
+    api_client, initial_status, berth_product, berth_lease
+):
+    # note: test_cancel_order tests the case where customer rejects the order(and berth).
+    order = OrderFactory(
+        product=berth_product,
+        lease=berth_lease,
+        customer=berth_lease.customer,
+        status=initial_status,
+    )
+    lease_initial_status = berth_lease.status
+    assert order.status == initial_status
+    global_id = to_global_id(OrderNode, order.id)
+    variables = {
+        "id": global_id,
+        "status": OrderStatusEnum.get(OrderStatus.CANCELLED).name,
+    }
+
+    assert Order.objects.count() == 1
+
+    executed = api_client.execute(UPDATE_ORDER_MUTATION, input=variables)
+
+    assert Order.objects.count() == 1
+
+    assert executed["data"]["updateOrder"]["order"] == {
+        "id": variables["id"],
+        "comment": order.comment,
+        "status": OrderStatus.CANCELLED.name,
+        "price": str(berth_product.price_for_tier(berth_lease.berth.pier.price_tier)),
+        "taxPercentage": str(berth_product.tax_percentage),
+        "dueDate": str(order.due_date),
+        "customer": {"id": to_global_id(ProfileNode, order.customer.id)},
+        "product": {"id": to_global_id(BerthProductNode, order.product.id)},
+        "lease": {"id": to_global_id(BerthLeaseNode, berth_lease.id)},
+    }
+    order.refresh_from_db()
+    order.lease.refresh_from_db()
+    assert order.lease.status == lease_initial_status
+    assert order.log_entries.count() == 1
+    log_entry = order.log_entries.first()
+    assert log_entry.to_status == OrderStatus.CANCELLED
+    assert "Manually updated by admin" in log_entry.comment
+
+
+@pytest.mark.parametrize(
     "api_client",
     ["api_client", "user", "harbor_services", "berth_supervisor", "berth_handler"],
     indirect=True,
