@@ -382,3 +382,60 @@ def test_berth_applications_name_filter_no_matching(berth_application, api_clien
     executed = api_client.execute(query)
 
     assert executed["data"] == {"berthApplications": {"edges": []}}
+
+
+BERTH_APPLICATIONS_WITH_APPLICATION_CODE_FILTER_QUERY = """
+query APPLICATIONS {
+    berthApplications(applicationCode: %s) {
+        edges {
+            node {
+                applicationCode
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_services", "berth_handler", "berth_supervisor"],
+    indirect=True,
+)
+def test_berth_applications_application_code_filter_true(
+    berth_application, berth_application2, api_client
+):
+    berth_application.application_code = ""
+    berth_application.save()
+
+    berth_application2.application_code = "test"
+    berth_application2.save()
+
+    query = BERTH_APPLICATIONS_WITH_APPLICATION_CODE_FILTER_QUERY % "true"
+    executed = api_client.execute(query)
+
+    assert executed["data"] == {
+        "berthApplications": {"edges": [{"node": {"applicationCode": "test"}}]}
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_services", "berth_handler", "berth_supervisor"],
+    indirect=True,
+)
+def test_berth_applications_application_code_filter_false(
+    berth_application, berth_application2, api_client
+):
+    berth_application.application_code = ""
+    berth_application.save()
+
+    berth_application2.application_code = "test"
+    berth_application2.save()
+
+    query = BERTH_APPLICATIONS_WITH_APPLICATION_CODE_FILTER_QUERY % "false"
+    executed = api_client.execute(query)
+
+    assert executed["data"] == {
+        "berthApplications": {"edges": [{"node": {"applicationCode": ""}}]}
+    }

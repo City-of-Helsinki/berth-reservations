@@ -61,6 +61,9 @@ class BerthApplicationFilter(django_filters.FilterSet):
     no_customer = django_filters.BooleanFilter(
         field_name="customer", lookup_expr="isnull"
     )
+    application_code = django_filters.BooleanFilter(
+        field_name="application_code", method="filter_application_code"
+    )
     order_by = django_filters.OrderingFilter(
         fields=("created_at",), label="Supports only `createdAt` and `-createdAt`.",
     )
@@ -74,6 +77,14 @@ class BerthApplicationFilter(django_filters.FilterSet):
     def filter_berth_switch(self, queryset, name, value):
         lookup = "__".join([name, "isnull"])
         return queryset.filter(**{lookup: not value})
+
+    def filter_application_code(self, queryset, name, value):
+        lookup = "__".join([name, "exact"])
+        return (
+            queryset.exclude(**{lookup: ""})
+            if value
+            else queryset.filter(**{lookup: ""})
+        )
 
 
 class BerthApplicationNode(DjangoObjectType):

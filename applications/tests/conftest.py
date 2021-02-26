@@ -44,6 +44,9 @@ def berth_application():
     return berth_application
 
 
+berth_application2 = berth_application
+
+
 @pytest.fixture
 def berth_application_with_customer(berth_application):
     berth_application.customer = CustomerProfileFactory()
