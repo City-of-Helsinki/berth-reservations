@@ -12,6 +12,7 @@ from uuid import UUID
 from babel.dates import format_date
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import MONTHLY, rrule
+from dateutil.utils import today
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest
@@ -375,6 +376,19 @@ def send_cancellation_notice(order):
             raise VenepaikkaGraphQLError(_("No email was found"))
 
     send_notification(email, notification_type.value, context, language)
+
+
+def prepare_for_resending(order):
+    if order.status == OrderStatus.ERROR or order.lease.status == LeaseStatus.ERROR:
+        order.set_status(
+            OrderStatus.WAITING,
+            comment=f"{today()}: {_('Cleanup the invoice to attempt resending')}\n",
+        )
+    elif order.status == OrderStatus.CANCELLED:
+        order.set_status(
+            OrderStatus.WAITING,
+            comment=f"{today()}: {_('Resend cancelled invoice')}\n",
+        )
 
 
 def resend_order(order, due_date: date, request: HttpRequest) -> None:
