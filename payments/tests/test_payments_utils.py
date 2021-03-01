@@ -6,6 +6,7 @@ from django.test import RequestFactory
 
 from applications.enums import ApplicationStatus
 from leases.enums import LeaseStatus
+from payments.enums import OrderStatus
 from payments.models import Order
 from payments.utils import approve_order, send_payment_notification
 
@@ -53,6 +54,21 @@ def test_approve_order(
     assert mail.outbox[0].alternatives == [
         (f"<b>{ order.order_number } { payment_url }</b>", "text/html")
     ]
+
+
+@pytest.mark.parametrize(
+    "order", ["non_billable_customer_order"], indirect=True,
+)
+def test_approve_order_with_non_billable_customer(
+    order: Order, helsinki_profile_user,
+):
+    request = RequestFactory().request()
+    due_date = today().date()
+    approve_order(order, "", due_date, helsinki_profile_user, request)
+    order.refresh_from_db()
+
+    assert order.status == OrderStatus.PAID_MANUALLY
+    assert len(mail.outbox) == 0
 
 
 @pytest.mark.parametrize(

@@ -343,7 +343,12 @@ def approve_order(
             order.lease.application.status = ApplicationStatus.OFFER_SENT
             order.lease.application.save()
 
-    send_payment_notification(order, request, email, phone_number=order.customer_phone)
+    if order.customer.is_non_billable_customer():
+        order.set_status(OrderStatus.PAID_MANUALLY, "Non-billable customer.")
+    else:
+        send_payment_notification(
+            order, request, email, phone_number=order.customer_phone
+        )
 
 
 def send_cancellation_notice(order):

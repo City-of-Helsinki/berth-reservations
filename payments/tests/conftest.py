@@ -11,8 +11,9 @@ from applications.tests.factories import (
 )
 from berth_reservations.tests.conftest import *  # noqa
 from berth_reservations.tests.utils import MockResponse
+from customers.enums import OrganizationType
 from customers.services import HelsinkiProfileUser
-from customers.tests.factories import CustomerProfileFactory
+from customers.tests.factories import CustomerProfileFactory, OrganizationFactory
 from leases.tests.conftest import *  # noqa
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from resources.tests.conftest import *  # noqa
@@ -140,6 +141,11 @@ def _generate_order(order_type: str = None):
             price_unit=PriceUnits.PERCENTAGE,
         )
         OrderLineFactory(order=order, product=storage_on_ice, price=Decimal("15.00"))
+    elif order_type == "non_billable_customer_order":
+        OrganizationFactory(
+            customer=customer_profile, organization_type=OrganizationType.NON_BILLABLE
+        )
+        order = OrderFactory(customer=customer_profile, status=OrderStatus.WAITING)
     else:
         order = OrderFactory(customer=customer_profile)
     return order
@@ -174,6 +180,12 @@ def berth_order(customer_profile):
 @pytest.fixture
 def winter_storage_order(customer_profile):
     order = _generate_order("winter_storage_order")
+    return order
+
+
+@pytest.fixture
+def non_billable_customer_order(customer_profile):
+    order = _generate_order("non_billable_customer_order")
     return order
 
 

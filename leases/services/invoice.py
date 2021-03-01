@@ -87,9 +87,13 @@ class BaseInvoicingService:
     ) -> Union[BerthLease, WinterStorageLease]:
         """Create a new lease instance"""
 
-        # Make copy of attached contract, if one exists
+        # Make copy of attached contract, if one exists and if the customer is billable.
         contract = None
-        if hasattr(lease, "contract") and lease.contract is not None:
+        if (
+            hasattr(lease, "contract")
+            and lease.contract is not None
+            and not lease.customer.is_non_billable_customer()
+        ):
             contract = lease.contract
 
         # Blank the PK to signal that a new instance has to be created
