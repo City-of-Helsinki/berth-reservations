@@ -1,6 +1,7 @@
 import random
 
 import pytest
+from django.core import mail
 
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
@@ -185,7 +186,12 @@ mutation RejectBerthApplicationMutation($input: RejectBerthApplicationMutationIn
 @pytest.mark.parametrize(
     "api_client", ["berth_services"], indirect=True,
 )
-def test_reject_berth_application(api_client, berth_application, customer_profile):
+def test_reject_berth_application(
+    api_client,
+    berth_application,
+    customer_profile,
+    notification_template_berth_application_rejected,
+):
     variables = {
         "id": to_global_id(BerthApplicationNode, berth_application.id),
     }
@@ -205,6 +211,17 @@ def test_reject_berth_application(api_client, berth_application, customer_profil
         ).count()
         == 1
     )
+    assert len(mail.outbox) == 1
+    assert (
+        mail.outbox[0].subject
+        == f"test berth application rejected subject, event: {berth_application.first_name}!"
+    )
+    assert mail.outbox[0].body == "test berth application rejected body text!"
+    assert mail.outbox[0].to == [berth_application.email]
+
+    assert mail.outbox[0].alternatives == [
+        ("<b>test berth application rejected body HTML!</b>", "text/html",)
+    ]
 
 
 @pytest.mark.parametrize(

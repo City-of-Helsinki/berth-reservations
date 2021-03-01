@@ -19,16 +19,6 @@ def notification_template_berth_application_created():
 
 
 @pytest.fixture
-def notification_template_berth_application_rejected():
-    return NotificationTemplate.objects.language("fi").create(
-        type=NotificationType.BERTH_APPLICATION_REJECTED.value,
-        subject="test berth application rejected subject, event: {{ application.first_name }}!",
-        body_html="<b>test berth application rejected body HTML!</b>",
-        body_text="test berth application rejected body text!",
-    )
-
-
-@pytest.fixture
 def notification_template_winter_application_created():
     return NotificationTemplate.objects.language("fi").create(
         type=NotificationType.WINTER_STORAGE_APPLICATION_CREATED.value,
