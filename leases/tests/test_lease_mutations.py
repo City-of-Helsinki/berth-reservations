@@ -1377,6 +1377,41 @@ def test_create_berth_lease_creates_contract(
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
+@freeze_time("2020-01-01T08:00:00Z")
+def test_create_berth_lease_no_contract_for_non_billable_customer(
+    api_client, berth_application, berth, boat, non_billable_customer
+):
+    berth_application.customer = non_billable_customer
+    berth_application.save()
+    boat.owner = non_billable_customer
+    boat.save()
+    min_width = berth.berth_type.width - 1
+    max_width = berth.berth_type.width + 1
+    BerthProductFactory(min_width=min_width, max_width=max_width)
+
+    variables = {
+        "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
+        "berthId": to_global_id(BerthNode, berth.id),
+        "boatId": to_global_id(BoatNode, boat.id),
+        "startDate": "2020-03-01",
+        "endDate": "2020-12-31",
+        "comment": "Very wow, such comment",
+    }
+
+    assert BerthLease.objects.count() == 0
+
+    api_client.execute(CREATE_BERTH_LEASE_MUTATION, input=variables)
+
+    assert BerthLease.objects.count() == 1
+
+    lease = BerthLease.objects.first()
+
+    assert not hasattr(lease, "contract")
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
 def test_create_winter_storage_lease_creates_contract(
     api_client, winter_storage_application, winter_storage_place, customer_profile
 ):
@@ -1403,6 +1438,36 @@ def test_create_winter_storage_lease_creates_contract(
     contract = lease.contract
 
     assert isinstance(contract, WinterStorageContract)
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_create_winter_storage_lease_no_contract_for_non_billable_customer(
+    api_client, winter_storage_application, winter_storage_place, non_billable_customer
+):
+    WinterStorageProductFactory(
+        winter_storage_area=winter_storage_place.winter_storage_section.area
+    )
+    winter_storage_application.customer = non_billable_customer
+    winter_storage_application.save()
+
+    variables = {
+        "applicationId": to_global_id(
+            WinterStorageApplicationNode, winter_storage_application.id
+        ),
+        "placeId": to_global_id(WinterStoragePlaceNode, winter_storage_place.id),
+    }
+
+    assert WinterStorageLease.objects.count() == 0
+
+    api_client.execute(CREATE_WINTER_STORAGE_LEASE_MUTATION, input=variables)
+
+    assert WinterStorageLease.objects.count() == 1
+
+    lease = WinterStorageLease.objects.first()
+
+    assert not hasattr(lease, "contract")
 
 
 TERMINATE_BERTH_LEASE_MUTATION = """
