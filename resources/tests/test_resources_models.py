@@ -1,14 +1,17 @@
 import random
 
 import pytest  # noqa
+from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
 
+from leases.consts import ACTIVE_LEASE_STATUSES, INACTIVE_LEASE_STATUSES
 from leases.enums import LeaseStatus
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from leases.utils import (
     calculate_berth_lease_end_date,
     calculate_berth_lease_start_date,
     calculate_winter_storage_lease_end_date,
+    calculate_winter_storage_lease_start_date,
 )
 
 from ..models import Berth, Pier, WinterStoragePlace, WinterStorageSection
@@ -117,6 +120,64 @@ def test_berth_is_not_available_auto_renew_last_season(superuser_api_client, ber
     assert not Berth.objects.get(id=berth.id).is_available
 
 
+@pytest.mark.parametrize(
+    "date", ["2020-01-01T08:00:00Z", "2020-06-30T08:00:00Z", "2020-11-01T08:00:00Z"]
+)
+@pytest.mark.parametrize("status", ACTIVE_LEASE_STATUSES)
+def test_berth_is_not_available_next_season(status, date):
+    with freeze_time(date):
+        lease = BerthLeaseFactory(status=status)
+
+        # Need to fetch the berth from the DB to get the annotated value
+        assert not Berth.objects.get(id=lease.berth_id).is_available
+
+
+@pytest.mark.parametrize(
+    "date", ["2020-01-01T08:00:00Z", "2020-06-30T08:00:00Z", "2020-11-01T08:00:00Z"]
+)
+@pytest.mark.parametrize("status", INACTIVE_LEASE_STATUSES)
+def test_berth_is_available_next_season(date, status):
+    with freeze_time(date):
+        lease = BerthLeaseFactory(status=status)
+
+        # Need to fetch the berth from the DB to get the annotated value
+        assert Berth.objects.get(id=lease.berth_id).is_available
+
+
+@pytest.mark.parametrize(
+    "date", ["2020-01-01T08:00:00Z", "2020-06-30T08:00:00Z", "2020-11-01T08:00:00Z"]
+)
+@pytest.mark.parametrize("inactive_status", INACTIVE_LEASE_STATUSES)
+def test_berth_is_available_rejected_new_lease(date, inactive_status):
+    with freeze_time(date):
+        old_lease = BerthLeaseFactory(
+            status=LeaseStatus.PAID,
+            start_date=calculate_berth_lease_start_date() - relativedelta(years=1),
+            end_date=calculate_berth_lease_end_date() - relativedelta(years=1),
+        )
+        BerthLeaseFactory(
+            status=inactive_status, berth=old_lease.berth, customer=old_lease.customer
+        )
+
+        # Need to fetch the berth from the DB to get the annotated value
+        assert Berth.objects.get(id=old_lease.berth_id).is_available
+
+
+@pytest.mark.parametrize(
+    "date", ["2020-01-01T08:00:00Z", "2020-06-30T08:00:00Z", "2020-11-01T08:00:00Z"]
+)
+def test_berth_is_not_available_renew_pending(date):
+    with freeze_time(date):
+        lease = BerthLeaseFactory(
+            status=LeaseStatus.PAID,
+            start_date=calculate_berth_lease_start_date() - relativedelta(years=1),
+            end_date=calculate_berth_lease_end_date() - relativedelta(years=1),
+        )
+
+        # Need to fetch the berth from the DB to get the annotated value
+        assert not Berth.objects.get(id=lease.berth_id).is_available
+
+
 def test_pier_number_of_places():
     pier = PierFactory()
     free_berths = random.randint(1, 10)
@@ -169,6 +230,66 @@ def test_winter_storage_place_is_not_available_valid_through_whole_season(
 ):
     WinterStorageLeaseFactory(place=winter_storage_place, status=status)
     assert not WinterStoragePlace.objects.get(id=winter_storage_place.id).is_available
+
+
+@pytest.mark.parametrize(
+    "date", ["2020-01-01T08:00:00Z", "2020-06-30T08:00:00Z", "2020-11-01T08:00:00Z"]
+)
+@pytest.mark.parametrize("status", ACTIVE_LEASE_STATUSES)
+def test_winter_storage_place_is_not_available_next_season(status, date):
+    with freeze_time(date):
+        lease = WinterStorageLeaseFactory(status=status)
+
+        # Need to fetch the berth from the DB to get the annotated value
+        assert not WinterStoragePlace.objects.get(id=lease.place_id).is_available
+
+
+@pytest.mark.parametrize(
+    "date", ["2020-01-01T08:00:00Z", "2020-06-30T08:00:00Z", "2020-11-01T08:00:00Z"]
+)
+@pytest.mark.parametrize("status", INACTIVE_LEASE_STATUSES)
+def test_winter_storage_place_is_available_next_season(date, status):
+    with freeze_time(date):
+        lease = WinterStorageLeaseFactory(status=status)
+
+        # Need to fetch the berth from the DB to get the annotated value
+        assert WinterStoragePlace.objects.get(id=lease.place_id).is_available
+
+
+@pytest.mark.parametrize(
+    "date", ["2020-01-01T08:00:00Z", "2020-06-30T08:00:00Z", "2020-11-01T08:00:00Z"]
+)
+@pytest.mark.parametrize("inactive_status", INACTIVE_LEASE_STATUSES)
+def test_winter_storage_place_is_available_rejected_new_lease(date, inactive_status):
+    with freeze_time(date):
+        old_lease = WinterStorageLeaseFactory(
+            status=LeaseStatus.PAID,
+            start_date=calculate_winter_storage_lease_start_date()
+            - relativedelta(years=1),
+            end_date=calculate_winter_storage_lease_end_date() - relativedelta(years=1),
+        )
+        WinterStorageLeaseFactory(
+            status=inactive_status, place=old_lease.place, customer=old_lease.customer
+        )
+
+        # Need to fetch the berth from the DB to get the annotated value
+        assert WinterStoragePlace.objects.get(id=old_lease.place_id).is_available
+
+
+@pytest.mark.parametrize(
+    "date", ["2020-01-01T08:00:00Z", "2020-06-30T08:00:00Z", "2020-11-01T08:00:00Z"]
+)
+def test_winter_storage_place_is_not_available_renew_pending(date):
+    with freeze_time(date):
+        lease = WinterStorageLeaseFactory(
+            status=LeaseStatus.PAID,
+            start_date=calculate_winter_storage_lease_start_date()
+            - relativedelta(years=1),
+            end_date=calculate_winter_storage_lease_end_date() - relativedelta(years=1),
+        )
+
+        # Need to fetch the berth from the DB to get the annotated value
+        assert not WinterStoragePlace.objects.get(id=lease.place_id).is_available
 
 
 def test_winter_storage_section_number_of_places():

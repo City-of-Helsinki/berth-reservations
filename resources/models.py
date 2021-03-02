@@ -1,3 +1,4 @@
+from dateutil.utils import today
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.files.storage import FileSystemStorage
@@ -25,7 +26,7 @@ from parler.models import TranslatableModel, TranslatedFields
 from leases.consts import ACTIVE_LEASE_STATUSES
 from leases.enums import LeaseStatus
 from leases.utils import (
-    calculate_berth_lease_end_date,
+    calculate_season_end_date,
     calculate_winter_storage_lease_end_date,
 )
 from payments.enums import PriceTier
@@ -615,33 +616,57 @@ class BerthManager(models.Manager):
             - If there are leases associated to the berth
             - If any lease ends during the current or the last season (previous year)
                 + If a lease ends during the current season:
-                    * It needs to have a "valid" status (DRAFTED, OFFERED, PAID)
+                    * It needs to have a "valid" status (DRAFTED, OFFERED, PAID, ERROR)
                 + If a lease ended during the last season:
+                    * It should not have been renewed for the next season
                     * It needs to have a "valid" status (PAID)
-                    * It needs to have renew automatically set
         """
         from leases.models import BerthLease
 
-        current_season_end = calculate_berth_lease_end_date()
+        season_end = calculate_season_end_date()
+        current_date = today().date()
 
-        in_current_season = Q(end_date=current_season_end)
-        in_last_season = Q(
-            end_date=current_season_end.replace(current_season_end.year - 1)
-        )
+        # If today is before the season ends but during the same year
+        if current_date < season_end and current_date.year == season_end.year:
+            last_year = current_date.year - 1
+        else:
+            last_year = current_date.year
+
+        in_current_season = Q(end_date__gte=season_end)
+        in_last_season = Q(end_date__year=last_year)
+
         active_current_status = Q(status__in=ACTIVE_LEASE_STATUSES)
         paid_status = Q(status=LeaseStatus.PAID)
-        auto_renew = Q(renew_automatically=True)
 
-        active_leases = BerthLease.objects.filter(berth=OuterRef("pk")).filter(
-            Q(in_current_season & active_current_status)
-            | Q(in_last_season & auto_renew & paid_status)
+        # In case the renewed leases for the upcoming season haven't been sent
+        # or some of the leases that had to be fixed (also for the upcoming season)
+        # are pending, we check for leases on the previous season that have already been paid,
+        # which in most cases means that the customer will keep the berth for the next season as well.
+        #
+        # Pre-filter the leases for the upcoming/current season
+        renewed_leases = BerthLease.objects.filter(
+            in_current_season, berth=OuterRef("berth"), customer=OuterRef("customer"),
         )
+        # Filter the leases from the previous season that have already been renewed
+        previous_leases = BerthLease.objects.exclude(Exists(renewed_leases)).filter(
+            in_last_season, paid_status, berth=OuterRef("pk")
+        )
+
+        # For the leases that have been renewed or are valid during the current season.
+        # Filter the leases on the current season that have not been rejected
+        current_leases = BerthLease.objects.filter(
+            in_current_season, active_current_status, berth=OuterRef("pk")
+        )
+
+        # A berth is NOT available when it already has a lease on the current (or upcoming) season
+        # or when the previous season lease has been paid and the new leases have not been sent
+        is_available = ~Exists(previous_leases | current_leases)
 
         return (
             super()
             .get_queryset()
             .annotate(
-                is_available=~Exists(active_leases),
+                is_available=is_available,
                 _int_number=RawSQL(
                     "CAST(substring(number FROM '^[0-9]+') AS INTEGER)",
                     params=[],
@@ -684,33 +709,58 @@ class Berth(AbstractBoatPlace):
 class WinterStoragePlaceManager(models.Manager):
     def get_queryset(self):
         """
-        The QuerySet annotates whether a berth is available or not. For this,
+        The QuerySet annotates whether a place is available or not. For this,
         it considers the following criteria:
-            - If there are leases associated to the berth
+            - If there are leases associated to the  place
             - If any lease ends during the current or the last season (previous year)
                 + If a lease ends during the current season:
-                    * It needs to have a "valid" status (DRAFTED, OFFERED, PAID)
+                    * It needs to have a "valid" status (DRAFTED, OFFERED, PAID, ERROR)
                 + If a lease ended during the last season:
+                    * It should not have been renewed for the next season
                     * It needs to have a "valid" status (PAID)
-                    * It needs to have renew automatically set
         """
         from leases.models import WinterStorageLease
 
-        current_season_end = calculate_winter_storage_lease_end_date()
+        season_end = calculate_winter_storage_lease_end_date()
+        current_date = today().date()
 
-        in_current_season = Q(end_date=current_season_end)
-        in_last_season = Q(
-            end_date=current_season_end.replace(current_season_end.year - 1)
-        )
+        # If today is before the season ends but during the same year
+        if current_date < season_end and current_date.year == season_end.year:
+            last_year = current_date.year - 1
+        else:
+            last_year = current_date.year
+
+        in_current_season = Q(end_date__gte=season_end)
+        in_last_season = Q(end_date__year=last_year)
+
         active_current_status = Q(status__in=ACTIVE_LEASE_STATUSES)
         paid_status = Q(status=LeaseStatus.PAID)
 
-        active_leases = WinterStorageLease.objects.filter(place=OuterRef("pk")).filter(
-            Q(in_current_season & active_current_status)
-            | Q(in_last_season & paid_status)
+        # In case the renewed leases for the upcoming season haven't been sent
+        # or some of the leases that had to be fixed (also for the upcoming season)
+        # are pending, we check for leases on the previous season that have already been paid,
+        # which in most cases means that the customer will keep the berth for the next season as well.
+        #
+        # Pre-filter the leases for the upcoming/current season
+        renewed_leases = WinterStorageLease.objects.filter(
+            in_current_season, place=OuterRef("place"), customer=OuterRef("customer"),
+        )
+        # Filter the leases from the previous season that have already been renewed
+        previous_leases = WinterStorageLease.objects.exclude(
+            Exists(renewed_leases)
+        ).filter(in_last_season, paid_status, place=OuterRef("pk"))
+
+        # For the leases that have been renewed or are valid during the current season.
+        # Filter the leases on the current season that have not been rejected
+        current_leases = WinterStorageLease.objects.filter(
+            in_current_season, active_current_status, place=OuterRef("pk")
         )
 
-        return super().get_queryset().annotate(is_available=~Exists(active_leases))
+        # A berth is NOT available when it already has a lease on the current (or upcoming) season
+        # or when the previous season lease has been paid and the new leases have not been sent
+        is_available = ~Exists(previous_leases | current_leases)
+
+        return super().get_queryset().annotate(is_available=is_available)
 
 
 class WinterStoragePlace(AbstractBoatPlace):
