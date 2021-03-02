@@ -12,6 +12,7 @@ from applications.tests.factories import (
 from berth_reservations.tests.factories import CustomerProfileFactory
 from customers.tests.factories import BoatFactory
 
+from ..consts import ACTIVE_LEASE_STATUSES
 from ..enums import LeaseStatus
 from ..models import (
     BerthLease,
@@ -310,9 +311,10 @@ def test_winter_storage_lease_application_different_customer(winter_storage_leas
     )
 
 
+@pytest.mark.parametrize("status", ACTIVE_LEASE_STATUSES)
 @freeze_time("2020-01-01T08:00:00Z")
-def test_berth_lease_is_active_before_season():
-    lease = BerthLeaseFactory(status=LeaseStatus.PAID)
+def test_berth_lease_is_active_before_season(status):
+    lease = BerthLeaseFactory(status=status)
 
     assert BerthLease.objects.get(id=lease.id).is_active
 
