@@ -1482,7 +1482,7 @@ mutation TERMINATE_BERTH_LEASE($input: TerminateBerthLeaseMutationInput!) {
 """
 
 
-@freeze_time("2020-05-01T08:00:00Z")
+@freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
@@ -1524,7 +1524,7 @@ def test_terminate_berth_lease_with_application(
     ]
 
 
-@freeze_time("2020-05-01T08:00:00Z")
+@freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
@@ -1576,7 +1576,7 @@ def test_terminate_berth_lease_without_application(
     ]
 
 
-@freeze_time("2020-05-01T08:00:00Z")
+@freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
@@ -1628,7 +1628,7 @@ def test_terminate_berth_lease_doesnt_exist(superuser_api_client):
     assert_doesnt_exist("BerthLease", executed)
 
 
-@freeze_time("2020-05-01T08:00:00Z")
+@freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
@@ -1663,7 +1663,7 @@ mutation TERMINATE_WINTER_STORAGE_LEASE_MUTATION($input: TerminateWinterStorageL
 """
 
 
-@freeze_time("2020-05-01T08:00:00Z")
+@freeze_time("2020-12-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
@@ -1709,7 +1709,7 @@ def test_terminate_ws_lease_with_application(
     ]
 
 
-@freeze_time("2020-05-01T08:00:00Z")
+@freeze_time("2020-12-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
@@ -1763,7 +1763,7 @@ def test_terminate_ws_lease_without_application(
     ]
 
 
-@freeze_time("2020-05-01T08:00:00Z")
+@freeze_time("2020-12-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
@@ -1821,7 +1821,7 @@ def test_terminate_ws_lease_doesnt_exist(superuser_api_client):
     assert_doesnt_exist("WinterStorageLease", executed)
 
 
-@freeze_time("2020-05-01T08:00:00Z")
+@freeze_time("2020-12-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
