@@ -13,10 +13,6 @@ class ApplicationStatus(TextChoices):
     OFFER_GENERATED = "offer_generated", _("Offer generated")
     OFFER_SENT = "offer_sent", _("Offer sent")
     NO_SUITABLE_BERTHS = "no_suitable_berths", _("No suitable berths")
-    NO_SUITABLE_BERTHS_NOTIFIED = (
-        "no_suitable_berths_notified",
-        _("Notified that there are no suitable berths"),
-    )
     HANDLED = "handled", _("Handled")
     REJECTED = "rejected", _("Rejected")
     EXPIRED = "expired", _("Expired")
