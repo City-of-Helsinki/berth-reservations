@@ -88,7 +88,7 @@ class BerthLeaseManager(models.Manager):
         current_season_start = calculate_berth_lease_start_date()
         today = date.today()
 
-        active_current_status = Q(status=LeaseStatus.PAID)
+        active_current_status = Q(status__in=ACTIVE_LEASE_STATUSES)
 
         if today < current_season_start:
             in_current_season = Q(start_date=current_season_start)
