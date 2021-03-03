@@ -183,7 +183,7 @@ class BerthLease(AbstractLease):
         leases_for_given_period = BerthLease.objects.filter(
             berth=self.berth,
             start_date__lte=self.end_date,
-            end_date__gte=self.start_date,
+            end_date__gt=self.start_date,
             status__in=ACTIVE_LEASE_STATUSES,
         )
         creating = self._state.adding
