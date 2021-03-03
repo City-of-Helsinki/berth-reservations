@@ -32,9 +32,11 @@ from utils.numbers import rounded
 from utils.relay import to_global_id
 
 from ..enums import LeaseStatus
-from ..models import BerthLease, WinterStorageLease
+from ..models import Berth, BerthLease, WinterStorageLease, WinterStoragePlace
 from ..schema import BerthLeaseNode, WinterStorageLeaseNode
 from ..utils import (
+    calculate_berth_lease_end_date,
+    calculate_berth_lease_start_date,
     calculate_winter_storage_lease_end_date,
     calculate_winter_storage_lease_start_date,
 )
@@ -1482,7 +1484,7 @@ mutation TERMINATE_BERTH_LEASE($input: TerminateBerthLeaseMutationInput!) {
 """
 
 
-@freeze_time("2020-05-01T08:00:00Z")
+@freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
@@ -1524,7 +1526,7 @@ def test_terminate_berth_lease_with_application(
     ]
 
 
-@freeze_time("2020-05-01T08:00:00Z")
+@freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
@@ -1576,7 +1578,7 @@ def test_terminate_berth_lease_without_application(
     ]
 
 
-@freeze_time("2020-05-01T08:00:00Z")
+@freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
@@ -1628,7 +1630,7 @@ def test_terminate_berth_lease_doesnt_exist(superuser_api_client):
     assert_doesnt_exist("BerthLease", executed)
 
 
-@freeze_time("2020-05-01T08:00:00Z")
+@freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
@@ -1651,6 +1653,53 @@ def test_terminate_berth_lease_no_email_no_token(api_client):
     )
 
 
+TERMINATE_BERTH_LEASE_MUTATION_W_START_DATE = """
+mutation TERMINATE_BERTH_LEASE($input: TerminateBerthLeaseMutationInput!) {
+    terminateBerthLease(input: $input) {
+        berthLease {
+            status
+            endDate
+            startDate
+        }
+    }
+}
+"""
+
+
+@freeze_time("2020-12-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_terminate_berth_lease_before_season(api_client):
+    start_date = calculate_berth_lease_start_date()
+    end_date = calculate_berth_lease_end_date()
+
+    berth_lease = BerthLeaseFactory(
+        start_date=start_date,
+        end_date=end_date,
+        status=LeaseStatus.PAID,
+        application=BerthApplicationFactory(email="foo@email.com", language="fi"),
+    )
+
+    # Have to query to get the annotated value `is_available`.
+    assert not Berth.objects.get(id=berth_lease.berth_id).is_available
+
+    variables = {
+        "id": to_global_id(BerthLeaseNode, berth_lease.id),
+    }
+
+    executed = api_client.execute(
+        TERMINATE_BERTH_LEASE_MUTATION_W_START_DATE, input=variables
+    )
+
+    assert executed["data"]["terminateBerthLease"]["berthLease"] == {
+        "status": LeaseStatus.TERMINATED.name,
+        "startDate": str(start_date),
+        "endDate": str(start_date),
+    }
+    assert Berth.objects.get(id=berth_lease.berth_id).is_available
+
+
 TERMINATE_WINTER_STORAGE_LEASE_MUTATION = """
 mutation TERMINATE_WINTER_STORAGE_LEASE_MUTATION($input: TerminateWinterStorageLeaseMutationInput!) {
     terminateWinterStorageLease(input: $input) {
@@ -1663,7 +1712,7 @@ mutation TERMINATE_WINTER_STORAGE_LEASE_MUTATION($input: TerminateWinterStorageL
 """
 
 
-@freeze_time("2020-05-01T08:00:00Z")
+@freeze_time("2020-12-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
@@ -1709,7 +1758,7 @@ def test_terminate_ws_lease_with_application(
     ]
 
 
-@freeze_time("2020-05-01T08:00:00Z")
+@freeze_time("2020-12-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
@@ -1763,7 +1812,7 @@ def test_terminate_ws_lease_without_application(
     ]
 
 
-@freeze_time("2020-05-01T08:00:00Z")
+@freeze_time("2020-12-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
@@ -1821,7 +1870,7 @@ def test_terminate_ws_lease_doesnt_exist(superuser_api_client):
     assert_doesnt_exist("WinterStorageLease", executed)
 
 
-@freeze_time("2020-05-01T08:00:00Z")
+@freeze_time("2020-12-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
@@ -1844,3 +1893,52 @@ def test_terminate_ws_lease_no_email_no_token(api_client):
     assert_in_errors(
         "The lease has no email and no profile token was provided", executed
     )
+
+
+TERMINATE_WINTER_STORAGE_LEASE_MUTATION_W_START_DATE = """
+mutation TERMINATE_WINTER_STORAGE_LEASE_MUTATION($input: TerminateWinterStorageLeaseMutationInput!) {
+    terminateWinterStorageLease(input: $input) {
+        winterStorageLease {
+            status
+            startDate
+            endDate
+        }
+    }
+}
+"""
+
+
+@freeze_time("2020-07-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_terminate_ws_lease_before_season(api_client):
+    start_date = calculate_winter_storage_lease_start_date()
+    end_date = calculate_winter_storage_lease_end_date()
+
+    ws_lease = WinterStorageLeaseFactory(
+        start_date=start_date,
+        end_date=end_date,
+        status=LeaseStatus.PAID,
+        application=WinterStorageApplicationFactory(
+            email="foo@email.com", language="fi"
+        ),
+    )
+
+    # Have to query to get the annotated value `is_available`.
+    assert not WinterStoragePlace.objects.get(id=ws_lease.place_id).is_available
+
+    variables = {
+        "id": to_global_id(WinterStorageLeaseNode, ws_lease.id),
+    }
+
+    executed = api_client.execute(
+        TERMINATE_WINTER_STORAGE_LEASE_MUTATION_W_START_DATE, input=variables
+    )
+
+    assert executed["data"]["terminateWinterStorageLease"]["winterStorageLease"] == {
+        "status": LeaseStatus.TERMINATED.name,
+        "startDate": str(start_date),
+        "endDate": str(start_date),
+    }
+    assert WinterStoragePlace.objects.get(id=ws_lease.place_id).is_available

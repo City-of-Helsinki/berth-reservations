@@ -11,6 +11,10 @@ from django_ilmoitin.utils import send_notification
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.services import ProfileService
+from leases.utils import (
+    calculate_berth_lease_start_date,
+    calculate_winter_storage_lease_start_date,
+)
 from utils.email import is_valid_email
 from utils.relay import get_node_from_global_id, to_global_id
 
@@ -47,7 +51,12 @@ def terminate_lease(
         raise VenepaikkaGraphQLError(_(f"Lease is not paid: {lease.status}"))
 
     lease.status = LeaseStatus.TERMINATED
-    lease.end_date = end_date or today().date()
+
+    if isinstance(lease, BerthLease):
+        default_date = calculate_berth_lease_start_date()
+    else:  # WinterStorageLease
+        default_date = calculate_winter_storage_lease_start_date()
+    lease.end_date = end_date or default_date
 
     language = (
         lease.application.language if lease.application else settings.LANGUAGES[0][0]
