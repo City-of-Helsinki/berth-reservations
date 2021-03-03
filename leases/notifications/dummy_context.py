@@ -22,12 +22,12 @@ def load_dummy_context():
             },
             NotificationType.BERTH_LEASE_TERMINATED_LEASE_NOTICE: {
                 "subject": NotificationType.BERTH_LEASE_TERMINATED_LEASE_NOTICE.label,
-                "cancellation_date": format_date(today(), locale="fi"),
+                "cancelled_at": format_date(today(), locale="fi"),
                 "lease": berth_lease,
             },
             NotificationType.WINTER_STORAGE_LEASE_TERMINATED_LEASE_NOTICE: {
                 "subject": NotificationType.WINTER_STORAGE_LEASE_TERMINATED_LEASE_NOTICE.label,
-                "cancellation_date": format_date(today(), locale="fi"),
+                "cancelled_at": format_date(today(), locale="fi"),
                 "lease": ws_lease,
             },
         }
