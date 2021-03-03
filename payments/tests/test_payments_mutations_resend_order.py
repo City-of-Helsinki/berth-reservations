@@ -45,6 +45,7 @@ mutation RESEND_ORDER_MUTATION($input: ResendOrderMutationInput!) {
 @pytest.mark.parametrize(
     "request_has_profile_token", [True, False],
 )
+@pytest.mark.parametrize("order_status", [OrderStatus.WAITING, OrderStatus.CANCELLED])
 def test_resend_order(
     api_client,
     order: Order,
@@ -54,8 +55,9 @@ def test_resend_order(
     berth_product,
     winter_storage_product,
     payment_provider,
+    order_status,
 ):
-    order.status = OrderStatus.WAITING
+    order.status = order_status
     order.order_type = OrderType.LEASE_ORDER.value
     initial_price = decimal.Decimal(
         "00.42"
@@ -285,3 +287,45 @@ def test_resend_order_not_fixed_in_error(
     assert order.status == OrderStatus.ERROR
 
     assert len(mail.outbox) == 0
+
+
+@freeze_time("2020-10-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services"], indirect=True,
+)
+@pytest.mark.parametrize(
+    "order", ["berth_order"], indirect=True,
+)
+@pytest.mark.parametrize(
+    "order_status",
+    [
+        OrderStatus.EXPIRED,
+        OrderStatus.REJECTED,
+        OrderStatus.PAID_MANUALLY,
+        OrderStatus.PAID,
+    ],
+)
+def test_resend_order_in_invalid_state(
+    api_client, order: Order, notification_template_orders_approved, order_status
+):
+    order.status = OrderStatus.WAITING
+    order.order_type = OrderType.LEASE_ORDER.value
+    order.customer_phone = "+358505658789"
+    order.customer_email = "test@kuva.hel.ninja"
+    order.save()
+    order.lease.status = LeaseStatus.OFFERED
+    order.lease.save()
+    order.set_status(order_status)  # sets lease status here too
+    orders = [order]
+
+    variables = {
+        "orders": [to_global_id(OrderNode, o.id) for o in orders],
+    }
+
+    executed = api_client.execute(RESEND_ORDER_MUTATION, input=variables)
+    assert len(executed["data"]["resendOrder"]["failedOrders"]) == 1
+    assert (
+        "Cannot resend an invoice for a lease that is not currently offered."
+        in executed["data"]["resendOrder"]["failedOrders"][0]["error"]
+    )
+    assert executed["data"]["resendOrder"]["sentOrders"] == []

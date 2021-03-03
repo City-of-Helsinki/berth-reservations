@@ -42,6 +42,7 @@ from ..providers import get_payment_provider
 from ..utils import (
     approve_order,
     fetch_order_profile,
+    prepare_for_resending,
     resend_order,
     send_cancellation_notice,
     update_order_from_profile,
@@ -657,14 +658,7 @@ class ResendOrderMutation(graphene.ClientIDMutation):
 
             try:
                 with transaction.atomic():
-                    if (
-                        order.status == OrderStatus.ERROR
-                        or order.lease.status == LeaseStatus.ERROR
-                    ):
-                        order.set_status(
-                            OrderStatus.WAITING,
-                            comment=f"{today()}: {_('Cleanup the invoice to attempt resending')}\n",
-                        )
+                    prepare_for_resending(order)
 
                     if order.lease.status != LeaseStatus.OFFERED:
                         raise ValidationError(
