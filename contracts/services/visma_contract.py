@@ -24,6 +24,7 @@ from .base import ContractService
 VISMASIGN_CLIENT_IDENTIFIER = "VISMASIGN_CLIENT_IDENTIFIER"
 VISMASIGN_SECRET = "VISMASIGN_SECRET"
 VISMASIGN_API_URL = "VISMASIGN_API_URL"
+VISMASIGN_TEST_SSN = "VISMASIGN_TEST_SSN"
 
 
 class VismaContractService(ContractService):
@@ -38,6 +39,7 @@ class VismaContractService(ContractService):
         self.api_url = self.config.get(VISMASIGN_API_URL).rstrip("/")
         self.client_identifier = self.config.get(VISMASIGN_CLIENT_IDENTIFIER)
         self.secret = self.config.get(VISMASIGN_SECRET)
+        self.test_ssn = self.config.get(VISMASIGN_TEST_SSN)
 
     def create_berth_contract(self, lease: BerthLease) -> BerthContract:
         document_name = f"berth_contract_{lease.id}"
@@ -102,11 +104,13 @@ class VismaContractService(ContractService):
     def fulfill_contract(
         self, contract: VismaContract, auth_service: str, return_url: str,
     ) -> str:
-        payload = self._json_to_bytes(
-            {"returnUrl": return_url, "authService": auth_service}
-        )
+        payload = {"returnUrl": return_url, "authService": auth_service}
+        if self.test_ssn:
+            payload["identifier"] = self.test_ssn
         r = self._make_request(
-            f"/api/v1/invitation/{contract.invitation_id}/signature", "POST", payload
+            f"/api/v1/invitation/{contract.invitation_id}/signature",
+            "POST",
+            self._json_to_bytes(payload),
         )
         return r.headers["Location"]
 
@@ -122,6 +126,7 @@ class VismaContractService(ContractService):
             VISMASIGN_CLIENT_IDENTIFIER: str,
             VISMASIGN_SECRET: str,
             VISMASIGN_API_URL: str,
+            VISMASIGN_TEST_SSN: str,
         }
 
     def _create_document(self, name: str) -> str:
