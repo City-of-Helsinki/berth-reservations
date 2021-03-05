@@ -39,6 +39,7 @@ from ..models import (
     DEFAULT_TAX_PERCENTAGE,
     Order,
     OrderLine,
+    OrderRefund,
 )
 from ..utils import (
     calculate_product_partial_month_price,
@@ -967,3 +968,25 @@ def test_order_status_dates_no_transitions(order):
     assert order.paid_at is None
     assert order.rejected_at is None
     assert order.cancelled_at is None
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        OrderStatus.WAITING,
+        OrderStatus.REJECTED,
+        OrderStatus.CANCELLED,
+        OrderStatus.EXPIRED,
+        OrderStatus.ERROR,
+        OrderStatus.REFUNDED,
+    ],
+)
+def test_order_refund_cannot_refund_not_paid(order, status):
+    order.status = status
+    order.save()
+
+    with pytest.raises(ValidationError) as exception:
+        OrderRefund.objects.create(order=order, amount=order.price)
+
+    errors = str(exception.value)
+    assert "Cannot refund orders that are not paid" in errors

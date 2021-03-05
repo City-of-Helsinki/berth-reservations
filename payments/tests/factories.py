@@ -11,7 +11,14 @@ from leases.utils import calculate_season_end_date, calculate_season_start_date
 from resources.tests.factories import BerthFactory, WinterStorageAreaFactory
 from utils.numbers import rounded
 
-from ..enums import OfferStatus, OrderStatus, PeriodType, PriceUnits, ProductServiceType
+from ..enums import (
+    OfferStatus,
+    OrderRefundStatus,
+    OrderStatus,
+    PeriodType,
+    PriceUnits,
+    ProductServiceType,
+)
 from ..models import (
     AbstractBaseProduct,
     AbstractPlaceProduct,
@@ -23,6 +30,7 @@ from ..models import (
     Order,
     OrderLine,
     OrderLogEntry,
+    OrderRefund,
     PLACE_PRODUCT_TAX_PERCENTAGES,
     WinterStorageProduct,
 )
@@ -199,3 +207,13 @@ class BerthSwitchOfferFactory(AbstractOfferFactory):
 
     class Meta:
         model = BerthSwitchOffer
+
+
+class OrderRefundFactory(factory.django.DjangoModelFactory):
+    order = factory.SubFactory(OrderFactory, status=OrderStatus.PAID)
+    refund_id = factory.Sequence(lambda n: str(n))
+    status = factory.LazyAttribute(lambda _: OrderRefundStatus.PENDING)
+    amount = factory.SelfAttribute(".order.price")
+
+    class Meta:
+        model = OrderRefund

@@ -85,6 +85,12 @@ class OfferStatus(TextChoices):
     CANCELLED = "cancelled", _("Cancelled")
 
 
+class OrderRefundStatus(TextChoices):
+    PENDING = "pending", _("Pending")
+    ACCEPTED = "accepted", _("Accepted")
+    REJECTED = "rejected", _("Rejected")
+
+
 class OrderType(TextChoices):
     LEASE_ORDER = "lease_order", _("Lease order")
     ADDITIONAL_PRODUCT_ORDER = "additional_product_order", _("Additional product order")

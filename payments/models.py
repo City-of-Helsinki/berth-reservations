@@ -30,6 +30,7 @@ from .enums import (
     AdditionalProductType,
     LeaseOrderType,
     OfferStatus,
+    OrderRefundStatus,
     OrderStatus,
     OrderType,
     PeriodType,
@@ -964,6 +965,93 @@ class OrderToken(UUIDModel, TimeStampedModel):
     @property
     def is_valid(self):
         return not self.cancelled and now() < self.valid_until
+
+
+class OrderRefund(UUIDModel, TimeStampedModel):
+    order = models.ForeignKey(
+        Order,
+        verbose_name=_("order"),
+        related_name="refunds",
+        on_delete=models.CASCADE,
+    )
+    refund_id = models.CharField(verbose_name=_("refund id"), max_length=16, blank=True)
+    status = models.CharField(
+        choices=OrderRefundStatus.choices,
+        default=OrderRefundStatus.PENDING,
+        max_length=8,
+    )
+    amount = models.DecimalField(
+        verbose_name=_("amount"),
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        if self.order.status not in OrderStatus.get_paid_statuses():
+            raise ValidationError(_("Cannot refund orders that are not paid"))
+
+    def set_status(self, new_status: OrderRefundStatus, comment: str = None) -> None:
+        old_status = self.status
+        if new_status == old_status:
+            return
+
+        valid_status_changes = {
+            OrderRefundStatus.PENDING: (
+                OrderRefundStatus.ACCEPTED,
+                OrderRefundStatus.REJECTED,
+            ),
+        }
+        valid_new_status = valid_status_changes.get(old_status, ())
+
+        if new_status not in valid_new_status:
+            raise OrderStatusTransitionError(
+                'Cannot set refund {} state to "{}", it is in an invalid state "{}".'.format(
+                    self.refund_id, new_status, old_status
+                )
+            )
+
+        self.status = new_status
+        self.save(update_fields=["status"])
+
+        self.create_log_entry(
+            from_status=old_status, to_status=new_status, comment=comment
+        )
+
+    def create_log_entry(
+        self,
+        from_status: OrderRefundStatus = None,
+        to_status: OrderRefundStatus = None,
+        comment: str = "",
+    ) -> None:
+        OrderRefundLogEntry.objects.create(
+            refund=self,
+            from_status=from_status,
+            to_status=to_status or self.status,
+            comment=comment,
+        )
+
+
+class OrderRefundLogEntry(UUIDModel, TimeStampedModel):
+    refund = models.ForeignKey(
+        OrderRefund,
+        verbose_name=_("order refund"),
+        related_name="log_entries",
+        on_delete=models.CASCADE,
+    )
+    from_status = models.CharField(choices=OrderRefundStatus.choices, max_length=8)
+    to_status = models.CharField(choices=OrderRefundStatus.choices, max_length=8)
+    comment = models.TextField(blank=True, null=True)
+
+    class Meta:
+        verbose_name_plural = _("refund log entries")
+
+    def __str__(self):
+        return f"Refund {self.refund.id} | {self.from_status or 'N/A'} --> {self.to_status}"
 
 
 class AbstractOffer(UUIDModel, TimeStampedModel):

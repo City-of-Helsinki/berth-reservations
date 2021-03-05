@@ -299,7 +299,7 @@ def get_lease_status(new_status) -> LeaseStatus:
         return LeaseStatus.OFFERED
     elif new_status == OrderStatus.ERROR:
         return LeaseStatus.ERROR
-    elif new_status == OrderStatus.CANCELLED:
+    elif new_status in (OrderStatus.CANCELLED, OrderStatus.REFUNDED):
         return None
     else:
         raise ValidationError(_("Invalid order status"))
