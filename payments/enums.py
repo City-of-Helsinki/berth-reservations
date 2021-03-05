@@ -70,6 +70,7 @@ class OrderStatus(TextChoices):
     ERROR = "error", _("Error")
     PAID = "paid", _("Paid")
     PAID_MANUALLY = "paid_man", _("Paid manually")  # max 9 chars
+    REFUNDED = "refunded", _("Refunded")
 
     @classmethod
     def get_paid_statuses(cls):

@@ -728,8 +728,8 @@ class Order(UUIDModel, TimeStampedModel):
                 OrderStatus.ERROR,
                 OrderStatus.CANCELLED,
             ),
-            OrderStatus.PAID: (),
-            OrderStatus.PAID_MANUALLY: (),
+            OrderStatus.PAID: (OrderStatus.REFUNDED,),
+            OrderStatus.PAID_MANUALLY: (OrderStatus.REFUNDED,),
             OrderStatus.ERROR: (
                 OrderStatus.WAITING,
                 OrderStatus.PAID_MANUALLY,
