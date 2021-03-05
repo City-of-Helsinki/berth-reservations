@@ -1,3 +1,3 @@
-from .invoice import BerthInvoicingService
+from .invoice import BerthInvoicingService, WinterStorageInvoicingService
 
-__all__ = ["BerthInvoicingService"]
+__all__ = ["BerthInvoicingService", "WinterStorageInvoicingService"]

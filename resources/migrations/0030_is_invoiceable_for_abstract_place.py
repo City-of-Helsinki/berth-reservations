@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("resources", "0027_map_harbors_with_resources"),
+        ("resources", "0029_remove_pier_harbors_harbor"),
     ]
 
     operations = [

@@ -312,6 +312,7 @@ class BaseInvoicingService:
         orders = self.get_failed_orders(self.season_start)
 
         for order in orders:
+            order.due_date = self.due_date
             order.set_status(
                 OrderStatus.OFFERED,
                 comment=f"{get_ts()}: {_('Cleanup the invoice to attempt resending')}\n",

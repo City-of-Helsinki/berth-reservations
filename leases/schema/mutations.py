@@ -29,7 +29,7 @@ from utils.schema import update_object
 
 from ..enums import LeaseStatus
 from ..models import BerthLease, WinterStorageLease
-from ..services import BerthInvoicingService
+from ..services import BerthInvoicingService, WinterStorageInvoicingService
 from ..stickers import get_next_sticker_number
 from ..utils import calculate_berth_lease_start_date, terminate_lease
 from .types import BerthLeaseNode, WinterStorageLeaseNode
@@ -577,6 +577,29 @@ class SendExistingBerthInvoicesMutation(graphene.ClientIDMutation):
         return SendExistingBerthInvoicesMutation(ok=True)
 
 
+class SendExistingWinterStorageInvoicesMutation(graphene.ClientIDMutation):
+    class Input(SendExistingInvoicesInput):
+        profile_token = graphene.String(
+            required=True, description="API token for Helsinki profile GraphQL API",
+        )
+
+    ok = graphene.Boolean(required=True)
+
+    @classmethod
+    @view_permission_required(CustomerProfile)
+    @change_permission_required(BerthLease, WinterStorageLease, Order)
+    def mutate_and_get_payload(cls, root, info, profile_token, **input):
+        service = WinterStorageInvoicingService(
+            request=info.context,
+            profile_token=profile_token,
+            due_date=input.get("due_date"),
+        )
+        t1 = threading.Thread(target=service.send_invoices, args=[])
+        t1.start()
+
+        return SendExistingWinterStorageInvoicesMutation(ok=True)
+
+
 class Mutation:
     create_berth_lease = CreateBerthLeaseMutation.Field(
         description="Creates a `BerthLease` associated with the `BerthApplication` and `Berth` passed. "
@@ -673,3 +696,6 @@ class Mutation:
     )
 
     send_existing_berth_invoices = SendExistingBerthInvoicesMutation.Field()
+    send_existing_winter_storage_invoices = (
+        SendExistingWinterStorageInvoicesMutation.Field()
+    )
