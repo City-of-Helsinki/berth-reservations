@@ -137,6 +137,7 @@ class BerthLeaseManager(models.Manager):
         leases: QuerySet = qs.exclude(Exists(future_leases.values("pk"))).filter(
             # Only allow leases that are auto-renewing and have been paid
             berth__is_active=True,
+            berth__is_invoiceable=True,
             renew_automatically=True,
             status=LeaseStatus.PAID,
             start_date__year=lease_year,

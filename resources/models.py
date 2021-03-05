@@ -693,6 +693,7 @@ class Berth(AbstractBoatPlace):
     is_accessible = models.BooleanField(
         verbose_name=_("is accessible"), blank=True, null=True,
     )
+    is_invoiceable = models.BooleanField(verbose_name=_("is invoiceable"), default=True)
 
     objects = BerthManager()
 

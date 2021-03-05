@@ -119,6 +119,7 @@ class BerthNode(DjangoObjectType):
             "is_active",
             "created_at",
             "modified_at",
+            "is_invoiceable",
         )
         interfaces = (relay.Node,)
         connection_class = CountConnection
