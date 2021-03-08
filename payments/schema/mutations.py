@@ -31,6 +31,7 @@ from utils.relay import get_node_from_global_id
 from utils.schema import update_object
 
 from ..enums import OrderStatus, OrderType, ProductServiceType
+from ..exceptions import VenepaikkaPaymentError
 from ..models import (
     AdditionalProduct,
     BerthProduct,
@@ -45,6 +46,7 @@ from ..utils import (
     prepare_for_resending,
     resend_order,
     send_cancellation_notice,
+    send_refund_notice,
     update_order_from_profile,
 )
 from .types import (
@@ -54,6 +56,7 @@ from .types import (
     FailedOrderType,
     OrderLineNode,
     OrderNode,
+    OrderRefundNode,
     OrderStatusEnum,
     PeriodTypeEnum,
     PriceUnitsEnum,
@@ -698,6 +701,46 @@ class ResendOrderMutation(graphene.ClientIDMutation):
         return ResendOrderMutation(sent_orders=sent_orders, failed_orders=failed_orders)
 
 
+class RefundOrderMutation(graphene.ClientIDMutation):
+    class Input:
+        order_id = graphene.ID(required=True)
+        profile_token = graphene.String(
+            required=False, description="API token for Helsinki profile GraphQL API",
+        )
+
+    order_refund = graphene.Field(OrderRefundNode, required=True)
+
+    @classmethod
+    @change_permission_required(
+        Order, BerthLease, WinterStorageLease,
+    )
+    def mutate_and_get_payload(cls, root, info, order_id, **input):
+        profile_token = input.get("profile_token", None)
+        try:
+            order = get_node_from_global_id(info, order_id, OrderNode, nullable=False)
+            refund = get_payment_provider(info.context).initiate_refund(order)
+
+            if profile_token:
+                # order.customer_email and order.customer_phone could be stale, if contact
+                # info in profile service has been changed.
+                profile = fetch_order_profile(order, profile_token)
+                update_order_from_profile(order, profile)
+
+            send_refund_notice(order)
+        except (
+            AnymailError,
+            OSError,
+            Order.DoesNotExist,
+            ValidationError,
+            VenepaikkaGraphQLError,
+            VenepaikkaPaymentError,
+        ) as e:
+            # If there's an error with either the validated data or the VismaPay service
+            raise VenepaikkaGraphQLError(str(e)) from e
+
+        return RefundOrderMutation(order_refund=refund)
+
+
 class Mutation:
     create_berth_product = CreateBerthProductMutation.Field(
         description="Creates a `BerthProduct` object."
@@ -821,6 +864,13 @@ class Mutation:
         "\n\n**Requires permissions** to update orders."
         "\n\nErrors:"
         "\n* The passed order must have a lease in status OFFERED"
+    )
+    refund_order = RefundOrderMutation.Field(
+        description="Refunds the specified order."
+        "\n\nStarts the refund process through VismaPay. It returns the `RefundOrder` object."
+        "\n\n**Requires permissions** to update orders."
+        "\n\nErrors:"
+        "\n* The passed order must be in `PAID` status"
     )
 
 

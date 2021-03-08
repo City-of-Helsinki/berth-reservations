@@ -247,7 +247,7 @@ def mocked_response_create(*args, **kwargs):
 
 
 def mocked_refund_response_create(*args, **kwargs):
-    if args[0].startswith(FAKE_BAMBORA_API_URL):
+    if any([arg.startswith(FAKE_BAMBORA_API_URL) for arg in args]):
         return MockResponse(data={"result": 10})
     else:
 
