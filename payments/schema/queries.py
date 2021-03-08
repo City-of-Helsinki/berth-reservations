@@ -1,12 +1,19 @@
-from graphene import Decimal, Field, List, Node, String
+from graphene import Decimal, Field, ID, List, Node, String
 from graphene_django import DjangoConnectionField
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from leases.models import BerthLease, WinterStorageLease
 from users.decorators import view_permission_required
+from utils.relay import from_global_id
 
 from ..enums import AdditionalProductType, OrderType, ProductServiceType
-from ..models import AdditionalProduct, BerthProduct, Order, WinterStorageProduct
+from ..models import (
+    AdditionalProduct,
+    BerthProduct,
+    Order,
+    OrderRefund,
+    WinterStorageProduct,
+)
 from .types import (
     AdditionalProductNode,
     AdditionalProductServiceNode,
@@ -14,6 +21,7 @@ from .types import (
     BerthProductNode,
     OrderDetailsType,
     OrderNode,
+    OrderRefundNode,
     OrderStatusEnum,
     OrderTypeEnum,
     WinterStorageProductNode,
@@ -64,6 +72,12 @@ class Query:
         order_type=OrderTypeEnum(),
         description="**Requires permissions** to access payments.",
     )
+    order_refunds = DjangoConnectionField(
+        OrderRefundNode,
+        order_id=ID(required=True),
+        description="Returns the Order Refund objects associated to the order."
+        "\n\n**Requires permissions** to access payments.",
+    )
 
     @view_permission_required(BerthProduct)
     def resolve_berth_product_for_width(self, info, width, **kwargs):
@@ -110,6 +124,9 @@ class Query:
         if statuses:
             qs = qs.filter(status__in=statuses)
         return qs
+
+    def resolve_order_refunds(self, info, order_id, **kwargs):
+        return OrderRefund.objects.filter(order_id=from_global_id(order_id, OrderNode))
 
 
 class OldAPIQuery:
