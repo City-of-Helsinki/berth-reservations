@@ -141,6 +141,27 @@ def _get_cancelled_order_context(subject: str = "Order cancelled"):
     }
 
 
+def _get_refunded_order_context(subject: str = "Order refunded"):
+    customer = CustomerProfileFactory.build()
+    return {
+        "subject": get_email_subject(NotificationType.ORDER_REFUNDED),
+        "order": {
+            **factory.build(
+                dict,
+                FACTORY_CLASS=OrderFactory,
+                customer=customer,
+                status=OrderStatus.REFUNDED,
+                product=BerthProductFactory.build(),
+                lease=BerthLeaseFactory.build(customer=customer),
+                price=Decimal("100"),
+                tax_percentage=Decimal("24.00"),
+                order_number="1234567abc",
+            ),
+        },
+        "refund": {"amount": Decimal("100")},
+    }
+
+
 def load_dummy_context():
     dummy_context.update(
         {
@@ -166,6 +187,9 @@ def load_dummy_context():
             ),
             NotificationType.ORDER_CANCELLED: _get_cancelled_order_context(
                 get_email_subject(NotificationType.ORDER_CANCELLED)
+            ),
+            NotificationType.ORDER_REFUNDED: _get_refunded_order_context(
+                get_email_subject(NotificationType.ORDER_REFUNDED)
             ),
             NotificationType.SMS_INVOICE_NOTICE: {
                 "product_name": "Berth",

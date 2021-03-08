@@ -64,6 +64,10 @@ def load_email_templates():
             "html": "order_cancelled_{lang}.html",
             "plain": None,
         },
+        PaymentNotificationType.ORDER_REFUNDED: {
+            "html": "order_refunded_confirmation_{lang}.html",
+            "plain": None,
+        },
         LeaseNotificationType.AUTOMATIC_INVOICING_EMAIL_ADMINS: {
             "html": "automatic_invoicing_email_admins_{lang}.html",
             "plain": "automatic_invoicing_email_admins_{lang}.txt",

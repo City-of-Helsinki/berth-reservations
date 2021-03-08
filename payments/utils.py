@@ -470,6 +470,8 @@ def get_email_subject(notification_type):
         return _("Boat berth invoice")
     if notification_type == NotificationType.ORDER_CANCELLED:
         return _("Confirmation")
+    if notification_type == NotificationType.ORDER_REFUNDED:
+        return _("Refund confirmation")
     return notification_type.label
 
 

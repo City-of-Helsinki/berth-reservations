@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-22 13:36+0200\n"
+"POT-Creation-Date: 2021-03-09 14:10+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1009,6 +1009,9 @@ msgstr ""
 
 msgid "Boat berth invoice"
 msgstr "Båtplatsfaktura"
+
+msgid "Refund confirmation"
+msgstr "Återbetalningsmeddelande"
 
 msgid "Maximum allowed width"
 msgstr "Maximala tillåtna bredd"
