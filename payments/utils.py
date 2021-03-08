@@ -1,3 +1,11 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .models import Order
+    from .notifications import NotificationType
+
 import base64
 import calendar
 import random
@@ -378,6 +386,31 @@ def send_cancellation_notice(order):
     send_notification(email, notification_type.value, context, language)
 
 
+def send_refund_notice(order):
+    from .notifications import NotificationType
+
+    language = (
+        order.lease.application.language
+        if order.lease and order.lease.application
+        else settings.LANGUAGE_CODE
+    )
+    notification_type = NotificationType.ORDER_REFUNDED
+
+    context = get_context(
+        order, notification_type, has_services=False, payment_url=None, cancel_url=None
+    )
+
+    email = order.customer_email
+
+    if not email:
+        if order.lease and order.lease.application:
+            email = order.lease.application.email
+        else:
+            raise VenepaikkaGraphQLError(_("No email was found"))
+
+    send_notification(email, notification_type.value, context, language)
+
+
 def prepare_for_resending(order):
     if order.status == OrderStatus.ERROR or order.lease.status == LeaseStatus.ERROR:
         order.set_status(
@@ -404,7 +437,14 @@ def resend_order(order, due_date: date, request: HttpRequest) -> None:
     send_payment_notification(order, request)
 
 
-def send_payment_notification(order, request, email=None, phone_number=None):
+def send_payment_notification(
+    order: Order,
+    request: HttpRequest,
+    email: str = None,
+    phone_number: str = None,
+    has_services: bool = True,
+    has_payment_urls: bool = True,
+):
     from payments.providers import get_payment_provider
 
     from .notifications import NotificationType
@@ -416,19 +456,29 @@ def send_payment_notification(order, request, email=None, phone_number=None):
         raise ValidationError(_("Missing customer email"))
 
     language = get_notification_language(order)
-    payment_url = get_payment_provider(
-        request, ui_return_url=settings.VENE_UI_RETURN_URL
-    ).get_payment_email_url(order, lang=language)
 
-    cancel_url = get_payment_provider(
-        request, ui_return_url=settings.VENE_UI_RETURN_URL
-    ).get_cancellation_email_url(order, lang=language)
+    payment_url = None
+    cancel_url = None
+
+    if has_payment_urls:
+        payment_url = get_payment_provider(
+            request, ui_return_url=settings.VENE_UI_RETURN_URL
+        ).get_payment_email_url(order, lang=language)
+
+        cancel_url = get_payment_provider(
+            request, ui_return_url=settings.VENE_UI_RETURN_URL
+        ).get_cancellation_email_url(order, lang=language)
 
     notification_type = get_order_notification_type(order)
-    context = get_context(order, payment_url, cancel_url, notification_type)
+    context = get_context(
+        order, notification_type, has_services, payment_url, cancel_url
+    )
     send_notification(order_email, notification_type.value, context, language)
 
-    if order_phone and notification_type != NotificationType.ORDER_CANCELLED:
+    if order_phone and notification_type not in (
+        NotificationType.ORDER_CANCELLED,
+        NotificationType.ORDER_REFUNDED,
+    ):
         if hasattr(order, "product") and order.product:
             product_name = order.product.name
         else:
@@ -475,20 +525,35 @@ def get_email_subject(notification_type):
     return notification_type.label
 
 
-def get_context(order, payment_url, cancel_url, notification_type):
+def get_context(
+    order: Order,
+    notification_type: NotificationType,
+    has_services: bool = True,
+    payment_url: str = None,
+    cancel_url: str = None,
+):
     if order.order_type == OrderType.LEASE_ORDER:
-        return {
+        context = {
             "subject": get_email_subject(notification_type),
             "order": order,
-            "fixed_services": order.order_lines.filter(
-                product__service__in=ProductServiceType.FIXED_SERVICES()
-            ),
-            "optional_services": order.order_lines.filter(
-                product__service__in=ProductServiceType.OPTIONAL_SERVICES()
-            ),
-            "payment_url": payment_url,
-            "cancel_url": cancel_url,
         }
+
+        if has_services:
+            context["fixed_services"] = order.order_lines.filter(
+                product__service__in=ProductServiceType.FIXED_SERVICES()
+            )
+            context["optional_services"] = (
+                order.order_lines.filter(
+                    product__service__in=ProductServiceType.OPTIONAL_SERVICES()
+                ),
+            )
+
+        if payment_url:
+            context["payment_url"] = payment_url
+        if cancel_url:
+            context["cancel_url"] = cancel_url
+
+        return context
     else:
         # We currently support only STORAGE_ON_ICE additional product orders,
         # so this is very specific implementation for now
