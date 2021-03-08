@@ -2,16 +2,18 @@ import hashlib
 import hmac
 import logging
 from datetime import datetime
+from typing import Iterable
 
 import requests
 from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse, HttpResponseServerError
 from django.utils.translation import gettext_lazy as _, override
 from requests.exceptions import RequestException
 
-from ..enums import OrderStatus, OrderType
+from ..enums import OrderRefundStatus, OrderStatus, OrderType
 from ..exceptions import (
     DuplicateOrderError,
     ExpiredOrderError,
@@ -20,7 +22,14 @@ from ..exceptions import (
     ServiceUnavailableError,
     UnknownReturnCodeError,
 )
-from ..models import AdditionalProduct, BerthProduct, Order, OrderLine, OrderToken
+from ..models import (
+    AdditionalProduct,
+    BerthProduct,
+    Order,
+    OrderLine,
+    OrderRefund,
+    OrderToken,
+)
 from ..utils import get_talpa_product_id, price_as_fractional_int
 from .base import PaymentProvider
 
@@ -44,6 +53,7 @@ class BamboraPayformProvider(PaymentProvider):
         self.url_payment_api = self.config.get(VENE_PAYMENTS_BAMBORA_API_URL)
         self.url_payment_auth = "{}/auth_payment".format(self.url_payment_api)
         self.url_payment_token = "{}/token/{{token}}".format(self.url_payment_api)
+        self.url_refund = "{}/create_refund".format(self.url_payment_api)
 
     @staticmethod
     def get_config_template() -> dict:
@@ -254,6 +264,102 @@ class BamboraPayformProvider(PaymentProvider):
         data = "{}|{}".format(payload["api_key"], payload["order_number"])
         payload.update(authcode=self.calculate_auth_code(data))
 
+    def initiate_refund(self, order: Order) -> OrderRefund:
+        # Orders which are PAID_MANUALLY may not have an entry in Bambora,
+        # so we can't guarantee that the refund will be executed
+        if order.status != OrderStatus.PAID:
+            raise ValidationError(
+                _("Cannot refund an order that has not been paid through VismaPay")
+            )
+
+        order_token = (
+            order.tokens.exclude(token__isnull=True, token__iexact="")
+            .order_by("-created_at")
+            .first()
+        )
+
+        if not order_token:
+            raise ValidationError(
+                _("Cannot refund an order that has not been paid through VismaPay")
+            )
+
+        payload = {
+            "version": "w3.1",
+            "api_key": self.config.get(VENE_PAYMENTS_BAMBORA_API_KEY),
+            "amount": price_as_fractional_int(order.price),
+            "notify_url": self.get_notify_refund_url(),
+            "order_number": f"{order.order_number}-{order_token.created_at.timestamp()}",
+        }
+        self.payload_add_auth_code(payload)
+
+        try:
+            r = requests.post(self.url_refund, json=payload, timeout=60)
+            r.raise_for_status()
+            response = r.json()
+            result = response["result"]
+
+            if result == 1:
+                raise PayloadValidationError(
+                    f"{_('Payment payload data validation failed: ')} {' '.join(response['errors'])}"
+                )
+            elif result == 10:
+                raise ServiceUnavailableError(
+                    _("Payment service is down for maintenance")
+                )
+
+            return OrderRefund.objects.create(
+                order=order, amount=order.price, refund_id=str(response["refund_id"])
+            )
+        except RequestException as e:
+            raise ServiceUnavailableError(_("Payment service is unreachable")) from e
+
+    def handle_notify_refund_request(self) -> HttpResponse:
+        request = self.request
+        logger.debug(
+            "Handling Bambora notify refund request, params: {}.".format(request.GET)
+        )
+
+        refund_id = request.GET.get("REFUND_ID")
+
+        try:
+            refund = OrderRefund.objects.get(refund_id=refund_id)
+            order = refund.order
+        except OrderRefund.DoesNotExist:
+            # Target order might be deleted after posting but before the notify arrives
+            logger.warning("Notify: OrderRefund does not exist.")
+            return HttpResponse(status=204)
+
+        order.invalidate_tokens()
+
+        if not self.check_new_refund_authcode(request):
+            return HttpResponse(status=204)
+
+        return_code = request.GET.get("RETURN_CODE")
+        if return_code == "0":
+            logger.debug("Notify: Refund completed successfully.")
+            try:
+                refund.set_status(
+                    OrderRefundStatus.ACCEPTED,
+                    "Code 0 (refund succeeded) in Bambora Payform notify refund request.",
+                )
+                order.set_status(
+                    OrderStatus.REFUNDED,
+                    "Code 0 (refund succeeded) in Bambora Payform notify refund request.",
+                )
+            except OrderStatusTransitionError as oste:
+                logger.warning(oste)
+        elif return_code == "1":
+            # Don't cancel the order
+            refund.set_status(
+                OrderRefundStatus.REJECTED,
+                "Code 1 (refund rejected) in Bambora Payform notify refund request.",
+            )
+            logger.debug("Notify: Refund failed.")
+        else:
+            logger.debug('Notify: Incorrect RETURN_CODE "{}".'.format(return_code))
+
+        return HttpResponse(status=204)
+
     def calculate_auth_code(self, data) -> str:
         """Calculate a hmac sha256 out of some data string"""
         return (
@@ -266,18 +372,12 @@ class BamboraPayformProvider(PaymentProvider):
             .upper()
         )
 
-    def check_new_payment_authcode(self, request: HttpRequest):
+    def check_authcode_params(self, request: HttpRequest, params: Iterable[str]):
         """Validate that success/notify payload authcode matches"""
         is_valid = True
         auth_code_calculation_values = [
             request.GET[param_name]
-            for param_name in (
-                "RETURN_CODE",
-                "ORDER_NUMBER",
-                "SETTLED",
-                "CONTACT_ID",
-                "INCIDENT_ID",
-            )
+            for param_name in params
             if param_name in request.GET
         ]
         correct_auth_code = self.calculate_auth_code(
@@ -288,6 +388,17 @@ class BamboraPayformProvider(PaymentProvider):
             logger.warning('Incorrect auth code "{}".'.format(auth_code))
             is_valid = False
         return is_valid
+
+    def check_new_payment_authcode(self, request: HttpRequest):
+        """Validate that success/notify payload authcode matches"""
+        return self.check_authcode_params(
+            request,
+            ("RETURN_CODE", "ORDER_NUMBER", "SETTLED", "CONTACT_ID", "INCIDENT_ID",),
+        )
+
+    def check_new_refund_authcode(self, request: HttpRequest):
+        """Validate that refund notify payload authcode matches"""
+        return self.check_authcode_params(request, ("RETURN_CODE", "REFUND_ID",))
 
     def handle_success_request(self) -> HttpResponse:  # noqa: C901
         """Handle the payform response after user has completed the payment flow in normal fashion"""

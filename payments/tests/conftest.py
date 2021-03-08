@@ -244,3 +244,11 @@ def mocked_response_create(*args, **kwargs):
         return MockResponse(
             data={"result": 0, "token": "token123", "type": "e-payment"}
         )
+
+
+def mocked_refund_response_create(*args, **kwargs):
+    if args[0].startswith(FAKE_BAMBORA_API_URL):
+        return MockResponse(data={"result": 10})
+    else:
+
+        return MockResponse(data={"result": 0, "refund_id": 123456, "type": "instant"})

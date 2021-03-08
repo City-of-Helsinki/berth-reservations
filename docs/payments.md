@@ -23,3 +23,6 @@ In addition to the general configuration keys mentioned in the previous section,
 
 ## Payment flow
 ![sequence diagram](./payment_flow.png)
+
+## Refund flow
+![sequence diagram](./refund_flow.png)

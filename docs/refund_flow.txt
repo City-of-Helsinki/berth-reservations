@@ -1,0 +1,23 @@
+# Generated with https://sequencediagram.org/
+
+title Venepaikka refund flow
+
+note over Admin: Confirm the refund
+Admin->Back-end: refundOrderMuation
+
+
+note over Back-end,Bambora API: Start the refund process
+Back-end->Bambora API:Create refund\n/create_refund
+
+note over Bambora API: Handle refund
+
+Bambora API-->>Back-end: create the status (refund_id)
+
+# Notify
+note over Bambora API,Back-end: The notify is called after a refund has been marked to final state.\nThe request is done by Visma Pay server so customer browser session doesn't exist.\nThe request is done couple of minutes after the refund has been processed.
+
+note over User: In some cases, a confirmation email is sent\nto the customer and customer must accept it
+
+Bambora API-->>Back-end:Final status for the refund [Accepted/Rejected]\n/notify_refund
+
+Back-end->User: Send refund notification email
