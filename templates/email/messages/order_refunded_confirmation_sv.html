@@ -1,0 +1,25 @@
+<p>
+    Bästa kund, vi har återbetalat {{ refund.amount }} av din betalning.<br/>
+    Ordernummer: {{ order.order_number }}
+</p>
+
+<h3>Område</h3>
+
+<p>
+    {{ order.lease.berth.pier.harbor.name }}<br/>
+    {{ order.lease.berth.pier.harbor.street_address }}<br/>
+    <br/>
+    Plats: {{ order.lease.berth.pier.identifier }} {{ order.lease.berth.number }}
+</p>
+
+<p>Frågor och mer information: <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a></p>
+
+<table style="width: 100%; margin: 48px 0;">
+    <tr>
+        <td style="text-align: center;">
+            <a style="font-size: 16px; color: #0072C6;" href="https://venepaikat.hel.fi">
+                Helsingfors stads båtservice &rarr;
+            </a>
+        </td>
+    </tr>
+</table>
