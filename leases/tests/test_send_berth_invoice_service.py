@@ -22,7 +22,7 @@ from ..enums import LeaseStatus
 from ..models import BerthLease
 from ..services import BerthInvoicingService
 from ..utils import calculate_season_end_date, calculate_season_start_date
-from .factories import BerthLeaseFactory
+from .factories import BerthFactory, BerthLeaseFactory
 
 faker = Faker()
 
@@ -654,3 +654,58 @@ def test_send_berth_invoices_invalid_limit_reached(
                 True
             )  # called with exited_with_errors=True
             assert invoicing_service.failure_count == 1
+
+
+@freeze_time("2020-01-01T08:00:00Z")
+def test_non_invoiceable_berth(notification_template_orders_approved):
+    berth = BerthFactory(is_invoiceable=False)
+
+    lease_with_non_invoiceable_berth = _lease_with_contract(
+        berth=berth,
+        renew_automatically=True,
+        boat=None,
+        status=LeaseStatus.PAID,
+        start_date=calculate_season_start_date(today() - relativedelta(years=1)),
+        end_date=calculate_season_end_date(today() - relativedelta(years=1)),
+    )
+    BerthProductFactory(
+        min_width=lease_with_non_invoiceable_berth.berth.berth_type.width - 1,
+        max_width=lease_with_non_invoiceable_berth.berth.berth_type.width + 1,
+    )
+    customer = lease_with_non_invoiceable_berth.customer
+
+    lease_with_invoiceable_berth = _lease_with_contract(
+        customer=customer,
+        renew_automatically=True,
+        boat=None,
+        status=LeaseStatus.PAID,
+        start_date=calculate_season_start_date(today() - relativedelta(years=1)),
+        end_date=calculate_season_end_date(today() - relativedelta(years=1)),
+    )
+    prod = BerthProductFactory(
+        min_width=lease_with_invoiceable_berth.berth.berth_type.width - 1,
+        max_width=lease_with_invoiceable_berth.berth.berth_type.width + 1,
+    )
+
+    user = UserFactory()
+
+    data = {
+        "id": to_global_id(ProfileNode, customer.id),
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "primary_email": {"email": user.email},
+        "primary_phone": {"phone": faker.phone_number()},
+    }
+
+    assert Order.objects.count() == 0
+
+    invoicing_service = _send_invoices(data)
+
+    assert len(invoicing_service.successful_orders) == 1
+    assert len(invoicing_service.failed_orders) == 0
+    assert len(invoicing_service.failed_leases) == 0
+    assert Order.objects.count() == 1
+
+    order = Order.objects.first()
+    assert order.id == invoicing_service.successful_orders[0]
+    assert order.product == prod

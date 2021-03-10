@@ -84,6 +84,7 @@ class BerthInput(AbstractBoatPlaceInput):
     pier_id = graphene.ID()
     comment = graphene.String()
     is_accessible = graphene.Boolean()
+    is_invoiceable = graphene.Boolean()
     width = graphene.Float(description=_("width (m)"))
     length = graphene.Float(description=_("length (m)"))
     depth = graphene.Float(description=_("depth (m)"))
