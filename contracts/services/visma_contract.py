@@ -126,7 +126,7 @@ class VismaContractService(ContractService):
             VISMASIGN_CLIENT_IDENTIFIER: str,
             VISMASIGN_SECRET: str,
             VISMASIGN_API_URL: str,
-            VISMASIGN_TEST_SSN: str,
+            VISMASIGN_TEST_SSN: (str, None),
         }
 
     def _create_document(self, name: str) -> str:
