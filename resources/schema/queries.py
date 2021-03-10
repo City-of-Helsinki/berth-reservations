@@ -46,6 +46,7 @@ class Query:
         min_width=graphene.Float(),
         min_length=graphene.Float(),
         is_available=graphene.Boolean(),
+        is_invoiceable=graphene.Boolean(),
         description="If filtering by both pier and harbor and the pier does not belong to the given harbor, "
         "will return an empty list of edges."
         "\n\n**Requires permissions** to query `leases` field. "
@@ -120,6 +121,8 @@ class Query:
             filters &= Q(berth_type__length__gte=min_length)
         if "is_available" in kwargs:
             filters &= Q(is_available=kwargs.get("is_available"))
+        if "is_invoiceable" in kwargs:
+            filters &= Q(is_invoiceable=kwargs.get("is_invoiceable"))
 
         return info.context.berth_loader.load_many(
             keys=Berth.objects.filter(filters).values_list("id", flat=True)
