@@ -1,19 +1,24 @@
 import random
 
 import factory
+from dateutil.relativedelta import relativedelta
+from dateutil.utils import today
 
+from applications.tests.factories import BerthApplicationFactory, BerthSwitchFactory
 from berth_reservations.tests.factories import CustomerProfileFactory
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
-from resources.tests.factories import WinterStorageAreaFactory
+from leases.utils import calculate_season_end_date, calculate_season_start_date
+from resources.tests.factories import BerthFactory, WinterStorageAreaFactory
 from utils.numbers import rounded
 
-from ..enums import OrderStatus, PeriodType, PriceUnits, ProductServiceType
+from ..enums import OfferStatus, OrderStatus, PeriodType, PriceUnits, ProductServiceType
 from ..models import (
     AbstractBaseProduct,
     AbstractPlaceProduct,
     ADDITIONAL_PRODUCT_TAX_PERCENTAGES,
     AdditionalProduct,
     BerthProduct,
+    BerthSwitchOffer,
     DEFAULT_TAX_PERCENTAGE,
     Order,
     OrderLine,
@@ -167,3 +172,30 @@ class OrderLogEntryFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = OrderLogEntry
+
+
+class AbstractOfferFactory(factory.django.DjangoModelFactory):
+    customer = factory.SubFactory(CustomerProfileFactory, user=None)
+    status = factory.LazyFunction(lambda: OfferStatus.PENDING)
+    customer_first_name = factory.Faker("first_name", locale="fi_FI")
+    customer_last_name = factory.Faker("last_name", locale="fi_FI")
+    customer_email = factory.LazyAttribute(
+        lambda x: f"{x.customer_first_name.lower()}.{x.customer_last_name.lower()}@email.com"
+    )
+    customer_phone = factory.Faker("phone_number", locale="fi_FI")
+
+
+class BerthSwitchOfferFactory(AbstractOfferFactory):
+    lease = factory.SubFactory(
+        BerthLeaseFactory,
+        customer=factory.SelfAttribute("..customer"),
+        start_date=calculate_season_start_date(today()) - relativedelta(years=1),
+        end_date=calculate_season_end_date(today()) - relativedelta(years=1),
+    )
+    berth = factory.SubFactory(BerthFactory)
+    application = factory.SubFactory(
+        BerthApplicationFactory, berth_switch=factory.SubFactory(BerthSwitchFactory),
+    )
+
+    class Meta:
+        model = BerthSwitchOffer

@@ -504,3 +504,7 @@ def get_context(order, payment_url, cancel_url, notification_type):
             "additional_product": {"name": additional_product_name, "season": season},
             "payment_url": payment_url,
         }
+
+
+def default_due_date():
+    return today() + relativedelta(weeks=2)

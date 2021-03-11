@@ -3,6 +3,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from typing import Union
 
+from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -16,14 +17,19 @@ from django.utils.translation import gettext_lazy as _
 
 from applications.enums import ApplicationAreaType
 from applications.models import BerthApplication, WinterStorageApplication
+from customers.models import CustomerProfile
+from customers.services import ProfileService
 from leases.models import BerthLease, WinterStorageLease
 from leases.stickers import get_next_sticker_number
+from leases.utils import calculate_season_start_date
+from resources.models import Berth
 from utils.models import TimeStampedModel, UUIDModel
 from utils.numbers import rounded as rounded_decimal
 
 from .enums import (
     AdditionalProductType,
     LeaseOrderType,
+    OfferStatus,
     OrderStatus,
     OrderType,
     PeriodType,
@@ -40,6 +46,7 @@ from .utils import (
     calculate_product_partial_year_price,
     calculate_product_percentage_price,
     convert_aftertax_to_pretax,
+    default_due_date,
     generate_order_number,
     get_application_status,
     get_lease_status,
@@ -957,3 +964,66 @@ class OrderToken(UUIDModel, TimeStampedModel):
     @property
     def is_valid(self):
         return not self.cancelled and now() < self.valid_until
+
+
+class AbstractOffer(UUIDModel, TimeStampedModel):
+    customer = models.ForeignKey(
+        CustomerProfile, related_name="offers", on_delete=models.CASCADE
+    )
+    status = models.CharField(
+        choices=OfferStatus.choices, default=OfferStatus.PENDING, max_length=9
+    )
+    due_date = models.DateField(verbose_name=_("due date"), default=default_due_date)
+    # Optional fields to contact
+    customer_first_name = models.TextField(blank=True, null=True)
+    customer_last_name = models.TextField(blank=True, null=True)
+    customer_email = models.TextField(blank=True, null=True)
+    customer_phone = models.TextField(blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def update_from_profile(self, profile_token: str):
+        profile = ProfileService(profile_token).get_profile(self.customer.id)
+
+        self.customer_first_name = profile.first_name
+        self.customer_last_name = profile.last_name
+        self.customer_email = profile.email
+        self.customer_phone = profile.phone
+
+        self.save()
+
+
+class BerthSwitchOffer(AbstractOffer):
+    application = models.ForeignKey(
+        BerthApplication, related_name="switch_offers", on_delete=models.CASCADE
+    )
+    lease = models.ForeignKey(
+        BerthLease, related_name="switch_offers", on_delete=models.CASCADE
+    )
+    berth = models.ForeignKey(
+        Berth, related_name="switch_offers", on_delete=models.CASCADE
+    )
+
+    def clean(self):
+        # Validate that the offer customer is the same from the lease
+        if self.customer != self.lease.customer:
+            raise ValidationError(
+                _("The lease has to belong to the same customer as the offer")
+            )
+
+        # Validate that the application is a switch application
+        if not self.application.berth_switch:
+            raise ValidationError(_("The application has to be a switch application"))
+
+        # Validate that the lease can only be from the immediate last season
+        if self.lease.start_date.year != calculate_season_start_date(
+            today()
+        ) - relativedelta(years=1):
+            raise ValidationError(
+                _("The exchanged lease has to be from the last season")
+            )
