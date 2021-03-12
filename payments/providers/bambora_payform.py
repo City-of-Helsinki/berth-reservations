@@ -13,6 +13,8 @@ from django.http import HttpRequest, HttpResponse, HttpResponseServerError
 from django.utils.translation import gettext_lazy as _, override
 from requests.exceptions import RequestException
 
+from leases.utils import terminate_lease
+
 from ..enums import OrderRefundStatus, OrderStatus, OrderType
 from ..exceptions import (
     DuplicateOrderError,
@@ -346,6 +348,8 @@ class BamboraPayformProvider(PaymentProvider):
                     OrderStatus.REFUNDED,
                     "Code 0 (refund succeeded) in Bambora Payform notify refund request.",
                 )
+                if refund.amount == order.price and order.lease:
+                    terminate_lease(order.lease, send_notice=False)
             except OrderStatusTransitionError as oste:
                 logger.warning(oste)
         elif return_code == "1":

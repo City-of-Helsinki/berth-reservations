@@ -7,6 +7,7 @@ from django.test.client import RequestFactory
 from django.utils.timezone import now
 
 from berth_reservations.tests.utils import MockResponse
+from leases.enums import LeaseStatus
 from payments.enums import OrderRefundStatus, OrderStatus
 from payments.models import Order, OrderRefund, OrderToken
 from payments.providers.bambora_payform import (
@@ -131,6 +132,8 @@ def test_handle_notify_request_success(
     """Test request notify helper returns http 204 and order status is correct when successful"""
     order.order_number = "abc123"
     order.status = OrderStatus.PAID
+    order.lease.status = LeaseStatus.PAID
+    order.lease.save()
     order.save()
     refund = OrderRefundFactory(order=order, refund_id="1234567", amount=order.price)
 
@@ -139,7 +142,6 @@ def test_handle_notify_request_success(
     payment_provider = create_bambora_provider(provider_base_config, request)
 
     assert refund.status == OrderRefundStatus.PENDING
-    lease_status = refund.order.lease.status
 
     returned = payment_provider.handle_notify_refund_request()
 
@@ -148,7 +150,7 @@ def test_handle_notify_request_success(
 
     assert refund.status == OrderRefundStatus.ACCEPTED
     assert order.status == OrderStatus.REFUNDED
-    assert order.lease.status == lease_status
+    assert order.lease.status == LeaseStatus.TERMINATED
 
     assert isinstance(returned, HttpResponse)
     assert returned.status_code == 204

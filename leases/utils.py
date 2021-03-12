@@ -1,6 +1,22 @@
-from datetime import date
+from __future__ import annotations
 
+from datetime import date
+from typing import TYPE_CHECKING, Union
+
+from babel.dates import format_date
 from dateutil.relativedelta import relativedelta
+from dateutil.utils import today
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+from django_ilmoitin.utils import send_notification
+
+from customers.services import ProfileService
+from leases.enums import LeaseStatus
+from utils.email import is_valid_email
+
+if TYPE_CHECKING:
+    from .models import BerthLease, WinterStorageLease
 
 
 def calculate_season_start_date(lease_start: date = None) -> date:
@@ -136,3 +152,70 @@ def calculate_winter_storage_lease_end_date() -> date:
     The season should end by default on 10.6 on the following year
     """
     return calculate_winter_season_end_date()
+
+
+def terminate_lease(
+    lease: Union[BerthLease, WinterStorageLease],
+    end_date: date = None,
+    profile_token: str = None,
+    send_notice: bool = True,
+) -> Union[BerthLease, WinterStorageLease]:
+    from .models import BerthLease
+    from .notifications import NotificationType
+
+    if lease.status != LeaseStatus.PAID:
+        raise ValidationError(_(f"Lease is not paid: {lease.status}"))
+
+    lease.status = LeaseStatus.TERMINATED
+
+    if isinstance(lease, BerthLease):
+        default_date = calculate_berth_lease_start_date()
+    else:  # WinterStorageLease
+        default_date = calculate_winter_storage_lease_start_date()
+    lease.end_date = end_date or default_date
+
+    lease.save()
+
+    if send_notice:
+        language = (
+            lease.application.language
+            if lease.application
+            else settings.LANGUAGES[0][0]
+        )
+
+        email = None
+
+        if profile_token:
+            profile_service = ProfileService(profile_token=profile_token)
+            profile = profile_service.get_profile(lease.customer.id)
+            email = profile.email
+
+        if not email and lease.application:
+            email = lease.application.email
+
+        if not email:
+            raise ValidationError(
+                _("The lease has no email and no profile token was provided")
+            )
+
+        if not is_valid_email(email):
+            raise ValidationError(_("Missing customer email"))
+
+        notification_type = (
+            NotificationType.BERTH_LEASE_TERMINATED_LEASE_NOTICE
+            if isinstance(lease, BerthLease)
+            else NotificationType.WINTER_STORAGE_LEASE_TERMINATED_LEASE_NOTICE
+        )
+
+        send_notification(
+            email,
+            notification_type,
+            {
+                "subject": notification_type.label,
+                "cancelled_at": format_date(today(), locale=language),
+                "lease": lease,
+            },
+            language=language,
+        )
+
+    return lease
