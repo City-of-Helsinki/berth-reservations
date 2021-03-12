@@ -76,6 +76,14 @@ class OrderStatus(TextChoices):
         return (cls.PAID, cls.PAID_MANUALLY)
 
 
+class OfferStatus(TextChoices):
+    PENDING = "pending", _("Pending")
+    ACCEPTED = "accepted", _("Accepted")
+    REJECTED = "rejected", _("Rejected")
+    EXPIRED = "expired", _("Expired")
+    CANCELLED = "cancelled", _("Cancelled")
+
+
 class OrderType(TextChoices):
     LEASE_ORDER = "lease_order", _("Lease order")
     ADDITIONAL_PRODUCT_ORDER = "additional_product_order", _("Additional product order")
