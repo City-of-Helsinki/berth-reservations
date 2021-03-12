@@ -1162,3 +1162,22 @@ def test_pier_filtering_by_harbor(api_client):
 
     executed = api_client.execute(query)
     assert executed["data"] == {"piers": {"count": 1, "totalCount": 11}}
+
+
+def test_berth_is_invoiceable(api_client):
+    for _i in range(10):
+        BerthFactory()
+
+    BerthFactory(is_invoiceable=False)
+
+    query = """
+        {
+            berths(isInvoiceable: %s) {
+                count
+                totalCount
+            }
+        }
+    """
+
+    executed = api_client.execute(query % "false")
+    assert executed["data"] == {"berths": {"count": 1, "totalCount": 11}}
