@@ -22,7 +22,11 @@ from customers.services import ProfileService
 from leases.enums import LeaseStatus
 from leases.models import BerthLease, WinterStorageLease
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
-from leases.utils import calculate_season_end_date, calculate_season_start_date
+from leases.utils import (
+    calculate_season_end_date,
+    calculate_season_start_date,
+    exchange_berth_for_lease,
+)
 from resources.models import Berth
 from resources.schema import BerthNode, WinterStorageAreaNode
 from users.decorators import (
@@ -34,7 +38,7 @@ from users.decorators import (
 from utils.relay import get_node_from_global_id
 from utils.schema import update_object
 
-from ..enums import OrderStatus, OrderType, ProductServiceType
+from ..enums import OfferStatus, OrderStatus, OrderType, ProductServiceType
 from ..exceptions import VenepaikkaPaymentError
 from ..models import (
     AdditionalProduct,
@@ -859,6 +863,38 @@ class CreateBerthSwitchOfferMutation(graphene.ClientIDMutation):
         return CreateBerthSwitchOfferMutation(berth_switch_offer=offer)
 
 
+class AcceptBerthSwitchOfferMutation(graphene.ClientIDMutation):
+    class Input:
+        offer_id = graphene.ID(required=True)
+        is_accepted = graphene.Boolean(required=True)
+
+    @classmethod
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, offer_id, is_accepted, **input):
+        offer = get_node_from_global_id(
+            info, offer_id, only_type=BerthSwitchOfferNode, nullable=False,
+        )
+        if is_accepted:
+            offer.status = OfferStatus.ACCEPTED
+            offer.save(update_fields=["status"])
+
+            old_lease, new_lease = exchange_berth_for_lease(
+                old_lease=offer.lease,
+                new_berth=offer.berth,
+                switch_date=max(today().date(), offer.lease.start_date),
+                old_lease_comment=_("Lease terminated due to a berth switch offer"),
+                new_lease_comment=_("Lease created from a berth switch offer"),
+            )
+            if old_lease.order:
+                new_lease.orders.add(old_lease.order)
+        else:
+            # Reject offer
+            offer.status = OfferStatus.REJECTED
+            offer.save(update_fields=["status"])
+
+        return AcceptBerthSwitchOfferMutation()
+
+
 class Mutation:
     create_berth_product = CreateBerthProductMutation.Field(
         description="Creates a `BerthProduct` object."
@@ -1001,6 +1037,16 @@ class Mutation:
         "\n* The passed application is not connected to a customer"
         "\n* The passed application is not a switch application"
         "\n* No associated lease could be find for the switch application"
+        "\n* The related lease must be in `PAID` status"
+    )
+    accept_berth_switch_offer = AcceptBerthSwitchOfferMutation.Field(
+        description="Accepts or rejects an offer for a berth switch application."
+        "\n\nIf the offer is accepted, it will terminate the old lease and create a new lease with the new berth."
+        "\n\nIf the offer is rejected, nothing is created and the related lease stays as is."
+        "\n\nErrors:"
+        "\n\n**Requires permissions** to add and change berth leases and to change berth switch offers."
+        "\n\nErrors:"
+        "\n* The passed berth switch offer ID doesn't exist"
         "\n* The related lease must be in `PAID` status"
     )
 
