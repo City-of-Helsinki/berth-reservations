@@ -1109,9 +1109,78 @@ class BerthSwitchOffer(AbstractOffer):
             raise ValidationError(_("The application has to be a switch application"))
 
         # Validate that the lease can only be from the immediate last season
-        if self.lease.start_date.year != calculate_season_start_date(
-            today()
-        ) - relativedelta(years=1):
+        if (
+            self.lease.start_date.year
+            != (calculate_season_start_date(today()) - relativedelta(years=1)).year
+        ):
             raise ValidationError(
                 _("The exchanged lease has to be from the last season")
             )
+
+    def set_status(self, new_status: OfferStatus, comment: str = None) -> None:
+        old_status = self.status
+        if new_status == old_status:
+            return
+
+        valid_status_changes = {
+            OfferStatus.PENDING: (
+                OfferStatus.ACCEPTED,
+                OfferStatus.REJECTED,
+                OfferStatus.EXPIRED,
+                OfferStatus.CANCELLED,
+            ),
+        }
+        valid_new_status = valid_status_changes.get(old_status, ())
+
+        if new_status not in valid_new_status:
+            raise OrderStatusTransitionError(
+                'Cannot set offer {} state to "{}", it is in an invalid state "{}".'.format(
+                    self.id, new_status, old_status
+                )
+            )
+
+        self.status = new_status
+        self.save(update_fields=["status"])
+
+        self.create_log_entry(
+            from_status=old_status, to_status=new_status, comment=comment
+        )
+
+    def create_log_entry(
+        self,
+        from_status: OfferStatus = None,
+        to_status: OfferStatus = None,
+        comment: str = "",
+    ) -> None:
+        BerthSwitchOfferLogEntry.objects.create(
+            offer=self,
+            from_status=from_status,
+            to_status=to_status or self.status,
+            comment=comment,
+        )
+
+
+class AbstractOfferLogEntry(UUIDModel, TimeStampedModel):
+    from_status = models.CharField(choices=OfferStatus.choices, max_length=9)
+    to_status = models.CharField(choices=OfferStatus.choices, max_length=9)
+    comment = models.TextField(blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+
+class BerthSwitchOfferLogEntry(AbstractOfferLogEntry):
+    offer = models.ForeignKey(
+        BerthSwitchOffer,
+        verbose_name=_("order"),
+        related_name="log_entries",
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        verbose_name_plural = _("berth switch offer log entries")
+
+    def __str__(self):
+        return (
+            f"Offer {self.offer.id} | {self.from_status or 'N/A'} --> {self.to_status}"
+        )
