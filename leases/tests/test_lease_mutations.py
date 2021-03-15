@@ -26,6 +26,7 @@ from contracts.schema.types import BerthContractNode
 from contracts.tests.factories import BerthContractFactory
 from customers.schema import BoatNode, ProfileNode
 from customers.tests.conftest import mocked_response_profile
+from payments.enums import OrderStatus
 from payments.models import Order
 from payments.schema import PlaceProductTaxEnum
 from payments.tests.factories import BerthProductFactory, WinterStorageProductFactory
@@ -1950,13 +1951,16 @@ mutation TERMINATE_BERTH_LEASE($input: TerminateBerthLeaseMutationInput!) {
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
+@pytest.mark.parametrize(
+    "lease_status", [LeaseStatus.PAID, LeaseStatus.ERROR, LeaseStatus.OFFERED],
+)
 def test_terminate_berth_lease_with_application(
-    api_client, notification_template_berth_lease_terminated
+    api_client, lease_status, notification_template_berth_lease_terminated
 ):
     berth_lease = BerthLeaseFactory(
         start_date=today() - relativedelta(weeks=1),
         end_date=today() + relativedelta(weeks=1),
-        status=LeaseStatus.PAID,
+        status=lease_status,
         application=BerthApplicationFactory(email="foo@email.com", language="fi"),
     )
 
@@ -1986,6 +1990,28 @@ def test_terminate_berth_lease_with_application(
             "text/html",
         )
     ]
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_terminate_berth_lease_with_waiting_order(
+    api_client, waiting_berth_order, notification_template_berth_lease_terminated
+):
+    variables = {
+        "id": to_global_id(BerthLeaseNode, waiting_berth_order.lease.id),
+    }
+
+    executed = api_client.execute(TERMINATE_BERTH_LEASE_MUTATION, input=variables)
+    assert (
+        executed["data"]["terminateBerthLease"]["berthLease"]["status"]
+        == LeaseStatus.TERMINATED.name
+    )
+    waiting_berth_order.refresh_from_db()
+    waiting_berth_order.lease.refresh_from_db()
+    assert waiting_berth_order.lease.status == LeaseStatus.TERMINATED
+    assert waiting_berth_order.status == OrderStatus.CANCELLED
+    assert len(mail.outbox) == 1
 
 
 @freeze_time("2020-07-01T08:00:00Z")

@@ -13,8 +13,11 @@ from django_ilmoitin.utils import send_notification
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.services import ProfileService
-from leases.enums import LeaseStatus
+from payments.enums import OrderStatus
 from utils.email import is_valid_email
+
+from .consts import TERMINABLE_STATUSES
+from .enums import LeaseStatus
 
 if TYPE_CHECKING:
     from leases.models import BerthLease, WinterStorageLease
@@ -165,8 +168,16 @@ def terminate_lease(
     from .models import BerthLease
     from .notifications import NotificationType
 
-    if lease.status != LeaseStatus.PAID:
-        raise ValidationError(_(f"Lease is not paid: {lease.status}"))
+    if lease.status not in TERMINABLE_STATUSES:
+        raise ValidationError(
+            _(
+                f"Only leases in paid, error or offered status can be terminated, current status is {lease.status}"
+            )
+        )
+
+    for order in lease.orders.all():
+        if order.status == OrderStatus.WAITING:
+            order.set_status(OrderStatus.CANCELLED, _("Lease was terminated"))
 
     lease.status = LeaseStatus.TERMINATED
 

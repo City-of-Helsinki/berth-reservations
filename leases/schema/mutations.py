@@ -243,6 +243,8 @@ class SwitchBerthMutation(graphene.ClientIDMutation):
     def validate_old_lease(cls, old_lease):
         if not old_lease.is_active:
             raise VenepaikkaGraphQLError(_("Berth lease is not active"))
+        if old_lease.status != LeaseStatus.PAID:
+            raise VenepaikkaGraphQLError(_(f"Lease is not paid: {old_lease.status}"))
 
     @classmethod
     @add_permission_required(BerthLease)
