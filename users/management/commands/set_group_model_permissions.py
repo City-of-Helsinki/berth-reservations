@@ -263,6 +263,18 @@ DEFAULT_MODELS_PERMS = {
             BERTH_SUPERVISOR: ("view",),
             HARBOR_SERVICES: None,
         },
+        "berthswitchoffer": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: ("view",),
+            HARBOR_SERVICES: None,
+        },
+        "berthswitchofferlogentry": {
+            BERTH_SERVICES: ("view", "add", "change", "delete",),
+            BERTH_HANDLER: ("view",),
+            BERTH_SUPERVISOR: ("view",),
+            HARBOR_SERVICES: None,
+        },
     },
     "django_ilmoitin": {
         "notificationtemplate": {
