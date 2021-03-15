@@ -52,7 +52,7 @@ jobs:
           K8S_SECRET_SECRET_KEY: ${{ secrets.GH_PROD_DJANGO_SECRET_KEY }}
           K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: ${{ secrets.GH_PROD_SSO_URL }}
           K8S_SECRET_MAIL_MAILGUN_KEY: ${{ secrets.GH_PROD_SECRET_MAILGUN_API_KEY }}
-          K8S_SECRET_MAIL_MAILGUN_DOMAIN: "mail.hel.ninja"
+          K8S_SECRET_MAIL_MAILGUN_DOMAIN: "hel.fi"
           K8S_SECRET_MAIL_MAILGUN_API: "https://api.eu.mailgun.net/v3"
           K8S_SECRET_MAILER_EMAIL_BACKEND: "anymail.backends.mailgun.EmailBackend"
           K8S_SECRET_DEFAULT_FROM_EMAIL: "venepaikkavaraukset@hel.fi"
