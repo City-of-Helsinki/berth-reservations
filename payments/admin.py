@@ -10,6 +10,8 @@ from .enums import LeaseOrderType
 from .models import (
     AdditionalProduct,
     BerthProduct,
+    BerthSwitchOffer,
+    BerthSwitchOfferLogEntry,
     Order,
     OrderLine,
     OrderLogEntry,
@@ -237,6 +239,22 @@ class OrderRefundAdmin(admin.ModelAdmin):
     )
 
 
+class OrderRefundLogEntryAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "refund_id",
+        "order_id",
+        "from_status",
+        "to_status",
+        "created_at",
+    )
+    list_filter = ("from_status", "to_status")
+    readonly_fields = ("created_at",)
+
+    def order_id(self, obj):
+        return obj.refund.order_id
+
+
 class OrderTokenAdmin(admin.ModelAdmin):
     list_display = (
         "order",
@@ -274,11 +292,36 @@ class OrderLogEntryAdmin(admin.ModelAdmin):
         return obj.order.id
 
 
-class OrderRefundLogEntryAdmin(admin.ModelAdmin):
+class BerthSwitchOfferLogEntryInline(admin.StackedInline):
+    model = BerthSwitchOfferLogEntry
+    fk_name = "offer"
+    extra = 0
+    readonly_fields = ("created_at",)
+
+
+class BerthSwitchOfferAdmin(admin.ModelAdmin):
+    list_display = ("customer", "name", "application", "berth", "lease", "status")
+    list_filter = ("status",)
+    inlines = (BerthSwitchOfferLogEntryInline,)
+    search_fields = (
+        "application__id",
+        "berth__id",
+        "berth__number",
+        "berth__pier__harbor__translations__name",
+        "lease__id",
+        "customer_first_name",
+        "customer_last_name",
+    )
+    autocomplete_fields = ("customer", "application", "lease", "berth")
+    date_hierarchy = "due_date"
+
+    def name(self, obj):
+        return f"{obj.customer_first_name} {obj.customer_last_name}"
+
+
+class BerthSwitchOfferLogEntryAdmin(admin.ModelAdmin):
     list_display = (
         "id",
-        "refund_id",
-        "order_id",
         "from_status",
         "to_status",
         "created_at",
@@ -286,9 +329,6 @@ class OrderRefundLogEntryAdmin(admin.ModelAdmin):
     list_filter = ("from_status", "to_status")
     search_fields = ("refund__id", "refund__order__id")
     readonly_fields = ("created_at",)
-
-    def order_id(self, obj):
-        return obj.refund.order_id
 
 
 admin.site.register([WinterStorageProduct, OrderLine])
@@ -299,3 +339,5 @@ admin.site.register(OrderLogEntry, OrderLogEntryAdmin)
 admin.site.register(OrderRefund, OrderRefundAdmin)
 admin.site.register(OrderRefundLogEntry, OrderRefundLogEntryAdmin)
 admin.site.register(OrderToken, OrderTokenAdmin)
+admin.site.register(BerthSwitchOfferLogEntry, BerthSwitchOfferLogEntryAdmin)
+admin.site.register(BerthSwitchOffer, BerthSwitchOfferAdmin)
