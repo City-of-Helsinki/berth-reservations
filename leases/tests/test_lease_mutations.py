@@ -211,19 +211,19 @@ def test_create_berth_lease_application_id_missing(superuser_api_client):
         CREATE_BERTH_LEASE_MUTATION, input=variables,
     )
 
-    assert_field_missing("applicationId", executed)
+    assert_in_errors("Must specify either application or customer", executed)
 
 
-def test_create_berth_lease_berth_id_missing(superuser_api_client):
+def test_create_berth_lease_berth_id_missing(superuser_api_client, customer_profile):
     variables = {
+        "customerId": to_global_id(ProfileNode, customer_profile.id),
         "berthId": to_global_id(BerthApplicationNode, randint(0, 999)),
     }
 
     executed = superuser_api_client.execute(
         CREATE_BERTH_LEASE_MUTATION, input=variables,
     )
-
-    assert_field_missing("berthId", executed)
+    assert_in_errors("Must receive a BerthNode", executed)
 
 
 def test_create_berth_lease_application_without_customer(
@@ -360,6 +360,93 @@ def test_create_berth_lease_with_order(
             },
         },
     }
+
+
+CREATE_BERTH_LEASE_WITHOUT_APPLICATION_MUTATION = """
+mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
+    createBerthLease(input:$input){
+        berthLease {
+            id
+            status
+            application {
+                id
+            }
+            customer {
+                id
+            }
+            berth {
+                id
+            }
+            order {
+                id
+                price
+                status
+                customer {
+                    id
+                }
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+@freeze_time("2020-01-01T08:00:00Z")
+def test_create_berth_lease_without_application(api_client, berth, customer_profile):
+    min_width = berth.berth_type.width - 1
+    max_width = berth.berth_type.width + 1
+    berth_product = BerthProductFactory(min_width=min_width, max_width=max_width)
+
+    variables = {
+        "customerId": to_global_id(ProfileNode, customer_profile.id),
+        "berthId": to_global_id(BerthNode, berth.id),
+    }
+
+    assert BerthLease.objects.count() == 0
+    assert Order.objects.count() == 0
+
+    executed = api_client.execute(
+        CREATE_BERTH_LEASE_WITHOUT_APPLICATION_MUTATION, input=variables
+    )
+
+    assert BerthLease.objects.count() == 1
+    assert Order.objects.count() == 1
+
+    assert executed["data"]["createBerthLease"]["berthLease"].pop("id") is not None
+    assert (
+        executed["data"]["createBerthLease"]["berthLease"]["order"].pop("id")
+        is not None
+    )
+    assert executed["data"]["createBerthLease"]["berthLease"] == {
+        "status": "DRAFTED",
+        "application": None,
+        "customer": {"id": to_global_id(ProfileNode, customer_profile.id)},
+        "berth": {"id": variables["berthId"]},
+        "order": {
+            "price": str(berth_product.price_for_tier(tier=berth.pier.price_tier)),
+            "status": "WAITING",
+            "customer": {"id": to_global_id(ProfileNode, customer_profile.id)},
+        },
+    }
+
+
+def test_create_berth_lease_application_and_customer_mutually_exclusive(
+    superuser_api_client, berth, customer_profile
+):
+    variables = {
+        "applicationId": to_global_id(BerthApplicationNode, randint(0, 999)),
+        "berthId": to_global_id(BerthNode, berth.id),
+        "customerId": to_global_id(ProfileNode, customer_profile.id),
+    }
+
+    executed = superuser_api_client.execute(
+        CREATE_BERTH_LEASE_MUTATION, input=variables,
+    )
+
+    assert_in_errors("Can not specify both application and customer", executed)
 
 
 DELETE_BERTH_LEASE_MUTATION = """

@@ -41,37 +41,49 @@ class AbstractLeaseInput:
 
 class CreateBerthLeaseMutation(graphene.ClientIDMutation):
     class Input(AbstractLeaseInput):
-        application_id = graphene.ID(required=True)
+        # either application_id or customer_id must be provided, but not both
+        application_id = graphene.ID()
+        customer_id = graphene.ID()
         berth_id = graphene.ID(required=True)
 
     berth_lease = graphene.Field(BerthLeaseNode)
 
     @classmethod
-    @view_permission_required(BerthApplication, CustomerProfile)
-    @add_permission_required(BerthLease)
-    @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, **input):
-        application = get_node_from_global_id(
-            info,
-            input.pop("application_id"),
-            only_type=BerthApplicationNode,
-            nullable=False,
-        )
+    def lookup_application_and_customer(cls, info, input):
+        from customers.schema import ProfileNode  # import here avoid circular import
 
-        if not application.customer:
+        if application_id := input.pop("application_id", None):
+            if "customer_id" in input:
+                raise VenepaikkaGraphQLError(
+                    _(
+                        "Can not specify both application and customer when creating a new berth lease"
+                    )
+                )
+            application = get_node_from_global_id(
+                info, application_id, only_type=BerthApplicationNode, nullable=False,
+            )
+            if not application.customer:
+                raise VenepaikkaGraphQLError(
+                    _("Application must be connected to an existing customer first")
+                )
+            input["application"] = application
+            input["customer"] = application.customer
+
+        elif customer_id := input.pop("customer_id", None):
+            assert "customer" not in input
+            input["customer"] = get_node_from_global_id(
+                info, customer_id, only_type=ProfileNode, nullable=False,
+            )
+        else:
             raise VenepaikkaGraphQLError(
-                _("Application must be connected to an existing customer first")
+                _(
+                    "Must specify either application or customer when creating a new berth lease"
+                )
             )
 
-        berth = get_node_from_global_id(
-            info, input.pop("berth_id"), only_type=BerthNode, nullable=False,
-        )
-
-        input["application"] = application
-        input["berth"] = berth
-        input["customer"] = application.customer
-
-        if input.get("boat_id", False):
+    @classmethod
+    def lookup_boat(cls, info, input):
+        if input.get("boat_id"):
             from customers.schema import BoatNode
 
             boat = get_node_from_global_id(
@@ -85,6 +97,19 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
 
             input["boat"] = boat
 
+    @classmethod
+    @view_permission_required(BerthApplication, CustomerProfile)
+    @add_permission_required(BerthLease)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        cls.lookup_application_and_customer(info, input)
+        cls.lookup_boat(info, input)
+
+        berth = get_node_from_global_id(
+            info, input.pop("berth_id"), only_type=BerthNode, nullable=False,
+        )
+        input["berth"] = berth
+
         try:
             lease = BerthLease.objects.create(**input)
             product = BerthProduct.objects.get_in_range(width=berth.berth_type.width)
@@ -93,7 +118,7 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
                 customer=input["customer"], lease=lease, product=product
             )
             # Do not create a contract for non-billable customers.
-            if not application.customer.is_non_billable_customer():
+            if not input["customer"].is_non_billable_customer():
                 get_contract_service().create_berth_contract(lease)
         except BerthProduct.DoesNotExist as e:
             raise VenepaikkaGraphQLError(e)
@@ -102,8 +127,9 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
             errors = sum(e.message_dict.values(), [])
             raise VenepaikkaGraphQLError(errors)
 
-        application.status = ApplicationStatus.OFFER_GENERATED
-        application.save()
+        if application := input.get("application"):
+            application.status = ApplicationStatus.OFFER_GENERATED
+            application.save()
 
         if order.customer.is_non_billable_customer():
             order.set_status(OrderStatus.PAID_MANUALLY, "Non-billable customer.")
