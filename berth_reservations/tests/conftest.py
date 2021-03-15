@@ -189,6 +189,25 @@ def notification_template_order_cancelled():
         )
 
 
+@pytest.fixture
+def notification_template_order_refunded():
+    from payments.notifications import NotificationType
+
+    notification = NotificationTemplate.objects.language("fi").create(
+        type=NotificationType.ORDER_REFUNDED,
+        subject="test order refunded subject: {{ order.order_number }}!",
+        body_html="<b>{{ order.order_number }} {{ order.price }}</b>",
+        body_text="{{ order.order_number }} {{ order.price }}",
+    )
+    notification.create_translation(
+        "en",
+        subject="test order refunded subject: {{ order.order_number }}!",
+        body_html="<b>{{ order.order_number }} {{ order.price }}</b>",
+        body_text="{{ order.order_number }} {{ order.price }}",
+    )
+    return notification
+
+
 @pytest.fixture(autouse=True)
 def patch_contract_service(monkeypatch):
     monkeypatch.setattr(

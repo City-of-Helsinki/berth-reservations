@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseNotFound, HttpResponseServerEr
 from django.shortcuts import redirect
 from django.urls import reverse
 
-from ..models import Order
+from ..models import Order, OrderRefund
 
 
 class PaymentProvider:
@@ -61,8 +61,21 @@ class PaymentProvider:
         """
         return self._get_final_return_url(self.get_vene_failure_url(), lang=lang)
 
+    def initiate_refund(self, order: Order) -> OrderRefund:
+        """Create a refund to the provider. Implement this in your subclass.
+        """
+        raise NotImplementedError
+
+    def handle_notify_refund_request(self) -> None:
+        """Handle incoming notify request for refunds from the payment provider.
+        Override this in your subclass if you need to handle notify requests."""
+        raise NotImplementedError
+
     def get_notify_url(self) -> str:
         return self.request.build_absolute_uri(reverse("payments:notify"))
+
+    def get_notify_refund_url(self) -> str:
+        return self.request.build_absolute_uri(reverse("payments:notify_refund"))
 
     def get_vene_success_url(self) -> str:
         return self.request.build_absolute_uri(reverse("payments:success"))

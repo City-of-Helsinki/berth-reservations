@@ -22,6 +22,7 @@ from ..schema.types import (
     OrderLineNode,
     OrderLogEntryNode,
     OrderNode,
+    OrderRefundNode,
     OrderStatusEnum,
     OrderTypeEnum,
     PeriodTypeEnum,
@@ -37,6 +38,7 @@ from .factories import (
     OrderFactory,
     OrderLineFactory,
     OrderLogEntryFactory,
+    OrderRefundFactory,
     WinterStorageProductFactory,
 )
 
@@ -744,4 +746,43 @@ def test_get_orders_filtered_statuses(superuser_api_client, order, status):
     assert executed["data"]["orders"]["edges"][0]["node"] == {
         "id": to_global_id(OrderNode, order.id),
         "status": status.name,
+    }
+
+
+ORDER_REFUNDS_QUERY = """
+query ORDER_REFUNDS {
+    orderRefunds(orderId: "%s") {
+        edges {
+            node {
+                id
+                status
+                refundId
+                amount
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "order",
+    ["berth_order", "winter_storage_order", "empty_order", "additional_product_order"],
+    indirect=True,
+)
+def test_get_order_refunds(superuser_api_client, order):
+    order.status = OrderStatus.PAID
+    order.save(update_fields=["status"])
+    refund = OrderRefundFactory(order=order)
+
+    executed = superuser_api_client.execute(
+        ORDER_REFUNDS_QUERY % to_global_id(OrderNode, order.id)
+    )
+
+    assert len(executed["data"]["orderRefunds"]["edges"]) == 1
+    assert executed["data"]["orderRefunds"]["edges"][0]["node"] == {
+        "id": to_global_id(OrderRefundNode, refund.id),
+        "status": refund.status.name,
+        "refundId": refund.refund_id,
+        "amount": str(order.price),
     }

@@ -13,6 +13,8 @@ from .models import (
     Order,
     OrderLine,
     OrderLogEntry,
+    OrderRefund,
+    OrderRefundLogEntry,
     OrderToken,
     WinterStorageProduct,
 )
@@ -70,9 +72,16 @@ class OrderLogEntryInline(admin.StackedInline):
     readonly_fields = ("created_at",)
 
 
+class OrderRefundInline(admin.StackedInline):
+    model = OrderRefund
+    fk_name = "order"
+    extra = 0
+    readonly_fields = ("created_at",)
+
+
 class OrderAdmin(admin.ModelAdmin):
     date_hierarchy = "due_date"
-    inlines = (OrderLineInline, OrderLogEntryInline)
+    inlines = (OrderLineInline, OrderRefundInline, OrderLogEntryInline)
     exclude = ("_product_content_type", "_lease_content_type")
     readonly_fields = (
         "pretax_price",
@@ -204,6 +213,30 @@ class OrderAdmin(admin.ModelAdmin):
     place.admin_order_field = "place"
 
 
+class OrderRefundLogEntryInline(admin.StackedInline):
+    model = OrderRefundLogEntry
+    fk_name = "refund"
+    extra = 0
+    readonly_fields = ("created_at",)
+
+
+class OrderRefundAdmin(admin.ModelAdmin):
+    inlines = (OrderRefundLogEntryInline,)
+    date_hierarchy = "created_at"
+    list_display = (
+        "id",
+        "created_at",
+        "refund_id",
+        "order",
+        "status",
+    )
+    list_filter = ("status",)
+    search_fields = (
+        "refund_id",
+        "order__customer__id",
+    )
+
+
 class OrderTokenAdmin(admin.ModelAdmin):
     list_display = (
         "order",
@@ -241,9 +274,28 @@ class OrderLogEntryAdmin(admin.ModelAdmin):
         return obj.order.id
 
 
+class OrderRefundLogEntryAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "refund_id",
+        "order_id",
+        "from_status",
+        "to_status",
+        "created_at",
+    )
+    list_filter = ("from_status", "to_status")
+    search_fields = ("refund__id", "refund__order__id")
+    readonly_fields = ("created_at",)
+
+    def order_id(self, obj):
+        return obj.refund.order_id
+
+
 admin.site.register([WinterStorageProduct, OrderLine])
 admin.site.register(BerthProduct, BerthProductAdmin)
 admin.site.register(AdditionalProduct, AdditionalProductAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderLogEntry, OrderLogEntryAdmin)
+admin.site.register(OrderRefund, OrderRefundAdmin)
+admin.site.register(OrderRefundLogEntry, OrderRefundLogEntryAdmin)
 admin.site.register(OrderToken, OrderTokenAdmin)

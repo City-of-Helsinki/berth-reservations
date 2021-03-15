@@ -70,6 +70,7 @@ class OrderStatus(TextChoices):
     ERROR = "error", _("Error")
     PAID = "paid", _("Paid")
     PAID_MANUALLY = "paid_man", _("Paid manually")  # max 9 chars
+    REFUNDED = "refunded", _("Refunded")
 
     @classmethod
     def get_paid_statuses(cls):
@@ -82,6 +83,12 @@ class OfferStatus(TextChoices):
     REJECTED = "rejected", _("Rejected")
     EXPIRED = "expired", _("Expired")
     CANCELLED = "cancelled", _("Cancelled")
+
+
+class OrderRefundStatus(TextChoices):
+    PENDING = "pending", _("Pending")
+    ACCEPTED = "accepted", _("Accepted")
+    REJECTED = "rejected", _("Rejected")
 
 
 class OrderType(TextChoices):

@@ -9,6 +9,7 @@ from utils.schema import CountConnection
 
 from ..enums import (
     AdditionalProductType,
+    OrderRefundStatus,
     OrderStatus,
     PeriodType,
     PriceTier,
@@ -22,6 +23,7 @@ from ..models import (
     Order,
     OrderLine,
     OrderLogEntry,
+    OrderRefund,
     PLACE_PRODUCT_TAX_PERCENTAGES,
     WinterStorageProduct,
 )
@@ -32,6 +34,7 @@ AdditionalProductTypeEnum = graphene.Enum.from_enum(AdditionalProductType)
 ProductServiceTypeEnum = graphene.Enum.from_enum(ProductServiceType)
 PeriodTypeEnum = graphene.Enum.from_enum(PeriodType)
 OrderStatusEnum = graphene.Enum.from_enum(OrderStatus)
+OrderRefundStatusEnum = graphene.Enum.from_enum(OrderRefundStatus)
 PlaceProductTaxEnum = graphene.Enum(
     "PlaceProductTaxEnum",
     [
@@ -220,6 +223,23 @@ class OrderNode(DjangoObjectType):
 
     @classmethod
     @view_permission_required(Order)
+    def get_queryset(cls, queryset, info):
+        return super().get_queryset(queryset, info)
+
+
+class OrderRefundNode(DjangoObjectType):
+    order = graphene.Field(OrderNode, required=True)
+    refund_id = graphene.String()
+    status = OrderRefundStatusEnum(required=True)
+    amount = graphene.Decimal(required=True)
+
+    class Meta:
+        model = OrderRefund
+        interfaces = (graphene.relay.Node,)
+        connection_class = CountConnection
+
+    @classmethod
+    @view_permission_required(Order, OrderRefund)
     def get_queryset(cls, queryset, info):
         return super().get_queryset(queryset, info)
 

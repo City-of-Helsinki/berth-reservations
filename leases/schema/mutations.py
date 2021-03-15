@@ -1,6 +1,7 @@
 import threading
 
 import graphene
+from anymail.exceptions import AnymailError
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
@@ -25,11 +26,10 @@ from utils.schema import update_object
 
 from ..enums import LeaseStatus
 from ..models import BerthLease, WinterStorageLease
-from ..notifications import NotificationType
 from ..services import BerthInvoicingService
 from ..stickers import get_next_sticker_number
+from ..utils import terminate_lease
 from .types import BerthLeaseNode, WinterStorageLeaseNode
-from .utils import terminate_lease
 
 
 class AbstractLeaseInput:
@@ -406,14 +406,26 @@ class TerminateBerthLeaseMutation(graphene.ClientIDMutation):
     @change_permission_required(BerthLease)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, id, **input):
-        lease = terminate_lease(
-            info,
-            id,
-            BerthLeaseNode,
-            NotificationType.BERTH_LEASE_TERMINATED_LEASE_NOTICE,
-            end_date=input.get("end_date"),
-            profile_token=input.get("profile_token"),
-        )
+        try:
+            lease: BerthLease = get_node_from_global_id(
+                info, id, only_type=BerthLeaseNode, nullable=False,
+            )
+
+            lease = terminate_lease(
+                lease,
+                end_date=input.get("end_date"),
+                profile_token=input.get("profile_token"),
+                send_notice=True,
+            )
+        except (
+            BerthLease.DoesNotExist,
+            AnymailError,
+            OSError,
+            ValidationError,
+            VenepaikkaGraphQLError,
+        ) as e:
+            raise VenepaikkaGraphQLError(str(e)) from e
+
         return TerminateBerthLeaseMutation(berth_lease=lease)
 
 
@@ -427,14 +439,26 @@ class TerminateWinterStorageLeaseMutation(graphene.ClientIDMutation):
     @change_permission_required(WinterStorageLease)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, id, **input):
-        lease = terminate_lease(
-            info,
-            id,
-            WinterStorageLeaseNode,
-            NotificationType.WINTER_STORAGE_LEASE_TERMINATED_LEASE_NOTICE,
-            end_date=input.get("end_date"),
-            profile_token=input.get("profile_token"),
-        )
+        try:
+            lease: WinterStorageLease = get_node_from_global_id(
+                info, id, only_type=WinterStorageLeaseNode, nullable=False,
+            )
+
+            lease = terminate_lease(
+                lease,
+                end_date=input.get("end_date"),
+                profile_token=input.get("profile_token"),
+                send_notice=True,
+            )
+        except (
+            WinterStorageLease.DoesNotExist,
+            AnymailError,
+            OSError,
+            ValidationError,
+            VenepaikkaGraphQLError,
+        ) as e:
+            raise VenepaikkaGraphQLError(str(e)) from e
+
         return TerminateWinterStorageLeaseMutation(winter_storage_lease=lease)
 
 
