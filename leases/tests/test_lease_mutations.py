@@ -22,6 +22,8 @@ from berth_reservations.tests.utils import (
     assert_not_enough_permissions,
 )
 from contracts.models import BerthContract, WinterStorageContract
+from contracts.schema.types import BerthContractNode
+from contracts.tests.factories import BerthContractFactory
 from customers.schema import BoatNode, ProfileNode
 from customers.tests.conftest import mocked_response_profile
 from payments.models import Order
@@ -669,6 +671,379 @@ def test_update_berth_lease_application_already_has_lease(
     )
 
     assert_in_errors("Berth lease with this Application already exists", executed)
+
+
+SWITCH_BERTH_MUTATION = """
+mutation SwitchBerth($input: SwitchBerthMutationInput!) {
+    switchBerth(input:$input){
+        oldBerthLease {
+            id
+            startDate
+            endDate
+            comment
+            boat {
+                id
+            }
+            application {
+                id
+                customer {
+                    id
+                }
+            }
+            contract {
+                id
+            }
+            status
+        }
+        newBerthLease {
+            id
+            startDate
+            endDate
+            comment
+            boat {
+                id
+            }
+            application {
+                id
+                customer {
+                    id
+                }
+            }
+            contract {
+                id
+            }
+            status
+        }
+    }
+}
+"""
+
+
+@freeze_time("2020-07-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_switch_berth(api_client, berth):
+    berth_lease = BerthLeaseFactory(
+        start_date=calculate_berth_lease_start_date(),
+        end_date=calculate_berth_lease_end_date(),
+        application=BerthApplicationFactory(email="foo@email.com", language="fi"),
+        status=LeaseStatus.PAID,
+    )
+    berth_lease.contract = BerthContractFactory()
+    berth_lease.contract.save()
+
+    old_lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
+    new_berth_id = to_global_id(BerthNode, berth.id)
+
+    variables = {
+        "oldLeaseId": old_lease_id,
+        "newBerthId": new_berth_id,
+    }
+
+    executed = api_client.execute(SWITCH_BERTH_MUTATION, input=variables)
+    assert executed["data"]["switchBerth"]["oldBerthLease"] == {
+        "id": old_lease_id,
+        "startDate": str(berth_lease.start_date),
+        "endDate": str(today().date()),
+        "comment": f"{berth_lease.comment}\nLease terminated due to berth switch",
+        "boat": {"id": to_global_id(BoatNode, berth_lease.boat_id)},
+        "application": {
+            "customer": None,
+            "id": to_global_id(BerthApplicationNode, berth_lease.application_id),
+        },
+        "contract": None,
+        "status": LeaseStatus.TERMINATED.name,
+    }
+
+    comment = (
+        f"Lease created from a berth switch\n"
+        f"Previous berth info:\n"
+        f"Harbor name: {berth_lease.berth.pier.harbor.name}\n"
+        f"Pier ID: {berth_lease.berth.pier.identifier}\n"
+        f"Berth number: {berth_lease.berth.number}\n"
+    )
+    new_lease = BerthLease.objects.get(berth=berth)
+    new_lease_id = to_global_id(BerthLeaseNode, new_lease.id)
+    assert executed["data"]["switchBerth"]["newBerthLease"] == {
+        "id": new_lease_id,
+        "startDate": str(today().date()),
+        "endDate": str(berth_lease.end_date),
+        "comment": comment,
+        "boat": {"id": to_global_id(BoatNode, berth_lease.boat_id)},
+        "application": None,
+        "contract": {"id": to_global_id(BerthContractNode, berth_lease.contract.id)},
+        "status": LeaseStatus.PAID.name,
+    }
+
+
+@freeze_time("2020-07-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_switch_berth_with_switch_date(api_client, berth):
+    berth_lease = BerthLeaseFactory(
+        start_date=calculate_berth_lease_start_date(),
+        end_date=calculate_berth_lease_end_date(),
+        application=BerthApplicationFactory(email="foo@email.com", language="fi"),
+        status=LeaseStatus.PAID,
+    )
+    berth_lease.contract = BerthContractFactory()
+    berth_lease.contract.save()
+
+    old_lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
+    new_berth_id = to_global_id(BerthNode, berth.id)
+
+    switch_date = today().date() + relativedelta(months=1)
+
+    variables = {
+        "oldLeaseId": old_lease_id,
+        "newBerthId": new_berth_id,
+        "switchDate": switch_date,
+    }
+
+    executed = api_client.execute(SWITCH_BERTH_MUTATION, input=variables)
+    assert executed["data"]["switchBerth"]["oldBerthLease"] == {
+        "id": old_lease_id,
+        "startDate": str(berth_lease.start_date),
+        "endDate": str(switch_date),
+        "comment": f"{berth_lease.comment}\nLease terminated due to berth switch",
+        "boat": {"id": to_global_id(BoatNode, berth_lease.boat_id)},
+        "application": {
+            "customer": None,
+            "id": to_global_id(BerthApplicationNode, berth_lease.application_id),
+        },
+        "contract": None,
+        "status": LeaseStatus.TERMINATED.name,
+    }
+
+    comment = (
+        f"Lease created from a berth switch\n"
+        f"Previous berth info:\n"
+        f"Harbor name: {berth_lease.berth.pier.harbor.name}\n"
+        f"Pier ID: {berth_lease.berth.pier.identifier}\n"
+        f"Berth number: {berth_lease.berth.number}\n"
+    )
+    new_lease = BerthLease.objects.get(berth=berth)
+    new_lease_id = to_global_id(BerthLeaseNode, new_lease.id)
+    assert executed["data"]["switchBerth"]["newBerthLease"] == {
+        "id": new_lease_id,
+        "startDate": str(switch_date),
+        "endDate": str(berth_lease.end_date),
+        "comment": comment,
+        "boat": {"id": to_global_id(BoatNode, berth_lease.boat_id)},
+        "application": None,
+        "contract": {"id": to_global_id(BerthContractNode, berth_lease.contract.id)},
+        "status": LeaseStatus.PAID.name,
+    }
+
+
+@freeze_time("2020-07-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_switch_berth_without_contract(api_client, berth):
+    berth_lease = BerthLeaseFactory(
+        start_date=calculate_berth_lease_start_date(),
+        end_date=calculate_berth_lease_end_date(),
+        application=BerthApplicationFactory(email="foo@email.com", language="fi"),
+        status=LeaseStatus.PAID,
+    )
+    berth_lease.contract = None
+    berth_lease.save()
+
+    old_lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
+
+    new_berth_id = to_global_id(BerthNode, berth.id)
+
+    variables = {
+        "oldLeaseId": old_lease_id,
+        "newBerthId": new_berth_id,
+    }
+
+    executed = api_client.execute(SWITCH_BERTH_MUTATION, input=variables)
+    assert executed["data"]["switchBerth"]["oldBerthLease"] == {
+        "id": old_lease_id,
+        "startDate": str(berth_lease.start_date),
+        "endDate": str(today().date()),
+        "comment": f"{berth_lease.comment}\nLease terminated due to berth switch",
+        "boat": {"id": to_global_id(BoatNode, berth_lease.boat_id)},
+        "application": {
+            "customer": None,
+            "id": to_global_id(BerthApplicationNode, berth_lease.application_id),
+        },
+        "contract": None,
+        "status": LeaseStatus.TERMINATED.name,
+    }
+
+    comment = (
+        f"Lease created from a berth switch\n"
+        f"Previous berth info:\n"
+        f"Harbor name: {berth_lease.berth.pier.harbor.name}\n"
+        f"Pier ID: {berth_lease.berth.pier.identifier}\n"
+        f"Berth number: {berth_lease.berth.number}\n"
+    )
+    new_lease = BerthLease.objects.get(berth=berth)
+    new_lease_id = to_global_id(BerthLeaseNode, new_lease.id)
+    assert executed["data"]["switchBerth"]["newBerthLease"] == {
+        "id": new_lease_id,
+        "startDate": str(today().date()),
+        "endDate": str(berth_lease.end_date),
+        "comment": comment,
+        "boat": {"id": to_global_id(BoatNode, berth_lease.boat_id)},
+        "application": None,
+        "contract": None,
+        "status": LeaseStatus.PAID.name,
+    }
+
+
+@freeze_time("2020-07-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_switch_berth_with_berth_already_has_lease(api_client):
+    old_lease = BerthLeaseFactory(
+        start_date=calculate_berth_lease_start_date(),
+        end_date=calculate_berth_lease_end_date(),
+        application=BerthApplicationFactory(email="foo@email.com", language="fi"),
+        status=LeaseStatus.PAID,
+    )
+    old_lease.contract = BerthContractFactory()
+    old_lease.contract.save()
+
+    old_lease_id = to_global_id(BerthLeaseNode, old_lease.id)
+
+    existing_lease = BerthLeaseFactory(
+        start_date=calculate_berth_lease_start_date(),
+        end_date=calculate_berth_lease_end_date(),
+    )
+
+    new_berth_id = to_global_id(BerthNode, existing_lease.berth.id)
+
+    variables = {
+        "oldLeaseId": old_lease_id,
+        "newBerthId": new_berth_id,
+    }
+
+    executed = api_client.execute(SWITCH_BERTH_MUTATION, input=variables)
+
+    assert_in_errors("Berth already has a lease", executed)
+
+
+@freeze_time("2020-07-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_switch_berth_non_paid_status(api_client, berth):
+    berth_lease = BerthLeaseFactory(
+        start_date=calculate_berth_lease_start_date(),
+        end_date=calculate_berth_lease_end_date(),
+        application=BerthApplicationFactory(email="foo@email.com", language="fi"),
+        status=LeaseStatus.OFFERED,
+    )
+    berth_lease.contract = BerthContractFactory()
+    berth_lease.contract.save()
+
+    old_lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
+
+    new_berth_id = to_global_id(BerthNode, berth.id)
+
+    variables = {
+        "oldLeaseId": old_lease_id,
+        "newBerthId": new_berth_id,
+    }
+
+    executed = api_client.execute(SWITCH_BERTH_MUTATION, input=variables)
+
+    assert_in_errors(f"Lease is not paid: {berth_lease.status}", executed)
+
+
+@freeze_time("2020-07-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_switch_berth_non_active(api_client, berth):
+    berth_lease = BerthLeaseFactory(
+        start_date=today() - relativedelta(months=12),
+        end_date=today() - relativedelta(months=10),
+        application=BerthApplicationFactory(email="foo@email.com", language="fi"),
+        status=LeaseStatus.PAID,
+    )
+    berth_lease.contract = BerthContractFactory()
+    berth_lease.contract.save()
+
+    old_lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
+
+    new_berth_id = to_global_id(BerthNode, berth.id)
+
+    variables = {
+        "oldLeaseId": old_lease_id,
+        "newBerthId": new_berth_id,
+    }
+
+    executed = api_client.execute(SWITCH_BERTH_MUTATION, input=variables)
+
+    assert_in_errors("Berth lease is not active", executed)
+
+
+@freeze_time("2020-07-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_switch_berth_non_existing_berth_id(api_client):
+    old_lease_id = to_global_id(BerthLeaseNode, uuid.uuid4())
+
+    new_berth_id = to_global_id(BerthNode, uuid.uuid4())
+
+    variables = {
+        "oldLeaseId": old_lease_id,
+        "newBerthId": new_berth_id,
+    }
+
+    executed = api_client.execute(SWITCH_BERTH_MUTATION, input=variables)
+
+    assert_in_errors("BerthLease matching query does not exist.", executed)
+
+
+@freeze_time("2020-07-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "harbor_services", "berth_supervisor"],
+    indirect=True,
+)
+def test_switch_berth_not_enough_permissions(api_client):
+    old_lease_id = to_global_id(BerthLeaseNode, uuid.uuid4())
+    new_berth_id = to_global_id(BerthNode, uuid.uuid4())
+
+    variables = {
+        "oldLeaseId": old_lease_id,
+        "newBerthId": new_berth_id,
+    }
+
+    executed = api_client.execute(SWITCH_BERTH_MUTATION, input=variables)
+
+    assert_not_enough_permissions(executed)
+
+
+@freeze_time("2020-08-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_switch_berth_with_switch_date_over_6_months_in_the_past(api_client):
+    old_lease_id = to_global_id(BerthLeaseNode, uuid.uuid4())
+    new_berth_id = to_global_id(BerthNode, uuid.uuid4())
+
+    switch_date = today().date() - relativedelta(months=7)
+
+    variables = {
+        "oldLeaseId": old_lease_id,
+        "newBerthId": new_berth_id,
+        "switchDate": switch_date,
+    }
+
+    executed = api_client.execute(SWITCH_BERTH_MUTATION, input=variables)
+
+    assert_in_errors("Switch date is more than 6 months in the past", executed)
 
 
 CREATE_WINTER_STORAGE_LEASE_MUTATION = """

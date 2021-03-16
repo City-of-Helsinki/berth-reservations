@@ -11,12 +11,14 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django_ilmoitin.utils import send_notification
 
+from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.services import ProfileService
 from leases.enums import LeaseStatus
 from utils.email import is_valid_email
 
 if TYPE_CHECKING:
-    from .models import BerthLease, WinterStorageLease
+    from leases.models import BerthLease, WinterStorageLease
+    from resources.models import Berth
 
 
 def calculate_season_start_date(lease_start: date = None) -> date:
@@ -219,3 +221,59 @@ def terminate_lease(
         )
 
     return lease
+
+
+def exchange_berth_for_lease(
+    old_lease: BerthLease,
+    new_berth: Berth,
+    switch_date: date,
+    old_lease_comment: str,
+    new_lease_comment: str,
+) -> (BerthLease, BerthLease):
+    # Avoid circular imports
+    from leases.models import BerthLease
+
+    end_date = old_lease.end_date
+    contract = None
+    if hasattr(old_lease, "contract"):
+        contract = old_lease.contract
+
+    old_lease = terminate_lease(
+        lease=old_lease, end_date=switch_date, send_notice=False,
+    )
+    if len(old_lease.comment) > 0:
+        old_lease.comment += f"\n{old_lease_comment}"
+    else:
+        old_lease.comment = old_lease_comment
+    old_lease.save(update_fields=["comment"])
+
+    try:
+        new_lease = BerthLease.objects.create(
+            berth=new_berth,
+            boat=old_lease.boat,
+            customer=old_lease.customer,
+            renew_automatically=old_lease.renew_automatically,
+            status=LeaseStatus.PAID,
+            start_date=switch_date,
+            end_date=end_date,
+            comment=_(
+                f"{new_lease_comment}\n"
+                f"{_('Previous berth info')}:\n"
+                f"{_('Harbor name')}: {old_lease.berth.pier.harbor.name}\n"
+                f"{_('Pier ID')}: {old_lease.berth.pier.identifier}\n"
+                f"{_('Berth number')}: {old_lease.berth.number}\n"
+            ),
+        )
+
+        if contract:
+            contract.lease = new_lease
+            contract.save()
+            old_lease.refresh_from_db()
+            new_lease.refresh_from_db()
+
+    except ValidationError as e:
+        # Flatten all the error messages on a single list
+        errors = sum(e.message_dict.values(), [])
+        raise VenepaikkaGraphQLError(errors)
+
+    return old_lease, new_lease

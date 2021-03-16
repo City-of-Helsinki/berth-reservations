@@ -1,7 +1,9 @@
 import threading
+from datetime import date, datetime
 
 import graphene
 from anymail.exceptions import AnymailError
+from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
@@ -12,6 +14,7 @@ from applications.new_schema import BerthApplicationNode, WinterStorageApplicati
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from contracts.services import get_contract_service
 from customers.models import CustomerProfile
+from leases.utils import exchange_berth_for_lease
 from payments.enums import OrderStatus
 from payments.models import BerthProduct, Order, WinterStorageProduct
 from resources.schema import BerthNode, WinterStoragePlaceNode, WinterStorageSectionNode
@@ -28,7 +31,7 @@ from ..enums import LeaseStatus
 from ..models import BerthLease, WinterStorageLease
 from ..services import BerthInvoicingService
 from ..stickers import get_next_sticker_number
-from ..utils import terminate_lease
+from ..utils import calculate_berth_lease_start_date, terminate_lease
 from .types import BerthLeaseNode, WinterStorageLeaseNode
 
 
@@ -213,6 +216,58 @@ class DeleteBerthLeaseMutation(graphene.ClientIDMutation):
         lease.delete()
 
         return DeleteBerthLeaseMutation()
+
+
+class SwitchBerthMutation(graphene.ClientIDMutation):
+    class Input:
+        old_lease_id = graphene.ID(required=True)
+        new_berth_id = graphene.ID(required=True)
+        switch_date = graphene.Date(
+            description="The date which will mark the end of the old lease and the start of the new lease."
+            "If none is provided, it will default to the day when the mutation is called"
+        )
+
+    old_berth_lease = graphene.Field(BerthLeaseNode)
+    new_berth_lease = graphene.Field(BerthLeaseNode)
+
+    @classmethod
+    def validate_switch_date(cls, switch_date):
+        if isinstance(switch_date, datetime):
+            switch_date = switch_date.date()
+        if switch_date < date.today() - relativedelta(months=6):
+            raise VenepaikkaGraphQLError(
+                _("Switch date is more than 6 months in the past")
+            )
+
+    @classmethod
+    def validate_old_lease(cls, old_lease):
+        if not old_lease.is_active:
+            raise VenepaikkaGraphQLError(_("Berth lease is not active"))
+
+    @classmethod
+    @add_permission_required(BerthLease)
+    @change_permission_required(BerthLease)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, old_lease_id, new_berth_id, **input):
+        switch_date = input.get("switch_date") or calculate_berth_lease_start_date()
+        cls.validate_switch_date(switch_date)
+
+        old_lease = get_node_from_global_id(
+            info, old_lease_id, only_type=BerthLeaseNode, nullable=False,
+        )
+        cls.validate_old_lease(old_lease)
+
+        new_berth = get_node_from_global_id(
+            info, new_berth_id, only_type=BerthNode, nullable=False,
+        )
+
+        old_lease_comment = _("Lease terminated due to berth switch")
+        new_lease_comment = _("Lease created from a berth switch")
+        old_lease, new_lease = exchange_berth_for_lease(
+            old_lease, new_berth, switch_date, old_lease_comment, new_lease_comment,
+        )
+
+        return SwitchBerthMutation(old_berth_lease=old_lease, new_berth_lease=new_lease)
 
 
 class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
@@ -575,6 +630,17 @@ class Mutation:
         "\n\nErrors:"
         "\n* A berth lease that is not `DRAFTED` anymore is passed"
         "\n* The passed lease ID doesn't exist"
+    )
+    switch_berth = SwitchBerthMutation.Field(
+        description="Switches the berth of a `BerthLease` object to the provided `Berth`."
+        "\n\n**Requires permissions** to edit and create leases."
+        "\n\nErrors:"
+        "\n* The passed lease or berth ID doesn't exist"
+        "\n* A berth lease that is not `PAID` is passed"
+        "\n* The the start date year does not match with the end date year"
+        "\n* A berth lease that has no contract is passed"
+        "\n* The passed berth already has a lease"
+        "\n* The provided `switch_date` is more than 6 months in the past"
     )
     terminate_berth_lease = TerminateBerthLeaseMutation.Field(
         description="Marks a `BerthLease` as terminated."
