@@ -5,6 +5,8 @@ from applications.tests.conftest import *  # noqa
 from berth_reservations.tests.conftest import *  # noqa
 from customers.tests.conftest import *  # noqa
 from customers.tests.factories import BoatFactory
+from leases.enums import LeaseStatus
+from payments.enums import OrderStatus
 from resources.tests.conftest import *  # noqa
 
 from ..notifications import NotificationType
@@ -21,6 +23,18 @@ def sticker_sequences():
 def berth_lease():
     boat = BoatFactory()
     return BerthLeaseFactory(customer=boat.owner, boat=boat)
+
+
+@pytest.fixture
+def waiting_berth_order(customer_profile):
+    from payments.tests.conftest import _generate_order  # avoid circular import
+
+    order = _generate_order("berth_order")
+    order.status = OrderStatus.WAITING
+    order.save()
+    order.lease.status = LeaseStatus.OFFERED
+    order.lease.save()
+    return order
 
 
 @pytest.fixture
