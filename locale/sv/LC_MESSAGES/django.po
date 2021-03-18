@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-09 14:10+0200\n"
+"POT-Creation-Date: 2021-03-18 09:10+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -88,20 +88,20 @@ msgstr "Erbjudande skickat"
 msgid "No suitable berths"
 msgstr "Inga lämpliga båtplatser"
 
-msgid "Notified that there are no suitable berths"
-msgstr ""
-
 msgid "Handled"
-msgstr ""
+msgstr "Hanteras"
+
+msgid "Rejected"
+msgstr "Avvisad"
 
 msgid "Expired"
 msgstr "Utgången"
 
 msgid "Marked"
-msgstr ""
+msgstr "Markant"
 
 msgid "Unmarked"
-msgstr ""
+msgstr "Omärkt"
 
 msgid "priority"
 msgstr "prioritet"
@@ -241,10 +241,8 @@ msgstr "godkänn villkoren"
 msgid "BerthApplication with no lease can only be "
 msgstr "En båtplatsansökan utan hyresavtal kan endast vara "
 
-#, fuzzy
-#| msgid "Application type"
 msgid "application area type"
-msgstr "Typ av ansökan"
+msgstr ""
 
 msgid "chosen winter storage areas"
 msgstr "valda vinterupplagsområden"
@@ -258,26 +256,20 @@ msgstr "trailerns registreringsnummer"
 msgid "Customer cannot be disconnected from processed applications"
 msgstr "Kunden kan inte kopplas bort från bearbetade applikationer"
 
-#, fuzzy
-#| msgid "Application type"
 msgid "Application has a lease"
-msgstr "Typ av ansökan"
+msgstr "Ansökan har ett hyresavtal"
 
 msgid "Berth application created"
 msgstr "Ansökan om båtplats har skapats"
 
-#, fuzzy
-#| msgid "Berth application created"
 msgid "Berth application rejected"
-msgstr "Ansökan om båtplats har skapats"
+msgstr "Ansökan om båtplats avvisat"
 
 msgid "Winter storage application created"
 msgstr "Ansökan om vinteruppläggning har skapats"
 
-#, fuzzy
-#| msgid "Winter storage application created"
 msgid "Unmarked winter storage application created"
-msgstr "Ansökan om vinteruppläggning har skapats"
+msgstr "Omärkt ansökan om vinteruppläggning har skapats"
 
 msgid "Finnish"
 msgstr "Finska"
@@ -287,6 +279,33 @@ msgstr "Svenska"
 
 msgid "Swedish"
 msgstr "Engelska"
+
+msgid "New"
+msgstr "Ny"
+
+msgid "Signed"
+msgstr "Signerad"
+
+msgid "Deleted"
+msgstr "Raderad"
+
+msgid "Cancelled"
+msgstr "Annullerad"
+
+msgid "contract status"
+msgstr "avtal status"
+
+msgid "No order found for given order number"
+msgstr ""
+
+msgid "No contract found for given order"
+msgstr ""
+
+msgid "return_url is not a valid URL"
+msgstr ""
+
+msgid "auth_service is not a supported authentication service"
+msgstr ""
 
 msgid "Online payment"
 msgstr "Nätbetalning"
@@ -315,10 +334,8 @@ msgstr "Inspektion"
 msgid "Insurance"
 msgstr "Försäkring"
 
-#, fuzzy
-#| msgid "customer profile"
 msgid "No customer ID provided"
-msgstr "kundprofil"
+msgstr ""
 
 msgid "invoicing type"
 msgstr "typ av fakturering"
@@ -572,6 +589,9 @@ msgstr ""
 msgid "Paid"
 msgstr "Betald"
 
+msgid "Terminated"
+msgstr "Avslutad"
+
 msgid "customer's boat"
 msgstr "kundens båt"
 
@@ -628,20 +648,14 @@ msgstr "Den valda båtplatsen är inte aktiv"
 msgid "place"
 msgstr "plats"
 
-#, fuzzy
-#| msgid "Inspection"
 msgid "section"
-msgstr "Inspektion"
+msgstr "sektion"
 
-#, fuzzy
-#| msgid "order number"
 msgid "sticker number"
-msgstr "beställningsnummer"
+msgstr ""
 
-#, fuzzy
-#| msgid "order number"
 msgid "sticker posted"
-msgstr "beställningsnummer"
+msgstr ""
 
 msgid "winter storage lease"
 msgstr "hyresavtal för vinteruppläggningsplats"
@@ -649,16 +663,11 @@ msgstr "hyresavtal för vinteruppläggningsplats"
 msgid "winter storage leases"
 msgstr "hyresavtal för vinteruppläggningsplatser"
 
-#, fuzzy
-#| msgid "Lease cannot have both place and area assigned"
 msgid "Lease cannot have both place and section assigned"
 msgstr ""
-"Det går inte att anvisa både en plats och ett område för ett hyresavtal"
 
-#, fuzzy
-#| msgid "Lease must have either place or area assigned"
 msgid "Lease must have either place or section assigned"
-msgstr "Antingen en plats eller ett område ska anvisas för hyresavtalet"
+msgstr ""
 
 msgid "WinterStoragePlace already has a lease"
 msgstr "Det finns redan ett hyresavtal för vinteruppläggningsplatsen"
@@ -669,11 +678,8 @@ msgstr "Den valda platsen är inte aktiv"
 msgid "Cannot change the place assigned to this lease"
 msgstr "Det går inte att byta ut platsen som är anvisad för detta hyresavtal"
 
-#, fuzzy
-#| msgid "Cannot change the berth assigned to this lease"
 msgid "Cannot change the section assigned to this lease"
 msgstr ""
-"Det går inte att byta ut båtplatsen som är anvisad för detta hyresavtal"
 
 msgid "time created"
 msgstr "tidpunkt för skapandet"
@@ -700,13 +706,24 @@ msgid "winter storage lease changes"
 msgstr "ändringar i hyresavtal för vinteruppläggningsplats"
 
 msgid "Next season invoices sent"
-msgstr ""
+msgstr "Nästa säsongs fakturor har skickats"
 
 msgid "Terminated berth lease"
 msgstr "Båtplats avslutades"
 
+msgid "Terminated winter storage lease"
+msgstr "Uppsagt vinteruppläggningsplats"
+
+msgid ""
+"Can not specify both application and customer when creating a new berth lease"
+msgstr ""
+
 msgid "Application must be connected to an existing customer first"
 msgstr "Ansökan måste först kopplas till en existerande kund"
+
+msgid ""
+"Must specify either application or customer when creating a new berth lease"
+msgstr ""
 
 msgid "Boat does not belong to the same customer as the Application"
 msgstr "Båten tillhör inte samma kund som ansökan"
@@ -715,32 +732,56 @@ msgstr "Båten tillhör inte samma kund som ansökan"
 msgid "Lease object is not DRAFTED anymore: {lease.status}"
 msgstr "Hyresobjektet är inte längre ett UTKAST: {lease.status}"
 
-#, fuzzy
-#| msgid "Cannot receive both Winter Storage Place and Area"
+msgid "Switch date is more than 6 months in the past"
+msgstr ""
+
+msgid "Berth lease is not active"
+msgstr "hyresavtal för båtplats är inte aktiv"
+
+msgid "Lease terminated due to berth switch"
+msgstr ""
+
+msgid "Lease created from a berth switch"
+msgstr ""
+
 msgid "Cannot receive both Winter Storage Place and Section"
 msgstr ""
-"Det går inte att ta emot både en plats och ett område för vinteruppläggning"
 
-#, fuzzy
-#| msgid "Either Winter Storage Place or Area are required"
 msgid "Either Winter Storage Place or Section are required"
-msgstr "Antingen plats eller område för vinteruppläggning krävs"
+msgstr ""
 
 msgid "Lease must be in PAID status"
 msgstr ""
 
-#, fuzzy
-#| msgid "estimated number of unmarked places"
 msgid "Lease must refer to unmarked area"
-msgstr "uppskattat antal omärkta platser"
+msgstr ""
 
 msgid "All leases must have an assigned sticker number"
 msgstr ""
 
-#, fuzzy
-#| msgid "Application must be connected to an existing customer first"
+msgid "Missing customer email"
+msgstr ""
+
+#, python-brace-format
+msgid "Limit of failures reached: {self.failure_count} elements failed"
+msgstr ""
+
 msgid "The application is not connected to a customer"
-msgstr "Ansökan måste först kopplas till en existerande kund"
+msgstr "Ansökan måste vara kopplat till en kund"
+
+msgid "No suitable product found"
+msgstr "Inga lämpliga produkt hittades"
+
+#, python-brace-format
+msgid "Lease is not paid: {lease.status}"
+msgstr "Hyresobjektet är inte betald: {lease.status}"
+
+msgid "The lease has no email and no profile token was provided"
+msgstr ""
+
+#, python-brace-format
+msgid "{new_lease_comment}\n"
+msgstr ""
 
 msgid "Pretax price"
 msgstr "Pris före skatt"
@@ -760,10 +801,8 @@ msgstr "Skatteprocent för hela beställningen"
 msgid "Place"
 msgstr "Plats"
 
-#, fuzzy
-#| msgid "order number"
 msgid "Order number"
-msgstr "beställningsnummer"
+msgstr "Beställningsnummer"
 
 msgid "Invalidate selected tokens"
 msgstr ""
@@ -801,13 +840,17 @@ msgstr "Procentvärde"
 msgid "Waiting"
 msgstr "Väntar"
 
-msgid "Rejected"
-msgstr "Avvisad"
+msgid "Paid manually"
+msgstr ""
 
-#, fuzzy
-#| msgid "order"
+msgid "Refunded"
+msgstr "Återbetalat"
+
+msgid "Accepted"
+msgstr ""
+
 msgid "Lease order"
-msgstr "beställning"
+msgstr "Hyresorder"
 
 msgid "Additional product order"
 msgstr ""
@@ -818,22 +861,25 @@ msgstr ""
 msgid "Renew berth order"
 msgstr ""
 
-#, fuzzy
-#| msgid "berth switch reason"
 msgid "Berth switch order"
-msgstr "orsak till byte av båtplats"
+msgstr "ordning till byte av båtplats"
 
-#, fuzzy
-#| msgid "winter storage area"
 msgid "Winter storage order"
-msgstr "vinterupplagsområde"
+msgstr "Vinteruppläggningsordning"
 
-#, fuzzy
-#| msgid "winter storage area"
 msgid "Unmarked winter storage order"
-msgstr "vinterupplagsområde"
+msgstr "Omärkt vinteruppläggningsordning"
 
 msgid "Invalid order"
+msgstr ""
+
+msgid "Tier 1"
+msgstr ""
+
+msgid "Tier 2"
+msgstr ""
+
+msgid "Tier 3"
 msgstr ""
 
 msgid "price"
@@ -842,11 +888,26 @@ msgstr "pris"
 msgid "tax percentage"
 msgstr "vinterupplagsområde"
 
-msgid "price group"
-msgstr "prisgrupp"
+msgid "minimum width"
+msgstr ""
+
+msgid "maximum width"
+msgstr ""
+
+msgid "tier 1 price"
+msgstr ""
+
+msgid "tier 2 price"
+msgstr ""
+
+msgid "tier 3 price"
+msgstr ""
 
 msgid "Berth product"
 msgstr "Båtplats"
+
+msgid "Tier not implemented"
+msgstr ""
 
 msgid "winter storage area"
 msgstr "vinterupplagsområde"
@@ -867,10 +928,8 @@ msgstr "Fasta tjänster gäller endast för en säsong"
 msgid "order number"
 msgstr "beställningsnummer"
 
-#, fuzzy
-#| msgid "berth type"
 msgid "order type"
-msgstr "båtplatstyp"
+msgstr "ordertyp"
 
 msgid "due date"
 msgstr "förfallodatum"
@@ -909,6 +968,9 @@ msgstr ""
 "Det går inte att byta ut hyresavtalet som är kopplat till den här "
 "beställningen"
 
+msgid "Cannot change due date of this order"
+msgstr ""
+
 msgid "The product passed is not valid"
 msgstr "Produkten är inte giltig"
 
@@ -930,8 +992,8 @@ msgid "Cannot change the product assigned to this order line"
 msgstr ""
 "Det går inte att byta ut produkten som är anvisad för denna beställningsrad"
 
-msgid "order log entry"
-msgstr "post i beställningshistorik"
+msgid "Lease must have a paid order"
+msgstr ""
 
 msgid "order log entries"
 msgstr "poster i beställningshistorik"
@@ -939,10 +1001,32 @@ msgstr "poster i beställningshistorik"
 msgid "token"
 msgstr ""
 
-#, fuzzy
-#| msgid "Cancelled"
 msgid "cancelled"
-msgstr "Anullerad"
+msgstr "annullerad"
+
+msgid "refund id"
+msgstr ""
+
+msgid "amount"
+msgstr "värde"
+
+msgid "Cannot refund orders that are not paid"
+msgstr ""
+
+msgid "order refund"
+msgstr "orderåterbetalning"
+
+msgid "refund log entries"
+msgstr ""
+
+msgid "The lease has to belong to the same customer as the offer"
+msgstr ""
+
+msgid "The application has to be a switch application"
+msgstr ""
+
+msgid "The exchanged lease has to be from the last season"
+msgstr ""
 
 msgid "New berth order approved"
 msgstr "Erbjudande om båtplats"
@@ -962,8 +1046,14 @@ msgstr "Faktura för plats på upplagsområde som fylls i upptagningsordning"
 msgid "Additional product order approved"
 msgstr "Ytterligare servicefaktura"
 
-msgid "Confirmation"
-msgstr "Bekräftelse"
+msgid "Order refunded"
+msgstr "Order återbetalat"
+
+msgid "Order cancelled"
+msgstr "Beställningen är avbruten"
+
+msgid "[SMS] Invoice notice"
+msgstr "[SMS] Fakturameddelande"
 
 msgid "Payment service is unreachable"
 msgstr "Betaltjänsten kan inte nås"
@@ -977,38 +1067,55 @@ msgstr "Det finns redan en beställning med samma ID"
 msgid "Payment service is down for maintenance"
 msgstr "Betaltjänsten är stängd för underhåll"
 
+msgid "Cannot refund an order that has not been paid through VismaPay"
+msgstr ""
+
 msgid "Additional product already exists"
 msgstr "Ytterligare tjänster finns redan"
 
 msgid "Lease with the given ID does not exist"
 msgstr "Det finns inget hyresavtal med den valda ID-koden"
 
-#, fuzzy
-#| msgid "Storage on ice"
 msgid "Only storage on ice supported"
-msgstr "Lämnats i is"
+msgstr ""
+
+msgid "Manually updated by admin"
+msgstr ""
 
 msgid "The order is not valid anymore"
 msgstr "Beställningen gäller inte längre"
 
-#, fuzzy
-#| msgid "winter storage area"
 msgid "Cannot cancel Unmarked winter storage order"
-msgstr "vinterupplagsområde"
+msgstr ""
 
 msgid "Order rejected by customer"
 msgstr ""
 
-#, fuzzy
-#| msgid "The order is not valid anymore"
+msgid "Cannot resend an invoice for a lease that is not currently offered."
+msgstr ""
+
+msgid ""
+"Profile token is required if an order does not previously have email or "
+"phone."
+msgstr ""
+
 msgid "Order does not have a valid type"
-msgstr "Beställningen gäller inte längre"
+msgstr ""
 
 msgid "Invalid order status"
 msgstr ""
 
+msgid "No email was found"
+msgstr ""
+
+msgid "Cannot resend an order for a lease not in status OFFERED"
+msgstr ""
+
 msgid "Boat berth invoice"
 msgstr "Båtplatsfaktura"
+
+msgid "Confirmation"
+msgstr "Bekräftelse"
 
 msgid "Refund confirmation"
 msgstr "Återbetalningsmeddelande"
@@ -1047,10 +1154,10 @@ msgid "Trawler place"
 msgstr "Trålarplats"
 
 msgid "East"
-msgstr ""
+msgstr "Öster"
 
 msgid "West"
-msgstr ""
+msgstr "Västerut"
 
 msgid "servicemap ID"
 msgstr "servicemap-ID"
@@ -1109,6 +1216,9 @@ msgstr "belysning"
 msgid "personal electricity contract"
 msgstr "personligt elavtal"
 
+msgid "price tier"
+msgstr ""
+
 msgid "piers"
 msgstr "bryggor"
 
@@ -1157,6 +1267,9 @@ msgstr "nummer"
 msgid "is accessible"
 msgstr "är tillgänglig"
 
+msgid "is invoiceable"
+msgstr ""
+
 msgid "berths"
 msgstr "båtplatser"
 
@@ -1168,6 +1281,19 @@ msgstr "vinteruppläggningsplats"
 
 msgid "winter storage places"
 msgstr "vinteruppläggningsplatser"
+
+#, python-brace-format
+msgid "Cannot delete {model_name} because it has some related leases"
+msgstr ""
+
+#, python-brace-format
+msgid ""
+"Cannot delete WinterStoragePlaceType because it has {place_count} related "
+"places"
+msgstr ""
+
+msgid "Cannot pass both pier and harbor filters"
+msgstr ""
 
 msgid ""
 "You cannot filter by dimension (width, length) and application a the same "
@@ -1184,6 +1310,9 @@ msgstr "tidpunkt för redigering"
 
 msgid "You do not have permission to perform this action."
 msgstr "Du har inte tillstånd att utföra denna åtgärd."
+
+#~ msgid "order log entry"
+#~ msgstr "post i beställningshistorik"
 
 #~ msgid "Berth available"
 #~ msgstr "Båtplatsen är tillgänglig"
