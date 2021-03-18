@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from munigeo.models import Municipality
 from parler.models import TranslatableModel, TranslatedFields
 
-from resources.models import WinterStorageArea as NewWSArea
+from resources.models import Harbor as NewHarbor, WinterStorageArea as NewWSArea
 
 
 class BoatType(TranslatableModel):
@@ -160,6 +160,13 @@ class Harbor(AbstractArea, TranslatableModel):
     )
     maximum_depth = models.PositiveSmallIntegerField(
         verbose_name=_("Maximum berth depth"), null=True, blank=True
+    )
+    resources_harbor = models.OneToOneField(
+        NewHarbor,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="harbors_harbor",
     )
 
     translations = TranslatedFields(

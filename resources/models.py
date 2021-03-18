@@ -495,6 +495,13 @@ class Pier(AbstractAreaSection):
         verbose_name=_("price tier"),
         default=PriceTier.TIER_1,
     )
+    harbors_harbor = models.ForeignKey(
+        "harbors.Harbor",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="resources_pier",
+    )
 
     objects = PierManager()
 
