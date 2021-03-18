@@ -39,6 +39,8 @@ def test_initiate_refund_success(provider_base_config: dict, order: Order):
     """Test the request creator constructs the payload base and returns a url that contains a token"""
     request = RequestFactory().request()
     order.status = OrderStatus.PAID
+    order.lease.status = LeaseStatus.PAID
+    order.lease.save()
     order.save()
 
     OrderToken.objects.create(
@@ -169,6 +171,8 @@ def test_handle_initiate_refund_error_validation(order, provider_base_config):
         order=order, token="12345", valid_until=now() + relativedelta(days=7)
     )
     order.status = OrderStatus.PAID
+    order.lease.status = LeaseStatus.PAID
+    order.lease.save()
     order.save()
     request = RequestFactory().request()
 
