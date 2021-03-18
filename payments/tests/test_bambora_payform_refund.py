@@ -58,7 +58,7 @@ def test_initiate_refund_success(provider_base_config: dict, order: Order):
     assert refund.refund_id == "123456"
     assert refund.order == order
     assert refund.status == OrderRefundStatus.PENDING
-    assert refund.amount == order.price
+    assert refund.amount == order.total_price
 
     args = mock_call.call_args.kwargs.get("json")
     assert (
@@ -210,7 +210,9 @@ def test_handle_notify_request_success(
     order.lease.status = LeaseStatus.PAID
     order.lease.save()
     order.save()
-    refund = OrderRefundFactory(order=order, refund_id="1234567", amount=order.price)
+    refund = OrderRefundFactory(
+        order=order, refund_id="1234567", amount=order.total_price
+    )
 
     rf = RequestFactory()
     request = rf.get("/payments/notify_refund/", notify_success_params)
@@ -236,7 +238,9 @@ def test_handle_notify_request_payment_failed(provider_base_config, order):
     order.order_number = "abc123"
     order.status = OrderStatus.PAID
     order.save()
-    refund = OrderRefundFactory(order=order, refund_id="1234567", amount=order.price)
+    refund = OrderRefundFactory(
+        order=order, refund_id="1234567", amount=order.total_price
+    )
 
     params = {
         "AUTHCODE": "8CF2D0EA9947D09B707E3C2953EF3014F1AD12D2BB0DCDBAC3ABD4601B50462B",

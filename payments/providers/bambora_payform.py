@@ -289,8 +289,9 @@ class BamboraPayformProvider(PaymentProvider):
         payload = {
             "version": "w3.1",
             "api_key": self.config.get(VENE_PAYMENTS_BAMBORA_API_KEY),
-            "amount": price_as_fractional_int(order.price),
+            "amount": price_as_fractional_int(order.total_price),
             "notify_url": self.get_notify_refund_url(),
+            "email": order.customer_email,
             "order_number": f"{order.order_number}-{order_token.created_at.timestamp()}",
         }
         self.payload_add_auth_code(payload)
