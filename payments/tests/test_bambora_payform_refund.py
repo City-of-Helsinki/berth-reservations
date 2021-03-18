@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.test.client import RequestFactory
 from django.utils.timezone import now
@@ -38,6 +39,8 @@ def test_initiate_refund_success(provider_base_config: dict, order: Order):
     """Test the request creator constructs the payload base and returns a url that contains a token"""
     request = RequestFactory().request()
     order.status = OrderStatus.PAID
+    order.lease.status = LeaseStatus.PAID
+    order.lease.save()
     order.save()
 
     OrderToken.objects.create(
@@ -57,13 +60,87 @@ def test_initiate_refund_success(provider_base_config: dict, order: Order):
     assert refund.refund_id == "123456"
     assert refund.order == order
     assert refund.status == OrderRefundStatus.PENDING
-    assert refund.amount == order.price
+    assert refund.amount == order.total_price
 
     args = mock_call.call_args.kwargs.get("json")
     assert (
         args.get("order_number")
         == f"{order.order_number}-{valid_token.created_at.timestamp()}"
     )
+
+
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
+)
+@pytest.mark.parametrize(
+    "order_status",
+    [
+        OrderStatus.CANCELLED,
+        OrderStatus.ERROR,
+        OrderStatus.EXPIRED,
+        OrderStatus.PAID_MANUALLY,
+        OrderStatus.REFUNDED,
+        OrderStatus.REJECTED,
+        OrderStatus.WAITING,
+    ],
+)
+def test_initiate_refund_invalid_order_status(
+    provider_base_config: dict, order: Order, order_status
+):
+    """Test the request creator constructs the payload base and returns a url that contains a token"""
+    request = RequestFactory().request()
+    order.status = order_status
+    order.save()
+
+    OrderToken.objects.create(
+        order=order, token="98765", valid_until=now() - relativedelta(hours=1)
+    )
+    OrderToken.objects.create(
+        order=order, token="12345", valid_until=now() + relativedelta(days=7)
+    )
+
+    payment_provider = create_bambora_provider(provider_base_config, request)
+    with pytest.raises(ValidationError) as exception:
+        payment_provider.initiate_refund(order)
+
+    assert "Cannot refund an order that is not paid" in str(exception)
+
+
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
+)
+@pytest.mark.parametrize(
+    "lease_status",
+    [
+        LeaseStatus.DRAFTED,
+        LeaseStatus.ERROR,
+        LeaseStatus.EXPIRED,
+        LeaseStatus.OFFERED,
+        LeaseStatus.TERMINATED,
+    ],
+)
+def test_initiate_refund_invalid_lease_status(
+    provider_base_config: dict, order: Order, lease_status
+):
+    """Test the request creator constructs the payload base and returns a url that contains a token"""
+    request = RequestFactory().request()
+    order.status = OrderStatus.PAID
+    order.lease.status = lease_status
+    order.lease.save()
+    order.save()
+
+    OrderToken.objects.create(
+        order=order, token="98765", valid_until=now() - relativedelta(hours=1)
+    )
+    OrderToken.objects.create(
+        order=order, token="12345", valid_until=now() + relativedelta(days=7)
+    )
+
+    payment_provider = create_bambora_provider(provider_base_config, request)
+    with pytest.raises(ValidationError) as exception:
+        payment_provider.initiate_refund(order)
+
+    assert "Cannot refund an order that is not paid" in str(exception)
 
 
 @pytest.mark.parametrize(
@@ -94,6 +171,8 @@ def test_handle_initiate_refund_error_validation(order, provider_base_config):
         order=order, token="12345", valid_until=now() + relativedelta(days=7)
     )
     order.status = OrderStatus.PAID
+    order.lease.status = LeaseStatus.PAID
+    order.lease.save()
     order.save()
     request = RequestFactory().request()
 
@@ -135,7 +214,9 @@ def test_handle_notify_request_success(
     order.lease.status = LeaseStatus.PAID
     order.lease.save()
     order.save()
-    refund = OrderRefundFactory(order=order, refund_id="1234567", amount=order.price)
+    refund = OrderRefundFactory(
+        order=order, refund_id="1234567", amount=order.total_price
+    )
 
     rf = RequestFactory()
     request = rf.get("/payments/notify_refund/", notify_success_params)
@@ -161,7 +242,9 @@ def test_handle_notify_request_payment_failed(provider_base_config, order):
     order.order_number = "abc123"
     order.status = OrderStatus.PAID
     order.save()
-    refund = OrderRefundFactory(order=order, refund_id="1234567", amount=order.price)
+    refund = OrderRefundFactory(
+        order=order, refund_id="1234567", amount=order.total_price
+    )
 
     params = {
         "AUTHCODE": "8CF2D0EA9947D09B707E3C2953EF3014F1AD12D2BB0DCDBAC3ABD4601B50462B",

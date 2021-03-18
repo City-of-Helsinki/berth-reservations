@@ -11,6 +11,7 @@ from berth_reservations.tests.utils import (
     assert_doesnt_exist,
     assert_not_enough_permissions,
 )
+from leases.enums import LeaseStatus
 from utils.relay import to_global_id
 
 from ..enums import OrderRefundStatus, OrderStatus
@@ -44,6 +45,8 @@ def test_refund_order(
 ):
     order.status = OrderStatus.PAID
     order.customer_email = "foo@email.com"
+    order.lease.status = LeaseStatus.PAID
+    order.lease.save()
     order.save()
     OrderToken.objects.create(
         order=order, token="1245", valid_until=today() + relativedelta(days=7)

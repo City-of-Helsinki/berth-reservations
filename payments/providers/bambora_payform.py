@@ -13,6 +13,7 @@ from django.http import HttpRequest, HttpResponse, HttpResponseServerError
 from django.utils.translation import gettext_lazy as _, override
 from requests.exceptions import RequestException
 
+from leases.enums import LeaseStatus
 from leases.utils import terminate_lease
 
 from ..enums import OrderRefundStatus, OrderStatus, OrderType
@@ -269,10 +270,10 @@ class BamboraPayformProvider(PaymentProvider):
     def initiate_refund(self, order: Order) -> OrderRefund:
         # Orders which are PAID_MANUALLY may not have an entry in Bambora,
         # so we can't guarantee that the refund will be executed
-        if order.status != OrderStatus.PAID:
-            raise ValidationError(
-                _("Cannot refund an order that has not been paid through VismaPay")
-            )
+        if (order.status != OrderStatus.PAID) or (
+            hasattr(order, "lease") and order.lease.status != LeaseStatus.PAID
+        ):
+            raise ValidationError(_("Cannot refund an order that is not paid"))
 
         order_token = (
             order.tokens.exclude(token__isnull=True, token__iexact="")
@@ -288,8 +289,9 @@ class BamboraPayformProvider(PaymentProvider):
         payload = {
             "version": "w3.1",
             "api_key": self.config.get(VENE_PAYMENTS_BAMBORA_API_KEY),
-            "amount": price_as_fractional_int(order.price),
+            "amount": price_as_fractional_int(order.total_price),
             "notify_url": self.get_notify_refund_url(),
+            "email": order.customer_email,
             "order_number": f"{order.order_number}-{order_token.created_at.timestamp()}",
         }
         self.payload_add_auth_code(payload)
