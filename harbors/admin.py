@@ -13,7 +13,11 @@ class BoatTypeAdmin(TranslatableAdmin):
 
 
 class HarborAdmin(TranslatableAdmin, admin.OSMGeoAdmin):
+    list_display = ("id", "__str__", "resources_harbor", "piers")
     filter_horizontal = ("suitable_boat_types",)
+
+    def piers(self, obj):
+        return ", ".join([str(pier) for pier in obj.resources_pier.all()])
 
 
 class WinterStorageAreaAdmin(TranslatableAdmin, admin.OSMGeoAdmin):
