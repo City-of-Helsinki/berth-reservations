@@ -18,6 +18,7 @@ from applications.enums import ApplicationAreaType
 from applications.models import BerthApplication, WinterStorageApplication
 from customers.models import CustomerProfile
 from customers.services import ProfileService
+from leases.enums import LeaseStatus
 from leases.models import BerthLease, WinterStorageLease
 from leases.stickers import get_next_sticker_number
 from leases.utils import calculate_season_start_date
@@ -1115,6 +1116,9 @@ class BerthSwitchOffer(AbstractOffer):
             raise ValidationError(
                 _("The exchanged lease has to be from the current season")
             )
+
+        if self.lease.status != LeaseStatus.PAID:
+            raise ValidationError(_("The associated lease must be paid"))
 
     def set_status(self, new_status: OfferStatus, comment: str = None) -> None:
         old_status = self.status

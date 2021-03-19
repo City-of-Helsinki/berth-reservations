@@ -1037,3 +1037,21 @@ def test_berth_switch_offer_another_season():
         )
 
     assert "The exchanged lease has to be from the current season" in str(exception)
+
+
+@pytest.mark.parametrize(
+    "lease_status",
+    [
+        LeaseStatus.DRAFTED,
+        LeaseStatus.ERROR,
+        LeaseStatus.EXPIRED,
+        LeaseStatus.OFFERED,
+        LeaseStatus.REFUSED,
+        LeaseStatus.TERMINATED,
+    ],
+)
+def test_berth_switch_offer_lease_not_paid(lease_status):
+    with pytest.raises(ValidationError) as exception:
+        BerthSwitchOfferFactory(lease__status=lease_status)
+
+    assert "The associated lease must be paid" in str(exception)
