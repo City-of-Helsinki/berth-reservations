@@ -3081,6 +3081,7 @@
         "maximum_width": 500,
         "maximum_length": 1800,
         "maximum_depth": null,
+        "disabled": true,
         "suitable_boat_types": []
     }
 }

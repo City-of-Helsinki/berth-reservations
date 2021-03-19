@@ -63,6 +63,7 @@ HARBOR_TO_PIER_MAPPINGS = {
     "2d8cd0cb-cae3-401e-9fc8-cd20e39c419a": 44,
     "204dfbfc-9bb5-429b-9c92-46953735d142": 37,
     "1c0b58f0-b66b-4593-8d77-964e26fc6101": 51,
+    "7582e577-faef-49da-b4bc-eff4dbd0043a": 45,
 }
 
 
