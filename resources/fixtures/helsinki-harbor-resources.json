@@ -585,8 +585,8 @@
   "pk": 16,
   "fields": {
     "language_code": "fi",
-    "name": "Merihaan venesatama (Hakaniemenranta 13)",
-    "street_address": "Hakaniemenranta 13",
+    "name": "Merihaan venesatama (Hakaniemenranta 30)",
+    "street_address": "Hakaniemenranta 30",
     "master": "9190743a-f883-4f92-8923-f572157bf6ab"
   }
 },
@@ -1145,8 +1145,8 @@
   "pk": 72,
   "fields": {
     "language_code": "en",
-    "name": "Merihaan venesatama (Hakaniemenranta 13)",
-    "street_address": "Hakaniemenranta 13",
+    "name": "Merihaan venesatama (Hakaniemenranta 30)",
+    "street_address": "Hakaniemenranta 30",
     "master": "9190743a-f883-4f92-8923-f572157bf6ab"
   }
 },
@@ -1155,8 +1155,8 @@
   "pk": 73,
   "fields": {
     "language_code": "sv",
-    "name": "Havshagens småbåtshamn (Hagnäskajen 13)",
-    "street_address": "Hagnäskajen 13",
+    "name": "Havshagens småbåtshamn (Hagnäskajen 30)",
+    "street_address": "Hagnäskajen 30",
     "master": "9190743a-f883-4f92-8923-f572157bf6ab"
   }
 },
@@ -4084,32 +4084,6 @@
       3,
       4,
       5
-    ]
-  }
-},
-{
-  "model": "resources.pier",
-  "pk": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.922Z",
-    "modified_at": "2020-04-06T11:56:25.944Z",
-    "identifier": "-",
-    "location": "SRID=4326;POINT (24.959497 60.17813499999998)",
-    "electricity": true,
-    "water": true,
-    "gate": true,
-    "harbor": "9190743a-f883-4f92-8923-f572157bf6ab",
-    "mooring": true,
-    "waste_collection": true,
-    "lighting": true,
-    "personal_electricity": false,
-    "price_tier": 1,
-    "suitable_boat_types": [
-      2,
-      3,
-      4,
-      5,
-      6
     ]
   }
 },
@@ -7832,20 +7806,6 @@
 },
 {
   "model": "resources.berth",
-  "pk": "085ff843-0ee0-4c86-a82f-921c3c42042c",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.512Z",
-    "is_active": false,
-    "number": "27",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "d9cea1d7-4cbb-4d21-870c-eb0066a85a50",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
   "pk": "08735228-28bf-4d88-997a-1e842e3a9a07",
   "fields": {
     "created_at": "2020-04-06T11:56:25.666Z",
@@ -8932,20 +8892,6 @@
     "number": "22",
     "pier": "af207c35-00db-433e-b42b-0f89a2aaf868",
     "berth_type": "e3cd2157-b938-44bc-acaf-3807b7532802",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
-  "pk": "0d3f60d8-5543-4533-92e7-ee36c11e7448",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.482Z",
-    "is_active": false,
-    "number": "18",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "e54c2da6-7c2c-482e-9eb1-6477fb09bb44",
     "comment": "",
     "is_accessible": null
   }
@@ -10142,20 +10088,6 @@
 },
 {
   "model": "resources.berth",
-  "pk": "12a85ff3-8e56-4a43-bc2e-09049fd47fe7",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.491Z",
-    "is_active": false,
-    "number": "21",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
   "pk": "12b6a5b3-cb13-4ea6-9b83-41f0810d4ec2",
   "fields": {
     "created_at": "2020-04-06T11:56:25.666Z",
@@ -10248,20 +10180,6 @@
     "number": "35",
     "pier": "438532db-0294-4077-876f-c2346460991a",
     "berth_type": "beed47ad-709f-412e-82ad-2c7b87712a22",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
-  "pk": "131d7c25-15ba-4c76-b26d-1fa3f1cd4596",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.419Z",
-    "is_active": false,
-    "number": "3",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
     "comment": "",
     "is_accessible": null
   }
@@ -12096,20 +12014,6 @@
     "number": "39",
     "pier": "43da53ac-7f48-44dc-a0ed-f35748e1996e",
     "berth_type": "a0dfe5e6-6eeb-405d-8d71-b571a02e5a23",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
-  "pk": "1c1063be-9580-449e-ae51-8c047fa0eca2",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.426Z",
-    "is_active": false,
-    "number": "4",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "e54c2da6-7c2c-482e-9eb1-6477fb09bb44",
     "comment": "",
     "is_accessible": null
   }
@@ -20936,20 +20840,6 @@
 },
 {
   "model": "resources.berth",
-  "pk": "42e27d24-e96e-4c00-952f-b9c208937f31",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.499Z",
-    "is_active": false,
-    "number": "23",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
   "pk": "42f81214-9670-47f6-b6aa-9a0fad797f32",
   "fields": {
     "created_at": "2020-04-06T11:56:25.666Z",
@@ -21476,20 +21366,6 @@
     "number": "12",
     "pier": "5c402717-c407-4358-bba8-2b394fde5826",
     "berth_type": "7a672e96-1ed7-42e1-a905-db9dc14938da",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
-  "pk": "4510f1bb-7e1c-4fb9-b8f8-be316358e3c3",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.439Z",
-    "is_active": false,
-    "number": "7",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
     "comment": "",
     "is_accessible": null
   }
@@ -24996,20 +24872,6 @@
 },
 {
   "model": "resources.berth",
-  "pk": "5435997f-0ace-45ed-8c3e-e68815218d56",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.472Z",
-    "is_active": false,
-    "number": "15",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
   "pk": "543ffce0-856a-4cdf-8d3f-f8f4096ac8cc",
   "fields": {
     "created_at": "2020-04-06T11:56:25.666Z",
@@ -26460,20 +26322,6 @@
     "number": "26",
     "pier": "541473a5-9fc9-4d38-874b-6b11448e62b2",
     "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
-  "pk": "5ab59fac-cf02-4b30-b1cf-e5636ca76309",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.475Z",
-    "is_active": false,
-    "number": "16",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "e54c2da6-7c2c-482e-9eb1-6477fb09bb44",
     "comment": "",
     "is_accessible": null
   }
@@ -27972,20 +27820,6 @@
     "number": "18",
     "pier": "53593a06-5b4f-49b9-9749-b8c2bc3deab9",
     "berth_type": "100b7106-5349-4e49-8146-de6acbb857e6",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
-  "pk": "62a80a04-2436-4d23-9483-4a0813c9add2",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.524Z",
-    "is_active": false,
-    "number": "31",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "d9cea1d7-4cbb-4d21-870c-eb0066a85a50",
     "comment": "",
     "is_accessible": null
   }
@@ -30212,20 +30046,6 @@
     "number": "6",
     "pier": "8038355e-ea72-4597-aad8-6c4fc8c3507d",
     "berth_type": "01b6bd2a-93ce-4ad6-ab8a-75e46d0d5d75",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
-  "pk": "6cec4fc7-5b20-447a-a65b-87b93ea1865a",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.488Z",
-    "is_active": false,
-    "number": "20",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "e54c2da6-7c2c-482e-9eb1-6477fb09bb44",
     "comment": "",
     "is_accessible": null
   }
@@ -32906,20 +32726,6 @@
 },
 {
   "model": "resources.berth",
-  "pk": "7881c185-02ae-42de-94e3-043c614d7554",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.453Z",
-    "is_active": false,
-    "number": "10",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "e54c2da6-7c2c-482e-9eb1-6477fb09bb44",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
   "pk": "7881ffd8-b347-47d4-bc7d-c9f97efe319e",
   "fields": {
     "created_at": "2020-04-06T11:56:25.666Z",
@@ -33208,20 +33014,6 @@
     "number": "30",
     "pier": "541473a5-9fc9-4d38-874b-6b11448e62b2",
     "berth_type": "36f2ffb3-67b5-4f62-9b12-fc06b25802eb",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
-  "pk": "7a3f7358-a28d-43bb-acb9-822dae560532",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.447Z",
-    "is_active": false,
-    "number": "9",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
     "comment": "",
     "is_accessible": null
   }
@@ -36574,20 +36366,6 @@
 },
 {
   "model": "resources.berth",
-  "pk": "8951d6b0-4b11-4958-8913-30af16a0b749",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.431Z",
-    "is_active": false,
-    "number": "5",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
   "pk": "89567567-b3d1-4963-8422-9fb68b3d5a73",
   "fields": {
     "created_at": "2020-04-06T11:56:25.666Z",
@@ -36932,20 +36710,6 @@
     "number": "16",
     "pier": "e519b3b6-f9e3-4e43-b4a8-622e8318f2ab",
     "berth_type": "100b7106-5349-4e49-8146-de6acbb857e6",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
-  "pk": "8ad5f0aa-5636-498d-9efd-b276f07078ed",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.411Z",
-    "is_active": false,
-    "number": "1",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
     "comment": "",
     "is_accessible": null
   }
@@ -37604,20 +37368,6 @@
     "number": "7",
     "pier": "43da53ac-7f48-44dc-a0ed-f35748e1996e",
     "berth_type": "7a672e96-1ed7-42e1-a905-db9dc14938da",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
-  "pk": "8e4bf1a3-3880-4958-a161-65f7f229144b",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.509Z",
-    "is_active": false,
-    "number": "26",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "e54c2da6-7c2c-482e-9eb1-6477fb09bb44",
     "comment": "",
     "is_accessible": null
   }
@@ -38870,20 +38620,6 @@
 },
 {
   "model": "resources.berth",
-  "pk": "9395a182-17b9-4900-890d-8154765c7603",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.435Z",
-    "is_active": false,
-    "number": "6",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "18d7b554-428b-49f2-a816-d1bae557c788",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
   "pk": "939ef6f3-3d39-44b0-b6a8-0d8e6b94c8e4",
   "fields": {
     "created_at": "2020-04-06T11:56:25.666Z",
@@ -39214,20 +38950,6 @@
     "number": "9",
     "pier": "60e91754-8760-4e32-b162-537d380e545c",
     "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
-  "pk": "9490e670-e764-4b0c-934d-bec060170f1f",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.517Z",
-    "is_active": false,
-    "number": "28",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "e54c2da6-7c2c-482e-9eb1-6477fb09bb44",
     "comment": "",
     "is_accessible": null
   }
@@ -42734,20 +42456,6 @@
 },
 {
   "model": "resources.berth",
-  "pk": "a3f7df90-5f1e-4871-a351-938de8a9f212",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.485Z",
-    "is_active": false,
-    "number": "19",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
   "pk": "a410cd2a-b8fc-48d1-927a-9be18925cdea",
   "fields": {
     "created_at": "2020-04-06T11:56:25.666Z",
@@ -43120,20 +42828,6 @@
     "number": "36",
     "pier": "cfa2d9a6-dd25-410d-9d09-9b99565add23",
     "berth_type": "96c102f3-ce7b-4220-859d-33ad8db934b7",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
-  "pk": "a5bfa39a-efb7-459c-a8eb-ab53715c748f",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.502Z",
-    "is_active": false,
-    "number": "24",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "e54c2da6-7c2c-482e-9eb1-6477fb09bb44",
     "comment": "",
     "is_accessible": null
   }
@@ -48082,20 +47776,6 @@
 },
 {
   "model": "resources.berth",
-  "pk": "bcd37747-9369-4b9c-8f42-c5b5262e0173",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.443Z",
-    "is_active": false,
-    "number": "8",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "e54c2da6-7c2c-482e-9eb1-6477fb09bb44",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
   "pk": "bcd5fcee-d7ee-47a2-9b4c-a0aad5783f1c",
   "fields": {
     "created_at": "2020-04-06T11:56:25.666Z",
@@ -50532,20 +50212,6 @@
 },
 {
   "model": "resources.berth",
-  "pk": "c727395a-fee2-4131-97f4-f3fdea9e3b8a",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.478Z",
-    "is_active": false,
-    "number": "17",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
   "pk": "c729fd69-c374-4741-ad2b-48f171a7ca65",
   "fields": {
     "created_at": "2020-04-06T11:56:25.666Z",
@@ -50708,20 +50374,6 @@
     "number": "51",
     "pier": "43da53ac-7f48-44dc-a0ed-f35748e1996e",
     "berth_type": "6b1bc10c-77e8-4551-8d82-a2b972d7f8a0",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
-  "pk": "c8156f24-fe39-4ab7-9ac1-14963191b530",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.506Z",
-    "is_active": false,
-    "number": "25",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "d9cea1d7-4cbb-4d21-870c-eb0066a85a50",
     "comment": "",
     "is_accessible": null
   }
@@ -52898,20 +52550,6 @@
 },
 {
   "model": "resources.berth",
-  "pk": "d1f5f3a2-4d22-47a3-9a20-067fc34c9ff9",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.460Z",
-    "is_active": false,
-    "number": "12",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "e54c2da6-7c2c-482e-9eb1-6477fb09bb44",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
   "pk": "d1fd865a-d3fb-4fbb-bb26-84bbc360b537",
   "fields": {
     "created_at": "2020-04-06T11:56:25.666Z",
@@ -53060,20 +52698,6 @@
     "number": "39",
     "pier": "2ed08847-866f-4634-912e-c2dcefdbafbe",
     "berth_type": "01b6bd2a-93ce-4ad6-ab8a-75e46d0d5d75",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
-  "pk": "d2817aea-f933-46d7-bee9-f5964eb63b84",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.464Z",
-    "is_active": false,
-    "number": "13",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
     "comment": "",
     "is_accessible": null
   }
@@ -54292,20 +53916,6 @@
     "number": "30",
     "pier": "c3b8ff59-d610-4441-802f-a924490416c5",
     "berth_type": "100b7106-5349-4e49-8146-de6acbb857e6",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
-  "pk": "d826d013-f80d-41b3-8ba4-735fd92abb4f",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.495Z",
-    "is_active": false,
-    "number": "22",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "e54c2da6-7c2c-482e-9eb1-6477fb09bb44",
     "comment": "",
     "is_accessible": null
   }
@@ -56146,20 +55756,6 @@
 },
 {
   "model": "resources.berth",
-  "pk": "e0356934-60b7-4be8-8be2-8de9b48a671b",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.416Z",
-    "is_active": false,
-    "number": "2",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "e54c2da6-7c2c-482e-9eb1-6477fb09bb44",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
   "pk": "e04b08d5-68ab-4166-a71e-9f7ebaaac1e4",
   "fields": {
     "created_at": "2020-04-06T11:56:25.666Z",
@@ -56728,20 +56324,6 @@
     "number": "58",
     "pier": "60e91754-8760-4e32-b162-537d380e545c",
     "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
-  "pk": "e2ac0d5a-5c68-41dc-af11-226530908126",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.408Z",
-    "is_active": false,
-    "number": "0",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "7719297a-272f-441c-b5ee-82d2ed17e5c3",
     "comment": "",
     "is_accessible": null
   }
@@ -57890,20 +57472,6 @@
     "number": "82",
     "pier": "2ed08847-866f-4634-912e-c2dcefdbafbe",
     "berth_type": "382f52fb-e8ad-44dd-82d3-e2ab55b6e841",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
-  "pk": "e88e23f7-7ac0-4cf6-8a7d-c6d145ff1f4d",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.468Z",
-    "is_active": false,
-    "number": "14",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "e54c2da6-7c2c-482e-9eb1-6477fb09bb44",
     "comment": "",
     "is_accessible": null
   }
@@ -62040,20 +61608,6 @@
 },
 {
   "model": "resources.berth",
-  "pk": "faa3af1c-0f1c-4d65-abf9-342957603685",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.521Z",
-    "is_active": false,
-    "number": "29",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "d9cea1d7-4cbb-4d21-870c-eb0066a85a50",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
   "pk": "facea054-ef40-4f87-a2fa-0da3df861662",
   "fields": {
     "created_at": "2020-04-06T11:56:25.666Z",
@@ -62986,20 +62540,6 @@
     "number": "23",
     "pier": "a66c0e04-9593-4ba3-85f4-91d7c8cf407f",
     "berth_type": "4e5593b0-ee8f-4b4d-a129-1e46bc0167c0",
-    "comment": "",
-    "is_accessible": null
-  }
-},
-{
-  "model": "resources.berth",
-  "pk": "fedf51da-6679-485c-ba9c-02e7c24e8d64",
-  "fields": {
-    "created_at": "2020-04-06T11:56:25.666Z",
-    "modified_at": "2020-12-16T12:10:41.456Z",
-    "is_active": false,
-    "number": "11",
-    "pier": "b3ba51a1-c48d-43df-a9b5-6b7faba7a92a",
-    "berth_type": "dda07afd-f071-42ea-91cf-9c1157dc26f0",
     "comment": "",
     "is_accessible": null
   }

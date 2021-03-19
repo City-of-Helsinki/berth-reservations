@@ -662,26 +662,6 @@
 },
 {
     "model": "harbors.harbortranslation",
-    "pk": 31,
-    "fields": {
-        "language_code": "fi",
-        "name": "Merihaan venesatama (Hakaniemenranta 13)",
-        "street_address": "Hakaniemenranta 13",
-        "master": 16
-    }
-},
-{
-    "model": "harbors.harbortranslation",
-    "pk": 32,
-    "fields": {
-        "language_code": "sv",
-        "name": "Havshagens sm\u00e5b\u00e5tshamn (Hagn\u00e4skajen 13)",
-        "street_address": "Hagn\u00e4skajen 13",
-        "master": 16
-    }
-},
-{
-    "model": "harbors.harbortranslation",
     "pk": 33,
     "fields": {
         "language_code": "fi",
@@ -1877,40 +1857,6 @@
         "suitable_boat_types": [
             2,
             3
-        ]
-    }
-},
-{
-    "model": "harbors.harbor",
-    "pk": 16,
-    "fields": {
-        "servicemap_id": "41454",
-        "disabled": true,
-        "zip_code": "00530",
-        "phone": "",
-        "email": "",
-        "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/merihaan-venesatama",
-        "location": "SRID=4326;POINT (24.959497 60.17813499999998)",
-        "municipality": "helsinki",
-        "image_file": "harbors/merihaka/41454.jpg",
-        "image_link": "",
-        "mooring": true,
-        "electricity": true,
-        "water": true,
-        "waste_collection": true,
-        "gate": true,
-        "lighting": true,
-        "availability_level": null,
-        "number_of_places": null,
-        "maximum_width": null,
-        "maximum_length": null,
-        "maximum_depth": null,
-        "suitable_boat_types": [
-            2,
-            3,
-            4,
-            5,
-            6
         ]
     }
 },
