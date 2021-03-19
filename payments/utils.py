@@ -571,7 +571,3 @@ def get_context(
             "additional_product": {"name": additional_product_name, "season": season},
             "payment_url": payment_url,
         }
-
-
-def default_due_date():
-    return today() + relativedelta(weeks=2)

@@ -185,7 +185,7 @@ class OrderLogEntryFactory(factory.django.DjangoModelFactory):
 
 class AbstractOfferFactory(factory.django.DjangoModelFactory):
     customer = factory.SubFactory(CustomerProfileFactory, user=None)
-    status = factory.LazyFunction(lambda: OfferStatus.PENDING)
+    status = factory.LazyFunction(lambda: OfferStatus.DRAFTED)
     customer_first_name = factory.Faker("first_name", locale="fi_FI")
     customer_last_name = factory.Faker("last_name", locale="fi_FI")
     customer_email = factory.LazyAttribute(

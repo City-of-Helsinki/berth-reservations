@@ -47,7 +47,6 @@ from .utils import (
     calculate_product_partial_year_price,
     calculate_product_percentage_price,
     convert_aftertax_to_pretax,
-    default_due_date,
     generate_order_number,
     get_application_status,
     get_lease_status,
@@ -1059,9 +1058,9 @@ class AbstractOffer(UUIDModel, TimeStampedModel):
         CustomerProfile, related_name="offers", on_delete=models.CASCADE
     )
     status = models.CharField(
-        choices=OfferStatus.choices, default=OfferStatus.PENDING, max_length=9
+        choices=OfferStatus.choices, default=OfferStatus.DRAFTED, max_length=9
     )
-    due_date = models.DateField(verbose_name=_("due date"), default=default_due_date)
+    due_date = models.DateField(verbose_name=_("due date"), null=True, blank=True)
     # Optional fields to contact
     customer_first_name = models.TextField(blank=True, null=True)
     customer_last_name = models.TextField(blank=True, null=True)
@@ -1108,6 +1107,10 @@ class BerthSwitchOffer(AbstractOffer):
         if not self.application.berth_switch:
             raise ValidationError(_("The application has to be a switch application"))
 
+        # Validate that once the offer has been sent, it will have a due date
+        if self.status != OfferStatus.DRAFTED and not self.due_date:
+            raise ValidationError(_("The offer must have a due date before sending it"))
+
         # Validate that the lease can only be from the immediate last season
         if (
             self.lease.start_date.year
@@ -1123,7 +1126,8 @@ class BerthSwitchOffer(AbstractOffer):
             return
 
         valid_status_changes = {
-            OfferStatus.PENDING: (
+            OfferStatus.DRAFTED: (OfferStatus.SENT, OfferStatus.CANCELLED,),
+            OfferStatus.SENT: (
                 OfferStatus.ACCEPTED,
                 OfferStatus.REJECTED,
                 OfferStatus.EXPIRED,
