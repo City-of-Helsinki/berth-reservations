@@ -1,6 +1,6 @@
 import random
 import uuid
-from datetime import timedelta
+from datetime import date, timedelta
 from decimal import Decimal
 
 import pytest
@@ -50,6 +50,7 @@ from ..utils import (
 from .factories import (
     AdditionalProductFactory,
     BerthProductFactory,
+    BerthSwitchOfferFactory,
     OrderFactory,
     OrderLineFactory,
     WinterStorageProductFactory,
@@ -1014,3 +1015,25 @@ def test_offer_without_due_date_not_drafted(berth_switch_offer, status):
         berth_switch_offer.set_status(status)
 
     assert "The offer must have a due date before sending it" in str(exception)
+
+
+@freeze_time("2020-06-11T08:00:00Z")
+def test_berth_switch_offer_current_season():
+    berth_switch_offer = BerthSwitchOfferFactory(
+        lease__start_date=calculate_berth_lease_start_date(),
+        lease__end_date=calculate_berth_lease_end_date(),
+    )
+
+    assert berth_switch_offer.lease.start_date == date(2020, 6, 11)
+
+
+@freeze_time("2020-06-11T08:00:00Z")
+def test_berth_switch_offer_another_season():
+    with pytest.raises(ValidationError) as exception:
+        BerthSwitchOfferFactory(
+            lease__start_date=calculate_berth_lease_start_date()
+            - relativedelta(years=1),
+            lease__end_date=calculate_berth_lease_end_date() - relativedelta(years=1),
+        )
+
+    assert "The exchanged lease has to be from the current season" in str(exception)

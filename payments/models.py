@@ -3,7 +3,6 @@ from datetime import date, timedelta
 from decimal import Decimal
 from typing import Union
 
-from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -1111,13 +1110,10 @@ class BerthSwitchOffer(AbstractOffer):
         if self.status != OfferStatus.DRAFTED and not self.due_date:
             raise ValidationError(_("The offer must have a due date before sending it"))
 
-        # Validate that the lease can only be from the immediate last season
-        if (
-            self.lease.start_date.year
-            != (calculate_season_start_date(today()) - relativedelta(years=1)).year
-        ):
+        # Validate that the lease can only be from the current season
+        if self.lease.start_date.year != calculate_season_start_date().year:
             raise ValidationError(
-                _("The exchanged lease has to be from the last season")
+                _("The exchanged lease has to be from the current season")
             )
 
     def set_status(self, new_status: OfferStatus, comment: str = None) -> None:

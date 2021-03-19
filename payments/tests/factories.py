@@ -1,14 +1,11 @@
 import random
 
 import factory
-from dateutil.relativedelta import relativedelta
-from dateutil.utils import today
 
 from applications.tests.factories import BerthApplicationFactory, BerthSwitchFactory
 from berth_reservations.tests.factories import CustomerProfileFactory
 from leases.enums import LeaseStatus
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
-from leases.utils import calculate_season_end_date, calculate_season_start_date
 from resources.tests.factories import BerthFactory, WinterStorageAreaFactory
 from utils.numbers import rounded
 
@@ -199,8 +196,6 @@ class BerthSwitchOfferFactory(AbstractOfferFactory):
         BerthLeaseFactory,
         customer=factory.SelfAttribute("..customer"),
         status=LeaseStatus.PAID,
-        start_date=calculate_season_start_date(today()) - relativedelta(years=1),
-        end_date=calculate_season_end_date(today()) - relativedelta(years=1),
     )
     berth = factory.SubFactory(BerthFactory)
     application = factory.SubFactory(
