@@ -1,0 +1,2 @@
+Kära kund. Vi bjuder dig en båtplats. Med den här länken kan du acceptera eller avslå erbjudandet. Vänligen gör ditt val före {{ due_date }}.
+ {{ accept_url }}

@@ -208,6 +208,31 @@ def notification_template_order_refunded():
     return notification
 
 
+@pytest.fixture
+def notification_template_switch_offer_sent():
+    from payments.notifications import NotificationType
+
+    notification = NotificationTemplate.objects.language("fi").create(
+        type=NotificationType.BERTH_SWITCH_ORDER_APPROVED,
+        subject="test offer sent subject, event: {{ offer.pk }}!",
+        body_html="<b>{{ offer.pk }} {{ accept_url }}</b>",
+        body_text="{{ offer.pk }} {{ accept_url }}",
+    )
+    notification.create_translation(
+        "en",
+        subject="test offer sent subject, event: {{ offer.pk }}!",
+        body_html="<b>{{ offer.pk }} {{ accept_url }}</b>",
+        body_text="{{ offer.pk }} {{ accept_url }}",
+    )
+    NotificationTemplate.objects.language("fi").create(
+        type=NotificationType.SMS_BERTH_SWITCH_NOTICE.value,
+        subject="SMS offer notice",
+        body_html="Offer {{ offer.pk }} due date {{ due_date }}",
+        body_text="Offer {{ offer.pk }} due date {{ due_date }}",
+    )
+    return notification
+
+
 @pytest.fixture(autouse=True)
 def patch_contract_service(monkeypatch):
     monkeypatch.setattr(

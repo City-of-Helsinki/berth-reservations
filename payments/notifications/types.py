@@ -30,3 +30,7 @@ class NotificationType(TextChoices):
     ORDER_REFUNDED = ("order_refunded", _("Order refunded"))
     ORDER_CANCELLED = ("order_cancelled", _("Order cancelled"))
     SMS_INVOICE_NOTICE = ("sms_invoice_notice", _("[SMS] Invoice notice"))
+    SMS_BERTH_SWITCH_NOTICE = (
+        "sms_berth_switch_notice",
+        _("[SMS] Berth switch notice"),
+    )

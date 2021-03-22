@@ -1090,12 +1090,13 @@ class AbstractOffer(UUIDModel, TimeStampedModel):
 
     def update_from_profile(self, profile_token: str):
         profile = ProfileService(profile_token).get_profile(self.customer.id)
+        self.update_from_customer_profile(profile)
 
+    def update_from_customer_profile(self, profile):
         self.customer_first_name = profile.first_name
         self.customer_last_name = profile.last_name
         self.customer_email = profile.email
         self.customer_phone = profile.phone
-
         self.save()
 
 

@@ -302,6 +302,14 @@ class OrderDetailsType(graphene.ObjectType):
     is_application_order = graphene.Boolean(required=True)
 
 
-class FailedOrderType(graphene.ObjectType):
+class GenericErrorType(graphene.ObjectType):
     id = graphene.ID(required=True)
     error = graphene.String()
+
+
+class FailedOrderType(GenericErrorType):
+    pass
+
+
+class FailedOfferType(GenericErrorType):
+    pass

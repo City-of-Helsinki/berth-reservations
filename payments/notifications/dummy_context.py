@@ -196,5 +196,9 @@ def load_dummy_context():
                 "due_date": str(today()),
                 "payment_url": "https://foo.bar/payment",
             },
+            NotificationType.SMS_BERTH_SWITCH_NOTICE: {
+                "due_date": str(today()),
+                "accept_url": "https://foo.bar/payment",
+            },
         }
     )

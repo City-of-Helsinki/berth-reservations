@@ -4,7 +4,7 @@ from typing import Optional, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from uuid import UUID
-    from .models import Order
+    from .models import Order, AbstractOffer
     from .notifications import NotificationType
 
 import base64
@@ -47,7 +47,7 @@ from resources.models import Harbor, WinterStorageArea
 from utils.email import is_valid_email
 from utils.numbers import rounded as rounded_decimal
 
-from .enums import OrderStatus, OrderType, ProductServiceType
+from .enums import OfferStatus, OrderStatus, OrderType, ProductServiceType
 
 
 def fetch_order_profile(order, profile_token):
@@ -57,7 +57,7 @@ def fetch_order_profile(order, profile_token):
 
 def update_order_from_profile(order, profile):
     order.customer_first_name = profile.first_name
-    order.customer_last_name = profile.first_name
+    order.customer_last_name = profile.last_name
     order.customer_email = profile.email
     order.customer_phone = profile.phone
     order.customer_address = profile.address
@@ -358,13 +358,7 @@ def approve_order(
     request: HttpRequest,
 ) -> None:
     if helsinki_profile_user:
-        order.customer_first_name = helsinki_profile_user.first_name
-        order.customer_last_name = helsinki_profile_user.last_name
-        order.customer_email = helsinki_profile_user.email
-        order.customer_phone = helsinki_profile_user.phone
-        order.customer_address = helsinki_profile_user.address
-        order.customer_zip_code = helsinki_profile_user.postal_code
-        order.customer_city = helsinki_profile_user.city
+        update_order_from_profile(order, helsinki_profile_user)
 
     order.due_date = due_date
     order.save()
@@ -599,3 +593,56 @@ def get_context(
             "additional_product": {"name": additional_product_name, "season": season},
             "payment_url": payment_url,
         }
+
+
+def send_berth_switch_offer(offer, due_date: date,) -> None:
+    if due_date:
+        offer.due_date = due_date
+        offer.save()
+
+    # Update offer and application status
+    offer.status = OfferStatus.OFFERED
+    offer.save()
+    offer.application.status = ApplicationStatus.OFFER_SENT
+    offer.application.save()
+
+    from .notifications import NotificationType
+
+    language = (
+        offer.application.language if offer.application else settings.LANGUAGE_CODE
+    )
+
+    email = offer.customer_email or offer.application.email
+
+    if not is_valid_email(email):
+        raise ValidationError(_("Missing customer email"))
+
+    notification_type = NotificationType.BERTH_SWITCH_ORDER_APPROVED
+
+    context = {
+        "subject": get_email_subject(notification_type),
+        "offer": offer,
+        "accept_url": get_offer_customer_url(offer, language, True),
+        "cancel_url": get_offer_customer_url(offer, language, False),
+        "due_date": format_date(offer.due_date, locale=language),
+    }
+
+    send_notification(email, notification_type.value, context, language)
+
+    if offer.customer_phone:
+        sms_service = SMSNotificationService()
+        sms_service.send(
+            NotificationType.SMS_BERTH_SWITCH_NOTICE,
+            context,
+            offer.customer_phone,
+            language=language,
+        )
+
+
+def get_offer_customer_url(
+    offer: AbstractOffer, lang: str = settings.LANGUAGE_CODE, accept=True
+):
+    return (
+        f"{settings.VENE_UI_RETURN_URL.format(LANG=lang)}/offer?"
+        f"offer_number={offer.offer_number}&accept={'true' if accept else 'false'}"
+    )
