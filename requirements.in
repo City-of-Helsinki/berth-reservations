@@ -18,7 +18,6 @@ factory-boy
 graphene-django
 graphene-federation
 graphene-file-upload
-pillow
 psycopg2-binary
 sentry-sdk
 uwsgi

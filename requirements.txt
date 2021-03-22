@@ -27,8 +27,8 @@ git+https://github.com/a-rmz/django-munigeo.git@0.4.0-beta#egg=django-munigeo  #
 django-parler-rest==2.1   # via django-munigeo
 django-parler==2.1        # via -r requirements.in, django-ilmoitin, django-munigeo, django-parler-rest
 django-silk==4.1.0        # via -r requirements.in
-django==3.1               # via -r requirements.in, django-anymail, django-cors-headers, django-filter, django-graphql-geojson, django-graphql-jwt, django-helusers, django-ilmoitin, django-mailer, django-mptt, django-munigeo, django-silk, djangorestframework, drf-oidc-auth, graphene-django
-djangorestframework==3.11.1  # via django-parler-rest, drf-oidc-auth
+django==3.1.7             # via -r requirements.in, django-anymail, django-cors-headers, django-filter, django-graphql-geojson, django-graphql-jwt, django-helusers, django-ilmoitin, django-mailer, django-mptt, django-munigeo, django-silk, djangorestframework, drf-oidc-auth, graphene-django
+djangorestframework==3.12.2  # via django-parler-rest, drf-oidc-auth
 drf-oidc-auth==0.10.0     # via django-helusers
 ecdsa==0.14.1             # via python-jose
 elastic-apm==5.8.1        # via -r requirements.in
@@ -44,11 +44,10 @@ graphql-core==2.3.2       # via django-graphql-jwt, django-ilmoitin, graphene, g
 graphql-relay==2.0.1      # via django-ilmoitin, graphene
 idna==2.10                # via requests
 itypes==1.2.0             # via coreapi
-jinja2==2.11.2            # via coreschema, django-ilmoitin, django-silk
+jinja2==2.11.3            # via coreschema, django-ilmoitin, django-silk
 json-log-formatter==0.3.0  # via -r requirements.in
 lockfile==0.12.2          # via django-mailer
 markupsafe==1.1.1         # via jinja2
-pillow==7.2.0             # via -r requirements.in
 promise==2.3              # via graphene-django, graphql-core, graphql-relay
 psycopg2-binary==2.8.5    # via -r requirements.in
 pyasn1==0.4.8             # via python-jose, rsa
