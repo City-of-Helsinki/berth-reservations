@@ -1,6 +1,6 @@
 import random
 import uuid
-from datetime import timedelta
+from datetime import date, timedelta
 from decimal import Decimal
 
 import pytest
@@ -28,6 +28,7 @@ from utils.numbers import rounded
 
 from ..enums import (
     AdditionalProductType,
+    OfferStatus,
     OrderStatus,
     PeriodType,
     PriceUnits,
@@ -49,6 +50,7 @@ from ..utils import (
 from .factories import (
     AdditionalProductFactory,
     BerthProductFactory,
+    BerthSwitchOfferFactory,
     OrderFactory,
     OrderLineFactory,
     WinterStorageProductFactory,
@@ -990,3 +992,66 @@ def test_order_refund_cannot_refund_not_paid(order, status):
 
     errors = str(exception.value)
     assert "Cannot refund orders that are not paid" in errors
+
+
+def test_offer_without_due_date_drafted(berth_switch_offer):
+    berth_switch_offer.status = OfferStatus.DRAFTED
+    berth_switch_offer.due_date = None
+    berth_switch_offer.save()
+    assert berth_switch_offer.due_date is None
+
+
+@pytest.mark.parametrize(
+    "status", [OfferStatus.CANCELLED, OfferStatus.SENT],
+)
+def test_offer_without_due_date_not_drafted(berth_switch_offer, status):
+    berth_switch_offer.status = OfferStatus.DRAFTED
+    berth_switch_offer.due_date = None
+    berth_switch_offer.save()
+
+    assert berth_switch_offer.due_date is None
+
+    with pytest.raises(ValidationError) as exception:
+        berth_switch_offer.set_status(status)
+
+    assert "The offer must have a due date before sending it" in str(exception)
+
+
+@freeze_time("2020-06-11T08:00:00Z")
+def test_berth_switch_offer_current_season():
+    berth_switch_offer = BerthSwitchOfferFactory(
+        lease__start_date=calculate_berth_lease_start_date(),
+        lease__end_date=calculate_berth_lease_end_date(),
+    )
+
+    assert berth_switch_offer.lease.start_date == date(2020, 6, 11)
+
+
+@freeze_time("2020-06-11T08:00:00Z")
+def test_berth_switch_offer_another_season():
+    with pytest.raises(ValidationError) as exception:
+        BerthSwitchOfferFactory(
+            lease__start_date=calculate_berth_lease_start_date()
+            - relativedelta(years=1),
+            lease__end_date=calculate_berth_lease_end_date() - relativedelta(years=1),
+        )
+
+    assert "The exchanged lease has to be from the current season" in str(exception)
+
+
+@pytest.mark.parametrize(
+    "lease_status",
+    [
+        LeaseStatus.DRAFTED,
+        LeaseStatus.ERROR,
+        LeaseStatus.EXPIRED,
+        LeaseStatus.OFFERED,
+        LeaseStatus.REFUSED,
+        LeaseStatus.TERMINATED,
+    ],
+)
+def test_berth_switch_offer_lease_not_paid(lease_status):
+    with pytest.raises(ValidationError) as exception:
+        BerthSwitchOfferFactory(lease__status=lease_status)
+
+    assert "The associated lease must be paid" in str(exception)

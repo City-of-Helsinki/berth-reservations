@@ -24,6 +24,7 @@ from ..providers import BamboraPayformProvider
 from .factories import (
     AdditionalProductFactory,
     BerthProductFactory,
+    BerthSwitchOfferFactory,
     OrderFactory,
     OrderLineFactory,
     OrderLogEntryFactory,
@@ -204,6 +205,12 @@ def order_log_entry():
 @pytest.fixture()
 def provider_base_config():
     return PROVIDER_BASE_CONFIG
+
+
+@pytest.fixture
+def berth_switch_offer():
+    offer = BerthSwitchOfferFactory()
+    return offer
 
 
 @pytest.fixture()

@@ -53,12 +53,7 @@ class Migration(migrations.Migration):
                         max_length=9,
                     ),
                 ),
-                (
-                    "due_date",
-                    models.DateField(
-                        default=payments.utils.default_due_date, verbose_name="due date"
-                    ),
-                ),
+                ("due_date", models.DateField(verbose_name="due date"),),
                 ("customer_first_name", models.TextField(blank=True, null=True)),
                 ("customer_last_name", models.TextField(blank=True, null=True)),
                 ("customer_email", models.TextField(blank=True, null=True)),

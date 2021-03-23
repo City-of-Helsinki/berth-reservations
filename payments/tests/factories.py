@@ -1,13 +1,11 @@
 import random
 
 import factory
-from dateutil.relativedelta import relativedelta
-from dateutil.utils import today
 
 from applications.tests.factories import BerthApplicationFactory, BerthSwitchFactory
 from berth_reservations.tests.factories import CustomerProfileFactory
+from leases.enums import LeaseStatus
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
-from leases.utils import calculate_season_end_date, calculate_season_start_date
 from resources.tests.factories import BerthFactory, WinterStorageAreaFactory
 from utils.numbers import rounded
 
@@ -184,7 +182,7 @@ class OrderLogEntryFactory(factory.django.DjangoModelFactory):
 
 class AbstractOfferFactory(factory.django.DjangoModelFactory):
     customer = factory.SubFactory(CustomerProfileFactory, user=None)
-    status = factory.LazyFunction(lambda: OfferStatus.PENDING)
+    status = factory.LazyFunction(lambda: OfferStatus.DRAFTED)
     customer_first_name = factory.Faker("first_name", locale="fi_FI")
     customer_last_name = factory.Faker("last_name", locale="fi_FI")
     customer_email = factory.LazyAttribute(
@@ -197,8 +195,7 @@ class BerthSwitchOfferFactory(AbstractOfferFactory):
     lease = factory.SubFactory(
         BerthLeaseFactory,
         customer=factory.SelfAttribute("..customer"),
-        start_date=calculate_season_start_date(today()) - relativedelta(years=1),
-        end_date=calculate_season_end_date(today()) - relativedelta(years=1),
+        status=LeaseStatus.PAID,
     )
     berth = factory.SubFactory(BerthFactory)
     application = factory.SubFactory(

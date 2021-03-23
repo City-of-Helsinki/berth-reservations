@@ -3,7 +3,6 @@ from datetime import date, timedelta
 from decimal import Decimal
 from typing import Union
 
-from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -19,6 +18,7 @@ from applications.enums import ApplicationAreaType
 from applications.models import BerthApplication, WinterStorageApplication
 from customers.models import CustomerProfile
 from customers.services import ProfileService
+from leases.enums import LeaseStatus
 from leases.models import BerthLease, WinterStorageLease
 from leases.stickers import get_next_sticker_number
 from leases.utils import calculate_season_start_date
@@ -47,7 +47,6 @@ from .utils import (
     calculate_product_partial_year_price,
     calculate_product_percentage_price,
     convert_aftertax_to_pretax,
-    default_due_date,
     generate_order_number,
     get_application_status,
     get_lease_status,
@@ -1059,9 +1058,9 @@ class AbstractOffer(UUIDModel, TimeStampedModel):
         CustomerProfile, related_name="offers", on_delete=models.CASCADE
     )
     status = models.CharField(
-        choices=OfferStatus.choices, default=OfferStatus.PENDING, max_length=9
+        choices=OfferStatus.choices, default=OfferStatus.DRAFTED, max_length=9
     )
-    due_date = models.DateField(verbose_name=_("due date"), default=default_due_date)
+    due_date = models.DateField(verbose_name=_("due date"), null=True, blank=True)
     # Optional fields to contact
     customer_first_name = models.TextField(blank=True, null=True)
     customer_last_name = models.TextField(blank=True, null=True)
@@ -1108,10 +1107,84 @@ class BerthSwitchOffer(AbstractOffer):
         if not self.application.berth_switch:
             raise ValidationError(_("The application has to be a switch application"))
 
-        # Validate that the lease can only be from the immediate last season
-        if self.lease.start_date.year != calculate_season_start_date(
-            today()
-        ) - relativedelta(years=1):
+        # Validate that once the offer has been sent, it will have a due date
+        if self.status != OfferStatus.DRAFTED and not self.due_date:
+            raise ValidationError(_("The offer must have a due date before sending it"))
+
+        # Validate that the lease can only be from the current season
+        if self.lease.start_date.year != calculate_season_start_date().year:
             raise ValidationError(
-                _("The exchanged lease has to be from the last season")
+                _("The exchanged lease has to be from the current season")
             )
+
+        if self.lease.status != LeaseStatus.PAID:
+            raise ValidationError(_("The associated lease must be paid"))
+
+    def set_status(self, new_status: OfferStatus, comment: str = None) -> None:
+        old_status = self.status
+        if new_status == old_status:
+            return
+
+        valid_status_changes = {
+            OfferStatus.DRAFTED: (OfferStatus.SENT, OfferStatus.CANCELLED,),
+            OfferStatus.SENT: (
+                OfferStatus.ACCEPTED,
+                OfferStatus.REJECTED,
+                OfferStatus.EXPIRED,
+                OfferStatus.CANCELLED,
+            ),
+        }
+        valid_new_status = valid_status_changes.get(old_status, ())
+
+        if new_status not in valid_new_status:
+            raise OrderStatusTransitionError(
+                'Cannot set offer {} state to "{}", it is in an invalid state "{}".'.format(
+                    self.id, new_status, old_status
+                )
+            )
+
+        self.status = new_status
+        self.save(update_fields=["status"])
+
+        self.create_log_entry(
+            from_status=old_status, to_status=new_status, comment=comment
+        )
+
+    def create_log_entry(
+        self,
+        from_status: OfferStatus = None,
+        to_status: OfferStatus = None,
+        comment: str = "",
+    ) -> None:
+        BerthSwitchOfferLogEntry.objects.create(
+            offer=self,
+            from_status=from_status,
+            to_status=to_status or self.status,
+            comment=comment,
+        )
+
+
+class AbstractOfferLogEntry(UUIDModel, TimeStampedModel):
+    from_status = models.CharField(choices=OfferStatus.choices, max_length=9)
+    to_status = models.CharField(choices=OfferStatus.choices, max_length=9)
+    comment = models.TextField(blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+
+class BerthSwitchOfferLogEntry(AbstractOfferLogEntry):
+    offer = models.ForeignKey(
+        BerthSwitchOffer,
+        verbose_name=_("order"),
+        related_name="log_entries",
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        verbose_name_plural = _("berth switch offer log entries")
+
+    def __str__(self):
+        return (
+            f"Offer {self.offer.id} | {self.from_status or 'N/A'} --> {self.to_status}"
+        )

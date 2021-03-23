@@ -1,6 +1,7 @@
 import json
 
 from django.contrib import admin, messages
+from django.db.models import Count
 from django.forms import forms
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -63,6 +64,32 @@ class CustomerProfileAdmin(admin.ModelAdmin):
         WinterStorageLeaseInline,
         OrderInline,
     )
+    search_fields = ("id",)
+    list_display = ("id", "berth_lease_count", "winter_lease_count", "order_count")
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .annotate(
+                berth_lease_count=Count("berth_leases"),
+                winter_lease_count=Count("winter_storage_leases"),
+                order_count=Count("orders"),
+            )
+        )
+
+    def berth_lease_count(self, obj):
+        return obj.berth_lease_count
+
+    def winter_lease_count(self, obj):
+        return obj.winter_lease_count
+
+    def order_count(self, obj):
+        return obj.order_count
+
+    berth_lease_count.admin_order_field = "berth_lease_count"
+    winter_lease_count.admin_order_field = "winter_lease_count"
+    order_count.admin_order_field = "order_count"
 
     change_list_template = "admin/customers/profiles_changelist.html"
 
