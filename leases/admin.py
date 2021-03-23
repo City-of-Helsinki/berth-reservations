@@ -64,6 +64,7 @@ class BaseLeaseAdmin(admin.ModelAdmin):
 
     has_contract.boolean = True
 
+    autocomplete_fields = ("customer",)
     list_filter = ("status",)
 
     date_hierarchy = "start_date"

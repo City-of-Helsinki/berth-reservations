@@ -113,6 +113,7 @@ class OrderAdmin(admin.ModelAdmin):
         "order_type",
     )
     list_filter = ("status", "order_type")
+    autocomplete_fields = ("customer",)
     search_fields = (
         "order_number",
         "customer__id",
@@ -300,7 +301,15 @@ class BerthSwitchOfferLogEntryInline(admin.StackedInline):
 
 
 class BerthSwitchOfferAdmin(admin.ModelAdmin):
-    list_display = ("customer", "name", "application", "berth", "lease", "status")
+    list_display = (
+        "customer",
+        "name",
+        "application",
+        "berth",
+        "lease",
+        "due_date",
+        "status",
+    )
     list_filter = ("status",)
     inlines = (BerthSwitchOfferLogEntryInline,)
     search_fields = (
