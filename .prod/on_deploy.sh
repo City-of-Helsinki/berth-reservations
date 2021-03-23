@@ -4,5 +4,6 @@
 python /app/manage.py migrate --noinput
 
 # TODO: Only has to be run once
+python /app/manage.py loaddata helsinki-harbor-resources.json
 python /app/manage.py loaddata helsinki-harbors.json
 python /app/manage.py harbors_connect_to_resources
