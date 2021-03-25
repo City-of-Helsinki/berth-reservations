@@ -616,10 +616,7 @@ def test_get_piers_filter_by_application(api_client, berth_application, berth):
     executed = api_client.execute(query)
 
     expected_berths = []
-    if (
-        berth.berth_type.length >= berth_application.boat_length
-        and berth.berth_type.width >= berth_application.boat_width
-    ):
+    if berth.berth_type.width >= berth_application.boat_width:
         expected_berths = [
             {
                 "node": {

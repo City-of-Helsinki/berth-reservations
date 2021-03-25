@@ -11,8 +11,8 @@ from ..models import Berth, BerthType, Pier
 
 
 def resolve_piers(info, **kwargs):
-    min_width = kwargs.get("min_berth_width", 0)
-    min_length = kwargs.get("min_berth_length", 0)
+    min_width = kwargs.get("min_berth_width")
+    min_length = kwargs.get("min_berth_length")
     application_global_id = kwargs.get("for_application")
     harbor_id = kwargs.get("harbor_id")
 
@@ -42,7 +42,8 @@ def resolve_piers(info, **kwargs):
             )
 
             min_width = application.boat_width
-            min_length = application.boat_length
+            # NOTE: not setting min_length here on purpose.
+            # See VEN-1251: berths that are too short need to be shown in the UI
         else:
             raise VenepaikkaGraphQLError(
                 _("You do not have permission to perform this action")
@@ -53,9 +54,12 @@ def resolve_piers(info, **kwargs):
     else:
         query = Pier.objects.all()
 
-    suitable_berth_types = BerthType.objects.filter(
-        width__gte=min_width, length__gte=min_length
-    )
+    suitable_berth_types = BerthType.objects.all()
+    if min_width is not None:
+        suitable_berth_types = suitable_berth_types.filter(width__gte=min_width)
+    if min_length is not None:
+        suitable_berth_types = suitable_berth_types.filter(length__gte=min_length)
+
     berth_queryset = Berth.objects.select_related("berth_type").filter(
         berth_type__in=suitable_berth_types
     )
