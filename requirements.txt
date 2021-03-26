@@ -59,7 +59,7 @@ pyjwt==1.7.1              # via django-graphql-jwt
 python-dateutil==2.8.1    # via django-silk, faker
 python-jose==3.2.0        # via django-helusers
 pytz==2020.1              # via babel, django, django-silk
-pyyaml==5.3.1             # via django-munigeo
+pyyaml==5.4.1             # via django-munigeo
 requests-cache==0.5.2     # via django-munigeo
 requests==2.24.0          # via coreapi, django-anymail, django-helusers, django-munigeo, django-silk, pyjwkest, requests-cache
 rsa==4.6                  # via python-jose
