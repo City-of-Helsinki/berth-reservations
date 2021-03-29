@@ -14,6 +14,7 @@ from pytz import timezone
 from .enums import ApplicationAreaType
 from .models import (
     BerthApplication,
+    BerthSwitch,
     BerthSwitchReason,
     HarborChoice,
     WinterStorageApplication,
@@ -52,10 +53,24 @@ class HarborChoiceInline(admin.TabularInline):
     extra = 10
     max_num = 10
 
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        field = super(HarborChoiceInline, self).formfield_for_foreignkey(
+            db_field, request, **kwargs
+        )
+        if db_field.name == "harbor":
+            field.queryset = field.queryset.translated("fi")
+        return field
+
 
 class BerthApplicationInline(admin.StackedInline):
     model = BerthApplication
     extra = 0
+
+
+class BerthSwitchAdmin(admin.ModelAdmin):
+    model = BerthSwitch
+    list_display = ("id", "harbor", "pier", "berth_number", "reason")
+    search_fields = ("berth_number", "pier", "harbor__translations__name", "harbor__id")
 
 
 class BerthApplicationAdmin(admin.ModelAdmin):
@@ -63,6 +78,7 @@ class BerthApplicationAdmin(admin.ModelAdmin):
     readonly_fields = [
         "application_type",
         "created_at",
+        "get_berth_switch_id",
         "get_berth_switch_harbor",
         "get_berth_switch_pier",
         "get_berth_switch_berth_number",
@@ -122,6 +138,7 @@ class BerthApplicationAdmin(admin.ModelAdmin):
             _("Switch berth information"),
             {
                 "fields": [
+                    "get_berth_switch_id",
                     "get_berth_switch_harbor",
                     "get_berth_switch_pier",
                     "get_berth_switch_berth_number",
@@ -152,6 +169,7 @@ class BerthApplicationAdmin(admin.ModelAdmin):
         "application_type",
         "status",
     )
+    autocomplete_fields = ("customer",)
     list_filter = (ApplicationTypeFilter, "status")
     search_fields = ("id", "first_name", "last_name")
     autocomplete_fields = ("customer",)
@@ -159,6 +177,11 @@ class BerthApplicationAdmin(admin.ModelAdmin):
 
     def application_type(self, obj):
         return _("Application") if obj.berth_switch is None else _("Switch application")
+
+    def get_berth_switch_id(self, obj):
+        return obj.berth_switch.id
+
+    get_berth_switch_id.short_description = _("Id")
 
     def get_berth_switch_harbor(self, obj):
         return obj.berth_switch.harbor
@@ -321,6 +344,7 @@ class WinterStorageApplicationAdmin(admin.ModelAdmin):
         "area_type",
         "status",
     )
+    autocomplete_fields = ("customer",)
     list_filter = ("area_type", "status")
     actions = ["export_applications", "resend_application_confirmation"]
     search_fields = ("id", "first_name", "last_name")
@@ -394,6 +418,7 @@ class BerthSwitchReasonAdmin(TranslatableAdmin):
 
 admin.site.register(BerthApplication, BerthApplicationAdmin)
 admin.site.register(WinterStorageApplication, WinterStorageApplicationAdmin)
+admin.site.register(BerthSwitch, BerthSwitchAdmin)
 admin.site.register(BerthSwitchReason, BerthSwitchReasonAdmin)
 
 # Register Permission model for GUI management of permissions

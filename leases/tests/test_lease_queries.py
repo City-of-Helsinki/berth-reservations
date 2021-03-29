@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from freezegun import freeze_time
 
-from applications.new_schema import BerthApplicationNode, WinterStorageApplicationNode
+from applications.schema import BerthApplicationNode, WinterStorageApplicationNode
 from berth_reservations.tests.utils import assert_not_enough_permissions
 from contracts.schema.types import BerthContractNode, WinterStorageContractNode
 from contracts.tests.factories import BerthContractFactory, WinterStorageContractFactory

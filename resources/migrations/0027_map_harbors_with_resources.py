@@ -7,7 +7,6 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("harbors", "0016_map_harbors_with_resources"),
         ("resources", "0026_berth_is_invoiceable"),
     ]
 
@@ -20,7 +19,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="resources_pier",
-                to="harbors.harbor",
+                to="resources.harbor",
             ),
         ),
     ]

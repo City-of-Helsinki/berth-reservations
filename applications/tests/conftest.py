@@ -3,8 +3,7 @@ from django_ilmoitin.models import NotificationTemplate
 
 from berth_reservations.tests.conftest import *  # noqa
 from berth_reservations.tests.factories import CustomerProfileFactory
-from harbors.tests.conftest import *  # noqa
-from harbors.tests.factories import HarborFactory
+from resources.tests.factories import HarborFactory
 from users.tests.conftest import *  # noqa
 
 from ..enums import ApplicationStatus

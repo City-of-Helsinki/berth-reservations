@@ -84,6 +84,8 @@ class Query:
     )
     berth_switch_offers = DjangoConnectionField(BerthSwitchOfferNode)
 
+    order_details = Field(OrderDetailsType, order_number=String(required=True))
+
     @view_permission_required(BerthProduct)
     def resolve_berth_product_for_width(self, info, width, **kwargs):
         return BerthProduct.objects.get_in_range(width)
@@ -132,10 +134,6 @@ class Query:
 
     def resolve_order_refunds(self, info, order_id, **kwargs):
         return OrderRefund.objects.filter(order_id=from_global_id(order_id, OrderNode))
-
-
-class OldAPIQuery:
-    order_details = Field(OrderDetailsType, order_number=String(required=True))
 
     def resolve_order_details(self, info, order_number):
         try:
