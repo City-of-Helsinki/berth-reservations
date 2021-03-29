@@ -1,6 +1,6 @@
 import factory.fuzzy
 
-from harbors.tests.factories import (
+from resources.tests.factories import (
     BoatTypeFactory,
     HarborFactory,
     WinterStorageAreaFactory,

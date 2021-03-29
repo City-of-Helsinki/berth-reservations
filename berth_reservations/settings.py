@@ -170,7 +170,6 @@ INSTALLED_APPS = [
     "users",
     "customers",
     "applications",
-    "harbors",
     "resources",
     "leases",
     "payments",

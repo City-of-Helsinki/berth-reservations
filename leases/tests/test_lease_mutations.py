@@ -10,7 +10,7 @@ from django.core import mail
 from freezegun import freeze_time
 
 from applications.enums import ApplicationStatus
-from applications.new_schema import BerthApplicationNode, WinterStorageApplicationNode
+from applications.schema import BerthApplicationNode, WinterStorageApplicationNode
 from applications.tests.factories import (
     BerthApplicationFactory,
     WinterStorageApplicationFactory,

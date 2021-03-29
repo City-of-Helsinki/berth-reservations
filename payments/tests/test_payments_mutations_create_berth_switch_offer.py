@@ -6,7 +6,7 @@ import pytest
 from faker import Faker
 from freezegun import freeze_time
 
-from applications.new_schema import BerthApplicationNode
+from applications.schema import BerthApplicationNode
 from applications.tests.factories import BerthSwitchFactory
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,

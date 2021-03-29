@@ -5,7 +5,7 @@ import pytest
 from freezegun import freeze_time
 
 from applications.enums import ApplicationStatus
-from applications.new_schema import BerthApplicationNode
+from applications.schema import BerthApplicationNode
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
     assert_not_enough_permissions,

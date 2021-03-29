@@ -3,6 +3,12 @@ import xlrd
 from django.conf import settings
 from freezegun import freeze_time
 
+from resources.tests.factories import (
+    BoatTypeFactory,
+    HarborFactory,
+    WinterStorageAreaFactory,
+)
+
 from ..enums import WinterStorageMethod
 from ..models import (
     BerthApplication,
@@ -25,8 +31,12 @@ EXCEL_FILE_LANG = settings.LANGUAGES[0][0]
 # Parametrised berth_switch_reason inside berth_switch
 @pytest.mark.parametrize("berth_switch_info", [True, False], indirect=True)
 def test_exporting_berth_applications_to_excel(
-    berth_switch, boat_type, harbor, berth_switch_info, customer_private,
+    berth_switch, berth_switch_info, customer_private,
 ):
+    harbor = HarborFactory(name="Satama")
+    harbor.create_translation("fi", name="Satama")
+    boat_type = BoatTypeFactory()
+    boat_type.create_translation("fi", name="Jollapaikka")
     application_data = {
         "first_name": "Kyösti",
         "last_name": "Testaaja",
@@ -134,9 +144,11 @@ def test_exporting_berth_applications_to_excel(
 
 @freeze_time("2019-01-14T08:00:00Z")
 @pytest.mark.parametrize("customer_private", [True, False])
-def test_exporting_winter_storage_applications_to_excel(
-    boat_type, customer_private, winter_area
-):
+def test_exporting_winter_storage_applications_to_excel(customer_private):
+    winter_area = WinterStorageAreaFactory(name="Satama")
+    winter_area.create_translation("fi", name="Satama")
+    boat_type = BoatTypeFactory()
+    boat_type.create_translation("fi", name="Jollapaikka")
     application_data = {
         "first_name": "Kyösti",
         "last_name": "Testaaja",

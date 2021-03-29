@@ -6,7 +6,6 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("harbors", "0012_disable_reverse_from_municipality"),
         ("leases", "0001_initial"),
         ("applications", "0014_update_verbose_names"),
     ]

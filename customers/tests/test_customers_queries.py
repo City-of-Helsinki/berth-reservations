@@ -4,7 +4,7 @@ import pytest
 from dateutil.parser import isoparse
 from freezegun import freeze_time
 
-from applications.new_schema import BerthApplicationNode, WinterStorageApplicationNode
+from applications.schema import BerthApplicationNode, WinterStorageApplicationNode
 from applications.tests.factories import (
     BerthApplicationFactory,
     WinterStorageApplicationFactory,

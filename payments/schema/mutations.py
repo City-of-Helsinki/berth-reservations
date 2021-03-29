@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 
 from applications.enums import ApplicationAreaType, ApplicationStatus
 from applications.models import BerthApplication, BerthSwitch, WinterStorageApplication
-from applications.new_schema import BerthApplicationNode
+from applications.schema import BerthApplicationNode
 from berth_reservations.exceptions import (
     VenepaikkaGraphQLError,
     VenepaikkaGraphQLWarning,
@@ -1160,7 +1160,6 @@ class Mutation:
         "\n* No associated lease could be find for the switch application"
         "\n* The related lease must be in `PAID` status"
     )
-
     update_berth_switch_offer = UpdateBerthSwitchOfferMutation.Field(
         description="Updates a berth switch offer."
         "\n\nCurrently it is possible to update the status and dueDate fields of the Offer."
@@ -1181,11 +1180,6 @@ class Mutation:
         "\n* The offer is not DRAFTED or OFFERED"
         "\n* Customer's contact information is not available"
     )
-
-
-class OldAPIMutation:
-    confirm_payment = ConfirmPaymentMutation.Field()
-    cancel_order = CancelOrderMutation.Field()
     accept_berth_switch_offer = AcceptBerthSwitchOfferMutation.Field(
         description="Accepts or rejects an offer for a berth switch application."
         "\n\nIf the offer is accepted, it will terminate the old lease and create a new lease with the new berth."
@@ -1196,3 +1190,6 @@ class OldAPIMutation:
         "\n* The passed berth switch offer ID doesn't exist"
         "\n* The related lease must be in `PAID` status"
     )
+
+    confirm_payment = ConfirmPaymentMutation.Field()
+    cancel_order = CancelOrderMutation.Field()
