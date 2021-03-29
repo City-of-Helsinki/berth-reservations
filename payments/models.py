@@ -1126,8 +1126,12 @@ class BerthSwitchOffer(AbstractOffer):
             return
 
         valid_status_changes = {
-            OfferStatus.DRAFTED: (OfferStatus.SENT, OfferStatus.CANCELLED,),
-            OfferStatus.SENT: (
+            OfferStatus.DRAFTED: (
+                OfferStatus.OFFERED,
+                OfferStatus.CANCELLED,
+                OfferStatus.EXPIRED,
+            ),
+            OfferStatus.OFFERED: (
                 OfferStatus.ACCEPTED,
                 OfferStatus.REJECTED,
                 OfferStatus.EXPIRED,

@@ -19,6 +19,7 @@ from .types import (
     AdditionalProductServiceNode,
     AdditionalProductTypeEnum,
     BerthProductNode,
+    BerthSwitchOfferNode,
     OrderDetailsType,
     OrderNode,
     OrderRefundNode,
@@ -78,6 +79,10 @@ class Query:
         description="Returns the Order Refund objects associated to the order."
         "\n\n**Requires permissions** to access payments.",
     )
+    berth_switch_offer = Node.Field(
+        BerthSwitchOfferNode, description="**Requires permissions** to access offers.",
+    )
+    berth_switch_offers = DjangoConnectionField(BerthSwitchOfferNode)
 
     @view_permission_required(BerthProduct)
     def resolve_berth_product_for_width(self, info, width, **kwargs):

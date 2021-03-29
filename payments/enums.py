@@ -79,7 +79,7 @@ class OrderStatus(TextChoices):
 
 class OfferStatus(TextChoices):
     DRAFTED = "drafted", _("Drafted")
-    SENT = "sent", _("Sent")
+    OFFERED = "offered", _("Offered")
     ACCEPTED = "accepted", _("Accepted")
     REJECTED = "rejected", _("Rejected")
     EXPIRED = "expired", _("Expired")

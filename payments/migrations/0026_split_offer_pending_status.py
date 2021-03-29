@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 choices=[
                     ("drafted", "Drafted"),
-                    ("sent", "Sent"),
+                    ("offered", "Offered"),
                     ("accepted", "Accepted"),
                     ("rejected", "Rejected"),
                     ("expired", "Expired"),
@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 choices=[
                     ("drafted", "Drafted"),
-                    ("sent", "Sent"),
+                    ("offered", "Offered"),
                     ("accepted", "Accepted"),
                     ("rejected", "Rejected"),
                     ("expired", "Expired"),
@@ -56,7 +56,7 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 choices=[
                     ("drafted", "Drafted"),
-                    ("sent", "Sent"),
+                    ("offered", "Offered"),
                     ("accepted", "Accepted"),
                     ("rejected", "Rejected"),
                     ("expired", "Expired"),

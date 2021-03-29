@@ -31,6 +31,7 @@ class BerthApplicationType(DjangoObjectType):
         exclude = (
             "customer",
             "lease",
+            "switch_offers",
         )
 
 

@@ -1002,7 +1002,7 @@ def test_offer_without_due_date_drafted(berth_switch_offer):
 
 
 @pytest.mark.parametrize(
-    "status", [OfferStatus.CANCELLED, OfferStatus.SENT],
+    "status", [OfferStatus.CANCELLED, OfferStatus.OFFERED],
 )
 def test_offer_without_due_date_not_drafted(berth_switch_offer, status):
     berth_switch_offer.status = OfferStatus.DRAFTED

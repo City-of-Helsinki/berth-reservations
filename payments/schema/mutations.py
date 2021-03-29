@@ -7,10 +7,12 @@ from dateutil.utils import today
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from applications.enums import ApplicationAreaType
-from applications.models import BerthApplication, WinterStorageApplication
+from applications.models import BerthApplication, BerthSwitch, WinterStorageApplication
+from applications.new_schema import BerthApplicationNode
 from berth_reservations.exceptions import (
     VenepaikkaGraphQLError,
     VenepaikkaGraphQLWarning,
@@ -20,7 +22,9 @@ from customers.services import ProfileService
 from leases.enums import LeaseStatus
 from leases.models import BerthLease, WinterStorageLease
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
-from resources.schema import WinterStorageAreaNode
+from leases.utils import calculate_season_end_date, calculate_season_start_date
+from resources.models import Berth
+from resources.schema import BerthNode, WinterStorageAreaNode
 from users.decorators import (
     add_permission_required,
     change_permission_required,
@@ -35,6 +39,7 @@ from ..exceptions import VenepaikkaPaymentError
 from ..models import (
     AdditionalProduct,
     BerthProduct,
+    BerthSwitchOffer,
     Order,
     OrderLine,
     WinterStorageProduct,
@@ -53,6 +58,7 @@ from .types import (
     AdditionalProductNode,
     AdditionalProductTaxEnum,
     BerthProductNode,
+    BerthSwitchOfferNode,
     FailedOrderType,
     OrderLineNode,
     OrderNode,
@@ -741,6 +747,118 @@ class RefundOrderMutation(graphene.ClientIDMutation):
         return RefundOrderMutation(order_refund=refund)
 
 
+class CreateBerthSwitchOfferMutation(graphene.ClientIDMutation):
+    class Input:
+        # Required fields
+        application_id = graphene.ID(required=True)
+        new_berth_id = graphene.ID(required=True)
+        # Optional fields
+        old_lease_id = graphene.ID(
+            description="If provided, it will ignore the `Berth Switch` from the application "
+            "and force this lease to be terminated when the offer is accepted"
+        )
+        due_date = graphene.Date()
+        profile_token = graphene.String(
+            description="API token for Helsinki profile GraphQL API",
+        )
+
+    berth_switch_offer = graphene.Field(BerthSwitchOfferNode, required=True)
+
+    @staticmethod
+    def get_old_lease(application: BerthApplication) -> BerthLease:
+        # TODO: This logic has to be refactored when the old harbors app is removed
+
+        # Based on the information filled by the customer on the switch application,
+        # we retrieve the corresponding lease
+        switch: BerthSwitch = application.berth_switch
+        berth_filters = Q(number__iexact=switch.berth_number)
+
+        # First check if the chosen harbor has a direct map with a resources harbor
+        if harbor := switch.harbor.resources_harbor:
+            berth_filters &= Q(pier__harbor=harbor)
+
+            # Try to match the one with the identifier provided by the customer
+            pier = harbor.piers.filter(identifier__iexact=switch.pier).first()
+
+            # If no pier is found but the harbor only has one pier associated,
+            # we can assume that the old berth has to be on that one pier
+            if not pier and harbor.piers.count() == 1:
+                pier = harbor.piers.first()
+
+            berth_filters &= Q(pier=pier)
+        else:
+            # Fetch all the piers associated to the selected harbor,
+            # in most cases there will be only one pier
+            piers = switch.harbor.resources_pier.all()
+
+            # Try to match the one with the identifier provided by the customer
+            pier = piers.filter(identifier__iexact=switch.pier).first()
+
+            # If no pier is found but the harbor only has one pier associated,
+            # we can assume that the old berth has to be on that one pier
+            if not pier and piers.count() == 1:
+                pier = piers.first()
+
+            berth_filters &= Q(pier=pier)
+
+        old_berth = Berth.objects.get(berth_filters)
+
+        # Find the lease on the current season
+        return BerthLease.objects.get(
+            customer=application.customer,
+            berth=old_berth,
+            status=LeaseStatus.PAID,
+            start_date=calculate_season_start_date(),
+            end_date=calculate_season_end_date(),
+        )
+
+    @classmethod
+    @add_permission_required(BerthSwitchOffer)
+    def mutate_and_get_payload(cls, root, info, application_id, new_berth_id, **input):
+        try:
+            application = get_node_from_global_id(
+                info, application_id, only_type=BerthApplicationNode, nullable=False
+            )
+
+            if not application.customer:
+                raise VenepaikkaGraphQLError(
+                    _("Application must be connected to a customer")
+                )
+
+            if not application.berth_switch:
+                raise VenepaikkaGraphQLError(
+                    _("Application must be a switch application")
+                )
+
+            new_berth = get_node_from_global_id(
+                info, new_berth_id, only_type=BerthNode, nullable=False
+            )
+            if old_lease_id := input.get("old_lease_id"):
+                old_lease = get_node_from_global_id(
+                    info, old_lease_id, only_type=BerthLeaseNode, nullable=False
+                )
+            else:
+                old_lease = cls.get_old_lease(application)
+        except BerthApplication.DoesNotExist as e:
+            raise VenepaikkaGraphQLError(str(e)) from e
+        except (BerthLease.DoesNotExist, Berth.DoesNotExist) as e:
+            raise VenepaikkaGraphQLError("NO_LEASE") from e
+
+        try:
+            offer = BerthSwitchOffer.objects.create(
+                customer=old_lease.customer,
+                application=application,
+                lease=old_lease,
+                berth=new_berth,
+            )
+            if profile_token := input.get("profile_token"):
+                offer.update_from_profile(profile_token)
+        except ValidationError as e:
+            raise VenepaikkaGraphQLError(str(e)) from e
+
+        return CreateBerthSwitchOfferMutation(berth_switch_offer=offer)
+
+
 class Mutation:
     create_berth_product = CreateBerthProductMutation.Field(
         description="Creates a `BerthProduct` object."
@@ -871,6 +989,19 @@ class Mutation:
         "\n\n**Requires permissions** to update orders."
         "\n\nErrors:"
         "\n* The passed order must be in `PAID` status"
+    )
+
+    create_berth_switch_offer = CreateBerthSwitchOfferMutation.Field(
+        description="Creates an offer for a berth switch application."
+        "\n\nIt expects an application with a `BerthSwitch`. From there, it takes the harbor, pier, and berth "
+        "and tries to find the lease associated to the customer, and creates the offer. "
+        "\n\nIf the `oldLeaseId` is passed, it will ignore that matching and it will automatically use that lease."
+        "\n\n**Requires permissions** to create offers."
+        "\n\nErrors:"
+        "\n* The passed application is not connected to a customer"
+        "\n* The passed application is not a switch application"
+        "\n* No associated lease could be find for the switch application"
+        "\n* The related lease must be in `PAID` status"
     )
 
 

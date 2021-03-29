@@ -154,6 +154,7 @@ class BerthApplicationAdmin(admin.ModelAdmin):
     )
     list_filter = (ApplicationTypeFilter, "status")
     search_fields = ("id", "first_name", "last_name")
+    autocomplete_fields = ("customer",)
     actions = ["export_applications", "resend_application_confirmation"]
 
     def application_type(self, obj):

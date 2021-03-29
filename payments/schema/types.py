@@ -9,6 +9,7 @@ from utils.schema import CountConnection
 
 from ..enums import (
     AdditionalProductType,
+    OfferStatus,
     OrderRefundStatus,
     OrderStatus,
     PeriodType,
@@ -20,6 +21,7 @@ from ..models import (
     ADDITIONAL_PRODUCT_TAX_PERCENTAGES,
     AdditionalProduct,
     BerthProduct,
+    BerthSwitchOffer,
     Order,
     OrderLine,
     OrderLogEntry,
@@ -35,6 +37,7 @@ ProductServiceTypeEnum = graphene.Enum.from_enum(ProductServiceType)
 PeriodTypeEnum = graphene.Enum.from_enum(PeriodType)
 OrderStatusEnum = graphene.Enum.from_enum(OrderStatus)
 OrderRefundStatusEnum = graphene.Enum.from_enum(OrderRefundStatus)
+OfferStatusEnum = graphene.Enum.from_enum(OfferStatus)
 PlaceProductTaxEnum = graphene.Enum(
     "PlaceProductTaxEnum",
     [
@@ -240,6 +243,34 @@ class OrderRefundNode(DjangoObjectType):
 
     @classmethod
     @view_permission_required(Order, OrderRefund)
+    def get_queryset(cls, queryset, info):
+        return super().get_queryset(queryset, info)
+
+
+class AbstractOfferNode:
+    customer = graphene.Field(ProfileNode, required=True)
+    status = OfferStatusEnum(required=True)
+    due_date = graphene.Date()
+    customer_first_name = graphene.String()
+    customer_last_name = graphene.String()
+    customer_email = graphene.String()
+    customer_phone = graphene.String()
+
+
+class BerthSwitchOfferNode(DjangoObjectType, AbstractOfferNode):
+    application = graphene.Field(
+        "applications.new_schema.BerthApplicationNode", required=True
+    )
+    lease = graphene.Field(BerthLeaseNode, required=True)
+    berth = graphene.Field("resources.schema.BerthNode", required=True)
+
+    class Meta:
+        model = BerthSwitchOffer
+        interfaces = (graphene.relay.Node,)
+        connection_class = CountConnection
+
+    @classmethod
+    @view_permission_required(BerthSwitchOffer)
     def get_queryset(cls, queryset, info):
         return super().get_queryset(queryset, info)
 
