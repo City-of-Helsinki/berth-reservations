@@ -19,9 +19,7 @@ def resolve_piers(info, **kwargs):
     # Filter out piers with no berths that fit the
     # passed dimensions only if the dimensions were given.
     # Otherwise, return the whole list of piers.
-    has_dimensions_filter = any(
-        ["min_berth_width" in kwargs, "min_berth_length" in kwargs]
-    )
+    has_dimensions_filter = min_width or min_length
 
     if has_dimensions_filter and application_global_id:
         raise VenepaikkaGraphQLError(
@@ -55,9 +53,9 @@ def resolve_piers(info, **kwargs):
         query = Pier.objects.all()
 
     suitable_berth_types = BerthType.objects.all()
-    if min_width is not None:
+    if min_width:
         suitable_berth_types = suitable_berth_types.filter(width__gte=min_width)
-    if min_length is not None:
+    if min_length:
         suitable_berth_types = suitable_berth_types.filter(length__gte=min_length)
 
     berth_queryset = Berth.objects.select_related("berth_type").filter(
@@ -73,12 +71,14 @@ def resolve_piers(info, **kwargs):
     ).select_related("harbor", "harbor__availability_level", "harbor__municipality")
 
     if has_dimensions_filter:
+        dimensions_filter = Q()
+        if min_width:
+            dimensions_filter &= Q(berths__berth_type__width__gte=min_width)
+        if min_length:
+            dimensions_filter &= Q(berths__berth_type__length__gte=min_length)
+
         query = query.annotate(
-            berth_count=Count(
-                "berths",
-                filter=Q(berths__berth_type__width__gte=min_width)
-                & Q(berths__berth_type__length__gte=min_length),
-            )
+            berth_count=Count("berths", filter=dimensions_filter)
         ).filter(berth_count__gt=0)
 
     return query

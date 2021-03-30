@@ -818,6 +818,82 @@ def test_get_harbor_count(api_client):
     assert executed["data"] == {"harbors": {"count": count, "totalCount": count}}
 
 
+@pytest.mark.parametrize("min_width", [None, 1, 4])
+@pytest.mark.parametrize("min_length", [None, 1, 5])
+def test_get_harbor_min_width_query(api_client, pier, min_width, min_length):
+    harbor = pier.harbor
+    # Add some berths
+    berth_1 = BerthFactory(pier=pier, is_active=False)
+    berth_type_1 = berth_1.berth_type
+    berth_type_1.width = 1
+    berth_type_1.length = 1
+    berth_type_1.save()
+
+    berth_2 = BerthFactory(pier=pier, is_active=False)
+    berth_type_2 = berth_2.berth_type
+    berth_type_2.width = 4
+    berth_type_2.length = 4
+    berth_type_2.save()
+
+    expected_berths = [
+        b
+        for b in [berth_1, berth_2]
+        if (min_width is None or b.berth_type.width >= min_width)
+        and (min_length is None or b.berth_type.length >= min_length)
+    ]
+
+    pier_filters = []
+    if min_width is not None:
+        pier_filters.append(f"minBerthWidth: {min_width}")
+    if min_length is not None:
+        pier_filters.append(f"minBerthLength: {min_length}")
+
+    query = """
+        {
+            harbor(id: "%s") {
+                properties {
+                    piers%s {
+                        edges {
+                          node {
+                            id
+                            properties {
+                              berths {
+                                count
+                                edges {
+                                  node {
+                                    id
+                                    number
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                    }
+                }
+            }
+        }
+    """ % (
+        to_global_id(HarborNode._meta.name, harbor.id),
+        f"({', '.join(pier_filters)})" if pier_filters else "",
+    )
+    expected_ids = {to_global_id(BerthNode._meta.name, b.id) for b in expected_berths}
+    executed = api_client.execute(query)
+
+    if expected_ids:
+        result_ids = [
+            berth_result["node"]["id"]
+            for berth_result in executed["data"]["harbor"]["properties"]["piers"][
+                "edges"
+            ][0]["node"]["properties"]["berths"]["edges"]
+        ]
+        assert set(result_ids) == expected_ids
+        assert len(result_ids) == len(expected_ids)
+        assert len(executed["data"]["harbor"]["properties"]["piers"]["edges"]) == 1
+    else:
+        assert executed["data"]["harbor"]["properties"]["piers"]["edges"] == []
+
+
 def test_get_harbor_count_filtered(api_client):
     electricity_count = random.randint(1, 10)
     no_electricity_count = random.randint(1, 10)
