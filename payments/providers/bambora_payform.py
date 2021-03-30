@@ -286,10 +286,11 @@ class BamboraPayformProvider(PaymentProvider):
                 _("Cannot refund an order that has not been paid through VismaPay")
             )
 
+        refund_amount = order.total_price
         payload = {
             "version": "w3.1",
             "api_key": self.config.get(VENE_PAYMENTS_BAMBORA_API_KEY),
-            "amount": price_as_fractional_int(order.total_price),
+            "amount": price_as_fractional_int(refund_amount),
             "notify_url": self.get_notify_refund_url(),
             "email": order.customer_email,
             "order_number": f"{order.order_number}-{order_token.created_at.timestamp()}",
@@ -312,7 +313,7 @@ class BamboraPayformProvider(PaymentProvider):
                 )
 
             return OrderRefund.objects.create(
-                order=order, amount=order.price, refund_id=str(response["refund_id"])
+                order=order, amount=refund_amount, refund_id=str(response["refund_id"])
             )
         except RequestException as e:
             raise ServiceUnavailableError(_("Payment service is unreachable")) from e
