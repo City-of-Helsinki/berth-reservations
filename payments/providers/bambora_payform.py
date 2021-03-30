@@ -351,7 +351,7 @@ class BamboraPayformProvider(PaymentProvider):
                     OrderStatus.REFUNDED,
                     "Code 0 (refund succeeded) in Bambora Payform notify refund request.",
                 )
-                if refund.amount == order.price and order.lease:
+                if refund.amount == order.total_price and order.lease:
                     terminate_lease(order.lease, send_notice=False)
             except OrderStatusTransitionError as oste:
                 logger.warning(oste)
