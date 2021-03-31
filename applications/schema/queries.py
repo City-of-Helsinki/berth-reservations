@@ -64,7 +64,7 @@ class Query:
             qs.select_related(
                 "boat_type",
                 "berth_switch",
-                "berth_switch__harbor",
+                "berth_switch__berth",
                 "berth_switch__reason",
                 "customer",
             )

@@ -69,8 +69,21 @@ class BerthApplicationInline(admin.StackedInline):
 
 class BerthSwitchAdmin(admin.ModelAdmin):
     model = BerthSwitch
-    list_display = ("id", "harbor", "pier", "berth_number", "reason")
-    search_fields = ("berth_number", "pier", "harbor__translations__name", "harbor__id")
+    list_display = ("id", "berth", "reason", "berth_applications")
+    readonly_fields = ("berth_applications",)
+    search_fields = (
+        "id",
+        "number",
+        "pier__identifier",
+        "pier__harbor__translations__name",
+        "pier__harbor_id",
+    )
+    autocomplete_fields = ("berth",)
+
+    def berth_applications(self, obj):
+        return ", ".join([str(application) for application in obj.applications.all()])
+
+    berth_applications.short_description = _("Applications")
 
 
 class BerthApplicationAdmin(admin.ModelAdmin):
@@ -79,9 +92,7 @@ class BerthApplicationAdmin(admin.ModelAdmin):
         "application_type",
         "created_at",
         "get_berth_switch_id",
-        "get_berth_switch_harbor",
-        "get_berth_switch_pier",
-        "get_berth_switch_berth_number",
+        "get_berth_switch_berth",
         "get_berth_switch_reason",
     ]
     fieldsets = [
@@ -139,9 +150,7 @@ class BerthApplicationAdmin(admin.ModelAdmin):
             {
                 "fields": [
                     "get_berth_switch_id",
-                    "get_berth_switch_harbor",
-                    "get_berth_switch_pier",
-                    "get_berth_switch_berth_number",
+                    "get_berth_switch_berth",
                     "get_berth_switch_reason",
                 ]
             },
@@ -183,20 +192,14 @@ class BerthApplicationAdmin(admin.ModelAdmin):
 
     get_berth_switch_id.short_description = _("Id")
 
-    def get_berth_switch_harbor(self, obj):
-        return obj.berth_switch.harbor
+    def get_berth_switch_berth(self, obj):
+        return (
+            f"{obj.berth_switch.berth.pier.harbor.name} "
+            f"({obj.berth_switch.berth.pier.identifier}) "
+            f"{obj.berth_switch.berth.number}"
+        )
 
-    get_berth_switch_harbor.short_description = _("Harbor")
-
-    def get_berth_switch_pier(self, obj):
-        return obj.berth_switch.pier
-
-    get_berth_switch_pier.short_description = _("Pier")
-
-    def get_berth_switch_berth_number(self, obj):
-        return obj.berth_switch.berth_number
-
-    get_berth_switch_berth_number.short_description = _("Berth number")
+    get_berth_switch_berth.short_description = _("Berth")
 
     def get_berth_switch_reason(self, obj):
         return obj.berth_switch.reason.title

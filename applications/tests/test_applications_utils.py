@@ -88,11 +88,13 @@ def test_exporting_berth_applications_to_excel(
     expected_berth_switch_reason = ""
     expected_berth_switch_str = ""
     if berth_switch:
-        switch_harbor_name = berth_switch_info.harbor.safe_translation_getter(
+        switch_harbor_name = berth_switch_info.berth.pier.harbor.safe_translation_getter(
             "name", language_code=EXCEL_FILE_LANG
         )
         expected_berth_switch_str = "{} ({}): {}".format(
-            switch_harbor_name, berth_switch_info.pier, berth_switch_info.berth_number,
+            switch_harbor_name,
+            berth_switch_info.berth.pier.identifier,
+            berth_switch_info.berth.number,
         )
         expected_berth_switch_reason = (
             berth_switch_info.reason.title if berth_switch_info.reason else "---"
