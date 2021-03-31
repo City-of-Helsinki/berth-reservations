@@ -26,7 +26,8 @@ from parler.models import TranslatableModel, TranslatedFields
 from leases.consts import ACTIVE_LEASE_STATUSES
 from leases.enums import LeaseStatus
 from leases.utils import (
-    calculate_season_end_date,
+    calculate_berth_lease_end_date,
+    calculate_berth_lease_start_date,
     calculate_winter_storage_lease_end_date,
 )
 from payments.enums import PriceTier
@@ -630,7 +631,8 @@ class BerthManager(models.Manager):
         """
         from leases.models import BerthLease
 
-        season_end = calculate_season_end_date()
+        season_start = calculate_berth_lease_start_date()
+        season_end = calculate_berth_lease_end_date()
         current_date = today().date()
 
         # If today is before the season ends but during the same year
@@ -639,7 +641,15 @@ class BerthManager(models.Manager):
         else:
             last_year = current_date.year
 
-        in_current_season = Q(end_date__gte=season_end)
+        in_current_season = Q(
+            # Check the lease starts at some point the during the season
+            start_date__gte=season_start,
+            # Check the lease ends earliest at the beginning of the season
+            # (for leases terminated before the season started)
+            end_date__gte=season_start,
+            # Check the lease ends latest at the end of the season
+            end_date__lte=season_end,
+        )
         in_last_season = Q(end_date__year=last_year)
 
         active_current_status = Q(status__in=ACTIVE_LEASE_STATUSES)

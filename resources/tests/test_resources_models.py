@@ -1,4 +1,6 @@
 import random
+from datetime import date
+from unittest import mock
 
 import pytest  # noqa
 from dateutil.relativedelta import relativedelta
@@ -73,22 +75,51 @@ def test_berth_is_available_last_season_renew_automatically_invalid_status(
     assert Berth.objects.get(id=berth.id).is_available
 
 
-@freeze_time("2020-01-01T08:00:00Z")
-@pytest.mark.parametrize("status", ["drafted", "offered", "paid", "expired", "refused"])
-@pytest.mark.parametrize("renew_automatically", [True, False])
-def test_berth_is_available_ends_during_season(
-    superuser_api_client, berth, status, renew_automatically
+@pytest.mark.parametrize("status", ["drafted", "offered", "paid", "error"])
+def test_berth_is_not_available_ends_during_season_before_lease_ends(
+    superuser_api_client, berth, status
 ):
-    end_date = calculate_berth_lease_end_date()
-    end_date = end_date.replace(month=end_date.month - 1)
+
+    start_date = calculate_berth_lease_start_date()
+    end_date = calculate_berth_lease_end_date() - relativedelta(month=6, day=29)
 
     BerthLeaseFactory(
         berth=berth,
+        start_date=start_date,
         end_date=end_date,
-        renew_automatically=renew_automatically,
         status=LeaseStatus(status),
     )
-    assert Berth.objects.get(id=berth.id).is_available
+    with mock.patch(
+        "leases.utils.calculate_berth_lease_start_date"
+    ) as mock_start, mock.patch(
+        "leases.utils.calculate_berth_lease_end_date"
+    ) as mock_end:
+        mock_start.return_value = date(2020, 6, 10)
+        mock_end.return_value = date(2020, 9, 15)
+        assert not Berth.objects.get(id=berth.id).is_available
+
+
+def test_berth_is_available_ends_during_season_after_lease_ends(
+    superuser_api_client, berth
+):
+    start_date = calculate_berth_lease_start_date()
+    end_date = calculate_berth_lease_end_date() - relativedelta(month=6, day=29)
+
+    BerthLeaseFactory(
+        berth=berth,
+        start_date=start_date,
+        end_date=end_date,
+        # The lease is terminated at some point and set to end on end_date
+        status=LeaseStatus.TERMINATED,
+    )
+    with mock.patch(
+        "resources.models.calculate_berth_lease_start_date"
+    ) as mock_start, mock.patch(
+        "resources.models.calculate_berth_lease_end_date"
+    ) as mock_end:
+        mock_start.return_value = date(2020, 6, 30)
+        mock_end.return_value = date(2020, 9, 15)
+        assert Berth.objects.get(id=berth.id).is_available
 
 
 @freeze_time("2020-01-01T08:00:00Z")
