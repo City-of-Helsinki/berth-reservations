@@ -258,6 +258,17 @@ class AbstractOfferNode:
 
 
 class BerthSwitchOfferNode(DjangoObjectType, AbstractOfferNode):
+    """
+    TODO:
+     Add permission check for this node
+     when the customer login is sorted out
+     Example:
+         @classmethod
+         @view_permission_required(BerthSwitchOffer)
+         def get_queryset(cls, queryset, info):
+             return super().get_queryset(queryset, info)
+    """
+
     application = graphene.Field(
         "applications.new_schema.BerthApplicationNode", required=True
     )
@@ -268,11 +279,6 @@ class BerthSwitchOfferNode(DjangoObjectType, AbstractOfferNode):
         model = BerthSwitchOffer
         interfaces = (graphene.relay.Node,)
         connection_class = CountConnection
-
-    @classmethod
-    @view_permission_required(BerthSwitchOffer)
-    def get_queryset(cls, queryset, info):
-        return super().get_queryset(queryset, info)
 
 
 class OrderDetailsType(graphene.ObjectType):
