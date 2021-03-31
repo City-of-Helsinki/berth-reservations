@@ -11,10 +11,10 @@ from berth_reservations.tests.utils import (
 )
 from customers.schema import ProfileNode
 from leases.tests.factories import BerthLeaseFactory
-from resources.schema import HarborNode, WinterStorageAreaNode
+from resources.schema import BerthNode, HarborNode, WinterStorageAreaNode
 from resources.tests.factories import (
+    BerthFactory,
     BoatTypeFactory,
-    HarborFactory,
     WinterStorageAreaFactory,
 )
 from utils.relay import to_global_id
@@ -29,11 +29,13 @@ mutation createBerthApplication($input: CreateBerthApplicationMutationInput!) {
     createBerthApplication(input: $input) {
         berthApplication {
             berthSwitch {
-                berthNumber,
+                berth {
+                    id
+                }
                 reason {
                     id
                 }
-            },
+            }
             harborChoices {
                 harbor {
                     id
@@ -46,16 +48,13 @@ mutation createBerthApplication($input: CreateBerthApplicationMutationInput!) {
 
 
 def test_create_berth_application(superuser_api_client, berth_switch_reason):
-    harbor = HarborFactory()
+    berth = BerthFactory()
+    berth_node_id = to_global_id(BerthNode, berth.id)
+    harbor_node_id = to_global_id(HarborNode, berth.pier.harbor.id)
     boat_type = BoatTypeFactory()
-    harbor_node_id = to_global_id(HarborNode, harbor.id)
+
     variables = {
-        "berthSwitch": {
-            "harborId": harbor_node_id,
-            "pier": "dinkkypier",
-            "berthNumber": "D33",
-            "reason": berth_switch_reason.id,
-        },
+        "berthSwitch": {"berthId": berth_node_id, "reason": berth_switch_reason.id},
         "berthApplication": {
             "language": "en",
             "firstName": "John",
@@ -84,7 +83,7 @@ def test_create_berth_application(superuser_api_client, berth_switch_reason):
             "createBerthApplication": {
                 "berthApplication": {
                     "berthSwitch": {
-                        "berthNumber": "D33",
+                        "berth": {"id": berth_node_id},
                         "reason": {"id": str(berth_switch_reason.id)},
                     },
                     "harborChoices": [{"harbor": {"id": harbor_node_id}}],
@@ -95,16 +94,13 @@ def test_create_berth_application(superuser_api_client, berth_switch_reason):
 
 
 def test_create_berth_application_wo_reason(superuser_api_client):
-    harbor = HarborFactory()
+    berth = BerthFactory()
+    berth_node_id = to_global_id(BerthNode, berth.id)
+    harbor_node_id = to_global_id(HarborNode, berth.pier.harbor.id)
     boat_type = BoatTypeFactory()
-    harbor_node_id = to_global_id(HarborNode, harbor.id)
 
     variables = {
-        "berthSwitch": {
-            "harborId": harbor_node_id,
-            "pier": "dinkkypier",
-            "berthNumber": "D33",
-        },
+        "berthSwitch": {"berthId": berth_node_id},
         "berthApplication": {
             "language": "en",
             "firstName": "John",
@@ -134,7 +130,7 @@ def test_create_berth_application_wo_reason(superuser_api_client):
         "data": {
             "createBerthApplication": {
                 "berthApplication": {
-                    "berthSwitch": {"berthNumber": "D33", "reason": None},
+                    "berthSwitch": {"berth": {"id": berth_node_id}, "reason": None},
                     "harborChoices": [{"harbor": {"id": harbor_node_id}}],
                 }
             }

@@ -9,9 +9,7 @@ class HarborChoiceInput(graphene.InputObjectType):
 
 
 class BerthSwitchInput(graphene.InputObjectType):
-    harbor_id = graphene.ID(required=True)
-    pier = graphene.String()
-    berth_number = graphene.String(required=True)
+    berth_id = graphene.ID(required=True)
     reason = graphene.ID()
 
 

@@ -43,7 +43,7 @@ class CreateBerthApplicationMutation(graphene.ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, **kwargs):
         from resources.models import BoatType
-        from resources.schema import HarborNode
+        from resources.schema import BerthNode, HarborNode
 
         application_data = kwargs.pop("berth_application")
 
@@ -53,17 +53,12 @@ class CreateBerthApplicationMutation(graphene.ClientIDMutation):
 
         switch_data = kwargs.pop("berth_switch", None)
         if switch_data:
-            old_harbor = get_node_from_global_id(
-                info, switch_data.get("harbor_id"), only_type=HarborNode
+            berth = get_node_from_global_id(
+                info, switch_data.get("berth_id"), only_type=BerthNode
             )
             reason_id = switch_data.get("reason")
             reason = BerthSwitchReason.objects.get(id=reason_id) if reason_id else None
-            berth_switch = BerthSwitch.objects.create(
-                harbor=old_harbor,
-                pier=switch_data.get("pier", ""),
-                berth_number=switch_data.get("berth_number"),
-                reason=reason,
-            )
+            berth_switch = BerthSwitch.objects.create(berth=berth, reason=reason)
             application_data["berth_switch"] = berth_switch
 
         choices = application_data.pop("choices", [])
