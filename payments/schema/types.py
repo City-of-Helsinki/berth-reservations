@@ -1,10 +1,14 @@
 import graphene
 from graphene_django import DjangoConnectionField, DjangoObjectType
+from graphql_jwt.decorators import login_required
 
+from customers.models import CustomerProfile
 from customers.schema import ProfileNode
+from leases.models import BerthLease, WinterStorageLease
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from resources.schema import WinterStorageAreaNode
 from users.decorators import view_permission_required
+from utils.relay import return_node_if_user_has_permissions
 from utils.schema import CountConnection
 
 from ..enums import (
@@ -225,9 +229,17 @@ class OrderNode(DjangoObjectType):
         )
 
     @classmethod
-    @view_permission_required(Order)
-    def get_queryset(cls, queryset, info):
-        return super().get_queryset(queryset, info)
+    @login_required
+    def get_node(cls, info, id):
+        node = super().get_node(info, id)
+        return return_node_if_user_has_permissions(
+            node,
+            info.context.user,
+            Order,
+            CustomerProfile,
+            BerthLease,
+            WinterStorageLease,
+        )
 
 
 class OrderRefundNode(DjangoObjectType):

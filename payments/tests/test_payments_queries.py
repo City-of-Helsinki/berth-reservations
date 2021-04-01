@@ -524,9 +524,8 @@ def test_get_orders(api_client, order):
 @pytest.mark.parametrize(
     "api_client", ["api_client", "user", "harbor_services"], indirect=True,
 )
-def test_get_orders_not_enough_permissions(api_client):
+def test_get_orders_not_enough_permissions(api_client, order):
     executed = api_client.execute(ORDERS_QUERY)
-
     assert_not_enough_permissions(executed)
 
 
