@@ -11,6 +11,7 @@ from applications.enums import ApplicationStatus
 from customers.services import SMSNotificationService
 from customers.tests.conftest import MOCK_HKI_PROFILE_ADDRESS, mocked_response_profile
 from leases.enums import LeaseStatus
+from payments.enums import OrderStatus
 from utils.relay import to_global_id
 
 from ..enums import ProductServiceType
@@ -39,6 +40,9 @@ mutation APPROVE_ORDER_MUTATION($input: ApproveOrderMutationInput!) {
 def test_approve_ap_order(
     api_client, order: Order, payment_provider, notification_template_orders_approved,
 ):
+    order.status = OrderStatus.DRAFTED
+    order.save(update_fields=["status"])
+
     due_date = (today() + relativedelta(days=14)).date()
     email = "foo@bar.com"
     variables = {

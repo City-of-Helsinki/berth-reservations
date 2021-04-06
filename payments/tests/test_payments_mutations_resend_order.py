@@ -45,7 +45,7 @@ mutation RESEND_ORDER_MUTATION($input: ResendOrderMutationInput!) {
 @pytest.mark.parametrize(
     "request_has_profile_token", [True, False],
 )
-@pytest.mark.parametrize("order_status", [OrderStatus.WAITING, OrderStatus.CANCELLED])
+@pytest.mark.parametrize("order_status", [OrderStatus.OFFERED, OrderStatus.ERROR])
 def test_resend_order(
     api_client,
     order: Order,
@@ -123,7 +123,7 @@ def test_resend_order(
         assert order.price != initial_price
         order.lease.refresh_from_db()
 
-        assert order.status == OrderStatus.WAITING
+        assert order.status == OrderStatus.OFFERED
         assert order.lease.status == LeaseStatus.OFFERED
 
         assert len(mail.outbox) == 1
@@ -212,7 +212,7 @@ def test_resend_order_in_error(
     assert executed["data"]["resendOrder"]["sentOrders"] == [str(order.id)]
 
     assert order.lease.status == LeaseStatus.OFFERED
-    assert order.status == OrderStatus.WAITING
+    assert order.status == OrderStatus.OFFERED
 
     assert len(mail.outbox) == 1
     assert (
@@ -308,7 +308,7 @@ def test_resend_order_not_fixed_in_error(
 def test_resend_order_in_invalid_state(
     api_client, order: Order, notification_template_orders_approved, order_status
 ):
-    order.status = OrderStatus.WAITING
+    order.status = OrderStatus.OFFERED
     order.order_type = OrderType.LEASE_ORDER.value
     order.customer_phone = "+358505658789"
     order.customer_email = "test@kuva.hel.ninja"

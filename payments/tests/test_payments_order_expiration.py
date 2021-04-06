@@ -20,14 +20,14 @@ def test_expire_too_old_unpaid_orders(berth_lease, berth_product):
         product=berth_product,
         customer=berth_lease.customer,
         due_date=datetime.date(2021, 1, 2),
-        status=OrderStatus.WAITING,
+        status=OrderStatus.OFFERED,
     )
     assert (
         Order.objects.expire_too_old_unpaid_orders(older_than_days=7, dry_run=False)
         == 0
     )
     order.refresh_from_db()
-    assert order.status == OrderStatus.WAITING
+    assert order.status == OrderStatus.OFFERED
     order.due_date = datetime.date(2021, 1, 1)
     order.save()
 

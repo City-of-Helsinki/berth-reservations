@@ -328,7 +328,9 @@ def get_lease_status(new_status) -> LeaseStatus:
         return LeaseStatus.REFUSED
     elif new_status == OrderStatus.EXPIRED:
         return LeaseStatus.EXPIRED
-    elif new_status == OrderStatus.WAITING:
+    elif new_status == OrderStatus.DRAFTED:
+        return LeaseStatus.DRAFTED
+    elif new_status == OrderStatus.OFFERED:
         return LeaseStatus.OFFERED
     elif new_status == OrderStatus.ERROR:
         return LeaseStatus.ERROR
@@ -366,6 +368,7 @@ def approve_order(
 
     order.due_date = due_date
     order.save()
+    order.set_status(OrderStatus.OFFERED)
 
     if order.lease and order.order_type == OrderType.LEASE_ORDER:
         # Update lease status
@@ -439,12 +442,12 @@ def send_refund_notice(order):
 def prepare_for_resending(order):
     if order.status == OrderStatus.ERROR or order.lease.status == LeaseStatus.ERROR:
         order.set_status(
-            OrderStatus.WAITING,
+            OrderStatus.OFFERED,
             comment=f"{today()}: {_('Cleanup the invoice to attempt resending')}\n",
         )
     elif order.status == OrderStatus.CANCELLED:
         order.set_status(
-            OrderStatus.WAITING,
+            OrderStatus.OFFERED,
             comment=f"{today()}: {_('Resend cancelled invoice')}\n",
         )
 

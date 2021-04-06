@@ -176,7 +176,7 @@ def terminate_lease(
         )
 
     for order in lease.orders.all():
-        if order.status == OrderStatus.WAITING:
+        if order.status in OrderStatus.get_waiting_statuses():
             order.set_status(OrderStatus.CANCELLED, _("Lease was terminated"))
 
     lease.status = LeaseStatus.TERMINATED

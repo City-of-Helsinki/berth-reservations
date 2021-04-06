@@ -128,7 +128,7 @@ def _get_cancelled_order_context(subject: str = "Order cancelled"):
                 dict,
                 FACTORY_CLASS=OrderFactory,
                 customer=customer,
-                status=OrderStatus.WAITING,
+                status=OrderStatus.CANCELLED,
                 product=BerthProductFactory.build(),
                 lease=BerthLeaseFactory.build(customer=customer),
                 price=Decimal("100"),

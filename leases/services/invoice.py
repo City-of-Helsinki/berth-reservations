@@ -308,7 +308,7 @@ class BaseInvoicingService:
 
         for order in orders:
             order.set_status(
-                OrderStatus.WAITING,
+                OrderStatus.OFFERED,
                 comment=f"{get_ts()}: {_('Cleanup the invoice to attempt resending')}\n",
             )
 

@@ -81,7 +81,8 @@ def test_initiate_refund_success(provider_base_config: dict, order: Order):
         OrderStatus.PAID_MANUALLY,
         OrderStatus.REFUNDED,
         OrderStatus.REJECTED,
-        OrderStatus.WAITING,
+        OrderStatus.DRAFTED,
+        OrderStatus.OFFERED,
     ],
 )
 def test_initiate_refund_invalid_order_status(

@@ -468,7 +468,7 @@ class ConfirmPaymentMutation(graphene.ClientIDMutation):
         order_number = input.get("order_number", None)
         try:
             order = Order.objects.get(order_number=order_number)
-            if order.status not in (OrderStatus.WAITING, OrderStatus.REJECTED):
+            if order.status not in (OrderStatus.OFFERED, OrderStatus.REJECTED):
                 raise VenepaikkaGraphQLError(
                     _("The order is not valid anymore")
                     + f": {OrderStatus(order.status).label}"
@@ -491,7 +491,7 @@ class CancelOrderMutation(graphene.ClientIDMutation):
         order_number = input.get("order_number", None)
         try:
             order = Order.objects.get(order_number=order_number)
-            if order.status != OrderStatus.WAITING:
+            if order.status != OrderStatus.OFFERED:
                 raise VenepaikkaGraphQLError(
                     _("The order is not valid anymore")
                     + f": {OrderStatus(order.status).label}"

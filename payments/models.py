@@ -40,7 +40,6 @@ from .enums import (
 )
 from .exceptions import OrderStatusTransitionError
 from .utils import (
-    calculate_order_due_date,
     calculate_organization_price,
     calculate_organization_tax_percentage,
     calculate_product_partial_month_price,
@@ -260,20 +259,20 @@ class OrderManager(models.Manager):
         )
 
     def expire_too_old_unpaid_orders(self, older_than_days, dry_run=False) -> int:
-        # Check all orders that are in WAITING status, and if there is
+        # Check all orders that are in OFFERED status, and if there is
         # {older_than_days} full days elapsed after the order's due_date, then
         # set the order status to EXPIRED.
         # Example:
-        # * There's an order with due_date=1.1.2021 and status=WAITING.
+        # * There's an order with due_date=1.1.2021 and status=OFFERED.
         # * Calling expire_too_old_unpaid_orders(older_than_days=7) on 9.1.2021 will set the status to EXPIRED.
         # * But calling the function on 8.1.2021 would not change the order.
 
         expire_before_date = date.today() - timedelta(days=older_than_days)
-        too_old_waiting_orders = self.get_queryset().filter(
-            status=OrderStatus.WAITING, due_date__lt=expire_before_date,
+        too_old_offered_orders = self.get_queryset().filter(
+            status=OrderStatus.OFFERED, due_date__lt=expire_before_date,
         )
         num_expired = 0
-        for order in too_old_waiting_orders:
+        for order in too_old_offered_orders:
             if order.order_type == OrderType.LEASE_ORDER and not order.lease:
                 logger.info(
                     f"Lease missing from lease order, skip invalid order {order}"
@@ -354,7 +353,7 @@ class Order(UUIDModel, TimeStampedModel):
     product = GenericForeignKey("_product_content_type", "_product_object_id")
     lease = GenericForeignKey("_lease_content_type", "_lease_object_id")
     status = models.CharField(
-        choices=OrderStatus.choices, default=OrderStatus.WAITING, max_length=9
+        choices=OrderStatus.choices, default=OrderStatus.DRAFTED, max_length=9
     )
     comment = models.TextField(blank=True, null=True)
 
@@ -542,7 +541,7 @@ class Order(UUIDModel, TimeStampedModel):
 
     def _check_same_product(self, old_instance) -> None:
         if (
-            self.status != OrderStatus.WAITING
+            self.status not in OrderStatus.get_waiting_statuses()
             and old_instance.product
             and self.product != old_instance.product
         ):
@@ -624,7 +623,7 @@ class Order(UUIDModel, TimeStampedModel):
     def recalculate_price(self):
         # Setting self.price to None forces _update_price to save the recalculated price, using the
         # same logic as creating a new Order.
-        if self.status == OrderStatus.WAITING:
+        if self.status in OrderStatus.get_waiting_statuses():
             self.price = None
             # Update the associated product for recomputing the price
             self._update_product()
@@ -720,7 +719,12 @@ class Order(UUIDModel, TimeStampedModel):
             return
 
         valid_status_changes = {
-            OrderStatus.WAITING: (
+            OrderStatus.DRAFTED: (
+                OrderStatus.OFFERED,
+                OrderStatus.PAID_MANUALLY,
+                OrderStatus.ERROR,
+            ),
+            OrderStatus.OFFERED: (
                 OrderStatus.PAID,
                 OrderStatus.PAID_MANUALLY,
                 OrderStatus.EXPIRED,
@@ -731,11 +735,12 @@ class Order(UUIDModel, TimeStampedModel):
             OrderStatus.PAID: (OrderStatus.REFUNDED,),
             OrderStatus.PAID_MANUALLY: (OrderStatus.REFUNDED,),
             OrderStatus.ERROR: (
-                OrderStatus.WAITING,
+                OrderStatus.DRAFTED,
+                OrderStatus.OFFERED,
                 OrderStatus.PAID_MANUALLY,
                 OrderStatus.CANCELLED,
             ),
-            OrderStatus.CANCELLED: (OrderStatus.WAITING,),
+            OrderStatus.CANCELLED: (OrderStatus.OFFERED,),
         }
         valid_new_status = valid_status_changes.get(old_status, ())
 

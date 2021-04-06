@@ -867,36 +867,40 @@ mutation UPDATE_ORDER($input: UpdateOrderMutationInput!) {
 @pytest.mark.parametrize(
     "api_client", ["berth_services"], indirect=True,
 )
-@freeze_time("2020-01-01T08:00:00Z")
-def test_update_order_berth_product(api_client, berth_product, berth_lease):
-    order = OrderFactory(
-        product=berth_product,
-        lease=berth_lease,
-        customer=berth_lease.customer,
-        status=OrderStatus.WAITING,
-    )
-
-    global_id = to_global_id(OrderNode, order.id)
-
-    # only valid state transitions
-    status_choices = [
+@pytest.mark.parametrize(
+    "status_choice",
+    [
         OrderStatus.PAID,
         OrderStatus.PAID_MANUALLY,
         OrderStatus.EXPIRED,
         OrderStatus.REJECTED,
         OrderStatus.ERROR,
-    ]
+    ],
+)
+@freeze_time("2020-01-01T08:00:00Z")
+def test_update_order_berth_product(
+    api_client, status_choice, berth_product, berth_lease
+):
+    order = OrderFactory(
+        product=berth_product,
+        lease=berth_lease,
+        customer=berth_lease.customer,
+        status=OrderStatus.OFFERED,
+    )
+
+    global_id = to_global_id(OrderNode, order.id)
+
+    # only valid state transitions
     variables = {
         "id": global_id,
         "comment": "foobar",
         "dueDate": today(),
-        "status": OrderStatusEnum.get(random.choice(status_choices).value).name,
+        "status": OrderStatusEnum.get(status_choice.value).name,
     }
 
     assert Order.objects.count() == 1
 
     executed = api_client.execute(UPDATE_ORDER_MUTATION, input=variables)
-
     assert Order.objects.count() == 1
 
     assert executed["data"]["updateOrder"]["order"] == {
@@ -915,7 +919,9 @@ def test_update_order_berth_product(api_client, berth_product, berth_lease):
 @pytest.mark.parametrize(
     "api_client", ["berth_services"], indirect=True,
 )
-@pytest.mark.parametrize("initial_status", [OrderStatus.WAITING, OrderStatus.ERROR])
+@pytest.mark.parametrize(
+    "initial_status", [OrderStatus.DRAFTED, OrderStatus.OFFERED, OrderStatus.ERROR]
+)
 @freeze_time("2020-01-01T08:00:00Z")
 def test_set_order_status_to_paid_manually(
     api_client, initial_status, berth_product, berth_lease
@@ -962,7 +968,7 @@ def test_set_order_status_to_paid_manually(
 @pytest.mark.parametrize(
     "api_client", ["berth_services"], indirect=True,
 )
-@pytest.mark.parametrize("initial_status", [OrderStatus.WAITING, OrderStatus.ERROR])
+@pytest.mark.parametrize("initial_status", [OrderStatus.OFFERED, OrderStatus.ERROR])
 @freeze_time("2020-01-01T08:00:00Z")
 def test_set_order_status_to_cancelled(
     api_client, initial_status, berth_product, berth_lease
@@ -1351,7 +1357,7 @@ mutation CONFIRM_PAYMENT_MUTATION($input: ConfirmPaymentMutationInput!) {
 @pytest.mark.parametrize(
     "order", ["berth_order", "winter_storage_order"], indirect=True,
 )
-@pytest.mark.parametrize("status", [OrderStatus.WAITING, OrderStatus.REJECTED])
+@pytest.mark.parametrize("status", [OrderStatus.OFFERED, OrderStatus.REJECTED])
 def test_confirm_payment(old_schema_api_client, order: Order, status):
     order.status = status
     order.save()
@@ -1410,7 +1416,7 @@ def test_payment_fails_doesnt_use_empty_token(old_schema_api_client, order: Orde
         order=order, valid_until=now() + relativedelta(day=1)
     )
 
-    order.status = OrderStatus.WAITING
+    order.status = OrderStatus.OFFERED
     order.save()
     variables = {"orderNumber": order.order_number}
 
@@ -1440,7 +1446,7 @@ mutation CANCEL_ORDER_MUTATION($input: CancelOrderMutationInput!) {
 def test_cancel_order(
     old_schema_api_client, order: Order, notification_template_order_cancelled
 ):
-    order.status = OrderStatus.WAITING
+    order.status = OrderStatus.OFFERED
     order.save()
     variables = {"orderNumber": order.order_number}
 
@@ -1521,7 +1527,7 @@ def test_cancel_order_does_not_exist(old_schema_api_client):
     "order", ["unmarked_winter_storage_order"], indirect=True,
 )
 def test_cancel_unmarked_order_fails(old_schema_api_client, order: Order):
-    order.status = OrderStatus.WAITING
+    order.status = OrderStatus.OFFERED
     order.save()
     variables = {"orderNumber": order.order_number}
 
