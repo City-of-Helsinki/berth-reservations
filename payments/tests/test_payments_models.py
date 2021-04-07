@@ -999,6 +999,26 @@ def test_order_refund_cannot_refund_not_paid(order, status):
     assert "Cannot refund orders that are not paid" in errors
 
 
+def test_order_due_date_has_to_be_set_for_order_in_offered_status(
+    order, berth_product, customer_profile
+):
+    with pytest.raises(ValidationError) as exception:
+        order.due_date = None
+        order.status = OrderStatus.OFFERED
+        order.save()
+
+    errors = str(exception.value)
+    assert "Order cannot be offered without a due date" in errors
+
+    with pytest.raises(ValidationError) as exception:
+        Order.objects.create(
+            product=berth_product, customer=customer_profile, status=OrderStatus.OFFERED
+        )
+
+    errors = str(exception.value)
+    assert "Order cannot be offered without a due date" in errors
+
+
 def test_offer_without_due_date_drafted(berth_switch_offer):
     berth_switch_offer.status = OfferStatus.DRAFTED
     berth_switch_offer.due_date = None

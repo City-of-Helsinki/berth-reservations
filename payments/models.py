@@ -380,9 +380,7 @@ class Order(UUIDModel, TimeStampedModel):
         blank=True,
         validators=[MinValueValidator(Decimal("0.00"))],
     )
-    due_date = models.DateField(
-        verbose_name=_("due date"), default=calculate_order_due_date,
-    )
+    due_date = models.DateField(verbose_name=_("due date"), blank=True, null=True)
 
     _product_content_type = models.ForeignKey(
         ContentType,
@@ -585,6 +583,9 @@ class Order(UUIDModel, TimeStampedModel):
 
             # if due_date change is allowed
             self._check_due_date(old_instance)
+
+        if self.status == OrderStatus.OFFERED and not self.due_date:
+            raise ValidationError(_("Order cannot be offered without a due date"))
 
     def _assign_product_from_object_id(self):
         # If for some reason neither was found (shouldn't be the case), raise an error

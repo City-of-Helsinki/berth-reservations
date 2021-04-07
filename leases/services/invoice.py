@@ -158,9 +158,10 @@ class BaseInvoicingService:
 
     def fail_order(self, order: Order, message: str, dont_count: bool = False) -> None:
         """Set an order to ERROR status and append it to the failed_order list"""
-        order.comment = f"{get_ts()}: {message}"
-        order.save(update_fields=["comment"])
         order.set_status(OrderStatus.ERROR, f"Lease renewing failed: {message}")
+        order.comment = f"{get_ts()}: {message}"
+        order.due_date = None
+        order.save(update_fields=["comment", "due_date"])
         self.failed_orders.append({order.id: message})
         self.failure_count += 1 if not dont_count else 0
         logger.debug(f"Lease order [{order.id}]: {message}")
