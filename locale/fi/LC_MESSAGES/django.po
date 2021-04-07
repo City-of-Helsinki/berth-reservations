@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-09 14:10+0200\n"
+"POT-Creation-Date: 2021-03-17 14:50+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -88,20 +88,20 @@ msgstr "Tarjous lähetetty"
 msgid "No suitable berths"
 msgstr "Ei soveltuvia venepaikkoja"
 
-msgid "Notified that there are no suitable berths"
-msgstr "Ilmoitettu ettei soveltuvia venepaikkoja ole"
-
 msgid "Handled"
 msgstr "Käsitelty"
+
+msgid "Rejected"
+msgstr "Hylätty"
 
 msgid "Expired"
 msgstr "Vanhentunut"
 
 msgid "Marked"
-msgstr ""
+msgstr "Merkitty"
 
 msgid "Unmarked"
-msgstr ""
+msgstr "Merkitsemätön"
 
 msgid "priority"
 msgstr "prioriteetti"
@@ -241,10 +241,8 @@ msgstr "hyväksy ehdot"
 msgid "BerthApplication with no lease can only be "
 msgstr "Vuokraton paikkahakemus voi olla vain "
 
-#, fuzzy
-#| msgid "Application type"
 msgid "application area type"
-msgstr "Hakemuksen tyyppi"
+msgstr "Hakemuksen alueen tyyppi"
 
 msgid "chosen winter storage areas"
 msgstr "valitut talvisäilytysalueet"
@@ -258,26 +256,20 @@ msgstr "trailerin rekisterinumero"
 msgid "Customer cannot be disconnected from processed applications"
 msgstr "Asiakaskytköstä ei voi poistaa käsitellystä hakemuksesta"
 
-#, fuzzy
-#| msgid "Application type"
 msgid "Application has a lease"
-msgstr "Hakemuksen tyyppi"
+msgstr "Hakemuksella on vuokrasopimus"
 
 msgid "Berth application created"
 msgstr "Venepaikkahakemus luotu"
 
-#, fuzzy
-#| msgid "Berth application created"
 msgid "Berth application rejected"
-msgstr "Venepaikkahakemus luotu"
+msgstr "Venepaikkahakemus hylätty"
 
 msgid "Winter storage application created"
 msgstr "Talvisäilytyshakemus luotu"
 
-#, fuzzy
-#| msgid "Winter storage application created"
 msgid "Unmarked winter storage application created"
-msgstr "Talvisäilytyshakemus luotu"
+msgstr "Nostojärjestysilmoitus luotu"
 
 msgid "Finnish"
 msgstr "Suomi"
@@ -287,6 +279,33 @@ msgstr "Englanti"
 
 msgid "Swedish"
 msgstr "Ruotsi"
+
+msgid "New"
+msgstr "Uusi"
+
+msgid "Signed"
+msgstr "Allekirjoitettu"
+
+msgid "Deleted"
+msgstr "Poistettu"
+
+msgid "Cancelled"
+msgstr "Peruutettu"
+
+msgid "contract status"
+msgstr "sopimuksen tila"
+
+msgid "No order found for given order number"
+msgstr ""
+
+msgid "No contract found for given order"
+msgstr ""
+
+msgid "return_url is not a valid URL"
+msgstr ""
+
+msgid "auth_service is not a supported authentication service"
+msgstr ""
 
 msgid "Online payment"
 msgstr "Verkkomaksu"
@@ -315,10 +334,8 @@ msgstr "Tarkastus"
 msgid "Insurance"
 msgstr "Vakuutus"
 
-#, fuzzy
-#| msgid "customer profile"
 msgid "No customer ID provided"
-msgstr "asiakasprofiili"
+msgstr "Asiakastunnusta ei annettu"
 
 msgid "invoicing type"
 msgstr "laskutustyyppi"
@@ -572,6 +589,9 @@ msgstr "Virhe"
 msgid "Paid"
 msgstr "Maksettu"
 
+msgid "Terminated"
+msgstr "Irtisanottu"
+
 msgid "customer's boat"
 msgstr "asiakkaan vene"
 
@@ -627,20 +647,14 @@ msgstr "Valittu venepaikka ei ole aktiivinen"
 msgid "place"
 msgstr "paikka"
 
-#, fuzzy
-#| msgid "Inspection"
 msgid "section"
-msgstr "Tarkastus"
+msgstr "osa-alue"
 
-#, fuzzy
-#| msgid "order number"
 msgid "sticker number"
-msgstr "tilausnumero"
+msgstr "tarran numero"
 
-#, fuzzy
-#| msgid "order number"
 msgid "sticker posted"
-msgstr "tilausnumero"
+msgstr "tarra postitettu"
 
 msgid "winter storage lease"
 msgstr "talvisäilytyspaikan vuokrasopimus"
@@ -648,15 +662,11 @@ msgstr "talvisäilytyspaikan vuokrasopimus"
 msgid "winter storage leases"
 msgstr "talvisäilytyspaikkojen vuokrasopimukset"
 
-#, fuzzy
-#| msgid "Lease cannot have both place and area assigned"
 msgid "Lease cannot have both place and section assigned"
-msgstr "Vuokrasopimukseen ei voida liittää sekä paikkaa että aluetta"
+msgstr "Vuokrasopimukseen ei voida liittää sekä paikkaa että osa-aluetta"
 
-#, fuzzy
-#| msgid "Lease must have either place or area assigned"
 msgid "Lease must have either place or section assigned"
-msgstr "Vuokrasopimukseen tulee olla liitettynä joko paikka tai alue"
+msgstr "Vuokrasopimukseen tulee olla liitettynä joko paikka tai osa-alue"
 
 msgid "WinterStoragePlace already has a lease"
 msgstr "Talvisäilytyspaikalla on jo vuokrasopimus"
@@ -667,10 +677,8 @@ msgstr "Valittu paikka ei ole aktiivinen"
 msgid "Cannot change the place assigned to this lease"
 msgstr "Tähän vuokrasopimukseen liitettyä paikkaa ei voida vaihtaa"
 
-#, fuzzy
-#| msgid "Cannot change the berth assigned to this lease"
 msgid "Cannot change the section assigned to this lease"
-msgstr "Tähän vuokrasopimukseen liitettyä venepaikkaa ei voida vaihtaa"
+msgstr "Tähän vuokrasopimukseen liitettyä osa-aluetta ei voida vaihtaa"
 
 msgid "time created"
 msgstr "aika luotu"
@@ -702,8 +710,19 @@ msgstr "Kausilaskujen lähetys valmis"
 msgid "Terminated berth lease"
 msgstr "Venepaikka irtisanottu"
 
+msgid "Terminated winter storage lease"
+msgstr "Talvisäilytyspaikan vuokrasopimus irtisanottu"
+
+msgid ""
+"Can not specify both application and customer when creating a new berth lease"
+msgstr ""
+
 msgid "Application must be connected to an existing customer first"
 msgstr "Hakemuksen tulee ensin olla yhdistetty olemassa olevaan asiakkaaseen"
+
+msgid ""
+"Must specify either application or customer when creating a new berth lease"
+msgstr ""
 
 msgid "Boat does not belong to the same customer as the Application"
 msgstr "Vene ei kuulu samalle asiakkaalle kuin hakemus"
@@ -712,23 +731,29 @@ msgstr "Vene ei kuulu samalle asiakkaalle kuin hakemus"
 msgid "Lease object is not DRAFTED anymore: {lease.status}"
 msgstr "Vuokrasopimuksen kohde ei enää ole luonnosteltu: {lease.status}"
 
-#, fuzzy
-#| msgid "Cannot receive both Winter Storage Place and Area"
-msgid "Cannot receive both Winter Storage Place and Section"
-msgstr "Ei voida hakea sekä talvisäilytyspaikkaa että -aluetta"
-
-#, fuzzy
-#| msgid "Either Winter Storage Place or Area are required"
-msgid "Either Winter Storage Place or Section are required"
-msgstr "Joko talvisäilytyspaikka tai -alue vaaditaan"
-
-msgid "Lease must be in PAID status"
+msgid "Switch date is more than 6 months in the past"
 msgstr ""
 
-#, fuzzy
-#| msgid "estimated number of unmarked places"
+msgid "Berth lease is not active"
+msgstr "Venepaikan vuokrasopimus ei ole aktiivinen"
+
+msgid "Lease terminated due to berth switch"
+msgstr "Venepaikan vuokrasopimus irtisanottu venepaikan vaihdon vuoksi"
+
+msgid "Lease created from a berth switch"
+msgstr "Venepaikan vuokrasopimus luotu venepaikan vaihdon vuoksi"
+
+msgid "Cannot receive both Winter Storage Place and Section"
+msgstr "Ei voida hakea sekä talvisäilytyspaikkaa että osa-aluetta"
+
+msgid "Either Winter Storage Place or Section are required"
+msgstr "Joko talvisäilytyspaikka tai osa-alue vaaditaan"
+
+msgid "Lease must be in PAID status"
+msgstr "Vuokrasopimus pitää olla MAKSETTU tilassa"
+
 msgid "Lease must refer to unmarked area"
-msgstr "merkitsemättömien paikkojen arvioitu määrä"
+msgstr ""
 
 msgid "All leases must have an assigned sticker number"
 msgstr ""
@@ -738,17 +763,26 @@ msgstr "Asiakkaan sähköpostiosoite puuttuu"
 
 #, python-brace-format
 msgid "Limit of failures reached: {self.failure_count} elements failed"
-msgstr "Virhetilanteiden maksimimäärä saavutettu: {self.failure_count} kohdetta epäonnistui"
+msgstr ""
+"Virhetilanteiden maksimimäärä saavutettu: {self.failure_count} kohdetta "
+"epäonnistui"
 
-#, fuzzy
-#| msgid "Application must be connected to an existing customer first"
 msgid "The application is not connected to a customer"
-msgstr "Hakemuksen tulee ensin olla yhdistetty olemassa olevaan asiakkaaseen"
+msgstr "Hakemus ei ole yhdistetty olemassa olevaan asiakkaaseen"
 
-#, fuzzy
-#| msgid "No suitable berths"
 msgid "No suitable product found"
 msgstr "Ei soveltuvia tuotteita"
+
+#, python-brace-format
+msgid "Lease is not paid: {lease.status}"
+msgstr "Vuokrasopimus ei ole maksettu: {lease.status}"
+
+msgid "The lease has no email and no profile token was provided"
+msgstr ""
+
+#, python-brace-format
+msgid "{new_lease_comment}\n"
+msgstr ""
 
 msgid "Pretax price"
 msgstr "Hinta ennen veroa"
@@ -772,7 +806,7 @@ msgid "Order number"
 msgstr "Tilausnumero"
 
 msgid "Invalidate selected tokens"
-msgstr ""
+msgstr "Mitätöi valitut tunnukset"
 
 msgid "Storage on ice"
 msgstr "Jäihin jättö"
@@ -807,40 +841,38 @@ msgstr "Prosenttimäärä"
 msgid "Waiting"
 msgstr "Odottaa käsittelyä"
 
-msgid "Rejected"
+msgid "Paid manually"
+msgstr "Maksettu manuaalisesti"
+
+msgid "Refunded"
 msgstr "Hylätty"
 
-#, fuzzy
-#| msgid "order"
+msgid "Accepted"
+msgstr "Hyväksytty"
+
 msgid "Lease order"
-msgstr "tilaus"
+msgstr "Venepaikan lasku"
 
 msgid "Additional product order"
-msgstr ""
+msgstr "Lisäpalvelulasku"
 
 msgid "New berth order"
-msgstr ""
+msgstr "Venepaikkalasku"
 
 msgid "Renew berth order"
-msgstr ""
+msgstr "Venepaikkalasku"
 
-#, fuzzy
-#| msgid "berth switch reason"
 msgid "Berth switch order"
-msgstr "paikanvaihdon syy"
+msgstr "Venepaikan vaihto"
 
-#, fuzzy
-#| msgid "winter storage area"
 msgid "Winter storage order"
-msgstr "talvisäilytysalue"
+msgstr "Talvisäilytystilaus"
 
-#, fuzzy
-#| msgid "winter storage area"
 msgid "Unmarked winter storage order"
-msgstr "talvisäilytysalue"
+msgstr "Merkitsemätön talvisäilytystilaus"
 
 msgid "Invalid order"
-msgstr ""
+msgstr "Virheellinen lasku"
 
 msgid "Tier 1"
 msgstr "Maksuluokka 1"
@@ -875,6 +907,9 @@ msgstr "maksuluokka 3:n hinta"
 msgid "Berth product"
 msgstr "Venepaikka"
 
+msgid "Tier not implemented"
+msgstr "Maksuluokkaa ei toteutettu"
+
 msgid "winter storage area"
 msgstr "talvisäilytysalue"
 
@@ -894,10 +929,8 @@ msgstr "Kiinteät palvelut ovat voimassa vain kaudella"
 msgid "order number"
 msgstr "tilausnumero"
 
-#, fuzzy
-#| msgid "berth type"
 msgid "order type"
-msgstr "venepaikan tyyppi"
+msgstr "laskun tyyppi"
 
 msgid "due date"
 msgstr "eräpäivä"
@@ -931,6 +964,9 @@ msgstr "Tähän tilaukseen liitettyä tuotetta ei voida vaihtaa"
 msgid "Cannot change the lease associated with this order"
 msgstr "Tähän tilaukseen liitettyä vuokrasopimusta ei voida vaihtaa"
 
+msgid "Cannot change due date of this order"
+msgstr "Laskun eräpäivää ei voida vaihtaa"
+
 msgid "The product passed is not valid"
 msgstr "Ohitettu tuote ei ole voimassa"
 
@@ -949,19 +985,41 @@ msgstr "Tähän tilausriviin liitettyä tilausta ei voida vaihtaa"
 msgid "Cannot change the product assigned to this order line"
 msgstr "Tähän tilausriviin määritettyä tuotetta ei voida vaihtaa"
 
-msgid "order log entry"
-msgstr "tilauslokikirjaus"
+msgid "Lease must have a paid order"
+msgstr "Vuokrasopimuksella tulee olla maksettu lasku"
 
 msgid "order log entries"
 msgstr "tilauslokikirjaukset"
 
 msgid "token"
-msgstr ""
+msgstr "tunnus"
 
-#, fuzzy
-#| msgid "Cancelled"
 msgid "cancelled"
-msgstr "Peruutettu"
+msgstr "peruutettu"
+
+msgid "refund id"
+msgstr "palautuksen tunniste"
+
+msgid "amount"
+msgstr "summa"
+
+msgid "Cannot refund orders that are not paid"
+msgstr "Maksamattomia laskuja ei voida hyvittää"
+
+msgid "order refund"
+msgstr "tilauksen hyvitys"
+
+msgid "refund log entries"
+msgstr "hyvitysten lokikirjaukset"
+
+msgid "The lease has to belong to the same customer as the offer"
+msgstr "Vuokrasopimuksen täytyy kuulua samalle asiakkaalle kuin tilaus"
+
+msgid "The application has to be a switch application"
+msgstr "Hakemuksen tulee olla vaihtohakemus"
+
+msgid "The exchanged lease has to be from the last season"
+msgstr ""
 
 msgid "New berth order approved"
 msgstr "Venepaikkatarjous"
@@ -981,8 +1039,14 @@ msgstr "Nostojärjestyspaikkalasku"
 msgid "Additional product order approved"
 msgstr "Lisäpalvelulasku"
 
-msgid "Confirmation"
-msgstr "Vahvistus"
+msgid "Order refunded"
+msgstr "Tilaus hyvitetty"
+
+msgid "Order cancelled"
+msgstr "Tilaus peruutettu"
+
+msgid "[SMS] Invoice notice"
+msgstr "[SMS] Laskuilmoitus"
 
 msgid "Payment service is unreachable"
 msgstr "Maksupalvelu ei ole käytettävissä"
@@ -996,38 +1060,55 @@ msgstr "Toisella tilauksella on jo sama tunnus"
 msgid "Payment service is down for maintenance"
 msgstr "Maksupalvelu on poissa käytöstä huoltotoimien vuoksi"
 
+msgid "Cannot refund an order that has not been paid through VismaPay"
+msgstr ""
+
 msgid "Additional product already exists"
 msgstr "Lisäpalvelu on jo olemassa"
 
 msgid "Lease with the given ID does not exist"
 msgstr "Annetulla tunnuksella ei ole vuokrasopimusta"
 
-#, fuzzy
-#| msgid "Storage on ice"
 msgid "Only storage on ice supported"
-msgstr "Jäihin jättö"
+msgstr "Vain jäissäsäilytys tuettu"
+
+msgid "Manually updated by admin"
+msgstr "Päivitetty ylläpitäjän toimesta"
 
 msgid "The order is not valid anymore"
 msgstr "Tilaus ei ole enää voimassa"
 
-#, fuzzy
-#| msgid "winter storage area"
 msgid "Cannot cancel Unmarked winter storage order"
-msgstr "talvisäilytysalue"
+msgstr "Nostojärjestyspaikkaa ei voida peruuttaa"
 
 msgid "Order rejected by customer"
+msgstr "Asiakkaan hylkäämä tilaus"
+
+msgid "Cannot resend an invoice for a lease that is not currently offered."
 msgstr ""
 
-#, fuzzy
-#| msgid "The order is not valid anymore"
+msgid ""
+"Profile token is required if an order does not previously have email or "
+"phone."
+msgstr ""
+
 msgid "Order does not have a valid type"
-msgstr "Tilaus ei ole enää voimassa"
+msgstr "Tilauksella ei ole kelvollista tyyppiä"
 
 msgid "Invalid order status"
 msgstr ""
 
+msgid "No email was found"
+msgstr ""
+
+msgid "Cannot resend an order for a lease not in status OFFERED"
+msgstr ""
+
 msgid "Boat berth invoice"
 msgstr "Venepaikkalasku"
+
+msgid "Confirmation"
+msgstr "Vahvistus"
 
 msgid "Refund confirmation"
 msgstr "Ilmoitus maksunpalautuksesta"
@@ -1066,10 +1147,10 @@ msgid "Trawler place"
 msgstr "Traileripaikka"
 
 msgid "East"
-msgstr ""
+msgstr "Itä"
 
 msgid "West"
-msgstr ""
+msgstr "Länsi"
 
 msgid "servicemap ID"
 msgstr "palvelukartan tunnus"
@@ -1179,6 +1260,9 @@ msgstr "numero"
 msgid "is accessible"
 msgstr "on esteetön"
 
+msgid "is invoiceable"
+msgstr "on laskutettavissa"
+
 msgid "berths"
 msgstr "venepaikat"
 
@@ -1190,6 +1274,19 @@ msgstr "talvisäilytyspaikka"
 
 msgid "winter storage places"
 msgstr "talvisäilytyspaikat"
+
+#, python-brace-format
+msgid "Cannot delete {model_name} because it has some related leases"
+msgstr ""
+
+#, python-brace-format
+msgid ""
+"Cannot delete WinterStoragePlaceType because it has {place_count} related "
+"places"
+msgstr ""
+
+msgid "Cannot pass both pier and harbor filters"
+msgstr ""
 
 msgid ""
 "You cannot filter by dimension (width, length) and application a the same "
@@ -1206,6 +1303,12 @@ msgstr "aika muokattu"
 
 msgid "You do not have permission to perform this action."
 msgstr "Sinulla ei ole lupaa suorittaa tätä toimintoa."
+
+#~ msgid "Notified that there are no suitable berths"
+#~ msgstr "Ilmoitettu ettei soveltuvia venepaikkoja ole"
+
+#~ msgid "order log entry"
+#~ msgstr "tilauslokikirjaus"
 
 #~ msgid "Berth available"
 #~ msgstr "Venepaikka saatavilla"
