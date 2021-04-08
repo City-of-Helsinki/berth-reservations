@@ -9,8 +9,9 @@ from graphql_jwt.decorators import login_required
 from applications.models import BerthApplication
 from applications.new_schema import BerthApplicationNode, WinterStorageApplicationNode
 from applications.new_schema.types import WinterStorageApplicationFilter
-from leases.models import BerthLease
+from leases.models import BerthLease, WinterStorageLease
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
+from payments.models import BerthSwitchOffer, Order
 from utils.relay import get_node_from_global_id, return_node_if_user_has_permissions
 from utils.schema import CountConnection
 
@@ -100,6 +101,7 @@ class ProfileNode(DjangoObjectType):
             "winter_storage_applications",
             "winter_storage_leases",
             "orders",
+            "offers",
         )
         interfaces = (relay.Node,)
         connection_class = CountConnection
@@ -134,6 +136,7 @@ class ProfileNode(DjangoObjectType):
     )
     winter_storage_leases = DjangoConnectionField(WinterStorageLeaseNode)
     orders = DjangoConnectionField("payments.schema.OrderNode")
+    offers = DjangoConnectionField("payments.schema.BerthSwitchOfferNode")
 
     def resolve_berth_applications(self, info, **kwargs):
         return self.berth_applications.order_by("created_at")
@@ -145,7 +148,15 @@ class ProfileNode(DjangoObjectType):
     def __resolve_reference(self, info, **kwargs):
         profile = get_node_from_global_id(info, self.id, only_type=ProfileNode)
         return return_node_if_user_has_permissions(
-            profile, info.context.user, CustomerProfile, BerthApplication, BerthLease
+            profile,
+            info.context.user,
+            CustomerProfile,
+            BerthApplication,
+            BerthLease,
+            BerthSwitchOffer,
+            Boat,
+            Order,
+            WinterStorageLease,
         )
 
     @classmethod
@@ -153,5 +164,13 @@ class ProfileNode(DjangoObjectType):
     def get_node(cls, info, id):
         node = super().get_node(info, id)
         return return_node_if_user_has_permissions(
-            node, info.context.user, CustomerProfile, BerthApplication, BerthLease
+            node,
+            info.context.user,
+            CustomerProfile,
+            BerthApplication,
+            BerthLease,
+            BerthSwitchOffer,
+            Boat,
+            Order,
+            WinterStorageLease,
         )

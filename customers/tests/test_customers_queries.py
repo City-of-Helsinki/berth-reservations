@@ -14,8 +14,15 @@ from berth_reservations.tests.utils import (
     assert_not_enough_permissions,
     create_api_client,
 )
+from leases.enums import LeaseStatus
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
+from payments.schema.types import BerthSwitchOfferNode, OrderNode
+from payments.tests.factories import (
+    BerthProductFactory,
+    BerthSwitchOfferFactory,
+    OrderFactory,
+)
 from utils.relay import to_global_id
 
 from ..enums import InvoicingType, OrganizationType
@@ -272,6 +279,20 @@ query GetBerthProfiles {
                         }
                     }
                 }
+                orders {
+                    edges {
+                        node {
+                            id
+                        }
+                    }
+                }
+                offers {
+                    edges {
+                        node {
+                            id
+                        }
+                    }
+                }
             }
         }
     }
@@ -287,13 +308,19 @@ query GetBerthProfiles {
 def test_query_berth_profiles(api_client, customer_profile):
     berth_application = BerthApplicationFactory(customer=customer_profile)
     boat = BoatFactory(owner=customer_profile)
-    berth_lease = BerthLeaseFactory(customer=customer_profile, boat=boat)
+    berth_lease = BerthLeaseFactory(
+        customer=customer_profile, boat=boat, status=LeaseStatus.PAID
+    )
     winter_storage_application = WinterStorageApplicationFactory(
         customer=customer_profile
     )
     winter_storage_lease = WinterStorageLeaseFactory(
         customer=customer_profile, boat=boat
     )
+    order = OrderFactory(
+        customer=customer_profile, lease=berth_lease, product=BerthProductFactory()
+    )
+    offer = BerthSwitchOfferFactory(customer=customer_profile, lease=berth_lease)
     organization = OrganizationFactory(customer=customer_profile)
 
     executed = api_client.execute(QUERY_BERTH_PROFILES)
@@ -308,6 +335,8 @@ def test_query_berth_profiles(api_client, customer_profile):
     winter_storage_lease_id = to_global_id(
         WinterStorageLeaseNode, winter_storage_lease.id
     )
+    order_id = to_global_id(OrderNode, order.id)
+    offer_id = to_global_id(BerthSwitchOfferNode, offer.id)
 
     assert executed["data"]["berthProfiles"]["edges"][0]["node"] == {
         "id": customer_id,
@@ -324,6 +353,8 @@ def test_query_berth_profiles(api_client, customer_profile):
             "edges": [{"node": {"id": winter_storage_application_id}}]
         },
         "winterStorageLeases": {"edges": [{"node": {"id": winter_storage_lease_id}}]},
+        "orders": {"edges": [{"node": {"id": order_id}}]},
+        "offers": {"edges": [{"node": {"id": offer_id}}]},
     }
 
 
@@ -475,6 +506,20 @@ query GetBerthProfile {
                 }
             }
         }
+        orders {
+            edges {
+                node {
+                    id
+                }
+            }
+        }
+        offers {
+            edges {
+                node {
+                    id
+                }
+            }
+        }
     }
 }
 """
@@ -490,13 +535,19 @@ def test_query_berth_profile(api_client, customer_profile):
 
     boat = BoatFactory(owner=customer_profile)
     berth_application = BerthApplicationFactory(customer=customer_profile)
-    berth_lease = BerthLeaseFactory(customer=customer_profile, boat=boat)
+    berth_lease = BerthLeaseFactory(
+        customer=customer_profile, boat=boat, status=LeaseStatus.PAID
+    )
     winter_storage_application = WinterStorageApplicationFactory(
         customer=customer_profile
     )
     winter_storage_lease = WinterStorageLeaseFactory(
         customer=customer_profile, boat=boat
     )
+    order = OrderFactory(
+        customer=customer_profile, lease=berth_lease, product=BerthProductFactory()
+    )
+    offer = BerthSwitchOfferFactory(customer=customer_profile, lease=berth_lease)
     organization = OrganizationFactory(customer=customer_profile)
 
     query = QUERY_BERTH_PROFILE % berth_profile_id
@@ -512,6 +563,8 @@ def test_query_berth_profile(api_client, customer_profile):
     winter_storage_lease_id = to_global_id(
         WinterStorageLeaseNode, winter_storage_lease.id
     )
+    order_id = to_global_id(OrderNode, order.id)
+    offer_id = to_global_id(BerthSwitchOfferNode, offer.id)
 
     assert executed["data"]["berthProfile"] == {
         "id": berth_profile_id,
@@ -528,6 +581,8 @@ def test_query_berth_profile(api_client, customer_profile):
             "edges": [{"node": {"id": winter_storage_application_id}}]
         },
         "winterStorageLeases": {"edges": [{"node": {"id": winter_storage_lease_id}}]},
+        "orders": {"edges": [{"node": {"id": order_id}}]},
+        "offers": {"edges": [{"node": {"id": offer_id}}]},
     }
 
 
@@ -536,13 +591,19 @@ def test_query_berth_profile_self_user(customer_profile):
 
     boat = BoatFactory(owner=customer_profile)
     berth_application = BerthApplicationFactory(customer=customer_profile)
-    berth_lease = BerthLeaseFactory(customer=customer_profile, boat=boat)
+    berth_lease = BerthLeaseFactory(
+        customer=customer_profile, boat=boat, status=LeaseStatus.PAID
+    )
     winter_storage_application = WinterStorageApplicationFactory(
         customer=customer_profile
     )
     winter_storage_lease = WinterStorageLeaseFactory(
         customer=customer_profile, boat=boat
     )
+    order = OrderFactory(
+        customer=customer_profile, lease=berth_lease, product=BerthProductFactory()
+    )
+    offer = BerthSwitchOfferFactory(customer=customer_profile, lease=berth_lease)
     organization = OrganizationFactory(customer=customer_profile)
 
     query = QUERY_BERTH_PROFILE % berth_profile_id
@@ -559,6 +620,8 @@ def test_query_berth_profile_self_user(customer_profile):
     winter_storage_lease_id = to_global_id(
         WinterStorageLeaseNode, winter_storage_lease.id
     )
+    order_id = to_global_id(OrderNode, order.id)
+    offer_id = to_global_id(BerthSwitchOfferNode, offer.id)
 
     assert executed["data"]["berthProfile"] == {
         "id": berth_profile_id,
@@ -575,6 +638,8 @@ def test_query_berth_profile_self_user(customer_profile):
             "edges": [{"node": {"id": winter_storage_application_id}}]
         },
         "winterStorageLeases": {"edges": [{"node": {"id": winter_storage_lease_id}}]},
+        "orders": {"edges": [{"node": {"id": order_id}}]},
+        "offers": {"edges": [{"node": {"id": offer_id}}]},
     }
 
 
