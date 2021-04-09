@@ -1085,6 +1085,27 @@ class AbstractOffer(UUIDModel, TimeStampedModel):
         self.save()
 
 
+class BerthSwitchOfferManager(models.Manager):
+    def expire_too_old_offers(self, older_than_days, dry_run=False) -> int:
+        # Check all orders that are in PENDING status, and if there is
+        # {older_than_days} full days elapsed after the offers's due_date, then
+        # set the order status to EXPIRED.
+        # Example:
+        # * There's an order with due_date=1.1.2021 and status=PENDING.
+        # * Calling expire_too_old_offers(older_than_days=7) on 9.1.2021 will set the status to EXPIRED.
+        # * But calling the function on 8.1.2021 would not change the offer.
+
+        expire_before_date = date.today() - timedelta(days=older_than_days)
+        too_old_pending_offers = self.get_queryset().filter(
+            status=OfferStatus.DRAFTED, due_date__lt=expire_before_date,
+        )
+        if not dry_run:
+            for offer in too_old_pending_offers:
+                offer.status = OfferStatus.EXPIRED
+                offer.save()
+        return len(too_old_pending_offers)
+
+
 class BerthSwitchOffer(AbstractOffer):
     application = models.ForeignKey(
         BerthApplication, related_name="switch_offers", on_delete=models.CASCADE
@@ -1095,6 +1116,8 @@ class BerthSwitchOffer(AbstractOffer):
     berth = models.ForeignKey(
         Berth, related_name="switch_offers", on_delete=models.CASCADE
     )
+
+    objects = BerthSwitchOfferManager()
 
     def clean(self):
         # Validate that the offer customer is the same from the lease
@@ -1119,6 +1142,19 @@ class BerthSwitchOffer(AbstractOffer):
 
         if self.lease.status != LeaseStatus.PAID:
             raise ValidationError(_("The associated lease must be paid"))
+
+        if not self._state.adding:
+            old_instance = BerthSwitchOffer.objects.get(id=self.id)
+
+            # if due_date change is allowed
+            self._check_due_date(old_instance)
+
+    def _check_due_date(self, old_instance) -> None:
+        if (
+            old_instance.due_date != self.due_date
+            and old_instance.status == OfferStatus.EXPIRED
+        ):
+            raise ValidationError(_("Cannot change due date of this offer"))
 
     def set_status(self, new_status: OfferStatus, comment: str = None) -> None:
         old_status = self.status

@@ -84,6 +84,7 @@ jobs:
           K8S_SECRET_NOTIFICATION_SERVICE_SENDER_NAME: "Hel.fi"
           K8S_SECRET_NOTIFICATION_SERVICE_TOKEN: ${{ secrets.GH_QA_SECRET_NOTIFICATION_SERVICE_TOKEN }}
           K8S_SECRET_ORDER_EXPIRATION_CRONJOB_ENABLED: "true"
+          K8S_SECRET_OFFER_EXPIRATION_CRONJOB_ENABLED: "true"
 
       - name: Deploy Order Expiration Cronjob
         uses: City-of-Helsinki/setup-cronjob-action@main
@@ -96,3 +97,15 @@ jobs:
           schedule: '30 1 * * *'
           command: "{/bin/sh}"
           args: "{-c,cd /app && /usr/bin/timeout --kill-after=20m 19m python manage.py expire_too_old_unpaid_orders 2>&1}"
+
+      - name: Deploy Order Expiration Cronjob
+        uses: City-of-Helsinki/setup-cronjob-action@main
+        with:
+          image_repository: ghcr.io/city-of-helsinki/${{ github.event.repository.name }}
+          image_tag:  ${{ github.sha }}
+          secret_name: project-staging-berth-reservations-secret
+          kubeconfig_raw: ${{ secrets.KUBECONFIG_RAW_STAGING}}
+          target_namespace: ${{ secrets.K8S_NAMESPACE_STAGING }}
+          schedule: '30 2 * * *'
+          command: "{/bin/sh}"
+          args: "{-c,cd /app && /usr/bin/timeout --kill-after=20m 19m python manage.py expire_too_old_offers 2>&1}"
