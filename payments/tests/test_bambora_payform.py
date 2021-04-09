@@ -11,7 +11,7 @@ from freezegun import freeze_time
 from applications.enums import ApplicationAreaType, ApplicationStatus
 from leases.enums import LeaseStatus
 from leases.stickers import create_ws_sticker_sequences
-from payments.enums import OrderStatus, OrderType
+from payments.enums import OrderStatus, OrderType, ProductServiceType
 from payments.models import Order, OrderToken
 from payments.providers.bambora_payform import (
     DuplicateOrderError,
@@ -143,9 +143,14 @@ def test_payload_add_products_success(payment_provider, order_with_products: Ord
         assert "type" in product
 
 
+@pytest.mark.parametrize("storage_on_ice", [True, False])
 def test_payload_additional_product_order(
-    payment_provider, berth_lease, additional_product
+    payment_provider, berth_lease, additional_product, storage_on_ice
 ):
+    if storage_on_ice:
+        additional_product.service = ProductServiceType.STORAGE_ON_ICE
+        additional_product.save()
+
     berth_product = BerthProductFactory(
         min_width=berth_lease.berth.berth_type.width - 1,
         max_width=berth_lease.berth.berth_type.width + 1,
@@ -180,7 +185,9 @@ def test_payload_additional_product_order(
     assert len(payload["products"]) == 1
     product = payload["products"][0]
     assert product["id"] == get_talpa_product_id(
-        additional_product.id, area=berth_lease.berth.pier.harbor
+        additional_product.id,
+        area=berth_lease.berth.pier.harbor,
+        is_storage_on_ice=storage_on_ice,
     )
     assert product["title"] is not None
     assert product["price"] > 0

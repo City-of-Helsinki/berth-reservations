@@ -1,41 +1,50 @@
 import pytest  # noqa
 
-from payments.tests.factories import BerthProductFactory, WinterStorageProductFactory
+from payments.tests.factories import (
+    AdditionalProductFactory,
+    BerthProductFactory,
+    WinterStorageProductFactory,
+)
 from payments.utils import get_talpa_product_id
 from resources.tests.factories import HarborFactory, WinterStorageAreaFactory
 
 
-def test_berth_product_east():
-    harbor = HarborFactory(region="east")
-    berth_product = BerthProductFactory()
+@pytest.mark.parametrize(
+    "region,business_unit,internal_order",
+    [("east", "2923301", "2923301100"), ("west", "2923302", "2923302200")],
+)
+def test_berth_product(customer_profile, region, business_unit, internal_order):
+    harbor = HarborFactory(region=region)
+    product = BerthProductFactory()
     assert (
-        get_talpa_product_id(berth_product.id, harbor)
-        == f"340100_2923301_2923301100_ _292015_44_{berth_product.id}"
+        get_talpa_product_id(product.id, harbor)
+        == f"340100_{business_unit}_{internal_order}_ _292015_44_{product.id}"
     )
 
 
-def test_berth_product_west():
-    harbor = HarborFactory(region="west")
-    berth_product = BerthProductFactory()
+@pytest.mark.parametrize(
+    "region,business_unit,internal_order",
+    [("east", "2923301", "2923301100"), ("west", "2923302", "2923302200")],
+)
+def test_winter_storage_product(
+    customer_profile, region, business_unit, internal_order
+):
+    area = WinterStorageAreaFactory(region=region)
+    product = WinterStorageProductFactory(winter_storage_area=area)
     assert (
-        get_talpa_product_id(berth_product.id, harbor)
-        == f"340100_2923302_2923302200_ _292015_44_{berth_product.id}"
+        get_talpa_product_id(product.id, area)
+        == f"340100_{business_unit}_{internal_order}_ _292014_44_{product.id}"
     )
 
 
-def test_winter_storage_product_east():
-    area = WinterStorageAreaFactory(region="east")
-    winter_storage_product = WinterStorageProductFactory(winter_storage_area=area)
+@pytest.mark.parametrize(
+    "region,business_unit,internal_order",
+    [("east", "2923301", "2923301100"), ("west", "2923302", "2923302200")],
+)
+def test_storage_on_ice(customer_profile, region, business_unit, internal_order):
+    harbor = HarborFactory(region=region)
+    product = AdditionalProductFactory()
     assert (
-        get_talpa_product_id(winter_storage_product.id, area)
-        == f"340100_2923301_2923301100_ _292014_44_{winter_storage_product.id}"
-    )
-
-
-def test_winter_storage_product_west():
-    area = WinterStorageAreaFactory(region="west")
-    winter_storage_product = WinterStorageProductFactory(winter_storage_area=area)
-    assert (
-        get_talpa_product_id(winter_storage_product.id, area)
-        == f"340100_2923302_2923302200_ _292014_44_{winter_storage_product.id}"
+        get_talpa_product_id(product.id, harbor, True)
+        == f"340100_{business_unit}_{internal_order}_ _292014_44_{product.id}"
     )

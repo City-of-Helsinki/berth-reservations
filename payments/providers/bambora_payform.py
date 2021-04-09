@@ -16,7 +16,7 @@ from requests.exceptions import RequestException
 from leases.enums import LeaseStatus
 from leases.utils import terminate_lease
 
-from ..enums import OrderRefundStatus, OrderStatus, OrderType
+from ..enums import OrderRefundStatus, OrderStatus, ProductServiceType
 from ..exceptions import (
     DuplicateOrderError,
     ExpiredOrderError,
@@ -25,14 +25,7 @@ from ..exceptions import (
     ServiceUnavailableError,
     UnknownReturnCodeError,
 )
-from ..models import (
-    AdditionalProduct,
-    BerthProduct,
-    Order,
-    OrderLine,
-    OrderRefund,
-    OrderToken,
-)
+from ..models import AdditionalProduct, Order, OrderLine, OrderRefund, OrderToken
 from ..utils import get_talpa_product_id, price_as_fractional_int, resolve_area
 from .base import PaymentProvider
 
@@ -212,7 +205,12 @@ class BamboraPayformProvider(PaymentProvider):
                 product_name = product.name
             items.append(
                 {
-                    "id": get_talpa_product_id(product.id, area),
+                    "id": get_talpa_product_id(
+                        product.id,
+                        area,
+                        is_storage_on_ice=product.service
+                        == ProductServiceType.STORAGE_ON_ICE,
+                    ),
                     "title": product_name,
                     "price": price_as_fractional_int(order_line.price),
                     "pretax_price": price_as_fractional_int(order_line.pretax_price),

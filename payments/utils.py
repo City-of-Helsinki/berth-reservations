@@ -233,19 +233,26 @@ def resolve_area(order: Order):
             order.lease.orders.filter(
                 status__in=OrderStatus.get_paid_statuses(),
                 order_type=OrderType.LEASE_ORDER,
-            ).first()
+            )
+            .order_by("-created_at")
+            .first()
         )
     )
 
-    if hasattr(lease_order.product, "winter_storage_area"):
+    if hasattr(lease_order, "product") and hasattr(
+        lease_order.product, "winter_storage_area"
+    ):
         return lease_order.product.winter_storage_area
-    else:
+    elif hasattr(lease_order.lease, "berth"):
         return order.lease.berth.pier.harbor
+
+    return None
 
 
 def get_talpa_product_id(
     product_id: Union[UUID, str],
     area: Optional[Union[Harbor, WinterStorageArea]] = None,
+    is_storage_on_ice: bool = False,
 ):
     """
     The required ID for Talpa should have the following format:
@@ -267,10 +274,10 @@ def get_talpa_product_id(
     function_area = " "
     internal_order = " "
 
-    if isinstance(area, Harbor):
-        function_area = "292015"
-    if isinstance(area, WinterStorageArea):
+    if is_storage_on_ice or isinstance(area, WinterStorageArea):
         function_area = "292014"
+    elif isinstance(area, Harbor):
+        function_area = "292015"
 
     if area:
         if area.region == AreaRegion.EAST:

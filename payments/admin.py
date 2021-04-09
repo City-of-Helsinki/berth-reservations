@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 from leases.models import BerthLease, WinterStorageLease
 
-from .enums import LeaseOrderType
+from .enums import LeaseOrderType, ProductServiceType
 from .models import (
     AdditionalProduct,
     BerthProduct,
@@ -20,7 +20,7 @@ from .models import (
     OrderToken,
     WinterStorageProduct,
 )
-from .utils import currency, percentage
+from .utils import currency, get_talpa_product_id, percentage, resolve_area
 
 
 class AdditionalProductAdmin(admin.ModelAdmin):
@@ -57,14 +57,32 @@ class OrderLineInline(admin.StackedInline):
     model = OrderLine
     fk_name = "order"
     extra = 0
-    readonly_fields = ("pretax_price",)
+    readonly_fields = (
+        "pretax_price",
+        "talpa_product_id",
+    )
 
     @currency
     def pretax_price(self, obj):
         return obj.pretax_price if obj.price and obj.tax_percentage else None
 
+    def talpa_product_id(self, obj):
+        return (
+            get_talpa_product_id(
+                obj.product.id,
+                resolve_area(obj.order),
+                is_storage_on_ice=obj.product.service
+                == ProductServiceType.STORAGE_ON_ICE,
+            )
+            if hasattr(obj, "product")
+            else "-"
+        )
+
     pretax_price.short_description = _("Pretax price")
     pretax_price.admin_order_field = "pretax_price"
+
+    talpa_product_id.short_description = _("Talpa product ID")
+    talpa_product_id.admin_order_field = "talpa_product_id"
 
 
 class OrderLogEntryInline(admin.StackedInline):
@@ -97,6 +115,7 @@ class OrderAdmin(admin.ModelAdmin):
         "paid_at",
         "rejected_at",
         "cancelled_at",
+        "talpa_product_id",
     )
     list_display = (
         "id",
@@ -200,6 +219,13 @@ class OrderAdmin(admin.ModelAdmin):
     def rejected_at(self, obj):
         return strftime(timezone.localtime(obj.rejected), "%d-%m-%Y %H:%M:%S",)
 
+    def talpa_product_id(self, obj):
+        return (
+            get_talpa_product_id(obj.product.id, resolve_area(obj.area))
+            if hasattr(obj, "product")
+            else "-"
+        )
+
     pretax_price.short_description = _("Pretax price")
     pretax_price.admin_order_field = "pretax_price"
 
@@ -214,6 +240,9 @@ class OrderAdmin(admin.ModelAdmin):
 
     place.short_description = _("Place")
     place.admin_order_field = "place"
+
+    talpa_product_id.short_description = _("Talpa product ID")
+    talpa_product_id.admin_order_field = "talpa_product_id"
 
 
 class OrderRefundLogEntryInline(admin.StackedInline):
@@ -340,10 +369,31 @@ class BerthSwitchOfferLogEntryAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at",)
 
 
-admin.site.register([WinterStorageProduct, OrderLine])
+class OrderLineAdmin(admin.ModelAdmin):
+    autocomplete_fields = ("order",)
+    readonly_fields = ("talpa_product_id",)
+
+    def talpa_product_id(self, obj):
+        return (
+            get_talpa_product_id(
+                obj.product.id,
+                resolve_area(obj.order),
+                is_storage_on_ice=obj.product.service
+                == ProductServiceType.STORAGE_ON_ICE,
+            )
+            if hasattr(obj, "product")
+            else "-"
+        )
+
+    talpa_product_id.short_description = _("Talpa product ID")
+    talpa_product_id.admin_order_field = "talpa_product_id"
+
+
+admin.site.register([WinterStorageProduct])
 admin.site.register(BerthProduct, BerthProductAdmin)
 admin.site.register(AdditionalProduct, AdditionalProductAdmin)
 admin.site.register(Order, OrderAdmin)
+admin.site.register(OrderLine, OrderLineAdmin)
 admin.site.register(OrderLogEntry, OrderLogEntryAdmin)
 admin.site.register(OrderRefund, OrderRefundAdmin)
 admin.site.register(OrderRefundLogEntry, OrderRefundLogEntryAdmin)
