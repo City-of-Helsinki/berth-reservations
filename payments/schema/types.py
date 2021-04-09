@@ -296,6 +296,9 @@ class BerthSwitchOfferNode(DjangoObjectType, AbstractOfferNode):
 class OrderDetailsType(graphene.ObjectType):
     order_type = OrderTypeEnum(required=True)
     status = OrderStatusEnum(required=True)
+    harbor = graphene.String(required=True)
+    pier = graphene.String(required=True)
+    berth = graphene.String(required=True)
 
 
 class FailedOrderType(graphene.ObjectType):

@@ -157,4 +157,15 @@ class OldAPIQuery:
             elif isinstance(order.lease, WinterStorageLease):
                 order_type = OrderTypeEnum.WINTER_STORAGE
 
-        return OrderDetailsType(status=order.status, order_type=order_type)
+        has_berth = order.lease and isinstance(order.lease, BerthLease)
+        harbor_name = order.lease.berth.pier.harbor.name if has_berth else ""
+        pier_identifier = order.lease.berth.pier.identifier if has_berth else ""
+        berth_number = order.lease.berth.number if has_berth else ""
+
+        return OrderDetailsType(
+            status=order.status,
+            order_type=order_type,
+            harbor=harbor_name,
+            pier=pier_identifier,
+            berth=berth_number,
+        )

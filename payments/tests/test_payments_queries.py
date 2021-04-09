@@ -674,6 +674,9 @@ query ORDER_DETAILS {
     orderDetails(orderNumber: "%s") {
         orderType
         status
+        harbor
+        pier
+        berth
     }
 }
 """
@@ -701,9 +704,17 @@ def test_get_order_status(old_schema_api_client, status, order: Order):
     else:
         order_type = OrderTypeEnum.UNKNOWN
 
+    has_berth = order.lease and isinstance(order.lease, BerthLease)
+    harbor_name = order.lease.berth.pier.harbor.name if has_berth else ""
+    pier_identifier = order.lease.berth.pier.identifier if has_berth else ""
+    berth_number = order.lease.berth.number if has_berth else ""
+
     assert executed["data"]["orderDetails"] == {
         "orderType": OrderTypeEnum.get(order_type).name,
         "status": OrderStatusEnum.get(order.status).name,
+        "harbor": harbor_name,
+        "pier": pier_identifier,
+        "berth": berth_number,
     }
 
 
