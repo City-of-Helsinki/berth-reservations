@@ -33,7 +33,7 @@ from ..models import (
     OrderRefund,
     OrderToken,
 )
-from ..utils import get_talpa_product_id, price_as_fractional_int
+from ..utils import get_talpa_product_id, price_as_fractional_int, resolve_area
 from .base import PaymentProvider
 
 logger = logging.getLogger(__name__)
@@ -169,7 +169,7 @@ class BamboraPayformProvider(PaymentProvider):
         order_lines: [OrderLine] = OrderLine.objects.filter(order=order.id)
         items: [dict] = []
 
-        area = self.resolve_area(order)
+        area = resolve_area(order)
 
         # Additional product orders doesn't have berth product
         if hasattr(order, "product") and order.product:
@@ -533,19 +533,3 @@ class BamboraPayformProvider(PaymentProvider):
             return HttpResponseServerError(
                 content="Payment failure and failed redirecting back to UI"
             )
-
-    @staticmethod
-    def resolve_area(order: Order):
-        lease_order = (
-            order
-            if order.order_type == OrderType.LEASE_ORDER
-            else order.lease.orders.filter(
-                status__in=OrderStatus.get_paid_statuses(),
-                order_type=OrderType.LEASE_ORDER,
-            ).first()
-        )
-
-        if hasattr(lease_order.product, "winter_storage_area"):
-            return lease_order.product.winter_storage_area
-        if isinstance(lease_order.product, BerthProduct):
-            return order.lease.berth.pier.harbor

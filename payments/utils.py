@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
+    from uuid import UUID
     from .models import Order
     from .notifications import NotificationType
 
@@ -14,8 +15,7 @@ import time
 from datetime import date, timedelta
 from decimal import Decimal
 from functools import wraps
-from typing import Callable, Optional, Union
-from uuid import UUID
+from typing import Callable
 
 from babel.dates import format_date
 from dateutil.relativedelta import relativedelta
@@ -223,6 +223,24 @@ def generate_order_number() -> str:
     t = time.time() * 1000000 * random.uniform(1, 1000)
     b = base64.b32encode(struct.pack(">Q", int(t)).lstrip(b"\x00")).strip(b"=").lower()
     return b.decode("utf8")
+
+
+def resolve_area(order: Order):
+    lease_order = (
+        order
+        if order.order_type == OrderType.LEASE_ORDER
+        else (
+            order.lease.orders.filter(
+                status__in=OrderStatus.get_paid_statuses(),
+                order_type=OrderType.LEASE_ORDER,
+            ).first()
+        )
+    )
+
+    if hasattr(lease_order.product, "winter_storage_area"):
+        return lease_order.product.winter_storage_area
+    else:
+        return order.lease.berth.pier.harbor
 
 
 def get_talpa_product_id(
