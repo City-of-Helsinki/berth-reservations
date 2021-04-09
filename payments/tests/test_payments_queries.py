@@ -677,6 +677,7 @@ query ORDER_DETAILS {
         harbor
         pier
         berth
+        isApplicationOrder
     }
 }
 """
@@ -687,8 +688,15 @@ query ORDER_DETAILS {
     ["berth_order", "winter_storage_order", "empty_order", "additional_product_order"],
     indirect=True,
 )
+@pytest.mark.parametrize("has_application", [True, False])
 @pytest.mark.parametrize("status", OrderStatus.values)
-def test_get_order_status(old_schema_api_client, status, order: Order):
+def test_get_order_status(
+    old_schema_api_client, status, has_application: bool, order: Order
+):
+    if not has_application and order.lease:
+        order.lease.application = None
+        order.lease.save()
+
     order.status = status
     order.save()
 
@@ -715,6 +723,7 @@ def test_get_order_status(old_schema_api_client, status, order: Order):
         "harbor": harbor_name,
         "pier": pier_identifier,
         "berth": berth_number,
+        "isApplicationOrder": has_application and order.lease is not None,
     }
 
 
