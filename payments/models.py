@@ -1054,6 +1054,14 @@ class OrderRefundLogEntry(UUIDModel, TimeStampedModel):
 
 
 class AbstractOffer(UUIDModel, TimeStampedModel):
+    offer_number = models.CharField(
+        max_length=64,
+        verbose_name=_("offer number"),
+        default=generate_order_number,
+        unique=True,
+        editable=False,
+        db_index=True,
+    )
     customer = models.ForeignKey(
         CustomerProfile, related_name="offers", on_delete=models.CASCADE
     )
