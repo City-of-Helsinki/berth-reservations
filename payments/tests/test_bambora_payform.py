@@ -1,4 +1,5 @@
 import hmac
+import random
 from decimal import Decimal
 from unittest import mock
 
@@ -149,7 +150,16 @@ def test_payload_additional_product_order(
 ):
     if storage_on_ice:
         additional_product.service = ProductServiceType.STORAGE_ON_ICE
-        additional_product.save()
+    else:
+        additional_product.service = random.choice(
+            list(
+                filter(
+                    lambda x: x != ProductServiceType.STORAGE_ON_ICE,
+                    ProductServiceType.values,
+                )
+            )
+        )
+    additional_product.save()
 
     berth_product = BerthProductFactory(
         min_width=berth_lease.berth.berth_type.width - 1,
