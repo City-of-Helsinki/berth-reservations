@@ -110,7 +110,7 @@ jobs:
           command: "{/bin/sh}"
           args: "{-c,cd /app && /usr/bin/timeout --kill-after=20m 19m python manage.py expire_too_old_unpaid_orders 2>&1}"
 
-      - name: Deploy Order Expiration Cronjob
+      - name: Deploy Offer Expiration Cronjob
         uses: City-of-Helsinki/setup-cronjob-action@main
         with:
           image_repository: ghcr.io/city-of-helsinki/${{ github.event.repository.name }}
