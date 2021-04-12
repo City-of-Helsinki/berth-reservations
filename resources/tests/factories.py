@@ -1,3 +1,5 @@
+import string
+
 import factory
 from django.contrib.gis.geos import Point
 from factory.random import randgen
@@ -62,7 +64,9 @@ class WinterStorageAreaFactory(AbstractAreaFactory):
 
 
 class AbstractAreaSectionFactory(factory.django.DjangoModelFactory):
-    identifier = factory.Faker("random_letter")
+    identifier = factory.Sequence(
+        lambda x: string.ascii_lowercase[x % len(string.ascii_lowercase)]
+    )
     location = factory.LazyFunction(
         lambda: Point(
             24.915 + randgen.uniform(0, 0.040), 60.154 + randgen.uniform(0, 0.022)

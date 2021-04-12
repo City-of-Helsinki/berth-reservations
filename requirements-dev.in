@@ -3,7 +3,6 @@ black
 flake8
 flake8-print
 freezegun
-ipython
 isort
 pre-commit
 pytest

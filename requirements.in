@@ -14,6 +14,7 @@ django-ilmoitin[graphql_api]
 git+https://github.com/a-rmz/django-munigeo.git@0.4.0-beta#egg=django-munigeo
 django-silk
 elastic-apm
+ipython
 factory-boy
 graphene-django
 graphene-federation
