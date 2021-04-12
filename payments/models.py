@@ -1097,7 +1097,7 @@ class BerthSwitchOfferManager(models.Manager):
 
         expire_before_date = date.today() - timedelta(days=older_than_days)
         too_old_pending_offers = self.get_queryset().filter(
-            status=OfferStatus.DRAFTED, due_date__lt=expire_before_date,
+            status=OfferStatus.OFFERED, due_date__lt=expire_before_date,
         )
         if not dry_run:
             for offer in too_old_pending_offers:

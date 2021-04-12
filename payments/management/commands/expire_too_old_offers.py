@@ -6,7 +6,7 @@ from .. import base_expiration_command
 
 
 class Command(base_expiration_command.ExpirationCommand):
-    help = 'Sets too old offers from state "waiting" to state "expired".'
+    help = 'Sets too old offers from state "offered" to state "expired".'
     feature_flag_name = "OFFER_EXPIRATION_CRONJOB_ENABLED"
 
     @atomic
