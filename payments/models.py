@@ -1101,8 +1101,10 @@ class BerthSwitchOfferManager(models.Manager):
         )
         if not dry_run:
             for offer in too_old_pending_offers:
-                offer.status = OfferStatus.EXPIRED
-                offer.save()
+                offer.set_status(
+                    OfferStatus.EXPIRED,
+                    comment=f"{_('Offer expired at')} {expire_before_date}",
+                )
         return len(too_old_pending_offers)
 
 
