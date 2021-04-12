@@ -221,7 +221,7 @@ class OrderAdmin(admin.ModelAdmin):
 
     def talpa_product_id(self, obj):
         return (
-            get_talpa_product_id(obj.product.id, resolve_area(obj.area))
+            get_talpa_product_id(obj.product.id, resolve_area(obj))
             if hasattr(obj, "product")
             else "-"
         )
