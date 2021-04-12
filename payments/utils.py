@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
+    from uuid import UUID
     from .models import Order
     from .notifications import NotificationType
 
@@ -14,8 +15,7 @@ import time
 from datetime import date, timedelta
 from decimal import Decimal
 from functools import wraps
-from typing import Callable, Optional, Union
-from uuid import UUID
+from typing import Callable
 
 from babel.dates import format_date
 from dateutil.relativedelta import relativedelta
@@ -225,9 +225,34 @@ def generate_order_number() -> str:
     return b.decode("utf8")
 
 
+def resolve_area(order: Order):
+    lease_order = (
+        order
+        if order.order_type == OrderType.LEASE_ORDER
+        else (
+            order.lease.orders.filter(
+                status__in=OrderStatus.get_paid_statuses(),
+                order_type=OrderType.LEASE_ORDER,
+            )
+            .order_by("-created_at")
+            .first()
+        )
+    )
+
+    if hasattr(lease_order, "product") and hasattr(
+        lease_order.product, "winter_storage_area"
+    ):
+        return lease_order.product.winter_storage_area
+    elif hasattr(lease_order.lease, "berth"):
+        return order.lease.berth.pier.harbor
+
+    return None
+
+
 def get_talpa_product_id(
     product_id: Union[UUID, str],
     area: Optional[Union[Harbor, WinterStorageArea]] = None,
+    is_storage_on_ice: bool = False,
 ):
     """
     The required ID for Talpa should have the following format:
@@ -249,10 +274,10 @@ def get_talpa_product_id(
     function_area = " "
     internal_order = " "
 
-    if isinstance(area, Harbor):
-        function_area = "292015"
-    if isinstance(area, WinterStorageArea):
+    if is_storage_on_ice or isinstance(area, WinterStorageArea):
         function_area = "292014"
+    elif isinstance(area, Harbor):
+        function_area = "292015"
 
     if area:
         if area.region == AreaRegion.EAST:

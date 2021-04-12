@@ -16,7 +16,7 @@ from requests.exceptions import RequestException
 from leases.enums import LeaseStatus
 from leases.utils import terminate_lease
 
-from ..enums import OrderRefundStatus, OrderStatus, OrderType
+from ..enums import OrderRefundStatus, OrderStatus, ProductServiceType
 from ..exceptions import (
     DuplicateOrderError,
     ExpiredOrderError,
@@ -25,15 +25,8 @@ from ..exceptions import (
     ServiceUnavailableError,
     UnknownReturnCodeError,
 )
-from ..models import (
-    AdditionalProduct,
-    BerthProduct,
-    Order,
-    OrderLine,
-    OrderRefund,
-    OrderToken,
-)
-from ..utils import get_talpa_product_id, price_as_fractional_int
+from ..models import AdditionalProduct, Order, OrderLine, OrderRefund, OrderToken
+from ..utils import get_talpa_product_id, price_as_fractional_int, resolve_area
 from .base import PaymentProvider
 
 logger = logging.getLogger(__name__)
@@ -169,7 +162,7 @@ class BamboraPayformProvider(PaymentProvider):
         order_lines: [OrderLine] = OrderLine.objects.filter(order=order.id)
         items: [dict] = []
 
-        area = self.resolve_area(order)
+        area = resolve_area(order)
 
         # Additional product orders doesn't have berth product
         if hasattr(order, "product") and order.product:
@@ -212,7 +205,12 @@ class BamboraPayformProvider(PaymentProvider):
                 product_name = product.name
             items.append(
                 {
-                    "id": get_talpa_product_id(product.id, area),
+                    "id": get_talpa_product_id(
+                        product.id,
+                        area,
+                        is_storage_on_ice=product.service
+                        == ProductServiceType.STORAGE_ON_ICE,
+                    ),
                     "title": product_name,
                     "price": price_as_fractional_int(order_line.price),
                     "pretax_price": price_as_fractional_int(order_line.pretax_price),
@@ -533,19 +531,3 @@ class BamboraPayformProvider(PaymentProvider):
             return HttpResponseServerError(
                 content="Payment failure and failed redirecting back to UI"
             )
-
-    @staticmethod
-    def resolve_area(order: Order):
-        lease_order = (
-            order
-            if order.order_type == OrderType.LEASE_ORDER
-            else order.lease.orders.filter(
-                status__in=OrderStatus.get_paid_statuses(),
-                order_type=OrderType.LEASE_ORDER,
-            ).first()
-        )
-
-        if hasattr(lease_order.product, "winter_storage_area"):
-            return lease_order.product.winter_storage_area
-        if isinstance(lease_order.product, BerthProduct):
-            return order.lease.berth.pier.harbor
