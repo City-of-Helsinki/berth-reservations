@@ -144,6 +144,11 @@ class OldAPIQuery:
             raise VenepaikkaGraphQLError(e)
 
         order_type = OrderTypeEnum.UNKNOWN
+        is_application_order = (
+            hasattr(order, "lease")
+            and getattr(order.lease, "application", None) is not None
+        )
+
         if order.order_type == OrderType.ADDITIONAL_PRODUCT_ORDER:
             order_type = OrderTypeEnum.ADDITIONAL_PRODUCT
         elif order.product:
@@ -168,4 +173,5 @@ class OldAPIQuery:
             harbor=harbor_name,
             pier=pier_identifier,
             berth=berth_number,
+            is_application_order=is_application_order,
         )

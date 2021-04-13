@@ -299,6 +299,7 @@ class OrderDetailsType(graphene.ObjectType):
     harbor = graphene.String(required=True)
     pier = graphene.String(required=True)
     berth = graphene.String(required=True)
+    is_application_order = graphene.Boolean(required=True)
 
 
 class FailedOrderType(graphene.ObjectType):
