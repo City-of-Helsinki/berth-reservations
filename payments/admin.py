@@ -331,6 +331,8 @@ class BerthSwitchOfferLogEntryInline(admin.StackedInline):
 
 class BerthSwitchOfferAdmin(admin.ModelAdmin):
     list_display = (
+        "id",
+        "offer_number",
         "customer",
         "name",
         "application",
@@ -349,6 +351,7 @@ class BerthSwitchOfferAdmin(admin.ModelAdmin):
         "lease__id",
         "customer_first_name",
         "customer_last_name",
+        "offer_number",
     )
     autocomplete_fields = ("customer", "application", "lease", "berth")
     date_hierarchy = "due_date"

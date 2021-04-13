@@ -19,6 +19,7 @@ from ..enums import (
 )
 from ..models import (
     AbstractBaseProduct,
+    AbstractOffer,
     AbstractPlaceProduct,
     ADDITIONAL_PRODUCT_TAX_PERCENTAGES,
     AdditionalProduct,
@@ -189,6 +190,9 @@ class AbstractOfferFactory(factory.django.DjangoModelFactory):
         lambda x: f"{x.customer_first_name.lower()}.{x.customer_last_name.lower()}@email.com"
     )
     customer_phone = factory.Faker("phone_number", locale="fi_FI")
+
+    class Meta:
+        model = AbstractOffer
 
 
 class BerthSwitchOfferFactory(AbstractOfferFactory):

@@ -865,15 +865,17 @@ class CreateBerthSwitchOfferMutation(graphene.ClientIDMutation):
 
 class AcceptBerthSwitchOfferMutation(graphene.ClientIDMutation):
     class Input:
-        offer_id = graphene.ID(required=True)
+        # offer_id = graphene.ID(required=True)
+        offer_number = graphene.String(required=True)
         is_accepted = graphene.Boolean(required=True)
 
     @classmethod
     @transaction.atomic
-    def mutate_and_get_payload(cls, root, info, offer_id, is_accepted, **input):
-        offer = get_node_from_global_id(
-            info, offer_id, only_type=BerthSwitchOfferNode, nullable=False,
-        )
+    def mutate_and_get_payload(cls, root, info, offer_number, is_accepted, **input):
+        # offer = get_node_from_global_id(
+        #     info, offer_id, only_type=BerthSwitchOfferNode, nullable=False,
+        # )
+        offer = BerthSwitchOffer.objects.get(offer_number=offer_number)
         if is_accepted:
             offer.status = OfferStatus.ACCEPTED
             offer.save(update_fields=["status"])
@@ -1039,6 +1041,11 @@ class Mutation:
         "\n* No associated lease could be find for the switch application"
         "\n* The related lease must be in `PAID` status"
     )
+
+
+class OldAPIMutation:
+    confirm_payment = ConfirmPaymentMutation.Field()
+    cancel_order = CancelOrderMutation.Field()
     accept_berth_switch_offer = AcceptBerthSwitchOfferMutation.Field(
         description="Accepts or rejects an offer for a berth switch application."
         "\n\nIf the offer is accepted, it will terminate the old lease and create a new lease with the new berth."
@@ -1049,8 +1056,3 @@ class Mutation:
         "\n* The passed berth switch offer ID doesn't exist"
         "\n* The related lease must be in `PAID` status"
     )
-
-
-class OldAPIMutation:
-    confirm_payment = ConfirmPaymentMutation.Field()
-    cancel_order = CancelOrderMutation.Field()
