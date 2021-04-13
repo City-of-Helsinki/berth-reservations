@@ -33,6 +33,7 @@ from ..services import BerthInvoicingService
 from ..stickers import get_next_sticker_number
 from ..utils import calculate_berth_lease_start_date, terminate_lease
 from .types import BerthLeaseNode, WinterStorageLeaseNode
+from .utils import lookup_or_create_boat
 
 
 class AbstractLeaseInput:
@@ -62,7 +63,7 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
                         "Can not specify both application and customer when creating a new berth lease"
                     )
                 )
-            application = get_node_from_global_id(
+            application: BerthApplication = get_node_from_global_id(
                 info, application_id, only_type=BerthApplicationNode, nullable=False,
             )
             if not application.customer:
@@ -85,28 +86,13 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
             )
 
     @classmethod
-    def lookup_boat(cls, info, input):
-        if input.get("boat_id"):
-            from customers.schema import BoatNode
-
-            boat = get_node_from_global_id(
-                info, input.pop("boat_id"), only_type=BoatNode, nullable=False,
-            )
-
-            if boat.owner.id != input["customer"].id:
-                raise VenepaikkaGraphQLError(
-                    _("Boat does not belong to the same customer as the Application")
-                )
-
-            input["boat"] = boat
-
-    @classmethod
     @view_permission_required(BerthApplication, CustomerProfile)
     @add_permission_required(BerthLease)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         cls.lookup_application_and_customer(info, input)
-        cls.lookup_boat(info, input)
+        if boat := lookup_or_create_boat(info, input):
+            input["boat"] = boat
 
         berth = get_node_from_global_id(
             info, input.pop("berth_id"), only_type=BerthNode, nullable=False,
@@ -322,18 +308,7 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
         input["application"] = application
         input["customer"] = application.customer
 
-        if input.get("boat_id", None):
-            from customers.schema import BoatNode
-
-            boat = get_node_from_global_id(
-                info, input.pop("boat_id"), only_type=BoatNode, nullable=False,
-            )
-
-            if boat.owner.id != input["customer"].id:
-                raise VenepaikkaGraphQLError(
-                    _("Boat does not belong to the same customer as the Application")
-                )
-
+        if boat := lookup_or_create_boat(info, input):
             input["boat"] = boat
 
         try:
