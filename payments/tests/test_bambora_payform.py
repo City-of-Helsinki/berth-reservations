@@ -159,6 +159,7 @@ def test_payload_additional_product_order(
                 )
             )
         )
+        additional_product.tax_percentage = Decimal("24.00")
     additional_product.save()
 
     berth_product = BerthProductFactory(
