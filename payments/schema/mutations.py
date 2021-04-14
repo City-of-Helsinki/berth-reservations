@@ -1147,6 +1147,7 @@ class Mutation:
         "\n\n**Requires permissions** to edit offers."
         "\n\nErrors:"
         "\n* State transition is not allowed"
+    )
 
     send_berth_switch_offer = SendBerthSwitchOfferMutation.Field(
         description="Sends an offer for a berth switch to the customer via email and SMS."

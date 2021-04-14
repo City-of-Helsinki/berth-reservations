@@ -176,7 +176,7 @@ def _get_offer_context(subject, offer) -> Dict:
     }
 
 
-def _get_berth_switch_offer_context(subject: str = "Berth order"):
+def _get_berth_switch_offer_context(subject: str = "Berth offer"):
     customer = CustomerProfileFactory.build()
     offer = BerthSwitchOfferFactory.build(
         customer=customer,
