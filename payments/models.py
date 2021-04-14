@@ -1147,7 +1147,11 @@ class BerthSwitchOffer(AbstractOffer):
             raise ValidationError(_("The application has to be a switch application"))
 
         # Validate that once the offer has been sent, it will have a due date
-        if self.status != OfferStatus.DRAFTED and not self.due_date:
+        # If offer is transitioned from DRAFTED directly to CANCELLED, then the due date is not set.
+        if (
+            self.status not in [OfferStatus.DRAFTED, OfferStatus.CANCELLED]
+            and not self.due_date
+        ):
             raise ValidationError(_("The offer must have a due date before sending it"))
 
         # Validate that the lease can only be from the current season

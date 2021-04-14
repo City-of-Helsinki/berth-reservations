@@ -17,6 +17,7 @@ from berth_reservations.exceptions import (
     VenepaikkaGraphQLError,
     VenepaikkaGraphQLWarning,
 )
+from customers.models import CustomerProfile
 from customers.schema import ProfileNode
 from customers.services import ProfileService
 from leases.enums import LeaseStatus
@@ -64,6 +65,7 @@ from .types import (
     BerthProductNode,
     BerthSwitchOfferNode,
     FailedOrderType,
+    OfferStatusEnum,
     OrderLineNode,
     OrderNode,
     OrderRefundNode,
@@ -897,6 +899,38 @@ class AcceptBerthSwitchOfferMutation(graphene.ClientIDMutation):
         return AcceptBerthSwitchOfferMutation()
 
 
+class OfferInput:
+    # currently the application, berth and lease of the Offer can not be changed
+    status = OfferStatusEnum()
+    due_date = graphene.Date()
+
+
+class UpdateBerthSwitchOfferMutation(graphene.ClientIDMutation):
+    class Input(OfferInput):
+        id = graphene.ID(required=True)
+
+    berth_switch_offer = graphene.Field(BerthSwitchOfferNode)
+
+    @classmethod
+    @change_permission_required(BerthSwitchOffer)
+    @view_permission_required(BerthLease, BerthApplication, CustomerProfile)
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        offer = get_node_from_global_id(
+            info, input.pop("id"), only_type=BerthSwitchOfferNode, nullable=False
+        )
+        try:
+            # do not assign status directly on the object, use proper state transition through set_status
+            new_status = input.pop("status", None)
+            update_object(offer, input)
+            if new_status:
+                offer.set_status(new_status, _("Manually updated by admin"))
+
+        except (ValidationError, IntegrityError) as e:
+            raise VenepaikkaGraphQLError(e)
+        return UpdateBerthSwitchOfferMutation(berth_switch_offer=offer)
+
+
 class Mutation:
     create_berth_product = CreateBerthProductMutation.Field(
         description="Creates a `BerthProduct` object."
@@ -1040,6 +1074,15 @@ class Mutation:
         "\n* The passed application is not a switch application"
         "\n* No associated lease could be find for the switch application"
         "\n* The related lease must be in `PAID` status"
+    )
+
+    update_berth_switch_offer = UpdateBerthSwitchOfferMutation.Field(
+        description="Updates a berth switch offer."
+        "\n\nCurrently it is possible to update the status and dueDate fields of the Offer."
+        "\n\ndueDate must be a valid date, it is not possible to remove dueDate once it is set."
+        "\n\n**Requires permissions** to edit offers."
+        "\n\nErrors:"
+        "\n* State transition is not allowed"
     )
 
 

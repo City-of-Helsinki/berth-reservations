@@ -1019,17 +1019,17 @@ def test_order_due_date_has_to_be_set_for_order_in_offered_status(
     assert "Order cannot be offered without a due date" in errors
 
 
-def test_offer_without_due_date_drafted(berth_switch_offer):
-    berth_switch_offer.status = OfferStatus.DRAFTED
+@pytest.mark.parametrize(
+    "status", [OfferStatus.CANCELLED, OfferStatus.DRAFTED],
+)
+def test_offer_due_date_not_required(berth_switch_offer, status):
+    berth_switch_offer.status = status
     berth_switch_offer.due_date = None
     berth_switch_offer.save()
     assert berth_switch_offer.due_date is None
 
 
-@pytest.mark.parametrize(
-    "status", [OfferStatus.CANCELLED, OfferStatus.OFFERED],
-)
-def test_offer_without_due_date_not_drafted(berth_switch_offer, status):
+def test_offer_due_date_required(berth_switch_offer):
     berth_switch_offer.status = OfferStatus.DRAFTED
     berth_switch_offer.due_date = None
     berth_switch_offer.save()
@@ -1037,7 +1037,7 @@ def test_offer_without_due_date_not_drafted(berth_switch_offer, status):
     assert berth_switch_offer.due_date is None
 
     with pytest.raises(ValidationError) as exception:
-        berth_switch_offer.set_status(status)
+        berth_switch_offer.set_status(OfferStatus.OFFERED)
 
     assert "The offer must have a due date before sending it" in str(exception)
 
