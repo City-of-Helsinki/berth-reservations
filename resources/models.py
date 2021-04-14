@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.files.storage import FileSystemStorage
 from django.db.models import (
+    BooleanField,
     Count,
     DecimalField,
     Exists,
@@ -16,7 +17,7 @@ from django.db.models import (
     UniqueConstraint,
     Value,
 )
-from django.db.models.expressions import RawSQL
+from django.db.models.expressions import ExpressionWrapper, RawSQL
 from django.db.models.functions import Coalesce
 from django.utils.translation import gettext_lazy as _
 from munigeo.models import Municipality
@@ -30,7 +31,7 @@ from leases.utils import (
     calculate_berth_lease_start_date,
     calculate_winter_storage_lease_end_date,
 )
-from payments.enums import PriceTier
+from payments.enums import OfferStatus, PriceTier
 from utils.models import TimeStampedModel, UUIDModel
 
 from .enums import AreaRegion, BerthMooringType
@@ -630,6 +631,7 @@ class BerthManager(models.Manager):
                     * It needs to have a "valid" status (PAID)
         """
         from leases.models import BerthLease
+        from payments.models import BerthSwitchOffer
 
         season_start = calculate_berth_lease_start_date()
         season_end = calculate_berth_lease_end_date()
@@ -663,21 +665,37 @@ class BerthManager(models.Manager):
         # Pre-filter the leases for the upcoming/current season
         renewed_leases = BerthLease.objects.filter(
             in_current_season, berth=OuterRef("berth"), customer=OuterRef("customer"),
-        )
+        ).values("pk")
         # Filter the leases from the previous season that have already been renewed
-        previous_leases = BerthLease.objects.exclude(Exists(renewed_leases)).filter(
-            in_last_season, paid_status, berth=OuterRef("pk")
+        previous_leases = (
+            BerthLease.objects.exclude(Exists(renewed_leases))
+            .filter(in_last_season, paid_status, berth=OuterRef("pk"))
+            .values("pk")
         )
 
         # For the leases that have been renewed or are valid during the current season.
         # Filter the leases on the current season that have not been rejected
         current_leases = BerthLease.objects.filter(
             in_current_season, active_current_status, berth=OuterRef("pk")
-        )
+        ).values("pk")
 
         # A berth is NOT available when it already has a lease on the current (or upcoming) season
-        # or when the previous season lease has been paid and the new leases have not been sent
-        is_available = ~Exists(previous_leases | current_leases)
+        # or when the previous season lease has been paid and the new leases have not been sent.
+        active_leases = ~Exists(previous_leases | current_leases)
+
+        # Additionally, the berth is also NOT available when there is a switch offer drafted or offered
+        # (this requires separate Exists clauses
+        active_offers = ~Exists(
+            BerthSwitchOffer.objects.filter(
+                status__in=(OfferStatus.DRAFTED, OfferStatus.OFFERED),
+                berth=OuterRef("pk"),
+            ).values("pk")
+        )
+
+        # Need to explicitly mark the result of the AND as a BooleanField
+        is_available = ExpressionWrapper(
+            Q(active_leases & active_offers), output_field=BooleanField()
+        )
 
         return (
             super()
