@@ -11,9 +11,9 @@ class NotificationType(TextChoices):
         "renew_berth_order_approved",
         _("Renew berth order approved"),
     )
-    BERTH_SWITCH_ORDER_APPROVED = (
-        "berth_switch_order_approved",
-        _("Berth switch order approved"),
+    BERTH_SWITCH_OFFER_APPROVED = (
+        "berth_switch_offer_approved",
+        _("Berth switch offer approved"),
     )
     NEW_WINTER_STORAGE_ORDER_APPROVED = (
         "new_winter_storage_order_approved",

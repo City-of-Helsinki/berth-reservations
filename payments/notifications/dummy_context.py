@@ -200,8 +200,8 @@ def load_dummy_context():
             NotificationType.RENEW_BERTH_ORDER_APPROVED: _get_berth_order_context(
                 get_email_subject(NotificationType.RENEW_BERTH_ORDER_APPROVED)
             ),
-            NotificationType.BERTH_SWITCH_ORDER_APPROVED: _get_berth_order_context(
-                get_email_subject(NotificationType.BERTH_SWITCH_ORDER_APPROVED)
+            NotificationType.BERTH_SWITCH_OFFER_APPROVED: _get_berth_order_context(
+                get_email_subject(NotificationType.BERTH_SWITCH_OFFER_APPROVED)
             ),
             NotificationType.NEW_WINTER_STORAGE_ORDER_APPROVED: _get_winter_storage_order_context(
                 get_email_subject(NotificationType.NEW_WINTER_STORAGE_ORDER_APPROVED)
@@ -220,8 +220,8 @@ def load_dummy_context():
             NotificationType.ORDER_REFUNDED: _get_refunded_order_context(
                 get_email_subject(NotificationType.ORDER_REFUNDED)
             ),
-            NotificationType.BERTH_SWITCH_ORDER_APPROVED: _get_berth_switch_offer_context(
-                get_email_subject(NotificationType.BERTH_SWITCH_ORDER_APPROVED)
+            NotificationType.BERTH_SWITCH_OFFER_APPROVED: _get_berth_switch_offer_context(
+                get_email_subject(NotificationType.BERTH_SWITCH_OFFER_APPROVED)
             ),
             NotificationType.SMS_INVOICE_NOTICE: {
                 "product_name": "Berth",

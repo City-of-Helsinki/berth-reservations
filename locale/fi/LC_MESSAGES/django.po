@@ -1027,7 +1027,7 @@ msgstr "Venepaikkatarjous"
 msgid "Renew berth order approved"
 msgstr "Venepaikkalasku"
 
-msgid "Berth switch order approved"
+msgid "Berth switch offer approved"
 msgstr "Venepaikan vaihtotarjous"
 
 msgid "New winter storage order approved"

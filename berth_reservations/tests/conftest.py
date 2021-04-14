@@ -213,7 +213,7 @@ def notification_template_switch_offer_sent():
     from payments.notifications import NotificationType
 
     notification = NotificationTemplate.objects.language("fi").create(
-        type=NotificationType.BERTH_SWITCH_ORDER_APPROVED,
+        type=NotificationType.BERTH_SWITCH_OFFER_APPROVED,
         subject="test offer sent subject, event: {{ offer.pk }}!",
         body_html="<b>{{ offer.pk }} {{ accept_url }}</b>",
         body_text="{{ offer.pk }} {{ accept_url }}",

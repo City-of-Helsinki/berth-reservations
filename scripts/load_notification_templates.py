@@ -44,7 +44,7 @@ def load_email_templates():
             "html": "berth_invoice_{lang}.html",
             "plain": "berth_invoice_{lang}.txt",
         },
-        PaymentNotificationType.BERTH_SWITCH_ORDER_APPROVED: {
+        PaymentNotificationType.BERTH_SWITCH_OFFER_APPROVED: {
             "html": "berth_offer_switch_{lang}.html",
             "plain": None,
         },

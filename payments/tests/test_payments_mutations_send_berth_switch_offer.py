@@ -123,7 +123,7 @@ def test_send_berth_switch_offer(
         mock_send_sms.assert_called_with(
             NotificationType.SMS_BERTH_SWITCH_NOTICE,
             {
-                "subject": "Berth switch order approved",
+                "subject": "Berth switch offer approved",
                 "offer": berth_switch_offer,
                 "accept_url": accept_url,
                 "cancel_url": cancel_url,

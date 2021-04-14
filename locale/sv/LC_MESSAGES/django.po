@@ -1034,7 +1034,7 @@ msgstr "Erbjudande om båtplats"
 msgid "Renew berth order approved"
 msgstr "Båtplatsfaktura"
 
-msgid "Berth switch order approved"
+msgid "Berth switch offer approved"
 msgstr "Erbjudande om byte av båtplats"
 
 msgid "New winter storage order approved"

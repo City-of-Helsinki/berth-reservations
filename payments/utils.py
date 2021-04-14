@@ -309,7 +309,7 @@ def get_order_notification_type(order):
     elif order.lease_order_type == LeaseOrderType.NEW_BERTH_ORDER:
         return NotificationType.NEW_BERTH_ORDER_APPROVED
     elif order.lease_order_type == LeaseOrderType.BERTH_SWITCH_ORDER:
-        return NotificationType.BERTH_SWITCH_ORDER_APPROVED
+        return NotificationType.BERTH_SWITCH_OFFER_APPROVED
     elif order.lease_order_type == LeaseOrderType.WINTER_STORAGE_ORDER:
         return NotificationType.NEW_WINTER_STORAGE_ORDER_APPROVED
     elif order.lease_order_type == LeaseOrderType.UNMARKED_WINTER_STORAGE_ORDER:
@@ -617,7 +617,7 @@ def send_berth_switch_offer(offer, due_date: date,) -> None:
     if not is_valid_email(email):
         raise ValidationError(_("Missing customer email"))
 
-    notification_type = NotificationType.BERTH_SWITCH_ORDER_APPROVED
+    notification_type = NotificationType.BERTH_SWITCH_OFFER_APPROVED
 
     context = {
         "subject": get_email_subject(notification_type),
