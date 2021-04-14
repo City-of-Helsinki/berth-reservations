@@ -4,6 +4,7 @@ from unittest import mock
 
 import pytest  # noqa
 from dateutil.relativedelta import relativedelta
+from dateutil.utils import today
 from freezegun import freeze_time
 
 from leases.consts import ACTIVE_LEASE_STATUSES, INACTIVE_LEASE_STATUSES
@@ -15,6 +16,8 @@ from leases.utils import (
     calculate_winter_storage_lease_end_date,
     calculate_winter_storage_lease_start_date,
 )
+from payments.enums import OfferStatus
+from payments.tests.factories import BerthSwitchOfferFactory
 
 from ..models import Berth, Pier, WinterStoragePlace, WinterStorageSection
 from .factories import (
@@ -207,6 +210,32 @@ def test_berth_is_not_available_renew_pending(date):
 
         # Need to fetch the berth from the DB to get the annotated value
         assert not Berth.objects.get(id=lease.berth_id).is_available
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        OfferStatus.ACCEPTED,
+        OfferStatus.REJECTED,
+        OfferStatus.EXPIRED,
+        OfferStatus.CANCELLED,
+    ],
+)
+def test_berth_is_available_inactive_offer(status):
+    offer = BerthSwitchOfferFactory(
+        status=status, due_date=today() + relativedelta(days=14)
+    )
+
+    assert Berth.objects.get(id=offer.berth_id).is_available
+
+
+@pytest.mark.parametrize("status", [OfferStatus.DRAFTED, OfferStatus.OFFERED])
+def test_berth_is_not_available_active_offer(status):
+    offer = BerthSwitchOfferFactory(
+        status=status, due_date=today() + relativedelta(days=14)
+    )
+
+    assert not Berth.objects.get(id=offer.berth_id).is_available
 
 
 def test_pier_number_of_places():
