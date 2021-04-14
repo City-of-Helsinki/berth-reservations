@@ -26,11 +26,23 @@ def berth_lease():
 
 
 @pytest.fixture
-def waiting_berth_order(customer_profile):
+def drafted_berth_order(customer_profile):
     from payments.tests.conftest import _generate_order  # avoid circular import
 
     order = _generate_order("berth_order")
-    order.status = OrderStatus.WAITING
+    order.status = OrderStatus.DRAFTED
+    order.save()
+    order.lease.status = LeaseStatus.DRAFTED
+    order.lease.save()
+    return order
+
+
+@pytest.fixture
+def offered_berth_order(customer_profile):
+    from payments.tests.conftest import _generate_order  # avoid circular import
+
+    order = _generate_order("berth_order")
+    order.status = OrderStatus.OFFERED
     order.save()
     order.lease.status = LeaseStatus.OFFERED
     order.lease.save()

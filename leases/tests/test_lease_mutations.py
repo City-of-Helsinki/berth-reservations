@@ -338,7 +338,7 @@ def test_create_berth_lease_with_order(
         "berth": {"id": variables["berthId"]},
         "order": {
             "price": str(berth_product.price_for_tier(tier=berth.pier.price_tier)),
-            "status": "WAITING",
+            "status": "DRAFTED",
             "customer": {"id": to_global_id(ProfileNode, customer_profile.id)},
             "product": {
                 "minWidth": rounded(
@@ -430,7 +430,7 @@ def test_create_berth_lease_without_application(api_client, berth, customer_prof
         "berth": {"id": variables["berthId"]},
         "order": {
             "price": str(berth_product.price_for_tier(tier=berth.pier.price_tier)),
-            "status": "WAITING",
+            "status": "DRAFTED",
             "customer": {"id": to_global_id(ProfileNode, customer_profile.id)},
         },
     }
@@ -1415,7 +1415,7 @@ def test_create_winter_storage_lease_with_order(
         "place": {"id": variables["placeId"]},
         "order": {
             "price": expected_price,
-            "status": "WAITING",
+            "status": "DRAFTED",
             "customer": {"id": to_global_id(ProfileNode, customer_profile.id)},
             "product": {
                 "priceUnit": product.price_unit.name,
@@ -1995,11 +1995,11 @@ def test_terminate_berth_lease_with_application(
 @pytest.mark.parametrize(
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
-def test_terminate_berth_lease_with_waiting_order(
-    api_client, waiting_berth_order, notification_template_berth_lease_terminated
+def test_terminate_berth_lease_with_offered_order(
+    api_client, offered_berth_order, notification_template_berth_lease_terminated
 ):
     variables = {
-        "id": to_global_id(BerthLeaseNode, waiting_berth_order.lease.id),
+        "id": to_global_id(BerthLeaseNode, offered_berth_order.lease.id),
     }
 
     executed = api_client.execute(TERMINATE_BERTH_LEASE_MUTATION, input=variables)
@@ -2007,11 +2007,33 @@ def test_terminate_berth_lease_with_waiting_order(
         executed["data"]["terminateBerthLease"]["berthLease"]["status"]
         == LeaseStatus.TERMINATED.name
     )
-    waiting_berth_order.refresh_from_db()
-    waiting_berth_order.lease.refresh_from_db()
-    assert waiting_berth_order.lease.status == LeaseStatus.TERMINATED
-    assert waiting_berth_order.status == OrderStatus.CANCELLED
+    offered_berth_order.refresh_from_db()
+    offered_berth_order.lease.refresh_from_db()
+    assert offered_berth_order.lease.status == LeaseStatus.TERMINATED
+    assert offered_berth_order.status == OrderStatus.CANCELLED
     assert len(mail.outbox) == 1
+
+
+@pytest.mark.parametrize(
+    "api_client", ["berth_services", "berth_handler"], indirect=True,
+)
+def test_terminate_berth_lease_with_drafted_order(
+    api_client, drafted_berth_order, notification_template_berth_lease_terminated
+):
+    variables = {
+        "id": to_global_id(BerthLeaseNode, drafted_berth_order.lease.id),
+    }
+
+    executed = api_client.execute(TERMINATE_BERTH_LEASE_MUTATION, input=variables)
+
+    drafted_berth_order.refresh_from_db()
+    drafted_berth_order.lease.refresh_from_db()
+    assert drafted_berth_order.lease.status == LeaseStatus.DRAFTED
+    assert drafted_berth_order.status == OrderStatus.DRAFTED
+    assert_in_errors(
+        "Only leases in paid, error or offered status can be terminated, current status is drafted",
+        executed,
+    )
 
 
 @freeze_time("2020-07-01T08:00:00Z")

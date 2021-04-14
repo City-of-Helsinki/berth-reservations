@@ -63,7 +63,8 @@ class PriceUnits(TextChoices):
 
 
 class OrderStatus(TextChoices):
-    WAITING = "waiting", _("Waiting")
+    DRAFTED = "drafted", _("Drafted")
+    OFFERED = "offered", _("Offered")
     REJECTED = "rejected", _("Rejected")
     CANCELLED = "cancelled", _("Cancelled")
     EXPIRED = "expired", _("Expired")
@@ -71,6 +72,10 @@ class OrderStatus(TextChoices):
     PAID = "paid", _("Paid")
     PAID_MANUALLY = "paid_man", _("Paid manually")  # max 9 chars
     REFUNDED = "refunded", _("Refunded")
+
+    @classmethod
+    def get_waiting_statuses(cls):
+        return (cls.DRAFTED, cls.OFFERED)
 
     @classmethod
     def get_paid_statuses(cls):

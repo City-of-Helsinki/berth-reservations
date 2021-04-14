@@ -505,7 +505,7 @@ def test_order_change_berth_product(customer_profile):
     order = Order.objects.create(
         product=BerthProductFactory(),
         customer=customer_profile,
-        status=OrderStatus.WAITING,
+        status=OrderStatus.DRAFTED,
     )
     new_product = BerthProductFactory()
     order.product = new_product
@@ -909,7 +909,7 @@ def test_order_set_status_no_application(berth):
         product=product,
         customer=lease.customer,
         lease=lease,
-        status=OrderStatus.WAITING,
+        status=OrderStatus.OFFERED,
     )
 
     order.set_status(OrderStatus.PAID)
@@ -925,12 +925,13 @@ def test_order_set_status_no_application(berth):
 @pytest.mark.parametrize(
     "from_status,to_status",
     [
-        (OrderStatus.WAITING, OrderStatus.PAID),
-        (OrderStatus.WAITING, OrderStatus.PAID_MANUALLY),
+        (OrderStatus.DRAFTED, OrderStatus.OFFERED),
+        (OrderStatus.OFFERED, OrderStatus.PAID),
+        (OrderStatus.OFFERED, OrderStatus.PAID_MANUALLY),
         (OrderStatus.ERROR, OrderStatus.PAID_MANUALLY),
-        (OrderStatus.WAITING, OrderStatus.REJECTED),
+        (OrderStatus.OFFERED, OrderStatus.REJECTED),
         (OrderStatus.ERROR, OrderStatus.CANCELLED),
-        (OrderStatus.WAITING, OrderStatus.CANCELLED),
+        (OrderStatus.OFFERED, OrderStatus.CANCELLED),
     ],
 )
 @freeze_time("2020-01-01T08:00:00Z")
@@ -961,9 +962,12 @@ def test_order_status_dates(order, from_status, to_status):
     ["berth_order", "winter_storage_order", "additional_product_order"],
     indirect=True,
 )
+@pytest.mark.parametrize(
+    "status", OrderStatus.get_waiting_statuses(),
+)
 @freeze_time("2020-01-01T08:00:00Z")
-def test_order_status_dates_no_transitions(order):
-    order.status = OrderStatus.WAITING
+def test_order_status_dates_no_transitions(order, status):
+    order.status = status
     order.save()
 
     order = Order.objects.get(id=order.id)
@@ -975,7 +979,8 @@ def test_order_status_dates_no_transitions(order):
 @pytest.mark.parametrize(
     "status",
     [
-        OrderStatus.WAITING,
+        OrderStatus.DRAFTED,
+        OrderStatus.OFFERED,
         OrderStatus.REJECTED,
         OrderStatus.CANCELLED,
         OrderStatus.EXPIRED,
@@ -992,6 +997,26 @@ def test_order_refund_cannot_refund_not_paid(order, status):
 
     errors = str(exception.value)
     assert "Cannot refund orders that are not paid" in errors
+
+
+def test_order_due_date_has_to_be_set_for_order_in_offered_status(
+    order, berth_product, customer_profile
+):
+    with pytest.raises(ValidationError) as exception:
+        order.due_date = None
+        order.status = OrderStatus.OFFERED
+        order.save()
+
+    errors = str(exception.value)
+    assert "Order cannot be offered without a due date" in errors
+
+    with pytest.raises(ValidationError) as exception:
+        Order.objects.create(
+            product=berth_product, customer=customer_profile, status=OrderStatus.OFFERED
+        )
+
+    errors = str(exception.value)
+    assert "Order cannot be offered without a due date" in errors
 
 
 def test_offer_without_due_date_drafted(berth_switch_offer):

@@ -80,7 +80,7 @@ class Command(BaseCommand):
                 # Valid leases
                 Q(_lease_object_id__in=leases)
                 # Invoices that haven't been paid
-                & Q(status=OrderStatus.WAITING)
+                & Q(status=OrderStatus.OFFERED)
                 & Q(
                     # Either "normal" customers
                     Q(customer__organization__isnull=True)

@@ -16,6 +16,7 @@ from berth_reservations.tests.utils import assert_not_enough_permissions
 from customers.services import SMSNotificationService
 from customers.tests.conftest import mocked_response_profile
 from leases.enums import LeaseStatus
+from payments.enums import OrderStatus
 from utils.relay import to_global_id
 
 from ..models import Order
@@ -43,6 +44,9 @@ mutation APPROVE_ORDER_MUTATION($input: ApproveOrderMutationInput!) {
 def test_approve_order(
     api_client, order: Order, payment_provider, notification_template_orders_approved,
 ):
+    order.status = OrderStatus.DRAFTED
+    order.save(update_fields=["status"])
+
     due_date = (today() + relativedelta(days=14)).date()
     variables = {
         "dueDate": due_date,
@@ -115,6 +119,9 @@ def test_approve_order(
 def test_approve_order_sms_not_sent(
     api_client, order: Order, payment_provider, notification_template_orders_approved,
 ):
+    order.status = OrderStatus.DRAFTED
+    order.save(update_fields=["status"])
+
     order.customer_phone = None
     order.save()
 
@@ -151,6 +158,9 @@ def test_approve_order_sms_not_sent(
 def test_approve_order_default_due_date(
     api_client, order: Order, payment_provider, notification_template_orders_approved,
 ):
+    order.status = OrderStatus.DRAFTED
+    order.save(update_fields=["status"])
+
     order.due_date = today().date()
     order.save()
 
@@ -224,6 +234,9 @@ def test_approve_order_anymail_error(
     notification_template_orders_approved,
     order: Order,
 ):
+    order.status = OrderStatus.DRAFTED
+    order.save(update_fields=["status"])
+
     order_id = to_global_id(OrderNode, order.id)
     previous_order_status = order.status
     previous_lease_status = order.lease.status
@@ -270,6 +283,9 @@ def test_approve_order_one_success_one_failure(
     payment_provider,
     notification_template_orders_approved,
 ):
+    order.status = OrderStatus.DRAFTED
+    order.save(update_fields=["status"])
+
     due_date = (today() + relativedelta(days=14)).date()
     failure_order_id = to_global_id(OrderNode, uuid.uuid4())
 

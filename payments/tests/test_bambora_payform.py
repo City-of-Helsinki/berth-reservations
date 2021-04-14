@@ -352,7 +352,7 @@ def test_handle_success_request_success(provider_base_config, order: Order):
     """Test request helper changes the order status to PAID
 
     Also check it returns a success url with order number"""
-    order.status = OrderStatus.WAITING
+    order.status = OrderStatus.OFFERED
     order.order_number = "abc123"
     order.save()
 
@@ -379,7 +379,7 @@ def test_handle_success_request_success(provider_base_config, order: Order):
 def test_generate_sticker_number_for_ws_lease(provider_base_config, order: Order):
     create_ws_sticker_sequences()
 
-    order.status = OrderStatus.WAITING
+    order.status = OrderStatus.OFFERED
     order.order_number = "abc123"
     order.save()
 
@@ -407,7 +407,7 @@ def test_generate_sticker_number_for_ws_lease(provider_base_config, order: Order
 
 def test_handle_success_request_payment_failed(provider_base_config, order):
     """Test request helper changes the order status to rejected and returns a failure url"""
-    order.status = OrderStatus.WAITING
+    order.status = OrderStatus.OFFERED
     order.order_number = "abc123-1602145394.662132"
     order.save()
 
@@ -423,7 +423,7 @@ def test_handle_success_request_payment_failed(provider_base_config, order):
     payment_provider = create_bambora_provider(provider_base_config, request)
     returned = payment_provider.handle_success_request()
     order_after = Order.objects.get(order_number=params.get("ORDER_NUMBER"))
-    assert order_after.status == OrderStatus.WAITING
+    assert order_after.status == OrderStatus.OFFERED
     assert isinstance(returned, HttpResponse)
     assert "payment_status=failure" in returned.url
 
@@ -501,7 +501,7 @@ def test_handle_notify_request_order_not_found(provider_base_config, order):
 @pytest.mark.parametrize(
     "order_status, expected_order_status",
     (
-        (OrderStatus.WAITING, OrderStatus.PAID),
+        (OrderStatus.OFFERED, OrderStatus.PAID),
         (OrderStatus.PAID, OrderStatus.PAID),
         (OrderStatus.EXPIRED, OrderStatus.EXPIRED),
         (OrderStatus.CANCELLED, OrderStatus.CANCELLED),
@@ -534,7 +534,7 @@ def test_handle_notify_request_success_for_ap_order(
     provider_base_config, berth_order: Order,
 ):
     berth_order.order_number = "abc123"
-    berth_order.status = OrderStatus.WAITING
+    berth_order.status = OrderStatus.OFFERED
     berth_order.order_type = OrderType.ADDITIONAL_PRODUCT_ORDER
     berth_order.save()
 
@@ -557,7 +557,7 @@ def test_handle_notify_request_success_for_ap_order(
 @pytest.mark.parametrize(
     "order_status, expected_order_status",
     (
-        (OrderStatus.WAITING, OrderStatus.WAITING),
+        (OrderStatus.OFFERED, OrderStatus.OFFERED),
         (OrderStatus.REJECTED, OrderStatus.REJECTED),
         (OrderStatus.EXPIRED, OrderStatus.EXPIRED),
         (OrderStatus.PAID, OrderStatus.PAID),
@@ -693,7 +693,7 @@ def test_initiate_duplicated_payment_new_token_after_expiry(
 @freeze_time("2019-01-14T08:00:00Z")
 def test_duplicate_payments_tokens_cancelled(provider_base_config, order: Order):
     # Fake the Payment initiate flow
-    order.status = OrderStatus.WAITING
+    order.status = OrderStatus.OFFERED
     order.order_number = "abc123"
     order.save()
 
@@ -766,7 +766,7 @@ def test_duplicate_payments_tokens_cancelled_notify_payment(
     provider_base_config, order: Order
 ):
     # Fake the Payment initiate flow
-    order.status = OrderStatus.WAITING
+    order.status = OrderStatus.OFFERED
     order.order_number = "abc123"
     order.save()
 

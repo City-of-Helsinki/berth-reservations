@@ -98,7 +98,7 @@ def test_send_berth_invoices_basic(notification_template_orders_approved):
     assert invoicing_service.successful_orders[0] == order.id
     assert order.lease == lease
     assert order.customer.id == customer.id
-    assert order.status == OrderStatus.WAITING
+    assert order.status == OrderStatus.OFFERED
 
     assert len(mail.outbox) == 1
     msg = mail.outbox[0]
@@ -202,7 +202,7 @@ def test_use_berth_leases_from_last_season(notification_template_orders_approved
     assert invoicing_service.successful_orders[0] == order.id
     assert order.lease == lease
     assert order.customer.id == customer.id
-    assert order.status == OrderStatus.WAITING
+    assert order.status == OrderStatus.OFFERED
 
     assert len(mail.outbox) == 1
     msg = mail.outbox[0]
@@ -268,7 +268,7 @@ def test_use_berth_leases_from_current_season(notification_template_orders_appro
     assert invoicing_service.successful_orders[0] == order.id
     assert order.lease == lease
     assert order.customer.id == customer.id
-    assert order.status == OrderStatus.WAITING
+    assert order.status == OrderStatus.OFFERED
 
     assert len(mail.outbox) == 1
     msg = mail.outbox[0]
@@ -392,6 +392,7 @@ def test_send_berth_invoices_missing_email(notification_template_orders_approved
     assert order.status == OrderStatus.ERROR
     assert order.comment == "01-01-2020 10:00:00: Missing customer email"
     assert order.id in invoicing_service.failed_orders[0].keys()
+    assert order.due_date is None
     assert invoicing_service.failed_orders[0].get(order.id) == "Missing customer email"
 
     assert len(mail.outbox) == 0
@@ -446,6 +447,7 @@ def test_send_berth_invoices_invalid_example_email(
     assert order.status == OrderStatus.ERROR
     assert order.comment == "01-01-2020 10:00:00: Missing customer email"
     assert order.id in invoicing_service.failed_orders[0].keys()
+    assert order.due_date is None
     assert invoicing_service.failed_orders[0].get(order.id) == "Missing customer email"
 
     assert len(mail.outbox) == 0
@@ -508,6 +510,7 @@ def test_send_berth_invoices_send_error(notification_template_orders_approved):
 
     assert order.id in invoicing_service.failed_orders[0].keys()
     assert order.comment == "01-01-2020 10:00:00: Anymail error"
+    assert order.due_date is None
     assert invoicing_service.failed_orders[0].get(order.id) == "Anymail error"
 
     assert len(mail.outbox) == 0
@@ -599,7 +602,7 @@ def test_send_berth_invoices_only_not_renewed(notification_template_orders_appro
     assert invoicing_service.successful_orders[0] == order.id
     assert order.lease == lease
     assert order.customer.id == customer.id
-    assert order.status == OrderStatus.WAITING
+    assert order.status == OrderStatus.OFFERED
 
 
 @freeze_time("2020-01-01T08:00:00Z")

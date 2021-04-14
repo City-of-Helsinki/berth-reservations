@@ -146,7 +146,7 @@ def _generate_order(order_type: str = None):
         OrganizationFactory(
             customer=customer_profile, organization_type=OrganizationType.NON_BILLABLE
         )
-        order = OrderFactory(customer=customer_profile, status=OrderStatus.WAITING)
+        order = OrderFactory(customer=customer_profile, status=OrderStatus.OFFERED)
     else:
         order = OrderFactory(customer=customer_profile)
     return order

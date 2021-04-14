@@ -1,4 +1,5 @@
 import random
+from datetime import date, timedelta
 
 import factory
 
@@ -133,6 +134,7 @@ class OrderFactory(factory.django.DjangoModelFactory):
             filter(lambda os: os is not OrderStatus.EXPIRED.value, OrderStatus.values)
         ),
     )
+    due_date = date.today() + timedelta(days=14)
     comment = factory.Faker("sentence")
 
     @factory.lazy_attribute

@@ -20,6 +20,9 @@ def test_approve_order(
     notification_template_orders_approved,
     helsinki_profile_user,
 ):
+    order.status = OrderStatus.DRAFTED
+    order.save(update_fields=["status"])
+
     request = RequestFactory().request()
     due_date = today().date()
     approve_order(
@@ -62,6 +65,9 @@ def test_approve_order(
 def test_approve_order_with_non_billable_customer(
     order: Order, helsinki_profile_user,
 ):
+    order.status = OrderStatus.DRAFTED
+    order.save(update_fields=["status"])
+
     request = RequestFactory().request()
     due_date = today().date()
     approve_order(order, "", due_date, helsinki_profile_user, request)
