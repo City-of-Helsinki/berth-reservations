@@ -31,6 +31,7 @@ from payments.models import Order
 from payments.schema import PlaceProductTaxEnum
 from payments.tests.factories import BerthProductFactory, WinterStorageProductFactory
 from resources.schema import BerthNode, WinterStoragePlaceNode, WinterStorageSectionNode
+from resources.tests.factories import BoatTypeFactory
 from utils.numbers import rounded
 from utils.relay import to_global_id
 
@@ -83,6 +84,7 @@ def test_create_berth_lease(api_client, berth_application, berth, customer_profi
     min_width = berth.berth_type.width - 1
     max_width = berth.berth_type.width + 1
     BerthProductFactory(min_width=min_width, max_width=max_width)
+    BoatTypeFactory(id=berth_application.boat_type.id)
 
     variables = {
         "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
@@ -90,10 +92,18 @@ def test_create_berth_lease(api_client, berth_application, berth, customer_profi
     }
 
     assert BerthLease.objects.count() == 0
+    assert customer_profile.boats.count() == 0
 
     executed = api_client.execute(CREATE_BERTH_LEASE_MUTATION, input=variables)
 
     assert BerthLease.objects.count() == 1
+    assert customer_profile.boats.count() == 1
+
+    boat = customer_profile.boats.first()
+    assert boat.owner == berth_application.customer
+    assert boat.width == berth_application.boat_width
+    assert boat.length == berth_application.boat_length
+    assert boat.registration_number == berth_application.boat_registration_number
 
     assert executed["data"]["createBerthLease"]["berthLease"].pop("id") is not None
     assert executed["data"]["createBerthLease"]["berthLease"] == {
@@ -101,7 +111,7 @@ def test_create_berth_lease(api_client, berth_application, berth, customer_profi
         "startDate": "2020-06-10",
         "endDate": "2020-09-14",
         "comment": "",
-        "boat": None,
+        "boat": {"id": to_global_id(BoatNode, boat.id)},
         "customer": {"id": to_global_id(ProfileNode, berth_application.customer.id)},
         "application": {
             "id": variables.get("applicationId"),
@@ -191,6 +201,7 @@ def test_create_berth_lease_application_doesnt_exist(superuser_api_client, berth
 def test_create_berth_lease_berth_doesnt_exist(
     superuser_api_client, berth_application, customer_profile
 ):
+    BoatTypeFactory(id=berth_application.boat_type.id)
     berth_application.customer = customer_profile
     berth_application.save()
     variables = {
@@ -252,6 +263,7 @@ def test_create_berth_lease_application_without_customer(
 def test_create_berth_lease_application_already_has_lease(
     superuser_api_client, berth_application, berth, customer_profile,
 ):
+    BoatTypeFactory(id=berth_application.boat_type.id)
     BerthLeaseFactory(application=berth_application)
     berth_application.customer = customer_profile
     berth_application.save()
@@ -308,6 +320,7 @@ mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
 def test_create_berth_lease_with_order(
     api_client, berth_application, berth, customer_profile
 ):
+    BoatTypeFactory(id=berth_application.boat_type.id)
     berth_application.customer = customer_profile
     berth_application.save()
     min_width = berth.berth_type.width - 1
@@ -1087,6 +1100,7 @@ mutation CreateWinterStorageLease($input: CreateWinterStorageLeaseMutationInput!
 def test_create_winter_storage_lease(
     api_client, winter_storage_application, winter_storage_place, customer_profile
 ):
+    BoatTypeFactory(id=winter_storage_application.boat_type.id)
     WinterStorageProductFactory(
         winter_storage_area=winter_storage_place.winter_storage_section.area
     )
@@ -1101,10 +1115,20 @@ def test_create_winter_storage_lease(
     }
 
     assert WinterStorageLease.objects.count() == 0
+    assert customer_profile.boats.count() == 0
 
     executed = api_client.execute(CREATE_WINTER_STORAGE_LEASE_MUTATION, input=variables)
 
     assert WinterStorageLease.objects.count() == 1
+    assert customer_profile.boats.count() == 1
+
+    boat = customer_profile.boats.first()
+    assert boat.owner == winter_storage_application.customer
+    assert boat.width == winter_storage_application.boat_width
+    assert boat.length == winter_storage_application.boat_length
+    assert (
+        boat.registration_number == winter_storage_application.boat_registration_number
+    )
 
     assert (
         executed["data"]["createWinterStorageLease"]["winterStorageLease"].pop("id")
@@ -1119,7 +1143,7 @@ def test_create_winter_storage_lease(
         "startDate": str(calculate_winter_storage_lease_start_date()),
         "endDate": str(calculate_winter_storage_lease_end_date()),
         "comment": "",
-        "boat": None,
+        "boat": {"id": to_global_id(BoatNode, boat.id)},
         "customer": {
             "id": to_global_id(ProfileNode, winter_storage_application.customer.id)
         },
@@ -1276,6 +1300,7 @@ def test_create_winter_storage_lease_application_already_has_lease(
     winter_storage_place,
     customer_profile,
 ):
+    BoatTypeFactory(id=winter_storage_application.boat_type.id)
     WinterStorageLeaseFactory(application=winter_storage_application)
     winter_storage_application.customer = customer_profile
     winter_storage_application.save()
@@ -1375,6 +1400,7 @@ mutation CreateWinterStorageLease($input: CreateWinterStorageLeaseMutationInput!
 def test_create_winter_storage_lease_with_order(
     api_client, winter_storage_application, winter_storage_place, customer_profile
 ):
+    BoatTypeFactory(id=winter_storage_application.boat_type.id)
     winter_storage_application.customer = customer_profile
     winter_storage_application.save()
     product = WinterStorageProductFactory(
@@ -1432,6 +1458,7 @@ def test_create_winter_storage_lease_with_order(
 def test_create_winter_storage_lease_with_order_no_product(
     api_client, winter_storage_application, winter_storage_place, customer_profile
 ):
+    BoatTypeFactory(id=winter_storage_application.boat_type.id)
     winter_storage_application.customer = customer_profile
     winter_storage_application.save()
 
@@ -1700,6 +1727,7 @@ def test_update_winter_storage_lease_application_already_has_lease(
 def test_create_berth_lease_for_non_billable_customer(
     api_client, berth_application, berth, non_billable_customer
 ):
+    BoatTypeFactory(id=berth_application.boat_type.id)
     berth_application.customer = non_billable_customer
     berth_application.save()
     min_width = berth.berth_type.width - 1
@@ -1762,6 +1790,7 @@ def test_create_winter_storage_lease_for_non_billable_customer(
     customer_profile,
     non_billable_customer,
 ):
+    BoatTypeFactory(id=winter_storage_application.boat_type.id)
     winter_storage_application.customer = non_billable_customer
     winter_storage_application.save()
     product = WinterStorageProductFactory(
@@ -1880,6 +1909,7 @@ def test_create_berth_lease_no_contract_for_non_billable_customer(
 def test_create_winter_storage_lease_creates_contract(
     api_client, winter_storage_application, winter_storage_place, customer_profile
 ):
+    BoatTypeFactory(id=winter_storage_application.boat_type.id)
     WinterStorageProductFactory(
         winter_storage_area=winter_storage_place.winter_storage_section.area
     )
@@ -1911,6 +1941,7 @@ def test_create_winter_storage_lease_creates_contract(
 def test_create_winter_storage_lease_no_contract_for_non_billable_customer(
     api_client, winter_storage_application, winter_storage_place, non_billable_customer
 ):
+    BoatTypeFactory(id=winter_storage_application.boat_type.id)
     WinterStorageProductFactory(
         winter_storage_area=winter_storage_place.winter_storage_section.area
     )
