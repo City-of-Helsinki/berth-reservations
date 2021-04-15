@@ -43,23 +43,25 @@ def hki_profile_address() -> dict:
     return MOCK_HKI_PROFILE_ADDRESS
 
 
+def get_customer_profile_dict() -> dict:
+    faker = Faker()
+    profile = CustomerProfileFactory()
+    return {
+        "id": to_global_id(ProfileNode, profile.id),
+        "first_name": profile.user.first_name,
+        "last_name": profile.user.last_name,
+        "primary_email": {"email": profile.user.email},
+        "primary_phone": {"phone": faker.phone_number()},
+        "primary_address": MOCK_HKI_PROFILE_ADDRESS,
+    }
+
+
 def mocked_response_profile(count=3, data=None, use_edges=True, *args, **kwargs):
     def wrapper(*args, **kwargs):
-        faker = Faker()
         profiles = []
 
         for _i in range(0, count):
-            profile = CustomerProfileFactory()
-            profiles.append(
-                {
-                    "id": to_global_id(ProfileNode, profile.id),
-                    "first_name": profile.user.first_name,
-                    "last_name": profile.user.last_name,
-                    "primary_email": {"email": profile.user.email},
-                    "primary_phone": {"phone": faker.phone_number()},
-                    "primary_address": MOCK_HKI_PROFILE_ADDRESS,
-                }
-            )
+            profiles.append(get_customer_profile_dict())
         if data:
             profiles.append(data)
 
@@ -76,6 +78,18 @@ def mocked_response_profile(count=3, data=None, use_edges=True, *args, **kwargs)
 
         profiles = {"profile": profiles[0]}
         return MockResponse(data={"data": profiles})
+
+    return wrapper
+
+
+def mocked_response_my_profile(data="", *args, **kwargs):
+    def wrapper(*args, **kwargs):
+        if data != "":
+            profile_dict = data
+        else:
+            profile_dict = get_customer_profile_dict()
+        my_profile = {"myProfile": profile_dict}
+        return MockResponse(data={"data": my_profile})
 
     return wrapper
 

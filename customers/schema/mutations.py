@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.utils.translation import gettext_lazy as _
 from graphene_file_upload.scalars import Upload
+from graphql_jwt.decorators import login_required
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from resources.models import BoatType
@@ -15,6 +16,7 @@ from utils.relay import from_global_id, get_node_from_global_id
 from utils.schema import update_object
 
 from ..models import Boat, BoatCertificate, CustomerProfile, Organization
+from ..services import ProfileService
 from .types import (
     BoatCertificateNode,
     BoatCertificateTypeEnum,
@@ -218,6 +220,38 @@ class CreateBerthServicesProfileMutation(graphene.ClientIDMutation):
         return CreateBerthServicesProfileMutation(profile=profile)
 
 
+class CreateMyBerthProfileMutation(graphene.ClientIDMutation):
+    class Input:
+        profile_token = graphene.String(
+            required=True, description="API token for Helsinki profile GraphQL API",
+        )
+
+    profile = graphene.Field(ProfileNode)
+
+    @classmethod
+    @login_required
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, profile_token, **input):
+        user = info.context.user
+        profile_exists = CustomerProfile.objects.filter(user=user).exists()
+        if profile_exists:
+            return None
+
+        profile_service = ProfileService(profile_token=profile_token)
+        my_profile = profile_service.get_my_profile()
+        if not my_profile:
+            raise VenepaikkaGraphQLError("Open city profile not found")
+
+        try:
+            profile = CustomerProfile.objects.create(id=my_profile.id, user=user)
+        except ValidationError as e:
+            # Flatten all the error messages on a single list
+            errors = sum(e.message_dict.values(), [])
+            raise VenepaikkaGraphQLError(errors)
+
+        return CreateMyBerthProfileMutation(profile=profile)
+
+
 class UpdateBerthServicesProfileMutation(graphene.ClientIDMutation):
     class Input(BerthServicesInput):
         id = graphene.GlobalID(required=True)
@@ -316,6 +350,15 @@ class Mutation:
         "The created `BerthServicesProfile` will be associated to that Open City profile."
         "\n\nErrors:"
         "\n* No customer `GlobalID` is provided"
+    )
+    create_my_berth_profile = CreateMyBerthProfileMutation.Field(
+        description="Creates a `ProfileNode` for the current user."
+        "\n\nA customer profile_token is required from the current user."
+        "\n\nThe `Profile` UUID is fetched for the current user from Open City profile "
+        "and a `CustomerProfile` is created with the same UUID."
+        "\nThe created `CustomerProfile` will thus be associated to that Open City profile."
+        "\n\nErrors:"
+        "\n* Open city profile not found"
     )
     update_berth_services_profile = UpdateBerthServicesProfileMutation.Field(
         description="Updates a `ProfileNode`."
