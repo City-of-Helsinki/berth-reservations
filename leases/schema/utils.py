@@ -2,9 +2,9 @@ from typing import Optional
 
 from django.utils.translation import gettext_lazy as _
 
+from applications.utils import create_or_update_boat_for_application
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.models import Boat
-from resources.models import BoatType
 from utils.relay import get_node_from_global_id, to_global_id
 
 
@@ -34,27 +34,5 @@ def lookup_or_create_boat(info, input: dict) -> Optional[Boat]:
                 _("Boat does not belong to the same customer as the Application")
             )
     elif application := input.get("application"):
-        # TODO: Remove this mapping
-        # This will only be done until the Harbors app is removed.
-        # The boat types are loaded from a fixture and they have the same ID and translations,
-        # so this is a safe temporary solution
-        boat_type = BoatType.objects.get(id=application.boat_type_id,)
-
-        boat_input = {
-            "boat_type": boat_type,
-            "name": application.boat_name,
-            "model": application.boat_model,
-            "length": application.boat_length,
-            "width": application.boat_width,
-            "draught": getattr(application, "boat_draught", None),
-            "weight": getattr(application, "boat_weight", None),
-            "propulsion": getattr(application, "boat_propulsion", ""),
-            "hull_material": getattr(application, "boat_hull_material", ""),
-            "intended_use": getattr(application, "boat_intended_use", ""),
-        }
-        boat, _created = Boat.objects.update_or_create(
-            owner=application.customer,
-            registration_number=application.boat_registration_number,
-            defaults=boat_input,
-        )
+        boat, _created = create_or_update_boat_for_application(application)
     return boat
