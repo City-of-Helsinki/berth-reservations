@@ -204,7 +204,7 @@ class OrderNode(DjangoObjectType):
     total_price = graphene.Decimal(required=True)
     total_pretax_price = graphene.Decimal(required=True)
     total_tax_percentage = graphene.Decimal(required=True)
-    due_date = graphene.Date(required=True)
+    due_date = graphene.Date()
     order_lines = DjangoConnectionField(OrderLineNode, required=True)
     log_entries = DjangoConnectionField(OrderLogEntryNode, required=True)
     paid_at = graphene.DateTime(

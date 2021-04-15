@@ -630,6 +630,35 @@ def test_get_order(api_client, order):
     }
 
 
+ORDER_QUERY_DUE_DATE = """
+query ORDER {
+    order(id: "%s") {
+        id
+        dueDate
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_order_without_due_date(api_client, order):
+    order.due_date = None
+    order.status = OrderStatus.DRAFTED
+    order.save()
+    order_global_id = to_global_id(OrderNode, order.id)
+
+    executed = api_client.execute(ORDER_QUERY_DUE_DATE % order_global_id)
+
+    assert executed["data"]["order"] == {
+        "id": order_global_id,
+        "dueDate": None,
+    }
+
+
 @pytest.mark.parametrize(
     "api_client", ["api_client", "user", "harbor_services"], indirect=True,
 )
