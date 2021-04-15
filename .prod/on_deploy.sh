@@ -5,6 +5,3 @@ python /app/manage.py migrate --noinput
 
 # Updates group permissions on each deployment in case of updated permissions
 python /app/manage.py set_group_model_permissions
-
-# Load the new berth products
-python /app/manage.py loaddata berth_products

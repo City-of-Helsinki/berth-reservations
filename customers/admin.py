@@ -67,6 +67,7 @@ class CustomerProfileAdmin(admin.ModelAdmin):
     )
     search_fields = ("id",)
     list_display = ("id", "berth_lease_count", "winter_lease_count", "order_count")
+    autocomplete_fields = ("user",)
 
     def get_queryset(self, request):
         return (

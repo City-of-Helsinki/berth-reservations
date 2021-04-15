@@ -7,7 +7,11 @@ from customers.schema import ProfileNode
 from customers.services.profile import ProfileService
 from utils.relay import from_global_id, to_global_id
 
-from .conftest import get_customer_profile_dict, mocked_response_profile
+from .conftest import (
+    get_customer_profile_dict,
+    mocked_response_my_profile,
+    mocked_response_profile,
+)
 
 
 def test_get_all_profiles():
@@ -67,6 +71,34 @@ def test_get_profile(customer_profile, user, hki_profile_address):
         ),
     ):
         profile = ProfileService(profile_token="token").get_profile(customer_profile.id)
+
+    assert profile.id == customer_profile.id
+    assert profile.first_name == user.first_name
+    assert profile.last_name == user.last_name
+    assert profile.email == user.email
+    assert profile.phone == phone
+    assert profile.address == hki_profile_address.get("address")
+    assert profile.postal_code == hki_profile_address.get("postal_code")
+    assert profile.city == hki_profile_address.get("city")
+
+
+def test_get_my_profile(customer_profile, user, hki_profile_address):
+    faker = Faker()
+    phone = faker.phone_number()
+    with mock.patch(
+        "customers.services.profile.requests.post",
+        side_effect=mocked_response_my_profile(
+            data={
+                "id": to_global_id(ProfileNode, customer_profile.id),
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "primary_email": {"email": user.email},
+                "primary_phone": {"phone": phone},
+                "primary_address": hki_profile_address,
+            },
+        ),
+    ):
+        profile = ProfileService(profile_token="token").get_my_profile()
 
     assert profile.id == customer_profile.id
     assert profile.first_name == user.first_name
