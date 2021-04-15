@@ -265,6 +265,9 @@ msgstr "Ansökan om båtplats har skapats"
 msgid "Berth application rejected"
 msgstr "Ansökan om båtplats avvisat"
 
+msgid "Berth application processed"
+msgstr "Ansökan om båtplats hanterat"
+
 msgid "Winter storage application created"
 msgstr "Ansökan om vinteruppläggning har skapats"
 

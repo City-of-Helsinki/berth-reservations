@@ -45,6 +45,7 @@ from leases.utils import (
 from resources.enums import AreaRegion
 from resources.models import Harbor, WinterStorageArea
 from utils.email import is_valid_email
+from utils.messaging import get_email_subject
 from utils.numbers import rounded as rounded_decimal
 
 from .enums import OfferStatus, OrderStatus, OrderType, ProductServiceType
@@ -530,21 +531,6 @@ def get_notification_language(order):
     if order.lease and order.lease.application:
         language = order.lease.application.language
     return language
-
-
-def get_email_subject(notification_type):
-    from .notifications import NotificationType
-
-    if (
-        notification_type == NotificationType.NEW_BERTH_ORDER_APPROVED
-        or notification_type == NotificationType.RENEW_BERTH_ORDER_APPROVED
-    ):
-        return _("Boat berth invoice")
-    if notification_type == NotificationType.ORDER_CANCELLED:
-        return _("Confirmation")
-    if notification_type == NotificationType.ORDER_REFUNDED:
-        return _("Refund confirmation")
-    return notification_type.label
 
 
 def get_context(
