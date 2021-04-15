@@ -1,5 +1,8 @@
+from decimal import Decimal
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from parler.models import TranslatableModel, TranslatedFields
@@ -111,10 +114,16 @@ class BaseApplication(models.Model):
         verbose_name=_("boat model"), max_length=64, blank=True
     )
     boat_length = models.DecimalField(
-        verbose_name=_("boat length"), decimal_places=2, max_digits=5
+        verbose_name=_("boat length"),
+        decimal_places=2,
+        max_digits=5,
+        validators=[MinValueValidator(Decimal("0.01"))],
     )
     boat_width = models.DecimalField(
-        verbose_name=_("boat width"), decimal_places=2, max_digits=5
+        verbose_name=_("boat width"),
+        decimal_places=2,
+        max_digits=5,
+        validators=[MinValueValidator(Decimal("0.01"))],
     )
 
     accept_boating_newsletter = models.BooleanField(
@@ -174,6 +183,7 @@ class BerthApplication(BaseApplication):
         max_digits=5,
         null=True,
         blank=True,
+        validators=[MinValueValidator(Decimal("0.01"))],
     )
     boat_weight = models.DecimalField(
         verbose_name=_("boat weight"),
@@ -181,6 +191,7 @@ class BerthApplication(BaseApplication):
         max_digits=10,
         null=True,
         blank=True,
+        validators=[MinValueValidator(Decimal("0.01"))],
     )
 
     accessibility_required = models.BooleanField(
