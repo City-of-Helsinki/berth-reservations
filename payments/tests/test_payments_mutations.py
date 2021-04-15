@@ -832,10 +832,14 @@ def test_create_order_lease_does_not_exist(
     assert_in_errors("Lease with the given ID does not exist", executed)
 
 
-UPDATE_ORDER_MUTATION = """
-mutation UPDATE_ORDER($input: UpdateOrderMutationInput!) {
-    updateOrder(input: $input) {
-        order {
+UPDATE_ORDERS_MUTATION = """
+mutation UPDATE_ORDERS($input: UpdateOrdersMutationInput!) {
+    updateOrders(input: $input) {
+        failedOrders {
+            id
+            error
+        }
+        successfulOrders {
             id
             comment
             price
@@ -889,27 +893,33 @@ def test_update_order_berth_product(
     )
 
     global_id = to_global_id(OrderNode, order.id)
-
+    due_date = today()
     # only valid state transitions
     variables = {
-        "id": global_id,
-        "comment": "foobar",
-        "dueDate": today(),
-        "status": OrderStatusEnum.get(status_choice.value).name,
+        "orders": [
+            {
+                "id": global_id,
+                "comment": "foobar",
+                "dueDate": due_date,
+                "status": OrderStatusEnum.get(status_choice.value).name,
+            }
+        ]
     }
 
     assert Order.objects.count() == 1
 
-    executed = api_client.execute(UPDATE_ORDER_MUTATION, input=variables)
+    executed = api_client.execute(UPDATE_ORDERS_MUTATION, input=variables)
     assert Order.objects.count() == 1
 
-    assert executed["data"]["updateOrder"]["order"] == {
-        "id": variables["id"],
-        "comment": variables["comment"],
+    assert len(executed["data"]["updateOrders"]["failedOrders"]) == 0
+    assert len(executed["data"]["updateOrders"]["successfulOrders"]) == 1
+    assert executed["data"]["updateOrders"]["successfulOrders"][0] == {
+        "id": global_id,
+        "comment": "foobar",
         "price": str(berth_product.price_for_tier(berth_lease.berth.pier.price_tier)),
         "taxPercentage": str(berth_product.tax_percentage),
-        "dueDate": str(variables["dueDate"].date()),
-        "status": variables["status"],
+        "dueDate": str(due_date.date()),
+        "status": OrderStatusEnum.get(status_choice.value).name,
         "customer": {"id": to_global_id(ProfileNode, order.customer.id)},
         "product": {"id": to_global_id(BerthProductNode, order.product.id)},
         "lease": {"id": to_global_id(BerthLeaseNode, berth_lease.id)},
@@ -934,19 +944,26 @@ def test_set_order_status_to_paid_manually(
     )
     assert order.status == initial_status
     global_id = to_global_id(OrderNode, order.id)
+
     variables = {
-        "id": global_id,
-        "status": OrderStatusEnum.get(OrderStatus.PAID_MANUALLY).name,
+        "orders": [
+            {
+                "id": global_id,
+                "status": OrderStatusEnum.get(OrderStatus.PAID_MANUALLY).name,
+            }
+        ]
     }
 
     assert Order.objects.count() == 1
 
-    executed = api_client.execute(UPDATE_ORDER_MUTATION, input=variables)
+    executed = api_client.execute(UPDATE_ORDERS_MUTATION, input=variables)
 
     assert Order.objects.count() == 1
 
-    assert executed["data"]["updateOrder"]["order"] == {
-        "id": variables["id"],
+    assert len(executed["data"]["updateOrders"]["failedOrders"]) == 0
+    assert len(executed["data"]["updateOrders"]["successfulOrders"]) == 1
+    assert executed["data"]["updateOrders"]["successfulOrders"][0] == {
+        "id": global_id,
         "comment": order.comment,
         "price": str(berth_product.price_for_tier(berth_lease.berth.pier.price_tier)),
         "taxPercentage": str(berth_product.tax_percentage),
@@ -984,18 +1001,24 @@ def test_set_order_status_to_cancelled(
     assert order.status == initial_status
     global_id = to_global_id(OrderNode, order.id)
     variables = {
-        "id": global_id,
-        "status": OrderStatusEnum.get(OrderStatus.CANCELLED).name,
+        "orders": [
+            {
+                "id": global_id,
+                "status": OrderStatusEnum.get(OrderStatus.CANCELLED).name,
+            }
+        ]
     }
 
     assert Order.objects.count() == 1
 
-    executed = api_client.execute(UPDATE_ORDER_MUTATION, input=variables)
+    executed = api_client.execute(UPDATE_ORDERS_MUTATION, input=variables)
 
     assert Order.objects.count() == 1
 
-    assert executed["data"]["updateOrder"]["order"] == {
-        "id": variables["id"],
+    assert len(executed["data"]["updateOrders"]["failedOrders"]) == 0
+    assert len(executed["data"]["updateOrders"]["successfulOrders"]) == 1
+    assert executed["data"]["updateOrders"]["successfulOrders"][0] == {
+        "id": global_id,
         "comment": order.comment,
         "status": OrderStatus.CANCELLED.name,
         "price": str(berth_product.price_for_tier(berth_lease.berth.pier.price_tier)),
@@ -1020,25 +1043,26 @@ def test_set_order_status_to_cancelled(
     indirect=True,
 )
 def test_update_order_not_enough_permissions(api_client):
-    variables = {
-        "id": to_global_id(OrderNode, uuid.uuid4()),
-    }
+    variables = {"orders": [{"id": to_global_id(OrderNode, uuid.uuid4())}]}
 
     assert Order.objects.count() == 0
 
-    executed = api_client.execute(UPDATE_ORDER_MUTATION, input=variables)
+    executed = api_client.execute(UPDATE_ORDERS_MUTATION, input=variables)
 
     assert Order.objects.count() == 0
     assert_not_enough_permissions(executed)
 
 
 def test_update_order_does_not_exist(superuser_api_client):
-    variables = {
-        "id": to_global_id(OrderNode, uuid.uuid4()),
-    }
-    executed = superuser_api_client.execute(UPDATE_ORDER_MUTATION, input=variables)
+    variables = {"orders": [{"id": to_global_id(OrderNode, uuid.uuid4())}]}
+    executed = superuser_api_client.execute(UPDATE_ORDERS_MUTATION, input=variables)
 
-    assert_doesnt_exist("Order", executed)
+    assert len(executed["data"]["updateOrders"]["failedOrders"]) == 1
+    assert len(executed["data"]["updateOrders"]["successfulOrders"]) == 0
+    assert (
+        executed["data"]["updateOrders"]["failedOrders"][0]["error"]
+        == "Order matching query does not exist."
+    )
 
 
 @pytest.mark.parametrize("lease_type", ["berth", "winter"])
@@ -1048,12 +1072,17 @@ def test_update_order_lease_does_not_exist(superuser_api_client, order, lease_ty
         uuid.uuid4(),
     )
     variables = {
-        "id": to_global_id(OrderNode, order.id),
-        "leaseId": lease_id,
+        "orders": [{"id": to_global_id(OrderNode, order.id), "leaseId": lease_id}]
     }
-    executed = superuser_api_client.execute(UPDATE_ORDER_MUTATION, input=variables)
 
-    assert_in_errors("Lease with the given ID does not exist", executed)
+    executed = superuser_api_client.execute(UPDATE_ORDERS_MUTATION, input=variables)
+
+    assert len(executed["data"]["updateOrders"]["failedOrders"]) == 1
+    assert len(executed["data"]["updateOrders"]["successfulOrders"]) == 0
+    assert (
+        executed["data"]["updateOrders"]["failedOrders"][0]["error"]
+        == "Lease with the given ID does not exist"
+    )
 
 
 DELETE_ORDER_MUTATION = """
