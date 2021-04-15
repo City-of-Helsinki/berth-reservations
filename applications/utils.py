@@ -236,6 +236,12 @@ def localize_datetime(dt, language=settings.LANGUAGES[0][0]):
 
 
 def create_or_update_boat_for_application(application) -> (Boat, bool):
+    def prop_or_none(prop):
+        value = getattr(application, prop, None)
+        if value == 0:
+            value = None
+        return value
+
     return Boat.objects.update_or_create(
         owner=application.customer,
         registration_number=application.boat_registration_number,
@@ -246,8 +252,8 @@ def create_or_update_boat_for_application(application) -> (Boat, bool):
             "registration_number": getattr(application, "boat_registration_number", ""),
             "name": getattr(application, "boat_name", ""),
             "model": getattr(application, "boat_model", ""),
-            "draught": getattr(application, "boat_draught", None),
-            "weight": getattr(application, "boat_weight", None),
+            "draught": prop_or_none("boat_draught"),
+            "weight": prop_or_none("boat_weight"),
             "propulsion": getattr(application, "boat_propulsion", ""),
             "hull_material": getattr(application, "boat_hull_material", ""),
             "intended_use": getattr(application, "boat_intended_use", ""),
