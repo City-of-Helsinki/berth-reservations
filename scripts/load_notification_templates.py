@@ -44,7 +44,7 @@ def load_email_templates():
             "html": "berth_invoice_{lang}.html",
             "plain": "berth_invoice_{lang}.txt",
         },
-        PaymentNotificationType.BERTH_SWITCH_ORDER_APPROVED: {
+        PaymentNotificationType.BERTH_SWITCH_OFFER_APPROVED: {
             "html": "berth_offer_switch_{lang}.html",
             "plain": None,
         },
@@ -120,6 +120,7 @@ def load_sms_templates(offset):
 
     sms_notifications = {
         PaymentNotificationType.SMS_INVOICE_NOTICE: "invoice_notice_{lang}.txt",
+        PaymentNotificationType.SMS_BERTH_SWITCH_NOTICE: "berth_switch_notice_{lang}.txt",
     }
 
     for notification_index, (notification_type, template_path) in enumerate(

@@ -55,6 +55,7 @@ from ..utils import (
     fetch_order_profile,
     prepare_for_resending,
     resend_order,
+    send_berth_switch_offer,
     send_cancellation_notice,
     send_refund_notice,
     update_order_from_profile,
@@ -64,6 +65,7 @@ from .types import (
     AdditionalProductTaxEnum,
     BerthProductNode,
     BerthSwitchOfferNode,
+    FailedOfferType,
     FailedOrderType,
     OfferStatusEnum,
     OrderLineNode,
@@ -590,6 +592,68 @@ class DeleteOrderLineMutation(graphene.ClientIDMutation):
         return DeleteOrderLineMutation()
 
 
+class SendBerthSwitchOfferMutation(graphene.ClientIDMutation):
+    class Input:
+        offers = graphene.List(graphene.ID, required=True)
+        due_date = graphene.Date(description="Defaults to the Offer due date")
+        profile_token = graphene.String(
+            description="API token for Helsinki profile GraphQL API",
+        )
+
+    sent_offers = graphene.List(graphene.ID)
+    failed_offers = graphene.List(FailedOfferType)
+
+    @classmethod
+    @change_permission_required(BerthSwitchOffer,)
+    def mutate_and_get_payload(cls, root, info, offers, **input):
+        due_date = input.pop("due_date", None)
+
+        failed_offers = []
+        sent_offers = []
+
+        for offer_id in offers:
+            try:
+                with transaction.atomic():
+                    offer = get_node_from_global_id(
+                        info, offer_id, only_type=BerthSwitchOfferNode, nullable=False
+                    )
+
+                    if offer.status not in (OfferStatus.DRAFTED, OfferStatus.OFFERED):
+                        # This mutation can also be used to resend offers
+                        raise ValidationError(
+                            _(f"Cannot send offer in {offer.status} status.")
+                        )
+
+                    if profile_token := input.get("profile_token"):
+                        offer.update_from_profile(profile_token)
+
+                    if not offer.customer_email and not offer.customer_phone:
+                        failed_offers.append(
+                            FailedOfferType(
+                                id=offer_id,
+                                error=_(
+                                    "Profile token is required if an offer does not previously have email or phone."
+                                ),
+                            )
+                        )
+                        continue
+                    send_berth_switch_offer(offer, due_date)
+            except (
+                AnymailError,
+                OSError,
+                BerthSwitchOffer.DoesNotExist,
+                ValidationError,
+                VenepaikkaGraphQLError,
+            ) as e:
+                failed_offers.append(FailedOfferType(id=offer_id, error=str(e)))
+            else:
+                sent_offers.append(offer.id)
+
+        return SendBerthSwitchOfferMutation(
+            sent_offers=sent_offers, failed_offers=failed_offers
+        )
+
+
 class OrderApprovalInput(graphene.InputObjectType):
     order_id = graphene.ID(required=True)
     email = graphene.String(required=True)
@@ -647,10 +711,10 @@ class ApproveOrderMutation(graphene.ClientIDMutation):
 
 class ResendOrderMutation(graphene.ClientIDMutation):
     class Input:
-        orders = graphene.List(graphene.NonNull(graphene.ID))
+        orders = graphene.List(graphene.ID, required=True)
         due_date = graphene.Date(description="Defaults to the Order due date")
         profile_token = graphene.String(
-            required=False, description="API token for Helsinki profile GraphQL API",
+            description="API token for Helsinki profile GraphQL API",
         )
 
     sent_orders = graphene.List(graphene.NonNull(graphene.ID), required=True)
@@ -1083,6 +1147,18 @@ class Mutation:
         "\n\n**Requires permissions** to edit offers."
         "\n\nErrors:"
         "\n* State transition is not allowed"
+    )
+
+    send_berth_switch_offer = SendBerthSwitchOfferMutation.Field(
+        description="Sends an offer for a berth switch to the customer via email and SMS."
+        "\n\nResending a previously sent offer is possible."
+        "\n\nOffer status is changed to PENDING and application status is changed to OFFER_SENT."
+        "\n\nIf profile_token is given, then customer's contact information stored in offer is refreshed from "
+        "\n\nthe city profile service."
+        "\n\n**Requires permissions** to edit offers."
+        "\n\nErrors:"
+        "\n* The offer is not DRAFTED or OFFERED"
+        "\n* Customer's contact information is not available"
     )
 
 

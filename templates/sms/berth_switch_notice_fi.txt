@@ -1,0 +1,2 @@
+Hyvä asiakas. Tarjoamme sinulle venepaikkaa. Tässä linkki jolla voit hyväksyä tai hylätä uuden venepaikkasi. Tee valintasi {{ due_date }} mennessä.
+{{ accept_url }}

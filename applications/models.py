@@ -221,28 +221,45 @@ class BerthApplication(BaseApplication):
 
     def _validate_status(self):
         """
-        If the BerthApplication does not have a BerthLease related to it,
-        it can only have PENDING or EXPIRED statuses.
-
-        With a lease, it can have any of the other statuses.
+        * If the BerthApplication it is a switch application, then the set of available statuses is restricted
+        * If the BerthApplication does not have a BerthLease related to it,
+          it can only have PENDING, EXPIRED or NO_SUITABLE_BERTHS statuses.
         """
-        allowed_statuses_without_lease = [
-            ApplicationStatus.PENDING,
-            ApplicationStatus.EXPIRED,
-            ApplicationStatus.NO_SUITABLE_BERTHS,
-        ]
-
-        if (
-            not hasattr(self, "lease")
-            and self.status not in allowed_statuses_without_lease
-        ):
-            raise ValidationError(
-                _(
-                    "BerthApplication with no lease can only be "
-                    f"{', '.join([status.name for status in allowed_statuses_without_lease])}; "
-                    f"has {self.status.name}"
+        if self.berth_switch:
+            allowed_statuses_for_switch = [
+                ApplicationStatus.PENDING,
+                ApplicationStatus.HANDLED,
+                ApplicationStatus.OFFER_SENT,
+                ApplicationStatus.EXPIRED,
+                ApplicationStatus.REJECTED,
+            ]
+            if self.status not in allowed_statuses_for_switch:
+                raise ValidationError(
+                    _(
+                        "Berth switch application can only be "
+                        f"{', '.join([status.name for status in allowed_statuses_for_switch])}; "
+                        f"has {self.status.name}"
+                    )
                 )
-            )
+        else:
+            # not a switch application
+            allowed_statuses_without_lease = [
+                ApplicationStatus.PENDING,
+                ApplicationStatus.EXPIRED,
+                ApplicationStatus.NO_SUITABLE_BERTHS,
+            ]
+
+            if (
+                not hasattr(self, "lease")
+                and self.status not in allowed_statuses_without_lease
+            ):
+                raise ValidationError(
+                    _(
+                        "BerthApplication with no lease can only be "
+                        f"{', '.join([status.name for status in allowed_statuses_without_lease])}; "
+                        f"has {self.status.name}"
+                    )
+                )
 
     def save(self, *args, **kwargs):
         # Ensure clean is always ran

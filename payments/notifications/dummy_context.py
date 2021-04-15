@@ -3,24 +3,28 @@ from decimal import Decimal
 from typing import Dict, List
 
 import factory
+from babel.dates import format_date
 from dateutil.utils import today
 from django.conf import settings
 from django_ilmoitin.dummy_context import dummy_context
 
+from applications.tests.factories import BerthApplicationFactory
 from berth_reservations.tests.factories import CustomerProfileFactory
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
+from resources.tests.factories import BerthFactory
 
 from ..enums import OrderStatus, ProductServiceType
 from ..models import Order, OrderLine
 from ..providers import BamboraPayformProvider
 from ..tests.factories import (
     BerthProductFactory,
+    BerthSwitchOfferFactory,
     OrderFactory,
     OrderLineFactory,
     WinterStorageProductFactory,
 )
 from ..tests.utils import random_price
-from ..utils import get_email_subject
+from ..utils import get_email_subject, get_offer_customer_url
 from .types import NotificationType
 
 provider = BamboraPayformProvider(
@@ -162,6 +166,31 @@ def _get_refunded_order_context(subject: str = "Order refunded"):
     }
 
 
+def _get_offer_context(subject, offer) -> Dict:
+    return {
+        "subject": subject,
+        "offer": offer,
+        "accept_url": get_offer_customer_url(offer, settings.LANGUAGE_CODE, True),
+        "cancel_url": get_offer_customer_url(offer, settings.LANGUAGE_CODE, False),
+        "due_date": format_date(offer.due_date, locale=settings.LANGUAGE_CODE),
+    }
+
+
+def _get_berth_switch_offer_context(subject: str = "Berth offer"):
+    customer = CustomerProfileFactory.build()
+    offer = BerthSwitchOfferFactory.build(
+        customer=customer,
+        application=BerthApplicationFactory.build(customer=customer),
+        berth=BerthFactory.build(),
+        lease=BerthLeaseFactory.build(
+            customer=customer,
+            # Fixed to a harbor with a real image
+            berth__pier__harbor__image_file="/img/helsinki_harbors/41189.jpg",
+        ),
+    )
+    return _get_offer_context(subject, offer)
+
+
 def load_dummy_context():
     dummy_context.update(
         {
@@ -171,8 +200,8 @@ def load_dummy_context():
             NotificationType.RENEW_BERTH_ORDER_APPROVED: _get_berth_order_context(
                 get_email_subject(NotificationType.RENEW_BERTH_ORDER_APPROVED)
             ),
-            NotificationType.BERTH_SWITCH_ORDER_APPROVED: _get_berth_order_context(
-                get_email_subject(NotificationType.BERTH_SWITCH_ORDER_APPROVED)
+            NotificationType.BERTH_SWITCH_OFFER_APPROVED: _get_berth_order_context(
+                get_email_subject(NotificationType.BERTH_SWITCH_OFFER_APPROVED)
             ),
             NotificationType.NEW_WINTER_STORAGE_ORDER_APPROVED: _get_winter_storage_order_context(
                 get_email_subject(NotificationType.NEW_WINTER_STORAGE_ORDER_APPROVED)
@@ -191,10 +220,17 @@ def load_dummy_context():
             NotificationType.ORDER_REFUNDED: _get_refunded_order_context(
                 get_email_subject(NotificationType.ORDER_REFUNDED)
             ),
+            NotificationType.BERTH_SWITCH_OFFER_APPROVED: _get_berth_switch_offer_context(
+                get_email_subject(NotificationType.BERTH_SWITCH_OFFER_APPROVED)
+            ),
             NotificationType.SMS_INVOICE_NOTICE: {
                 "product_name": "Berth",
                 "due_date": str(today()),
                 "payment_url": "https://foo.bar/payment",
+            },
+            NotificationType.SMS_BERTH_SWITCH_NOTICE: {
+                "due_date": str(today()),
+                "accept_url": "https://foo.bar/payment",
             },
         }
     )
