@@ -755,7 +755,7 @@ class Order(UUIDModel, TimeStampedModel):
         self.status = new_status
         self.save(update_fields=["status"])
 
-        if self.order_type == OrderType.LEASE_ORDER:
+        if self.order_type == OrderType.LEASE_ORDER and self.lease:
             self.update_lease_and_application(new_status)
             self.update_sticker_number_if_needed()
 

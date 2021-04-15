@@ -899,6 +899,15 @@ def test_berth_product_range():
     assert BerthProduct.objects.get_in_range(width=2.76) == bp3
 
 
+def test_order_set_status_no_lease(berth):
+    product = BerthProductFactory(min_width=1, max_width=5)
+    order = OrderFactory(product=product, status=OrderStatus.OFFERED, lease=None,)
+
+    order.set_status(OrderStatus.PAID)
+    assert not order.lease
+    assert order.status == OrderStatus.PAID
+
+
 def test_order_set_status_no_application(berth):
     lease = BerthLeaseFactory(berth=berth, application=None, status=LeaseStatus.OFFERED)
     product = BerthProductFactory(
