@@ -21,6 +21,7 @@ urlpatterns = [
         csrf_exempt(SentryGraphQLView.as_view(schema=new_schema, graphiql=True)),
     ),
     path("payments/", include(payment_urls)),
+    path("gdpr-api/", include("helsinki_gdpr.urls")),
 ]
 
 if settings.ENABLE_PROFILING_TOOLS:

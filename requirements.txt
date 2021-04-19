@@ -20,7 +20,7 @@ django-environ==0.4.5     # via -r requirements.in
 django-filter==2.4.0      # via -r requirements.in
 django-graphql-geojson==0.1.4  # via -r requirements.in
 django-graphql-jwt==0.3.1  # via -r requirements.in
-django-helusers==0.5.6    # via -r requirements.in
+django-helusers==0.5.6    # via -r requirements.in, helsinki-profile-gdpr-api
 django-ilmoitin[graphql_api]==0.6.0  # via -r requirements.in
 django-js-asset==1.2.2    # via django-mptt
 django-mailer==2.0.1      # via -r requirements.in, django-ilmoitin
@@ -29,9 +29,9 @@ git+https://github.com/a-rmz/django-munigeo.git@0.4.0-beta#egg=django-munigeo  #
 django-parler-rest==2.1   # via django-munigeo
 django-parler==2.1        # via -r requirements.in, django-ilmoitin, django-munigeo, django-parler-rest
 django-silk==4.1.0        # via -r requirements.in
-django==3.1.7             # via -r requirements.in, django-anymail, django-cors-headers, django-filter, django-graphql-geojson, django-graphql-jwt, django-helusers, django-ilmoitin, django-mailer, django-mptt, django-munigeo, django-silk, djangorestframework, drf-oidc-auth, graphene-django
-djangorestframework==3.12.2  # via django-parler-rest, drf-oidc-auth
-drf-oidc-auth==0.10.0     # via django-helusers
+django==3.1.7             # via -r requirements.in, django-anymail, django-cors-headers, django-filter, django-graphql-geojson, django-graphql-jwt, django-helusers, django-ilmoitin, django-mailer, django-mptt, django-munigeo, django-silk, djangorestframework, drf-oidc-auth, graphene-django, helsinki-profile-gdpr-api
+djangorestframework==3.12.2  # via django-parler-rest, drf-oidc-auth, helsinki-profile-gdpr-api
+drf-oidc-auth==0.10.0     # via django-helusers, helsinki-profile-gdpr-api
 ecdsa==0.14.1             # via python-jose
 elastic-apm==5.8.1        # via -r requirements.in
 factory-boy==3.0.1        # via -r requirements.in
@@ -44,6 +44,7 @@ graphene-file-upload==1.2.2  # via -r requirements.in
 graphene==2.1.8           # via django-ilmoitin, graphene-django, graphene-federation
 graphql-core==2.3.2       # via django-graphql-jwt, django-ilmoitin, graphene, graphene-django, graphql-relay
 graphql-relay==2.0.1      # via django-ilmoitin, graphene
+helsinki-profile-gdpr-api==0.1.0  # via -r requirements.in
 idna==2.10                # via requests
 ipython-genutils==0.2.0   # via traitlets
 ipython==7.22.0           # via -r requirements.in
