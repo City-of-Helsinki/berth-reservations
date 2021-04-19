@@ -33,33 +33,13 @@ def test_berth_is_available_no_leases(superuser_api_client, berth):
 
 
 @pytest.mark.parametrize("status", ["expired", "refused"])
-@pytest.mark.parametrize("renew_automatically", [True, False])
-def test_berth_is_available_lease_status(
-    superuser_api_client, berth, status, renew_automatically
-):
-    BerthLeaseFactory(
-        berth=berth, renew_automatically=renew_automatically, status=LeaseStatus(status)
-    )
-    assert Berth.objects.get(id=berth.id).is_available
-
-
-def test_berth_is_available_last_season_dont_renew_automatically(
-    superuser_api_client, berth
-):
-    start_date = calculate_berth_lease_start_date()
-    end_date = calculate_berth_lease_end_date()
-
-    start_date = start_date.replace(year=start_date.year - 1)
-    end_date = end_date.replace(year=end_date.year - 1)
-
-    BerthLeaseFactory(
-        berth=berth, start_date=start_date, end_date=end_date, renew_automatically=False
-    )
+def test_berth_is_available_lease_status(superuser_api_client, berth, status):
+    BerthLeaseFactory(berth=berth, status=LeaseStatus(status))
     assert Berth.objects.get(id=berth.id).is_available
 
 
 @pytest.mark.parametrize("status", ["drafted", "offered", "expired", "refused"])
-def test_berth_is_available_last_season_renew_automatically_invalid_status(
+def test_berth_is_available_last_season_invalid_status(
     superuser_api_client, berth, status
 ):
     start_date = calculate_berth_lease_start_date()
@@ -72,7 +52,6 @@ def test_berth_is_available_last_season_renew_automatically_invalid_status(
         berth=berth,
         start_date=start_date,
         end_date=end_date,
-        renew_automatically=False,
         status=LeaseStatus(status),
     )
     assert Berth.objects.get(id=berth.id).is_available
@@ -127,13 +106,10 @@ def test_berth_is_available_ends_during_season_after_lease_ends(
 
 @freeze_time("2020-01-01T08:00:00Z")
 @pytest.mark.parametrize("status", ["drafted", "offered", "paid"])
-@pytest.mark.parametrize("renew_automatically", [True, False])
 def test_berth_is_not_available_valid_through_whole_season(
-    superuser_api_client, berth, status, renew_automatically
+    superuser_api_client, berth, status
 ):
-    BerthLeaseFactory(
-        berth=berth, status=status, renew_automatically=renew_automatically
-    )
+    BerthLeaseFactory(berth=berth, status=status)
     assert not Berth.objects.get(id=berth.id).is_available
 
 
@@ -145,11 +121,7 @@ def test_berth_is_not_available_auto_renew_last_season(superuser_api_client, ber
     start_date = start_date.replace(year=start_date.year - 1)
     end_date = end_date.replace(year=end_date.year - 1)
     BerthLeaseFactory(
-        berth=berth,
-        start_date=start_date,
-        end_date=end_date,
-        status=LeaseStatus.PAID,
-        renew_automatically=True,
+        berth=berth, start_date=start_date, end_date=end_date, status=LeaseStatus.PAID,
     )
     assert not Berth.objects.get(id=berth.id).is_available
 

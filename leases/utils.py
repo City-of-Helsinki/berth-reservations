@@ -263,7 +263,6 @@ def exchange_berth_for_lease(
             berth=new_berth,
             boat=old_lease.boat,
             customer=old_lease.customer,
-            renew_automatically=old_lease.renew_automatically,
             status=LeaseStatus.PAID,
             start_date=switch_date,
             end_date=end_date,

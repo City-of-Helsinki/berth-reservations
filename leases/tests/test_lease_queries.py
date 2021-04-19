@@ -39,7 +39,6 @@ query GetBerthLeases {
                 startDate
                 endDate
                 comment
-                renewAutomatically
                 boat {
                     id
                 }
@@ -94,7 +93,6 @@ def test_query_berth_leases(api_client, berth_lease, berth_application):
         "startDate": str(berth_lease.start_date),
         "endDate": str(berth_lease.end_date),
         "comment": berth_lease.comment,
-        "renewAutomatically": True,
         "boat": {"id": boat_id},
         "customer": {
             "id": customer_id,
@@ -714,7 +712,6 @@ query SendBerthInvoicePreview {
 @freeze_time("2020-02-01")
 def test_query_send_berth_invoice_preview(api_client):
     lease = BerthLeaseFactory(
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.PAID,
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),
@@ -723,7 +720,6 @@ def test_query_send_berth_invoice_preview(api_client):
     lease.contract = BerthContractFactory()
     lease.contract.save()
     BerthLeaseFactory(
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.REFUSED,
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),
