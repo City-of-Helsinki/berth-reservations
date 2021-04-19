@@ -65,6 +65,8 @@ env = environ.Env(
     FORCED_HOST=(str, None),
     ENABLE_APM_TOOLS=(bool, False),
     ENABLE_PROFILING_TOOLS=(bool, False),
+    GDPR_API_QUERY_SCOPE=(str, "berths.gdprquery"),
+    GDPR_API_DELETE_SCOPE=(str, "berths.gdprdelete"),
 )
 if os.path.exists(env_file):
     env.read_env(env_file)
@@ -319,6 +321,10 @@ if env("SESSION_COOKIE_SECURE") is not None:
 
 EXPIRE_WAITING_ORDERS_OLDER_THAN_DAYS = 7
 EXPIRE_WAITING_OFFERS_OLDER_THAN_DAYS = 7
+
+GDPR_API_QUERY_SCOPE = env("GDPR_API_QUERY_SCOPE")
+GDPR_API_DELETE_SCOPE = env("GDPR_API_DELETE_SCOPE")
+GDPR_API_MODEL = "customers.CustomerProfile"
 
 # local_settings.py can be used to override environment-specific settings
 # like database and email that differ between development and production.
