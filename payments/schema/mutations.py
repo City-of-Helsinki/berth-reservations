@@ -40,7 +40,7 @@ from utils.relay import get_node_from_global_id
 from utils.schema import update_object
 
 from ..enums import OfferStatus, OrderStatus, OrderType, ProductServiceType
-from ..exceptions import OrderStatusTransitionError, VenepaikkaPaymentError
+from ..exceptions import VenepaikkaPaymentError
 from ..models import (
     AdditionalProduct,
     BerthProduct,
@@ -396,71 +396,52 @@ class CreateAdditionalProductOrderMutation(graphene.ClientIDMutation):
         return CreateAdditionalProductOrderMutation(order=order)
 
 
-class UpdateOrderInput(OrderInput, graphene.InputObjectType):
-    id = graphene.ID(required=True)
+class UpdateOrderMutation(graphene.ClientIDMutation):
+    class Input(OrderInput):
+        id = graphene.ID(required=True)
 
-
-class UpdateOrdersMutation(graphene.ClientIDMutation):
-    class Input:
-        orders = graphene.List(UpdateOrderInput, required=True)
-
-    successful_orders = graphene.List(OrderNode)
-    failed_orders = graphene.List(FailedOrderType)
+    order = graphene.Field(OrderNode)
 
     @classmethod
     @change_permission_required(Order)
     @view_permission_required(BerthLease, WinterStorageLease)
-    def mutate_and_get_payload(cls, root, info, orders, **input):
-
-        successful_orders = []
-        failed_orders = []
-
-        for order_input in orders:
-            order_id = order_input.pop("id")
-            try:
-                with transaction.atomic():
-                    order = get_node_from_global_id(
-                        info, order_id, only_type=OrderNode, nullable=False
-                    )
-                    if lease_id := order_input.pop("lease_id", None):
-                        lease = None
-                        try:
-                            lease = get_node_from_global_id(
-                                info, lease_id, BerthLeaseNode, nullable=True
-                            )
-                        # If a different node type is received get_node raises an assertion error
-                        # when trying to validate the type
-                        except AssertionError:
-                            lease = get_node_from_global_id(
-                                info, lease_id, WinterStorageLeaseNode, nullable=True
-                            )
-                        finally:
-                            if not lease:
-                                raise VenepaikkaGraphQLError(
-                                    _("Lease with the given ID does not exist")
-                                )
-                            order_input["lease"] = lease
-
-                    # handle case where order_input has both lease and status.
-                    # set order status only after changing the lease, because setting order status
-                    # usually triggers a change in lease status.
-                    new_status = order_input.pop("status", None)
-                    update_object(order, order_input)
-                    if new_status:
-                        order.set_status(new_status, _("Manually updated by admin"))
-
-            except (
-                ValidationError,
-                IntegrityError,
-                VenepaikkaGraphQLError,
-                OrderStatusTransitionError,
-            ) as e:
-                failed_orders.append(FailedOrderType(id=order_id, error=str(e)))
-            else:
-                successful_orders.append(order)
-        return UpdateOrdersMutation(
-            successful_orders=successful_orders, failed_orders=failed_orders
+    @transaction.atomic
+    def mutate_and_get_payload(cls, root, info, **input):
+        order = get_node_from_global_id(
+            info, input.pop("id"), only_type=OrderNode, nullable=False
         )
+        lease_id = input.pop("lease_id", None)
+        if lease_id:
+            lease = None
+            try:
+                lease = get_node_from_global_id(
+                    info, lease_id, BerthLeaseNode, nullable=True
+                )
+            # If a different node type is received get_node raises an assertion error
+            # when trying to validate the type
+            except AssertionError:
+                lease = get_node_from_global_id(
+                    info, lease_id, WinterStorageLeaseNode, nullable=True
+                )
+            finally:
+                if not lease:
+                    raise VenepaikkaGraphQLError(
+                        _("Lease with the given ID does not exist")
+                    )
+                input["lease"] = lease
+
+        try:
+            # handle case where input has both lease and status.
+            # set order status only after changing the lease, because setting order status
+            # usually triggers a change in lease status.
+            new_status = input.pop("status", None)
+            update_object(order, input)
+            if new_status:
+                order.set_status(new_status, _("Manually updated by admin"))
+
+        except (ValidationError, IntegrityError) as e:
+            raise VenepaikkaGraphQLError(e)
+        return UpdateOrderMutation(order=order)
 
 
 class DeleteOrderMutation(graphene.ClientIDMutation):
@@ -1079,7 +1060,7 @@ class Mutation:
     create_additional_product_order = CreateAdditionalProductOrderMutation.Field(
         description="Creates an `Order` object and the `OrderLine`s for only one additional product."
     )
-    update_orders = UpdateOrdersMutation.Field(
+    update_order = UpdateOrderMutation.Field(
         description="Updates an `Order` object."
         "\n\n**Requires permissions** to edit payments."
         "\n\nErrors:"
