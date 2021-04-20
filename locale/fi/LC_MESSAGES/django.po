@@ -265,6 +265,9 @@ msgstr "Venepaikkahakemus luotu"
 msgid "Berth application rejected"
 msgstr "Venepaikkahakemus hylätty"
 
+msgid "Berth application processed"
+msgstr "Venepaikkahakemus käsitelty"
+
 msgid "Winter storage application created"
 msgstr "Talvisäilytyshakemus luotu"
 
@@ -575,7 +578,7 @@ msgid "Street address of the area"
 msgstr "Alueen katuosoite"
 
 msgid "Drafted"
-msgstr "Luonnosteltu"
+msgstr "Luotu"
 
 msgid "Offered"
 msgstr "Tarjottu"
@@ -729,7 +732,7 @@ msgstr "Vene ei kuulu samalle asiakkaalle kuin hakemus"
 
 #, python-brace-format
 msgid "Lease object is not DRAFTED anymore: {lease.status}"
-msgstr "Vuokrasopimuksen kohde ei enää ole luonnosteltu: {lease.status}"
+msgstr "Vuokrasopimuksen kohde ei enää ole luotu -tilassa: {lease.status}"
 
 msgid "Switch date is more than 6 months in the past"
 msgstr ""
@@ -1085,7 +1088,7 @@ msgid "Order rejected by customer"
 msgstr "Asiakkaan hylkäämä tilaus"
 
 msgid "Cannot resend an invoice for a lease that is not currently offered."
-msgstr ""
+msgstr "Ei voi uudelleenlähettää laskua koska vuokrasopimus ei ole tarjottu -tilassa"
 
 msgid ""
 "Profile token is required if an order does not previously have email or "
