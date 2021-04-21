@@ -9,8 +9,10 @@ from berth_reservations.tests.utils import (
     assert_in_errors,
     assert_not_enough_permissions,
 )
+from leases.enums import LeaseStatus
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
+from resources.models import WinterStoragePlace
 
 from ..schema import (
     BerthNode,
@@ -462,6 +464,7 @@ def test_get_winter_storage_places(api_client, winter_storage_place):
                     node {
                         number
                         isActive
+                        isAvailable
                         createdAt
                         modifiedAt
                     }
@@ -470,6 +473,8 @@ def test_get_winter_storage_places(api_client, winter_storage_place):
         }
     """
     executed = api_client.execute(query)
+    assert WinterStoragePlace.objects.get(pk=winter_storage_place.pk).is_available
+
     assert executed["data"] == {
         "winterStoragePlaces": {
             "edges": [
@@ -477,6 +482,7 @@ def test_get_winter_storage_places(api_client, winter_storage_place):
                     "node": {
                         "number": winter_storage_place.number,
                         "isActive": winter_storage_place.is_active,
+                        "isAvailable": True,  # no lease so must be available
                         "createdAt": winter_storage_place.created_at.isoformat(),
                         "modifiedAt": winter_storage_place.modified_at.isoformat(),
                     }
@@ -491,12 +497,18 @@ def test_get_winter_storage_places(api_client, winter_storage_place):
     ["berth_supervisor", "berth_handler", "berth_services"],
     indirect=True,
 )
-def test_get_winter_storage_place_with_leases(api_client, winter_storage_place):
+@pytest.mark.parametrize("lease_status", [LeaseStatus.PAID, LeaseStatus.EXPIRED])
+def test_get_winter_storage_place_with_leases(
+    api_client, lease_status, winter_storage_place
+):
     ws_lease = WinterStorageLeaseFactory(place=winter_storage_place)
-
+    ws_lease.status = lease_status
+    ws_lease.save()
+    expected_is_available = lease_status == LeaseStatus.EXPIRED
     query = """
         {
             winterStoragePlace(id: "%s") {
+                isAvailable
                 leases {
                     edges {
                         node {
@@ -512,6 +524,7 @@ def test_get_winter_storage_place_with_leases(api_client, winter_storage_place):
     executed = api_client.execute(query)
 
     assert executed["data"]["winterStoragePlace"] == {
+        "isAvailable": expected_is_available,
         "leases": {
             "edges": [
                 {
@@ -522,7 +535,7 @@ def test_get_winter_storage_place_with_leases(api_client, winter_storage_place):
                     }
                 }
             ]
-        }
+        },
     }
 
 

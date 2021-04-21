@@ -254,6 +254,8 @@ class WinterStoragePlaceNode(DjangoObjectType):
     width = graphene.Float(description=_("width (m)"), required=True)
     length = graphene.Float(description=_("length (m)"), required=True)
 
+    is_available = graphene.Boolean(required=True)
+
     class Meta:
         model = WinterStoragePlace
         fields = (
