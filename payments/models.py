@@ -734,7 +734,7 @@ class Order(UUIDModel, TimeStampedModel):
                 OrderStatus.CANCELLED,
             ),
             OrderStatus.PAID: (OrderStatus.REFUNDED,),
-            OrderStatus.PAID_MANUALLY: (OrderStatus.REFUNDED,),
+            OrderStatus.PAID_MANUALLY: (),
             OrderStatus.ERROR: (
                 OrderStatus.DRAFTED,
                 OrderStatus.OFFERED,
