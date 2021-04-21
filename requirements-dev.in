@@ -8,5 +8,6 @@ pre-commit
 pytest
 pytest-cov
 pytest-django
+requests-mock
 xlrd
 gql
