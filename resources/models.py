@@ -20,6 +20,7 @@ from django.db.models import (
 from django.db.models.expressions import ExpressionWrapper, RawSQL
 from django.db.models.functions import Coalesce
 from django.utils.translation import gettext_lazy as _
+from helsinki_gdpr.models import SerializableMixin
 from munigeo.models import Municipality
 from parler.managers import TranslatableManager
 from parler.models import TranslatableModel, TranslatedFields
@@ -37,7 +38,7 @@ from utils.models import TimeStampedModel, UUIDModel
 from .enums import AreaRegion, BerthMooringType
 
 
-class BoatType(TranslatableModel):
+class BoatType(TranslatableModel, SerializableMixin):
     translations = TranslatedFields(
         name=models.CharField(
             verbose_name=_("name"), max_length=200, help_text=_("Name of the boat type")
@@ -51,6 +52,8 @@ class BoatType(TranslatableModel):
 
     def __str__(self):
         return self.safe_translation_getter("name", super().__str__())
+
+    serialize_fields = ({"name": "name"},)
 
 
 class AvailabilityLevel(TranslatableModel):
@@ -178,7 +181,7 @@ class WinterStorageAreaManager(TranslatableManager):
         )
 
 
-class Harbor(AbstractArea, TranslatableModel):
+class Harbor(AbstractArea, TranslatableModel, SerializableMixin):
     municipality = models.ForeignKey(
         Municipality,
         null=True,
@@ -220,8 +223,10 @@ class Harbor(AbstractArea, TranslatableModel):
     def __str__(self):
         return self.safe_translation_getter("name", super().__str__())
 
+    serialize_fields = ({"name": "name"},)
 
-class WinterStorageArea(AbstractArea, TranslatableModel):
+
+class WinterStorageArea(AbstractArea, TranslatableModel, SerializableMixin):
     municipality = models.ForeignKey(
         Municipality,
         null=True,
@@ -284,6 +289,8 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
 
     def __str__(self):
         return self.safe_translation_getter("name", super().__str__())
+
+    serialize_fields = ({"name": "name"},)
 
 
 class AbstractAreaSection(TimeStampedModel, UUIDModel):
@@ -449,7 +456,7 @@ class WinterStorageSectionManager(models.Manager):
         )
 
 
-class Pier(AbstractAreaSection):
+class Pier(AbstractAreaSection, SerializableMixin):
     harbor = models.ForeignKey(
         Harbor, verbose_name=_("harbor"), related_name="piers", on_delete=models.CASCADE
     )
@@ -487,8 +494,10 @@ class Pier(AbstractAreaSection):
     def __str__(self):
         return "{} ({})".format(self.harbor, self.identifier or "-")
 
+    serialize_fields = ({"name": "identifier"},)
 
-class WinterStorageSection(AbstractAreaSection):
+
+class WinterStorageSection(AbstractAreaSection, SerializableMixin):
     area = models.ForeignKey(
         WinterStorageArea,
         verbose_name=_("winter storage area"),
@@ -517,6 +526,8 @@ class WinterStorageSection(AbstractAreaSection):
 
     def __str__(self):
         return "{} ({})".format(self.area, self.identifier or "-")
+
+    serialize_fields = ({"name": "identifier"},)
 
 
 class AbstractPlaceType(TimeStampedModel, UUIDModel):
@@ -683,7 +694,7 @@ class BerthManager(models.Manager):
         )
 
 
-class Berth(AbstractBoatPlace):
+class Berth(AbstractBoatPlace, SerializableMixin):
     number = models.CharField(verbose_name=_("number"), max_length=30)
 
     pier = models.ForeignKey(
@@ -710,6 +721,11 @@ class Berth(AbstractBoatPlace):
 
     def __str__(self):
         return "{}: {}".format(self.pier, self.number)
+
+    serialize_fields = (
+        {"name": "number"},
+        {"name": "pier", "accessor": lambda x: x.serialize()},
+    )
 
 
 class WinterStoragePlaceManager(models.Manager):
@@ -769,7 +785,7 @@ class WinterStoragePlaceManager(models.Manager):
         return super().get_queryset().annotate(is_available=is_available)
 
 
-class WinterStoragePlace(AbstractBoatPlace):
+class WinterStoragePlace(AbstractBoatPlace, SerializableMixin):
     number = models.PositiveSmallIntegerField(verbose_name=_("number"))
 
     winter_storage_section = models.ForeignKey(
@@ -794,3 +810,8 @@ class WinterStoragePlace(AbstractBoatPlace):
 
     def __str__(self):
         return "{}: {}".format(self.winter_storage_section, self.number)
+
+    serialize_fields = (
+        {"name": "number"},
+        {"name": "winter_storage_section", "accessor": lambda x: x.serialize()},
+    )
