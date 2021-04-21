@@ -10,6 +10,7 @@ from django.db import models, transaction
 from django.db.models import Case, UniqueConstraint, Value, When
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from helsinki_gdpr.models import SerializableMixin
 
 from leases.enums import LeaseStatus
 from resources.models import BoatType
@@ -240,7 +241,7 @@ class CustomerProfileManager(models.Manager):
         return result
 
 
-class CustomerProfile(TimeStampedModel):
+class CustomerProfile(TimeStampedModel, SerializableMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
     invoicing_type = models.CharField(
@@ -272,8 +273,26 @@ class CustomerProfile(TimeStampedModel):
         else:
             return str(self.id)
 
+    serialize_fields = (
+        {
+            "name": "invoicing_type",
+            "accessor": lambda x: dict(InvoicingType.choices)[x],
+        },
+        {"name": "comment"},
+        {"name": "created_at", "accessor": lambda x: x.strftime("%d-%m-%Y %H:%M:%S")},
+        {"name": "modified_at", "accessor": lambda x: x.strftime("%d-%m-%Y %H:%M:%S")},
+        {"name": "berth_applications"},
+        {"name": "berth_leases"},
+        {"name": "boats"},
+        {"name": "offers"},
+        {"name": "orders"},
+        {"name": "organization"},
+        {"name": "winter_storage_applications"},
+        {"name": "winter_storage_leases"},
+    )
 
-class Organization(TimeStampedModel, UUIDModel):
+
+class Organization(TimeStampedModel, UUIDModel, SerializableMixin):
     customer = models.OneToOneField(
         CustomerProfile,
         verbose_name=_("customer"),
@@ -314,8 +333,17 @@ class Organization(TimeStampedModel, UUIDModel):
             f"[{self.organization_type}]: {self.name} [{self.business_id}] ({self.id})"
         )
 
+    serialize_fields = (
+        {"name": "id"},
+        {"name": "business_id"},
+        {"name": "name"},
+        {"name": "address"},
+        {"name": "postal_code"},
+        {"name": "city"},
+    )
 
-class Boat(TimeStampedModel, UUIDModel):
+
+class Boat(TimeStampedModel, UUIDModel, SerializableMixin):
     owner = models.ForeignKey(
         CustomerProfile,
         verbose_name=_("owner"),
@@ -378,6 +406,15 @@ class Boat(TimeStampedModel, UUIDModel):
     def __str__(self):
         return "{} ({})".format(self.registration_number, self.pk)
 
+    serialize_fields = (
+        {"name": "id"},
+        {"name": "certificates"},
+        {"name": "registration_number"},
+        {"name": "length"},
+        {"name": "width"},
+        {"name": "draught"},
+    )
+
 
 def get_boat_media_folder(instance, filename):
     return "boats/{boat_id}/{filename}".format(boat_id=instance.id, filename=filename)
@@ -387,7 +424,7 @@ def get_boat_certificate_media_folder(instance, filename):
     return get_boat_media_folder(instance=instance.boat, filename=filename)
 
 
-class BoatCertificate(UUIDModel):
+class BoatCertificate(UUIDModel, SerializableMixin):
     boat = models.ForeignKey(
         Boat,
         verbose_name=_("boat"),
@@ -433,3 +470,10 @@ class BoatCertificate(UUIDModel):
                     _("Cannot change the boat assigned to this certificate")
                 )
         super().clean()
+
+    serialize_fields = (
+        {
+            "name": "certificate_type",
+            "accessor": lambda x: dict(BoatCertificateType.choices)[x],
+        },
+    )
