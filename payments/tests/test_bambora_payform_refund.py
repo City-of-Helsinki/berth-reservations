@@ -72,6 +72,58 @@ def test_initiate_refund_success(provider_base_config: dict, order: Order):
 @pytest.mark.parametrize(
     "order", ["berth_order", "winter_storage_order"], indirect=True,
 )
+def test_initiate_refund_no_order_email(provider_base_config: dict, order: Order):
+    """Test the request creator constructs the payload base and returns a url that contains a token"""
+    request = RequestFactory().request()
+    order.status = OrderStatus.PAID
+    order.email = None
+    order.lease.status = LeaseStatus.PAID
+    order.lease.save()
+    order.save()
+
+    OrderToken.objects.create(
+        order=order, token="12345", valid_until=now() + relativedelta(days=7)
+    )
+
+    payment_provider = create_bambora_provider(provider_base_config, request)
+    with mock.patch(
+        "payments.providers.bambora_payform.requests.post",
+        side_effect=mocked_refund_response_create,
+    ):
+        refund = payment_provider.initiate_refund(order)
+
+    assert refund.refund_id == "123456"
+
+
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
+)
+def test_initiate_refund_no_order_email_or_application(
+    provider_base_config: dict, order: Order
+):
+    """Test the request creator constructs the payload base and returns a url that contains a token"""
+    request = RequestFactory().request()
+    order.status = OrderStatus.PAID
+    order.customer_email = None
+    order.lease.status = LeaseStatus.PAID
+    order.lease.application = None
+    order.lease.save()
+    order.save()
+
+    OrderToken.objects.create(
+        order=order, token="12345", valid_until=now() + relativedelta(days=7)
+    )
+
+    payment_provider = create_bambora_provider(provider_base_config, request)
+    with pytest.raises(ValidationError) as exception:
+        payment_provider.initiate_refund(order)
+
+    assert "Cannot refund an order that has no email" in str(exception)
+
+
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
+)
 @pytest.mark.parametrize(
     "order_status",
     [
@@ -172,6 +224,7 @@ def test_handle_initiate_refund_error_validation(order, provider_base_config):
         order=order, token="12345", valid_until=now() + relativedelta(days=7)
     )
     order.status = OrderStatus.PAID
+    order.customer_email = "a@b.com"
     order.lease.status = LeaseStatus.PAID
     order.lease.save()
     order.save()
