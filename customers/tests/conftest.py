@@ -1,6 +1,7 @@
 import pytest
 from django_ilmoitin.models import NotificationTemplate
 from faker import Faker
+from rest_framework.test import APIClient
 
 from berth_reservations.tests.conftest import *  # noqa
 from berth_reservations.tests.factories import CustomerProfileFactory
@@ -18,6 +19,11 @@ MOCK_HKI_PROFILE_ADDRESS: dict = {
     "postal_code": "00100",
     "city": "Helsinki",
 }
+
+
+@pytest.fixture
+def rest_api_client():
+    return APIClient()
 
 
 @pytest.fixture
