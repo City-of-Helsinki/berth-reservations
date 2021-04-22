@@ -101,6 +101,8 @@ DATABASES["default"]["ENGINE"] = "django.contrib.gis.db.backends.postgis"
 # Configure the age of DB connections
 DATABASES["default"]["CONN_MAX_AGE"] = env.int("DATABASE_CONN_MAX_AGE")
 
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
 CACHES = {"default": env.cache()}
 
 DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL")
@@ -154,7 +156,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.gis",
-    "helusers",
+    "helusers.apps.HelusersConfig",
     "helusers.apps.HelusersAdminConfig",
     "django_filters",
     "corsheaders",

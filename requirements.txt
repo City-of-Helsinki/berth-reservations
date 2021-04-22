@@ -5,7 +5,7 @@
 #    pip-compile requirements.in
 #
 aniso8601==7.0.0          # via graphene
-asgiref==3.2.10           # via django
+asgiref==3.3.4            # via django
 autopep8==1.5.4           # via django-silk
 babel==2.9.0              # via -r requirements.in
 backcall==0.2.0           # via ipython
@@ -29,7 +29,7 @@ git+https://github.com/a-rmz/django-munigeo.git@0.4.0-beta#egg=django-munigeo  #
 django-parler-rest==2.1   # via django-munigeo
 django-parler==2.1        # via -r requirements.in, django-ilmoitin, django-munigeo, django-parler-rest
 django-silk==4.1.0        # via -r requirements.in
-django==3.1.7             # via -r requirements.in, django-anymail, django-cors-headers, django-filter, django-graphql-geojson, django-graphql-jwt, django-helusers, django-ilmoitin, django-mailer, django-mptt, django-munigeo, django-silk, djangorestframework, drf-oidc-auth, graphene-django
+django==3.2               # via -r requirements.in, django-anymail, django-cors-headers, django-filter, django-graphql-geojson, django-graphql-jwt, django-helusers, django-ilmoitin, django-mailer, django-mptt, django-munigeo, django-silk, djangorestframework, drf-oidc-auth, graphene-django
 djangorestframework==3.12.2  # via django-parler-rest, drf-oidc-auth
 drf-oidc-auth==0.10.0     # via django-helusers
 ecdsa==0.14.1             # via python-jose
@@ -72,7 +72,7 @@ pytz==2020.1              # via babel, django, django-silk
 pyyaml==5.4.1             # via django-munigeo
 requests-cache==0.5.2     # via django-munigeo
 requests==2.24.0          # via coreapi, django-anymail, django-helusers, django-munigeo, django-silk, pyjwkest, requests-cache
-rsa==4.6                  # via python-jose
+rsa==4.7.2                # via python-jose
 rx==1.6.1                 # via graphql-core
 sentry-sdk==0.16.5        # via -r requirements.in
 singledispatch==3.4.0.3   # via graphene-django
