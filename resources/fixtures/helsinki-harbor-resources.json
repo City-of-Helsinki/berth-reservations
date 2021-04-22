@@ -216,6 +216,33 @@
   }
 },
 {
+  "model": "resources.boattypetranslation",
+  "pk": 25,
+  "fields": {
+    "language_code": "fi",
+    "name": "Muu",
+    "master": 9
+  }
+},
+{
+  "model": "resources.boattypetranslation",
+  "pk": 26,
+  "fields": {
+    "language_code": "en",
+    "name": "Other",
+    "master": 9
+  }
+},
+{
+  "model": "resources.boattypetranslation",
+  "pk": 27,
+  "fields": {
+    "language_code": "sv",
+    "name": "Annat",
+    "master": 9
+  }
+},
+{
   "model": "resources.boattype",
   "pk": 1,
   "fields": {}
@@ -253,6 +280,11 @@
 {
   "model": "resources.boattype",
   "pk": 8,
+  "fields": {}
+},
+{
+  "model": "resources.boattype",
+  "pk": 9,
   "fields": {}
 },
 {
