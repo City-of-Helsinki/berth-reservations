@@ -228,6 +228,7 @@ class WinterStoragePlaceAdmin(admin.ModelAdmin):
         "winter_storage_section__area__id",
     )
     list_filter = ("is_active",)
+    readonly_fields = ("is_available",)
 
     def is_available(self, obj):
         return obj.is_available
