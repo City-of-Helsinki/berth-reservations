@@ -47,7 +47,7 @@ def test_initiate_refund_success(provider_base_config: dict, order: Order):
         order=order, token="98765", valid_until=now() - relativedelta(hours=1)
     )
     valid_token = OrderToken.objects.create(
-        order=order, token="12345", valid_until=now() + relativedelta(days=7)
+        order=order, token="12345", valid_until=now() - relativedelta(days=7)
     )
 
     payment_provider = create_bambora_provider(provider_base_config, request)
@@ -82,7 +82,7 @@ def test_initiate_refund_no_order_email(provider_base_config: dict, order: Order
     order.save()
 
     OrderToken.objects.create(
-        order=order, token="12345", valid_until=now() + relativedelta(days=7)
+        order=order, token="12345", valid_until=now() - relativedelta(days=7)
     )
 
     payment_provider = create_bambora_provider(provider_base_config, request)
@@ -111,7 +111,7 @@ def test_initiate_refund_no_order_email_or_application(
     order.save()
 
     OrderToken.objects.create(
-        order=order, token="12345", valid_until=now() + relativedelta(days=7)
+        order=order, token="12345", valid_until=now() - relativedelta(days=7)
     )
 
     payment_provider = create_bambora_provider(provider_base_config, request)
@@ -119,6 +119,33 @@ def test_initiate_refund_no_order_email_or_application(
         payment_provider.initiate_refund(order)
 
     assert "Cannot refund an order that has no email" in str(exception)
+
+
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
+)
+def test_initiate_refund_token_still_valid(provider_base_config: dict, order: Order):
+    """Test the request creator constructs the payload base and returns a url that contains a token"""
+    request = RequestFactory().request()
+    order.status = OrderStatus.PAID
+    order.lease.status = LeaseStatus.PAID
+    order.lease.save()
+    order.save()
+
+    OrderToken.objects.create(
+        order=order, token="12345", valid_until=now() - relativedelta(days=7)
+    )
+    OrderToken.objects.create(
+        order=order, token="98765", valid_until=now() + relativedelta(hours=1)
+    )
+
+    payment_provider = create_bambora_provider(provider_base_config, request)
+    with pytest.raises(ValidationError) as exception:
+        payment_provider.initiate_refund(order)
+
+    assert "Cannot refund an order that has not been settled yet (active token)" in str(
+        exception
+    )
 
 
 @pytest.mark.parametrize(
@@ -149,7 +176,7 @@ def test_initiate_refund_invalid_order_status(
         order=order, token="98765", valid_until=now() - relativedelta(hours=1)
     )
     OrderToken.objects.create(
-        order=order, token="12345", valid_until=now() + relativedelta(days=7)
+        order=order, token="12345", valid_until=now() - relativedelta(days=7)
     )
 
     payment_provider = create_bambora_provider(provider_base_config, request)
@@ -186,7 +213,7 @@ def test_initiate_refund_invalid_lease_status(
         order=order, token="98765", valid_until=now() - relativedelta(hours=1)
     )
     OrderToken.objects.create(
-        order=order, token="12345", valid_until=now() + relativedelta(days=7)
+        order=order, token="12345", valid_until=now() - relativedelta(days=7)
     )
 
     payment_provider = create_bambora_provider(provider_base_config, request)
@@ -221,7 +248,7 @@ def test_handle_initiate_refund_error_validation(order, provider_base_config):
     """Test the response handler raises PayloadValidationError as expected"""
     r = {"result": 1, "type": "e-payment", "errors": ["Invalid auth code"]}
     OrderToken.objects.create(
-        order=order, token="12345", valid_until=now() + relativedelta(days=7)
+        order=order, token="12345", valid_until=now() - relativedelta(days=7)
     )
     order.status = OrderStatus.PAID
     order.customer_email = "a@b.com"

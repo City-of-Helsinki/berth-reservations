@@ -49,7 +49,7 @@ def test_refund_order(
     order.lease.save()
     order.save()
     OrderToken.objects.create(
-        order=order, token="1245", valid_until=today() + relativedelta(days=7)
+        order=order, token="1245", valid_until=today() - relativedelta(days=7)
     )
 
     variables = {

@@ -283,6 +283,10 @@ class BamboraPayformProvider(PaymentProvider):
             raise ValidationError(
                 _("Cannot refund an order that has not been paid through VismaPay")
             )
+        if order_token.is_valid:
+            raise ValidationError(
+                _("Cannot refund an order that has not been settled yet (active token)")
+            )
 
         refund_amount = order.total_price
         email = order.customer_email or (
