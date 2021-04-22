@@ -671,10 +671,6 @@ def test_non_invoiceable_berth(notification_template_orders_approved):
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),
         end_date=calculate_season_end_date(today() - relativedelta(years=1)),
     )
-    BerthProductFactory(
-        min_width=lease_with_non_invoiceable_berth.berth.berth_type.width - 1,
-        max_width=lease_with_non_invoiceable_berth.berth.berth_type.width + 1,
-    )
     customer = lease_with_non_invoiceable_berth.customer
 
     lease_with_invoiceable_berth = _lease_with_contract(
