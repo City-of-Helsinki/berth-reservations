@@ -550,10 +550,8 @@ def get_context(
             context["fixed_services"] = order.order_lines.filter(
                 product__service__in=ProductServiceType.FIXED_SERVICES()
             )
-            context["optional_services"] = (
-                order.order_lines.filter(
-                    product__service__in=ProductServiceType.OPTIONAL_SERVICES()
-                ),
+            context["optional_services"] = order.order_lines.filter(
+                product__service__in=ProductServiceType.OPTIONAL_SERVICES()
             )
 
         if payment_url:
