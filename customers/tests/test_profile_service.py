@@ -1,13 +1,13 @@
 from unittest import mock
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from faker import Faker
 
 from customers.schema import ProfileNode
 from customers.services.profile import ProfileService
-from utils.relay import to_global_id
+from utils.relay import from_global_id, to_global_id
 
-from .conftest import mocked_response_profile
+from .conftest import get_customer_profile_dict, mocked_response_profile
 
 
 def test_get_all_profiles():
@@ -20,6 +20,28 @@ def test_get_all_profiles():
     assert len(profiles.keys()) == 5
     for id, user_profile in profiles.items():
         assert user_profile.id == id
+        assert user_profile.first_name is not None
+        assert user_profile.last_name is not None
+        assert user_profile.email is not None
+        assert user_profile.phone is not None
+
+
+def test_get_all_profiles_id_list():
+    profiles = [get_customer_profile_dict() for _i in range(0, 5)]
+    profile_ids = [UUID(from_global_id(profile["id"])) for profile in profiles]
+
+    with mock.patch(
+        "customers.services.profile.requests.post",
+        side_effect=mocked_response_profile(data=profiles, count=0),
+    ):
+        profiles = ProfileService(profile_token="token").get_all_profiles(
+            profile_ids=profile_ids
+        )
+
+    assert len(profiles.keys()) == 5
+    for id, user_profile in profiles.items():
+        assert user_profile.id == id
+        assert user_profile.id in profile_ids
         assert user_profile.first_name is not None
         assert user_profile.last_name is not None
         assert user_profile.email is not None
