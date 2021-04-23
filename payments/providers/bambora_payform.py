@@ -283,14 +283,25 @@ class BamboraPayformProvider(PaymentProvider):
             raise ValidationError(
                 _("Cannot refund an order that has not been paid through VismaPay")
             )
+        if order_token.is_valid:
+            raise ValidationError(
+                _("Cannot refund an order that has not been settled yet (active token)")
+            )
 
         refund_amount = order.total_price
+        email = order.customer_email or (
+            order.lease.application.email
+            if hasattr(order, "lease") and getattr(order.lease, "application", None)
+            else None
+        )
+        if not email:
+            raise ValidationError(_("Cannot refund an order that has no email"))
         payload = {
             "version": "w3.1",
             "api_key": self.config.get(VENE_PAYMENTS_BAMBORA_API_KEY),
             "amount": price_as_fractional_int(refund_amount),
             "notify_url": self.get_notify_refund_url(),
-            "email": order.customer_email,
+            "email": email,
             "order_number": f"{order.order_number}-{order_token.created_at.timestamp()}",
         }
         self.payload_add_auth_code(payload)
