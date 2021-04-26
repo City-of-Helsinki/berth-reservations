@@ -24,7 +24,7 @@ from leases.stickers import get_next_sticker_number
 from leases.utils import calculate_season_start_date
 from resources.models import Berth
 from utils.models import TimeStampedModel, UUIDModel
-from utils.numbers import rounded as rounded_decimal
+from utils.numbers import rounded as round_to_nearest, rounded as rounded_decimal
 
 from .enums import (
     AdditionalProductType,
@@ -662,14 +662,18 @@ class Order(UUIDModel, TimeStampedModel):
             ):
                 price = self.product.price_value
                 if self.lease.place:
-                    place_sqm = (
+                    place_sqm = Decimal(
                         self.lease.place.place_type.width
                         * self.lease.place.place_type.length
+                    )
+                    price = round_to_nearest(
+                        price * place_sqm, round_to_nearest=1, decimals=2
                     )
                 elif self.lease.boat:
                     # If the lease is only associated to an section,
                     # calculate the price based on the boat dimensions
                     place_sqm = self.lease.boat.width * self.lease.boat.length
+                    price = price * place_sqm
                 else:
                     # If the lease is not associated to a boat object,
                     # take the values set by the user on the application
@@ -677,7 +681,7 @@ class Order(UUIDModel, TimeStampedModel):
                         self.lease.application.boat_width
                         * self.lease.application.boat_length
                     )
-                price = price * place_sqm
+                    price = price * place_sqm
             else:
                 price = self.product.price_for_tier(self.lease.berth.pier.price_tier)
 
