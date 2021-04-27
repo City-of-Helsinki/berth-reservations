@@ -44,6 +44,7 @@ class OrganizationInline(admin.StackedInline):
 
 class BoatAdmin(admin.ModelAdmin):
     inlines = (BoatCertificateInline,)
+    search_fields = ("registration_number", "name", "model")
 
 
 class BoatCertificateAdmin(admin.ModelAdmin):
