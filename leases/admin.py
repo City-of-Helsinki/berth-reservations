@@ -45,8 +45,12 @@ class WinterStorageLeaseChangeInline(admin.StackedInline):
 class BerthLeaseInline(admin.StackedInline):
     model = BerthLease
     fk_name = "customer"
-    raw_id_fields = ("berth", "application")
     extra = 0
+    autocomplete_fields = (
+        "application",
+        "boat",
+        "berth",
+    )
 
 
 class BaseLeaseAdmin(admin.ModelAdmin):
@@ -132,7 +136,7 @@ class GenericOrderInline(GenericStackedInline):
 class WinterStorageLeaseInline(admin.StackedInline):
     model = WinterStorageLease
     fk_name = "customer"
-    raw_id_fields = ("application",)
+    autocomplete_fields = ("application", "boat", "place", "section")
     extra = 0
 
 
