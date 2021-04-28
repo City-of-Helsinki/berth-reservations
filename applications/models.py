@@ -273,10 +273,33 @@ class BerthApplication(BaseApplication):
                 )
 
     def save(self, *args, **kwargs):
+        fields_to_strip = [
+            "first_name",
+            "last_name",
+            "email",
+            "phone_number",
+            "address",
+            "zip_code",
+            "municipality",
+            "company_name",
+            "business_id",
+            "boat_registration_number",
+            "boat_name",
+            "boat_model",
+            "application_code",
+            "boat_propulsion",
+            "boat_hull_material",
+            "boat_intended_use",
+            "renting_period",
+            "rent_from",
+            "rent_till",
+        ]
+        for field in fields_to_strip:
+            if field_value := getattr(self, field):
+                setattr(self, field, field_value.strip())
+
         # Ensure clean is always ran
-        # FIXME: exclude decimal fields for now, as GQL API uses floats for those
-        #  which does not work well with Django's validation for DecimalField
-        self.full_clean(exclude=["boat_length", "boat_width", "boat_draught"])
+        self.full_clean()
         super().save(*args, **kwargs)
 
     def clean(self):
@@ -316,6 +339,28 @@ class WinterStorageApplication(BaseApplication):
     trailer_registration_number = models.CharField(
         verbose_name=_("trailer registration number"), max_length=64, blank=True
     )
+
+    def save(self, *args, **kwargs):
+        fields_to_strip = [
+            "first_name",
+            "last_name",
+            "email",
+            "phone_number",
+            "address",
+            "zip_code",
+            "municipality",
+            "company_name",
+            "business_id",
+            "boat_registration_number",
+            "boat_name",
+            "boat_model",
+            "application_code",
+            "trailer_registration_number",
+        ]
+        for field in fields_to_strip:
+            if field_value := getattr(self, field):
+                setattr(self, field, field_value.strip())
+        super().save(*args, **kwargs)
 
     def resolve_area_type(self) -> ApplicationAreaType:
         first_area = self.chosen_areas.first()
