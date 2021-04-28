@@ -1,8 +1,10 @@
 from datetime import date
 
+import pytest
 from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
 
+from applications.enums import ApplicationStatus
 from berth_reservations.tests.factories import CustomerProfileFactory
 from berth_reservations.tests.utils import assert_doesnt_exist
 from leases.enums import LeaseStatus
@@ -56,7 +58,6 @@ def test_accept_offer(old_schema_api_client):
 
     assert berth_switch_offer.status == OfferStatus.ACCEPTED
     assert berth_switch_offer.lease.status == LeaseStatus.TERMINATED
-
     new_lease = BerthLease.objects.exclude(id=berth_switch_offer.lease_id).first()
     assert new_lease.status == LeaseStatus.PAID
 
@@ -90,7 +91,53 @@ def test_reject_offer(old_schema_api_client):
 
     assert berth_switch_offer.status == OfferStatus.REJECTED
     assert berth_switch_offer.lease.status == LeaseStatus.PAID
+    assert berth_switch_offer.application.status == ApplicationStatus.REJECTED
     assert BerthLease.objects.all().count() == 1
+
+
+@freeze_time("2020-02-01T08:00:00Z")
+@pytest.mark.parametrize("is_accepted", [True, False])
+@pytest.mark.parametrize(
+    "initial_status",
+    [
+        OfferStatus.REJECTED,
+        OfferStatus.DRAFTED,
+        OfferStatus.CANCELLED,
+        OfferStatus.ACCEPTED,
+    ],
+)
+def test_accept_offer_invalid_status(
+    old_schema_api_client, is_accepted, initial_status
+):
+    customer = CustomerProfileFactory()
+    due_date = date.today() + relativedelta(days=14)
+    berth_switch_offer = BerthSwitchOfferFactory(
+        customer=customer,
+        due_date=due_date,
+        status=initial_status,
+        lease=BerthLeaseFactory(
+            customer=customer,
+            start_date=calculate_berth_lease_start_date(),
+            end_date=calculate_berth_lease_end_date(),
+            status=LeaseStatus.PAID,
+        ),
+    )
+
+    variables = {
+        # "offerId": to_global_id(BerthSwitchOfferNode, berth_switch_offer.id),
+        "offerNumber": berth_switch_offer.offer_number,
+        "isAccepted": is_accepted,
+    }
+
+    old_schema_api_client.execute(ACCEPT_BERTH_SWITCH_OFFER_MUTATION, input=variables)
+
+    berth_switch_offer.refresh_from_db()
+    berth_switch_offer.lease.refresh_from_db()
+
+    assert berth_switch_offer.status == initial_status
+    assert berth_switch_offer.lease.status == LeaseStatus.PAID
+    new_lease = BerthLease.objects.exclude(id=berth_switch_offer.lease_id).first()
+    assert new_lease is None
 
 
 def test_accept_berth_switch_offer_does_not_exist(old_schema_api_client):

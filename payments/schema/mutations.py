@@ -10,7 +10,7 @@ from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
-from applications.enums import ApplicationAreaType
+from applications.enums import ApplicationAreaType, ApplicationStatus
 from applications.models import BerthApplication, BerthSwitch, WinterStorageApplication
 from applications.new_schema import BerthApplicationNode
 from berth_reservations.exceptions import (
@@ -942,6 +942,9 @@ class CreateBerthSwitchOfferMutation(graphene.ClientIDMutation):
             )
             if profile_token := input.get("profile_token"):
                 offer.update_from_profile(profile_token)
+            application.status = ApplicationStatus.OFFER_GENERATED
+            application.save()
+
         except ValidationError as e:
             raise VenepaikkaGraphQLError(str(e)) from e
 
@@ -950,20 +953,18 @@ class CreateBerthSwitchOfferMutation(graphene.ClientIDMutation):
 
 class AcceptBerthSwitchOfferMutation(graphene.ClientIDMutation):
     class Input:
-        # offer_id = graphene.ID(required=True)
         offer_number = graphene.String(required=True)
         is_accepted = graphene.Boolean(required=True)
 
     @classmethod
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, offer_number, is_accepted, **input):
-        # offer = get_node_from_global_id(
-        #     info, offer_id, only_type=BerthSwitchOfferNode, nullable=False,
-        # )
         offer = BerthSwitchOffer.objects.get(offer_number=offer_number)
         if is_accepted:
-            offer.status = OfferStatus.ACCEPTED
-            offer.save(update_fields=["status"])
+            if offer.status == OfferStatus.ACCEPTED:
+                # do not proceed with db updates in exchange_berth_for_lease
+                raise VenepaikkaGraphQLError(_("Offer is already accepted"))
+            offer.set_status(OfferStatus.ACCEPTED)
 
             old_lease, new_lease = exchange_berth_for_lease(
                 old_lease=offer.lease,
@@ -976,8 +977,7 @@ class AcceptBerthSwitchOfferMutation(graphene.ClientIDMutation):
                 new_lease.orders.add(old_lease.order)
         else:
             # Reject offer
-            offer.status = OfferStatus.REJECTED
-            offer.save(update_fields=["status"])
+            offer.set_status(OfferStatus.REJECTED)
 
         return AcceptBerthSwitchOfferMutation()
 
