@@ -180,6 +180,26 @@ class HarborManager(TranslatableManager):
         )
 
 
+class WinterStorageAreaManager(TranslatableManager):
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                electricity=BoolOr("sections__electricity"),
+                water=BoolOr("sections__water"),
+                gate=BoolOr("sections__gate"),
+                summer_storage_for_docking_equipment=BoolOr(
+                    "sections__summer_storage_for_docking_equipment"
+                ),
+                summer_storage_for_trailers=BoolOr(
+                    "sections__summer_storage_for_trailers"
+                ),
+                summer_storage_for_boats=BoolOr("sections__summer_storage_for_boats"),
+            )
+        )
+
+
 class Harbor(AbstractArea, TranslatableModel):
     municipality = models.ForeignKey(
         Municipality,
@@ -277,6 +297,8 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
             blank=True,
         ),
     )
+
+    objects = WinterStorageAreaManager()
 
     class Meta:
         verbose_name = _("winter storage area")

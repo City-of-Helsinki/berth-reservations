@@ -388,6 +388,12 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
     number_of_places = graphene.Int(required=True)
     number_of_free_places = graphene.Int(required=True)
     number_of_inactive_places = graphene.Int(required=True)
+    electricity = graphene.Boolean(required=True)
+    water = graphene.Boolean(required=True)
+    gate = graphene.Boolean(required=True)
+    summer_storage_for_docking_equipment = graphene.Boolean(required=True)
+    summer_storage_for_trailers = graphene.Boolean(required=True)
+    summer_storage_for_boats = graphene.Boolean(required=True)
 
     def resolve_image_file(self, info, **kwargs):
         return self.image_file_url

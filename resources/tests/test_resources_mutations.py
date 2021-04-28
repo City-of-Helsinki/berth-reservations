@@ -1661,7 +1661,6 @@ mutation CreateWinterStorageSection($input: CreateWinterStorageSectionMutationIn
                 electricity
                 water
                 gate
-                repairArea
                 summerStorageForDockingEquipment
                 summerStorageForTrailers
                 summerStorageForBoats
@@ -1687,7 +1686,6 @@ def test_create_winter_storage_section_plain(api_client, winter_storage_area):
         "electricity": True,
         "water": True,
         "gate": True,
-        "repairArea": True,
         "summerStorageForDockingEquipment": True,
         "summerStorageForTrailers": True,
         "summerStorageForBoats": True,
@@ -1728,7 +1726,6 @@ def test_create_winter_storage_section_plain(api_client, winter_storage_area):
         "electricity": variables["electricity"],
         "gate": variables["gate"],
         "water": variables["water"],
-        "repairArea": variables["repairArea"],
         "summerStorageForDockingEquipment": variables[
             "summerStorageForDockingEquipment"
         ],
@@ -1911,7 +1908,6 @@ mutation UpdateWinterStorageSection($input: UpdateWinterStorageSectionMutationIn
                 electricity
                 water
                 gate
-                repairArea
                 summerStorageForDockingEquipment
                 summerStorageForTrailers
                 summerStorageForBoats
@@ -1943,7 +1939,6 @@ def test_update_winter_storage_section(
         "electricity": True,
         "water": True,
         "gate": True,
-        "repairArea": True,
         "summerStorageForDockingEquipment": True,
         "summerStorageForTrailers": True,
         "summerStorageForBoats": True,
@@ -1981,7 +1976,6 @@ def test_update_winter_storage_section(
         "electricity": variables["electricity"],
         "water": variables["water"],
         "gate": variables["gate"],
-        "repairArea": variables["repairArea"],
         "summerStorageForDockingEquipment": variables[
             "summerStorageForDockingEquipment"
         ],

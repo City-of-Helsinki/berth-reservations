@@ -12,12 +12,13 @@ from berth_reservations.tests.utils import (
 from leases.enums import LeaseStatus
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
-from resources.models import Harbor, WinterStoragePlace
+from resources.models import Harbor, WinterStorageArea, WinterStoragePlace
 
 from ..schema import (
     BerthNode,
     HarborNode,
     PierNode,
+    WinterStorageAreaNode,
     WinterStoragePlaceNode,
     WinterStorageSectionNode,
 )
@@ -1336,6 +1337,67 @@ def test_get_harbor_services(api_client):
                             "gate": True,
                             "lighting": False,
                             "suitableBoatTypes": suitable_boat_types,
+                        },
+                    }
+                }
+            ]
+        }
+    }
+
+
+def test_get_winter_storage_area_services(api_client):
+    first_section = WinterStorageSectionFactory(
+        water=True,
+        electricity=True,
+        gate=True,
+        summer_storage_for_docking_equipment=True,
+        summer_storage_for_trailers=True,
+        summer_storage_for_boats=False,
+    )
+    WinterStorageSectionFactory(
+        area=first_section.area,
+        water=False,
+        electricity=False,
+        gate=False,
+        summer_storage_for_docking_equipment=False,
+        summer_storage_for_trailers=False,
+        summer_storage_for_boats=False,
+    )
+    area = WinterStorageArea.objects.get(id=first_section.area.id)
+
+    query = """
+        {
+            winterStorageAreas {
+                edges {
+                    node {
+                        id
+                        properties {
+                            electricity
+                            water
+                            gate
+                            summerStorageForDockingEquipment
+                            summerStorageForTrailers
+                            summerStorageForBoats
+                        }
+                    }
+                }
+            }
+        }
+    """
+    executed = api_client.execute(query)
+    assert executed["data"] == {
+        "winterStorageAreas": {
+            "edges": [
+                {
+                    "node": {
+                        "id": to_global_id(WinterStorageAreaNode._meta.name, area.id),
+                        "properties": {
+                            "electricity": True,
+                            "water": True,
+                            "gate": True,
+                            "summerStorageForDockingEquipment": True,
+                            "summerStorageForTrailers": True,
+                            "summerStorageForBoats": False,
                         },
                     }
                 }
