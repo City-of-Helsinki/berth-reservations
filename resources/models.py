@@ -1,6 +1,7 @@
 from dateutil.utils import today
 from django.conf import settings
 from django.contrib.gis.db import models
+from django.contrib.postgres.aggregates import BoolOr
 from django.core.files.storage import FileSystemStorage
 from django.db.models import (
     BooleanField,
@@ -169,6 +170,12 @@ class HarborManager(TranslatableManager):
                 number_of_places=Subquery(
                     number_of_places_qs, output_field=SmallIntegerField()
                 ),
+                electricity=BoolOr("piers__electricity"),
+                water=BoolOr("piers__water"),
+                gate=BoolOr("piers__gate"),
+                mooring=BoolOr("piers__mooring"),
+                waste_collection=BoolOr("piers__waste_collection"),
+                lighting=BoolOr("piers__lighting"),
             )
         )
 
@@ -328,7 +335,6 @@ class AbstractAreaSection(TimeStampedModel, UUIDModel):
         verbose_name=_("location"), blank=True, null=True, srid=settings.DEFAULT_SRID
     )
 
-    # TODO: make services as m2m field, when we have more specs?
     # Common services
     electricity = models.BooleanField(verbose_name=_("electricity"), default=False)
     water = models.BooleanField(verbose_name=_("water"), default=False)

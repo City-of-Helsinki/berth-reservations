@@ -12,7 +12,7 @@ from berth_reservations.tests.utils import (
 from leases.enums import LeaseStatus
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
-from resources.models import WinterStoragePlace
+from resources.models import Harbor, WinterStoragePlace
 
 from ..schema import (
     BerthNode,
@@ -1267,3 +1267,78 @@ def test_berth_is_invoiceable(api_client):
 
     executed = api_client.execute(query % "false")
     assert executed["data"] == {"berths": {"count": 1, "totalCount": 11}}
+
+
+def test_get_harbor_services(api_client):
+    first_pier = PierFactory(
+        mooring=True,
+        water=True,
+        electricity=True,
+        waste_collection=True,
+        gate=True,
+        lighting=False,
+        suitable_boat_types__count=2,
+    )
+    second_pier = PierFactory(
+        harbor=first_pier.harbor,
+        mooring=False,
+        water=False,
+        electricity=False,
+        waste_collection=False,
+        gate=False,
+        lighting=False,
+        suitable_boat_types__count=2,
+    )
+    harbor = Harbor.objects.get(id=first_pier.harbor.id)
+
+    combined_types = list(
+        first_pier.suitable_boat_types.values_list("id", flat=True)
+    ) + list(second_pier.suitable_boat_types.values_list("id", flat=True))
+
+    suitable_boat_types = [
+        {"id": str(type_id)} for type_id in sorted(set(combined_types))
+    ]
+
+    query = """
+        {
+            harbors {
+                edges {
+                    node {
+                        id
+                        properties {
+                            mooring
+                            electricity
+                            water
+                            wasteCollection
+                            gate
+                            lighting
+                            suitableBoatTypes {
+                                id
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    """
+    executed = api_client.execute(query)
+    assert executed["data"] == {
+        "harbors": {
+            "edges": [
+                {
+                    "node": {
+                        "id": to_global_id(HarborNode._meta.name, harbor.id),
+                        "properties": {
+                            "mooring": True,
+                            "electricity": True,
+                            "water": True,
+                            "wasteCollection": True,
+                            "gate": True,
+                            "lighting": False,
+                            "suitableBoatTypes": suitable_boat_types,
+                        },
+                    }
+                }
+            ]
+        }
+    }
