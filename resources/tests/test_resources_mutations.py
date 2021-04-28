@@ -818,35 +818,6 @@ def test_update_harbor(api_client, harbor, availability_level, municipality):
     }
 
 
-# Handling map files is disabled
-#
-# @pytest.mark.parametrize(
-#     "api_client", ["harbor_services", "berth_services"], indirect=True,
-# )
-# def test_update_harbor_remove_map(api_client, harbor):
-#     global_id = to_global_id(HarborNode._meta.name, str(harbor.id))
-#     map_file_names = ["map1.pdf", "map2.pdf", "map3.pdf"]
-#
-#     # Create map objects and get only the IDs
-#     map_files = [
-#         HarborMap.objects.create(
-#             map_file=SimpleUploadedFile(
-#                 name=file_name, content=None, content_type="application/pdf"
-#             ),
-#             harbor=harbor,
-#         ).id
-#         for file_name in map_file_names
-#     ]
-#
-#     assert harbor.maps.count() == 3
-#
-#     variables = {"id": global_id, "removeMapFiles": map_files}
-#
-#     executed = api_client.execute(UPDATE_HARBOR_MUTATION, input=variables)
-#
-#     assert len(executed["data"]["updateHarbor"]["harbor"]["properties"]["maps"]) == 0
-
-
 def test_update_harbor_no_id(superuser_api_client, harbor):
     variables = {"name": "Uusi Foobarsatama"}
 

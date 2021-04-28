@@ -113,18 +113,6 @@ DEFAULT_MODELS_PERMS = {
             BERTH_SUPERVISOR: ("view",),
             HARBOR_SERVICES: ("view", "add", "change", "delete",),
         },
-        "harbormap": {
-            BERTH_SERVICES: ("view", "add", "change", "delete",),
-            BERTH_HANDLER: ("view",),
-            BERTH_SUPERVISOR: ("view",),
-            HARBOR_SERVICES: ("view", "add", "change", "delete",),
-        },
-        "winterstorageareamap": {
-            BERTH_SERVICES: ("view", "add", "change", "delete",),
-            BERTH_HANDLER: ("view",),
-            BERTH_SUPERVISOR: ("view",),
-            HARBOR_SERVICES: ("view", "add", "change", "delete",),
-        },
         "pier": {
             BERTH_SERVICES: ("view", "add", "change", "delete",),
             BERTH_HANDLER: ("view",),

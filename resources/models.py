@@ -2,7 +2,6 @@ from dateutil.utils import today
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.postgres.aggregates import BoolOr
-from django.core.files.storage import FileSystemStorage
 from django.db.models import (
     BooleanField,
     Count,
@@ -52,26 +51,6 @@ class BoatType(TranslatableModel):
 
     def __str__(self):
         return self.safe_translation_getter("name", super().__str__())
-
-
-def get_harbor_media_folder(instance, filename):
-    return "harbors/{harbor_id}/{filename}".format(
-        harbor_id=instance.id, filename=filename
-    )
-
-
-def get_winter_area_media_folder(instance, filename):
-    return "winter_areas/{area_id}/{filename}".format(
-        area_id=instance.id, filename=filename
-    )
-
-
-def get_map_resource_media_folder(instance, filename):
-    if isinstance(instance, HarborMap):
-        return get_harbor_media_folder(instance.harbor, filename)
-    elif isinstance(instance, WinterStorageAreaMap):
-        return get_winter_area_media_folder(instance.winter_storage_area, filename)
-    return None
 
 
 class AvailabilityLevel(TranslatableModel):
@@ -306,34 +285,6 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
 
     def __str__(self):
         return self.safe_translation_getter("name", super().__str__())
-
-
-class AbstractAreaMap(UUIDModel):
-    map_file = models.FileField(
-        upload_to=get_map_resource_media_folder,
-        storage=FileSystemStorage(),
-        verbose_name=_("map file"),
-        null=False,
-        blank=False,
-    )
-
-    class Meta:
-        abstract = True
-
-
-class HarborMap(AbstractAreaMap):
-    harbor = models.ForeignKey(
-        Harbor, verbose_name=_("harbor"), related_name="maps", on_delete=models.CASCADE,
-    )
-
-
-class WinterStorageAreaMap(AbstractAreaMap):
-    winter_storage_area = models.ForeignKey(
-        WinterStorageArea,
-        verbose_name=_("winter storage area"),
-        related_name="maps",
-        on_delete=models.CASCADE,
-    )
 
 
 class AbstractAreaSection(TimeStampedModel, UUIDModel):

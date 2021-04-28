@@ -18,12 +18,6 @@
     Website
 </a></p>
 
-{% for harbor_map in offer.berth.pier.harbor.maps.all() %}
-    <p><a href="{{ harbor_map.map_file.url }}">
-        Harbor map (PDF)
-    </a></p>
-{% endfor %}
-
 <table style="width: 100%; table-layout: fixed;">
     <tr>
         {% if offer.berth.pier.waste_collection %}
