@@ -127,7 +127,6 @@ class Command(BaseCommand):
         section.electricity = old_area.electricity
         section.water = old_area.water
         section.gate = old_area.gate
-        section.repair_area = old_area.repair_area
         section.summer_storage_for_docking_equipment = (
             old_area.summer_storage_for_docking_equipment
         )

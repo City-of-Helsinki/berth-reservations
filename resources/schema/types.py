@@ -335,7 +335,6 @@ class WinterStorageSectionNode(graphql_geojson.GeoJSONType):
     class Meta:
         model = WinterStorageSection
         filter_fields = [
-            "repair_area",
             "electricity",
             "gate",
             "water",
@@ -358,7 +357,6 @@ class WinterStorageAreaFilter(django_filters.FilterSet):
     class Meta:
         model = WinterStorageArea
         fields = (
-            "sections__repair_area",
             "sections__electricity",
             "sections__water",
             "sections__summer_storage_for_docking_equipment",

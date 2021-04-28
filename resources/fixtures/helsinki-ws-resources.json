@@ -625,7 +625,6 @@
     "water": true,
     "gate": false,
     "area": "3f485ff8-36bf-4786-bfe6-b0729e8e9c6b",
-    "repair_area": false,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": false,
     "summer_storage_for_boats": false
@@ -643,7 +642,6 @@
     "water": true,
     "gate": false,
     "area": "ed291ec2-1cb3-4049-a642-e290280bd8bf",
-    "repair_area": true,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": true,
     "summer_storage_for_boats": false
@@ -661,7 +659,6 @@
     "water": false,
     "gate": false,
     "area": "5bfe1de8-dcc7-4ed4-b16d-c5f2fa08be0d",
-    "repair_area": false,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": true,
     "summer_storage_for_boats": true
@@ -679,7 +676,6 @@
     "water": true,
     "gate": false,
     "area": "9d577c99-63f3-4234-8138-f70a4f8684f2",
-    "repair_area": false,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": true,
     "summer_storage_for_boats": false
@@ -697,7 +693,6 @@
     "water": true,
     "gate": false,
     "area": "a9ef8fe9-86a8-44e4-a806-32ed47494129",
-    "repair_area": false,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": false,
     "summer_storage_for_boats": false
@@ -715,7 +710,6 @@
     "water": true,
     "gate": false,
     "area": "ed291ec2-1cb3-4049-a642-e290280bd8bf",
-    "repair_area": true,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": true,
     "summer_storage_for_boats": false
@@ -733,7 +727,6 @@
     "water": true,
     "gate": false,
     "area": "9d577c99-63f3-4234-8138-f70a4f8684f2",
-    "repair_area": false,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": true,
     "summer_storage_for_boats": false
@@ -751,7 +744,6 @@
     "water": true,
     "gate": false,
     "area": "3f485ff8-36bf-4786-bfe6-b0729e8e9c6b",
-    "repair_area": false,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": false,
     "summer_storage_for_boats": false
@@ -769,7 +761,6 @@
     "water": false,
     "gate": false,
     "area": "10f6d541-5e4e-420c-abc4-014a48aca3c4",
-    "repair_area": false,
     "summer_storage_for_docking_equipment": false,
     "summer_storage_for_trailers": false,
     "summer_storage_for_boats": false
@@ -787,7 +778,6 @@
     "water": true,
     "gate": false,
     "area": "506b0830-fa3e-4da7-a837-b4ffa1218eb1",
-    "repair_area": false,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": false,
     "summer_storage_for_boats": false
@@ -805,7 +795,6 @@
     "water": true,
     "gate": false,
     "area": "ed291ec2-1cb3-4049-a642-e290280bd8bf",
-    "repair_area": true,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": true,
     "summer_storage_for_boats": false
@@ -823,7 +812,6 @@
     "water": true,
     "gate": false,
     "area": "db0323f0-8da5-40e3-a8aa-e46ad4af3e93",
-    "repair_area": true,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": true,
     "summer_storage_for_boats": false
@@ -841,7 +829,6 @@
     "water": true,
     "gate": false,
     "area": "ed291ec2-1cb3-4049-a642-e290280bd8bf",
-    "repair_area": true,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": true,
     "summer_storage_for_boats": false
@@ -859,7 +846,6 @@
     "water": true,
     "gate": false,
     "area": "ed291ec2-1cb3-4049-a642-e290280bd8bf",
-    "repair_area": true,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": true,
     "summer_storage_for_boats": false
@@ -877,7 +863,6 @@
     "water": true,
     "gate": false,
     "area": "ed291ec2-1cb3-4049-a642-e290280bd8bf",
-    "repair_area": true,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": true,
     "summer_storage_for_boats": false
@@ -895,7 +880,6 @@
     "water": false,
     "gate": false,
     "area": "c200c0fa-8afc-43ab-8d43-a3d10be4c44a",
-    "repair_area": false,
     "summer_storage_for_docking_equipment": false,
     "summer_storage_for_trailers": true,
     "summer_storage_for_boats": false
@@ -913,7 +897,6 @@
     "water": true,
     "gate": false,
     "area": "ed291ec2-1cb3-4049-a642-e290280bd8bf",
-    "repair_area": true,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": true,
     "summer_storage_for_boats": false
@@ -931,7 +914,6 @@
     "water": false,
     "gate": false,
     "area": "f38c0645-bb9c-4c67-a515-cf11f3787541",
-    "repair_area": false,
     "summer_storage_for_docking_equipment": false,
     "summer_storage_for_trailers": false,
     "summer_storage_for_boats": false
@@ -949,7 +931,6 @@
     "water": true,
     "gate": false,
     "area": "3631fbc5-1454-448f-9a9b-fff64588d208",
-    "repair_area": false,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": false,
     "summer_storage_for_boats": false
@@ -967,7 +948,6 @@
     "water": false,
     "gate": false,
     "area": "72335b05-1913-44e2-8f5d-a4219498b47a",
-    "repair_area": false,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": true,
     "summer_storage_for_boats": false
@@ -985,7 +965,6 @@
     "water": true,
     "gate": false,
     "area": "94d97495-bb5c-4d6e-a91a-5da9e70d0aea",
-    "repair_area": false,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": true,
     "summer_storage_for_boats": false
@@ -1003,7 +982,6 @@
     "water": true,
     "gate": false,
     "area": "9d577c99-63f3-4234-8138-f70a4f8684f2",
-    "repair_area": false,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": true,
     "summer_storage_for_boats": false
@@ -1021,7 +999,6 @@
     "water": true,
     "gate": false,
     "area": "9d577c99-63f3-4234-8138-f70a4f8684f2",
-    "repair_area": false,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": true,
     "summer_storage_for_boats": false
@@ -1039,7 +1016,6 @@
     "water": true,
     "gate": false,
     "area": "3f485ff8-36bf-4786-bfe6-b0729e8e9c6b",
-    "repair_area": false,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": false,
     "summer_storage_for_boats": false
@@ -1057,7 +1033,6 @@
     "water": true,
     "gate": false,
     "area": "38955371-4dd2-4321-8994-f4b52c81aa41",
-    "repair_area": false,
     "summer_storage_for_docking_equipment": true,
     "summer_storage_for_trailers": false,
     "summer_storage_for_boats": false

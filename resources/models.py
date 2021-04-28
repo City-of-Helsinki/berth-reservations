@@ -532,7 +532,6 @@ class WinterStorageSection(AbstractAreaSection):
     )
 
     # Additional winter storage area services
-    repair_area = models.BooleanField(verbose_name=_("repair area"), default=False)
     summer_storage_for_docking_equipment = models.BooleanField(
         verbose_name=_("summer storage for docking equipment"), default=False
     )
