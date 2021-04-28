@@ -37,6 +37,7 @@ mutation CREATE_BERTH_SWITCH_OFFER_MUTATION($input: CreateBerthSwitchOfferMutati
             }
             application {
                 id
+                status
             }
             lease {
                 id
@@ -79,7 +80,7 @@ def test_create_berth_switch_offer_direct_harbor_mapping(
     assert executed["data"]["createBerthSwitchOffer"]["berthSwitchOffer"] == {
         "status": OfferStatus.DRAFTED.name,
         "dueDate": None,
-        "application": {"id": variables["applicationId"]},
+        "application": {"id": variables["applicationId"], "status": "OFFER_GENERATED"},
         "customer": {"id": to_global_id(ProfileNode, berth_lease.customer.id)},
         "lease": {"id": to_global_id(BerthLeaseNode, berth_lease.id)},
         "berth": {"id": variables["newBerthId"]},
@@ -119,7 +120,7 @@ def test_create_berth_switch_offer_direct_pier_mapping(
     assert executed["data"]["createBerthSwitchOffer"]["berthSwitchOffer"] == {
         "status": OfferStatus.DRAFTED.name,
         "dueDate": None,
-        "application": {"id": variables["applicationId"]},
+        "application": {"id": variables["applicationId"], "status": "OFFER_GENERATED"},
         "customer": {"id": to_global_id(ProfileNode, berth_lease.customer.id)},
         "lease": {"id": to_global_id(BerthLeaseNode, berth_lease.id)},
         "berth": {"id": variables["newBerthId"]},
@@ -164,7 +165,7 @@ def test_create_berth_switch_offer_several_pier_mapping(
     assert executed["data"]["createBerthSwitchOffer"]["berthSwitchOffer"] == {
         "status": OfferStatus.DRAFTED.name,
         "dueDate": None,
-        "application": {"id": variables["applicationId"]},
+        "application": {"id": variables["applicationId"], "status": "OFFER_GENERATED"},
         "customer": {"id": to_global_id(ProfileNode, berth_lease.customer.id)},
         "lease": {"id": to_global_id(BerthLeaseNode, berth_lease.id)},
         "berth": {"id": variables["newBerthId"]},
@@ -202,7 +203,7 @@ def test_create_berth_switch_offer_default_pier_mapping(
     assert executed["data"]["createBerthSwitchOffer"]["berthSwitchOffer"] == {
         "status": OfferStatus.DRAFTED.name,
         "dueDate": None,
-        "application": {"id": variables["applicationId"]},
+        "application": {"id": variables["applicationId"], "status": "OFFER_GENERATED"},
         "customer": {"id": to_global_id(ProfileNode, berth_lease.customer.id)},
         "lease": {"id": to_global_id(BerthLeaseNode, berth_lease.id)},
         "berth": {"id": variables["newBerthId"]},
@@ -238,7 +239,7 @@ def test_create_berth_switch_offer_old_lease(api_client, berth_application, bert
     assert executed["data"]["createBerthSwitchOffer"]["berthSwitchOffer"] == {
         "status": OfferStatus.DRAFTED.name,
         "dueDate": None,
-        "application": {"id": variables["applicationId"]},
+        "application": {"id": variables["applicationId"], "status": "OFFER_GENERATED"},
         "customer": {"id": to_global_id(ProfileNode, berth_lease.customer.id)},
         "lease": {"id": to_global_id(BerthLeaseNode, berth_lease.id)},
         "berth": {"id": variables["newBerthId"]},

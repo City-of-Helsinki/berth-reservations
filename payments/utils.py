@@ -341,6 +341,19 @@ def get_lease_status(new_status) -> LeaseStatus:
         raise ValidationError(_("Invalid order status"))
 
 
+def get_switch_application_status(new_offer_status) -> ApplicationStatus:
+    if new_offer_status == OfferStatus.DRAFTED:
+        return ApplicationStatus.OFFER_GENERATED
+    elif new_offer_status == OfferStatus.OFFERED:
+        return ApplicationStatus.OFFER_SENT
+    elif new_offer_status == OfferStatus.REJECTED:
+        return ApplicationStatus.REJECTED
+    elif new_offer_status == OfferStatus.EXPIRED:
+        return ApplicationStatus.EXPIRED
+    else:
+        return None
+
+
 def get_application_status(new_status) -> ApplicationStatus:
     # return None if application status need not be changed
     if new_status == OrderStatus.REJECTED:
@@ -585,10 +598,7 @@ def send_berth_switch_offer(offer, due_date: date,) -> None:
         offer.save()
 
     # Update offer and application status
-    offer.status = OfferStatus.OFFERED
-    offer.save()
-    offer.application.status = ApplicationStatus.OFFER_SENT
-    offer.application.save()
+    offer.set_status(OfferStatus.OFFERED)
 
     from .notifications import NotificationType
 

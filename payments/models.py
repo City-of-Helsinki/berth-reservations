@@ -49,6 +49,7 @@ from .utils import (
     generate_order_number,
     get_application_status,
     get_lease_status,
+    get_switch_application_status,
     rounded,
 )
 
@@ -1207,9 +1208,16 @@ class BerthSwitchOffer(AbstractOffer):
         self.status = new_status
         self.save(update_fields=["status"])
 
+        self.update_application(new_status)
+
         self.create_log_entry(
             from_status=old_status, to_status=new_status, comment=comment
         )
+
+    def update_application(self, new_status):
+        if new_application_status := get_switch_application_status(new_status):
+            self.application.status = new_application_status
+            self.application.save(update_fields=["status"])
 
     def create_log_entry(
         self,

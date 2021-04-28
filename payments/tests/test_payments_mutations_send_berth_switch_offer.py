@@ -59,6 +59,15 @@ def test_send_berth_switch_offer(
         berth_switch_offer.customer_phone = ""  # trigger update from profile service
         berth_switch_offer.customer_email = ""
     berth_switch_offer.save()
+
+    # set a valid initial status for application
+    berth_switch_offer.application.status = (
+        ApplicationStatus.PENDING
+        if offer_status == OfferStatus.DRAFTED
+        else ApplicationStatus.OFFER_SENT
+    )
+    berth_switch_offer.application.save()
+
     offers = [berth_switch_offer]
 
     variables = {

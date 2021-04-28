@@ -239,7 +239,7 @@ class BerthApplication(BaseApplication):
         if self.berth_switch:
             allowed_statuses_for_switch = [
                 ApplicationStatus.PENDING,
-                ApplicationStatus.HANDLED,
+                ApplicationStatus.OFFER_GENERATED,
                 ApplicationStatus.OFFER_SENT,
                 ApplicationStatus.EXPIRED,
                 ApplicationStatus.REJECTED,

@@ -4,6 +4,7 @@ import uuid
 import pytest
 from freezegun import freeze_time
 
+from applications.enums import ApplicationStatus
 from applications.new_schema import BerthApplicationNode
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
@@ -15,9 +16,9 @@ from leases.schema import BerthLeaseNode
 from resources.schema import BerthNode
 from utils.relay import to_global_id
 
-from ..enums import OfferStatus, OrderStatus
+from ..enums import OfferStatus
 from ..models import BerthSwitchOffer
-from ..schema.types import BerthSwitchOfferNode, OfferStatusEnum
+from ..schema.types import BerthSwitchOfferNode
 
 UPDATE_OFFER_MUTATION = """
 mutation UPDATE_OFFER($input: UpdateBerthSwitchOfferMutationInput!) {
@@ -37,6 +38,7 @@ mutation UPDATE_OFFER($input: UpdateBerthSwitchOfferMutationInput!) {
             }
             application {
                 id
+                status
             }
             lease {
                 id
@@ -51,22 +53,53 @@ mutation UPDATE_OFFER($input: UpdateBerthSwitchOfferMutationInput!) {
 @pytest.mark.parametrize(
     "api_client", ["berth_services"], indirect=True,
 )
-@pytest.mark.parametrize("initial_status", [OfferStatus.OFFERED, OfferStatus.DRAFTED])
+@pytest.mark.parametrize(
+    "initial_offer_status, initial_application_status, offer_status, expected_application_status",
+    [
+        (
+            OfferStatus.OFFERED,
+            ApplicationStatus.OFFER_SENT,
+            OfferStatus.CANCELLED,
+            ApplicationStatus.OFFER_SENT,
+        ),
+        (
+            OfferStatus.DRAFTED,
+            ApplicationStatus.OFFER_GENERATED,
+            OfferStatus.CANCELLED,
+            ApplicationStatus.OFFER_GENERATED,
+        ),
+        (
+            OfferStatus.OFFERED,
+            ApplicationStatus.OFFER_SENT,
+            OfferStatus.EXPIRED,
+            ApplicationStatus.EXPIRED,
+        ),
+    ],
+)
 @pytest.mark.parametrize("due_date", [datetime.date(2021, 1, 31), None])
-def test_set_offer_status_to_cancelled(
-    berth_switch_offer, due_date, api_client, initial_status
+def test_set_offer_status(
+    berth_switch_offer,
+    api_client,
+    initial_offer_status,
+    initial_application_status,
+    offer_status,
+    expected_application_status,
+    due_date,
 ):
-    if initial_status == OfferStatus.DRAFTED:
+    if initial_offer_status == OfferStatus.DRAFTED:
         berth_switch_offer.due_date = None
     else:
         berth_switch_offer.due_date = datetime.date(2021, 1, 15)
-    berth_switch_offer.status = initial_status
+    berth_switch_offer.status = initial_offer_status
     berth_switch_offer.save()
+    berth_switch_offer.application.status = initial_application_status
+    berth_switch_offer.application.save()
+
     global_id = to_global_id(BerthSwitchOfferNode, berth_switch_offer.id)
 
     variables = {
         "id": global_id,
-        "status": OfferStatusEnum.get(OfferStatus.CANCELLED).name,
+        "status": offer_status.name,
     }
     if due_date:
         variables["dueDate"] = due_date
@@ -85,7 +118,7 @@ def test_set_offer_status_to_cancelled(
 
     assert executed["data"]["updateBerthSwitchOffer"]["berthSwitchOffer"] == {
         "id": variables["id"],
-        "status": OfferStatus.CANCELLED.name,
+        "status": offer_status.name,
         "dueDate": expected_due_date,
         "offerNumber": berth_switch_offer.offer_number,
         "customerFirstName": berth_switch_offer.customer_first_name,
@@ -93,7 +126,8 @@ def test_set_offer_status_to_cancelled(
         "customer": {"id": to_global_id(ProfileNode, berth_switch_offer.customer.id)},
         "berth": {"id": to_global_id(BerthNode, berth_switch_offer.berth.id)},
         "application": {
-            "id": to_global_id(BerthApplicationNode, berth_switch_offer.application.id)
+            "id": to_global_id(BerthApplicationNode, berth_switch_offer.application.id),
+            "status": expected_application_status.name,
         },
         "lease": {"id": to_global_id(BerthLeaseNode, berth_switch_offer.lease.id)},
     }
@@ -101,7 +135,7 @@ def test_set_offer_status_to_cancelled(
     berth_switch_offer.lease.refresh_from_db()
     assert berth_switch_offer.log_entries.count() == 1
     log_entry = berth_switch_offer.log_entries.first()
-    assert log_entry.to_status == OrderStatus.CANCELLED
+    assert log_entry.to_status == str(offer_status)
     assert "Manually updated by admin" in log_entry.comment
     assert berth_switch_offer.lease.status == LeaseStatus.PAID
 
