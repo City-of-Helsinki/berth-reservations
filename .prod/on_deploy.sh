@@ -5,3 +5,6 @@ python /app/manage.py migrate --noinput
 
 # Updates group permissions on each deployment in case of updated permissions
 python /app/manage.py set_group_model_permissions
+
+# To load the required "Other" boat type
+python /app/manage.py loaddata helsinki-harbor-resources.json
