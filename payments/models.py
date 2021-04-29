@@ -1138,6 +1138,8 @@ class BerthSwitchOffer(AbstractOffer):
     objects = BerthSwitchOfferManager()
 
     def clean(self):
+        creating = self._state.adding
+
         # Validate that the offer customer is the same from the lease
         if self.customer != self.lease.customer:
             raise ValidationError(
@@ -1156,16 +1158,21 @@ class BerthSwitchOffer(AbstractOffer):
         ):
             raise ValidationError(_("The offer must have a due date before sending it"))
 
-        # Validate that the lease can only be from the current season
-        if self.lease.start_date.year != calculate_season_start_date().year:
-            raise ValidationError(
-                _("The exchanged lease has to be from the current season")
-            )
+        # Checks that only apply when creating the offer
+        if creating:
+            # Since the lease will be terminated later, we only check that the lease has been paid
+            # on the moment we create the offer
+            if self.lease.status != LeaseStatus.PAID:
+                raise ValidationError(_("The associated lease must be paid"))
 
-        if self.lease.status != LeaseStatus.PAID:
-            raise ValidationError(_("The associated lease must be paid"))
-
-        if not self._state.adding:
+            # Validate that the lease can only be from the current season
+            # An offer could be updated at some point after the lease season has ended,
+            # so we only check that the offer is for the current season when creating
+            if self.lease.start_date.year != calculate_season_start_date().year:
+                raise ValidationError(
+                    _("The exchanged lease has to be from the current season")
+                )
+        else:
             old_instance = BerthSwitchOffer.objects.get(id=self.id)
 
             # if due_date change is allowed
