@@ -1089,3 +1089,14 @@ def test_berth_switch_offer_lease_not_paid(lease_status):
         BerthSwitchOfferFactory(lease__status=lease_status)
 
     assert "The associated lease must be paid" in str(exception)
+
+
+def test_berth_switch_offer_lease_changed_status():
+    offer = BerthSwitchOfferFactory(lease__status=LeaseStatus.PAID)
+    offer.lease.status = LeaseStatus.TERMINATED
+    offer.lease.save()
+
+    offer.set_status(OfferStatus.CANCELLED)
+
+    assert offer.status == OfferStatus.CANCELLED
+    assert offer.lease.status == LeaseStatus.TERMINATED
