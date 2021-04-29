@@ -299,7 +299,8 @@ class BerthApplication(BaseApplication):
                 setattr(self, field, field_value.strip())
 
         # Ensure clean is always ran
-        self.full_clean()
+        # TODO: Remove this when the old harbors app is removed
+        self.full_clean(exclude=["boat_width", "boat_length"])
         super().save(*args, **kwargs)
 
     def clean(self):
