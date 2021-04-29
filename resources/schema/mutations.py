@@ -557,7 +557,6 @@ class DeletePierMutation(graphene.ClientIDMutation):
 
 class WinterStorageSectionInput(AbstractAreaSectionInput):
     area_id = graphene.ID()
-    repair_area = graphene.Boolean()
     summer_storage_for_docking_equipment = graphene.Boolean()
     summer_storage_for_trailers = graphene.Boolean()
     summer_storage_for_boats = graphene.Boolean()

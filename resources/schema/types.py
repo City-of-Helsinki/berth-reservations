@@ -203,9 +203,6 @@ class HarborNode(graphql_geojson.GeoJSONType):
     max_width = graphene.Float()
     max_length = graphene.Float()
     max_depth = graphene.Float()
-    number_of_places = graphene.Int(required=True)
-    number_of_free_places = graphene.Int(required=True)
-    number_of_inactive_places = graphene.Int(required=True)
     piers = DjangoFilterConnectionField(
         PierNode,
         min_berth_width=graphene.Float(),
@@ -217,6 +214,17 @@ class HarborNode(graphql_geojson.GeoJSONType):
         "\n* Filter `forApplication` with a user without enough permissions"
         "\n * Filter `forApplication` combined with either dimension (width, length) filter",
     )
+    # Annotated fields depending on the Piers on the harbor
+    number_of_places = graphene.Int(required=True)
+    number_of_free_places = graphene.Int(required=True)
+    number_of_inactive_places = graphene.Int(required=True)
+    mooring = graphene.Boolean(required=True)
+    electricity = graphene.Boolean(required=True)
+    water = graphene.Boolean(required=True)
+    waste_collection = graphene.Boolean(required=True)
+    gate = graphene.Boolean(required=True)
+    lighting = graphene.Boolean(required=True)
+    suitable_boat_types = graphene.List("resources.schema.BoatTypeType", required=True)
 
     def resolve_image_file(self, info, **kwargs):
         return self.image_file_url
@@ -244,6 +252,15 @@ class HarborNode(graphql_geojson.GeoJSONType):
 
     def resolve_number_of_places(self, info, **kwargs):
         return self.number_of_places or 0
+
+    def resolve_suitable_boat_types(self, info, **kwargs):
+        type_ids = (
+            self.piers.order_by("suitable_boat_types__id")
+            .distinct("suitable_boat_types__id")
+            .values_list("suitable_boat_types", flat=True)
+        )
+        filtered_ids = list(filter(None, type_ids))
+        return info.context.suitable_boat_type_loader.load_many(keys=filtered_ids)
 
 
 class WinterStoragePlaceNode(DjangoObjectType):
@@ -318,7 +335,6 @@ class WinterStorageSectionNode(graphql_geojson.GeoJSONType):
     class Meta:
         model = WinterStorageSection
         filter_fields = [
-            "repair_area",
             "electricity",
             "gate",
             "water",
@@ -341,7 +357,6 @@ class WinterStorageAreaFilter(django_filters.FilterSet):
     class Meta:
         model = WinterStorageArea
         fields = (
-            "sections__repair_area",
             "sections__electricity",
             "sections__water",
             "sections__summer_storage_for_docking_equipment",
@@ -373,6 +388,12 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
     number_of_places = graphene.Int(required=True)
     number_of_free_places = graphene.Int(required=True)
     number_of_inactive_places = graphene.Int(required=True)
+    electricity = graphene.Boolean(required=True)
+    water = graphene.Boolean(required=True)
+    gate = graphene.Boolean(required=True)
+    summer_storage_for_docking_equipment = graphene.Boolean(required=True)
+    summer_storage_for_trailers = graphene.Boolean(required=True)
+    summer_storage_for_boats = graphene.Boolean(required=True)
 
     def resolve_image_file(self, info, **kwargs):
         return self.image_file_url

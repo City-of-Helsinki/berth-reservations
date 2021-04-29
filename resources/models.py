@@ -1,6 +1,7 @@
 from dateutil.utils import today
 from django.conf import settings
 from django.contrib.gis.db import models
+from django.contrib.postgres.aggregates import BoolOr
 from django.core.files.storage import FileSystemStorage
 from django.db.models import (
     BooleanField,
@@ -169,6 +170,32 @@ class HarborManager(TranslatableManager):
                 number_of_places=Subquery(
                     number_of_places_qs, output_field=SmallIntegerField()
                 ),
+                electricity=BoolOr("piers__electricity"),
+                water=BoolOr("piers__water"),
+                gate=BoolOr("piers__gate"),
+                mooring=BoolOr("piers__mooring"),
+                waste_collection=BoolOr("piers__waste_collection"),
+                lighting=BoolOr("piers__lighting"),
+            )
+        )
+
+
+class WinterStorageAreaManager(TranslatableManager):
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                electricity=BoolOr("sections__electricity"),
+                water=BoolOr("sections__water"),
+                gate=BoolOr("sections__gate"),
+                summer_storage_for_docking_equipment=BoolOr(
+                    "sections__summer_storage_for_docking_equipment"
+                ),
+                summer_storage_for_trailers=BoolOr(
+                    "sections__summer_storage_for_trailers"
+                ),
+                summer_storage_for_boats=BoolOr("sections__summer_storage_for_boats"),
             )
         )
 
@@ -271,6 +298,8 @@ class WinterStorageArea(AbstractArea, TranslatableModel):
         ),
     )
 
+    objects = WinterStorageAreaManager()
+
     class Meta:
         verbose_name = _("winter storage area")
         verbose_name_plural = _("winter storage areas")
@@ -328,7 +357,6 @@ class AbstractAreaSection(TimeStampedModel, UUIDModel):
         verbose_name=_("location"), blank=True, null=True, srid=settings.DEFAULT_SRID
     )
 
-    # TODO: make services as m2m field, when we have more specs?
     # Common services
     electricity = models.BooleanField(verbose_name=_("electricity"), default=False)
     water = models.BooleanField(verbose_name=_("water"), default=False)
@@ -526,7 +554,6 @@ class WinterStorageSection(AbstractAreaSection):
     )
 
     # Additional winter storage area services
-    repair_area = models.BooleanField(verbose_name=_("repair area"), default=False)
     summer_storage_for_docking_equipment = models.BooleanField(
         verbose_name=_("summer storage for docking equipment"), default=False
     )
