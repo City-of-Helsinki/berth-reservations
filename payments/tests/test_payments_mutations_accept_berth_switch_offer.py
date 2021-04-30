@@ -60,6 +60,7 @@ def test_accept_offer(old_schema_api_client):
     assert berth_switch_offer.lease.status == LeaseStatus.TERMINATED
     new_lease = BerthLease.objects.exclude(id=berth_switch_offer.lease_id).first()
     assert new_lease.status == LeaseStatus.PAID
+    assert new_lease.application == berth_switch_offer.application
 
 
 @freeze_time("2020-02-01T08:00:00Z")
