@@ -220,6 +220,10 @@ def price_as_fractional_int(price: Decimal) -> int:
     return int(rounded_decimal(price) * 100)
 
 
+def price_from_fractional_int(price: int) -> Decimal:
+    return Decimal(rounded_decimal(price / 100, as_string=True))
+
+
 def generate_order_number() -> str:
     t = time.time() * 1000000 * random.uniform(1, 1000)
     b = base64.b32encode(struct.pack(">Q", int(t)).lstrip(b"\x00")).strip(b"=").lower()

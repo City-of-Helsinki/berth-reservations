@@ -257,5 +257,58 @@ def mocked_refund_response_create(*args, **kwargs):
     if any([arg.startswith(FAKE_BAMBORA_API_URL) for arg in args]):
         return MockResponse(data={"result": 10})
     else:
-
         return MockResponse(data={"result": 0, "refund_id": 123456, "type": "instant"})
+
+
+def mocked_refund_payment_details(*args, products=None, **kwargs):
+    def wrapper(*args, **kwargs):
+        if any([arg.startswith(FAKE_BAMBORA_API_URL) for arg in args]):
+            return MockResponse(data={"result": 10})
+        else:
+            from ..providers.bambora_payform import BamboraPaymentDetails
+
+            customer = kwargs.get(
+                "customer",
+                {
+                    "firstname": "Test",
+                    "lastname": "Person",
+                    "email": "test.person@email.com",
+                    "address_street": "",
+                    "address_city": "",
+                    "address_zip": "",
+                    "address_country": "",
+                },
+            )
+            order_number = kwargs.get("order_number", "abc123")
+            refunds = kwargs.get("refunds", [])
+            payment_products = products or [
+                {
+                    "id": "as123",
+                    "product_id": 1123,
+                    "title": "Product 1",
+                    "count": 1,
+                    "pretax_price": 100,
+                    "tax": 24,
+                    "price": 124,
+                    "type": 1,
+                },
+            ]
+            amount = sum([product.get("price") for product in payment_products])
+
+            return BamboraPaymentDetails(
+                {
+                    "id": 123,
+                    "amount": amount,
+                    "currency": "EUR",
+                    "order_number": order_number,
+                    "created_at": "2018-09-12 08:30:22",
+                    "status": 4,
+                    "refund_type": "email",
+                    "source": {"object": "card", "brand": "Visa"},
+                    "customer": customer,
+                    "payment_products": payment_products,
+                    "refunds": refunds,
+                }
+            )
+
+    return wrapper

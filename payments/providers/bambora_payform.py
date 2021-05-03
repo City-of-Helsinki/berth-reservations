@@ -1,8 +1,9 @@
 import hashlib
 import hmac
 import logging
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Iterable
+from typing import Iterable, List, Optional
 
 import requests
 from dateutil.relativedelta import relativedelta
@@ -22,11 +23,19 @@ from ..exceptions import (
     ExpiredOrderError,
     OrderStatusTransitionError,
     PayloadValidationError,
+    PaymentNotFoundError,
+    RefundPriceError,
     ServiceUnavailableError,
     UnknownReturnCodeError,
 )
 from ..models import AdditionalProduct, Order, OrderLine, OrderRefund, OrderToken
-from ..utils import get_talpa_product_id, price_as_fractional_int, resolve_area
+from ..utils import (
+    currency_format,
+    get_talpa_product_id,
+    price_as_fractional_int,
+    price_from_fractional_int,
+    resolve_area,
+)
 from .base import PaymentProvider
 
 logger = logging.getLogger(__name__)
@@ -36,6 +45,83 @@ VENE_PAYMENTS_BAMBORA_API_URL = "VENE_PAYMENTS_BAMBORA_API_URL"
 VENE_PAYMENTS_BAMBORA_API_KEY = "VENE_PAYMENTS_BAMBORA_API_KEY"
 VENE_PAYMENTS_BAMBORA_API_SECRET = "VENE_PAYMENTS_BAMBORA_API_SECRET"
 VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS = "VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS"
+
+
+@dataclass
+class BamboraPaymentCustomerDetails:
+    firstname: str
+    lastname: str
+    email: str
+    address_street: str
+    address_city: str
+    address_zip: str
+    address_country: Optional[str]
+
+
+@dataclass
+class BamboraPaymentProductDetails:
+    id: str
+    product_id: int
+    title: str
+    count: int
+    pretax_price: int
+    tax: int
+    price: int
+    type: int
+
+
+@dataclass
+class BamboraPaymentRefundDetails:
+    id: int
+    amount: int
+    created_at: str
+    order_number: str
+    status: int
+    payment_products: List[BamboraPaymentProductDetails]
+
+
+@dataclass
+class BamboraPaymentDetails:
+    id: int
+    amount: int
+    currency: str
+    order_number: str
+    source: dict
+    created_at: str
+    status: int
+    refund_type: str
+    customer: BamboraPaymentCustomerDetails
+    payment_products: List[BamboraPaymentProductDetails]
+    refunds: List[BamboraPaymentRefundDetails]
+
+    def __init__(self, payment_dict: dict):
+        self.id = payment_dict.get("id", "")
+        self.amount = payment_dict.get("amount", 0)
+        self.currency = payment_dict.get("currency", "EUR")
+        self.order_number = payment_dict.get("order_number", "")
+        self.source = payment_dict.get("source", {})
+        self.created_at = payment_dict.get("created_at", "")
+        self.status = payment_dict.get("status", 4)
+        self.refund_type = payment_dict.get("refund_type", "")
+
+        self.customer = BamboraPaymentCustomerDetails(
+            **payment_dict.get("customer", {})
+        )
+        self.payment_products = [
+            BamboraPaymentProductDetails(**product)
+            for product in payment_dict.get("payment_products", [])
+        ]
+
+        self.refunds = []
+        for refund in payment_dict.get("refunds", []):
+            # Refunds have nested products
+            refund_products = [
+                BamboraPaymentProductDetails(**refund)
+                for refund in refund.pop("payment_products", [])
+            ]
+            self.refunds.append(
+                BamboraPaymentRefundDetails(**refund, payment_products=refund_products)
+            )
 
 
 class BamboraPayformProvider(PaymentProvider):
@@ -50,6 +136,7 @@ class BamboraPayformProvider(PaymentProvider):
         self.url_payment_auth = "{}/auth_payment".format(self.url_payment_api)
         self.url_payment_token = "{}/token/{{token}}".format(self.url_payment_api)
         self.url_refund = "{}/create_refund".format(self.url_payment_api)
+        self.url_payment_details = "{}/get_payment".format(self.url_payment_api)
 
     @staticmethod
     def get_config_template() -> dict:
@@ -265,14 +352,32 @@ class BamboraPayformProvider(PaymentProvider):
         data = "{}|{}".format(payload["api_key"], payload["order_number"])
         payload.update(authcode=self.calculate_auth_code(data))
 
-    def initiate_refund(self, order: Order) -> OrderRefund:
-        # Orders which are PAID_MANUALLY may not have an entry in Bambora,
-        # so we can't guarantee that the refund will be executed
-        if (order.status != OrderStatus.PAID) or (
-            hasattr(order, "lease") and order.lease.status != LeaseStatus.PAID
-        ):
-            raise ValidationError(_("Cannot refund an order that is not paid"))
+    def get_payment_details(self, order_number: str) -> BamboraPaymentDetails:
+        payload = {
+            "version": "w3.1",
+            "api_key": self.config.get(VENE_PAYMENTS_BAMBORA_API_KEY),
+            "order_number": order_number,
+        }
+        self.payload_add_auth_code(payload)
 
+        r = requests.post(self.url_payment_details, json=payload, timeout=60)
+        r.raise_for_status()
+        response = r.json()
+        result = response.get("result")
+
+        if result == 1:
+            raise PayloadValidationError(
+                f"{_('Payment payload data validation failed: ')} {' '.join(response['errors'])}"
+            )
+        elif result == 2 or "payment" not in response:
+            raise PaymentNotFoundError(_("Provided payment was not found"))
+        elif result == 10:
+            raise ServiceUnavailableError(_("Payment service is down for maintenance"))
+
+        payment = response.get("payment", {})
+        return BamboraPaymentDetails(payment_dict=payment)
+
+    def get_refund_order_number(self, order: Order) -> str:
         order_token = (
             order.tokens.exclude(token__isnull=True, token__iexact="")
             .order_by("-created_at")
@@ -288,7 +393,16 @@ class BamboraPayformProvider(PaymentProvider):
                 _("Cannot refund an order that has not been settled yet (active token)")
             )
 
-        refund_amount = order.total_price
+        return f"{order.order_number}-{order_token.created_at.timestamp()}"
+
+    def initiate_refund(self, order: Order) -> OrderRefund:
+        # Orders which are PAID_MANUALLY may not have an entry in Bambora,
+        # so we can't guarantee that the refund will be executed
+        if (order.status != OrderStatus.PAID) or (
+            hasattr(order, "lease") and order.lease.status != LeaseStatus.PAID
+        ):
+            raise ValidationError(_("Cannot refund an order that is not paid"))
+
         email = order.customer_email or (
             order.lease.application.email
             if hasattr(order, "lease") and getattr(order.lease, "application", None)
@@ -296,13 +410,34 @@ class BamboraPayformProvider(PaymentProvider):
         )
         if not email:
             raise ValidationError(_("Cannot refund an order that has no email"))
+
+        order_number = self.get_refund_order_number(order)
+
+        # The refund requires the product IDs that Bambora assigns them
+        payment_details = self.get_payment_details(order_number)
+
+        products = []
+        refund_amount = 0
+
+        for product in payment_details.payment_products:
+            products.append({"id": product.product_id, "count": 1})
+            refund_amount = price_from_fractional_int(product.price)
+
+        if refund_amount != order.total_price:
+            raise RefundPriceError(
+                _(
+                    f"The amount to be refunded ({currency_format(refund_amount)}) "
+                    f"does not match the amount paid ({currency_format(order.total_price)})"
+                )
+            )
+
         payload = {
             "version": "w3.1",
             "api_key": self.config.get(VENE_PAYMENTS_BAMBORA_API_KEY),
-            "amount": price_as_fractional_int(refund_amount),
+            "products": products,
             "notify_url": self.get_notify_refund_url(),
             "email": email,
-            "order_number": f"{order.order_number}-{order_token.created_at.timestamp()}",
+            "order_number": order_number,
         }
         self.payload_add_auth_code(payload)
 
