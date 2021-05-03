@@ -293,7 +293,7 @@ def mocked_refund_payment_details(*args, products=None, **kwargs):
                     "type": 1,
                 },
             ]
-            amount = sum([product.get("price") for product in payment_products])
+            amount = sum([int(product.get("price")) for product in payment_products])
 
             return BamboraPaymentDetails(
                 {

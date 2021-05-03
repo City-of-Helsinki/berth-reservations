@@ -79,7 +79,7 @@ def test_initiate_refund_success(provider_base_config: dict, order: Order):
                 convert_aftertax_to_pretax(place_price, order.product.tax_percentage)
             ),
             "tax": int(order.product.tax_percentage),
-            "price": price_as_fractional_int(place_price),
+            "price": str(price_as_fractional_int(place_price)),
             "type": 1,
         }
     ]
