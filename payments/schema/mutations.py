@@ -973,6 +973,8 @@ class AcceptBerthSwitchOfferMutation(graphene.ClientIDMutation):
                 old_lease_comment=_("Lease terminated due to a berth switch offer"),
                 new_lease_comment=_("Lease created from a berth switch offer"),
             )
+            new_lease.application = offer.application
+            new_lease.save()
             if old_lease.order:
                 new_lease.orders.add(old_lease.order)
         else:
