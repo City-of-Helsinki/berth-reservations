@@ -10,6 +10,7 @@ from django.utils.timezone import now
 from berth_reservations.tests.utils import MockResponse
 from leases.enums import LeaseStatus
 from payments.enums import OrderRefundStatus, OrderStatus
+from payments.exceptions import RefundPriceError
 from payments.models import Order, OrderRefund, OrderToken
 from payments.providers.bambora_payform import (
     PayloadValidationError,
@@ -18,10 +19,17 @@ from payments.providers.bambora_payform import (
 from payments.tests.conftest import (
     create_bambora_provider,
     FAKE_BAMBORA_API_URL,
+    mocked_refund_payment_details,
     mocked_refund_response_create,
     mocked_response_create,
 )
 from payments.tests.factories import OrderRefundFactory
+from payments.utils import (
+    convert_aftertax_to_pretax,
+    currency_format,
+    get_talpa_product_id,
+    price_as_fractional_int,
+)
 
 notify_success_params = {
     "AUTHCODE": "9C60B3077276A38495E2D785D1B5E6A293427BC4025E5C39AB870EA4CF187E0B",
@@ -49,12 +57,41 @@ def test_initiate_refund_success(provider_base_config: dict, order: Order):
     valid_token = OrderToken.objects.create(
         order=order, token="12345", valid_until=now() - relativedelta(days=7)
     )
+    if hasattr(order.product, "price_for_tier"):
+        place_price = order.product.price_for_tier(order.lease.berth.pier.price_tier)
+        area = order.lease.berth.pier.harbor
+    else:
+        # Winter products are priced per m2
+        place_price = (
+            order.product.price_value
+            * order.lease.place.place_type.width
+            * order.lease.place.place_type.length
+        )
+        area = order.lease.place.winter_storage_section.area
+
+    products = [
+        {
+            "id": get_talpa_product_id(order.product.id, area, False),
+            "product_id": 1123,
+            "title": order.product.name,
+            "count": 1,
+            "pretax_price": price_as_fractional_int(
+                convert_aftertax_to_pretax(place_price, order.product.tax_percentage)
+            ),
+            "tax": int(order.product.tax_percentage),
+            "price": price_as_fractional_int(place_price),
+            "type": 1,
+        }
+    ]
 
     payment_provider = create_bambora_provider(provider_base_config, request)
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
         side_effect=mocked_refund_response_create,
-    ) as mock_call:
+    ) as mock_call, mock.patch(
+        "payments.providers.bambora_payform.BamboraPayformProvider.get_payment_details",
+        side_effect=mocked_refund_payment_details(products=products),
+    ):
         refund = payment_provider.initiate_refund(order)
 
     assert refund.refund_id == "123456"
@@ -85,14 +122,99 @@ def test_initiate_refund_no_order_email(provider_base_config: dict, order: Order
         order=order, token="12345", valid_until=now() - relativedelta(days=7)
     )
 
+    if hasattr(order.product, "price_for_tier"):
+        place_price = order.product.price_for_tier(order.lease.berth.pier.price_tier)
+        area = order.lease.berth.pier.harbor
+    else:
+        # Winter products are priced per m2
+        place_price = (
+            order.product.price_value
+            * order.lease.place.place_type.width
+            * order.lease.place.place_type.length
+        )
+        area = order.lease.place.winter_storage_section.area
+
+    products = [
+        {
+            "id": get_talpa_product_id(order.product.id, area, False),
+            "product_id": 1123,
+            "title": order.product.name,
+            "count": 1,
+            "pretax_price": price_as_fractional_int(
+                convert_aftertax_to_pretax(place_price, order.product.tax_percentage)
+            ),
+            "tax": int(order.product.tax_percentage),
+            "price": price_as_fractional_int(place_price),
+            "type": 1,
+        }
+    ]
+
     payment_provider = create_bambora_provider(provider_base_config, request)
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
         side_effect=mocked_refund_response_create,
+    ), mock.patch(
+        "payments.providers.bambora_payform.BamboraPayformProvider.get_payment_details",
+        side_effect=mocked_refund_payment_details(products=products),
     ):
         refund = payment_provider.initiate_refund(order)
 
     assert refund.refund_id == "123456"
+
+
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
+)
+def test_initiate_refund_refunded_amount_does_not_match(
+    provider_base_config: dict, order: Order
+):
+    """Test the request creator constructs the payload base and returns a url that contains a token"""
+    request = RequestFactory().request()
+    order.status = OrderStatus.PAID
+    order.lease.status = LeaseStatus.PAID
+    order.lease.save()
+    order.save()
+
+    OrderToken.objects.create(
+        order=order, token="98765", valid_until=now() - relativedelta(hours=1)
+    )
+    OrderToken.objects.create(
+        order=order, token="12345", valid_until=now() - relativedelta(days=7)
+    )
+    place_price = order.total_price + 10
+
+    products = [
+        {
+            "id": "123123123",
+            "product_id": 1123,
+            "title": order.product.name,
+            "count": 1,
+            "pretax_price": price_as_fractional_int(
+                convert_aftertax_to_pretax(place_price, order.product.tax_percentage)
+            ),
+            "tax": int(order.product.tax_percentage),
+            "price": price_as_fractional_int(place_price),
+            "type": 1,
+        }
+    ]
+
+    payment_provider = create_bambora_provider(provider_base_config, request)
+    with mock.patch(
+        "payments.providers.bambora_payform.requests.post",
+        side_effect=mocked_refund_response_create,
+    ), mock.patch(
+        "payments.providers.bambora_payform.BamboraPayformProvider.get_payment_details",
+        side_effect=mocked_refund_payment_details(products=products),
+    ), pytest.raises(
+        RefundPriceError
+    ) as exception:
+        payment_provider.initiate_refund(order)
+
+    assert (
+        f"The amount to be refunded ({currency_format(place_price)}) "
+        f"does not match the amount paid ({currency_format(order.total_price)})"
+    ) in str(exception)
+    assert not OrderRefund.objects.exists()
 
 
 @pytest.mark.parametrize(

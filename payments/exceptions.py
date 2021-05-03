@@ -24,3 +24,11 @@ class UnknownReturnCodeError(VenepaikkaPaymentError):
 
 class ExpiredOrderError(VenepaikkaPaymentError):
     """If the Order is being paid after the due date"""
+
+
+class PaymentNotFoundError(VenepaikkaPaymentError):
+    """When the payment cannot be found on Bambora's system"""
+
+
+class RefundPriceError(VenepaikkaPaymentError):
+    """When the amount to be refunded (taken from Bambora) is different than the price of the order"""

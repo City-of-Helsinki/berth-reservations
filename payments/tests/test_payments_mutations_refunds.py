@@ -17,7 +17,12 @@ from utils.relay import to_global_id
 from ..enums import OrderRefundStatus, OrderStatus
 from ..models import Order, OrderToken
 from ..schema.types import OrderNode
-from .conftest import mocked_refund_response_create
+from ..utils import (
+    convert_aftertax_to_pretax,
+    get_talpa_product_id,
+    price_as_fractional_int,
+)
+from .conftest import mocked_refund_payment_details, mocked_refund_response_create
 
 REFUND_ORDER_MUTATION = """
 mutation REFUND_ORDER_MUTATION($input: RefundOrderMutationInput!) {
@@ -51,6 +56,32 @@ def test_refund_order(
     OrderToken.objects.create(
         order=order, token="1245", valid_until=today() - relativedelta(days=7)
     )
+    if hasattr(order.product, "price_for_tier"):
+        place_price = order.product.price_for_tier(order.lease.berth.pier.price_tier)
+        area = order.lease.berth.pier.harbor
+    else:
+        # Winter products are priced per m2
+        place_price = (
+            order.product.price_value
+            * order.lease.place.place_type.width
+            * order.lease.place.place_type.length
+        )
+        area = order.lease.place.winter_storage_section.area
+
+    products = [
+        {
+            "id": get_talpa_product_id(order.product.id, area, False),
+            "product_id": 1123,
+            "title": order.product.name,
+            "count": 1,
+            "pretax_price": price_as_fractional_int(
+                convert_aftertax_to_pretax(place_price, order.product.tax_percentage)
+            ),
+            "tax": int(order.product.tax_percentage),
+            "price": price_as_fractional_int(place_price),
+            "type": 1,
+        }
+    ]
 
     variables = {
         "orderId": to_global_id(OrderNode, order.id),
@@ -59,6 +90,9 @@ def test_refund_order(
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
         side_effect=mocked_refund_response_create,
+    ), mock.patch(
+        "payments.providers.bambora_payform.BamboraPayformProvider.get_payment_details",
+        side_effect=mocked_refund_payment_details(products=products),
     ):
         executed = api_client.execute(REFUND_ORDER_MUTATION, input=variables)
 
@@ -106,6 +140,9 @@ def test_refund_order_does_not_exist(
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
         side_effect=mocked_refund_response_create,
+    ), mock.patch(
+        "payments.providers.bambora_payform.BamboraPayformProvider.get_payment_details",
+        side_effect=mocked_refund_payment_details(products=[]),
     ):
         executed = superuser_api_client.execute(REFUND_ORDER_MUTATION, input=variables)
 
