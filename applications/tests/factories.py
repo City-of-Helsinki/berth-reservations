@@ -1,7 +1,6 @@
 import factory.fuzzy
 
-from resources.tests.factories import (
-    BerthFactory,
+from harbors.tests.factories import (
     BoatTypeFactory,
     HarborFactory,
     WinterStorageAreaFactory,
@@ -61,7 +60,9 @@ class WinterAreaChoiceFactory(factory.django.DjangoModelFactory):
 
 
 class BerthSwitchFactory(factory.django.DjangoModelFactory):
-    berth = factory.SubFactory(BerthFactory)
+    harbor = factory.SubFactory(HarborFactory)
+    pier = factory.Faker("random_int", min=1, max=100)
+    berth_number = factory.Faker("random_int", min=1, max=100)
 
     class Meta:
         model = BerthSwitch

@@ -30,12 +30,10 @@ class AvailabilityLevelFactory(factory.django.DjangoModelFactory):
 
 
 class BoatTypeFactory(factory.django.DjangoModelFactory):
-    id = factory.Sequence(int)
     name = factory.Faker("word")
 
     class Meta:
         model = BoatType
-        django_get_or_create = ("id",)
 
 
 class AbstractAreaFactory(factory.django.DjangoModelFactory):

@@ -720,7 +720,7 @@ query ORDER_DETAILS {
 @pytest.mark.parametrize("has_application", [True, False])
 @pytest.mark.parametrize("status", OrderStatus.values)
 def test_get_order_status(
-    superuser_api_client, status, has_application: bool, order: Order
+    old_schema_api_client, status, has_application: bool, order: Order
 ):
     if not has_application and order.lease:
         order.lease.application = None
@@ -729,7 +729,7 @@ def test_get_order_status(
     order.status = status
     order.save()
 
-    executed = superuser_api_client.execute(ORDER_DETAILS_QUERY % order.order_number)
+    executed = old_schema_api_client.execute(ORDER_DETAILS_QUERY % order.order_number)
 
     if order.product:
         if isinstance(order.product, BerthProduct):
@@ -756,8 +756,8 @@ def test_get_order_status(
     }
 
 
-def test_get_order_status_order_does_not_exist(superuser_api_client):
-    executed = superuser_api_client.execute(
+def test_get_order_status_order_does_not_exist(old_schema_api_client):
+    executed = old_schema_api_client.execute(
         ORDER_DETAILS_QUERY % generate_order_number()
     )
 

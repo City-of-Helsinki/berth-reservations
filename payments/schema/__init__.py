@@ -1,5 +1,5 @@
-from .mutations import Mutation
-from .queries import Query
+from .mutations import Mutation, OldAPIMutation
+from .queries import OldAPIQuery, Query
 from .types import (
     AdditionalProductNode,
     AdditionalProductTaxEnum,
@@ -29,6 +29,8 @@ __all__ = [
     "BerthSwitchOfferNode",
     "Mutation",
     "OfferStatusEnum",
+    "OldAPIMutation",
+    "OldAPIQuery",
     "OrderDetailsType",
     "OrderLineNode",
     "OrderLogEntryNode",

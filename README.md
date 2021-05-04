@@ -196,7 +196,9 @@ import them first:
 ### Resources
 Then load the fixtures with the following commands:
 
+    ./manage.py loaddata helsinki-harbors.json
     ./manage.py loaddata helsinki-ws-resources.json
+    ./manage.py loaddata helsinki-winter-areas.json
     ./manage.py loaddata helsinki-harbor-resources.json
 
 And assign the corresponding region to areas:
@@ -205,6 +207,8 @@ And assign the corresponding region to areas:
 
 Point harbor and ws images to customer ui images:
 
+    ./manage.py harbors_add_helsinki_harbors_images
+    ./manage.py harbors_add_helsinki_winter_areas_images
     ./manage.py add_helsinki_harbors_images
     ./manage.py add_helsinki_winter_areas_images
 

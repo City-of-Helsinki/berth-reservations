@@ -7,6 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
+        ("harbors", "0005_add_titles_for_avlblty_levels"),
         ("applications", "0001_initial"),
     ]
 
@@ -27,8 +28,7 @@ class Migration(migrations.Migration):
                 (
                     "harbor",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
-                        to="resources.Harbor",
+                        on_delete=django.db.models.deletion.CASCADE, to="harbors.Harbor"
                     ),
                 ),
             ],
@@ -164,7 +164,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="applications",
-                to="resources.BoatType",
+                to="harbors.BoatType",
                 verbose_name="boat type",
             ),
         ),
@@ -272,7 +272,7 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(
                 blank=True,
                 through="applications.HarborChoice",
-                to="resources.Harbor",
+                to="harbors.Harbor",
                 verbose_name="chosen harbors",
             ),
         ),

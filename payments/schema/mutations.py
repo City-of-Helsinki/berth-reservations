@@ -7,11 +7,12 @@ from dateutil.utils import today
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from applications.enums import ApplicationAreaType, ApplicationStatus
-from applications.models import BerthApplication, WinterStorageApplication
-from applications.schema import BerthApplicationNode
+from applications.models import BerthApplication, BerthSwitch, WinterStorageApplication
+from applications.new_schema import BerthApplicationNode
 from berth_reservations.exceptions import (
     VenepaikkaGraphQLError,
     VenepaikkaGraphQLWarning,
@@ -854,11 +855,47 @@ class CreateBerthSwitchOfferMutation(graphene.ClientIDMutation):
 
     @staticmethod
     def get_old_lease(application: BerthApplication) -> BerthLease:
+        # TODO: This logic has to be refactored when the old harbors app is removed
+
         # Based on the information filled by the customer on the switch application,
-        # we retrieve the corresponding lease on the current season
+        # we retrieve the corresponding lease
+        switch: BerthSwitch = application.berth_switch
+        berth_filters = Q(number__iexact=switch.berth_number)
+
+        # First check if the chosen harbor has a direct map with a resources harbor
+        if harbor := switch.harbor.resources_harbor:
+            berth_filters &= Q(pier__harbor=harbor)
+
+            # Try to match the one with the identifier provided by the customer
+            pier = harbor.piers.filter(identifier__iexact=switch.pier).first()
+
+            # If no pier is found but the harbor only has one pier associated,
+            # we can assume that the old berth has to be on that one pier
+            if not pier and harbor.piers.count() == 1:
+                pier = harbor.piers.first()
+
+            berth_filters &= Q(pier=pier)
+        else:
+            # Fetch all the piers associated to the selected harbor,
+            # in most cases there will be only one pier
+            piers = switch.harbor.resources_pier.all()
+
+            # Try to match the one with the identifier provided by the customer
+            pier = piers.filter(identifier__iexact=switch.pier).first()
+
+            # If no pier is found but the harbor only has one pier associated,
+            # we can assume that the old berth has to be on that one pier
+            if not pier and piers.count() == 1:
+                pier = piers.first()
+
+            berth_filters &= Q(pier=pier)
+
+        old_berth = Berth.objects.get(berth_filters)
+
+        # Find the lease on the current season
         return BerthLease.objects.get(
             customer=application.customer,
-            berth=application.berth_switch.berth,
+            berth=old_berth,
             status=LeaseStatus.PAID,
             start_date=calculate_season_start_date(),
             end_date=calculate_season_end_date(),
@@ -1123,6 +1160,7 @@ class Mutation:
         "\n* No associated lease could be find for the switch application"
         "\n* The related lease must be in `PAID` status"
     )
+
     update_berth_switch_offer = UpdateBerthSwitchOfferMutation.Field(
         description="Updates a berth switch offer."
         "\n\nCurrently it is possible to update the status and dueDate fields of the Offer."
@@ -1143,6 +1181,11 @@ class Mutation:
         "\n* The offer is not DRAFTED or OFFERED"
         "\n* Customer's contact information is not available"
     )
+
+
+class OldAPIMutation:
+    confirm_payment = ConfirmPaymentMutation.Field()
+    cancel_order = CancelOrderMutation.Field()
     accept_berth_switch_offer = AcceptBerthSwitchOfferMutation.Field(
         description="Accepts or rejects an offer for a berth switch application."
         "\n\nIf the offer is accepted, it will terminate the old lease and create a new lease with the new berth."
@@ -1153,6 +1196,3 @@ class Mutation:
         "\n* The passed berth switch offer ID doesn't exist"
         "\n* The related lease must be in `PAID` status"
     )
-
-    confirm_payment = ConfirmPaymentMutation.Field()
-    cancel_order = CancelOrderMutation.Field()

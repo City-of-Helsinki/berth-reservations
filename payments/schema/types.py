@@ -282,7 +282,7 @@ class BerthSwitchOfferNode(DjangoObjectType, AbstractOfferNode):
     """
 
     application = graphene.Field(
-        "applications.schema.BerthApplicationNode", required=True
+        "applications.new_schema.BerthApplicationNode", required=True
     )
     lease = graphene.Field(BerthLeaseNode, required=True)
     berth = graphene.Field("resources.schema.BerthNode", required=True)

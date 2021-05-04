@@ -1,50 +1,28 @@
-import django_ilmoitin.api.schema as django_ilmoitin_schema
 import graphene
-from django_ilmoitin.models import NotificationTemplate
-from graphene_federation import build_schema
 
 import applications.schema
-import contracts.schema
-import customers.schema
-import leases.schema
-import payments.schema
-import resources.schema
-from users.decorators import view_permission_required
+import contracts
+import harbors.schema
+from payments.schema import OldAPIMutation, OldAPIQuery
 
 
 class Query(
+    harbors.schema.Query,
     applications.schema.Query,
     contracts.schema.Query,
-    customers.schema.Query,
-    leases.schema.Query,
-    payments.schema.Query,
-    resources.schema.Query,
-    django_ilmoitin_schema.Query,
-    graphene.ObjectType,
-):
-    @staticmethod
-    @view_permission_required(NotificationTemplate)
-    def resolve_notification_templates(parent, info, **kwargs):
-        return django_ilmoitin_schema.Query.resolve_notification_templates(
-            parent, info, **kwargs
-        )
-
-
-class Mutation(
-    applications.schema.Mutation,
-    contracts.schema.Mutation,
-    customers.schema.Mutation,
-    leases.schema.Mutation,
-    payments.schema.Mutation,
-    resources.schema.Mutation,
+    OldAPIQuery,
     graphene.ObjectType,
 ):
     pass
 
 
-# We need to list all the extended types separately,
-# otherwise graphene will not generate their schemas.
-extended_types = [customers.schema.ProfileNode]
+class Mutation(
+    applications.schema.Mutation,
+    contracts.schema.Mutation,
+    OldAPIMutation,
+    graphene.ObjectType,
+):
+    pass
 
 
-schema = build_schema(query=Query, mutation=Mutation, types=extended_types)
+schema = graphene.Schema(query=Query, mutation=Mutation)

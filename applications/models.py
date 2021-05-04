@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from parler.models import TranslatableModel, TranslatedFields
 
 from customers.models import CustomerProfile
-from resources.models import Berth, BoatType, Harbor, WinterStorageArea
+from harbors.models import BoatType, Harbor, WinterStorageArea
 
 from .enums import ApplicationAreaType, ApplicationStatus, WinterStorageMethod
 from .utils import localize_datetime
@@ -51,7 +51,9 @@ class BerthSwitchReason(TranslatableModel):
 
 
 class BerthSwitch(models.Model):
-    berth = models.ForeignKey(Berth, verbose_name=_("berth"), on_delete=models.CASCADE)
+    harbor = models.ForeignKey(Harbor, on_delete=models.CASCADE)
+    pier = models.CharField(verbose_name=_("pier"), max_length=40, blank=True)
+    berth_number = models.CharField(verbose_name=_("berth number"), max_length=20)
     reason = models.ForeignKey(
         BerthSwitchReason,
         null=True,
@@ -169,7 +171,6 @@ class BerthApplication(BaseApplication):
     berth_switch = models.ForeignKey(
         BerthSwitch,
         verbose_name=_("berth switch"),
-        related_name="applications",
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -367,8 +368,8 @@ class WinterStorageApplication(BaseApplication):
 
         is_unmarked_area = bool(
             self.chosen_areas.count() == 1
-            and first_area.estimated_number_of_unmarked_spaces
-            and first_area.estimated_number_of_unmarked_spaces > 0
+            and first_area.number_of_unmarked_spaces
+            and first_area.number_of_unmarked_spaces > 0
         )
 
         return (

@@ -30,7 +30,7 @@ mutation ACCEPT_BERTH_SWITCH_OFFER_MUTATION($input: AcceptBerthSwitchOfferMutati
 
 
 @freeze_time("2020-02-01T08:00:00Z")
-def test_accept_offer(user_api_client):
+def test_accept_offer(old_schema_api_client):
     customer = CustomerProfileFactory()
     due_date = date.today() + relativedelta(days=14)
     berth_switch_offer = BerthSwitchOfferFactory(
@@ -51,7 +51,7 @@ def test_accept_offer(user_api_client):
         "isAccepted": True,
     }
 
-    user_api_client.execute(ACCEPT_BERTH_SWITCH_OFFER_MUTATION, input=variables)
+    old_schema_api_client.execute(ACCEPT_BERTH_SWITCH_OFFER_MUTATION, input=variables)
 
     berth_switch_offer.refresh_from_db()
     berth_switch_offer.lease.refresh_from_db()
@@ -64,7 +64,7 @@ def test_accept_offer(user_api_client):
 
 
 @freeze_time("2020-02-01T08:00:00Z")
-def test_reject_offer(user_api_client):
+def test_reject_offer(old_schema_api_client):
     customer = CustomerProfileFactory()
     due_date = date.today() + relativedelta(days=14)
     berth_switch_offer = BerthSwitchOfferFactory(
@@ -85,7 +85,7 @@ def test_reject_offer(user_api_client):
         "isAccepted": False,
     }
 
-    user_api_client.execute(ACCEPT_BERTH_SWITCH_OFFER_MUTATION, input=variables)
+    old_schema_api_client.execute(ACCEPT_BERTH_SWITCH_OFFER_MUTATION, input=variables)
 
     berth_switch_offer.refresh_from_db()
     berth_switch_offer.lease.refresh_from_db()
@@ -107,7 +107,9 @@ def test_reject_offer(user_api_client):
         OfferStatus.ACCEPTED,
     ],
 )
-def test_accept_offer_invalid_status(user_api_client, is_accepted, initial_status):
+def test_accept_offer_invalid_status(
+    old_schema_api_client, is_accepted, initial_status
+):
     customer = CustomerProfileFactory()
     due_date = date.today() + relativedelta(days=14)
     berth_switch_offer = BerthSwitchOfferFactory(
@@ -128,7 +130,7 @@ def test_accept_offer_invalid_status(user_api_client, is_accepted, initial_statu
         "isAccepted": is_accepted,
     }
 
-    user_api_client.execute(ACCEPT_BERTH_SWITCH_OFFER_MUTATION, input=variables)
+    old_schema_api_client.execute(ACCEPT_BERTH_SWITCH_OFFER_MUTATION, input=variables)
 
     berth_switch_offer.refresh_from_db()
     berth_switch_offer.lease.refresh_from_db()
@@ -139,12 +141,13 @@ def test_accept_offer_invalid_status(user_api_client, is_accepted, initial_statu
     assert new_lease is None
 
 
-def test_accept_berth_switch_offer_does_not_exist(user_api_client):
+def test_accept_berth_switch_offer_does_not_exist(old_schema_api_client):
     variables = {
+        # "offerId": "test",
         "offerNumber": "test",
         "isAccepted": True,
     }
-    executed = user_api_client.execute(
+    executed = old_schema_api_client.execute(
         ACCEPT_BERTH_SWITCH_OFFER_MUTATION, input=variables
     )
 
