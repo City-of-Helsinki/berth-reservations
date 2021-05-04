@@ -3,7 +3,8 @@ from django_ilmoitin.models import NotificationTemplate
 
 from berth_reservations.tests.conftest import *  # noqa
 from berth_reservations.tests.factories import CustomerProfileFactory
-from resources.tests.factories import BerthFactory
+from harbors.tests.conftest import *  # noqa
+from harbors.tests.factories import HarborFactory
 from users.tests.conftest import *  # noqa
 
 from ..enums import ApplicationStatus
@@ -16,8 +17,8 @@ from .factories import BerthApplicationFactory, WinterStorageApplicationFactory
 def berth_switch_info(request):
     has_reason = request.param if hasattr(request, "param") else None
 
-    berth = BerthFactory()
-    berth.pier.harbor.create_translation("fi", name="Nykyinen satama")
+    harbor = HarborFactory()
+    harbor.create_translation("fi", name="Nykyinen satama")
 
     berth_switch_reason = (
         BerthSwitchReason.objects.language("fi").create(title="Good reason")
@@ -25,7 +26,9 @@ def berth_switch_info(request):
         else None
     )
 
-    berth_switch = BerthSwitch.objects.create(berth=berth, reason=berth_switch_reason)
+    berth_switch = BerthSwitch.objects.create(
+        harbor=harbor, pier="D", berth_number="11", reason=berth_switch_reason
+    )
     return berth_switch
 
 

@@ -112,6 +112,11 @@ def api_client(
 
 
 @pytest.fixture
+def old_schema_api_client():
+    return create_api_client(graphql_v2=False)
+
+
+@pytest.fixture
 def municipality():
     municipality = MunicipalityFactory()
     return municipality

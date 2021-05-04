@@ -60,8 +60,8 @@ def deep_get(dictionary, keys, default=None):
 
 
 def from_data_to_main_fields(apps, schema_editor):
-    Harbor = apps.get_model("resources", "Harbor")
-    BoatType = apps.get_model("resources", "BoatType")
+    Harbor = apps.get_model("harbors", "Harbor")
+    BoatType = apps.get_model("harbors", "BoatType")
     Reservation = apps.get_model("applications", "Reservation")
     HarborChoice = apps.get_model("applications", "HarborChoice")
 

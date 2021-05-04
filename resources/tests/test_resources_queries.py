@@ -4,7 +4,7 @@ import random
 import pytest
 from graphql_relay import to_global_id
 
-from applications.schema import BerthApplicationNode
+from applications.new_schema import BerthApplicationNode
 from berth_reservations.tests.utils import (
     assert_in_errors,
     assert_not_enough_permissions,

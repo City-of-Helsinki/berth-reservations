@@ -23,11 +23,11 @@ FULFILL_CONTRACT_MUTATION_INPUT = {
 @pytest.mark.parametrize(
     "order", ["berth_order", "winter_storage_order"], indirect=True
 )
-def test_fulfill_contract(superuser_api_client, order: Order):
+def test_fulfill_contract(old_schema_api_client, order: Order):
     order.lease.contract.save()
     order.order_number = FULFILL_CONTRACT_MUTATION_INPUT["orderNumber"]
     order.save()
-    executed = superuser_api_client.execute(
+    executed = old_schema_api_client.execute(
         FULFILL_CONTRACT_MUTATION, input=FULFILL_CONTRACT_MUTATION_INPUT
     )
     assert (
@@ -36,8 +36,8 @@ def test_fulfill_contract(superuser_api_client, order: Order):
     )
 
 
-def test_fulfill_contract_no_order(superuser_api_client):
-    executed = superuser_api_client.execute(
+def test_fulfill_contract_no_order(old_schema_api_client):
+    executed = old_schema_api_client.execute(
         FULFILL_CONTRACT_MUTATION, input=FULFILL_CONTRACT_MUTATION_INPUT
     )
     assert_in_errors("No order found for given order number", executed)
@@ -46,12 +46,12 @@ def test_fulfill_contract_no_order(superuser_api_client):
 @pytest.mark.parametrize(
     "order", ["berth_order", "winter_storage_order"], indirect=True
 )
-def test_fulfill_contract_no_contract_for_order(superuser_api_client, order: Order):
+def test_fulfill_contract_no_contract_for_order(old_schema_api_client, order: Order):
     order.lease.contract = None
     order.lease.save()
     order.order_number = FULFILL_CONTRACT_MUTATION_INPUT["orderNumber"]
     order.save()
-    executed = superuser_api_client.execute(
+    executed = old_schema_api_client.execute(
         FULFILL_CONTRACT_MUTATION, input=FULFILL_CONTRACT_MUTATION_INPUT
     )
     assert_in_errors("No contract found for given order", executed)

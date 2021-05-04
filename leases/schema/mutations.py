@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 
 from applications.enums import ApplicationAreaType, ApplicationStatus
 from applications.models import BerthApplication, WinterStorageApplication
-from applications.schema import BerthApplicationNode, WinterStorageApplicationNode
+from applications.new_schema import BerthApplicationNode, WinterStorageApplicationNode
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from contracts.services import get_contract_service
 from customers.models import CustomerProfile

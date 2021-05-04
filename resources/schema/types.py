@@ -81,6 +81,7 @@ class PierNode(graphql_geojson.GeoJSONType):
         geojson_field = "location"
         interfaces = (relay.Node,)
         connection_class = CountConnection
+        exclude = ("harbors_harbor",)
 
     def resolve_berths(self, info, **kwargs):
         filters = Q()
@@ -193,6 +194,7 @@ class HarborNode(graphql_geojson.GeoJSONType):
         interfaces = (relay.Node,)
         filterset_class = HarborFilter
         connection_class = CountConnection
+        exclude = ("harbors_harbor",)
 
     name = graphene.String()
     street_address = graphene.String()
@@ -372,6 +374,7 @@ class WinterStorageAreaNode(graphql_geojson.GeoJSONType):
         model = WinterStorageArea
         geojson_field = "location"
         interfaces = (relay.Node,)
+        exclude = ("harbors_area",)
         filterset_class = WinterStorageAreaFilter
         connection_class = CountConnection
 

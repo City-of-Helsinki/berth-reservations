@@ -216,11 +216,14 @@ def parse_berth_switch_str(berth_switch):
     :rtype: str
     """
 
-    berth_switch_str = "{} ({}): {}".format(
-        berth_switch.berth.pier.harbor.name,
-        berth_switch.berth.pier.identifier,
-        berth_switch.berth.number,
-    )
+    if berth_switch.pier:
+        berth_switch_str = "{} ({}): {}".format(
+            berth_switch.harbor.name, berth_switch.pier, berth_switch.berth_number
+        )
+    else:
+        berth_switch_str = "{}: {}".format(
+            berth_switch.harbor.name, berth_switch.berth_number
+        )
 
     return berth_switch_str
 

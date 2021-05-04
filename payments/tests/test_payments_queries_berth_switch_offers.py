@@ -1,6 +1,6 @@
 import pytest
 
-from applications.schema import BerthApplicationNode
+from applications.new_schema import BerthApplicationNode
 from customers.schema import ProfileNode
 from leases.schema import BerthLeaseNode
 from resources.schema import BerthNode
