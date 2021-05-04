@@ -1387,7 +1387,7 @@ mutation CONFIRM_PAYMENT_MUTATION($input: ConfirmPaymentMutationInput!) {
     "order", ["berth_order", "winter_storage_order"], indirect=True,
 )
 @pytest.mark.parametrize("status", [OrderStatus.OFFERED, OrderStatus.REJECTED])
-def test_confirm_payment(old_schema_api_client, order: Order, status):
+def test_confirm_payment(superuser_api_client, order: Order, status):
     order.status = status
     order.save()
     variables = {"orderNumber": order.order_number}
@@ -1396,21 +1396,21 @@ def test_confirm_payment(old_schema_api_client, order: Order, status):
         "payments.providers.bambora_payform.requests.post",
         side_effect=mocked_response_create,
     ):
-        executed = old_schema_api_client.execute(
+        executed = superuser_api_client.execute(
             CONFIRM_PAYMENT_MUTATION, input=variables
         )
 
     assert "token/token123" in executed["data"]["confirmPayment"]["url"]
 
 
-def test_confirm_payment_does_not_exist(old_schema_api_client):
+def test_confirm_payment_does_not_exist(superuser_api_client):
     variables = {"orderNumber": generate_order_number()}
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
         side_effect=mocked_response_create,
     ):
-        executed = old_schema_api_client.execute(
+        executed = superuser_api_client.execute(
             CONFIRM_PAYMENT_MUTATION, input=variables
         )
 
@@ -1420,7 +1420,7 @@ def test_confirm_payment_does_not_exist(old_schema_api_client):
 @pytest.mark.parametrize(
     "status", [OrderStatus.EXPIRED, OrderStatus.CANCELLED, OrderStatus.PAID]
 )
-def test_confirm_payment_invalid_status(old_schema_api_client, status):
+def test_confirm_payment_invalid_status(superuser_api_client, status):
     order = OrderFactory(status=status)
     variables = {"orderNumber": order.order_number}
 
@@ -1428,7 +1428,7 @@ def test_confirm_payment_invalid_status(old_schema_api_client, status):
         "payments.providers.bambora_payform.requests.post",
         side_effect=mocked_response_create,
     ) as mock_call:
-        executed = old_schema_api_client.execute(
+        executed = superuser_api_client.execute(
             CONFIRM_PAYMENT_MUTATION, input=variables
         )
 
@@ -1440,7 +1440,7 @@ def test_confirm_payment_invalid_status(old_schema_api_client, status):
 @pytest.mark.parametrize(
     "order", ["berth_order", "winter_storage_order"], indirect=True,
 )
-def test_payment_fails_doesnt_use_empty_token(old_schema_api_client, order: Order):
+def test_payment_fails_doesnt_use_empty_token(superuser_api_client, order: Order):
     empty_token = OrderToken.objects.create(
         order=order, valid_until=now() + relativedelta(day=1)
     )
@@ -1453,7 +1453,7 @@ def test_payment_fails_doesnt_use_empty_token(old_schema_api_client, order: Orde
         "payments.providers.bambora_payform.requests.post",
         side_effect=mocked_response_create,
     ):
-        old_schema_api_client.execute(CONFIRM_PAYMENT_MUTATION, input=variables)
+        superuser_api_client.execute(CONFIRM_PAYMENT_MUTATION, input=variables)
 
     empty_token.refresh_from_db()
     assert not empty_token.is_valid
@@ -1473,7 +1473,7 @@ mutation CANCEL_ORDER_MUTATION($input: CancelOrderMutationInput!) {
     "order", ["berth_order", "winter_storage_order"], indirect=True,
 )
 def test_cancel_order(
-    old_schema_api_client, order: Order, notification_template_order_cancelled
+    superuser_api_client, order: Order, notification_template_order_cancelled
 ):
     order.status = OrderStatus.OFFERED
     order.save()
@@ -1483,7 +1483,7 @@ def test_cancel_order(
         "payments.providers.bambora_payform.requests.post",
         side_effect=mocked_response_create,
     ):
-        old_schema_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
+        superuser_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
 
     order.refresh_from_db()
     order.lease.refresh_from_db()
@@ -1525,7 +1525,7 @@ def test_cancel_order(
     ],
 )
 def test_cancel_order_invalid_status(
-    old_schema_api_client, order: Order, status: OrderStatus
+    superuser_api_client, order: Order, status: OrderStatus
 ):
     order.status = status
     order.save()
@@ -1535,19 +1535,19 @@ def test_cancel_order_invalid_status(
         "payments.providers.bambora_payform.requests.post",
         side_effect=mocked_response_create,
     ):
-        executed = old_schema_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
+        executed = superuser_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
 
     assert_in_errors(f"The order is not valid anymore: {status.label}", executed)
 
 
-def test_cancel_order_does_not_exist(old_schema_api_client):
+def test_cancel_order_does_not_exist(superuser_api_client):
     variables = {"orderNumber": generate_order_number()}
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
         side_effect=mocked_response_create,
     ):
-        executed = old_schema_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
+        executed = superuser_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
 
     assert_doesnt_exist("Order", executed)
 
@@ -1555,7 +1555,7 @@ def test_cancel_order_does_not_exist(old_schema_api_client):
 @pytest.mark.parametrize(
     "order", ["unmarked_winter_storage_order"], indirect=True,
 )
-def test_cancel_unmarked_order_fails(old_schema_api_client, order: Order):
+def test_cancel_unmarked_order_fails(superuser_api_client, order: Order):
     order.status = OrderStatus.OFFERED
     order.save()
     variables = {"orderNumber": order.order_number}
@@ -1564,6 +1564,6 @@ def test_cancel_unmarked_order_fails(old_schema_api_client, order: Order):
         "payments.providers.bambora_payform.requests.post",
         side_effect=mocked_response_create,
     ):
-        executed = old_schema_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
+        executed = superuser_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
 
     assert_in_errors("Cannot cancel Unmarked winter storage order", executed)

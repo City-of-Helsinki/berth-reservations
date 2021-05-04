@@ -7,8 +7,8 @@ from graphene_federation import extend, external
 from graphql_jwt.decorators import login_required
 
 from applications.models import BerthApplication
-from applications.new_schema import BerthApplicationNode, WinterStorageApplicationNode
-from applications.new_schema.types import WinterStorageApplicationFilter
+from applications.schema import BerthApplicationNode, WinterStorageApplicationNode
+from applications.schema.types import WinterStorageApplicationFilter
 from leases.models import BerthLease, WinterStorageLease
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from payments.models import BerthSwitchOffer, Order

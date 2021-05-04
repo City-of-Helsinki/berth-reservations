@@ -8,7 +8,6 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("harbors", "0008_add_avlblty_lvl_to_winter_areas"),
         ("applications", "0008_refactor_and_rename_reservations"),
     ]
 
@@ -36,7 +35,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="+",
-                to="harbors.BoatType",
+                to="resources.BoatType",
                 verbose_name="boat type",
             ),
         ),
@@ -234,7 +233,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="+",
-                        to="harbors.BoatType",
+                        to="resources.BoatType",
                         verbose_name="boat type",
                     ),
                 ),
@@ -243,7 +242,7 @@ class Migration(migrations.Migration):
                     models.ManyToManyField(
                         blank=True,
                         through="applications.WinterStorageAreaChoice",
-                        to="harbors.WinterStorageArea",
+                        to="resources.WinterStorageArea",
                         verbose_name="chosen winter storage areas",
                     ),
                 ),
@@ -263,7 +262,7 @@ class Migration(migrations.Migration):
             name="winter_storage_area",
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
-                to="harbors.WinterStorageArea",
+                to="resources.WinterStorageArea",
             ),
         ),
         migrations.AlterUniqueTogether(

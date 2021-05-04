@@ -14,6 +14,7 @@ from pytz import timezone
 from .enums import ApplicationAreaType
 from .models import (
     BerthApplication,
+    BerthSwitch,
     BerthSwitchReason,
     HarborChoice,
     WinterStorageApplication,
@@ -52,10 +53,37 @@ class HarborChoiceInline(admin.TabularInline):
     extra = 10
     max_num = 10
 
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        field = super(HarborChoiceInline, self).formfield_for_foreignkey(
+            db_field, request, **kwargs
+        )
+        if db_field.name == "harbor":
+            field.queryset = field.queryset.translated("fi")
+        return field
+
 
 class BerthApplicationInline(admin.StackedInline):
     model = BerthApplication
     extra = 0
+
+
+class BerthSwitchAdmin(admin.ModelAdmin):
+    model = BerthSwitch
+    list_display = ("id", "berth", "reason", "berth_applications")
+    readonly_fields = ("berth_applications",)
+    search_fields = (
+        "id",
+        "number",
+        "pier__identifier",
+        "pier__harbor__translations__name",
+        "pier__harbor_id",
+    )
+    autocomplete_fields = ("berth",)
+
+    def berth_applications(self, obj):
+        return ", ".join([str(application) for application in obj.applications.all()])
+
+    berth_applications.short_description = _("Applications")
 
 
 class BerthApplicationAdmin(admin.ModelAdmin):
@@ -63,9 +91,8 @@ class BerthApplicationAdmin(admin.ModelAdmin):
     readonly_fields = [
         "application_type",
         "created_at",
-        "get_berth_switch_harbor",
-        "get_berth_switch_pier",
-        "get_berth_switch_berth_number",
+        "get_berth_switch_id",
+        "get_berth_switch_berth",
         "get_berth_switch_reason",
     ]
     fieldsets = [
@@ -122,9 +149,8 @@ class BerthApplicationAdmin(admin.ModelAdmin):
             _("Switch berth information"),
             {
                 "fields": [
-                    "get_berth_switch_harbor",
-                    "get_berth_switch_pier",
-                    "get_berth_switch_berth_number",
+                    "get_berth_switch_id",
+                    "get_berth_switch_berth",
                     "get_berth_switch_reason",
                 ]
             },
@@ -152,6 +178,7 @@ class BerthApplicationAdmin(admin.ModelAdmin):
         "application_type",
         "status",
     )
+    autocomplete_fields = ("customer",)
     list_filter = (ApplicationTypeFilter, "status")
     search_fields = ("id", "first_name", "last_name")
     autocomplete_fields = ("customer",)
@@ -160,20 +187,19 @@ class BerthApplicationAdmin(admin.ModelAdmin):
     def application_type(self, obj):
         return _("Application") if obj.berth_switch is None else _("Switch application")
 
-    def get_berth_switch_harbor(self, obj):
-        return obj.berth_switch.harbor
+    def get_berth_switch_id(self, obj):
+        return obj.berth_switch.id
 
-    get_berth_switch_harbor.short_description = _("Harbor")
+    get_berth_switch_id.short_description = _("Id")
 
-    def get_berth_switch_pier(self, obj):
-        return obj.berth_switch.pier
+    def get_berth_switch_berth(self, obj):
+        return (
+            f"{obj.berth_switch.berth.pier.harbor.name} "
+            f"({obj.berth_switch.berth.pier.identifier}) "
+            f"{obj.berth_switch.berth.number}"
+        )
 
-    get_berth_switch_pier.short_description = _("Pier")
-
-    def get_berth_switch_berth_number(self, obj):
-        return obj.berth_switch.berth_number
-
-    get_berth_switch_berth_number.short_description = _("Berth number")
+    get_berth_switch_berth.short_description = _("Berth")
 
     def get_berth_switch_reason(self, obj):
         return obj.berth_switch.reason.title
@@ -321,6 +347,7 @@ class WinterStorageApplicationAdmin(admin.ModelAdmin):
         "area_type",
         "status",
     )
+    autocomplete_fields = ("customer",)
     list_filter = ("area_type", "status")
     actions = ["export_applications", "resend_application_confirmation"]
     search_fields = ("id", "first_name", "last_name")
@@ -394,6 +421,7 @@ class BerthSwitchReasonAdmin(TranslatableAdmin):
 
 admin.site.register(BerthApplication, BerthApplicationAdmin)
 admin.site.register(WinterStorageApplication, WinterStorageApplicationAdmin)
+admin.site.register(BerthSwitch, BerthSwitchAdmin)
 admin.site.register(BerthSwitchReason, BerthSwitchReasonAdmin)
 
 # Register Permission model for GUI management of permissions

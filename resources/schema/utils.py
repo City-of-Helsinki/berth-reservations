@@ -2,7 +2,7 @@ from django.db.models import Count, Prefetch, Q
 from django.utils.translation import gettext_lazy as _
 
 from applications.models import BerthApplication
-from applications.new_schema import BerthApplicationNode
+from applications.schema import BerthApplicationNode
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from users.utils import user_has_view_permission
 from utils.relay import get_node_from_global_id

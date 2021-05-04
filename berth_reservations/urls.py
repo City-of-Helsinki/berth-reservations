@@ -10,16 +10,11 @@ from contracts.services import get_contract_service
 from payments import urls as payment_urls
 from payments.models import Order
 
-from .new_schema import new_schema
 from .views import SentryGraphQLView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("graphql/", csrf_exempt(SentryGraphQLView.as_view(graphiql=True))),
-    path(
-        "graphql_v2/",
-        csrf_exempt(SentryGraphQLView.as_view(schema=new_schema, graphiql=True)),
-    ),
     path("payments/", include(payment_urls)),
 ]
 
