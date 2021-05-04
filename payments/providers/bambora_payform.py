@@ -430,7 +430,7 @@ class BamboraPayformProvider(PaymentProvider):
         refund_amount = 0
 
         for product in payment_details.payment_products:
-            products.append({"id": product.product_id, "count": 1})
+            products.append({"product_id": product.product_id, "count": 1})
             refund_amount = price_from_fractional_int(product.price)
 
         if refund_amount != order.total_price:
