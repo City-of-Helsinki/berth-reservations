@@ -69,6 +69,16 @@ class BamboraPaymentProductDetails:
     price: int
     type: int
 
+    def __init__(self, product_dict: dict):
+        self.id = product_dict.get("id", "")
+        self.product_id = product_dict.get("product_id", "")
+        self.title = product_dict.get("title", "")
+        self.count = int(product_dict.get("count", 1))
+        self.pretax_price = int(product_dict.get("pretax_price", 0))
+        self.tax = int(product_dict.get("tax", 24))
+        self.price = int(product_dict.get("price", 0))
+        self.type = int(product_dict.get("type", 1))
+
 
 @dataclass
 class BamboraPaymentRefundDetails:
@@ -96,7 +106,7 @@ class BamboraPaymentDetails:
 
     def __init__(self, payment_dict: dict):
         self.id = payment_dict.get("id", "")
-        self.amount = payment_dict.get("amount", 0)
+        self.amount = int(payment_dict.get("amount", 0))
         self.currency = payment_dict.get("currency", "EUR")
         self.order_number = payment_dict.get("order_number", "")
         self.source = payment_dict.get("source", {})
@@ -108,7 +118,7 @@ class BamboraPaymentDetails:
             **payment_dict.get("customer", {})
         )
         self.payment_products = [
-            BamboraPaymentProductDetails(**product)
+            BamboraPaymentProductDetails(product)
             for product in payment_dict.get("payment_products", [])
         ]
 
@@ -116,8 +126,8 @@ class BamboraPaymentDetails:
         for refund in payment_dict.get("refunds", []):
             # Refunds have nested products
             refund_products = [
-                BamboraPaymentProductDetails(**refund)
-                for refund in refund.pop("payment_products", [])
+                BamboraPaymentProductDetails(refund_product)
+                for refund_product in refund.pop("payment_products", [])
             ]
             self.refunds.append(
                 BamboraPaymentRefundDetails(**refund, payment_products=refund_products)
