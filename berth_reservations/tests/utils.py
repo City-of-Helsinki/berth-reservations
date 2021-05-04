@@ -4,7 +4,6 @@ from graphene.test import Client as GrapheneClient
 from requests import RequestException
 
 from ..middlewares import GQLDataLoaders
-from ..new_schema import new_schema
 from ..schema import schema
 
 
@@ -26,21 +25,15 @@ class ApiClient(GrapheneClient):
         return super().execute(*args, middleware=[GQLDataLoaders()], **kwargs)
 
 
-def create_api_client(user=None, graphql_v2=True):
+def create_api_client(user=None):
     if not user:
         # Django's AuthenticationMiddleware inserts AnonymousUser
         # for all requests, where user is not authenticated.
         user = AnonymousUser()
 
-    if graphql_v2:
-        request = RequestFactory().post("/graphql_v2")
-        request.user = user
-        client = ApiClient(new_schema, context=request)
-
-    else:
-        request = RequestFactory().post("/graphql")
-        request.user = user
-        client = ApiClient(schema, context=request)
+    request = RequestFactory().post("/graphql")
+    request.user = user
+    client = ApiClient(schema, context=request)
 
     client.user = user
 

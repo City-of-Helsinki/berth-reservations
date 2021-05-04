@@ -33,7 +33,7 @@ HARBOR_REGIONS = {
         "Hietalahdenallas / Venesatama",
         "Katajanokan venesatama",
         "Lähteelä retkisatama",
-        "Merihaan venesatama (Hakaniemenranta 13)",
+        "Merihaan venesatama (Hakaniemenranta 30)",
         "Merisatama (Ehrenströmintie 21)",
         "Merisatama (Merisatama 28)",
         "Merisatama (Merisatamanranta 20)",

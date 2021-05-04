@@ -6,7 +6,7 @@ import pytest
 from faker import Faker
 from freezegun import freeze_time
 
-from applications.new_schema import BerthApplicationNode
+from applications.schema import BerthApplicationNode
 from applications.tests.factories import BerthSwitchFactory
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
@@ -14,13 +14,12 @@ from berth_reservations.tests.utils import (
     assert_not_enough_permissions,
 )
 from customers.tests.conftest import mocked_response_profile
-from harbors.tests.factories import HarborFactory as OldHarborFactory
 from leases.enums import LeaseStatus
 from leases.schema import BerthLeaseNode
 from leases.tests.factories import BerthLeaseFactory
 from leases.utils import calculate_season_end_date, calculate_season_start_date
 from resources.schema import BerthNode
-from resources.tests.factories import PierFactory
+from resources.tests.factories import BerthFactory
 from utils.relay import to_global_id
 
 from ..enums import OfferStatus
@@ -54,144 +53,15 @@ mutation CREATE_BERTH_SWITCH_OFFER_MUTATION($input: CreateBerthSwitchOfferMutati
     "api_client", ["berth_services"], indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
-def test_create_berth_switch_offer_direct_harbor_mapping(
-    api_client, berth_application, berth
-):
+def test_create_berth_switch_offer(api_client, berth_application, berth):
     berth_lease = BerthLeaseFactory(
-        start_date=calculate_season_start_date(), end_date=calculate_season_end_date()
+        start_date=calculate_season_start_date(),
+        end_date=calculate_season_end_date(),
+        status=LeaseStatus.PAID,
     )
     berth_application.customer = berth_lease.customer
-    old_harbor = OldHarborFactory(resources_harbor=berth_lease.berth.pier.harbor)
-    berth_application.berth_switch = BerthSwitchFactory(
-        harbor=old_harbor,
-        pier=berth_lease.berth.pier.identifier,
-        berth_number=berth_lease.berth.number,
-    )
+    berth_application.berth_switch = BerthSwitchFactory(berth=berth_lease.berth)
     berth_application.save()
-    berth_lease.status = LeaseStatus.PAID
-    berth_lease.save()
-
-    variables = {
-        "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
-        "newBerthId": to_global_id(BerthNode, berth.id),
-    }
-    executed = api_client.execute(CREATE_BERTH_SWITCH_OFFER_MUTATION, input=variables)
-
-    assert executed["data"]["createBerthSwitchOffer"]["berthSwitchOffer"] == {
-        "status": OfferStatus.DRAFTED.name,
-        "dueDate": None,
-        "application": {"id": variables["applicationId"], "status": "OFFER_GENERATED"},
-        "customer": {"id": to_global_id(ProfileNode, berth_lease.customer.id)},
-        "lease": {"id": to_global_id(BerthLeaseNode, berth_lease.id)},
-        "berth": {"id": variables["newBerthId"]},
-    }
-
-
-@pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
-)
-@freeze_time("2020-01-01T08:00:00Z")
-def test_create_berth_switch_offer_direct_pier_mapping(
-    api_client, berth_application, berth
-):
-    berth_lease = BerthLeaseFactory(
-        start_date=calculate_season_start_date(), end_date=calculate_season_end_date()
-    )
-    berth_application.customer = berth_lease.customer
-    old_harbor = OldHarborFactory()
-    berth_lease.berth.pier.harbors_harbor = old_harbor
-    berth_lease.berth.pier.save()
-
-    berth_application.berth_switch = BerthSwitchFactory(
-        harbor=old_harbor,
-        pier=berth_lease.berth.pier.identifier,
-        berth_number=berth_lease.berth.number,
-    )
-    berth_application.save()
-    berth_lease.status = LeaseStatus.PAID
-    berth_lease.save()
-
-    variables = {
-        "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
-        "newBerthId": to_global_id(BerthNode, berth.id),
-    }
-    executed = api_client.execute(CREATE_BERTH_SWITCH_OFFER_MUTATION, input=variables)
-
-    assert executed["data"]["createBerthSwitchOffer"]["berthSwitchOffer"] == {
-        "status": OfferStatus.DRAFTED.name,
-        "dueDate": None,
-        "application": {"id": variables["applicationId"], "status": "OFFER_GENERATED"},
-        "customer": {"id": to_global_id(ProfileNode, berth_lease.customer.id)},
-        "lease": {"id": to_global_id(BerthLeaseNode, berth_lease.id)},
-        "berth": {"id": variables["newBerthId"]},
-    }
-
-
-@pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
-)
-@freeze_time("2020-01-01T08:00:00Z")
-def test_create_berth_switch_offer_several_pier_mapping(
-    api_client, berth_application, berth
-):
-    berth_lease = BerthLeaseFactory(
-        start_date=calculate_season_start_date(), end_date=calculate_season_end_date()
-    )
-    berth_application.customer = berth_lease.customer
-    old_harbor = OldHarborFactory()
-    berth_lease.berth.pier.harbors_harbor = old_harbor
-    berth_lease.berth.pier.save()
-
-    # Random piers to add noise to the mapping
-    PierFactory(harbors_harbor=old_harbor)
-    PierFactory(harbors_harbor=old_harbor)
-    PierFactory(harbors_harbor=old_harbor)
-
-    berth_application.berth_switch = BerthSwitchFactory(
-        harbor=old_harbor,
-        pier=berth_lease.berth.pier.identifier,
-        berth_number=berth_lease.berth.number,
-    )
-    berth_application.save()
-    berth_lease.status = LeaseStatus.PAID
-    berth_lease.save()
-
-    variables = {
-        "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
-        "newBerthId": to_global_id(BerthNode, berth.id),
-    }
-    executed = api_client.execute(CREATE_BERTH_SWITCH_OFFER_MUTATION, input=variables)
-
-    assert executed["data"]["createBerthSwitchOffer"]["berthSwitchOffer"] == {
-        "status": OfferStatus.DRAFTED.name,
-        "dueDate": None,
-        "application": {"id": variables["applicationId"], "status": "OFFER_GENERATED"},
-        "customer": {"id": to_global_id(ProfileNode, berth_lease.customer.id)},
-        "lease": {"id": to_global_id(BerthLeaseNode, berth_lease.id)},
-        "berth": {"id": variables["newBerthId"]},
-    }
-
-
-@pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
-)
-@freeze_time("2020-01-01T08:00:00Z")
-def test_create_berth_switch_offer_default_pier_mapping(
-    api_client, berth_application, berth
-):
-    berth_lease = BerthLeaseFactory(
-        start_date=calculate_season_start_date(), end_date=calculate_season_end_date()
-    )
-    berth_application.customer = berth_lease.customer
-    old_harbor = OldHarborFactory()
-    berth_lease.berth.pier.harbors_harbor = old_harbor
-    berth_lease.berth.pier.save()
-
-    berth_application.berth_switch = BerthSwitchFactory(
-        harbor=old_harbor, pier="", berth_number=berth_lease.berth.number,
-    )
-    berth_application.save()
-    berth_lease.status = LeaseStatus.PAID
     berth_lease.save()
 
     variables = {
@@ -216,18 +86,19 @@ def test_create_berth_switch_offer_default_pier_mapping(
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_switch_offer_old_lease(api_client, berth_application, berth):
     berth_lease = BerthLeaseFactory(
-        start_date=calculate_season_start_date(), end_date=calculate_season_end_date()
+        start_date=calculate_season_start_date(),
+        end_date=calculate_season_end_date(),
+        status=LeaseStatus.PAID,
     )
     BerthLeaseFactory(
         customer=berth_lease.customer,
         start_date=calculate_season_start_date(),
         end_date=calculate_season_end_date(),
+        status=LeaseStatus.PAID,
     )
     berth_application.customer = berth_lease.customer
-    berth_application.berth_switch = BerthSwitchFactory()
+    berth_application.berth_switch = BerthSwitchFactory(berth=berth_lease.berth)
     berth_application.save()
-    berth_lease.status = LeaseStatus.PAID
-    berth_lease.save()
 
     variables = {
         "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
@@ -250,18 +121,18 @@ def test_create_berth_switch_offer_old_lease(api_client, berth_application, bert
     "api_client", ["berth_services"], indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
-def test_create_berth_switch_offer_wrong_pier(api_client, berth_application, berth):
+def test_create_berth_switch_offer_wrong_berth(api_client, berth_application, berth):
     berth_lease = BerthLeaseFactory(
-        start_date=calculate_season_start_date(), end_date=calculate_season_end_date()
+        start_date=calculate_season_start_date(),
+        end_date=calculate_season_end_date(),
+        status=LeaseStatus.PAID,
     )
     berth_application.customer = berth_lease.customer
 
     berth_application.berth_switch = BerthSwitchFactory(
-        pier="wrong pier", berth_number=berth_lease.berth.number,
+        berth=BerthFactory(number="9999"),
     )
     berth_application.save()
-    berth_lease.status = LeaseStatus.PAID
-    berth_lease.save()
 
     variables = {
         "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
@@ -269,76 +140,6 @@ def test_create_berth_switch_offer_wrong_pier(api_client, berth_application, ber
     }
     executed = api_client.execute(CREATE_BERTH_SWITCH_OFFER_MUTATION, input=variables)
 
-    assert_in_errors("NO_LEASE", executed)
-
-
-@pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
-)
-@freeze_time("2020-01-01T08:00:00Z")
-def test_create_berth_switch_offer_several_piers_missing_id(
-    api_client, berth_application, berth
-):
-    berth_lease = BerthLeaseFactory(
-        start_date=calculate_season_start_date(), end_date=calculate_season_end_date()
-    )
-    berth_application.customer = berth_lease.customer
-    old_harbor = OldHarborFactory()
-    berth_lease.berth.pier.harbors_harbor = old_harbor
-    berth_lease.berth.pier.save()
-
-    # Random piers to add noise to the mapping
-    PierFactory(harbors_harbor=old_harbor)
-    PierFactory(harbors_harbor=old_harbor)
-    PierFactory(harbors_harbor=old_harbor)
-
-    berth_application.berth_switch = BerthSwitchFactory(
-        harbor=old_harbor, pier="", berth_number=berth_lease.berth.number,
-    )
-    berth_application.save()
-    berth_lease.status = LeaseStatus.PAID
-    berth_lease.save()
-
-    variables = {
-        "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
-        "newBerthId": to_global_id(BerthNode, berth.id),
-    }
-    executed = api_client.execute(CREATE_BERTH_SWITCH_OFFER_MUTATION, input=variables)
-    assert_in_errors("NO_LEASE", executed)
-
-
-@pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
-)
-@freeze_time("2020-01-01T08:00:00Z")
-def test_create_berth_switch_offer_missing_berth(api_client, berth_application, berth):
-    berth_lease = BerthLeaseFactory(
-        start_date=calculate_season_start_date(), end_date=calculate_season_end_date()
-    )
-    berth_application.customer = berth_lease.customer
-    old_harbor = OldHarborFactory()
-    berth_lease.berth.pier.harbors_harbor = old_harbor
-    berth_lease.berth.pier.save()
-
-    # Random piers to add noise to the mapping
-    PierFactory(harbors_harbor=old_harbor)
-    PierFactory(harbors_harbor=old_harbor)
-    PierFactory(harbors_harbor=old_harbor)
-
-    berth_application.berth_switch = BerthSwitchFactory(
-        harbor=old_harbor,
-        pier=berth_lease.berth.pier.identifier,
-        berth_number=int(berth_lease.berth.number) + 1,
-    )
-    berth_application.save()
-    berth_lease.status = LeaseStatus.PAID
-    berth_lease.save()
-
-    variables = {
-        "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
-        "newBerthId": to_global_id(BerthNode, berth.id),
-    }
-    executed = api_client.execute(CREATE_BERTH_SWITCH_OFFER_MUTATION, input=variables)
     assert_in_errors("NO_LEASE", executed)
 
 
@@ -487,18 +288,13 @@ def test_create_berth_switch_offer_refresh_profile(
 ):
     faker = Faker("fi_FI")
     berth_lease = BerthLeaseFactory(
-        start_date=calculate_season_start_date(), end_date=calculate_season_end_date()
+        start_date=calculate_season_start_date(),
+        end_date=calculate_season_end_date(),
+        status=LeaseStatus.PAID,
     )
     berth_application.customer = berth_lease.customer
-    old_harbor = OldHarborFactory(resources_harbor=berth_lease.berth.pier.harbor)
-    berth_application.berth_switch = BerthSwitchFactory(
-        harbor=old_harbor,
-        pier=berth_lease.berth.pier.identifier,
-        berth_number=berth_lease.berth.number,
-    )
+    berth_application.berth_switch = BerthSwitchFactory(berth=berth_lease.berth)
     berth_application.save()
-    berth_lease.status = LeaseStatus.PAID
-    berth_lease.save()
 
     first_name = faker.first_name()
     last_name = faker.last_name()
