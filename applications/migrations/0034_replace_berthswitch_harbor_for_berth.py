@@ -11,11 +11,12 @@ def fix_applications(apps, schema_editor):
 
     with transaction.atomic():
         for switch in BerthSwitch.objects.all():
+            identifier = switch.pier or "-"
             try:
                 # Assign the correct berth to the switch
                 berth = Berth.objects.get(
-                    harbor=switch.harbor,
-                    harbor__pier__identifier__iexact=switch.pier,
+                    pier__harbor=switch.harbor,
+                    pier__identifier__iexact=identifier,
                     number=switch.berth_number,
                 )
                 switch.berth = berth

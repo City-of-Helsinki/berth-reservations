@@ -4,12 +4,69 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+old_harbor_mapping = {
+    1: "40393",
+    2: "41636",
+    3: "40971",
+    4: "39913",
+    5: "41390",
+    6: "40672",
+    7: "41926",
+    8: "40166",
+    9: "40827",
+    10: "48272",
+    11: "40310",
+    12: "41189",
+    13: "39950",
+    14: "40864",
+    15: "40290",
+    16: "41454",
+    17: "41066",
+    18: "40948",
+    19: "45995",
+    20: "40359",
+    21: "42225",
+    22: "40712",
+    23: "41359",
+    24: "40590",
+    25: "41669",
+    26: "41150",
+    27: "40842",
+    28: "40897",
+    29: "40800",
+    30: "41074",
+    31: "40203",
+    32: "40535",
+    33: "40627",
+    34: "41857",
+    35: "40876",
+    36: "42276",
+    37: "41472",
+    38: "42136",
+    39: "41415",
+    40: "41637",
+    41: "42130",
+    42: "48272",
+    43: "41189",
+    44: "40359",
+    45: "41359",
+    46: "40393",
+    47: "40864",
+    48: "40864",
+    49: "41454",
+    50: "40971",
+    51: "41472",
+    52: "41390",
+}
+
+
 def berth_switch_save_servicemap_id(apps, schema_editor):
     BerthSwitch = apps.get_model("applications", "BerthSwitch")
 
     for switch in BerthSwitch.objects.all():
         if hasattr(switch, "_temp_servicemap_id"):
-            switch._temp_servicemap_id = switch.harbor.servicemap_id
+            switch._temp_servicemap_id = old_harbor_mapping[int(switch.harbor_id)]
+            switch.harbor = None
             switch.save()
 
 
@@ -41,14 +98,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name="berthswitch",
-            name="_temp_servicemap_id",
-            field=models.CharField(null=True, blank=True, max_length=8),
-        ),
-        migrations.RunPython(
-            berth_switch_save_servicemap_id, reverse_code=migrations.RunPython.noop
-        ),
         migrations.AlterField(
             model_name="berthswitch",
             name="harbor",
@@ -59,8 +108,13 @@ class Migration(migrations.Migration):
                 null=True,
             ),
         ),
+        migrations.AddField(
+            model_name="berthswitch",
+            name="_temp_servicemap_id",
+            field=models.CharField(null=True, blank=True, max_length=8),
+        ),
         migrations.RunPython(
-            berth_switch_clear_harbor_id, reverse_code=migrations.RunPython.noop
+            berth_switch_save_servicemap_id, reverse_code=migrations.RunPython.noop
         ),
         migrations.RemoveField(model_name="berthswitch", name="harbor",),
         migrations.AddField(

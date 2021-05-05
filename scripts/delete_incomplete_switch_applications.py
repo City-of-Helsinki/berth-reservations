@@ -84,6 +84,9 @@ for application in BerthApplication.objects.filter(berth_switch__isnull=False):
                 switch.berth_number,
             ]
         )
+        # TODO: this has to be removed when run manually
+        # application.berth_switch.delete()
+        # application.delete()
 
 with open("customers.csv", mode="w+") as csvfile:
     writer = csv.writer(csvfile, delimiter=",", quotechar='"',)
