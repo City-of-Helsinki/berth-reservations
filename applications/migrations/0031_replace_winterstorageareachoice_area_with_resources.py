@@ -4,6 +4,24 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+old_winter_area_mapping = {
+    1: "9d577c99-63f3-4234-8138-f70a4f8684f2",
+    2: "3631fbc5-1454-448f-9a9b-fff64588d208",
+    3: "3f485ff8-36bf-4786-bfe6-b0729e8e9c6b",
+    4: "ed291ec2-1cb3-4049-a642-e290280bd8bf",
+    5: "10f6d541-5e4e-420c-abc4-014a48aca3c4",
+    6: "a9ef8fe9-86a8-44e4-a806-32ed47494129",
+    7: "5bfe1de8-dcc7-4ed4-b16d-c5f2fa08be0d",
+    8: "72335b05-1913-44e2-8f5d-a4219498b47a",
+    9: "94d97495-bb5c-4d6e-a91a-5da9e70d0aea",
+    10: "c200c0fa-8afc-43ab-8d43-a3d10be4c44a",
+    11: "db0323f0-8da5-40e3-a8aa-e46ad4af3e93",
+    12: "506b0830-fa3e-4da7-a837-b4ffa1218eb1",
+    13: "f38c0645-bb9c-4c67-a515-cf11f3787541",
+    14: "38955371-4dd2-4321-8994-f4b52c81aa41",
+}
+
+
 def copy_area_choices(apps, schema_editor):
     WinterStorageAreaChoice = apps.get_model("applications", "WinterStorageAreaChoice")
     TmpChoice = apps.get_model("applications", "TmpChoice")
@@ -13,7 +31,9 @@ def copy_area_choices(apps, schema_editor):
         TmpChoice.objects.create(
             id=choice.id,
             priority=choice.priority,
-            winter_storage_area=choice.winter_storage_area.resources_area,
+            winter_storage_area_id=old_winter_area_mapping[
+                choice.winter_storage_area_id
+            ],
             application=choice.application,
         )
 
