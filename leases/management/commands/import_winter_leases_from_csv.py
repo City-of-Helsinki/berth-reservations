@@ -158,6 +158,15 @@ class Command(BaseCommand):
                             )
                         )
 
+        self.stdout.write(
+            self.style.SUCCESS(f"Leases imported correctly: {len(successful)}")
+        )
+        self.stdout.write(self.style.ERROR(f"Leases failed to import: {len(failed)}"))
+        self.stdout.write(
+            self.style.ERROR(
+                f"Customers with multiple profiles: {len(multiple_profiles)}"
+            )
+        )
         with open("./successful_leases.csv", "w+", encoding="utf-8") as successful_file:
             writer = csv.writer(successful_file, delimiter=",")
             writer.writerow(["Lease id", "Section id", "Place number", "Customer name"])
