@@ -183,7 +183,10 @@ class ProfileService:
 
         if force_only_one:
             if len(profiles) > 1:
-                ids = [from_global_id(node.get("id")) for node in profiles]
+                ids = [
+                    from_global_id(profile_node.get("node", {}).get("id"))
+                    for profile_node in profiles
+                ]
                 raise MultipleProfilesException(ids=ids)
             elif len(profiles) == 0:
                 raise NoProfilesException
