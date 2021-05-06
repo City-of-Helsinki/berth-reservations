@@ -13,6 +13,7 @@ from berth_reservations.tests.utils import (
     assert_not_enough_permissions,
 )
 from resources.schema import BoatTypeType
+from users.utils import get_berth_customers_group
 from utils.numbers import random_decimal
 from utils.relay import from_global_id, to_global_id
 
@@ -538,10 +539,13 @@ def test_create_my_berth_profile(user_api_client, hki_profile_address):
         )
 
     assert CustomerProfile.objects.count() == 1
-
     assert executed["data"]["createMyBerthProfile"]["profile"] == {
         "id": customer_id,
     }
+    profile = CustomerProfile.objects.all().first()
+    assert profile.user is not None
+    assert profile.user.groups.count() == 1
+    assert profile.user.groups.first() == get_berth_customers_group()
 
 
 def test_create_my_berth_profile_does_not_exist(user_api_client):
@@ -563,6 +567,7 @@ def test_create_my_berth_profile_already_exists(user_api_client):
     CustomerProfile.objects.create(id=uuid.uuid4(), user=User.objects.first())
 
     assert CustomerProfile.objects.count() == 1
+    assert CustomerProfile.objects.all().first().user.groups.count() == 0
 
     executed = user_api_client.execute(
         CREATE_MY_BERTH_PROFILE_MUTATION, input=variables
@@ -570,6 +575,12 @@ def test_create_my_berth_profile_already_exists(user_api_client):
 
     assert CustomerProfile.objects.count() == 1
     assert executed["data"]["createMyBerthProfile"] is None
+
+    # the berth customer group is still assigned, if it was not assigned before
+    profile = CustomerProfile.objects.all().first()
+    assert profile.user is not None
+    assert profile.user.groups.count() == 1
+    assert profile.user.groups.first() == get_berth_customers_group()
 
 
 UPDATE_BERTH_SERVICE_PROFILE_MUTATION = """
