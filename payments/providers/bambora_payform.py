@@ -82,7 +82,7 @@ class BamboraPaymentProductDetails:
 
 @dataclass
 class BamboraPaymentRefundDetails:
-    id: int
+    refund_id: int
     amount: int
     created_at: str
     order_number: str
@@ -412,6 +412,11 @@ class BamboraPayformProvider(PaymentProvider):
             hasattr(order, "lease") and order.lease.status != LeaseStatus.PAID
         ):
             raise ValidationError(_("Cannot refund an order that is not paid"))
+
+        if order.refunds.filter(status=OrderRefundStatus.PENDING).exists():
+            raise ValidationError(
+                _("Cannot refund an order that has another pending refund")
+            )
 
         email = order.customer_email or (
             order.lease.application.email
