@@ -223,6 +223,58 @@ def test_initiate_refund_refunded_amount_does_not_match(
 @pytest.mark.parametrize(
     "order", ["berth_order", "winter_storage_order"], indirect=True,
 )
+def test_initiate_refund_another_pending_refund(
+    provider_base_config: dict, order: Order
+):
+    """Test the request creator constructs the payload base and returns a url that contains a token"""
+    request = RequestFactory().request()
+    order.status = OrderStatus.PAID
+    order.lease.status = LeaseStatus.PAID
+    order.lease.save()
+    order.save()
+    OrderRefundFactory(order=order, status=OrderRefundStatus.PENDING)
+
+    OrderToken.objects.create(
+        order=order, token="98765", valid_until=now() - relativedelta(hours=1)
+    )
+    OrderToken.objects.create(
+        order=order, token="12345", valid_until=now() - relativedelta(days=7)
+    )
+
+    products = [
+        {
+            "id": "123123123",
+            "product_id": 1123,
+            "title": order.product.name,
+            "count": 1,
+            "pretax_price": 100,
+            "tax": 24,
+            "price": 100,
+            "type": 1,
+        }
+    ]
+
+    assert OrderRefund.objects.count() == 1
+
+    payment_provider = create_bambora_provider(provider_base_config, request)
+    with mock.patch(
+        "payments.providers.bambora_payform.requests.post",
+        side_effect=mocked_refund_response_create,
+    ), mock.patch(
+        "payments.providers.bambora_payform.BamboraPayformProvider.get_payment_details",
+        side_effect=mocked_refund_payment_details(products=products),
+    ), pytest.raises(
+        ValidationError
+    ) as exception:
+        payment_provider.initiate_refund(order)
+
+    assert "Cannot refund an order that has another pending refund" in str(exception)
+    assert OrderRefund.objects.count() == 1
+
+
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
+)
 def test_initiate_refund_no_order_email_or_application(
     provider_base_config: dict, order: Order
 ):
