@@ -53,6 +53,22 @@ class BerthProductAdmin(admin.ModelAdmin):
     )
 
 
+class WinterStorageProductAdmin(admin.ModelAdmin):
+    list_display = ("winter_storage_area", "price")
+
+    @currency
+    def price(self, obj):
+        return obj.price_value
+
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        field = super(WinterStorageProductAdmin, self).formfield_for_foreignkey(
+            db_field, request, **kwargs
+        )
+        if db_field.name == "winter_storage_area":
+            field.queryset = field.queryset.translated("fi")
+        return field
+
+
 class OrderLineInline(admin.StackedInline):
     model = OrderLine
     fk_name = "order"
@@ -392,7 +408,7 @@ class OrderLineAdmin(admin.ModelAdmin):
     talpa_product_id.admin_order_field = "talpa_product_id"
 
 
-admin.site.register([WinterStorageProduct])
+admin.site.register(WinterStorageProduct, WinterStorageProductAdmin)
 admin.site.register(BerthProduct, BerthProductAdmin)
 admin.site.register(AdditionalProduct, AdditionalProductAdmin)
 admin.site.register(Order, OrderAdmin)

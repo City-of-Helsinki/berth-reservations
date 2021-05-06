@@ -26,7 +26,12 @@ from utils.relay import to_global_id
 
 from ..enums import LeaseStatus
 from ..schema import BerthLeaseNode, WinterStorageLeaseNode
-from ..utils import calculate_season_end_date, calculate_season_start_date
+from ..utils import (
+    calculate_season_end_date,
+    calculate_season_start_date,
+    calculate_winter_season_end_date,
+    calculate_winter_season_start_date,
+)
 from .factories import BerthLeaseFactory, WinterStorageLeaseFactory
 
 QUERY_BERTH_LEASES = """
@@ -39,7 +44,6 @@ query GetBerthLeases {
                 startDate
                 endDate
                 comment
-                renewAutomatically
                 boat {
                     id
                 }
@@ -94,7 +98,6 @@ def test_query_berth_leases(api_client, berth_lease, berth_application):
         "startDate": str(berth_lease.start_date),
         "endDate": str(berth_lease.end_date),
         "comment": berth_lease.comment,
-        "renewAutomatically": True,
         "boat": {"id": boat_id},
         "customer": {
             "id": customer_id,
@@ -714,7 +717,6 @@ query SendBerthInvoicePreview {
 @freeze_time("2020-02-01")
 def test_query_send_berth_invoice_preview(api_client):
     lease = BerthLeaseFactory(
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.PAID,
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),
@@ -723,7 +725,6 @@ def test_query_send_berth_invoice_preview(api_client):
     lease.contract = BerthContractFactory()
     lease.contract.save()
     BerthLeaseFactory(
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.REFUSED,
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),
@@ -737,3 +738,80 @@ def test_query_send_berth_invoice_preview(api_client):
     executed = api_client.execute(QUERY_SEND_BERTH_INVOICE_PREVIEW)
 
     assert executed["data"]["sendBerthInvoicePreview"] == {"expectedLeases": 1}
+
+
+FILTERED_QUERY_WINTER_STORAGE_LEASES = """
+query GetWinterStorageLeases {
+    winterStorageLeases(statuses: [%s], startYear: %d) {
+        edges {
+            node {
+                id
+                status
+                startDate
+            }
+        }
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_services", "berth_handler", "berth_supervisor"],
+    indirect=True,
+)
+@freeze_time("2020-02-01")
+def test_query_winter_storage_leases_filtered(api_client):
+    lease = WinterStorageLeaseFactory(status=LeaseStatus.DRAFTED)
+    WinterStorageLeaseFactory(status=LeaseStatus.OFFERED)
+
+    query = FILTERED_QUERY_WINTER_STORAGE_LEASES % ("DRAFTED", 2020)
+
+    lease_id = to_global_id(WinterStorageLeaseNode, lease.id)
+
+    executed = api_client.execute(query)
+
+    assert executed["data"]["winterStorageLeases"]["edges"][0]["node"] == {
+        "id": lease_id,
+        "status": "DRAFTED",
+        "startDate": str(lease.start_date),
+    }
+
+
+QUERY_SEND_WINTER_STORAGE_LEASE_INVOICE_PREVIEW = """
+query SendWinterStorageInvoicePreview {
+    sendMarkedWinterStorageInvoicePreview  {
+        expectedLeases
+    }
+}
+"""
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_services", "berth_handler", "berth_supervisor"],
+    indirect=True,
+)
+@freeze_time("2020-01-01")
+def test_query_send_marked_winter_storage_invoice_preview(api_client):
+    lease = WinterStorageLeaseFactory(
+        boat=None,
+        status=LeaseStatus.PAID,
+        start_date=calculate_winter_season_start_date(),
+        end_date=calculate_winter_season_end_date(),
+    )
+    WinterStorageLeaseFactory(
+        boat=None,
+        status=LeaseStatus.REFUSED,
+        start_date=calculate_winter_season_start_date(),
+        end_date=calculate_winter_season_end_date(),
+    )
+    WinterStorageProductFactory(
+        winter_storage_area=lease.place.winter_storage_section.area
+    )
+
+    executed = api_client.execute(QUERY_SEND_WINTER_STORAGE_LEASE_INVOICE_PREVIEW)
+
+    assert executed["data"]["sendMarkedWinterStorageInvoicePreview"] == {
+        "expectedLeases": 1
+    }

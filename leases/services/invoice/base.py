@@ -24,13 +24,12 @@ from customers.services import HelsinkiProfileUser, ProfileService
 from leases.enums import LeaseStatus
 from leases.exceptions import AutomaticInvoicingError
 from leases.models import BerthLease, WinterStorageLease
-from leases.utils import calculate_season_end_date, calculate_season_start_date
 from payments.enums import OrderStatus
 from payments.models import BerthProduct, Order, WinterStorageProduct
 from payments.utils import approve_order, resend_order, update_order_from_profile
 from utils.email import is_valid_email
 
-from ..notifications import NotificationType as LeaseNotificationType
+from ...notifications import NotificationType as LeaseNotificationType
 
 logger = logging.getLogger(__name__)
 
@@ -233,7 +232,12 @@ class BaseInvoicingService:
 
         logger.debug("Fetching profiles")
         # Fetch all the profiles from the Profile service
-        profiles = ProfileService(self.profile_token).get_all_profiles()
+        profile_ids = leases.distinct("customer_id").values_list(
+            "customer_id", flat=True
+        )
+        profiles = ProfileService(self.profile_token).get_all_profiles(
+            profile_ids=profile_ids
+        )
 
         logger.debug(f"Profiles fetched: {len(profiles)}")
 
@@ -308,6 +312,7 @@ class BaseInvoicingService:
         orders = self.get_failed_orders(self.season_start)
 
         for order in orders:
+            order.due_date = self.due_date
             order.set_status(
                 OrderStatus.OFFERED,
                 comment=f"{get_ts()}: {_('Cleanup the invoice to attempt resending')}\n",
@@ -326,29 +331,3 @@ class BaseInvoicingService:
                 VenepaikkaGraphQLError,
             ) as e:
                 self.fail_order(order, f'{_("Failed resending invoice")} ({e})')
-
-
-class BerthInvoicingService(BaseInvoicingService):
-    def __init__(self, *args, **kwargs):
-        super(BerthInvoicingService, self).__init__(*args, **kwargs)
-        self.season_start = calculate_season_start_date()
-        self.season_end = calculate_season_end_date()
-
-    @staticmethod
-    def get_product(lease: BerthLease) -> BerthProduct:
-        # The berth product is determined by the width of the berth of the lease
-        return BerthProduct.objects.get_in_range(width=lease.berth.berth_type.width)
-
-    @staticmethod
-    def get_valid_leases(season_start: date) -> QuerySet:
-        return BerthLease.objects.get_renewable_leases(season_start=season_start)
-
-    @staticmethod
-    def get_failed_orders(season_start: date) -> QuerySet:
-        leases = BerthLease.objects.filter(
-            start_date__year=season_start.year
-        ).values_list("id")
-
-        return Order.objects.filter(
-            _lease_object_id__in=leases, status=OrderStatus.ERROR
-        )

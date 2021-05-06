@@ -43,25 +43,30 @@ def hki_profile_address() -> dict:
     return MOCK_HKI_PROFILE_ADDRESS
 
 
+def get_customer_profile_dict() -> dict:
+    faker = Faker()
+    profile = CustomerProfileFactory()
+    return {
+        "id": to_global_id(ProfileNode, profile.id),
+        "first_name": profile.user.first_name,
+        "last_name": profile.user.last_name,
+        "primary_email": {"email": profile.user.email},
+        "primary_phone": {"phone": faker.phone_number()},
+        "primary_address": MOCK_HKI_PROFILE_ADDRESS,
+    }
+
+
 def mocked_response_profile(count=3, data=None, use_edges=True, *args, **kwargs):
     def wrapper(*args, **kwargs):
-        faker = Faker()
         profiles = []
 
         for _i in range(0, count):
-            profile = CustomerProfileFactory()
-            profiles.append(
-                {
-                    "id": to_global_id(ProfileNode, profile.id),
-                    "first_name": profile.user.first_name,
-                    "last_name": profile.user.last_name,
-                    "primary_email": {"email": profile.user.email},
-                    "primary_phone": {"phone": faker.phone_number()},
-                    "primary_address": MOCK_HKI_PROFILE_ADDRESS,
-                }
-            )
+            profiles.append(get_customer_profile_dict())
         if data:
-            profiles.append(data)
+            if isinstance(data, dict):
+                profiles.append(data)
+            else:
+                profiles.extend(data)
 
         if use_edges:
             edges = [{"node": node} for node in profiles]

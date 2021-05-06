@@ -20,6 +20,7 @@ from .utils import (
     calculate_berth_lease_end_date,
     calculate_berth_lease_start_date,
     calculate_season_start_date,
+    calculate_winter_season_start_date,
     calculate_winter_storage_lease_end_date,
     calculate_winter_storage_lease_start_date,
 )
@@ -138,7 +139,6 @@ class BerthLeaseManager(models.Manager):
             # Only allow leases that are auto-renewing and have been paid
             berth__is_active=True,
             berth__is_invoiceable=True,
-            renew_automatically=True,
             status=LeaseStatus.PAID,
             start_date__year=lease_year,
             end_date__year=lease_year,
@@ -165,9 +165,6 @@ class BerthLease(AbstractLease):
     )
     end_date = models.DateField(
         verbose_name=_("end date"), default=calculate_berth_lease_end_date
-    )
-    renew_automatically = models.BooleanField(
-        verbose_name=_("renew automatically"), default=True
     )
     objects = BerthLeaseManager()
 
@@ -240,6 +237,50 @@ class WinterStorageLeaseManager(models.Manager):
                 )
             )
         )
+
+    def get_renewable_marked_leases(self, season_start: date = None) -> QuerySet:
+        """
+        Get the leases that were active last last season
+        If today is:
+            (1) on the same year the season starts: leases that start on today's year
+                and end the next year (today.year + 1)
+            (2) on the same year the season ends: leases that start on the last year (today.year - 1)
+                and end today's year
+        """
+        qs = self.get_queryset()
+
+        # Default the season start to the default season start date
+        if not season_start:
+            season_start = calculate_winter_season_start_date()
+
+        current_date = today().date()
+        if current_date.year == season_start.year:  # (1)
+            start_year = current_date.year
+            end_year = current_date.year + 1
+        else:  # (2) if current_date.year == season_end.year:
+            start_year = current_date.year - 1
+            end_year = current_date.year
+
+        # Filter leases from the upcoming season
+        future_leases = qs.filter(
+            start_date__year__gte=end_year,
+            place=OuterRef("place"),
+            customer=OuterRef("customer"),
+        )
+
+        # Exclude leases that have already been assigned to the same customer and berth on the future
+        leases: QuerySet = qs.exclude(Exists(future_leases.values("pk"))).filter(
+            # Only allow leases that have been paid
+            place__isnull=False,
+            place__is_active=True,
+            place__is_invoiceable=True,
+            section__isnull=True,
+            status=LeaseStatus.PAID,
+            start_date__year=start_year,
+            end_date__year=end_year,
+        )
+
+        return leases
 
 
 class WinterStorageLease(AbstractLease):

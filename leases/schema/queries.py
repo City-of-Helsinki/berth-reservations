@@ -34,11 +34,16 @@ class Query:
     winter_storage_lease = graphene.relay.Node.Field(WinterStorageLeaseNode)
     winter_storage_leases = DjangoFilterConnectionField(
         WinterStorageLeaseNode,
+        statuses=graphene.List(LeaseStatusEnum),
+        start_year=graphene.Int(),
         filterset_class=AbstractLeaseNodeFilter,
         description="`WinterStorageLeases` are ordered by `createdAt` in ascending order by default.",
     )
 
     send_berth_invoice_preview = graphene.Field(SendExistingInvoicesPreviewType)
+    send_marked_winter_storage_invoice_preview = graphene.Field(
+        SendExistingInvoicesPreviewType
+    )
 
     @view_permission_required(BerthLease, BerthApplication, CustomerProfile)
     def resolve_berth_leases(self, info, statuses=None, start_year=None, **kwargs):
@@ -63,9 +68,17 @@ class Query:
     @view_permission_required(
         WinterStorageLease, WinterStorageApplication, CustomerProfile
     )
-    def resolve_winter_storage_leases(self, info, **kwargs):
+    def resolve_winter_storage_leases(
+        self, info, statuses=None, start_year=None, **kwargs
+    ):
+        qs = WinterStorageLease.objects
+        if statuses:
+            qs = qs.filter(status__in=statuses)
+        if start_year:
+            qs = qs.filter(start_date__year=start_year)
+
         return (
-            WinterStorageLease.objects.select_related(
+            qs.select_related(
                 "application",
                 "application__customer",
                 "place",
@@ -79,4 +92,9 @@ class Query:
     @view_permission_required(BerthLease)
     def resolve_send_berth_invoice_preview(self, info, **kwargs):
         count = BerthLease.objects.get_renewable_leases().count()
+        return SendExistingInvoicesPreviewType(expected_leases=count)
+
+    @view_permission_required(WinterStorageLease)
+    def resolve_send_marked_winter_storage_invoice_preview(self, info, **kwargs):
+        count = WinterStorageLease.objects.get_renewable_marked_leases().count()
         return SendExistingInvoicesPreviewType(expected_leases=count)

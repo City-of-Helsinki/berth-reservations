@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
 from uuid import UUID
@@ -13,6 +14,7 @@ from customers.exceptions import (
 from utils.relay import from_global_id, to_global_id
 
 PROFILE_API_URL = "PROFILE_API_URL"
+BATCH_SIZE = 100
 
 
 @dataclass
@@ -31,35 +33,6 @@ class ProfileService:
     profile_token: str
     api_url: str
 
-    ALL_PROFILES_QUERY = """
-        query GetProfiles {
-            profiles(serviceType: BERTH, first: %d, after: "%s") {
-                pageInfo {
-                    endCursor
-                    hasNextPage
-                }
-                edges {
-                    node {
-                        id
-                        first_name: firstName
-                        last_name: lastName
-                        primary_email: primaryEmail {
-                            email
-                        }
-                        primary_phone: primaryPhone {
-                            phone
-                        }
-                        primary_address: primaryAddress {
-                            address
-                            postal_code: postalCode
-                            city
-                        }
-                    }
-                }
-            }
-        }
-    """
-
     def __init__(self, profile_token, **kwargs):
         if "config" in kwargs:
             self.config = kwargs.get("config")
@@ -73,24 +46,83 @@ class ProfileService:
             PROFILE_API_URL: str,
         }
 
-    def get_all_profiles(self) -> Dict[UUID, HelsinkiProfileUser]:
-        def _exec_query(after=""):
-            response = self.query(self.ALL_PROFILES_QUERY % (100, after))
-            edges = response.get("profiles", {}).get("edges", [])
+    def get_all_profiles(
+        self, profile_ids: List[UUID] = None
+    ) -> Dict[UUID, HelsinkiProfileUser]:
+        query = """
+            query GetProfiles {{
+                profiles(serviceType: BERTH, first: {first}, after: "{after}", id: {ids}) {{
+                    pageInfo {{
+                        endCursor
+                        hasNextPage
+                    }}
+                    edges {{
+                        node {{
+                            id
+                            first_name: firstName
+                            last_name: lastName
+                            primary_email: primaryEmail {{
+                                email
+                            }}
+                            primary_phone: primaryPhone {{
+                                phone
+                            }}
+                            primary_address: primaryAddress {{
+                                address
+                                postal_code: postalCode
+                                city
+                            }}
+                        }}
+                    }}
+                }}
+            }}
+        """
+
+        def _exec_query(after="", ids: List[Union[str, UUID]] = None):
+            if ids is not None:
+                # json.dumps forces the converted strings to use double quotes
+                # instead of single
+                ids = [
+                    str(original_id) for original_id in ids if original_id is not None
+                ]
+                first = len(ids)
+            else:
+                ids = []
+                first = BATCH_SIZE
+
+            parsed_query = query.format(first=first, after=after, ids=json.dumps(ids))
+            response = self.query(parsed_query)
+            response_edges = response.get("profiles", {}).get("edges", [])
 
             page_info = response.get("profiles", {}).get("pageInfo", {})
-            has_next = page_info.get("hasNextPage", False)
-            end_cursor = page_info.get("endCursor", "")
-            return edges, has_next, end_cursor
+            response_has_next = page_info.get("hasNextPage", False)
+            response_end_cursor = page_info.get("endCursor", "")
+            return response_edges, response_has_next, response_end_cursor
 
         returned_users = []
+        end_cursor = ""
+        has_next = True
+        next_batch_ids = []
+        id_batches = (
+            [
+                profile_ids[x : x + BATCH_SIZE]
+                for x in range(0, len(profile_ids), BATCH_SIZE)
+            ]
+            if profile_ids
+            else []
+        )
+
         try:
-            end_cursor = ""
-            while True:
-                edges, has_next, end_cursor = _exec_query(after=end_cursor)
+            while has_next or (profile_ids and len(id_batches) > 0):
+                if profile_ids:
+                    next_batch_ids = id_batches.pop(0)
+                    end_cursor = ""
+
+                edges, has_next, end_cursor = _exec_query(
+                    after=end_cursor, ids=next_batch_ids
+                )
                 returned_users += edges
-                if not has_next:
-                    break
+
         # Catch network errors
         except requests.exceptions.RequestException:
             pass

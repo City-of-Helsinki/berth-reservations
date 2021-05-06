@@ -50,7 +50,6 @@ def _send_invoices(data):
 @freeze_time("2020-01-01T08:00:00Z")
 def test_send_berth_invoices_basic(notification_template_orders_approved):
     lease = _lease_with_contract(
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.PAID,
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),
@@ -109,7 +108,6 @@ def test_send_berth_invoices_basic(notification_template_orders_approved):
 @freeze_time("2020-01-01T08:00:00Z")
 def test_send_berth_invoices_no_contract(notification_template_orders_approved):
     lease = BerthLeaseFactory(
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.PAID,
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),
@@ -148,7 +146,6 @@ def test_send_berth_invoices_no_contract(notification_template_orders_approved):
 def test_use_berth_leases_from_last_season(notification_template_orders_approved):
     # This lease from the upcoming season should be ignored
     _lease_with_contract(
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.PAID,
         start_date=calculate_season_start_date(today()),
@@ -156,7 +153,6 @@ def test_use_berth_leases_from_last_season(notification_template_orders_approved
     )
     # Only the lease from last season will be renewed
     lease = _lease_with_contract(
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.PAID,
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),
@@ -214,7 +210,6 @@ def test_use_berth_leases_from_last_season(notification_template_orders_approved
 def test_use_berth_leases_from_current_season(notification_template_orders_approved):
     # This lease from last season should be ignored
     _lease_with_contract(
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.PAID,
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),
@@ -222,7 +217,6 @@ def test_use_berth_leases_from_current_season(notification_template_orders_appro
     )
     # Only the lease from the current's year season will be renewed
     lease = _lease_with_contract(
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.PAID,
         start_date=calculate_season_start_date(today()),
@@ -279,7 +273,6 @@ def test_use_berth_leases_from_current_season(notification_template_orders_appro
 @freeze_time("2020-01-01T08:00:00Z")
 def test_berth_lease_berth_product(notification_template_orders_approved):
     lease = _lease_with_contract(
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.PAID,
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),
@@ -318,7 +311,6 @@ def test_berth_lease_berth_product(notification_template_orders_approved):
 @freeze_time("2020-01-01T08:00:00Z")
 def test_berth_lease_no_product():
     lease = _lease_with_contract(
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.PAID,
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),
@@ -356,7 +348,6 @@ def test_berth_lease_no_product():
 @freeze_time("2020-01-01T08:00:00Z")
 def test_send_berth_invoices_missing_email(notification_template_orders_approved):
     lease = _lease_with_contract(
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.PAID,
         start_date=today() - relativedelta(years=1),
@@ -411,7 +402,6 @@ def test_send_berth_invoices_invalid_example_email(
     notification_template_orders_approved,
 ):
     lease = _lease_with_contract(
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.PAID,
         start_date=today() - relativedelta(years=1),
@@ -464,7 +454,6 @@ def test_send_berth_invoices_invalid_example_email(
 @freeze_time("2020-01-01T08:00:00Z")
 def test_send_berth_invoices_send_error(notification_template_orders_approved):
     lease = _lease_with_contract(
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.PAID,
         start_date=today() - relativedelta(years=1),
@@ -534,7 +523,6 @@ def test_send_berth_invoices_send_error(notification_template_orders_approved):
 def test_send_berth_invoices_only_not_renewed(notification_template_orders_approved):
     # This lease should be ignored since it already has a lease for the upcoming season
     renewed_lease = _lease_with_contract(
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.PAID,
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),
@@ -544,7 +532,6 @@ def test_send_berth_invoices_only_not_renewed(notification_template_orders_appro
     _lease_with_contract(
         customer=renewed_lease.customer,
         berth=renewed_lease.berth,
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.DRAFTED,
         start_date=calculate_season_start_date(today()),
@@ -552,7 +539,6 @@ def test_send_berth_invoices_only_not_renewed(notification_template_orders_appro
     )
     # This lease should be renewed
     valid_lease = _lease_with_contract(
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.PAID,
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),
@@ -610,7 +596,6 @@ def test_send_berth_invoices_invalid_limit_reached(
     notification_template_orders_approved,
 ):
     first_lease = _lease_with_contract(
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.PAID,
         start_date=today() - relativedelta(years=1),
@@ -618,7 +603,6 @@ def test_send_berth_invoices_invalid_limit_reached(
     )
     for _ in range(2):
         _lease_with_contract(
-            renew_automatically=True,
             boat=None,
             status=LeaseStatus.PAID,
             start_date=today() - relativedelta(years=1),
@@ -665,7 +649,6 @@ def test_non_invoiceable_berth(notification_template_orders_approved):
 
     lease_with_non_invoiceable_berth = _lease_with_contract(
         berth=berth,
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.PAID,
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),
@@ -675,7 +658,6 @@ def test_non_invoiceable_berth(notification_template_orders_approved):
 
     lease_with_invoiceable_berth = _lease_with_contract(
         customer=customer,
-        renew_automatically=True,
         boat=None,
         status=LeaseStatus.PAID,
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),

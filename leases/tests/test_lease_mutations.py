@@ -1425,7 +1425,9 @@ def test_create_winter_storage_lease_with_order(
     assert Order.objects.count() == 1
     sqm = winter_storage_place.place_type.width * winter_storage_place.place_type.length
     expected_price = product.price_value
-    expected_price = rounded(expected_price * sqm, decimals=2, as_string=True)
+    expected_price = rounded(
+        expected_price * sqm, decimals=2, as_string=True, round_to_nearest=1
+    )
 
     assert (
         executed["data"]["createWinterStorageLease"]["winterStorageLease"].pop("id")

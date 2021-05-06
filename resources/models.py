@@ -632,6 +632,7 @@ class WinterStoragePlaceType(AbstractPlaceType):
 
 class AbstractBoatPlace(TimeStampedModel, UUIDModel):
     is_active = models.BooleanField(verbose_name=_("is active"), default=True)
+    is_invoiceable = models.BooleanField(verbose_name=_("is invoiceable"), default=True)
 
     class Meta:
         abstract = True
@@ -748,7 +749,6 @@ class Berth(AbstractBoatPlace):
     is_accessible = models.BooleanField(
         verbose_name=_("is accessible"), blank=True, null=True,
     )
-    is_invoiceable = models.BooleanField(verbose_name=_("is invoiceable"), default=True)
 
     objects = BerthManager()
 

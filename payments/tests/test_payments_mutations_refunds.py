@@ -12,6 +12,7 @@ from berth_reservations.tests.utils import (
     assert_not_enough_permissions,
 )
 from leases.enums import LeaseStatus
+from utils.numbers import rounded
 from utils.relay import to_global_id
 
 from ..enums import OrderRefundStatus, OrderStatus
@@ -61,10 +62,11 @@ def test_refund_order(
         area = order.lease.berth.pier.harbor
     else:
         # Winter products are priced per m2
-        place_price = (
+        place_price = rounded(
             order.product.price_value
             * order.lease.place.place_type.width
-            * order.lease.place.place_type.length
+            * order.lease.place.place_type.length,
+            round_to_nearest=1,
         )
         area = order.lease.place.winter_storage_section.area
 
