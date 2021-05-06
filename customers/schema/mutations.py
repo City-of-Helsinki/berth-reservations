@@ -12,6 +12,7 @@ from users.decorators import (
     change_permission_required,
     delete_permission_required,
 )
+from users.utils import get_berth_customers_group
 from utils.relay import from_global_id, get_node_from_global_id
 from utils.schema import update_object
 
@@ -233,6 +234,9 @@ class CreateMyBerthProfileMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, profile_token, **input):
         user = info.context.user
+        if not user.groups.exists():
+            # customers need to belong to the berth customers group, and no other groups
+            user.groups.add(get_berth_customers_group())
         profile_exists = CustomerProfile.objects.filter(user=user).exists()
         if profile_exists:
             return None

@@ -30,5 +30,13 @@
       "name": "Harbour services",
       "permissions": []
     }
+  },
+  {
+    "model": "auth.group",
+    "pk": 4,
+    "fields": {
+      "name": "Berth customer",
+      "permissions": []
+    }
   }
 ]
