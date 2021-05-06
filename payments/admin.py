@@ -271,18 +271,28 @@ class OrderRefundLogEntryInline(admin.StackedInline):
 class OrderRefundAdmin(admin.ModelAdmin):
     inlines = (OrderRefundLogEntryInline,)
     date_hierarchy = "created_at"
+    autocomplete_fields = ("order",)
     list_display = (
         "id",
-        "created_at",
         "refund_id",
+        "created_at",
+        "time_settled",
         "order",
         "status",
+        "amount",
     )
     list_filter = ("status",)
     search_fields = (
         "refund_id",
         "order__customer__id",
     )
+    readonly_fields = ("time_settled",)
+
+    def time_settled(self, obj):
+        entry = (
+            obj.log_entries.filter(from_status="pending").order_by("created_at").first()
+        )
+        return entry.created_at if entry else None
 
 
 class OrderRefundLogEntryAdmin(admin.ModelAdmin):
