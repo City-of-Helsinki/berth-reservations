@@ -188,32 +188,6 @@ DEFAULT_MODELS_PERMS = {
             HARBOR_SERVICES: None,
         },
     },
-    "harbors": {
-        "boattype": {
-            BERTH_SERVICES: ("view", "add", "change", "delete",),
-            BERTH_HANDLER: ("view",),
-            BERTH_SUPERVISOR: ("view",),
-            HARBOR_SERVICES: ("view", "add", "change", "delete",),
-        },
-        "availabilitylevel": {
-            BERTH_SERVICES: ("view", "add", "change", "delete",),
-            BERTH_HANDLER: ("view",),
-            BERTH_SUPERVISOR: ("view",),
-            HARBOR_SERVICES: ("view", "add", "change", "delete",),
-        },
-        "harbor": {
-            BERTH_SERVICES: ("view", "add", "change", "delete",),
-            BERTH_HANDLER: ("view",),
-            BERTH_SUPERVISOR: ("view",),
-            HARBOR_SERVICES: ("view", "add", "change", "delete",),
-        },
-        "winterstoragearea": {
-            BERTH_SERVICES: ("view", "add", "change", "delete",),
-            BERTH_HANDLER: ("view",),
-            BERTH_SUPERVISOR: ("view",),
-            HARBOR_SERVICES: ("view", "add", "change", "delete",),
-        },
-    },
     "payments": {
         "berthproduct": {
             BERTH_SERVICES: ("view", "add", "change", "delete",),
