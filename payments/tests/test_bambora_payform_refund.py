@@ -30,6 +30,7 @@ from payments.utils import (
     get_talpa_product_id,
     price_as_fractional_int,
 )
+from utils.numbers import rounded
 
 notify_success_params = {
     "AUTHCODE": "9C60B3077276A38495E2D785D1B5E6A293427BC4025E5C39AB870EA4CF187E0B",
@@ -62,10 +63,11 @@ def test_initiate_refund_success(provider_base_config: dict, order: Order):
         area = order.lease.berth.pier.harbor
     else:
         # Winter products are priced per m2
-        place_price = (
+        place_price = rounded(
             order.product.price_value
             * order.lease.place.place_type.width
-            * order.lease.place.place_type.length
+            * order.lease.place.place_type.length,
+            round_to_nearest=1,
         )
         area = order.lease.place.winter_storage_section.area
 
@@ -127,10 +129,11 @@ def test_initiate_refund_no_order_email(provider_base_config: dict, order: Order
         area = order.lease.berth.pier.harbor
     else:
         # Winter products are priced per m2
-        place_price = (
+        place_price = rounded(
             order.product.price_value
             * order.lease.place.place_type.width
-            * order.lease.place.place_type.length
+            * order.lease.place.place_type.length,
+            round_to_nearest=1,
         )
         area = order.lease.place.winter_storage_section.area
 
