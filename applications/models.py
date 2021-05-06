@@ -298,8 +298,9 @@ class BerthApplication(BaseApplication):
                 setattr(self, field, field_value.strip())
 
         # Ensure clean is always ran
-        # TODO: Remove this when the old harbors app is removed
-        self.full_clean(exclude=["boat_width", "boat_length"])
+        # FIXME: exclude decimal fields for now, as GQL API uses floats for those
+        #  which does not work well with Django's validation for DecimalField
+        self.full_clean(exclude=["boat_length", "boat_width", "boat_draught"])
         super().save(*args, **kwargs)
 
     def clean(self):
