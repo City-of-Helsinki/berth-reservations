@@ -26,14 +26,10 @@ ApplicationAreaTypeEnum = graphene.Enum.from_enum(ApplicationAreaType)
 
 class HarborChoiceType(DjangoObjectType):
     harbor = graphene.Field("resources.schema.HarborNode", required=True)
-    harbor_name = graphene.String(required=True)
 
     class Meta:
         model = HarborChoice
         exclude = ("id", "application")
-
-    def resolve_harbor_name(self, info, **kwargs):
-        return self.harbor.safe_translation_getter("name")
 
 
 class BerthSwitchReasonType(DjangoObjectType):
@@ -45,16 +41,11 @@ class BerthSwitchReasonType(DjangoObjectType):
 
 
 class BerthSwitchType(DjangoObjectType):
-    harbor = graphene.Field("resources.schema.HarborNode", required=True)
-    harbor_name = graphene.String(required=True)
     reason = graphene.Field(BerthSwitchReasonType)
 
     class Meta:
         model = BerthSwitch
         exclude = ("berthapplication_set",)
-
-    def resolve_harbor_name(self, info, **kwargs):
-        return self.harbor.safe_translation_getter("name")
 
 
 class BerthApplicationFilter(django_filters.FilterSet):
