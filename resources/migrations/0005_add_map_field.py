@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                     "map_file",
                     models.FileField(
                         storage=django.core.files.storage.FileSystemStorage(),
-                        upload_to=resources.models.get_map_resource_media_folder,
+                        upload_to=None,
                         verbose_name="map file",
                     ),
                 ),
@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
                     "map_file",
                     models.FileField(
                         storage=django.core.files.storage.FileSystemStorage(),
-                        upload_to=resources.models.get_map_resource_media_folder,
+                        upload_to=None,
                         verbose_name="map file",
                     ),
                 ),

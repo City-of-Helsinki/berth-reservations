@@ -8,10 +8,8 @@ from .models import (
     BerthType,
     BoatType,
     Harbor,
-    HarborMap,
     Pier,
     WinterStorageArea,
-    WinterStorageAreaMap,
     WinterStoragePlace,
     WinterStoragePlaceType,
     WinterStorageSection,
@@ -247,10 +245,8 @@ admin.site.register(BoatType, BoatTypeAdmin)
 admin.site.register(Berth, BerthAdmin)
 admin.site.register(BerthType)
 admin.site.register(Harbor, HarborAdmin)
-admin.site.register(HarborMap)
 admin.site.register(Pier, PierAdmin)
 admin.site.register(WinterStorageArea, WinterStorageAreaAdmin)
-admin.site.register(WinterStorageAreaMap)
 admin.site.register(WinterStoragePlaceType)
 admin.site.register(WinterStorageSection, WinterStorageSectionAdmin)
 admin.site.register(WinterStoragePlace, WinterStoragePlaceAdmin)

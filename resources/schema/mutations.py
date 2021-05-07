@@ -24,10 +24,8 @@ from ..models import (
     BerthType,
     BoatType,
     Harbor,
-    HarborMap,
     Pier,
     WinterStorageArea,
-    WinterStorageAreaMap,
     WinterStoragePlace,
     WinterStoragePlaceType,
     WinterStorageSection,
@@ -244,9 +242,7 @@ class CreateHarborMutation(graphene.ClientIDMutation, AbstractAreaMixin):
     def mutate_and_get_payload(cls, root, info, **input):
         cls.validate_availability_level_id(input)
         cls.validate_municipality_id(input)
-
         harbor = Harbor.objects.create(**input)
-        add_map_files(HarborMap, input.pop("add_map_files", []), harbor)
 
         return CreateHarborMutation(harbor=harbor)
 
@@ -270,9 +266,6 @@ class UpdateHarborMutation(graphene.ClientIDMutation, AbstractAreaMixin):
 
         cls.validate_availability_level_id(input)
         cls.validate_municipality_id(input)
-
-        add_map_files(HarborMap, input.pop("add_map_files", []), harbor)
-        remove_map_files(HarborMap, input.pop("remove_map_files", []))
         update_object(harbor, input)
 
         return UpdateHarborMutation(harbor=harbor)
@@ -324,11 +317,7 @@ class CreateWinterStorageAreaMutation(graphene.ClientIDMutation, AbstractAreaMix
 
         cls.validate_availability_level_id(input)
         cls.validate_municipality_id(input)
-
         winter_storage_area = WinterStorageArea.objects.create(**input)
-        add_map_files(
-            WinterStorageAreaMap, input.pop("add_map_files", []), winter_storage_area
-        )
 
         return CreateWinterStorageAreaMutation(winter_storage_area=winter_storage_area)
 
@@ -375,10 +364,6 @@ class UpdateWinterStorageAreaMutation(graphene.ClientIDMutation, AbstractAreaMix
         )
         cls.validate_availability_level_id(input)
         cls.validate_municipality_id(input)
-        add_map_files(
-            WinterStorageAreaMap, input.pop("add_map_files", []), winter_storage_area
-        )
-        remove_map_files(WinterStorageAreaMap, input.pop("remove_map_files", []))
         update_object(winter_storage_area, input)
 
         return UpdateWinterStorageAreaMutation(winter_storage_area=winter_storage_area)
