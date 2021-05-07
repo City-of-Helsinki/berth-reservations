@@ -3,6 +3,12 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
+    inputs:
+      build_required:
+        description: "Build images (true/false)"
+        required: true
+        default: "false"
 
 env:
   CONTAINER_REGISTRY: ghcr.io
@@ -22,14 +28,17 @@ env:
 
 jobs:
   build:
+    if: github.event_name == 'push' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     name: Build
     steps:
       - uses: actions/checkout@v2
       - name: Build
+        if: github.event_name == 'push' || github.event.inputs.build_required == 'true'
         uses: andersinno/kolga-build-action@v2
 
   staging:
+    if: github.event_name == 'push' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     needs: build
     name: Staging
