@@ -87,7 +87,10 @@ class HarborAdmin(CustomTranslatableAdmin, admin.OSMGeoAdmin):
         "max_length",
         "max_depth",
     )
-    search_fields = ("id",)
+    search_fields = (
+        "id",
+        "translations__name",
+    )
 
     def number_of_places(self, obj):
         return obj.number_of_places
