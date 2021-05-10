@@ -118,3 +118,10 @@ class PriceTier(IntegerChoices):
     TIER_1 = 1, _("Tier 1")
     TIER_2 = 2, _("Tier 2")
     TIER_3 = 3, _("Tier 3")
+
+
+class PricingCategory(IntegerChoices):
+    DEFAULT = 0, _("Default")
+    DINGHY = 1, _("Dinghy places")
+    TRAILER = 2, _("Trailer places")
+    VASIKKASAARI = 3, _("Vasikkasaari berths")

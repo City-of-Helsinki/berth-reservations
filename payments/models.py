@@ -36,6 +36,7 @@ from .enums import (
     PeriodType,
     PriceTier,
     PriceUnits,
+    PricingCategory,
     ProductServiceType,
 )
 from .exceptions import OrderStatusTransitionError
@@ -48,6 +49,7 @@ from .utils import (
     convert_aftertax_to_pretax,
     generate_order_number,
     get_application_status,
+    get_berth_product_pricing_category,
     get_lease_status,
     get_switch_application_status,
     rounded,
@@ -95,8 +97,14 @@ class AbstractPlaceProduct(models.Model):
 
 
 class BerthProductManager(models.Manager):
-    def get_in_range(self, width: Union[Decimal, float, int]):
-        products = self.get_queryset().filter(min_width__lt=width, max_width__gte=width)
+    def get_in_range(
+        self,
+        width: Union[Decimal, float, int],
+        pricing_category: PricingCategory = PricingCategory.DEFAULT,
+    ):
+        products = self.get_queryset().filter(
+            min_width__lt=width, max_width__gte=width, pricing_category=pricing_category
+        )
         if len(products) != 1:
             logger.error(f"Not only one berth product found: {width=}, {products=}")
 
@@ -135,20 +143,31 @@ class BerthProduct(AbstractPlaceProduct, TimeStampedModel, UUIDModel):
         default=PriceUnits.AMOUNT,
         max_length=10,
     )
+    pricing_category = models.PositiveSmallIntegerField(
+        verbose_name=_("pricing category"),
+        choices=PricingCategory.choices,
+        default=PricingCategory.DEFAULT,
+    )
     objects = BerthProductManager()
 
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=("min_width", "max_width",), name="unique_width_range"
+                fields=("min_width", "max_width", "pricing_category"),
+                name="unique_width_range",
             )
         ]
-        ordering = ["min_width"]
+        ordering = ["min_width", "pricing_category"]
 
     def __str__(self):
+        pricing_category = ""
+        if self.pricing_category != PricingCategory.DEFAULT:
+            pricing_category = f" ({PricingCategory(self.pricing_category).name})"
+
         return (
             f"[{self.min_width}-{self.max_width}] "
             f"T1:{self.tier_1_price}€, T2:{self.tier_2_price}€, T3: {self.tier_3_price}€"
+            f"{pricing_category}"
         )
 
     def save(self, *args, **kwargs):
@@ -638,7 +657,10 @@ class Order(UUIDModel, TimeStampedModel):
         if self.product and self.lease:
             if isinstance(self.lease, BerthLease):
                 width = self.lease.berth.berth_type.width
-                self.product = BerthProduct.objects.get_in_range(width=width)
+                pricing_category = get_berth_product_pricing_category(self)
+                self.product = BerthProduct.objects.get_in_range(
+                    width=width, pricing_category=pricing_category
+                )
             elif isinstance(self.lease, WinterStorageLease):
                 self.product = WinterStorageProduct.objects.get(
                     winter_storage_area=self.lease.get_winter_storage_area()

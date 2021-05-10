@@ -19,6 +19,7 @@ from leases.utils import (
     calculate_winter_storage_lease_end_date,
     calculate_winter_storage_lease_start_date,
 )
+from resources.enums import BerthMooringType
 from resources.tests.factories import (
     WinterStoragePlaceFactory,
     WinterStoragePlaceTypeFactory,
@@ -32,6 +33,7 @@ from ..enums import (
     OrderStatus,
     PeriodType,
     PriceUnits,
+    PricingCategory,
     ProductServiceType,
 )
 from ..models import (
@@ -1141,3 +1143,64 @@ def test_marked_winter_storage_price_rounded(width, length, expected_price):
         tax_percentage=Decimal("24.00"),
     )
     assert order.price == Decimal(expected_price)
+
+
+@pytest.mark.parametrize(
+    "mooring_type,expected_price",
+    [
+        (BerthMooringType.DINGHY_PLACE, Decimal("62.00")),
+        (BerthMooringType.TRAWLER_PLACE, Decimal("129.00")),
+    ],
+)
+@pytest.mark.parametrize("berth_width", [0.1, 1, 2, 3, 4, 5, 999])
+def test_order_berth_product_dingy(berth_width, mooring_type, expected_price):
+    lease = BerthLeaseFactory(
+        berth__berth_type__mooring_type=mooring_type,
+        berth__berth_type__width=berth_width,
+    )
+    product = BerthProduct(
+        min_width=Decimal("0"),
+        max_width=Decimal("999.99"),
+        tier_1_price=expected_price,
+        tier_2_price=expected_price,
+        tier_3_price=expected_price,
+        pricing_category=PricingCategory.DINGHY,
+    )
+    order = OrderFactory(
+        customer=lease.customer,
+        lease=lease,
+        product=product,
+        price=None,
+        tax_percentage=Decimal("24.00"),
+    )
+    assert order.price == expected_price
+
+
+@pytest.mark.parametrize(
+    "berth_width,expected_price",
+    [
+        (Decimal("2.5"), Decimal("100.00")),
+        (Decimal("2.7"), Decimal("102.00")),
+        (Decimal("3.0"), Decimal("129.00")),
+        (Decimal("3.5"), Decimal("157.00")),
+    ],
+)
+def test_order_berth_product_vasikkasaari(berth_width, expected_price):
+    lease = BerthLeaseFactory(berth__berth_type__width=berth_width,)
+    lease.berth.pier.harbor.create_translation("fi", name="Vasikkasaaren venesatama")
+    product = BerthProduct(
+        min_width=berth_width - Decimal("0.01"),
+        max_width=berth_width,
+        tier_1_price=expected_price,
+        tier_2_price=expected_price,
+        tier_3_price=expected_price,
+        pricing_category=PricingCategory.VASIKKASAARI,
+    )
+    order = OrderFactory(
+        customer=lease.customer,
+        lease=lease,
+        product=product,
+        price=None,
+        tax_percentage=Decimal("24.00"),
+    )
+    assert order.price == expected_price

@@ -50,6 +50,13 @@ class BerthProductAdmin(admin.ModelAdmin):
         "tier_1_price",
         "tier_2_price",
         "tier_3_price",
+        "pricing_category",
+    )
+    list_filter = ("pricing_category",)
+    ordering = (
+        "pricing_category",
+        "min_width",
+        "max_width",
     )
 
 

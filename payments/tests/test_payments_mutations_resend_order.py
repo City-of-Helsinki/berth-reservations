@@ -18,6 +18,7 @@ from utils.relay import to_global_id
 from ..models import Order
 from ..notifications import NotificationType
 from ..schema.types import OrderNode
+from ..utils import get_berth_product_pricing_category
 
 RESEND_ORDER_MUTATION = """
 mutation RESEND_ORDER_MUTATION($input: ResendOrderMutationInput!) {
@@ -45,6 +46,7 @@ mutation RESEND_ORDER_MUTATION($input: ResendOrderMutationInput!) {
 @pytest.mark.parametrize(
     "request_has_profile_token", [True, False],
 )
+# @pytest.mark.parametrize("mooring_type,pricing_category", [(BerthMooringType.DINGHY_PLACE)])
 @pytest.mark.parametrize("order_status", [OrderStatus.OFFERED, OrderStatus.ERROR])
 def test_resend_order(
     api_client,
@@ -85,6 +87,7 @@ def test_resend_order(
     berth_product.tier_1_price = decimal.Decimal("100.0")
     berth_product.tier_2_price = decimal.Decimal("200.0")
     berth_product.tier_3_price = decimal.Decimal("300.0")
+    berth_product.pricing_category = get_berth_product_pricing_category(order)
     berth_product.save()
 
     variables = {
@@ -185,6 +188,8 @@ def test_resend_order_in_error(
     order.status = OrderStatus.ERROR
     order.lease.status = LeaseStatus.ERROR
     order.lease.save()
+    order.product.pricing_category = get_berth_product_pricing_category(order)
+    order.product.save()
     order.save()
 
     profile_data = {
@@ -255,6 +260,8 @@ def test_resend_order_not_fixed_in_error(
     order.status = OrderStatus.ERROR
     order.lease.status = LeaseStatus.ERROR
     order.lease.save()
+    order.product.pricing_category = get_berth_product_pricing_category(order)
+    order.product.save()
     order.save()
 
     profile_data = {
