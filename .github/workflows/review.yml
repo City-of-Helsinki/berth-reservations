@@ -80,6 +80,7 @@ jobs:
           target_namespace: ${{ env.K8S_NAMESPACE }}
           single_run: true
           secret_name: "-secret"
+          name: "order-expiration-cronjob-review"
           command: "{/bin/sh}"
           args: "{-c,cd /app && /usr/bin/timeout --kill-after=20m 19m python manage.py expire_too_old_unpaid_orders 2>&1}"
 
@@ -92,5 +93,6 @@ jobs:
           target_namespace: ${{ env.K8S_NAMESPACE }}
           single_run: true
           secret_name: "-secret"
+          name: "offer-expiration-cronjob-review"
           command: "{/bin/sh}"
           args: "{-c,cd /app && /usr/bin/timeout --kill-after=20m 19m python manage.py expire_too_old_offers 2>&1}"
