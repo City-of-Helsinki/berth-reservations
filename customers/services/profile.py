@@ -261,7 +261,7 @@ class ProfileService:
         """
         response = self.query(query=mutation, variables=variables)
         global_id = response.get("createProfile", {}).get("profile", {}).get("id")
-        profile_id = from_global_id(global_id)
+        profile_id = UUID(from_global_id(global_id))
         profile = CustomerProfile.objects.create(id=profile_id)
         return profile
 
