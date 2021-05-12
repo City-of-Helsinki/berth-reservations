@@ -318,9 +318,8 @@ class BaseInvoicingService:
                 comment=f"{get_ts()}: {_('Cleanup the invoice to attempt resending')}\n",
             )
 
-            update_order_from_profile(order, profiles[order.customer.id])
-
             try:
+                update_order_from_profile(order, profiles[order.customer.id])
                 resend_order(order, self.due_date, self.request)
                 self.successful_orders.append(order.id)
             except (
@@ -329,5 +328,6 @@ class BaseInvoicingService:
                 Order.DoesNotExist,
                 ValidationError,
                 VenepaikkaGraphQLError,
+                KeyError,
             ) as e:
                 self.fail_order(order, f'{_("Failed resending invoice")} ({e})')
