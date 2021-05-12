@@ -94,6 +94,7 @@ jobs:
           secret_name: project-staging-berth-reservations-secret
           kubeconfig_raw: ${{ secrets.KUBECONFIG_RAW_STAGING}}
           target_namespace: ${{ secrets.K8S_NAMESPACE_STAGING }}
+          name: "order-expiration-cronjob-qa"
           schedule: '30 1 * * *'
           command: "{/bin/sh}"
           args: "{-c,cd /app && /usr/bin/timeout --kill-after=20m 19m python manage.py expire_too_old_unpaid_orders 2>&1}"
@@ -106,6 +107,7 @@ jobs:
           secret_name: project-staging-berth-reservations-secret
           kubeconfig_raw: ${{ secrets.KUBECONFIG_RAW_STAGING}}
           target_namespace: ${{ secrets.K8S_NAMESPACE_STAGING }}
+          name: "offer-expiration-cronjob-qa"
           schedule: '30 2 * * *'
           command: "{/bin/sh}"
           args: "{-c,cd /app && /usr/bin/timeout --kill-after=20m 19m python manage.py expire_too_old_offers 2>&1}"
