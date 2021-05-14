@@ -146,7 +146,7 @@ class Query:
             and getattr(order.lease, "application", None) is not None
         )
 
-        order_type = self._get_order_type(order)
+        order_type = Query._get_order_type(order)
 
         if isinstance(order.lease, BerthLease):
             place_number = order.lease.berth.number
@@ -170,7 +170,9 @@ class Query:
             is_application_order=is_application_order,
         )
 
-    def _get_order_type(self, order):
+    @staticmethod
+    def _get_order_type(order):
+        # in graphene-python, all resolvers are implictly staticmethods, so need to make this utility static too.
         order_type = OrderTypeEnum.UNKNOWN
         if order.order_type == OrderType.ADDITIONAL_PRODUCT_ORDER:
             order_type = OrderTypeEnum.ADDITIONAL_PRODUCT
