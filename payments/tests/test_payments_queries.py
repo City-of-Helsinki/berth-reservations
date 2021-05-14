@@ -703,9 +703,9 @@ query ORDER_DETAILS {
     orderDetails(orderNumber: "%s") {
         orderType
         status
-        harbor
-        pier
-        berth
+        place
+        section
+        area
         isApplicationOrder
     }
 }
@@ -741,17 +741,25 @@ def test_get_order_status(
     else:
         order_type = OrderTypeEnum.UNKNOWN
 
-    has_berth = order.lease and isinstance(order.lease, BerthLease)
-    harbor_name = order.lease.berth.pier.harbor.name if has_berth else ""
-    pier_identifier = order.lease.berth.pier.identifier if has_berth else ""
-    berth_number = order.lease.berth.number if has_berth else ""
+    if isinstance(order.lease, BerthLease):
+        place_number = order.lease.berth.number
+        section_identifier = order.lease.berth.pier.identifier
+        area_name = order.lease.berth.pier.harbor.name
+    elif isinstance(order.lease, WinterStorageLease):
+        place_number = str(order.lease.place.number)
+        section_identifier = order.lease.place.winter_storage_section.identifier
+        area_name = order.lease.place.winter_storage_section.area.name
+    else:
+        place_number = None
+        section_identifier = None
+        area_name = None
 
     assert executed["data"]["orderDetails"] == {
         "orderType": OrderTypeEnum.get(order_type).name,
         "status": OrderStatusEnum.get(order.status).name,
-        "harbor": harbor_name,
-        "pier": pier_identifier,
-        "berth": berth_number,
+        "place": place_number,
+        "section": section_identifier,
+        "area": area_name,
         "isApplicationOrder": has_application and order.lease is not None,
     }
 
