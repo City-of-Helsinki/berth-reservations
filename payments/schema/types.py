@@ -19,6 +19,7 @@ from ..enums import (
     PeriodType,
     PriceTier,
     PriceUnits,
+    PricingCategory,
     ProductServiceType,
 )
 from ..models import (
@@ -42,6 +43,7 @@ PeriodTypeEnum = graphene.Enum.from_enum(PeriodType)
 OrderStatusEnum = graphene.Enum.from_enum(OrderStatus)
 OrderRefundStatusEnum = graphene.Enum.from_enum(OrderRefundStatus)
 OfferStatusEnum = graphene.Enum.from_enum(OfferStatus)
+PricingCategoryEnum = graphene.Enum.from_enum(PricingCategory)
 PlaceProductTaxEnum = graphene.Enum(
     "PlaceProductTaxEnum",
     [
@@ -85,6 +87,7 @@ class BerthProductNode(DjangoObjectType):
     price_unit = PriceUnitsEnum(
         required=True, description="`Fixed to PriceUnit.AMOUNT`"
     )
+    pricing_category = PricingCategoryEnum(required=True)
 
     class Meta:
         model = BerthProduct

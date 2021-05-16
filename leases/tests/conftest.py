@@ -26,6 +26,12 @@ def berth_lease():
 
 
 @pytest.fixture
+def berth_lease_without_product():
+    boat = BoatFactory()
+    return BerthLeaseFactory(customer=boat.owner, boat=boat, create_product=False)
+
+
+@pytest.fixture
 def drafted_berth_order(customer_profile):
     from payments.tests.conftest import _generate_order  # avoid circular import
 

@@ -177,9 +177,7 @@ def test_query_berth_lease(api_client, berth_lease, berth_application):
     berth_lease.application = berth_application
     berth_lease.save()
 
-    order = OrderFactory(
-        lease=berth_lease, customer=berth_lease.customer, product=BerthProductFactory()
-    )
+    order = OrderFactory(lease=berth_lease)
 
     query = QUERY_BERTH_LEASE % berth_lease_id
     executed = api_client.execute(query)
@@ -499,11 +497,7 @@ def test_query_winter_storage_lease(
     winter_storage_lease.application = winter_storage_application
     winter_storage_lease.save()
 
-    order = OrderFactory(
-        lease=winter_storage_lease,
-        customer=winter_storage_lease.customer,
-        product=WinterStorageProductFactory(),
-    )
+    order = OrderFactory(lease=winter_storage_lease,)
 
     query = QUERY_WINTER_STORAGE_LEASE % lease_id
     executed = api_client.execute(query)

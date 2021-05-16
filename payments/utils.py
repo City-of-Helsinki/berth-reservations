@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from typing import Optional, TYPE_CHECKING, Union
 
-from leases.models import BerthLease
+from leases.models import BerthLease, WinterStorageLease
 
 if TYPE_CHECKING:
     from uuid import UUID
-    from .models import Order, AbstractOffer
+    from .models import Order, AbstractOffer, BerthProduct, WinterStorageProduct
     from .notifications import NotificationType
 
 import base64
@@ -313,7 +313,7 @@ def get_talpa_product_id(
     )
 
 
-@lru_cache(maxsize=10)
+@lru_cache(maxsize=3)
 def _get_vasikkasaari_harbor():
     return Harbor.objects.translated(
         "fi", name__icontains="Vasikkasaaren venesatama"
@@ -333,6 +333,24 @@ def get_berth_product_pricing_category(order: Order) -> PricingCategory:
             return PricingCategory.VASIKKASAARI
 
     return PricingCategory.DEFAULT
+
+
+def get_order_product(
+    order: Order,
+) -> Optional[Union[BerthProduct, WinterStorageProduct]]:
+    from .models import BerthProduct, WinterStorageProduct
+
+    if isinstance(order.lease, BerthLease):
+        width = order.lease.berth.berth_type.width
+        pricing_category = get_berth_product_pricing_category(order)
+        return BerthProduct.objects.get_in_range(
+            width=width, pricing_category=pricing_category
+        )
+    elif isinstance(order.lease, WinterStorageLease):
+        return WinterStorageProduct.objects.get(
+            winter_storage_area=order.lease.get_winter_storage_area()
+        )
+    return None
 
 
 def get_order_notification_type(order):

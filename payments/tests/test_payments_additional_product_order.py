@@ -6,6 +6,7 @@ from freezegun import freeze_time
 from customers.schema import ProfileNode
 from leases.enums import LeaseStatus
 from leases.schema import BerthLeaseNode
+from leases.tests.factories import BerthLeaseFactory
 from utils.relay import to_global_id
 
 from ..enums import OrderStatus, PeriodType, PriceUnits, ProductServiceType
@@ -17,6 +18,7 @@ from .factories import (
     OrderLineFactory,
     PlainAdditionalProductFactory,
 )
+from .utils import get_berth_lease_pricing_category
 
 CREATE_ADDITIONAL_PRODUCT_ORDER_MUTATION = """
 mutation CREATE_ADDITIONAL_PRODUCT_ORDER($input: CreateAdditionalProductOrderMutationInput!) {
@@ -64,9 +66,10 @@ mutation CREATE_ADDITIONAL_PRODUCT_ORDER($input: CreateAdditionalProductOrderMut
     "api_client", ["berth_services"], indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
-def test_create_additional_product_order(api_client, berth_lease):
+def test_create_additional_product_order(api_client):
+    berth_lease = BerthLeaseFactory(create_product=False, status=LeaseStatus.PAID)
     # Setup the existing order and lease
-    berth_product = BerthProductFactory(
+    BerthProductFactory(
         min_width=berth_lease.berth.berth_type.width - 1,
         max_width=berth_lease.berth.berth_type.width + 1,
         tier_1_price=Decimal("200.00"),
@@ -74,15 +77,15 @@ def test_create_additional_product_order(api_client, berth_lease):
         tier_3_price=Decimal("200.00"),
         price_unit=PriceUnits.AMOUNT,
         tax_percentage=Decimal("24.00"),
+        pricing_category=get_berth_lease_pricing_category(berth_lease),
     )
     order = OrderFactory(
-        product=berth_product, lease=berth_lease, customer=berth_lease.customer
+        lease=berth_lease,
+        product=None,
+        price=Decimal("0.00"),
+        tax_percentage=Decimal("0.00"),
+        status=OrderStatus.PAID,
     )
-    order.status = OrderStatus.PAID
-    order.save()
-    lease = order.lease
-    lease.status = LeaseStatus.PAID
-    lease.save()
     # Optional services should be not included in the base price for additional product order
     extra_service = PlainAdditionalProductFactory(
         service=ProductServiceType.PARKING_PERMIT,
@@ -109,9 +112,9 @@ def test_create_additional_product_order(api_client, berth_lease):
         price_unit=PriceUnits.PERCENTAGE,
     )
 
-    customer_id = to_global_id(ProfileNode, lease.customer.id)
+    customer_id = to_global_id(ProfileNode, berth_lease.customer.id)
     additional_product_id = to_global_id(AdditionalProductNode, additional_product.id)
-    lease_id = to_global_id(BerthLeaseNode, lease.id)
+    lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
 
     variables = {
         "customerId": customer_id,
@@ -125,7 +128,6 @@ def test_create_additional_product_order(api_client, berth_lease):
     executed = api_client.execute(
         CREATE_ADDITIONAL_PRODUCT_ORDER_MUTATION, input=variables
     )
-
     assert Order.objects.count() == 2
     assert OrderLine.objects.count() == 3
 

@@ -49,8 +49,8 @@ from .utils import (
     convert_aftertax_to_pretax,
     generate_order_number,
     get_application_status,
-    get_berth_product_pricing_category,
     get_lease_status,
+    get_order_product,
     get_switch_application_status,
     rounded,
 )
@@ -531,12 +531,6 @@ class Order(UUIDModel, TimeStampedModel):
         if not isinstance(self.lease, (BerthLease, WinterStorageLease)):
             raise ValidationError(_("You cannot assign other types of leases"))
 
-        # Check that the lease customer and the received customer are the same
-        if self.lease.customer != self.customer:
-            raise ValidationError(
-                _("The lease provided belongs to a different customer")
-            )
-
     def _check_product_and_lease(self) -> None:
         if isinstance(self.product, BerthProduct) and not isinstance(
             self.lease, BerthLease
@@ -588,9 +582,6 @@ class Order(UUIDModel, TimeStampedModel):
             # Check that product and lease are from the same type
             if self.product:
                 self._check_product_and_lease()
-
-        # Check that it has either product or price
-        self._check_product_or_price()
 
         if not self._state.adding:
             old_instance = Order.objects.get(id=self.id)
@@ -655,16 +646,7 @@ class Order(UUIDModel, TimeStampedModel):
 
     def _update_product(self):
         if self.product and self.lease:
-            if isinstance(self.lease, BerthLease):
-                width = self.lease.berth.berth_type.width
-                pricing_category = get_berth_product_pricing_category(self)
-                self.product = BerthProduct.objects.get_in_range(
-                    width=width, pricing_category=pricing_category
-                )
-            elif isinstance(self.lease, WinterStorageLease):
-                self.product = WinterStorageProduct.objects.get(
-                    winter_storage_area=self.lease.get_winter_storage_area()
-                )
+            self.product = get_order_product(self)
 
     def _update_price(self):
         price = (
@@ -734,10 +716,33 @@ class Order(UUIDModel, TimeStampedModel):
 
         creating = self._state.adding
 
-        # If the product instance is being passed
+        # If the product or lease instance is being passed
         # Price has to be assigned before saving if creating
-        if creating and self.product:
-            self._update_price()
+        if creating:
+            if self.lease:
+                if self.product:
+                    raise ValidationError("Cannot set a product when passing a lease")
+
+                # TODO: this is the problem
+                # Manually-set price has higher precedence over automatically retrieved product
+                if self.order_type == OrderType.LEASE_ORDER and not self.price:
+                    self.product = get_order_product(self)
+
+                if not self.customer:
+                    # If no customer is passed, use the one from the lease
+                    self.customer = self.lease.customer
+
+                # Check that the lease customer and the received customer are the same
+                if self.lease.customer != self.customer:
+                    raise ValidationError(
+                        _("The lease provided belongs to a different customer")
+                    )
+
+            if self.product:
+                self._update_price()
+
+        # Check that it has either product or price
+        self._check_product_or_price()
 
         super().save(*args, **kwargs)
 

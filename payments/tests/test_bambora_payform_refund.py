@@ -421,6 +421,9 @@ def test_initiate_refund_error_unavailable(provider_base_config, order: Order):
             unavailable_payment_provider.initiate_payment(order)
 
 
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
+)
 def test_handle_initiate_refund_error_validation(order, provider_base_config):
     """Test the response handler raises PayloadValidationError as expected"""
     r = {"result": 1, "type": "e-payment", "errors": ["Invalid auth code"]}
@@ -463,6 +466,9 @@ def test_check_refund_authcode_invalid(payment_provider):
     assert not payment_provider.check_new_refund_authcode(request)
 
 
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
+)
 def test_handle_notify_request_success(
     provider_base_config, order: Order,
 ):
@@ -495,6 +501,9 @@ def test_handle_notify_request_success(
     assert returned.status_code == 204
 
 
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
+)
 def test_handle_notify_request_payment_failed(provider_base_config, order):
     """Test request notify helper returns http 204 and order status is correct when payment fails"""
     order.order_number = "abc123"

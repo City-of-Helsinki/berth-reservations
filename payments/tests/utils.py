@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from utils.numbers import random_decimal
 
-from ..utils import rounded
+from ..utils import _get_vasikkasaari_harbor, rounded
 
 
 @rounded
@@ -20,3 +20,21 @@ def random_tax(min=0, max=100, decimals=0) -> Decimal:
 
 def random_bool():
     return bool(random.getrandbits(1))
+
+
+def get_berth_lease_pricing_category(lease):
+    from payments.enums import PricingCategory
+    from resources.enums import BerthMooringType
+
+    mooring_type = lease.berth.berth_type.mooring_type
+
+    if mooring_type == BerthMooringType.DINGHY_PLACE:
+        return PricingCategory.DINGHY
+
+    if mooring_type == BerthMooringType.TRAWLER_PLACE:
+        return PricingCategory.TRAILER
+
+    if lease.berth.pier.harbor == _get_vasikkasaari_harbor():
+        return PricingCategory.VASIKKASAARI
+
+    return PricingCategory.DEFAULT

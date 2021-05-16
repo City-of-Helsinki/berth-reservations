@@ -46,7 +46,6 @@ mutation RESEND_ORDER_MUTATION($input: ResendOrderMutationInput!) {
 @pytest.mark.parametrize(
     "request_has_profile_token", [True, False],
 )
-# @pytest.mark.parametrize("mooring_type,pricing_category", [(BerthMooringType.DINGHY_PLACE)])
 @pytest.mark.parametrize("order_status", [OrderStatus.OFFERED, OrderStatus.ERROR])
 def test_resend_order(
     api_client,

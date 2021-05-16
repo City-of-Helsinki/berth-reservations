@@ -11,14 +11,12 @@ from payments.tests.factories import OrderFactory
 
 
 @freeze_time("2021-01-09T08:00:00Z")
-def test_expire_too_old_unpaid_orders(berth_lease, berth_product):
+def test_expire_too_old_unpaid_orders(berth_lease):
     # VEN-783:
     # The due date should only be editable up to 7 days after it has expired.
     # Therefore invalidated orders should be expired when due date + 7 days have gone.
     order = OrderFactory(
         lease=berth_lease,
-        product=berth_product,
-        customer=berth_lease.customer,
         due_date=datetime.date(2021, 1, 2),
         status=OrderStatus.OFFERED,
     )

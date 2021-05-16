@@ -17,7 +17,6 @@ from customers.tests.factories import CustomerProfileFactory, OrganizationFactor
 from leases.tests.conftest import *  # noqa
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from resources.tests.conftest import *  # noqa
-from utils.numbers import random_decimal
 
 from ..enums import OrderStatus, OrderType, PeriodType, PriceUnits, ProductServiceType
 from ..providers import BamboraPayformProvider
@@ -63,22 +62,15 @@ def additional_product():
 def _generate_order(order_type: str = None):
     customer_profile = CustomerProfileFactory()
     if order_type == "berth_order":
-        min_width = random_decimal(1, 5)
-        max_width = random_decimal(min_width + Decimal("0.1"), 10)
-
         order = OrderFactory(
             customer=customer_profile,
-            product=BerthProductFactory(min_width=min_width, max_width=max_width),
             lease=BerthLeaseFactory(
-                application=BerthApplicationFactory(),
-                customer=customer_profile,
-                berth__berth_type__width=random_decimal(min_width, max_width),
+                application=BerthApplicationFactory(), customer=customer_profile,
             ),
         )
     elif order_type == "winter_storage_order":
         order = OrderFactory(
             customer=customer_profile,
-            product=WinterStorageProductFactory(),
             lease=WinterStorageLeaseFactory(
                 application=WinterStorageApplicationFactory(), customer=customer_profile
             ),
@@ -86,21 +78,12 @@ def _generate_order(order_type: str = None):
     elif order_type == "unmarked_winter_storage_order":
         order = OrderFactory(
             customer=customer_profile,
-            product=WinterStorageProductFactory(),
             lease=WinterStorageLeaseFactory(
                 application=WinterStorageApplicationFactory(
                     area_type=ApplicationAreaType.UNMARKED
                 ),
                 customer=customer_profile,
             ),
-        )
-    elif order_type == "empty_order":
-        order = OrderFactory(
-            customer=customer_profile,
-            price=random_price(),
-            tax_percentage=random_tax(),
-            product=None,
-            lease=None,
         )
     elif order_type == "additional_product_order":
         order = OrderFactory(
@@ -115,14 +98,11 @@ def _generate_order(order_type: str = None):
         )
     elif order_type == "additional_product_order_with_lease_order":
         lease = BerthLeaseFactory(
-            application=BerthApplicationFactory(), customer=customer_profile
+            application=BerthApplicationFactory(), customer=customer_profile,
         )
         OrderFactory(
             order_type=OrderType.LEASE_ORDER,
             customer=customer_profile,
-            price=random_price(),
-            tax_percentage=random_tax(),
-            product=BerthProductFactory(),
             lease=lease,
             status=OrderStatus.PAID,
         )
@@ -147,8 +127,14 @@ def _generate_order(order_type: str = None):
             customer=customer_profile, organization_type=OrganizationType.NON_BILLABLE
         )
         order = OrderFactory(customer=customer_profile, status=OrderStatus.OFFERED)
-    else:
-        order = OrderFactory(customer=customer_profile)
+    else:  # Also covers the case of `order_type == "empty_order"`
+        order = OrderFactory(
+            customer=customer_profile,
+            price=random_price(),
+            tax_percentage=random_tax(),
+            product=None,
+            lease=None,
+        )
     return order
 
 

@@ -9,6 +9,7 @@ from leases.enums import LeaseStatus
 from payments.enums import OrderStatus, PricingCategory
 from payments.models import Order
 from payments.utils import (
+    _get_vasikkasaari_harbor,
     approve_order,
     get_berth_product_pricing_category,
     send_payment_notification,
@@ -111,6 +112,7 @@ def test_get_berth_product_pricing_category_mooring_type(
 
 
 def test_get_berth_product_pricing_category_vasikkasaari(berth_order):
+    _get_vasikkasaari_harbor.cache_clear()
     berth_order.lease.berth.berth_type.mooring_type = BerthMooringType.SIDE_SLIP_PLACE
     berth_order.lease.berth.berth_type.save()
     berth_order.lease.berth.pier.harbor.create_translation(

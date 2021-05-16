@@ -16,6 +16,7 @@ from customers.tests.conftest import mocked_response_profile
 from payments.enums import OrderStatus
 from payments.models import BerthProduct, Order
 from payments.tests.factories import BerthProductFactory
+from payments.tests.utils import get_berth_lease_pricing_category
 from utils.relay import to_global_id
 
 from ..enums import LeaseStatus
@@ -58,11 +59,6 @@ def test_send_berth_invoices_basic(notification_template_orders_approved):
 
     customer = lease.customer
 
-    BerthProductFactory(
-        min_width=lease.berth.berth_type.width - 1,
-        max_width=lease.berth.berth_type.width + 1,
-    )
-
     user = UserFactory()
 
     data = {
@@ -77,10 +73,10 @@ def test_send_berth_invoices_basic(notification_template_orders_approved):
 
     invoicing_service = _send_invoices(data)
 
+    assert Order.objects.count() == 1
     assert len(invoicing_service.successful_orders) == 1
     assert len(invoicing_service.failed_orders) == 0
     assert len(invoicing_service.failed_leases) == 0
-    assert Order.objects.count() == 1
 
     assert Order.objects.first().id == invoicing_service.successful_orders[0]
 
@@ -159,10 +155,6 @@ def test_use_berth_leases_from_last_season(notification_template_orders_approved
         end_date=calculate_season_end_date(today() - relativedelta(years=1)),
     )
     customer = lease.customer
-    BerthProductFactory(
-        min_width=lease.berth.berth_type.width - 1,
-        max_width=lease.berth.berth_type.width + 1,
-    )
 
     user = UserFactory()
 
@@ -223,10 +215,6 @@ def test_use_berth_leases_from_current_season(notification_template_orders_appro
         end_date=calculate_season_end_date(today()),
     )
     customer = lease.customer
-    BerthProductFactory(
-        min_width=lease.berth.berth_type.width - 1,
-        max_width=lease.berth.berth_type.width + 1,
-    )
 
     user = UserFactory()
 
@@ -279,10 +267,6 @@ def test_berth_lease_berth_product(notification_template_orders_approved):
         end_date=calculate_season_end_date(today() - relativedelta(years=1)),
     )
     customer = lease.customer
-    BerthProductFactory(
-        min_width=lease.berth.berth_type.width - 1,
-        max_width=lease.berth.berth_type.width + 1,
-    )
 
     user = UserFactory()
 
@@ -315,6 +299,7 @@ def test_berth_lease_no_product():
         status=LeaseStatus.PAID,
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),
         end_date=calculate_season_end_date(today() - relativedelta(years=1)),
+        create_product=False,
     )
     customer = lease.customer
 
@@ -340,8 +325,10 @@ def test_berth_lease_no_product():
 
     lease = BerthLease.objects.exclude(id=lease.id).first()
     assert lease.id in invoicing_service.failed_leases[0].keys()
-    assert (
-        invoicing_service.failed_leases[0].get(lease.id) == "No suitable product found"
+    assert "Order must have either product object or price value" in invoicing_service.failed_leases[
+        0
+    ].get(
+        lease.id
     )
 
 
@@ -354,10 +341,6 @@ def test_send_berth_invoices_missing_email(notification_template_orders_approved
         end_date=today() + relativedelta(years=-1, months=5),
     )
     customer = lease.customer
-    BerthProductFactory(
-        min_width=lease.berth.berth_type.width - 1,
-        max_width=lease.berth.berth_type.width + 1,
-    )
 
     user = UserFactory()
 
@@ -408,10 +391,6 @@ def test_send_berth_invoices_invalid_example_email(
         end_date=today() + relativedelta(years=-1, months=5),
     )
     customer = lease.customer
-    BerthProductFactory(
-        min_width=lease.berth.berth_type.width - 1,
-        max_width=lease.berth.berth_type.width + 1,
-    )
 
     user = UserFactory()
 
@@ -460,10 +439,6 @@ def test_send_berth_invoices_send_error(notification_template_orders_approved):
         end_date=today() + relativedelta(years=-1, months=5),
     )
     customer = lease.customer
-    BerthProductFactory(
-        min_width=lease.berth.berth_type.width - 1,
-        max_width=lease.berth.berth_type.width + 1,
-    )
 
     user = UserFactory()
 
@@ -546,10 +521,6 @@ def test_send_berth_invoices_only_not_renewed(notification_template_orders_appro
     )
 
     customer = valid_lease.customer
-    BerthProductFactory(
-        min_width=valid_lease.berth.berth_type.width - 1,
-        max_width=valid_lease.berth.berth_type.width + 1,
-    )
 
     user = UserFactory()
 
@@ -663,9 +634,9 @@ def test_non_invoiceable_berth(notification_template_orders_approved):
         start_date=calculate_season_start_date(today() - relativedelta(years=1)),
         end_date=calculate_season_end_date(today() - relativedelta(years=1)),
     )
-    prod = BerthProductFactory(
-        min_width=lease_with_invoiceable_berth.berth.berth_type.width - 1,
-        max_width=lease_with_invoiceable_berth.berth.berth_type.width + 1,
+    expected_product = BerthProduct.objects.get_in_range(
+        lease_with_invoiceable_berth.berth.berth_type.width,
+        get_berth_lease_pricing_category(lease_with_invoiceable_berth),
     )
 
     user = UserFactory()
@@ -689,4 +660,4 @@ def test_non_invoiceable_berth(notification_template_orders_approved):
 
     order = Order.objects.first()
     assert order.id == invoicing_service.successful_orders[0]
-    assert order.product == prod
+    assert order.product == expected_product

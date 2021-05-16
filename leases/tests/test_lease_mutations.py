@@ -27,11 +27,13 @@ from contracts.tests.factories import BerthContractFactory
 from customers.schema import BoatNode, ProfileNode
 from customers.tests.conftest import mocked_response_profile
 from payments.enums import OrderStatus
-from payments.models import Order
-from payments.schema import PlaceProductTaxEnum
+from payments.models import BerthProduct, Order
+from payments.schema import BerthProductNode
 from payments.tests.factories import BerthProductFactory, WinterStorageProductFactory
+from payments.tests.utils import get_berth_lease_pricing_category
+from resources.enums import BerthMooringType
 from resources.schema import BerthNode, WinterStoragePlaceNode, WinterStorageSectionNode
-from resources.tests.factories import BoatTypeFactory
+from resources.tests.factories import BerthFactory, BoatTypeFactory
 from utils.numbers import rounded
 from utils.relay import to_global_id
 
@@ -45,6 +47,7 @@ from ..utils import (
     calculate_winter_storage_lease_start_date,
 )
 from .factories import BerthLeaseFactory, WinterStorageLeaseFactory
+from .utils import create_berth_products, create_winter_storage_product
 
 CREATE_BERTH_LEASE_MUTATION = """
 mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
@@ -81,10 +84,8 @@ mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
 def test_create_berth_lease(api_client, berth_application, berth, customer_profile):
     berth_application.customer = customer_profile
     berth_application.save()
-    min_width = berth.berth_type.width - 1
-    max_width = berth.berth_type.width + 1
-    BerthProductFactory(min_width=min_width, max_width=max_width)
     BoatTypeFactory(id=berth_application.boat_type.id)
+    create_berth_products(berth)
 
     variables = {
         "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
@@ -132,9 +133,7 @@ def test_create_berth_lease_all_arguments(
     berth_application.save()
     boat.owner = customer_profile
     boat.save()
-    min_width = berth.berth_type.width - 1
-    max_width = berth.berth_type.width + 1
-    BerthProductFactory(min_width=min_width, max_width=max_width)
+    create_berth_products(berth)
 
     variables = {
         "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
@@ -297,13 +296,10 @@ mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
                 }
                 product {
                     ... on BerthProductNode {
-                        minWidth
-                        maxWidth
-                        tier1Price
-                        tier2Price
-                        tier3Price
-                        priceUnit
-                        taxPercentage
+                        id
+                    }
+                    ... on WinterStorageProductNode {
+                        id
                     }
                 }
             }
@@ -317,15 +313,15 @@ mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
     "api_client", ["berth_services", "berth_handler"], indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
-def test_create_berth_lease_with_order(
-    api_client, berth_application, berth, customer_profile
-):
+def test_create_berth_lease_with_order(api_client, berth_application, customer_profile):
     BoatTypeFactory(id=berth_application.boat_type.id)
+    berth = BerthFactory(berth_type__mooring_type=BerthMooringType.QUAYSIDE_MOORING)
     berth_application.customer = customer_profile
     berth_application.save()
     min_width = berth.berth_type.width - 1
     max_width = berth.berth_type.width + 1
     berth_product = BerthProductFactory(min_width=min_width, max_width=max_width)
+    expected_product = BerthProduct.objects.get_in_range(berth.berth_type.width)
 
     variables = {
         "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
@@ -353,27 +349,7 @@ def test_create_berth_lease_with_order(
             "price": str(berth_product.price_for_tier(tier=berth.pier.price_tier)),
             "status": "DRAFTED",
             "customer": {"id": to_global_id(ProfileNode, customer_profile.id)},
-            "product": {
-                "minWidth": rounded(
-                    berth_product.min_width, decimals=2, as_string=True
-                ),
-                "maxWidth": rounded(
-                    berth_product.max_width, decimals=2, as_string=True
-                ),
-                "tier1Price": rounded(
-                    berth_product.tier_1_price, decimals=2, as_string=True
-                ),
-                "tier2Price": rounded(
-                    berth_product.tier_2_price, decimals=2, as_string=True
-                ),
-                "tier3Price": rounded(
-                    berth_product.tier_3_price, decimals=2, as_string=True
-                ),
-                "priceUnit": berth_product.price_unit.name,
-                "taxPercentage": PlaceProductTaxEnum.get(
-                    berth_product.tax_percentage
-                ).name,
-            },
+            "product": {"id": to_global_id(BerthProductNode, expected_product.id)},
         },
     }
 
@@ -412,9 +388,7 @@ mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_lease_without_application(api_client, berth, customer_profile):
-    min_width = berth.berth_type.width - 1
-    max_width = berth.berth_type.width + 1
-    berth_product = BerthProductFactory(min_width=min_width, max_width=max_width)
+    create_berth_products(berth)
 
     variables = {
         "customerId": to_global_id(ProfileNode, customer_profile.id),
@@ -430,6 +404,10 @@ def test_create_berth_lease_without_application(api_client, berth, customer_prof
 
     assert BerthLease.objects.count() == 1
     assert Order.objects.count() == 1
+    expected_product = BerthProduct.objects.get_in_range(
+        berth.berth_type.width,
+        get_berth_lease_pricing_category(BerthLease.objects.first()),
+    )
 
     assert executed["data"]["createBerthLease"]["berthLease"].pop("id") is not None
     assert (
@@ -442,7 +420,7 @@ def test_create_berth_lease_without_application(api_client, berth, customer_prof
         "customer": {"id": to_global_id(ProfileNode, customer_profile.id)},
         "berth": {"id": variables["berthId"]},
         "order": {
-            "price": str(berth_product.price_for_tier(tier=berth.pier.price_tier)),
+            "price": str(expected_product.price_for_tier(tier=berth.pier.price_tier)),
             "status": "DRAFTED",
             "customer": {"id": to_global_id(ProfileNode, customer_profile.id)},
         },
@@ -1101,9 +1079,7 @@ def test_create_winter_storage_lease(
     api_client, winter_storage_application, winter_storage_place, customer_profile
 ):
     BoatTypeFactory(id=winter_storage_application.boat_type.id)
-    WinterStorageProductFactory(
-        winter_storage_area=winter_storage_place.winter_storage_section.area
-    )
+    create_winter_storage_product(winter_storage_place.winter_storage_section.area)
     winter_storage_application.customer = customer_profile
     winter_storage_application.save()
 
@@ -1162,7 +1138,7 @@ def test_create_winter_storage_lease(
 def test_create_winter_storage_lease_with_section(
     api_client, winter_storage_application, winter_storage_section, boat
 ):
-    WinterStorageProductFactory(winter_storage_area=winter_storage_section.area)
+    create_winter_storage_product(winter_storage_section.area)
     winter_storage_application.customer = boat.owner
     winter_storage_application.save()
 
@@ -1732,9 +1708,7 @@ def test_create_berth_lease_for_non_billable_customer(
     BoatTypeFactory(id=berth_application.boat_type.id)
     berth_application.customer = non_billable_customer
     berth_application.save()
-    min_width = berth.berth_type.width - 1
-    max_width = berth.berth_type.width + 1
-    berth_product = BerthProductFactory(min_width=min_width, max_width=max_width)
+    create_berth_products(berth)
 
     variables = {
         "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
@@ -1743,6 +1717,11 @@ def test_create_berth_lease_for_non_billable_customer(
 
     executed = api_client.execute(
         CREATE_BERTH_LEASE_WITH_ORDER_MUTATION, input=variables
+    )
+
+    expected_product = BerthProduct.objects.get_in_range(
+        berth.berth_type.width,
+        get_berth_lease_pricing_category(BerthLease.objects.first()),
     )
 
     assert executed["data"]["createBerthLease"]["berthLease"].pop("id") is not None
@@ -1756,27 +1735,7 @@ def test_create_berth_lease_for_non_billable_customer(
             "price": "0.00",
             "status": "PAID_MANUALLY",
             "customer": {"id": to_global_id(ProfileNode, non_billable_customer.id)},
-            "product": {
-                "minWidth": rounded(
-                    berth_product.min_width, decimals=2, as_string=True
-                ),
-                "maxWidth": rounded(
-                    berth_product.max_width, decimals=2, as_string=True
-                ),
-                "tier1Price": rounded(
-                    berth_product.tier_1_price, decimals=2, as_string=True
-                ),
-                "tier2Price": rounded(
-                    berth_product.tier_2_price, decimals=2, as_string=True
-                ),
-                "tier3Price": rounded(
-                    berth_product.tier_3_price, decimals=2, as_string=True
-                ),
-                "priceUnit": berth_product.price_unit.name,
-                "taxPercentage": PlaceProductTaxEnum.get(
-                    berth_product.tax_percentage
-                ).name,
-            },
+            "product": {"id": to_global_id(BerthProductNode, expected_product.id)},
         },
     }
 
@@ -1841,13 +1800,11 @@ def test_create_winter_storage_lease_for_non_billable_customer(
 def test_create_berth_lease_creates_contract(
     api_client, berth_application, berth, boat, customer_profile
 ):
+    create_berth_products(berth)
     berth_application.customer = customer_profile
     berth_application.save()
     boat.owner = customer_profile
     boat.save()
-    min_width = berth.berth_type.width - 1
-    max_width = berth.berth_type.width + 1
-    BerthProductFactory(min_width=min_width, max_width=max_width)
 
     variables = {
         "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
@@ -1881,9 +1838,7 @@ def test_create_berth_lease_no_contract_for_non_billable_customer(
     berth_application.save()
     boat.owner = non_billable_customer
     boat.save()
-    min_width = berth.berth_type.width - 1
-    max_width = berth.berth_type.width + 1
-    BerthProductFactory(min_width=min_width, max_width=max_width)
+    create_berth_products(berth)
 
     variables = {
         "applicationId": to_global_id(BerthApplicationNode, berth_application.id),

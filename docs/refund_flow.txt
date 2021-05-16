@@ -6,7 +6,12 @@ note over Admin: Confirm the refund
 Admin->Back-end: refundOrderMuation
 
 
-note over Back-end,Bambora API: Start the refund process
+note over Back-end,Bambora API: Get the payment details to retreive the product ids
+Back-end->Bambora API:Get payment details\n/get_payment
+Bambora API-->>Back-end: (Payment object)
+
+note over Back-end,Bambora API: Start the refund process.\nThe refund is made for all the products included on the payment.
+note over Back-end: Create the OrderRefund object
 Back-end->Bambora API:Create refund\n/create_refund
 
 note over Bambora API: Handle refund
