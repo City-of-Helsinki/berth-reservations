@@ -141,12 +141,39 @@ class Query:
         except Order.DoesNotExist as e:
             raise VenepaikkaGraphQLError(e)
 
-        order_type = OrderTypeEnum.UNKNOWN
         is_application_order = (
             hasattr(order, "lease")
             and getattr(order.lease, "application", None) is not None
         )
 
+        order_type = Query._get_order_type(order)
+
+        if isinstance(order.lease, BerthLease):
+            place_number = order.lease.berth.number
+            section_identifier = order.lease.berth.pier.identifier
+            area_name = order.lease.berth.pier.harbor.name
+        elif isinstance(order.lease, WinterStorageLease):
+            place_number = str(order.lease.place.number)
+            section_identifier = order.lease.place.winter_storage_section.identifier
+            area_name = order.lease.place.winter_storage_section.area.name
+        else:
+            place_number = None
+            section_identifier = None
+            area_name = None
+
+        return OrderDetailsType(
+            status=order.status,
+            order_type=order_type,
+            area=area_name,
+            section=section_identifier,
+            place=place_number,
+            is_application_order=is_application_order,
+        )
+
+    @staticmethod
+    def _get_order_type(order):
+        # in graphene-python, all resolvers are implictly staticmethods, so need to make this utility static too.
+        order_type = OrderTypeEnum.UNKNOWN
         if order.order_type == OrderType.ADDITIONAL_PRODUCT_ORDER:
             order_type = OrderTypeEnum.ADDITIONAL_PRODUCT
         elif order.product:
@@ -159,17 +186,4 @@ class Query:
                 order_type = OrderTypeEnum.BERTH
             elif isinstance(order.lease, WinterStorageLease):
                 order_type = OrderTypeEnum.WINTER_STORAGE
-
-        has_berth = order.lease and isinstance(order.lease, BerthLease)
-        harbor_name = order.lease.berth.pier.harbor.name if has_berth else ""
-        pier_identifier = order.lease.berth.pier.identifier if has_berth else ""
-        berth_number = order.lease.berth.number if has_berth else ""
-
-        return OrderDetailsType(
-            status=order.status,
-            order_type=order_type,
-            harbor=harbor_name,
-            pier=pier_identifier,
-            berth=berth_number,
-            is_application_order=is_application_order,
-        )
+        return order_type

@@ -45,7 +45,6 @@ class BerthSwitchType(DjangoObjectType):
 
     class Meta:
         model = BerthSwitch
-        exclude = ("berthapplication_set",)
 
 
 class BerthApplicationFilter(django_filters.FilterSet):

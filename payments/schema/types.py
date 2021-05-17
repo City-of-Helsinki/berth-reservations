@@ -296,9 +296,9 @@ class BerthSwitchOfferNode(DjangoObjectType, AbstractOfferNode):
 class OrderDetailsType(graphene.ObjectType):
     order_type = OrderTypeEnum(required=True)
     status = OrderStatusEnum(required=True)
-    harbor = graphene.String(required=True)
-    pier = graphene.String(required=True)
-    berth = graphene.String(required=True)
+    place = graphene.String()  # (berth/ws place number)
+    section = graphene.String()  # (pier/section identifier)
+    area = graphene.String()  # (harbor/ws area name)
     is_application_order = graphene.Boolean(required=True)
 
 
