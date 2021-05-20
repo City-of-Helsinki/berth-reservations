@@ -274,17 +274,9 @@ class BaseInvoicingService:
                             continue
                         customer = new_lease.customer
 
-                        # Get the associated product
-                        product = self.get_product(new_lease)
-
-                        # If no product is found, the billing can't be done
-                        if not product:
-                            self.fail_lease(new_lease, _("No suitable product found"))
-                            continue
-
                         try:
                             order = Order.objects.create(
-                                customer=customer, lease=new_lease, product=product
+                                lease=new_lease, customer=customer
                             )
 
                             helsinki_profile_user = profiles.get(customer.id)

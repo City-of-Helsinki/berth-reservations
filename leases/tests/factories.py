@@ -6,6 +6,7 @@ from customers.tests.factories import BoatFactory
 from resources.tests.factories import BerthFactory, WinterStoragePlaceFactory
 
 from ..models import BerthLease, WinterStorageLease
+from .utils import create_berth_products, create_winter_storage_product
 
 
 class AbstractLeaseFactory(factory.django.DjangoModelFactory):
@@ -21,6 +22,12 @@ class BerthLeaseFactory(AbstractLeaseFactory):
         "contracts.tests.factories.BerthContractFactory", lease=None,
     )
 
+    @factory.post_generation
+    def create_product(obj, create, extracted, **kwargs):
+        """When creating a lease, create all the necessary products for that berth"""
+        if extracted is not False:
+            create_berth_products(obj.berth, create)
+
     class Meta:
         model = BerthLease
 
@@ -31,6 +38,12 @@ class WinterStorageLeaseFactory(AbstractLeaseFactory):
     contract = factory.SubFactory(
         "contracts.tests.factories.WinterStorageContractFactory", lease=None,
     )
+
+    @factory.post_generation
+    def create_product(obj, create, extracted, **kwargs):
+        """When creating a lease, create all the necessary products for that berth"""
+        if extracted is not False:
+            create_winter_storage_product(obj.get_winter_storage_area(), create)
 
     class Meta:
         model = WinterStorageLease

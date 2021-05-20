@@ -36,6 +36,7 @@ from .enums import (
     PeriodType,
     PriceTier,
     PriceUnits,
+    PricingCategory,
     ProductServiceType,
 )
 from .exceptions import OrderStatusTransitionError
@@ -49,6 +50,7 @@ from .utils import (
     generate_order_number,
     get_application_status,
     get_lease_status,
+    get_order_product,
     get_switch_application_status,
     rounded,
 )
@@ -95,8 +97,14 @@ class AbstractPlaceProduct(models.Model):
 
 
 class BerthProductManager(models.Manager):
-    def get_in_range(self, width: Union[Decimal, float, int]):
-        products = self.get_queryset().filter(min_width__lt=width, max_width__gte=width)
+    def get_in_range(
+        self,
+        width: Union[Decimal, float, int],
+        pricing_category: PricingCategory = PricingCategory.DEFAULT,
+    ):
+        products = self.get_queryset().filter(
+            min_width__lt=width, max_width__gte=width, pricing_category=pricing_category
+        )
         if len(products) != 1:
             logger.error(f"Not only one berth product found: {width=}, {products=}")
 
@@ -135,20 +143,31 @@ class BerthProduct(AbstractPlaceProduct, TimeStampedModel, UUIDModel):
         default=PriceUnits.AMOUNT,
         max_length=10,
     )
+    pricing_category = models.PositiveSmallIntegerField(
+        verbose_name=_("pricing category"),
+        choices=PricingCategory.choices,
+        default=PricingCategory.DEFAULT,
+    )
     objects = BerthProductManager()
 
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=("min_width", "max_width",), name="unique_width_range"
+                fields=("min_width", "max_width", "pricing_category"),
+                name="unique_width_range",
             )
         ]
-        ordering = ["min_width"]
+        ordering = ["min_width", "pricing_category"]
 
     def __str__(self):
+        pricing_category = ""
+        if self.pricing_category != PricingCategory.DEFAULT:
+            pricing_category = f" ({PricingCategory(self.pricing_category).name})"
+
         return (
             f"[{self.min_width}-{self.max_width}] "
             f"T1:{self.tier_1_price}€, T2:{self.tier_2_price}€, T3: {self.tier_3_price}€"
+            f"{pricing_category}"
         )
 
     def save(self, *args, **kwargs):
@@ -512,12 +531,6 @@ class Order(UUIDModel, TimeStampedModel):
         if not isinstance(self.lease, (BerthLease, WinterStorageLease)):
             raise ValidationError(_("You cannot assign other types of leases"))
 
-        # Check that the lease customer and the received customer are the same
-        if self.lease.customer != self.customer:
-            raise ValidationError(
-                _("The lease provided belongs to a different customer")
-            )
-
     def _check_product_and_lease(self) -> None:
         if isinstance(self.product, BerthProduct) and not isinstance(
             self.lease, BerthLease
@@ -569,9 +582,6 @@ class Order(UUIDModel, TimeStampedModel):
             # Check that product and lease are from the same type
             if self.product:
                 self._check_product_and_lease()
-
-        # Check that it has either product or price
-        self._check_product_or_price()
 
         if not self._state.adding:
             old_instance = Order.objects.get(id=self.id)
@@ -636,13 +646,7 @@ class Order(UUIDModel, TimeStampedModel):
 
     def _update_product(self):
         if self.product and self.lease:
-            if isinstance(self.lease, BerthLease):
-                width = self.lease.berth.berth_type.width
-                self.product = BerthProduct.objects.get_in_range(width=width)
-            elif isinstance(self.lease, WinterStorageLease):
-                self.product = WinterStorageProduct.objects.get(
-                    winter_storage_area=self.lease.get_winter_storage_area()
-                )
+            self.product = get_order_product(self)
 
     def _update_price(self):
         price = (
@@ -712,10 +716,33 @@ class Order(UUIDModel, TimeStampedModel):
 
         creating = self._state.adding
 
-        # If the product instance is being passed
+        # If the product or lease instance is being passed
         # Price has to be assigned before saving if creating
-        if creating and self.product:
-            self._update_price()
+        if creating:
+            if self.lease:
+                if self.product:
+                    raise ValidationError("Cannot set a product when passing a lease")
+
+                # TODO: this is the problem
+                # Manually-set price has higher precedence over automatically retrieved product
+                if self.order_type == OrderType.LEASE_ORDER and not self.price:
+                    self.product = get_order_product(self)
+
+                if not self.customer:
+                    # If no customer is passed, use the one from the lease
+                    self.customer = self.lease.customer
+
+                # Check that the lease customer and the received customer are the same
+                if self.lease.customer != self.customer:
+                    raise ValidationError(
+                        _("The lease provided belongs to a different customer")
+                    )
+
+            if self.product:
+                self._update_price()
+
+        # Check that it has either product or price
+        self._check_product_or_price()
 
         super().save(*args, **kwargs)
 

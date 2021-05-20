@@ -19,6 +19,7 @@ from leases.utils import (
     calculate_winter_storage_lease_end_date,
     calculate_winter_storage_lease_start_date,
 )
+from resources.enums import BerthMooringType
 from resources.tests.factories import (
     WinterStoragePlaceFactory,
     WinterStoragePlaceTypeFactory,
@@ -32,6 +33,7 @@ from ..enums import (
     OrderStatus,
     PeriodType,
     PriceUnits,
+    PricingCategory,
     ProductServiceType,
 )
 from ..models import (
@@ -41,8 +43,10 @@ from ..models import (
     Order,
     OrderLine,
     OrderRefund,
+    WinterStorageProduct,
 )
 from ..utils import (
+    _get_vasikkasaari_harbor,
     calculate_product_partial_month_price,
     calculate_product_partial_year_price,
     calculate_product_percentage_price,
@@ -55,7 +59,12 @@ from .factories import (
     OrderLineFactory,
     WinterStorageProductFactory,
 )
-from .utils import random_bool, random_price, random_tax
+from .utils import (
+    get_berth_lease_pricing_category,
+    random_bool,
+    random_price,
+    random_tax,
+)
 
 
 def test_berth_product_invalid_price_unit():
@@ -152,7 +161,7 @@ def test_additional_product_fixed_service_tax_value():
 def test_order_berth_product_winter_storage_lease_raise_error():
     lease = WinterStorageLeaseFactory()
     with pytest.raises(ValidationError) as exception:
-        Order.objects.create(
+        OrderFactory(
             product=BerthProductFactory(), lease=lease, customer=lease.customer
         )
 
@@ -163,7 +172,7 @@ def test_order_berth_product_winter_storage_lease_raise_error():
 def test_order_winter_storage_product_berth_lease_raise_error():
     lease = BerthLeaseFactory()
     with pytest.raises(ValidationError) as exception:
-        Order.objects.create(
+        OrderFactory(
             product=WinterStorageProductFactory(), lease=lease, customer=lease.customer
         )
 
@@ -174,9 +183,7 @@ def test_order_winter_storage_product_berth_lease_raise_error():
 
 
 def test_order_retrieves_berth_product(berth_product, customer_profile):
-    order = Order.objects.create(
-        _product_object_id=berth_product.id, customer=customer_profile
-    )
+    order = OrderFactory(_product_object_id=berth_product.id, customer=customer_profile)
     assert order.product.id == berth_product.id
     assert order._product_content_type.name == berth_product._meta.verbose_name
 
@@ -184,7 +191,7 @@ def test_order_retrieves_berth_product(berth_product, customer_profile):
 def test_order_retrieves_winter_storage_product(
     winter_storage_product, customer_profile
 ):
-    order = Order.objects.create(
+    order = OrderFactory(
         _product_object_id=winter_storage_product.id, customer=customer_profile
     )
     assert order.product.id == winter_storage_product.id
@@ -193,7 +200,7 @@ def test_order_retrieves_winter_storage_product(
 
 def test_order_raise_error_invalid_product_id(customer_profile):
     with pytest.raises(ValidationError) as exception:
-        Order.objects.create(_product_object_id=uuid.uuid4(), customer=customer_profile)
+        OrderFactory(_product_object_id=uuid.uuid4(), customer=customer_profile)
     errors = str(exception.value)
     assert "The product passed is not valid" in errors
 
@@ -205,30 +212,22 @@ def test_order_raise_error_no_product_or_price(customer_profile):
     assert "Order must have either product object or price value" in errors
 
 
-def test_order_retrieves_berth_lease(berth_lease, berth_product, customer_profile):
-    order = Order.objects.create(
-        _lease_object_id=berth_lease.id,
-        customer=customer_profile,
-        product=berth_product,
-    )
+def test_order_retrieves_berth_lease(berth_lease):
+    order = OrderFactory(_lease_object_id=berth_lease.id, customer=berth_lease.customer)
     assert order.lease.id == berth_lease.id
     assert order._lease_content_type.name == berth_lease._meta.verbose_name
 
 
-def test_order_retrieves_winter_storage_lease(
-    winter_storage_lease, winter_storage_product, customer_profile
-):
+def test_order_retrieves_winter_storage_lease(winter_storage_lease):
     order = Order.objects.create(
-        _lease_object_id=winter_storage_lease.id,
-        customer=customer_profile,
-        product=winter_storage_product,
+        _lease_object_id=winter_storage_lease.id, customer=winter_storage_lease.customer
     )
     sqm = (
         winter_storage_lease.place.place_type.width
         * winter_storage_lease.place.place_type.length
     )
     expected_price = rounded(
-        winter_storage_product.price_value * sqm, decimals=2, round_to_nearest=1
+        order.product.price_value * sqm, decimals=2, round_to_nearest=1
     )
 
     assert order.lease.id == winter_storage_lease.id
@@ -236,41 +235,52 @@ def test_order_retrieves_winter_storage_lease(
     assert order.price == expected_price
 
 
-def test_order_berth_product_price(berth_product, customer_profile):
-    order = OrderFactory(product=berth_product, customer=customer_profile)
-    assert order.product == berth_product
-    assert order.price == berth_product.price_for_tier(
+def test_order_berth_product_price(berth_lease):
+    order = OrderFactory(lease=berth_lease)
+    expected_product = BerthProduct.objects.get_in_range(
+        berth_lease.berth.berth_type.width,
+        get_berth_lease_pricing_category(berth_lease),
+    )
+
+    assert order.product == expected_product
+    assert order.price == expected_product.price_for_tier(
         order.lease.berth.pier.price_tier
     )
-    assert order.tax_percentage == berth_product.tax_percentage
+    assert order.tax_percentage == expected_product.tax_percentage
 
 
-def test_order_winter_storage_product_price(winter_storage_product, customer_profile):
-    order = Order.objects.create(
-        product=winter_storage_product, customer=customer_profile
+def test_order_winter_storage_product_price(winter_storage_lease):
+    order = OrderFactory(lease=winter_storage_lease)
+    expected_product = WinterStorageProduct.objects.get(
+        winter_storage_area=winter_storage_lease.get_winter_storage_area()
     )
-    assert order.product == winter_storage_product
-    assert order.price == winter_storage_product.price_value
-    assert order.tax_percentage == winter_storage_product.tax_percentage
+    expected_price = rounded(
+        order.product.price_value
+        * winter_storage_lease.place.place_type.width
+        * winter_storage_lease.place.place_type.length,
+        decimals=2,
+        round_to_nearest=1,
+    )
+    assert order.product == expected_product
+    assert order.price == expected_price
+    assert order.tax_percentage == expected_product.tax_percentage
 
 
 def test_order_with_plain_price_and_tax(customer_profile):
     price = random_price()
     tax = random_tax()
-    order = Order.objects.create(
-        price=price, tax_percentage=tax, customer=customer_profile
-    )
+    order = OrderFactory(price=price, tax_percentage=tax, customer=customer_profile)
     assert order.product is None
     assert order.price == price
     assert order.tax_percentage == tax
 
 
 def test_order_raise_error_berth_lease_and_different_customer(
-    berth_lease, berth_product, customer_profile
+    berth_lease, customer_profile
 ):
     with pytest.raises(ValidationError) as exception:
-        Order.objects.create(
-            product=berth_product, lease=berth_lease, customer=customer_profile,
+        OrderFactory(
+            lease=berth_lease, customer=customer_profile,
         )
 
     errors = str(exception.value)
@@ -278,13 +288,11 @@ def test_order_raise_error_berth_lease_and_different_customer(
 
 
 def test_order_raise_error_winter_storage_lease_and_different_customer(
-    winter_storage_lease, winter_storage_product, customer_profile
+    winter_storage_lease, customer_profile
 ):
     with pytest.raises(ValidationError) as exception:
-        Order.objects.create(
-            product=winter_storage_product,
-            lease=winter_storage_lease,
-            customer=customer_profile,
+        OrderFactory(
+            lease=winter_storage_lease, customer=customer_profile,
         )
 
     errors = str(exception.value)
@@ -293,11 +301,7 @@ def test_order_raise_error_winter_storage_lease_and_different_customer(
 
 def test_order_berth_lease_right_price_for_full_season(berth):
     lease = BerthLeaseFactory(berth=berth)
-    product = BerthProductFactory(
-        min_width=lease.berth.berth_type.width - 1,
-        max_width=lease.berth.berth_type.width + 1,
-    )
-    order = Order.objects.create(product=product, customer=lease.customer, lease=lease)
+    order = OrderFactory(customer=lease.customer, lease=lease)
 
     assert order.lease.start_date == calculate_berth_lease_start_date()
     assert order.lease.end_date == calculate_berth_lease_end_date()
@@ -320,12 +324,13 @@ def test_order_winter_storage_lease_right_price_for_full_season(winter_storage_a
 
     section = WinterStorageSectionFactory(**services, area=winter_storage_area)
     lease = WinterStorageLeaseFactory(
-        place=WinterStoragePlaceFactory(winter_storage_section=section)
+        place=WinterStoragePlaceFactory(winter_storage_section=section),
+        create_product=False,
     )
-    product = WinterStorageProductFactory(
+    WinterStorageProductFactory(
         winter_storage_area=winter_storage_area, price_value=Decimal("100.00")
     )
-    order = Order.objects.create(product=product, customer=lease.customer, lease=lease)
+    order = OrderFactory(lease=lease)
 
     for service, create in services.items():
         if create:
@@ -352,7 +357,7 @@ def test_order_winter_storage_lease_right_price_for_full_season(winter_storage_a
 
 
 @freeze_time("2020-01-01T08:00:00Z")
-def test_order_winter_storage_lease_right_price_for_partial_month(winter_storage_area,):
+def test_order_winter_storage_lease_right_price_for_partial_month(winter_storage_area):
     services = {
         "summer_storage_for_docking_equipment": True,
         "summer_storage_for_trailers": random_bool(),
@@ -373,8 +378,7 @@ def test_order_winter_storage_lease_right_price_for_partial_month(winter_storage
         start_date=today(),
         end_date=today() + timedelta(days=day_offset),
     )
-    product = WinterStorageProductFactory(winter_storage_area=winter_storage_area)
-    order = Order.objects.create(product=product, customer=lease.customer, lease=lease)
+    order = OrderFactory(lease=lease)
 
     for service, create in services.items():
         if create:
@@ -425,8 +429,7 @@ def test_order_winter_storage_lease_right_price_for_partial_months(
         start_date=today(),
         end_date=today() + timedelta(days=day_offset),
     )
-    product = WinterStorageProductFactory(winter_storage_area=winter_storage_area)
-    order = Order.objects.create(product=product, customer=lease.customer, lease=lease)
+    order = OrderFactory(lease=lease)
 
     for service, create in services.items():
         if create:
@@ -454,7 +457,7 @@ def test_order_winter_storage_lease_right_price_for_partial_months(
 
 
 @freeze_time("2020-01-01T08:00:00Z")
-def test_order_winter_storage_lease_right_price_for_partial_year(winter_storage_area,):
+def test_order_winter_storage_lease_right_price_for_partial_year(winter_storage_area):
     services = {
         "summer_storage_for_docking_equipment": True,
         "summer_storage_for_trailers": random_bool(),
@@ -475,8 +478,7 @@ def test_order_winter_storage_lease_right_price_for_partial_year(winter_storage_
         start_date=today(),
         end_date=today() + timedelta(days=day_offset),
     )
-    product = WinterStorageProductFactory(winter_storage_area=winter_storage_area)
-    order = Order.objects.create(product=product, customer=lease.customer, lease=lease)
+    order = OrderFactory(lease=lease)
 
     for service, create in services.items():
         if create:
@@ -504,7 +506,7 @@ def test_order_winter_storage_lease_right_price_for_partial_year(winter_storage_
 
 
 def test_order_change_berth_product(customer_profile):
-    order = Order.objects.create(
+    order = OrderFactory(
         product=BerthProductFactory(),
         customer=customer_profile,
         status=OrderStatus.DRAFTED,
@@ -527,7 +529,7 @@ def test_order_change_berth_product(customer_profile):
     ],
 )
 def test_order_cannot_change_berth_product(status, customer_profile):
-    order = Order.objects.create(
+    order = OrderFactory(
         product=BerthProductFactory(), customer=customer_profile, status=status
     )
     with pytest.raises(ValidationError) as exception:
@@ -539,7 +541,7 @@ def test_order_cannot_change_berth_product(status, customer_profile):
 
 
 def test_order_cannot_change_winter_storage_product(customer_profile):
-    order = Order.objects.create(
+    order = OrderFactory(
         product=WinterStorageProductFactory(),
         customer=customer_profile,
         status=OrderStatus.PAID,
@@ -553,9 +555,7 @@ def test_order_cannot_change_winter_storage_product(customer_profile):
 
 
 def test_order_cannot_change_berth_lease(berth_lease):
-    order = Order.objects.create(
-        product=BerthProductFactory(), lease=berth_lease, customer=berth_lease.customer,
-    )
+    order = OrderFactory(lease=berth_lease)
     with pytest.raises(ValidationError) as exception:
         order.lease = BerthLeaseFactory(customer=berth_lease.customer)
         order.save()
@@ -565,11 +565,7 @@ def test_order_cannot_change_berth_lease(berth_lease):
 
 
 def test_order_cannot_change_winter_storage_lease(winter_storage_lease):
-    order = Order.objects.create(
-        product=WinterStorageProductFactory(),
-        lease=winter_storage_lease,
-        customer=winter_storage_lease.customer,
-    )
+    order = OrderFactory(lease=winter_storage_lease,)
     with pytest.raises(ValidationError) as exception:
         order.lease = WinterStorageLeaseFactory(customer=winter_storage_lease.customer)
         order.save()
@@ -579,9 +575,7 @@ def test_order_cannot_change_winter_storage_lease(winter_storage_lease):
 
 
 def test_order_berth_lease_can_change_price(berth_lease):
-    order = Order.objects.create(
-        product=BerthProductFactory(), lease=berth_lease, customer=berth_lease.customer,
-    )
+    order = OrderFactory(lease=berth_lease)
     price = random_price()
     tax_percentage = random_tax()
 
@@ -595,11 +589,7 @@ def test_order_berth_lease_can_change_price(berth_lease):
 
 
 def test_order_winter_storage_lease_can_change_price(winter_storage_lease):
-    order = Order.objects.create(
-        product=WinterStorageProductFactory(),
-        lease=winter_storage_lease,
-        customer=winter_storage_lease.customer,
-    )
+    order = OrderFactory(lease=winter_storage_lease,)
     price = random_price()
     tax_percentage = random_tax()
 
@@ -619,8 +609,8 @@ def test_order_pretax_price(order):
 
 
 def test_order_manager_only_berth_orders():
-    OrderFactory(product=BerthProductFactory())
-    OrderFactory(product=WinterStorageProductFactory())
+    OrderFactory(lease=BerthLeaseFactory())
+    OrderFactory(lease=WinterStorageLeaseFactory())
 
     orders = Order.objects.berth_orders()
     assert orders.count() == 1
@@ -630,8 +620,8 @@ def test_order_manager_only_berth_orders():
 
 
 def test_order_manager_only_winter_storage_orders():
-    OrderFactory(product=BerthProductFactory())
-    OrderFactory(product=WinterStorageProductFactory())
+    OrderFactory(lease=BerthLeaseFactory())
+    OrderFactory(lease=WinterStorageLeaseFactory())
 
     orders = Order.objects.winter_storage_orders()
     assert orders.count() == 1
@@ -641,7 +631,7 @@ def test_order_manager_only_winter_storage_orders():
 
 
 @pytest.mark.parametrize("period", ["month", "season", "year"])
-def test_order_line_product_price(period):
+def test_order_line_product_price(period, customer_profile):
     service = (
         random.choice(list(ProductServiceType))
         if period == "season"
@@ -650,7 +640,11 @@ def test_order_line_product_price(period):
     product = AdditionalProductFactory(
         price_unit=PriceUnits.AMOUNT, period=PeriodType(period), service=service
     )
-    order_line = OrderLineFactory(product=product)
+    order_line = OrderLineFactory(
+        product=product,
+        order__customer=customer_profile,
+        order__lease=BerthLeaseFactory(customer=customer_profile),
+    )
 
     if product.period == PeriodType.MONTH:
         expected_price = calculate_product_partial_month_price(
@@ -691,7 +685,7 @@ def test_order_line_pretax_price(order_line):
 
 def test_order_tax_percentage():
     # Hard-code the base price. Base tax percentage currently is always 24%
-    o = OrderFactory(price=Decimal("100.00"))
+    o = OrderFactory(price=Decimal("100.00"), tax_percentage=Decimal("24.00"))
 
     # Create a product for an optional service
     ap = AdditionalProductFactory(
@@ -719,11 +713,13 @@ def test_winter_season_price():
         place_type=WinterStoragePlaceTypeFactory(width=1, length=1)
     )
 
-    product = WinterStorageProductFactory(price_value=Decimal("10"))
     lease = WinterStorageLeaseFactory(
-        place=place, start_date=start_date, end_date=end_date
+        place=place, start_date=start_date, end_date=end_date, create_product=False
     )
-    order = Order.objects.create(product=product, lease=lease, customer=lease.customer)
+    WinterStorageProductFactory(
+        price_value=Decimal("10"), winter_storage_area=lease.get_winter_storage_area()
+    )
+    order = OrderFactory(lease=lease)
     assert order.price == Decimal("10.00")
 
 
@@ -732,33 +728,32 @@ def test_berth_season_price(berth):
     start_date = today()
     end_date = start_date + relativedelta(days=15)
 
+    lease = BerthLeaseFactory(
+        berth=berth, start_date=start_date, end_date=end_date, create_product=False
+    )
     price = Decimal("10")
-    product = BerthProductFactory(
+    BerthProductFactory(
         tier_1_price=price,
         tier_2_price=price,
         tier_3_price=price,
         min_width=berth.berth_type.width - 1,
         max_width=berth.berth_type.width + 1,
+        pricing_category=get_berth_lease_pricing_category(lease),
     )
-    lease = BerthLeaseFactory(berth=berth, start_date=start_date, end_date=end_date)
-    order = Order.objects.create(product=product, lease=lease, customer=lease.customer)
+    order = OrderFactory(lease=lease)
     assert order.price == Decimal("10.00")
 
 
 def test_order_winter_storage_lease_with_section_right_price(
-    winter_storage_section, winter_storage_product, boat
+    winter_storage_section, boat
 ):
     winter_storage_lease = WinterStorageLeaseFactory(
         place=None, section=winter_storage_section, customer=boat.owner, boat=boat
     )
-    order = Order.objects.create(
-        _lease_object_id=winter_storage_lease.id,
-        customer=boat.owner,
-        product=winter_storage_product,
-    )
+    order = OrderFactory(lease=winter_storage_lease)
     sqm = boat.width * boat.length
 
-    expected_price = rounded(winter_storage_product.price_value * sqm, decimals=2)
+    expected_price = rounded(order.product.price_value * sqm, decimals=2)
 
     assert order.lease.id == winter_storage_lease.id
     assert order._lease_content_type.name == winter_storage_lease._meta.verbose_name
@@ -766,10 +761,7 @@ def test_order_winter_storage_lease_with_section_right_price(
 
 
 def test_order_winter_storage_lease_without_boat_right_price(
-    winter_storage_section,
-    winter_storage_product,
-    winter_storage_application,
-    customer_profile,
+    winter_storage_section, winter_storage_application, customer_profile,
 ):
     winter_storage_lease = WinterStorageLeaseFactory(
         place=None,
@@ -778,23 +770,17 @@ def test_order_winter_storage_lease_without_boat_right_price(
         boat=None,
         application=winter_storage_application,
     )
-    order = Order.objects.create(
-        _lease_object_id=winter_storage_lease.id,
-        customer=customer_profile,
-        product=winter_storage_product,
-    )
+    order = OrderFactory(lease=winter_storage_lease)
     sqm = winter_storage_application.boat_width * winter_storage_application.boat_length
 
-    expected_price = rounded(winter_storage_product.price_value * sqm, decimals=2)
+    expected_price = rounded(order.product.price_value * sqm, decimals=2)
 
     assert order.lease.id == winter_storage_lease.id
     assert order._lease_content_type.name == winter_storage_lease._meta.verbose_name
     assert order.price == expected_price
 
 
-def test_order_right_price_for_company(
-    winter_storage_section, winter_storage_product, boat, company_customer
-):
+def test_order_right_price_for_company(winter_storage_section, boat, company_customer):
     boat.owner = company_customer
     # we don't use decimals for width and length in this unit test
     # it causes random rounding problems when asserting the double price
@@ -805,22 +791,18 @@ def test_order_right_price_for_company(
     winter_storage_lease = WinterStorageLeaseFactory(
         place=None, section=winter_storage_section, customer=boat.owner, boat=boat
     )
-    order = Order.objects.create(
-        _lease_object_id=winter_storage_lease.id,
-        customer=boat.owner,
-        product=winter_storage_product,
-    )
+    order = OrderFactory(lease=winter_storage_lease)
     sqm = boat.width * boat.length
 
     # expect double the price
-    expected_price = winter_storage_product.price_value * sqm * 2
+    expected_price = order.product.price_value * sqm * 2
 
     assert order.price == expected_price
-    assert order.tax_percentage == winter_storage_product.tax_percentage
+    assert order.tax_percentage == order.product.tax_percentage
 
 
 def test_order_right_price_for_non_billable(
-    winter_storage_section, winter_storage_product, boat, non_billable_customer
+    winter_storage_section, boat, non_billable_customer
 ):
     boat.owner = non_billable_customer
     boat.save()
@@ -828,29 +810,25 @@ def test_order_right_price_for_non_billable(
     winter_storage_lease = WinterStorageLeaseFactory(
         place=None, section=winter_storage_section, customer=boat.owner, boat=boat
     )
-    order = Order.objects.create(
-        _lease_object_id=winter_storage_lease.id,
-        customer=boat.owner,
-        product=winter_storage_product,
-    )
+    order = OrderFactory(lease=winter_storage_lease)
 
     assert order.price == 0
     assert order.tax_percentage == 0
 
 
-def test_order_line_product_price_for_company(
-    berth_lease, berth_product, company_customer
-):
+def test_order_line_product_price_for_company(company_customer):
+    berth_lease = BerthLeaseFactory(customer=company_customer)
     product = AdditionalProductFactory(
         price_unit=PriceUnits.AMOUNT,
         period=PeriodType("year"),
         service=ProductServiceType.PARKING_PERMIT,
     )
 
-    order = Order.objects.create(
-        _lease_object_id=berth_lease.id,
-        _product_object_id=berth_product.id,
-        customer=company_customer,
+    order = OrderFactory(
+        lease=berth_lease,
+        price=Decimal("0.00"),
+        tax_percentage=Decimal("0.00"),
+        product=None,
     )
 
     order_line = OrderLineFactory(product=product, order=order)
@@ -868,19 +846,19 @@ def test_order_line_product_price_for_company(
     assert order_line.tax_percentage == product.tax_percentage
 
 
-def test_order_line_product_price_for_non_billable(
-    berth_lease, berth_product, non_billable_customer
-):
+def test_order_line_product_price_for_non_billable(non_billable_customer):
+    berth_lease = BerthLeaseFactory(customer=non_billable_customer)
     product = AdditionalProductFactory(
         price_unit=PriceUnits.AMOUNT,
         period=PeriodType("year"),
         service=ProductServiceType.PARKING_PERMIT,
     )
 
-    order = Order.objects.create(
-        _lease_object_id=berth_lease.id,
-        _product_object_id=berth_product.id,
-        customer=non_billable_customer,
+    order = OrderFactory(
+        lease=berth_lease,
+        price=Decimal("0.00"),
+        tax_percentage=Decimal("0.00"),
+        product=None,
     )
 
     order_line = OrderLineFactory(product=product, order=order)
@@ -902,8 +880,7 @@ def test_berth_product_range():
 
 
 def test_order_set_status_no_lease(berth):
-    product = BerthProductFactory(min_width=1, max_width=5)
-    order = OrderFactory(product=product, status=OrderStatus.OFFERED, lease=None,)
+    order = OrderFactory(status=OrderStatus.OFFERED, lease=None)
 
     order.set_status(OrderStatus.PAID)
     assert not order.lease
@@ -912,16 +889,7 @@ def test_order_set_status_no_lease(berth):
 
 def test_order_set_status_no_application(berth):
     lease = BerthLeaseFactory(berth=berth, application=None, status=LeaseStatus.OFFERED)
-    product = BerthProductFactory(
-        min_width=lease.berth.berth_type.width - 1,
-        max_width=lease.berth.berth_type.width + 1,
-    )
-    order = OrderFactory(
-        product=product,
-        customer=lease.customer,
-        lease=lease,
-        status=OrderStatus.OFFERED,
-    )
+    order = OrderFactory(lease=lease, status=OrderStatus.OFFERED,)
 
     order.set_status(OrderStatus.PAID)
     assert order.status == OrderStatus.PAID
@@ -1010,8 +978,11 @@ def test_order_refund_cannot_refund_not_paid(order, status):
     assert "Cannot refund orders that are not paid" in errors
 
 
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True
+)
 def test_order_due_date_has_to_be_set_for_order_in_offered_status(
-    order, berth_product, customer_profile
+    order, customer_profile, berth_lease
 ):
     with pytest.raises(ValidationError) as exception:
         order.due_date = None
@@ -1022,9 +993,7 @@ def test_order_due_date_has_to_be_set_for_order_in_offered_status(
     assert "Order cannot be offered without a due date" in errors
 
     with pytest.raises(ValidationError) as exception:
-        Order.objects.create(
-            product=berth_product, customer=customer_profile, status=OrderStatus.OFFERED
-        )
+        OrderFactory(lease=berth_lease, due_date=None, status=OrderStatus.OFFERED)
 
     errors = str(exception.value)
     assert "Order cannot be offered without a due date" in errors
@@ -1126,18 +1095,72 @@ def test_marked_winter_storage_price_rounded(width, length, expected_price):
     Testing all the possible width-length-price combinations according to the pricing table.
     """
     lease = WinterStorageLeaseFactory(
-        place__place_type__width=width, place__place_type__length=length
+        place__place_type__width=width,
+        place__place_type__length=length,
+        create_product=False,
     )
-    product = WinterStorageProductFactory(
+    WinterStorageProductFactory(
         winter_storage_area=lease.place.winter_storage_section.area,
         price_value=Decimal("11.40"),
         tax_percentage=Decimal("24.00"),
     )
-    order = OrderFactory(
-        customer=lease.customer,
-        lease=lease,
-        product=product,
-        price=None,
-        tax_percentage=Decimal("24.00"),
-    )
+    order = OrderFactory(lease=lease)
     assert order.price == Decimal(expected_price)
+
+
+@pytest.mark.parametrize(
+    "mooring_type,pricing_category,expected_price",
+    [
+        (BerthMooringType.DINGHY_PLACE, PricingCategory.DINGHY, Decimal("62.00")),
+        (BerthMooringType.TRAWLER_PLACE, PricingCategory.TRAILER, Decimal("129.00")),
+    ],
+)
+@pytest.mark.parametrize("berth_width", [0.1, 1, 2, 3, 4, 5, 999])
+def test_order_berth_product_mooring_type(
+    berth_width, mooring_type, pricing_category, expected_price
+):
+    lease = BerthLeaseFactory(
+        berth__berth_type__mooring_type=mooring_type,
+        berth__berth_type__width=Decimal(str(berth_width)),
+        create_product=False,
+    )
+    BerthProductFactory(
+        min_width=Decimal("0"),
+        max_width=Decimal("999.99"),
+        tier_1_price=expected_price,
+        tier_2_price=expected_price,
+        tier_3_price=expected_price,
+        pricing_category=pricing_category,
+    )
+    order = OrderFactory(lease=lease)
+    assert order.price == expected_price
+
+
+@pytest.mark.parametrize(
+    "berth_width,expected_price",
+    [
+        (Decimal("2.5"), Decimal("100.00")),
+        (Decimal("2.7"), Decimal("102.00")),
+        (Decimal("3.0"), Decimal("129.00")),
+        (Decimal("3.5"), Decimal("157.00")),
+    ],
+)
+def test_order_berth_product_vasikkasaari(berth_width, expected_price):
+    _get_vasikkasaari_harbor.cache_clear()
+
+    lease = BerthLeaseFactory(
+        berth__berth_type__width=berth_width,
+        berth__berth_type__mooring_type=BerthMooringType.QUAYSIDE_MOORING,
+        create_product=False,
+    )
+    lease.berth.pier.harbor.create_translation("fi", name="Vasikkasaaren venesatama")
+    BerthProductFactory(
+        min_width=berth_width - Decimal("0.01"),
+        max_width=berth_width,
+        tier_1_price=expected_price,
+        tier_2_price=expected_price,
+        tier_3_price=expected_price,
+        pricing_category=PricingCategory.VASIKKASAARI,
+    )
+    order = OrderFactory(lease=lease)
+    assert order.price == expected_price

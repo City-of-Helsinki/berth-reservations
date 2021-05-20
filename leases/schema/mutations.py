@@ -101,20 +101,15 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
 
         try:
             lease = BerthLease.objects.create(**input)
-            product = BerthProduct.objects.get_in_range(width=berth.berth_type.width)
 
-            order = Order.objects.create(
-                customer=input["customer"], lease=lease, product=product
-            )
+            order = Order.objects.create(customer=input["customer"], lease=lease)
             # Do not create a contract for non-billable customers.
             if not input["customer"].is_non_billable_customer():
                 get_contract_service().create_berth_contract(lease)
         except BerthProduct.DoesNotExist as e:
             raise VenepaikkaGraphQLError(e)
         except ValidationError as e:
-            # Flatten all the error messages on a single list
-            errors = sum(e.message_dict.values(), [])
-            raise VenepaikkaGraphQLError(errors)
+            raise VenepaikkaGraphQLError(str(e))
 
         if application := input.get("application"):
             application.status = ApplicationStatus.OFFER_GENERATED
@@ -171,9 +166,7 @@ class UpdateBerthLeaseMutation(graphene.ClientIDMutation):
         try:
             update_object(lease, input)
         except ValidationError as e:
-            # Flatten all the error messages on a single list
-            errors = sum(e.message_dict.values(), [])
-            raise VenepaikkaGraphQLError(errors)
+            raise VenepaikkaGraphQLError(str(e))
 
         return UpdateBerthLeaseMutation(berth_lease=lease)
 
@@ -293,12 +286,10 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
                 info, place_id, only_type=WinterStoragePlaceNode, nullable=False,
             )
             input["place"] = place
-            area = place.winter_storage_section.area
         elif section_id := input.pop("section_id", None):
             section = get_node_from_global_id(
                 info, section_id, only_type=WinterStorageSectionNode, nullable=False,
             )
-            area = section.area
             input["section"] = section
         else:
             raise VenepaikkaGraphQLError(
@@ -313,19 +304,14 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
 
         try:
             lease = WinterStorageLease.objects.create(**input)
-            product = WinterStorageProduct.objects.get(winter_storage_area=area)
-            order = Order.objects.create(
-                customer=input["customer"], lease=lease, product=product
-            )
+            order = Order.objects.create(customer=input["customer"], lease=lease)
             # Do not create a contract for non-billable customers.
             if not application.customer.is_non_billable_customer():
                 get_contract_service().create_winter_storage_contract(lease)
         except WinterStorageProduct.DoesNotExist as e:
             raise VenepaikkaGraphQLError(e)
         except ValidationError as e:
-            # Flatten all the error messages on a single list
-            errors = sum(e.message_dict.values(), [])
-            raise VenepaikkaGraphQLError(errors)
+            raise VenepaikkaGraphQLError(str(e))
 
         application.status = ApplicationStatus.OFFER_GENERATED
         application.save()
@@ -384,9 +370,7 @@ class UpdateWinterStorageLeaseMutation(graphene.ClientIDMutation):
         try:
             update_object(lease, input)
         except ValidationError as e:
-            # Flatten all the error messages on a single list
-            errors = sum(e.message_dict.values(), [])
-            raise VenepaikkaGraphQLError(errors)
+            raise VenepaikkaGraphQLError(str(e))
 
         return UpdateWinterStorageLeaseMutation(winter_storage_lease=lease)
 

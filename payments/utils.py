@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from typing import Optional, TYPE_CHECKING, Union
 
+from leases.models import BerthLease, WinterStorageLease
+
 if TYPE_CHECKING:
     from uuid import UUID
-    from .models import Order, AbstractOffer
+    from .models import Order, AbstractOffer, BerthProduct, WinterStorageProduct
     from .notifications import NotificationType
 
 import base64
@@ -14,7 +16,7 @@ import struct
 import time
 from datetime import date, timedelta
 from decimal import Decimal
-from functools import wraps
+from functools import lru_cache, wraps
 from typing import Callable
 
 from babel.dates import format_date
@@ -42,13 +44,19 @@ from leases.utils import (
     calculate_winter_season_end_date,
     calculate_winter_season_start_date,
 )
-from resources.enums import AreaRegion
+from resources.enums import AreaRegion, BerthMooringType
 from resources.models import Harbor, WinterStorageArea
 from utils.email import is_valid_email
 from utils.messaging import get_email_subject
 from utils.numbers import rounded as rounded_decimal
 
-from .enums import OfferStatus, OrderStatus, OrderType, ProductServiceType
+from .enums import (
+    OfferStatus,
+    OrderStatus,
+    OrderType,
+    PricingCategory,
+    ProductServiceType,
+)
 
 
 def fetch_order_profile(order, profile_token):
@@ -303,6 +311,46 @@ def get_talpa_product_id(
             own_product_number,
         ]
     )
+
+
+@lru_cache(maxsize=3)
+def _get_vasikkasaari_harbor():
+    return Harbor.objects.translated(
+        "fi", name__icontains="Vasikkasaaren venesatama"
+    ).first()
+
+
+def get_berth_product_pricing_category(order: Order) -> PricingCategory:
+    if hasattr(order, "lease") and isinstance(order.lease, BerthLease):
+        mooring_type = order.lease.berth.berth_type.mooring_type
+        if mooring_type == BerthMooringType.DINGHY_PLACE:
+            return PricingCategory.DINGHY
+
+        if mooring_type == BerthMooringType.TRAWLER_PLACE:
+            return PricingCategory.TRAILER
+
+        if order.lease.berth.pier.harbor == _get_vasikkasaari_harbor():
+            return PricingCategory.VASIKKASAARI
+
+    return PricingCategory.DEFAULT
+
+
+def get_order_product(
+    order: Order,
+) -> Optional[Union[BerthProduct, WinterStorageProduct]]:
+    from .models import BerthProduct, WinterStorageProduct
+
+    if isinstance(order.lease, BerthLease):
+        width = order.lease.berth.berth_type.width
+        pricing_category = get_berth_product_pricing_category(order)
+        return BerthProduct.objects.get_in_range(
+            width=width, pricing_category=pricing_category
+        )
+    elif isinstance(order.lease, WinterStorageLease):
+        return WinterStorageProduct.objects.get(
+            winter_storage_area=order.lease.get_winter_storage_area()
+        )
+    return None
 
 
 def get_order_notification_type(order):

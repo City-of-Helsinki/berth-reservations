@@ -26,7 +26,7 @@ from payments.tests.conftest import (
     FAKE_BAMBORA_API_URL,
     mocked_response_create,
 )
-from payments.tests.factories import BerthProductFactory, OrderFactory, OrderLineFactory
+from payments.tests.factories import OrderFactory, OrderLineFactory
 from payments.utils import get_talpa_product_id, price_as_fractional_int
 
 success_params = {
@@ -146,7 +146,7 @@ def test_payload_add_products_success(payment_provider, order_with_products: Ord
 
 @pytest.mark.parametrize("storage_on_ice", [True, False])
 def test_payload_additional_product_order(
-    payment_provider, berth_lease, additional_product, storage_on_ice
+    payment_provider, additional_product, storage_on_ice, berth_lease_without_product
 ):
     if storage_on_ice:
         additional_product.service = ProductServiceType.STORAGE_ON_ICE
@@ -162,23 +162,19 @@ def test_payload_additional_product_order(
         additional_product.tax_percentage = Decimal("24.00")
     additional_product.save()
 
-    berth_product = BerthProductFactory(
-        min_width=berth_lease.berth.berth_type.width - 1,
-        max_width=berth_lease.berth.berth_type.width + 1,
-    )
     OrderFactory(
-        customer=berth_lease.customer,
-        product=berth_product,
-        lease=berth_lease,
+        price=Decimal("0.00"),
+        tax_percentage=Decimal("24.00"),
+        product=None,
+        lease=berth_lease_without_product,
         status=OrderStatus.PAID,
     )
-    berth_lease.status = LeaseStatus.PAID
-    berth_lease.save()
+    berth_lease_without_product.status = LeaseStatus.PAID
+    berth_lease_without_product.save()
 
     additional_product_order = OrderFactory(
         order_type=OrderType.ADDITIONAL_PRODUCT_ORDER,
-        customer=berth_lease.customer,
-        lease=berth_lease,
+        lease=berth_lease_without_product,
         product=None,
         price=Decimal("0.00"),
         tax_percentage=Decimal("0.00"),
@@ -197,7 +193,7 @@ def test_payload_additional_product_order(
     product = payload["products"][0]
     assert product["id"] == get_talpa_product_id(
         additional_product.id,
-        area=berth_lease.berth.pier.harbor,
+        area=berth_lease_without_product.berth.pier.harbor,
         is_storage_on_ice=storage_on_ice,
     )
     assert product["title"] is not None

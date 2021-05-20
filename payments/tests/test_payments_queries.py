@@ -474,6 +474,9 @@ query ORDERS {
     ["berth_supervisor", "berth_handler", "berth_services"],
     indirect=True,
 )
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
+)
 def test_get_orders(api_client, order):
     OrderLogEntryFactory(order=order)
     OrderLineFactory(order=order)
@@ -580,6 +583,9 @@ query ORDER {
     "api_client",
     ["berth_supervisor", "berth_handler", "berth_services"],
     indirect=True,
+)
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True,
 )
 def test_get_order(api_client, order):
     order_global_id = to_global_id(OrderNode, order.id)
@@ -731,13 +737,13 @@ def test_get_order_status(
 
     executed = superuser_api_client.execute(ORDER_DETAILS_QUERY % order.order_number)
 
-    if order.product:
+    if order.order_type == OrderType.ADDITIONAL_PRODUCT_ORDER:
+        order_type = OrderTypeEnum.ADDITIONAL_PRODUCT
+    elif order.product:
         if isinstance(order.product, BerthProduct):
             order_type = OrderTypeEnum.BERTH
         elif isinstance(order.product, WinterStorageProduct):
             order_type = OrderTypeEnum.WINTER_STORAGE
-    elif order.order_type == OrderType.ADDITIONAL_PRODUCT_ORDER:
-        order_type = OrderTypeEnum.ADDITIONAL_PRODUCT
     else:
         order_type = OrderTypeEnum.UNKNOWN
 

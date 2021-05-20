@@ -50,6 +50,13 @@ class BerthProductAdmin(admin.ModelAdmin):
         "tier_1_price",
         "tier_2_price",
         "tier_3_price",
+        "pricing_category",
+    )
+    list_filter = ("pricing_category",)
+    ordering = (
+        "pricing_category",
+        "min_width",
+        "max_width",
     )
 
 
@@ -149,6 +156,7 @@ class OrderAdmin(admin.ModelAdmin):
     )
     list_filter = ("status", "order_type")
     autocomplete_fields = ("customer",)
+    ordering = ("-created_at",)
     search_fields = (
         "order_number",
         "customer__id",
@@ -278,13 +286,19 @@ class OrderRefundAdmin(admin.ModelAdmin):
         "created_at",
         "time_settled",
         "order",
+        "customer",
         "status",
         "amount",
     )
     list_filter = ("status",)
+    ordering = ("-created_at",)
     search_fields = (
         "refund_id",
+        "order__order_number",
         "order__customer__id",
+        "order__customer_first_name",
+        "order__customer_last_name",
+        "order__customer_email",
     )
     readonly_fields = ("time_settled",)
 
@@ -293,6 +307,10 @@ class OrderRefundAdmin(admin.ModelAdmin):
             obj.log_entries.filter(from_status="pending").order_by("created_at").first()
         )
         return entry.created_at if entry else None
+
+    def customer(self, obj):
+        if obj.order.customer_first_name or obj.order.customer_last_name:
+            return f"{obj.order.customer_first_name  or ''} {obj.order.customer_last_name or ''}"
 
 
 class OrderRefundLogEntryAdmin(admin.ModelAdmin):

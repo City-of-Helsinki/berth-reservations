@@ -67,7 +67,7 @@ from ..utils import (
 )
 from .conftest import mocked_response_create
 from .factories import OrderFactory
-from .utils import random_price
+from .utils import get_berth_lease_pricing_category, random_price
 
 CREATE_BERTH_PRODUCT_MUTATION = """
 mutation CREATE_BERTH_PRODUCT($input: CreateBerthProductMutationInput!) {
@@ -710,6 +710,9 @@ mutation CREATE_ORDER($input: CreateOrderMutationInput!) {
                 ... on BerthLeaseNode {
                     id
                 }
+                ... on WinterStorageLeaseNode {
+                    id
+                }
             }
         }
     }
@@ -722,15 +725,20 @@ mutation CREATE_ORDER($input: CreateOrderMutationInput!) {
 )
 # Freezing time to avoid season price miscalculation
 @freeze_time("2020-01-01T08:00:00Z")
-def test_create_order_berth_product(api_client, berth_product):
-    berth_lease = BerthLeaseFactory(start_date=calculate_season_start_date())
+def test_create_order_berth_product(api_client):
+    berth_lease = BerthLeaseFactory(
+        start_date=calculate_season_start_date(), berth__berth_type__mooring_type=7
+    )
     customer_id = to_global_id(ProfileNode, berth_lease.customer.id)
-    product_id = to_global_id(BerthProductNode, berth_product.id)
     lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
 
+    expected_product = BerthProduct.objects.get_in_range(
+        berth_lease.berth.berth_type.width,
+        get_berth_lease_pricing_category(berth_lease),
+    )
+    expected_product_id = to_global_id(BerthProductNode, expected_product.id)
+
     variables = {
-        "customerId": customer_id,
-        "productId": product_id,
         "leaseId": lease_id,
     }
 
@@ -742,10 +750,12 @@ def test_create_order_berth_product(api_client, berth_product):
     assert executed["data"]["createOrder"]["order"].pop("id") is not None
 
     assert executed["data"]["createOrder"]["order"] == {
-        "price": str(berth_product.price_for_tier(berth_lease.berth.pier.price_tier)),
-        "taxPercentage": str(berth_product.tax_percentage),
-        "customer": {"id": variables["customerId"]},
-        "product": {"id": variables["productId"]},
+        "price": str(
+            expected_product.price_for_tier(berth_lease.berth.pier.price_tier)
+        ),
+        "taxPercentage": str(expected_product.tax_percentage),
+        "customer": {"id": customer_id},
+        "product": {"id": expected_product_id},
         "lease": {"id": variables["leaseId"]},
     }
 
@@ -753,15 +763,22 @@ def test_create_order_berth_product(api_client, berth_product):
 @pytest.mark.parametrize(
     "api_client", ["berth_services"], indirect=True,
 )
-def test_create_order_winter_storage_product(
-    api_client, winter_storage_product, customer_profile
-):
-    customer_id = to_global_id(ProfileNode, customer_profile.id)
-    product_id = to_global_id(WinterStorageProductNode, winter_storage_product.id)
+def test_create_order_winter_storage_lease(api_client, winter_storage_lease):
+    lease_id = to_global_id(WinterStorageLeaseNode, winter_storage_lease.id)
+    customer_id = to_global_id(ProfileNode, winter_storage_lease.customer.id)
+    expected_product = WinterStorageProduct.objects.get(
+        winter_storage_area=winter_storage_lease.get_winter_storage_area()
+    )
+    expected_price = rounded(
+        winter_storage_lease.place.place_type.width
+        * winter_storage_lease.place.place_type.length
+        * expected_product.price_value,
+        round_to_nearest=1,
+        as_string=True,
+    )
 
     variables = {
-        "customerId": customer_id,
-        "productId": product_id,
+        "leaseId": lease_id,
     }
 
     assert Order.objects.count() == 0
@@ -772,11 +789,11 @@ def test_create_order_winter_storage_product(
     assert executed["data"]["createOrder"]["order"].pop("id") is not None
 
     assert executed["data"]["createOrder"]["order"] == {
-        "price": str(winter_storage_product.price_value),
-        "taxPercentage": str(winter_storage_product.tax_percentage),
-        "customer": {"id": variables["customerId"]},
-        "product": {"id": variables["productId"]},
-        "lease": None,
+        "price": expected_price,
+        "taxPercentage": str(expected_product.tax_percentage),
+        "customer": {"id": customer_id},
+        "product": {"id": to_global_id(WinterStorageProductNode, expected_product.id)},
+        "lease": {"id": to_global_id(WinterStorageLeaseNode, winter_storage_lease.id)},
     }
 
 
@@ -798,29 +815,13 @@ def test_create_order_not_enough_permissions(api_client):
     assert_not_enough_permissions(executed)
 
 
-def test_create_order_profile_does_not_exist(superuser_api_client):
-    variables = {
-        "customerId": to_global_id(ProfileNode, uuid.uuid4()),
-    }
-
-    assert Order.objects.count() == 0
-
-    executed = superuser_api_client.execute(CREATE_ORDER_MUTATION, input=variables)
-
-    assert Order.objects.count() == 0
-    assert_doesnt_exist("CustomerProfile", executed)
-
-
 @pytest.mark.parametrize("lease_type", ["berth", "winter"])
-def test_create_order_lease_does_not_exist(
-    superuser_api_client, customer_profile, lease_type
-):
+def test_create_order_lease_does_not_exist(superuser_api_client, lease_type):
     lease_id = to_global_id(
         BerthLeaseNode if lease_type == "berth" else WinterStorageLeaseNode,
         uuid.uuid4(),
     )
     variables = {
-        "customerId": to_global_id(ProfileNode, customer_profile.id),
         "leaseId": lease_id,
     }
 
@@ -882,15 +883,8 @@ mutation UPDATE_ORDERS($input: UpdateOrdersMutationInput!) {
     ],
 )
 @freeze_time("2020-01-01T08:00:00Z")
-def test_update_order_berth_product(
-    api_client, status_choice, berth_product, berth_lease
-):
-    order = OrderFactory(
-        product=berth_product,
-        lease=berth_lease,
-        customer=berth_lease.customer,
-        status=OrderStatus.OFFERED,
-    )
+def test_update_order_berth_product(api_client, status_choice, berth_lease):
+    order = OrderFactory(lease=berth_lease, status=OrderStatus.OFFERED,)
 
     global_id = to_global_id(OrderNode, order.id)
     due_date = today()
@@ -916,8 +910,8 @@ def test_update_order_berth_product(
     assert executed["data"]["updateOrders"]["successfulOrders"][0] == {
         "id": global_id,
         "comment": "foobar",
-        "price": str(berth_product.price_for_tier(berth_lease.berth.pier.price_tier)),
-        "taxPercentage": str(berth_product.tax_percentage),
+        "price": str(order.product.price_for_tier(berth_lease.berth.pier.price_tier)),
+        "taxPercentage": str(order.product.tax_percentage),
         "dueDate": str(due_date.date()),
         "status": OrderStatusEnum.get(status_choice.value).name,
         "customer": {"id": to_global_id(ProfileNode, order.customer.id)},
@@ -933,15 +927,8 @@ def test_update_order_berth_product(
     "initial_status", [OrderStatus.DRAFTED, OrderStatus.OFFERED, OrderStatus.ERROR]
 )
 @freeze_time("2020-01-01T08:00:00Z")
-def test_set_order_status_to_paid_manually(
-    api_client, initial_status, berth_product, berth_lease
-):
-    order = OrderFactory(
-        product=berth_product,
-        lease=berth_lease,
-        customer=berth_lease.customer,
-        status=initial_status,
-    )
+def test_set_order_status_to_paid_manually(api_client, initial_status, berth_lease):
+    order = OrderFactory(lease=berth_lease, status=initial_status,)
     assert order.status == initial_status
     global_id = to_global_id(OrderNode, order.id)
 
@@ -965,8 +952,8 @@ def test_set_order_status_to_paid_manually(
     assert executed["data"]["updateOrders"]["successfulOrders"][0] == {
         "id": global_id,
         "comment": order.comment,
-        "price": str(berth_product.price_for_tier(berth_lease.berth.pier.price_tier)),
-        "taxPercentage": str(berth_product.tax_percentage),
+        "price": str(order.product.price_for_tier(berth_lease.berth.pier.price_tier)),
+        "taxPercentage": str(order.product.tax_percentage),
         "status": OrderStatus.PAID_MANUALLY.name,
         "dueDate": str(order.due_date),
         "customer": {"id": to_global_id(ProfileNode, order.customer.id)},
@@ -987,16 +974,9 @@ def test_set_order_status_to_paid_manually(
 )
 @pytest.mark.parametrize("initial_status", [OrderStatus.OFFERED, OrderStatus.ERROR])
 @freeze_time("2020-01-01T08:00:00Z")
-def test_set_order_status_to_cancelled(
-    api_client, initial_status, berth_product, berth_lease
-):
+def test_set_order_status_to_cancelled(api_client, initial_status, berth_lease):
     # note: test_cancel_order tests the case where customer rejects the order(and berth).
-    order = OrderFactory(
-        product=berth_product,
-        lease=berth_lease,
-        customer=berth_lease.customer,
-        status=initial_status,
-    )
+    order = OrderFactory(lease=berth_lease, status=initial_status,)
     lease_initial_status = berth_lease.status
     assert order.status == initial_status
     global_id = to_global_id(OrderNode, order.id)
@@ -1021,8 +1001,8 @@ def test_set_order_status_to_cancelled(
         "id": global_id,
         "comment": order.comment,
         "status": OrderStatus.CANCELLED.name,
-        "price": str(berth_product.price_for_tier(berth_lease.berth.pier.price_tier)),
-        "taxPercentage": str(berth_product.tax_percentage),
+        "price": str(order.product.price_for_tier(berth_lease.berth.pier.price_tier)),
+        "taxPercentage": str(order.product.tax_percentage),
         "dueDate": str(order.due_date),
         "customer": {"id": to_global_id(ProfileNode, order.customer.id)},
         "product": {"id": to_global_id(BerthProductNode, order.product.id)},

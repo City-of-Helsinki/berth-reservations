@@ -1,6 +1,22 @@
 [
 {
     "model": "payments.berthproduct",
+    "pk": "0fa2a826-771b-4682-833f-1d7d20fa840d",
+    "fields": {
+        "created_at": "2021-05-10T12:05:25.521Z",
+        "modified_at": "2021-05-10T12:11:25.266Z",
+        "tax_percentage": "24.00",
+        "min_width": "2.99",
+        "max_width": "3.00",
+        "tier_1_price": "129.00",
+        "tier_2_price": "129.00",
+        "tier_3_price": "129.00",
+        "price_unit": "amount",
+        "pricing_category": 3
+    }
+},
+{
+    "model": "payments.berthproduct",
     "pk": "11141749-ddca-4719-b201-d2bb542e9757",
     "fields": {
         "created_at": "2020-11-18T08:45:55.040Z",
@@ -11,7 +27,8 @@
         "tier_1_price": "530.00",
         "tier_2_price": "490.00",
         "tier_3_price": "450.00",
-        "price_unit": "amount"
+        "price_unit": "amount",
+        "pricing_category": 0
     }
 },
 {
@@ -19,14 +36,47 @@
     "pk": "15aa93ca-8cb1-46db-bf15-c044eff6abe6",
     "fields": {
         "created_at": "2020-11-18T08:45:55.030Z",
-        "modified_at": "2020-11-18T08:45:55.030Z",
+        "modified_at": "2021-05-10T10:12:45.280Z",
         "tax_percentage": "24.00",
         "min_width": "2.00",
         "max_width": "2.75",
         "tier_1_price": "290.00",
         "tier_2_price": "250.00",
         "tier_3_price": "220.00",
-        "price_unit": "amount"
+        "price_unit": "amount",
+        "pricing_category": 0
+    }
+},
+{
+    "model": "payments.berthproduct",
+    "pk": "165e2bb0-d6dd-45fa-b056-93f7f194af8c",
+    "fields": {
+        "created_at": "2021-05-10T12:04:39.763Z",
+        "modified_at": "2021-05-10T12:04:39.763Z",
+        "tax_percentage": "24.00",
+        "min_width": "0.00",
+        "max_width": "999.99",
+        "tier_1_price": "129.00",
+        "tier_2_price": "129.00",
+        "tier_3_price": "129.00",
+        "price_unit": "amount",
+        "pricing_category": 2
+    }
+},
+{
+    "model": "payments.berthproduct",
+    "pk": "17f6bc41-1d07-4ea0-b07f-f3387b9932b6",
+    "fields": {
+        "created_at": "2021-05-10T12:05:03.145Z",
+        "modified_at": "2021-05-10T12:11:08.113Z",
+        "tax_percentage": "24.00",
+        "min_width": "2.49",
+        "max_width": "2.50",
+        "tier_1_price": "100.00",
+        "tier_2_price": "100.00",
+        "tier_3_price": "100.00",
+        "price_unit": "amount",
+        "pricing_category": 3
     }
 },
 {
@@ -34,14 +84,15 @@
     "pk": "1855e80c-29a6-483f-9609-7807e439862d",
     "fields": {
         "created_at": "2020-11-18T08:45:55.037Z",
-        "modified_at": "2020-11-18T08:45:55.037Z",
+        "modified_at": "2021-05-10T10:14:36.255Z",
         "tax_percentage": "24.00",
         "min_width": "3.00",
         "max_width": "4.00",
         "tier_1_price": "440.00",
         "tier_2_price": "410.00",
         "tier_3_price": "380.00",
-        "price_unit": "amount"
+        "price_unit": "amount",
+        "pricing_category": 0
     }
 },
 {
@@ -56,7 +107,40 @@
         "tier_1_price": "330.00",
         "tier_2_price": "310.00",
         "tier_3_price": "290.00",
-        "price_unit": "amount"
+        "price_unit": "amount",
+        "pricing_category": 0
+    }
+},
+{
+    "model": "payments.berthproduct",
+    "pk": "5546c846-3d31-441f-94eb-4142b0de8b3c",
+    "fields": {
+        "created_at": "2021-05-10T11:57:42.997Z",
+        "modified_at": "2021-05-10T12:04:20.069Z",
+        "tax_percentage": "24.00",
+        "min_width": "0.00",
+        "max_width": "999.99",
+        "tier_1_price": "62.00",
+        "tier_2_price": "62.00",
+        "tier_3_price": "62.00",
+        "price_unit": "amount",
+        "pricing_category": 1
+    }
+},
+{
+    "model": "payments.berthproduct",
+    "pk": "7df805b8-a8d1-4eca-81d2-f7da4cd88bcb",
+    "fields": {
+        "created_at": "2021-05-10T12:05:15.258Z",
+        "modified_at": "2021-05-10T12:11:16.946Z",
+        "tax_percentage": "24.00",
+        "min_width": "2.69",
+        "max_width": "2.70",
+        "tier_1_price": "102.00",
+        "tier_2_price": "102.00",
+        "tier_3_price": "102.00",
+        "price_unit": "amount",
+        "pricing_category": 3
     }
 },
 {
@@ -71,7 +155,24 @@
         "tier_1_price": "200.00",
         "tier_2_price": "170.00",
         "tier_3_price": "150.00",
-        "price_unit": "amount"
+        "price_unit": "amount",
+        "pricing_category": 0
+    }
+},
+{
+    "model": "payments.berthproduct",
+    "pk": "a0a429e2-0994-4c13-998b-d9f645e4afaf",
+    "fields": {
+        "created_at": "2021-05-10T12:05:43.572Z",
+        "modified_at": "2021-05-10T12:11:33.458Z",
+        "tax_percentage": "24.00",
+        "min_width": "3.49",
+        "max_width": "3.50",
+        "tier_1_price": "157.00",
+        "tier_2_price": "157.00",
+        "tier_3_price": "157.00",
+        "price_unit": "amount",
+        "pricing_category": 3
     }
 },
 {
@@ -86,7 +187,8 @@
         "tier_1_price": "820.00",
         "tier_2_price": "750.00",
         "tier_3_price": "660.00",
-        "price_unit": "amount"
+        "price_unit": "amount",
+        "pricing_category": 0
     }
 },
 {
@@ -101,7 +203,8 @@
         "tier_1_price": "610.00",
         "tier_2_price": "550.00",
         "tier_3_price": "520.00",
-        "price_unit": "amount"
+        "price_unit": "amount",
+        "pricing_category": 0
     }
 }
 ]

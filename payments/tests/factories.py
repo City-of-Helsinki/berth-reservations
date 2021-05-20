@@ -6,7 +6,7 @@ import factory
 from applications.tests.factories import BerthApplicationFactory, BerthSwitchFactory
 from berth_reservations.tests.factories import CustomerProfileFactory
 from leases.enums import LeaseStatus
-from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
+from leases.tests.factories import BerthLeaseFactory
 from resources.tests.factories import BerthFactory, WinterStorageAreaFactory
 from utils.numbers import rounded
 
@@ -16,6 +16,7 @@ from ..enums import (
     OrderStatus,
     PeriodType,
     PriceUnits,
+    PricingCategory,
     ProductServiceType,
 )
 from ..models import (
@@ -34,7 +35,7 @@ from ..models import (
     PLACE_PRODUCT_TAX_PERCENTAGES,
     WinterStorageProduct,
 )
-from .utils import random_bool, random_price
+from .utils import random_price, random_tax
 
 
 class AbstractBaseProductFactory(factory.django.DjangoModelFactory):
@@ -72,10 +73,11 @@ class BerthProductFactory(factory.django.DjangoModelFactory):
     tax_percentage = factory.Faker(
         "random_element", elements=PLACE_PRODUCT_TAX_PERCENTAGES
     )
+    pricing_category = PricingCategory.DEFAULT
 
     class Meta:
         model = BerthProduct
-        django_get_or_create = ("min_width", "max_width")
+        django_get_or_create = ("min_width", "max_width", "pricing_category")
 
 
 class WinterStorageProductFactory(
@@ -86,6 +88,7 @@ class WinterStorageProductFactory(
 
     class Meta:
         model = WinterStorageProduct
+        django_get_or_create = ("winter_storage_area",)
 
 
 class AdditionalProductFactory(AbstractBaseProductFactory):
@@ -119,15 +122,7 @@ class PlainAdditionalProductFactory(AbstractBaseProductFactory):
 
 
 class OrderFactory(factory.django.DjangoModelFactory):
-    customer = factory.SubFactory(CustomerProfileFactory)
     customer_phone = factory.Faker("phone_number", locale="fi_FI")
-    product = factory.LazyFunction(
-        lambda: BerthProductFactory()
-        if random_bool()
-        else WinterStorageProductFactory()
-    )
-    price = None
-    tax_percentage = None
     status = factory.Faker(
         "random_element",
         elements=list(
@@ -138,13 +133,20 @@ class OrderFactory(factory.django.DjangoModelFactory):
     comment = factory.Faker("sentence")
 
     @factory.lazy_attribute
-    def lease(self):
-        if isinstance(self.product, BerthProduct):
-            return BerthLeaseFactory(customer=self.customer)
-        elif isinstance(self.product, WinterStorageProduct):
-            return WinterStorageLeaseFactory(customer=self.customer)
-        else:
-            return None
+    def customer(self):
+        if hasattr(self, "lease") and self.lease is not None:
+            return self.lease.customer
+        return CustomerProfileFactory()
+
+    @factory.lazy_attribute
+    def price(self):
+        if not getattr(self, "lease", None):
+            return random_price()
+
+    @factory.lazy_attribute
+    def tax_percentage(self):
+        if not getattr(self, "lease", None):
+            return random_tax()
 
     class Meta:
         model = Order

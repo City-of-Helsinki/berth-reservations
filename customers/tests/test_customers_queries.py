@@ -18,11 +18,7 @@ from leases.enums import LeaseStatus
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from payments.schema.types import BerthSwitchOfferNode, OrderNode
-from payments.tests.factories import (
-    BerthProductFactory,
-    BerthSwitchOfferFactory,
-    OrderFactory,
-)
+from payments.tests.factories import BerthSwitchOfferFactory, OrderFactory
 from utils.relay import to_global_id
 
 from ..enums import InvoicingType, OrganizationType
@@ -317,9 +313,7 @@ def test_query_berth_profiles(api_client, customer_profile):
     winter_storage_lease = WinterStorageLeaseFactory(
         customer=customer_profile, boat=boat
     )
-    order = OrderFactory(
-        customer=customer_profile, lease=berth_lease, product=BerthProductFactory()
-    )
+    order = OrderFactory(lease=berth_lease)
     offer = BerthSwitchOfferFactory(customer=customer_profile, lease=berth_lease)
     organization = OrganizationFactory(customer=customer_profile)
 
@@ -544,9 +538,7 @@ def test_query_berth_profile(api_client, customer_profile):
     winter_storage_lease = WinterStorageLeaseFactory(
         customer=customer_profile, boat=boat
     )
-    order = OrderFactory(
-        customer=customer_profile, lease=berth_lease, product=BerthProductFactory()
-    )
+    order = OrderFactory(lease=berth_lease,)
     offer = BerthSwitchOfferFactory(customer=customer_profile, lease=berth_lease)
     organization = OrganizationFactory(customer=customer_profile)
 
@@ -600,9 +592,7 @@ def test_query_berth_profile_self_user(customer_profile):
     winter_storage_lease = WinterStorageLeaseFactory(
         customer=customer_profile, boat=boat
     )
-    order = OrderFactory(
-        customer=customer_profile, lease=berth_lease, product=BerthProductFactory()
-    )
+    order = OrderFactory(lease=berth_lease)
     offer = BerthSwitchOfferFactory(customer=customer_profile, lease=berth_lease)
     organization = OrganizationFactory(customer=customer_profile)
 

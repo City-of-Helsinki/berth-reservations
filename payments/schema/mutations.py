@@ -284,15 +284,25 @@ class DeleteAdditionalProductMutation(graphene.ClientIDMutation):
 
 class OrderInput:
     lease_id = graphene.ID()
+    customer_id = graphene.ID(
+        description="**Doesn't have an effect** until the price input is added."
+    )
     status = OrderStatusEnum()
     comment = graphene.String()
     due_date = graphene.Date()
+    product_id = graphene.ID(
+        description="**OBSOLETE**: The product is determined based on the lease passed. "
+        "If no lease is provided, an explicit price must be specified (not implemented yet). "
+        "This field has no effect at all and will be removed on a later version.",
+        deprecation_reason="**OBSOLETE**: The product is determined based on the lease passed. "
+        "If no lease is provided, an explicit price must be specified (not implemented yet) "
+        "This field has no effect at all and will be removed on a later version.",
+    )
 
 
 class CreateOrderMutation(graphene.ClientIDMutation):
     class Input(OrderInput):
-        customer_id = graphene.ID(required=True)
-        product_id = graphene.ID()
+        pass
 
     order = graphene.Field(OrderNode)
 
@@ -301,28 +311,14 @@ class CreateOrderMutation(graphene.ClientIDMutation):
     @view_permission_required(BerthLease, WinterStorageLease)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        input["customer"] = get_node_from_global_id(
-            info, input.pop("customer_id"), ProfileNode, nullable=False
-        )
-        product_id = input.pop("product_id", None)
-        if product_id:
-            product = None
-            try:
-                product = get_node_from_global_id(
-                    info, product_id, BerthProductNode, nullable=True
-                )
-            # If a different node type is received get_node raises an assertion error
-            # when trying to validate the type
-            except AssertionError:
-                product = get_node_from_global_id(
-                    info, product_id, WinterStorageProductNode, nullable=True
-                )
-            finally:
-                if product:
-                    input["product"] = product
+        if input.get("customer_id") and input.get("lease_id"):
+            raise VenepaikkaGraphQLError(_("Cannot receive both Lease and Customer"))
 
-        lease_id = input.pop("lease_id", None)
-        if lease_id:
+        # TODO: until the price input is added, the customer input won't have an effect
+        # _customer = input.pop("customer_id", None)
+        input.pop("customer_id", None)
+
+        if lease_id := input.pop("lease_id", None):
             lease = None
             try:
                 lease = get_node_from_global_id(
@@ -340,6 +336,7 @@ class CreateOrderMutation(graphene.ClientIDMutation):
                         _("Lease with the given ID does not exist")
                     )
                 input["lease"] = lease
+                input["customer"] = lease.customer
 
         try:
             order = Order.objects.create(**input)

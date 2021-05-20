@@ -113,6 +113,13 @@ class BerthLeaseAdmin(BaseLeaseAdmin):
         "berth__pier__identifier",
         "berth__number",
     )
+    ordering = (
+        "-created_at",
+        "-start_date",
+        "-end_date",
+        "berth__pier__identifier",
+        "berth__number",
+    )
 
     def harbor(self, obj):
         return obj.berth.pier.harbor
@@ -122,6 +129,9 @@ class BerthLeaseAdmin(BaseLeaseAdmin):
 
     def berth_number(self, obj):
         return obj.berth.number
+
+    pier.admin_order_field = "berth__pier__identifier"
+    berth_number.admin_order_field = "berth__number"
 
 
 class GenericOrderInline(GenericStackedInline):

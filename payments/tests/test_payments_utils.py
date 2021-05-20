@@ -6,9 +6,15 @@ from django.test import RequestFactory
 
 from applications.enums import ApplicationStatus
 from leases.enums import LeaseStatus
-from payments.enums import OrderStatus
+from payments.enums import OrderStatus, PricingCategory
 from payments.models import Order
-from payments.utils import approve_order, send_payment_notification
+from payments.utils import (
+    _get_vasikkasaari_harbor,
+    approve_order,
+    get_berth_product_pricing_category,
+    send_payment_notification,
+)
+from resources.enums import BerthMooringType
 
 
 @pytest.mark.parametrize(
@@ -87,3 +93,33 @@ def test_send_payment_notification_example_email(order: Order):
         send_payment_notification(order, RequestFactory().request())
 
     assert "Missing customer email" in str(exception)
+
+
+@pytest.mark.parametrize(
+    "mooring_type,expected_category",
+    [
+        (BerthMooringType.DINGHY_PLACE, PricingCategory.DINGHY),
+        (BerthMooringType.TRAWLER_PLACE, PricingCategory.TRAILER),
+    ],
+)
+def test_get_berth_product_pricing_category_mooring_type(
+    berth_order, mooring_type, expected_category
+):
+    berth_order.lease.berth.berth_type.mooring_type = mooring_type
+    berth_order.lease.berth.berth_type.save()
+
+    assert get_berth_product_pricing_category(berth_order) == expected_category
+
+
+def test_get_berth_product_pricing_category_vasikkasaari(berth_order):
+    _get_vasikkasaari_harbor.cache_clear()
+    berth_order.lease.berth.berth_type.mooring_type = BerthMooringType.SIDE_SLIP_PLACE
+    berth_order.lease.berth.berth_type.save()
+    berth_order.lease.berth.pier.harbor.create_translation(
+        "fi", name="Vasikkasaaren venesatama"
+    )
+    berth_order.lease.berth.pier.save()
+
+    assert (
+        get_berth_product_pricing_category(berth_order) == PricingCategory.VASIKKASAARI
+    )
