@@ -720,7 +720,13 @@ query ORDER_DETAILS {
 
 @pytest.mark.parametrize(
     "order",
-    ["berth_order", "winter_storage_order", "empty_order", "additional_product_order"],
+    [
+        "berth_order",
+        "winter_storage_order",
+        "empty_order",
+        "additional_product_order",
+        "unmarked_winter_storage_order",
+    ],
     indirect=True,
 )
 @pytest.mark.parametrize("has_application", [True, False])
@@ -752,9 +758,14 @@ def test_get_order_status(
         section_identifier = order.lease.berth.pier.identifier
         area_name = order.lease.berth.pier.harbor.name
     elif isinstance(order.lease, WinterStorageLease):
-        place_number = str(order.lease.place.number)
-        section_identifier = order.lease.place.winter_storage_section.identifier
-        area_name = order.lease.place.winter_storage_section.area.name
+        if order.lease.place:
+            place_number = str(order.lease.place.number)
+            section_identifier = order.lease.place.winter_storage_section.identifier
+            area_name = order.lease.place.winter_storage_section.area.name
+        else:
+            place_number = None
+            section_identifier = order.lease.section.identifier
+            area_name = order.lease.section.area.name
     else:
         place_number = None
         section_identifier = None
