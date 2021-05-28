@@ -17,6 +17,7 @@ from customers.tests.factories import CustomerProfileFactory, OrganizationFactor
 from leases.tests.conftest import *  # noqa
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from resources.tests.conftest import *  # noqa
+from resources.tests.factories import WinterStorageSectionFactory
 
 from ..enums import OrderStatus, OrderType, PeriodType, PriceUnits, ProductServiceType
 from ..providers import BamboraPayformProvider
@@ -82,6 +83,8 @@ def _generate_order(order_type: str = None):
                 application=WinterStorageApplicationFactory(
                     area_type=ApplicationAreaType.UNMARKED
                 ),
+                place=None,
+                section=WinterStorageSectionFactory(),
                 customer=customer_profile,
             ),
         )

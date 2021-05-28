@@ -153,9 +153,15 @@ class Query:
             section_identifier = order.lease.berth.pier.identifier
             area_name = order.lease.berth.pier.harbor.name
         elif isinstance(order.lease, WinterStorageLease):
-            place_number = str(order.lease.place.number)
-            section_identifier = order.lease.place.winter_storage_section.identifier
-            area_name = order.lease.place.winter_storage_section.area.name
+            if order.lease.place:
+                place_number = str(order.lease.place.number)
+                section_identifier = order.lease.place.winter_storage_section.identifier
+                area_name = order.lease.place.winter_storage_section.area.name
+            else:
+                # unmarked ws lease
+                place_number = None
+                section_identifier = order.lease.section.identifier
+                area_name = order.lease.section.area.name
         else:
             place_number = None
             section_identifier = None
