@@ -198,6 +198,7 @@ Then load the fixtures with the following commands:
 
     ./manage.py loaddata helsinki-ws-resources.json
     ./manage.py loaddata helsinki-harbor-resources.json
+    ./manage.py loaddata helsinki-harbor-resources-fixes-2021-06-11.json
 
 And assign the corresponding region to areas:
 

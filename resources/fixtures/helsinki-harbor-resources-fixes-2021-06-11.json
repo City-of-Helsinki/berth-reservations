@@ -1,0 +1,1279 @@
+[
+{
+  "model": "resources.harbortranslation",
+  "pk": 200,
+  "fields": {
+    "language_code": "fi",
+    "name": "Katajanokan venesatama (rantamuuri)",
+    "street_address": "Laivastokatu 1c",
+    "master": "50770b29-302f-45c7-8a3d-6203d56125e0"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 201,
+  "fields": {
+    "language_code": "en",
+    "name": "Katajanokan venesatama (rantamuuri)",
+    "street_address": "Laivastokatu 1c",
+    "master": "50770b29-302f-45c7-8a3d-6203d56125e0"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 202,
+  "fields": {
+    "language_code": "sv",
+    "name": "Skatuddens småbåtshamn (strandmuren)",
+    "street_address": "Maringatan 1 C",
+    "master": "50770b29-302f-45c7-8a3d-6203d56125e0"
+  }
+},
+{
+  "model": "resources.harbor",
+  "pk": "50770b29-302f-45c7-8a3d-6203d56125e0",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.857Z",
+    "modified_at": "2020-09-17T15:56:26.162Z",
+    "servicemap_id": "",
+    "zip_code": "00170",
+    "phone": "",
+    "email": "",
+    "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/katajanokan-venesatama",
+    "location": "SRID=4326;POINT (24.96585654232736 60.16959497046764)",
+    "image_file": "/img/helsinki_harbors/48272.jpg",
+    "region": "west",
+    "municipality": "helsinki",
+    "availability_level": null
+  }
+},
+{
+  "model": "resources.pier",
+  "pk": "99bb90e6-ebd5-4bed-8e5a-2a5c41321da6",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.922Z",
+    "modified_at": "2020-04-06T11:56:25.944Z",
+    "identifier": "Rantamuuri",
+    "location": "SRID=4326;POINT (24.96636079762264 60.16910397273679)",
+    "electricity": true,
+    "water": true,
+    "gate": false,
+    "harbor": "50770b29-302f-45c7-8a3d-6203d56125e0",
+    "mooring": true,
+    "waste_collection": true,
+    "lighting": true,
+    "personal_electricity": false,
+    "price_tier": 1,
+    "suitable_boat_types": [
+      3,
+      4,
+      5,
+      6
+    ]
+  }
+},
+  {
+  "model": "resources.harbortranslation",
+  "pk": 203,
+  "fields": {
+    "language_code": "fi",
+    "name": "Merisatama (Ehrenströmintie ranta)",
+    "street_address": "Ehrenströmintie 21",
+    "master": "d1052504-3912-44d7-a442-a68a995ecdb1"
+  }
+},
+  {
+  "model": "resources.harbortranslation",
+  "pk": 204,
+  "fields": {
+    "language_code": "en",
+    "name": "Merisatama (Ehrenströmintie ranta)",
+    "street_address": "Ehrenströmintie 21",
+    "master": "d1052504-3912-44d7-a442-a68a995ecdb1"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 205,
+  "fields": {
+    "language_code": "sv",
+    "name": "Havshamnen (Ehrenströmsvägen strand)",
+    "street_address": "Ehrenströmsvägen 21",
+    "master": "d1052504-3912-44d7-a442-a68a995ecdb1"
+  }
+},
+  {
+  "model": "resources.harbor",
+  "pk": "d1052504-3912-44d7-a442-a68a995ecdb1",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.857Z",
+    "modified_at": "2020-09-17T15:56:26.179Z",
+    "servicemap_id": "40971",
+    "zip_code": "00140",
+    "phone": "",
+    "email": "",
+    "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/merisatama",
+    "location": "SRID=4326;POINT (24.95324466270327 60.15452603410284)",
+    "region": "west",
+    "municipality": "helsinki",
+    "image_file": "/img/helsinki_harbors/40971.jpg",
+    "availability_level": null
+  }
+},
+  {
+  "model": "resources.pier",
+  "pk": "a66c0e04-9593-4ba3-85f4-91d7c8cf407f",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.922Z",
+    "modified_at": "2020-04-06T11:56:25.944Z",
+    "identifier": "21",
+    "location": "SRID=4326;POINT (24.95324466270327 60.15452603410284)",
+    "electricity": false,
+    "water": false,
+    "gate": false,
+    "harbor": "d1052504-3912-44d7-a442-a68a995ecdb1",
+    "mooring": true,
+    "waste_collection": true,
+    "lighting": true,
+    "personal_electricity": false,
+    "price_tier": 2,
+    "suitable_boat_types": [
+      3,
+      4,
+      5,
+      6
+    ]
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 46,
+  "fields": {
+    "language_code": "en",
+    "name": "Merisatama (Ehrenströmintie 22)",
+    "street_address": "Ehrenströmintie 22",
+    "master": "ed355574-2a94-45e8-8e2a-3bd149866302"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 47,
+  "fields": {
+    "language_code": "sv",
+    "name": "Havshamnen (Ehrenströmsvägen 22)",
+    "street_address": "Ehrenströmsvägen 22",
+    "master": "ed355574-2a94-45e8-8e2a-3bd149866302"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 3,
+  "fields": {
+    "language_code": "fi",
+    "name": "Merisatama (Ehrenströmintie 22)",
+    "street_address": "Ehrenströmintie 22",
+    "master": "ed355574-2a94-45e8-8e2a-3bd149866302"
+  }
+},
+
+
+  {
+  "model": "resources.harbortranslation",
+  "pk": 206,
+  "fields": {
+    "language_code": "fi",
+    "name": "Kipparlahden venesatama (rantamuuri)",
+    "street_address": "Kipparlahdenkuja 3",
+    "master": "43db4434-a825-4093-b87f-f2083e069bfe"
+  }
+},
+  {
+  "model": "resources.harbortranslation",
+  "pk": 207,
+  "fields": {
+    "language_code": "en",
+    "name": "Kipparlahden venesatama (rantamuuri)",
+    "street_address": "Kipparlahdenkuja 3",
+    "master": "43db4434-a825-4093-b87f-f2083e069bfe"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 208,
+  "fields": {
+    "language_code": "sv",
+    "name": "Skepparvikens småbåtshamn (strandmuren)",
+    "street_address": "Skepparviksgränden 3",
+    "master": "43db4434-a825-4093-b87f-f2083e069bfe"
+  }
+},
+  {
+  "model": "resources.harbor",
+  "pk": "43db4434-a825-4093-b87f-f2083e069bfe",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.857Z",
+    "modified_at": "2020-09-17T15:56:26.060Z",
+    "servicemap_id": "41189",
+    "zip_code": "00810",
+    "phone": "",
+    "email": "",
+    "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/kipparlahden-venesatama",
+    "location": "SRID=4326;POINT (25.02156792855906 60.19045365285283)",
+    "region": "east",
+    "municipality": "helsinki",
+    "image_file": "/img/helsinki_harbors/41189.jpg",
+    "availability_level": null
+  }
+},
+  {
+  "model": "resources.pier",
+  "pk": "45ac7c00-f70e-4b08-a816-d6194b2df6b4",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.922Z",
+    "modified_at": "2020-04-06T11:56:25.944Z",
+    "identifier": "Rantamuuri",
+    "location": "SRID=4326;POINT (25.02156792855906 60.19045365285283)",
+    "electricity": false,
+    "water": false,
+    "gate": false,
+    "harbor": "43db4434-a825-4093-b87f-f2083e069bfe",
+    "mooring": true,
+    "waste_collection": true,
+    "lighting": false,
+    "personal_electricity": false,
+    "price_tier": 3,
+    "suitable_boat_types": [
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  }
+},
+
+
+  {
+  "model": "resources.harbortranslation",
+  "pk": 209,
+  "fields": {
+    "language_code": "fi",
+    "name": "Laivalahden venesatama (aallonmurtaja)",
+    "street_address": "Simppukarinkatu 2",
+    "master": "79e723d7-96d7-4225-a7c9-8c72411c651f"
+  }
+},{
+  "model": "resources.harbortranslation",
+  "pk": 210,
+  "fields": {
+    "language_code": "en",
+    "name": "Laivalahden venesatama (aallonmurtaja)",
+    "street_address": "Simppukarinkatu 2",
+    "master": "79e723d7-96d7-4225-a7c9-8c72411c651f"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 211,
+  "fields": {
+    "language_code": "sv",
+    "name": "Båtsvikens småbåtshamn (vågbrytare)",
+    "street_address": "Simpörsgatan 2",
+    "master": "79e723d7-96d7-4225-a7c9-8c72411c651f"
+  }
+},
+  {
+  "model": "resources.harbor",
+  "pk": "79e723d7-96d7-4225-a7c9-8c72411c651f",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.857Z",
+    "modified_at": "2020-09-17T15:56:26.071Z",
+    "servicemap_id": "40864",
+    "zip_code": "00810",
+    "phone": "",
+    "email": "",
+    "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/laivalahden-venesatama",
+    "location": "SRID=4326;POINT (25.02772281481857 60.18698499999979)",
+    "region": "east",
+    "municipality": "helsinki",
+    "image_file": "/img/helsinki_harbors/40864.jpg",
+    "availability_level": null
+  }
+},
+  {
+  "model": "resources.pier",
+  "pk": "caecb1e6-ce4b-4b60-bb15-f258bc250d04",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.922Z",
+    "modified_at": "2020-04-06T11:56:25.944Z",
+    "identifier": "Aallonmurtaja",
+    "location": "SRID=4326;POINT (25.02497623278769 60.1852353794545)",
+    "electricity": false,
+    "water": true,
+    "gate": false,
+    "harbor": "79e723d7-96d7-4225-a7c9-8c72411c651f",
+    "mooring": true,
+    "waste_collection": true,
+    "lighting": true,
+    "personal_electricity": false,
+    "price_tier": 2,
+    "suitable_boat_types": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  }
+},  {
+  "model": "resources.harbortranslation",
+  "pk": 212,
+  "fields": {
+    "language_code": "fi",
+    "name": "Laivalahden venesatama (Reginankuja)",
+    "street_address": "Simppukarinkatu 2",
+    "master": "0ffcf4db-4f02-4f6b-b0d4-a120a99c679e"
+  }
+},{
+  "model": "resources.harbortranslation",
+  "pk": 213,
+  "fields": {
+    "language_code": "en",
+    "name": "Laivalahden venesatama (Reginankuja)",
+    "street_address": "Simppukarinkatu 2",
+    "master": "0ffcf4db-4f02-4f6b-b0d4-a120a99c679e"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 214,
+  "fields": {
+    "language_code": "sv",
+    "name": "Båtsvikens småbåtshamn (Reginagränden)",
+    "street_address": "Simpörsgatan 2",
+    "master": "0ffcf4db-4f02-4f6b-b0d4-a120a99c679e"
+  }
+},
+  {
+  "model": "resources.harbor",
+  "pk": "0ffcf4db-4f02-4f6b-b0d4-a120a99c679e",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.857Z",
+    "modified_at": "2020-09-17T15:56:26.071Z",
+    "servicemap_id": "40864",
+    "zip_code": "00810",
+    "phone": "",
+    "email": "",
+    "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/laivalahden-venesatama",
+    "location": "SRID=4326;POINT (25.02772281481857 60.18698499999979)",
+    "region": "east",
+    "municipality": "helsinki",
+    "image_file": "/img/helsinki_harbors/40864.jpg",
+    "availability_level": null
+  }
+},
+  {
+  "model": "resources.pier",
+  "pk": "345fc0b2-0a6a-4833-abc3-f72fcba2501c",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.922Z",
+    "modified_at": "2020-04-06T11:56:25.944Z",
+    "identifier": "Reginankuja",
+    "location": "SRID=4326;POINT (25.02545366599298 60.18744105954804)",
+    "electricity": false,
+    "water": true,
+    "gate": false,
+    "harbor": "0ffcf4db-4f02-4f6b-b0d4-a120a99c679e",
+    "mooring": true,
+    "waste_collection": false,
+    "lighting": true,
+    "personal_electricity": false,
+    "price_tier": 2,
+    "suitable_boat_types": [
+      3,
+      4,
+      5,
+      7,
+      8
+    ]
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 215,
+  "fields": {
+    "language_code": "fi",
+    "name": "Mustikkamaan venesatama (rantamuuri)",
+    "street_address": "Mustikkamaantie 1",
+    "master": "87bfb482-0581-46b7-929c-50889aa9a2b6"
+  }
+},
+  {
+  "model": "resources.harbortranslation",
+  "pk": 216,
+  "fields": {
+    "language_code": "en",
+    "name": "Mustikkamaan venesatama (rantamuuri)",
+    "street_address": "Mustikkamaantie 1",
+    "master": "87bfb482-0581-46b7-929c-50889aa9a2b6"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 217,
+  "fields": {
+    "language_code": "sv",
+    "name": "Blåbärslandets småbåtshamn (strandmuren)",
+    "street_address": "Blåbärslandsvägen 1",
+    "master": "87bfb482-0581-46b7-929c-50889aa9a2b6"
+  }
+},
+  {
+  "model": "resources.harbor",
+  "pk": "87bfb482-0581-46b7-929c-50889aa9a2b6",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.857Z",
+    "modified_at": "2020-09-17T15:56:26.083Z",
+    "servicemap_id": "40359",
+    "zip_code": "00570",
+    "phone": "",
+    "email": "",
+    "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/mustikkamaan-venesatama",
+    "location": "SRID=4326;POINT (24.99521236574618 60.18296813265754)",
+    "region": "east",
+    "municipality": "helsinki",
+    "image_file": "/img/helsinki_harbors/40359.jpg",
+    "availability_level": null
+  }
+},
+{
+  "model": "resources.pier",
+  "pk": "2d8cd0cb-cae3-401e-9fc8-cd20e39c419a",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.922Z",
+    "modified_at": "2020-04-06T11:56:25.944Z",
+    "identifier": "Rantamuuri",
+    "location": "SRID=4326;POINT (24.99457400000004 60.18247199999998)",
+    "electricity": false,
+    "water": false,
+    "gate": false,
+    "harbor": "87bfb482-0581-46b7-929c-50889aa9a2b6",
+    "mooring": true,
+    "waste_collection": true,
+    "lighting": true,
+    "personal_electricity": false,
+    "price_tier": 2,
+    "suitable_boat_types": [
+      3,
+      4,
+      5
+    ]
+  }
+},
+  {
+  "model": "resources.harbortranslation",
+  "pk": 218,
+  "fields": {
+    "language_code": "fi",
+    "name": "Pajalahden venesatama (rantamuuri)",
+    "street_address": "Meripuistotie 1a",
+    "master": "0aff22db-c4b7-45b6-8eb5-dcf53cdd3e21"
+  }
+},{
+  "model": "resources.harbortranslation",
+  "pk": 219,
+  "fields": {
+    "language_code": "en",
+    "name": "Pajalahden venesatama (rantamuuri)",
+    "street_address": "Meripuistotie 1a",
+    "master": "0aff22db-c4b7-45b6-8eb5-dcf53cdd3e21"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 220,
+  "fields": {
+    "language_code": "sv",
+    "name": "Smedjevikens småbåtshamn (strandmuren)",
+    "street_address": "Hallonnässtranden 5",
+    "master": "0aff22db-c4b7-45b6-8eb5-dcf53cdd3e21"
+  }
+},{
+  "model": "resources.harbor",
+  "pk": "0aff22db-c4b7-45b6-8eb5-dcf53cdd3e21",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.857Z",
+    "modified_at": "2020-09-17T15:56:26.196Z",
+    "servicemap_id": "41359",
+    "zip_code": "00210",
+    "phone": "",
+    "email": "",
+    "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/pajalahden-venesatama",
+    "location": "SRID=4326;POINT (24.88904799999996 60.15822599999999)",
+    "region": "west",
+    "municipality": "helsinki",
+    "image_file": "/img/helsinki_harbors/41359.jpg",
+    "availability_level": null
+  }
+},{
+  "model": "resources.pier",
+  "pk": "7582e577-faef-49da-b4bc-eff4dbd0043a",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.922Z",
+    "modified_at": "2020-04-06T11:56:25.944Z",
+    "identifier": "rantamuuri",
+    "location": "SRID=4326;POINT (24.88904799999996 60.15822599999999)",
+    "electricity": false,
+    "water": false,
+    "gate": true,
+    "harbor": "0aff22db-c4b7-45b6-8eb5-dcf53cdd3e21",
+    "mooring": true,
+    "waste_collection": true,
+    "lighting": true,
+    "personal_electricity": false,
+    "price_tier": 2,
+    "suitable_boat_types": [
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  }
+},{
+  "model": "resources.harbortranslation",
+  "pk": 1,
+  "fields": {
+    "language_code": "fi",
+    "name": "Airorannan venesatama A",
+    "street_address": "Airoranta 2",
+    "master": "2e42adb3-0cdb-4823-868d-3b808cc55fe8"
+  }
+},{
+  "model": "resources.harbortranslation",
+  "pk": 42,
+  "fields": {
+    "language_code": "en",
+    "name": "Airorannan venesatama A",
+    "street_address": "Airoranta 2",
+    "master": "2e42adb3-0cdb-4823-868d-3b808cc55fe8"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 43,
+  "fields": {
+    "language_code": "sv",
+    "name": "Årstrands småbåtshamn A",
+    "street_address": "Årstrand 2",
+    "master": "2e42adb3-0cdb-4823-868d-3b808cc55fe8"
+  }
+},
+
+
+
+
+
+
+
+
+
+
+
+  {
+  "model": "resources.harbortranslation",
+  "pk": 221,
+  "fields": {
+    "language_code": "fi",
+    "name": "Airorannan venesatama B",
+    "street_address": "Airoranta 2",
+    "master": "5a927c8e-4331-49d8-a622-fd35eef1a30b"
+  }
+},{
+  "model": "resources.harbortranslation",
+  "pk": 222,
+  "fields": {
+    "language_code": "en",
+    "name": "Airorannan venesatama B",
+    "street_address": "Airoranta 2",
+    "master": "5a927c8e-4331-49d8-a622-fd35eef1a30b"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 223,
+  "fields": {
+    "language_code": "sv",
+    "name": "Årstrands småbåtshamn B",
+    "street_address": "Årstrand 2",
+    "master": "5a927c8e-4331-49d8-a622-fd35eef1a30b"
+  }
+},{
+  "model": "resources.harbor",
+  "pk": "5a927c8e-4331-49d8-a622-fd35eef1a30b",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.857Z",
+    "modified_at": "2020-09-17T15:56:26.026Z",
+    "servicemap_id": "40393",
+    "zip_code": "00830",
+    "phone": "",
+    "email": "",
+    "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/airorannan-venesatama",
+    "location": "SRID=4326;POINT (25.06585287235345 60.18815467436053)",
+    "region": "east",
+    "municipality": "helsinki",
+    "image_file": "/img/helsinki_harbors/40393.jpg",
+    "availability_level": null
+  }
+},{
+  "model": "resources.pier",
+  "pk": "013d1eb5-03ea-427a-82d8-4ac70c31ecaa",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.922Z",
+    "modified_at": "2020-04-06T11:56:25.944Z",
+    "identifier": "B",
+    "location": "SRID=4326;POINT (25.0665395178596 60.18808000000039)",
+    "electricity": false,
+    "water": false,
+    "gate": false,
+    "harbor": "5a927c8e-4331-49d8-a622-fd35eef1a30b",
+    "mooring": false,
+    "waste_collection": false,
+    "lighting": false,
+    "personal_electricity": false,
+    "price_tier": 3,
+    "suitable_boat_types": [
+      2,
+      3
+    ]
+  }
+},{
+  "model": "resources.harbortranslation",
+  "pk": 37,
+  "fields": {
+    "language_code": "fi",
+    "name": "Tammasaaren allas (paikat 1-31)",
+    "street_address": "Tammasaarenaukio 4",
+    "master": "26ec853e-fa8e-484f-9b5d-ecac3ad3c51d"
+  }
+},{
+  "model": "resources.harbortranslation",
+  "pk": 114,
+  "fields": {
+    "language_code": "en",
+    "name": "Tammasaaren allas (paikat 1-31)",
+    "street_address": "Tammasaarenaukio 4",
+    "master": "26ec853e-fa8e-484f-9b5d-ecac3ad3c51d"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 115,
+  "fields": {
+    "language_code": "sv",
+    "name": "Märaholmsbassängen (platser 1-31)",
+    "street_address": "Märaholmsplatsen 4",
+    "master": "26ec853e-fa8e-484f-9b5d-ecac3ad3c51d"
+  }
+},
+{
+  "model": "resources.pier",
+  "pk": "204dfbfc-9bb5-429b-9c92-46953735d142",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.922Z",
+    "modified_at": "2020-11-18T12:22:29.941Z",
+    "identifier": "001-031",
+    "location": "SRID=4326;POINT (24.90518811639428 60.16102670629775)",
+    "electricity": false,
+    "water": true,
+    "gate": false,
+    "harbor": "26ec853e-fa8e-484f-9b5d-ecac3ad3c51d",
+    "mooring": true,
+    "waste_collection": false,
+    "lighting": true,
+    "personal_electricity": false,
+    "price_tier": 2,
+    "suitable_boat_types": [
+      3,
+      4,
+      5,
+      6
+    ]
+  }
+},
+
+
+  {
+  "model": "resources.harbortranslation",
+  "pk": 224,
+  "fields": {
+    "language_code": "fi",
+    "name": "Tammasaaren allas (paikat 32-75)",
+    "street_address": "Tammasaarenaukio 4",
+    "master": "09fdb540-33ad-4a34-b68f-dd2c87923715"
+  }
+},{
+  "model": "resources.harbortranslation",
+  "pk": 225,
+  "fields": {
+    "language_code": "en",
+    "name": "Tammasaaren allas (paikat 32-75)",
+    "street_address": "Tammasaarenaukio 4",
+    "master": "09fdb540-33ad-4a34-b68f-dd2c87923715"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 226,
+  "fields": {
+    "language_code": "sv",
+    "name": "Märaholmsbassängen (platser 32-75)",
+    "street_address": "Märaholmsplatsen 4",
+    "master": "09fdb540-33ad-4a34-b68f-dd2c87923715"
+  }
+},
+  {
+  "model": "resources.harbor",
+  "pk": "09fdb540-33ad-4a34-b68f-dd2c87923715",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.857Z",
+    "modified_at": "2020-09-17T15:56:26.252Z",
+    "servicemap_id": "41472",
+    "zip_code": "00180",
+    "phone": "",
+    "email": "",
+    "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/tammasaarenallas",
+    "location": "SRID=4326;POINT (24.90518811639428 60.16102670629775)",
+    "region": "west",
+    "municipality": "helsinki",
+    "image_file": "/img/helsinki_harbors/41472.jpg",
+    "availability_level": null
+  }
+},{
+  "model": "resources.pier",
+  "pk": "1c0b58f0-b66b-4593-8d77-964e26fc6101",
+  "fields": {
+    "created_at": "2020-11-18T12:22:14.638Z",
+    "modified_at": "2020-11-18T12:27:36.426Z",
+    "identifier": "032-075",
+    "location": "SRID=4326;POINT (24.90518811639429 60.16102670629776)",
+    "electricity": true,
+    "water": true,
+    "gate": false,
+    "harbor": "09fdb540-33ad-4a34-b68f-dd2c87923715",
+    "mooring": true,
+    "waste_collection": true,
+    "lighting": true,
+    "personal_electricity": true,
+    "price_tier": 1,
+    "suitable_boat_types": []
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 227,
+  "fields": {
+    "language_code": "fi",
+    "name": "Puotilan venesatama (poiju)",
+    "street_address": "Meripellontie 11",
+    "master": "59752e6d-2bc0-4c37-83ae-52246a24f085"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 228,
+  "fields": {
+    "language_code": "en",
+    "name": "Puotilan venesatama (poiju)",
+    "street_address": "Meripellontie 11",
+    "master": "59752e6d-2bc0-4c37-83ae-52246a24f085"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 229,
+  "fields": {
+    "language_code": "sv",
+    "name": "Botby gårds småbåtshamn (boj)",
+    "street_address": "Sjöåkervägen 11",
+    "master": "59752e6d-2bc0-4c37-83ae-52246a24f085"
+  }
+},
+{
+  "model": "resources.harbor",
+  "pk": "59752e6d-2bc0-4c37-83ae-52246a24f085",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.857Z",
+    "modified_at": "2020-09-17T15:56:26.110Z",
+    "servicemap_id": "40897",
+    "zip_code": "00930",
+    "phone": "",
+    "email": "",
+    "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/puotilan-venesatama",
+    "location": "SRID=4326;POINT (25.10433199999997 60.207024)",
+    "region": "east",
+    "municipality": "helsinki",
+    "image_file": "/img/helsinki_harbors/40897.jpg",
+    "availability_level": null
+  }
+},{
+  "model": "resources.pier",
+  "pk": "132259a7-d61d-482a-a903-a622c6bdb6ba",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.922Z",
+    "modified_at": "2020-04-06T11:56:25.944Z",
+    "identifier": "E 1 Poiju",
+    "location": "SRID=4326;POINT (25.10433199999997 60.207024)",
+    "electricity": true,
+    "water": true,
+    "gate": false,
+    "harbor": "59752e6d-2bc0-4c37-83ae-52246a24f085",
+    "mooring": true,
+    "waste_collection": true,
+    "lighting": true,
+    "personal_electricity": false,
+    "price_tier": 1,
+    "suitable_boat_types": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  }
+},
+
+  {
+  "model": "resources.harbortranslation",
+  "pk": 230,
+  "fields": {
+    "language_code": "fi",
+    "name": "Puotilan venesatama (jollapaikat)",
+    "street_address": "Meripellontie 11",
+    "master": "29b69e0b-5299-4869-84f6-8f69c9c40ad4"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 231,
+  "fields": {
+    "language_code": "en",
+    "name": "Puotilan venesatama (jollapaikat)",
+    "street_address": "Meripellontie 11",
+    "master": "29b69e0b-5299-4869-84f6-8f69c9c40ad4"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 232,
+  "fields": {
+    "language_code": "sv",
+    "name": "Botby gårds småbåtshamn (jolle)",
+    "street_address": "Sjöåkervägen 11",
+    "master": "29b69e0b-5299-4869-84f6-8f69c9c40ad4"
+  }
+},
+{
+  "model": "resources.harbor",
+  "pk": "29b69e0b-5299-4869-84f6-8f69c9c40ad4",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.857Z",
+    "modified_at": "2020-09-17T15:56:26.110Z",
+    "servicemap_id": "40897",
+    "zip_code": "00930",
+    "phone": "",
+    "email": "",
+    "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/puotilan-venesatama",
+    "location": "SRID=4326;POINT (25.10433199999997 60.207024)",
+    "region": "east",
+    "municipality": "helsinki",
+    "image_file": "/img/helsinki_harbors/40897.jpg",
+    "availability_level": null
+  }
+},{
+  "model": "resources.pier",
+  "pk": "eed0821b-9487-4d02-8dca-4d7f40276e86",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.922Z",
+    "modified_at": "2020-04-06T11:56:25.944Z",
+    "identifier": "F Jolla",
+    "location": "SRID=4326;POINT (25.10433199999997 60.207024)",
+    "electricity": true,
+    "water": true,
+    "gate": true,
+    "harbor": "29b69e0b-5299-4869-84f6-8f69c9c40ad4",
+    "mooring": true,
+    "waste_collection": true,
+    "lighting": true,
+    "personal_electricity": false,
+    "price_tier": 1,
+    "suitable_boat_types": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  }
+},{
+  "model": "resources.harbortranslation",
+  "pk": 233,
+  "fields": {
+    "language_code": "fi",
+    "name": "Meri-Rastilan venesatama (jollapaikat)",
+    "street_address": "Märssykuja 7",
+    "master": "b575b506-c236-45b4-973a-2f7fbd734846"
+  }
+},{
+  "model": "resources.harbortranslation",
+  "pk": 234,
+  "fields": {
+    "language_code": "en",
+    "name": "Meri-Rastilan venesatama (jollapaikat)",
+    "street_address": "Märssykuja 7",
+    "master": "b575b506-c236-45b4-973a-2f7fbd734846"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 235,
+  "fields": {
+    "language_code": "sv",
+    "name": "Havsrastböle småbåtshamn (jolle)",
+    "street_address": "Märsgränden 7",
+    "master": "b575b506-c236-45b4-973a-2f7fbd734846"
+  }
+},{
+  "model": "resources.harbor",
+  "pk": "b575b506-c236-45b4-973a-2f7fbd734846",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.857Z",
+    "modified_at": "2020-09-17T15:56:26.077Z",
+    "servicemap_id": "41066",
+    "zip_code": "00980",
+    "phone": "",
+    "email": "",
+    "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/meri-rastilan-venesatama",
+    "location": "SRID=4326;POINT (25.113478 60.20614000000001)",
+    "region": "east",
+    "municipality": "helsinki",
+    "image_file": "/img/helsinki_harbors/41066.jpg",
+    "availability_level": null
+  }
+},{
+  "model": "resources.pier",
+  "pk": "88f92e14-6184-4001-ab99-d9be05493d8d",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.922Z",
+    "modified_at": "2020-04-06T11:56:25.944Z",
+    "identifier": "A (jollapaikat)",
+    "location": "SRID=4326;POINT (25.113478 60.20614000000001)",
+    "electricity": true,
+    "water": true,
+    "gate": true,
+    "harbor": "b575b506-c236-45b4-973a-2f7fbd734846",
+    "mooring": true,
+    "waste_collection": true,
+    "lighting": true,
+    "personal_electricity": false,
+    "price_tier": 1,
+    "suitable_boat_types": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  }
+},
+  {
+  "model": "resources.harbortranslation",
+  "pk": 236,
+  "fields": {
+    "language_code": "fi",
+    "name": "Nandelstadhin venesatama (jollapaikat)",
+    "street_address": "Lars Sonckin tie 8a",
+    "master": "ecd70a94-4638-4d77-b2bd-930a701ffd2d"
+  }
+},{
+  "model": "resources.harbortranslation",
+  "pk": 237,
+  "fields": {
+    "language_code": "en",
+    "name": "Nandelstadhin venesatama (jollapaikat)",
+    "street_address": "Lars Sonckin tie 8a",
+    "master": "ecd70a94-4638-4d77-b2bd-930a701ffd2d"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 238,
+  "fields": {
+    "language_code": "sv",
+    "name": "Nandelstadhs småbåtshamn (jolle)",
+    "street_address": "Lars Soncks väg 8a",
+    "master": "ecd70a94-4638-4d77-b2bd-930a701ffd2d"
+  }
+},{
+  "model": "resources.harbor",
+  "pk": "ecd70a94-4638-4d77-b2bd-930a701ffd2d",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.857Z",
+    "modified_at": "2020-09-17T15:56:26.088Z",
+    "servicemap_id": "42225",
+    "zip_code": "00570",
+    "phone": "",
+    "email": "",
+    "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/nandelstadhin-venesatama",
+    "location": "SRID=4326;POINT (25.01524699999996 60.182655)",
+    "region": "east",
+    "municipality": "helsinki",
+    "image_file": "/img/helsinki_harbors/42225.jpg",
+    "availability_level": null
+  }
+},{
+  "model": "resources.pier",
+  "pk": "14731a3d-6855-4531-997b-640a68c22c30",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.922Z",
+    "modified_at": "2020-04-06T11:56:25.944Z",
+    "identifier": "B",
+    "location": "SRID=4326;POINT (25.01524699999996 60.182655)",
+    "electricity": true,
+    "water": true,
+    "gate": true,
+    "harbor": "ecd70a94-4638-4d77-b2bd-930a701ffd2d",
+    "mooring": true,
+    "waste_collection": true,
+    "lighting": true,
+    "personal_electricity": false,
+    "price_tier": 1,
+    "suitable_boat_types": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 239,
+  "fields": {
+    "language_code": "fi",
+    "name": "Nandelstadhin venesatama (poiju)",
+    "street_address": "Lars Sonckin tie 8a",
+    "master": "8a35f356-1bdb-42c7-aabd-869d5ef3bf2c"
+  }
+},{
+  "model": "resources.harbortranslation",
+  "pk": 240,
+  "fields": {
+    "language_code": "en",
+    "name": "Nandelstadhin venesatama (poiju)",
+    "street_address": "Lars Sonckin tie 8a",
+    "master": "8a35f356-1bdb-42c7-aabd-869d5ef3bf2c"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 241,
+  "fields": {
+    "language_code": "sv",
+    "name": "Nandelstadhs småbåtshamn (boj)",
+    "street_address": "Lars Soncks väg 8a",
+    "master": "8a35f356-1bdb-42c7-aabd-869d5ef3bf2c"
+  }
+},{
+  "model": "resources.harbor",
+  "pk": "8a35f356-1bdb-42c7-aabd-869d5ef3bf2c",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.857Z",
+    "modified_at": "2020-09-17T15:56:26.088Z",
+    "servicemap_id": "42225",
+    "zip_code": "00570",
+    "phone": "",
+    "email": "",
+    "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/nandelstadhin-venesatama",
+    "location": "SRID=4326;POINT (25.01524699999996 60.182655)",
+    "region": "east",
+    "municipality": "helsinki",
+    "image_file": "/img/helsinki_harbors/42225.jpg",
+    "availability_level": null
+  }
+},{
+  "model": "resources.pier",
+  "pk": "067acaa1-8175-4e0b-a28e-ea1c5a0ac653",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.922Z",
+    "modified_at": "2020-04-06T11:56:25.944Z",
+    "identifier": "C",
+    "location": "SRID=4326;POINT (25.01524699999996 60.182655)",
+    "electricity": true,
+    "water": false,
+    "gate": false,
+    "harbor": "8a35f356-1bdb-42c7-aabd-869d5ef3bf2c",
+    "mooring": true,
+    "waste_collection": true,
+    "lighting": true,
+    "personal_electricity": false,
+    "price_tier": 2,
+    "suitable_boat_types": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  }
+},{
+  "model": "resources.harbortranslation",
+  "pk": 242,
+  "fields": {
+    "language_code": "fi",
+    "name": "Naurissalmen venesatama (jollapaikat)",
+    "street_address": "Kipparlahdensilmukka 9",
+    "master": "73029acc-c846-4c79-95fa-4db81b8bcdfc"
+  }
+},{
+  "model": "resources.harbortranslation",
+  "pk": 243,
+  "fields": {
+    "language_code": "en",
+    "name": "Naurissalmen venesatama (jollapaikat)",
+    "street_address": "Kipparlahdensilmukka 9",
+    "master": "73029acc-c846-4c79-95fa-4db81b8bcdfc"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 244,
+  "fields": {
+    "language_code": "sv",
+    "name": "Rovholmssundets småbåtshamn (jolle)",
+    "street_address": "",
+    "master": "73029acc-c846-4c79-95fa-4db81b8bcdfc"
+  }
+},{
+  "model": "resources.harbor",
+  "pk": "73029acc-c846-4c79-95fa-4db81b8bcdfc",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.857Z",
+    "modified_at": "2020-09-17T15:56:26.094Z",
+    "servicemap_id": "40712",
+    "zip_code": "00810",
+    "phone": "",
+    "email": "",
+    "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/naurissalmen-venesatama",
+    "location": "SRID=4326;POINT (25.01592299999999 60.19148599999995)",
+    "region": "east",
+    "municipality": "helsinki",
+    "image_file": "/img/helsinki_harbors/40712.jpg",
+    "availability_level": null
+  }
+},{
+  "model": "resources.pier",
+  "pk": "74683f12-4c05-4e11-aa81-5109ac86d232",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.922Z",
+    "modified_at": "2020-04-06T11:56:25.944Z",
+    "identifier": "B (jollapaikat)",
+    "location": "SRID=4326;POINT (25.01592299999999 60.19148599999995)",
+    "electricity": true,
+    "water": true,
+    "gate": true,
+    "harbor": "73029acc-c846-4c79-95fa-4db81b8bcdfc",
+    "mooring": true,
+    "waste_collection": true,
+    "lighting": true,
+    "personal_electricity": false,
+    "price_tier": 1,
+    "suitable_boat_types": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  }
+},
+  {
+  "model": "resources.harbortranslation",
+  "pk": 245,
+  "fields": {
+    "language_code": "fi",
+    "name": "Puotilan venesatama (traileripaikat)",
+    "street_address": "Meripellontie 11",
+    "master": "dbfe8c73-5172-4dbe-ae61-74606165d0bd"
+  }
+},{
+  "model": "resources.harbortranslation",
+  "pk": 246,
+  "fields": {
+    "language_code": "en",
+    "name": "Puotilan venesatama (traileripaikat)",
+    "street_address": "Meripellontie 11",
+    "master": "dbfe8c73-5172-4dbe-ae61-74606165d0bd"
+  }
+},
+{
+  "model": "resources.harbortranslation",
+  "pk": 247,
+  "fields": {
+    "language_code": "sv",
+    "name": "Botby gårds småbåtshamn (trailerplatser)",
+    "street_address": "Sjöåkervägen 11",
+    "master": "dbfe8c73-5172-4dbe-ae61-74606165d0bd"
+  }
+},{
+  "model": "resources.harbor",
+  "pk": "dbfe8c73-5172-4dbe-ae61-74606165d0bd",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.857Z",
+    "modified_at": "2020-09-17T15:56:26.110Z",
+    "servicemap_id": "40897",
+    "zip_code": "00930",
+    "phone": "",
+    "email": "",
+    "www_url": "https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/kaupungin-venepaikat/kaupungin-venesatamat/puotilan-venesatama",
+    "location": "SRID=4326;POINT (25.10433199999997 60.207024)",
+    "region": "east",
+    "municipality": "helsinki",
+    "image_file": "/img/helsinki_harbors/40897.jpg",
+    "availability_level": null
+  }
+},{
+  "model": "resources.pier",
+  "pk": "cc5a8a71-dec8-41cb-806f-368b41065cb3",
+  "fields": {
+    "created_at": "2020-04-06T11:56:25.922Z",
+    "modified_at": "2020-04-06T11:56:25.944Z",
+    "identifier": "TR",
+    "location": "SRID=4326;POINT (25.10433199999997 60.207024)",
+    "electricity": true,
+    "water": true,
+    "gate": true,
+    "harbor": "dbfe8c73-5172-4dbe-ae61-74606165d0bd",
+    "mooring": true,
+    "waste_collection": true,
+    "lighting": true,
+    "personal_electricity": false,
+    "price_tier": 1,
+    "suitable_boat_types": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  }
+}
+]
