@@ -12,21 +12,21 @@ from ..notifications import NotificationType
 from .factories import BerthApplicationFactory, WinterStorageApplicationFactory
 
 
-@pytest.fixture
-def berth_switch_info(request):
-    has_reason = request.param if hasattr(request, "param") else None
-
+def _generate_berth_switch_info():
     berth = BerthFactory()
     berth.pier.harbor.create_translation("fi", name="Nykyinen satama")
 
-    berth_switch_reason = (
-        BerthSwitchReason.objects.language("fi").create(title="Good reason")
-        if has_reason
-        else None
+    berth_switch_reason = BerthSwitchReason.objects.language("fi").create(
+        title="Good reason"
     )
 
     berth_switch = BerthSwitch.objects.create(berth=berth, reason=berth_switch_reason)
     return berth_switch
+
+
+@pytest.fixture
+def berth_switch_info():
+    return _generate_berth_switch_info()
 
 
 @pytest.fixture
@@ -38,9 +38,25 @@ def berth_switch_reason():
 
 
 @pytest.fixture
-def berth_application():
+def berth_application(request):
+    application_type = request.param if hasattr(request, "param") else None
+
+    if application_type == "switch":
+        berth_switch_application = BerthApplicationFactory(
+            berth_switch=_generate_berth_switch_info()
+        )
+        return berth_switch_application
+
     berth_application = BerthApplicationFactory()
     return berth_application
+
+
+@pytest.fixture
+def berth_switch_application():
+    berth_switch_application = BerthApplicationFactory(
+        berth_switch=_generate_berth_switch_info()
+    )
+    return berth_switch_application
 
 
 berth_application2 = berth_application
