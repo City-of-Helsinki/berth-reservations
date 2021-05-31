@@ -7,7 +7,6 @@ from graphql_relay import from_global_id, to_global_id
 
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
-    assert_field_duplicated,
     assert_field_missing,
     assert_in_errors,
     assert_not_enough_permissions,
@@ -663,10 +662,9 @@ def test_create_harbor_duplicated_servicemap_id(superuser_api_client, harbor):
 
     assert Harbor.objects.count() == 1
 
-    executed = superuser_api_client.execute(CREATE_HARBOR_MUTATION, input=variables)
-
-    assert Harbor.objects.count() == 1
-    assert_field_duplicated("servicemap_id", executed)
+    superuser_api_client.execute(CREATE_HARBOR_MUTATION, input=variables)
+    # changed 2021-05-31: multiple harbors with equal servicemap_id allowd
+    assert Harbor.objects.count() == 2
 
 
 DELETE_HARBOR_MUTATION = """

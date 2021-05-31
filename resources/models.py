@@ -86,7 +86,6 @@ class AbstractArea(TimeStampedModel, UUIDModel):
         help_text=_("ID in the Servicemap system"),
         blank=True,
         null=True,
-        unique=True,
     )
 
     zip_code = models.CharField(verbose_name=_("postal code"), max_length=10)
