@@ -338,6 +338,7 @@ class OrderTokenAdmin(admin.ModelAdmin):
     list_filter = ("cancelled",)
     search_fields = ("order__order_number",)
     actions = ("invalidate_tokens",)
+    autocomplete_fields = ("order",)
 
     def order_number(self, obj):
         return obj.order.order_number
