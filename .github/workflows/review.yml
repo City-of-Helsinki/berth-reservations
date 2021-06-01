@@ -1,5 +1,15 @@
 name: Build & Review
-on: [pull_request]
+on: 
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      build_required:
+        description: "Build images (true/false). Note that PR environment is deployed with versions merged with target, so manual deploy needs to build image (at least first time)"
+        required: true
+        default: "true"
+      pr_number:
+        description: "Pull request number (if redeploy without build) or own number for environment"
+        required: true
 
 env:
   CONTAINER_REGISTRY: ghcr.io
@@ -27,6 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build
+        if: github.event_name == 'pull_request' || github.event.inputs.build_required == 'true'
         uses: andersinno/kolga-build-action@v2
 
   review:
@@ -35,14 +46,29 @@ jobs:
     name: Review
     steps:
       - uses: actions/checkout@v2
+
+      - name: Parse branch from event
+        id: branch
+        run: |
+          branch=$(echo ${{ github.event.ref }} | sed 's/refs\/heads\///')
+          echo "::set-output name=manual_branch::$branch"
+
       - uses: andersinno/kolga-setup-action@v2
+        with:
+          head_ref: ${{ steps.branch.outputs.manual_branch }}
+          pr_number: ${{ github.event.inputs.pr_number }}
 
       - name: Review-Services
-        uses: andersinno/kolga-deploy-service-action@v2
+        uses: City-of-Helsinki/review-services-action@main
         with:
-          projects: BERTH_RESERVATIONS
-        env:
-          POSTGRES_IMAGE: "docker.io/andersinnovations/postgis:11-bitnami"
+          database: ${{ env.K8S_NAMESPACE }}
+          namespace: ${{ env.K8S_NAMESPACE }}
+          action: create
+          db_user: ${{ secrets.K8S_SECRET_DATABASE_ADMIN_USERNAME_REVIEW }}
+          db_password: ${{ secrets.K8S_SECRET_DATABASE_ADMIN_PASSWORD_REVIEW }}
+          db_host: ${{ secrets.K8S_SECRET_DATABASE_HOST_REVIEW }}
+          db_port: ${{ secrets.K8S_SECRET_DATABASE_PORT_REVIEW }}
+          kubeconfig: ${{ secrets.KUBECONFIG_RAW }}
 
       - name: Deploy
         uses: andersinno/kolga-deploy-action@v2
@@ -53,6 +79,13 @@ jobs:
           K8S_SECRET_CREATE_SUPERUSER: 1
           K8S_SECRET_CHECK_MIGRATIONS: 1
           K8S_SECRET_SECRET_KEY: ${{ secrets.GH_TEST_DJANGO_SECRET_KEY }}
+          # Application uses only URL of DB, so have to build it here
+          K8S_SECRET_DATABASE_URL: postgis://${{ secrets.K8S_SECRET_DATABASE_USERNAME_REVIEW }}:${{ secrets.K8S_SECRET_DATABASE_PASSWORD_REVIEW }}@${{ secrets.K8S_SECRET_DATABASE_HOST_REVIEW }}:${{ secrets.K8S_SECRET_DATABASE_PORT_REVIEW }}/${{ env.K8S_NAMESPACE }}
+          K8S_SECRET_DATABASE_HOST: ${{ secrets.K8S_SECRET_DATABASE_HOST_REVIEW }}
+          K8S_SECRET_DATABASE_PORT: ${{ secrets.K8S_SECRET_DATABASE_PORT_REVIEW }}
+          K8S_SECRET_DATABASE_DB: ${{ env.K8S_NAMESPACE }}
+          K8S_SECRET_DATABASE_USERNAME: ${{ secrets.K8S_SECRET_DATABASE_USERNAME_REVIEW }}
+          K8S_SECRET_DATABASE_PASSWORD: ${{ secrets.K8S_SECRET_DATABASE_PASSWORD_REVIEW }}
           K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://tunnistamo.test.kuva.hel.ninja/openid"
           K8S_SECRET_CORS_ORIGIN_ALLOW_ALL: 1
           K8S_SECRET_VENE_UI_RETURN_URL: "https://venepaikat.hel.ninja/{LANG}"
