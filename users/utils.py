@@ -58,7 +58,7 @@ def is_customer(user):
 
 
 @lru_cache(maxsize=3)
-def get_berth_customers_group():
+def get_berth_customers_group() -> Group:
     return Group.objects.get(name=settings.CUSTOMER_GROUP_NAME)
 
 

@@ -243,7 +243,9 @@ class CustomerProfileManager(models.Manager):
 
 class CustomerProfile(TimeStampedModel, SerializableMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        User, null=True, blank=True, on_delete=models.CASCADE, related_name="customer"
+    )
     invoicing_type = models.CharField(
         choices=InvoicingType.choices,
         verbose_name=_("invoicing type"),

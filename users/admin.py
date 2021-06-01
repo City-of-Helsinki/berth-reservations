@@ -5,6 +5,12 @@ from customers.admin import CustomerProfileInline
 
 
 class UserAdmin(admin.ModelAdmin):
+    list_filter = ("groups",)
+    list_display = (
+        "id",
+        "customer",
+        "__str__",
+    )
     inlines = (CustomerProfileInline,)
     readonly_fields = ("password",)
     search_fields = (
