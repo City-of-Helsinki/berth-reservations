@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Exists, ExpressionWrapper, OuterRef, Q, QuerySet
 from django.utils.translation import gettext_lazy as _
+from helsinki_gdpr.models import SerializableMixin
 
 from applications.models import BerthApplication, WinterStorageApplication
 from customers.models import Boat, CustomerProfile
@@ -84,7 +85,7 @@ class AbstractLease(TimeStampedModel, UUIDModel):
         super().save(*args, **kwargs)
 
 
-class BerthLeaseManager(models.Manager):
+class BerthLeaseManager(SerializableMixin.SerializableManager):
     def get_queryset(self):
         current_season_start = calculate_berth_lease_start_date()
         today = date.today()
@@ -148,7 +149,7 @@ class BerthLeaseManager(models.Manager):
         return leases
 
 
-class BerthLease(AbstractLease):
+class BerthLease(AbstractLease, SerializableMixin):
     berth = models.ForeignKey(
         Berth, verbose_name=_("berth"), on_delete=models.PROTECT, related_name="leases"
     )
@@ -215,8 +216,25 @@ class BerthLease(AbstractLease):
             self.berth, self.start_date, self.end_date, self.status
         )
 
+    serialize_fields = (
+        {"name": "id"},
+        {"name": "boat", "accessor": lambda x: x.id if x else None},
+        {"name": "status", "accessor": lambda x: dict(LeaseStatus.choices)[x]},
+        {
+            "name": "orders",
+            "accessor": lambda orders: [order.id for order in orders.all()]
+            if orders
+            else None,
+        },
+        {"name": "comment"},
+        {"name": "berth", "accessor": lambda x: x.serialize()},
+        {"name": "application", "accessor": lambda x: x.id if x else None},
+        {"name": "start_date", "accessor": lambda x: x.strftime("%d-%m-%Y")},
+        {"name": "end_date", "accessor": lambda x: x.strftime("%d-%m-%Y")},
+    )
 
-class WinterStorageLeaseManager(models.Manager):
+
+class WinterStorageLeaseManager(SerializableMixin.SerializableManager):
     def get_queryset(self):
         current_season_start = calculate_winter_storage_lease_start_date()
         today = date.today()
@@ -283,7 +301,7 @@ class WinterStorageLeaseManager(models.Manager):
         return leases
 
 
-class WinterStorageLease(AbstractLease):
+class WinterStorageLease(AbstractLease, SerializableMixin):
     place = models.ForeignKey(
         WinterStoragePlace,
         verbose_name=_("place"),
@@ -391,6 +409,29 @@ class WinterStorageLease(AbstractLease):
         return " {} > {} - {} ({})".format(
             self.place or self.section, self.start_date, self.end_date, self.status
         )
+
+    serialize_fields = (
+        {"name": "id"},
+        {"name": "boat", "accessor": lambda x: x.id if x else None},
+        {"name": "status", "accessor": lambda x: dict(LeaseStatus.choices)[x]},
+        {
+            "name": "orders",
+            "accessor": lambda orders: [order.id for order in orders.all()]
+            if orders
+            else None,
+        },
+        {"name": "comment"},
+        {"name": "place", "accessor": lambda x: x.serialize() if x else None},
+        {"name": "section", "accessor": lambda x: x.serialize() if x else None},
+        {"name": "application", "accessor": lambda x: x.id if x else None},
+        {"name": "start_date", "accessor": lambda x: x.strftime("%d-%m-%Y")},
+        {"name": "end_date", "accessor": lambda x: x.strftime("%d-%m-%Y")},
+        {"name": "sticker_number"},
+        {
+            "name": "sticker_posted",
+            "accessor": lambda x: x.strftime("%d-%m-%Y") if x else None,
+        },
+    )
 
 
 class AbstractLeaseChange(models.Model):

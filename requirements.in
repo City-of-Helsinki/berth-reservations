@@ -15,6 +15,7 @@ git+https://github.com/a-rmz/django-munigeo.git@0.4.0-beta#egg=django-munigeo
 django-silk
 elastic-apm
 ipython
+helsinki-profile-gdpr-api
 factory-boy
 graphene-django
 graphene-federation

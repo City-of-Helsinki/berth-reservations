@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from helsinki_gdpr.models import SerializableMixin
 from parler.models import TranslatableModel, TranslatedFields
 
 from customers.models import CustomerProfile
@@ -14,7 +15,7 @@ from .enums import ApplicationAreaType, ApplicationStatus, WinterStorageMethod
 from .utils import localize_datetime
 
 
-class HarborChoice(models.Model):
+class HarborChoice(SerializableMixin):
     harbor = models.ForeignKey(Harbor, on_delete=models.CASCADE)
     application = models.ForeignKey("BerthApplication", on_delete=models.CASCADE)
     priority = models.PositiveSmallIntegerField(verbose_name=_("priority"))
@@ -23,8 +24,10 @@ class HarborChoice(models.Model):
         unique_together = ("application", "priority")
         ordering = ("application", "priority")
 
+    serialize_fields = ({"name": "harbor", "accessor": lambda x: x.name},)
 
-class WinterStorageAreaChoice(models.Model):
+
+class WinterStorageAreaChoice(SerializableMixin):
     winter_storage_area = models.ForeignKey(WinterStorageArea, on_delete=models.CASCADE)
     application = models.ForeignKey(
         "WinterStorageApplication", on_delete=models.CASCADE
@@ -34,6 +37,8 @@ class WinterStorageAreaChoice(models.Model):
     class Meta:
         unique_together = ("application", "priority")
         ordering = ("application", "priority")
+
+    serialize_fields = ({"name": "winter_storage_area", "accessor": lambda x: x.name},)
 
 
 class BerthSwitchReason(TranslatableModel):
@@ -50,7 +55,7 @@ class BerthSwitchReason(TranslatableModel):
         return self.safe_translation_getter("title", super().__str__())
 
 
-class BerthSwitch(models.Model):
+class BerthSwitch(SerializableMixin):
     berth = models.ForeignKey(Berth, verbose_name=_("berth"), on_delete=models.CASCADE)
     reason = models.ForeignKey(
         BerthSwitchReason,
@@ -58,6 +63,13 @@ class BerthSwitch(models.Model):
         blank=True,
         verbose_name=_("berth switch reason"),
         on_delete=models.SET_NULL,
+    )
+
+    serialize_fields = (
+        {"name": "harbor", "accessor": lambda x: x.name},
+        {"name": "pier"},
+        {"name": "berth_number"},
+        {"name": "reason", "accessor": lambda x: x.title if x else None},
     )
 
 
@@ -153,7 +165,7 @@ class BaseApplication(models.Model):
         return "{}: {} {}".format(self.pk, self.first_name, self.last_name)
 
 
-class BerthApplication(BaseApplication):
+class BerthApplication(BaseApplication, SerializableMixin):
     customer = models.ForeignKey(
         CustomerProfile,
         null=True,
@@ -306,8 +318,53 @@ class BerthApplication(BaseApplication):
     def clean(self):
         self._validate_status()
 
+    serialize_fields = (
+        {"name": "id"},
+        {"name": "created_at", "accessor": lambda x: x.strftime("%d-%m-%Y %H:%M:%S")},
+        {"name": "status", "accessor": lambda x: dict(ApplicationStatus.choices)[x]},
+        {"name": "language"},
+        {"name": "first_name"},
+        {"name": "last_name"},
+        {"name": "email"},
+        {"name": "phone_number"},
+        {"name": "address"},
+        {"name": "zip_code"},
+        {"name": "municipality"},
+        {"name": "company_name"},
+        {"name": "business_id"},
+        {"name": "boat_type", "accessor": lambda x: x.name if x else None},
+        {"name": "boat_registration_number"},
+        {"name": "boat_name"},
+        {"name": "boat_model"},
+        {"name": "boat_length"},
+        {"name": "boat_width"},
+        {"name": "accept_boating_newsletter"},
+        {"name": "accept_fitness_news"},
+        {"name": "accept_library_news"},
+        {"name": "accept_other_culture_news"},
+        {"name": "information_accuracy_confirmed"},
+        {"name": "application_code"},
+        {
+            "name": "harborchoice_set",
+            "accessor": lambda x: x.serialize() if x else None,
+        },
+        {"name": "berth_switch", "accessor": lambda x: x.serialize() if x else None},
+        {"name": "boat_draught"},
+        {"name": "boat_weight"},
+        {"name": "accessibility_required"},
+        {"name": "boat_propulsion"},
+        {"name": "boat_hull_material"},
+        {"name": "boat_intended_use"},
+        {"name": "renting_period"},
+        {"name": "rent_from"},
+        {"name": "rent_till"},
+        {"name": "boat_is_inspected"},
+        {"name": "boat_is_insured"},
+        {"name": "agree_to_terms"},
+    )
 
-class WinterStorageApplication(BaseApplication):
+
+class WinterStorageApplication(BaseApplication, SerializableMixin):
     area_type = models.CharField(
         choices=ApplicationAreaType.choices,
         verbose_name=_("application area type"),
@@ -384,3 +441,44 @@ class WinterStorageApplication(BaseApplication):
             "area_choices": self.winterstorageareachoice_set.order_by("priority"),
             "application": self,
         }
+
+    serialize_fields = (
+        {"name": "id"},
+        {"name": "created_at", "accessor": lambda x: x.strftime("%d-%m-%Y %H:%M:%S")},
+        {"name": "status", "accessor": lambda x: dict(ApplicationStatus.choices)[x]},
+        {"name": "language"},
+        {"name": "first_name"},
+        {"name": "last_name"},
+        {"name": "email"},
+        {"name": "phone_number"},
+        {"name": "address"},
+        {"name": "zip_code"},
+        {"name": "municipality"},
+        {"name": "company_name"},
+        {"name": "business_id"},
+        {"name": "boat_type", "accessor": lambda x: x.name if x else None},
+        {"name": "boat_registration_number"},
+        {"name": "boat_name"},
+        {"name": "boat_model"},
+        {"name": "boat_length"},
+        {"name": "boat_width"},
+        {"name": "accept_boating_newsletter"},
+        {"name": "accept_fitness_news"},
+        {"name": "accept_library_news"},
+        {"name": "accept_other_culture_news"},
+        {"name": "information_accuracy_confirmed"},
+        {"name": "application_code"},
+        {
+            "name": "area_type",
+            "accessor": lambda x: dict(ApplicationAreaType.choices)[x] if x else None,
+        },
+        {
+            "name": "winterstorageareachoice_set",
+            "accessor": lambda x: x.serialize() if x else None,
+        },
+        {
+            "name": "storage_method",
+            "accessor": lambda x: dict(WinterStorageMethod.choices)[x] if x else None,
+        },
+        {"name": "trailer_registration_number"},
+    )

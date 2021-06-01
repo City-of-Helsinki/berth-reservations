@@ -46,7 +46,7 @@ env = environ.Env(
     OFFER_EXPIRATION_CRONJOB_ENABLED=(bool, False),
     TOKEN_AUTH_ACCEPTED_AUDIENCE=(str, "https://api.hel.fi/auth/berths"),
     TOKEN_AUTH_ACCEPTED_SCOPE_PREFIX=(str, "berths"),
-    TOKEN_AUTH_AUTHSERVER_URL=(str, ""),
+    TOKEN_AUTH_AUTHSERVER_URL=(str, "https://api.hel.fi/sso/openid"),
     TOKEN_AUTH_FIELD_FOR_CONSENTS=(str, "https://api.hel.fi/auth"),
     TOKEN_AUTH_REQUIRE_SCOPE_PREFIX=(bool, True),
     VENE_PAYMENTS_PROVIDER_CLASS=(str, "payments.providers.BamboraPayformProvider"),
@@ -65,6 +65,8 @@ env = environ.Env(
     FORCED_HOST=(str, None),
     ENABLE_APM_TOOLS=(bool, False),
     ENABLE_PROFILING_TOOLS=(bool, False),
+    GDPR_API_QUERY_SCOPE=(str, "berths.gdprquery"),
+    GDPR_API_DELETE_SCOPE=(str, "berths.gdprdelete"),
 )
 if os.path.exists(env_file):
     env.read_env(env_file)
@@ -319,6 +321,10 @@ if env("SESSION_COOKIE_SECURE") is not None:
 
 EXPIRE_WAITING_ORDERS_OLDER_THAN_DAYS = 7
 EXPIRE_WAITING_OFFERS_OLDER_THAN_DAYS = 7
+
+GDPR_API_QUERY_SCOPE = env("GDPR_API_QUERY_SCOPE")
+GDPR_API_DELETE_SCOPE = env("GDPR_API_DELETE_SCOPE")
+GDPR_API_MODEL = "customers.CustomerProfile"
 
 # local_settings.py can be used to override environment-specific settings
 # like database and email that differ between development and production.

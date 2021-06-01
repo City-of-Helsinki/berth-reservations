@@ -13,6 +13,7 @@ from django.db.models import Max, OuterRef, Q, Subquery, UniqueConstraint, Value
 from django.db.models.functions import Coalesce
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
+from helsinki_gdpr.models import SerializableMixin
 
 from applications.enums import ApplicationAreaType
 from applications.models import BerthApplication, WinterStorageApplication
@@ -111,7 +112,9 @@ class BerthProductManager(models.Manager):
         return products.first()
 
 
-class BerthProduct(AbstractPlaceProduct, TimeStampedModel, UUIDModel):
+class BerthProduct(
+    AbstractPlaceProduct, TimeStampedModel, UUIDModel, SerializableMixin
+):
     """The range boundaries are (]"""
 
     min_width = models.DecimalField(
@@ -191,8 +194,20 @@ class BerthProduct(AbstractPlaceProduct, TimeStampedModel, UUIDModel):
             return self.tier_3_price
         raise ValueError(_("Tier not implemented"))
 
+    serialize_fields = (
+        {"name": "min_width"},
+        {"name": "max_width"},
+        {"name": "tier_1_price"},
+        {"name": "tier_2_price"},
+        {"name": "tier_3_price"},
+        {"name": "price_unit"},
+        {"name": "tax_percentage"},
+    )
 
-class WinterStorageProduct(AbstractPlaceProduct, AbstractBaseProduct):
+
+class WinterStorageProduct(
+    AbstractPlaceProduct, AbstractBaseProduct, SerializableMixin
+):
     winter_storage_area = models.OneToOneField(
         "resources.WinterStorageArea",
         verbose_name=_("winter storage area"),
@@ -212,8 +227,13 @@ class WinterStorageProduct(AbstractPlaceProduct, AbstractBaseProduct):
     def name(self):
         return _("Winter Storage product")
 
+    serialize_fields = (
+        {"name": "tax_percentage"},
+        {"name": "winter_storage_area", "accessor": lambda x: x.name},
+    )
 
-class AdditionalProduct(AbstractBaseProduct):
+
+class AdditionalProduct(AbstractBaseProduct, SerializableMixin):
     service = models.CharField(
         choices=ProductServiceType.choices, verbose_name=_("service"), max_length=40
     )
@@ -259,8 +279,20 @@ class AdditionalProduct(AbstractBaseProduct):
     def name(self):
         return f"{ProductServiceType(self.service).label} - {PeriodType(self.period).label}"
 
+    serialize_fields = (
+        {"name": "service"},
+        {"name": "period"},
+        {"name": "price_value"},
+        {"name": "price_unit"},
+        {"name": "tax_percentage"},
+        {
+            "name": "product_type",
+            "accessor": lambda x: dict(AdditionalProductType.choices)[x] if x else None,
+        },
+    )
 
-class OrderManager(models.Manager):
+
+class OrderManager(SerializableMixin.SerializableManager):
     def berth_orders(self):
         product_ct = ContentType.objects.get_for_model(BerthProduct)
         lease_ct = ContentType.objects.get_for_model(BerthLease)
@@ -349,7 +381,7 @@ class OrderManager(models.Manager):
         )
 
 
-class Order(UUIDModel, TimeStampedModel):
+class Order(UUIDModel, TimeStampedModel, SerializableMixin):
     order_number = models.CharField(
         max_length=64,
         verbose_name=_("order number"),
@@ -845,8 +877,40 @@ class Order(UUIDModel, TimeStampedModel):
             self.lease.sticker_number = sticker_number
             self.lease.save(update_fields=["sticker_number"])
 
+    serialize_fields = (
+        {"name": "id"},
+        {"name": "product", "accessor": lambda x: x.serialize() if x else None},
+        {"name": "lease", "accessor": lambda x: x.id if x else None},
+        {"name": "status", "accessor": lambda x: dict(OrderStatus.choices)[x]},
+        {"name": "comment"},
+        {"name": "price"},
+        {"name": "tax_percentage"},
+        {"name": "pretax_price"},
+        {"name": "total_price"},
+        {"name": "total_pretax_price"},
+        {"name": "total_tax_percentage"},
+        {
+            "name": "due_date",
+            "accessor": lambda x: x.strftime("%d-%m-%Y") if x else None,
+        },
+        {"name": "order_lines"},
+        {"name": "log_entries"},
+        {
+            "name": "paid_at",
+            "accessor": lambda x: x.strftime("%d-%m-%Y %H:%M:%S") if x else None,
+        },
+        {
+            "name": "cancelled_at",
+            "accessor": lambda x: x.strftime("%d-%m-%Y %H:%M:%S") if x else None,
+        },
+        {
+            "name": "rejected_at",
+            "accessor": lambda x: x.strftime("%d-%m-%Y %H:%M:%S") if x else None,
+        },
+    )
 
-class OrderLine(UUIDModel, TimeStampedModel):
+
+class OrderLine(UUIDModel, TimeStampedModel, SerializableMixin):
     order = models.ForeignKey(
         Order,
         verbose_name=_("order"),
@@ -970,8 +1034,16 @@ class OrderLine(UUIDModel, TimeStampedModel):
             else f"{_('No product')} - {self.price}€"
         )
 
+    serialize_fields = (
+        {"name": "product", "accessor": lambda x: x.serialize() if x else None},
+        {"name": "quantity"},
+        {"name": "price"},
+        {"name": "tax_percentage"},
+        {"name": "pretax_price"},
+    )
 
-class OrderLogEntry(UUIDModel, TimeStampedModel):
+
+class OrderLogEntry(UUIDModel, TimeStampedModel, SerializableMixin):
     order = models.ForeignKey(
         Order,
         verbose_name=_("order"),
@@ -989,6 +1061,12 @@ class OrderLogEntry(UUIDModel, TimeStampedModel):
         return (
             f"Order {self.order.id} | {self.from_status or 'N/A'} --> {self.to_status}"
         )
+
+    serialize_fields = (
+        {"name": "from_status", "accessor": lambda x: dict(OrderStatus.choices)[x]},
+        {"name": "to_status", "accessor": lambda x: dict(OrderStatus.choices)[x]},
+        {"name": "comment"},
+    )
 
 
 class OrderToken(UUIDModel, TimeStampedModel):
@@ -1132,7 +1210,7 @@ class AbstractOffer(UUIDModel, TimeStampedModel):
         self.save()
 
 
-class BerthSwitchOfferManager(models.Manager):
+class BerthSwitchOfferManager(SerializableMixin.SerializableManager):
     def expire_too_old_offers(self, older_than_days, dry_run=False) -> int:
         # Check all orders that are in PENDING status, and if there is
         # {older_than_days} full days elapsed after the offers's due_date, then
@@ -1155,7 +1233,7 @@ class BerthSwitchOfferManager(models.Manager):
         return len(too_old_pending_offers)
 
 
-class BerthSwitchOffer(AbstractOffer):
+class BerthSwitchOffer(AbstractOffer, SerializableMixin):
     application = models.ForeignKey(
         BerthApplication, related_name="switch_offers", on_delete=models.CASCADE
     )
@@ -1269,6 +1347,22 @@ class BerthSwitchOffer(AbstractOffer):
             to_status=to_status or self.status,
             comment=comment,
         )
+
+    serialize_fields = (
+        {"name": "id"},
+        {"name": "status", "accessor": lambda x: dict(OfferStatus.choices)[x]},
+        {
+            "name": "due_date",
+            "accessor": lambda x: x.strftime("%d-%m-%Y") if x else None,
+        },
+        {"name": "customer_first_name"},
+        {"name": "customer_last_name"},
+        {"name": "customer_email"},
+        {"name": "customer_phone"},
+        {"name": "application", "accessor": lambda x: x.id},
+        {"name": "lease", "accessor": lambda x: x.id},
+        {"name": "berth", "accessor": lambda x: x.id},
+    )
 
 
 class AbstractOfferLogEntry(UUIDModel, TimeStampedModel):
