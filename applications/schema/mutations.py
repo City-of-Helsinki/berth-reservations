@@ -7,9 +7,11 @@ from customers.models import CustomerProfile
 from leases.models import BerthLease, WinterStorageLease
 from users.decorators import (
     change_permission_required,
+    check_user_is_authorised,
     delete_permission_required,
     view_permission_required,
 )
+from users.utils import user_has_delete_permission
 from utils.relay import get_node_from_global_id
 from utils.schema import update_object
 
@@ -117,12 +119,21 @@ class DeleteBerthApplicationMutation(graphene.ClientIDMutation):
     class Input:
         id = graphene.ID(required=True)
 
+    def get_nodes_to_check(info, **input):
+        application = get_node_from_global_id(
+            info, input.get("id"), only_type=BerthApplicationNode, nullable=True
+        )
+        return [application]
+
     @classmethod
-    @delete_permission_required(BerthApplication)
     @transaction.atomic
+    @check_user_is_authorised(
+        get_nodes_to_check=get_nodes_to_check,
+        model_checks=[user_has_delete_permission(BerthApplication)],
+    )
     def mutate_and_get_payload(cls, root, info, **input):
         application = get_node_from_global_id(
-            info, input.get("id"), only_type=BerthApplicationNode, nullable=False
+            info, input.pop("id"), only_type=BerthApplicationNode, nullable=False
         )
 
         application.delete()
