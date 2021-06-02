@@ -1,12 +1,13 @@
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from graphene import relay
+from graphql_jwt.exceptions import PermissionDenied
 from graphql_relay import (
     from_global_id as relay_from_global_id,
     to_global_id as relay_to_global_id,
 )
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
-from users.utils import get_node_user, user_has_view_permission
 
 
 def get_node_from_global_id(info, global_id, only_type, nullable=True):
@@ -59,6 +60,41 @@ def from_global_id(global_id, node_type=None):
     return _id
 
 
+def is_customer(user):
+    if user.is_staff or user.is_superuser:
+        return False
+    elif (
+        user.groups.count() == 1
+        and user.groups.first().name == settings.CUSTOMER_GROUP_NAME
+    ):
+        return True
+    else:
+        return False
+
+
+def get_node_user(node):
+    if not node:
+        return None
+
+    node_user = None
+    if hasattr(node, "user"):
+        node_user = node.user
+    elif hasattr(node, "customer") and hasattr(node.customer, "user"):
+        node_user = node.customer.user
+    return node_user
+
+
+def user_is_linked_to_node(user, node):
+    if user is None:
+        return False
+    return user == get_node_user(node)
+
+
+def validate_user_is_linked_to_node(user, node):
+    if not user_is_linked_to_node(user, node):
+        raise PermissionDenied(_("You do not have permission to perform this action."))
+
+
 def return_node_if_user_has_permissions(node, user, *models):
     """
     Checks whether the user has permissions to access this node / model.
@@ -78,12 +114,14 @@ def return_node_if_user_has_permissions(node, user, *models):
     :param models: Django models that user has to have permissions to
     :return: None | Django Model or Graphene Node | Exception raised
     """
+    from users.utils import user_has_view_permission
+
     if not node:
         return None
 
     node_user = get_node_user(node)
 
-    if (node_user and node_user == user) or user_has_view_permission(user, *models):
+    if (node_user and node_user == user) or user_has_view_permission(*models)(user):
         return node
     else:
         raise VenepaikkaGraphQLError(
