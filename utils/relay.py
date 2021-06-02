@@ -6,7 +6,7 @@ from graphql_relay import (
 )
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
-from users.utils import user_has_view_permission
+from users.utils import get_node_user, user_has_view_permission
 
 
 def get_node_from_global_id(info, global_id, only_type, nullable=True):
@@ -64,9 +64,7 @@ def return_node_if_user_has_permissions(node, user, *models):
     Checks whether the user has permissions to access this node / model.
 
     1. If the passed node is falsy, we return None.
-    2. Otherwise we try to get to the user this node belongs to,
-       either directly by node.user or through CustomerProfile,
-       i.e. by doing node.customer.user
+    2. Otherwise, try to get the user this node belongs to (get_node_user)
     3. If the node belongs to the user making the request,
        the node / model is returned.
     4. If the node does not belong to the user, but the user has
@@ -83,11 +81,7 @@ def return_node_if_user_has_permissions(node, user, *models):
     if not node:
         return None
 
-    node_user = None
-    if hasattr(node, "user"):
-        node_user = node.user
-    elif hasattr(node, "customer") and hasattr(node.customer, "user"):
-        node_user = node.customer.user
+    node_user = get_node_user(node)
 
     if (node_user and node_user == user) or user_has_view_permission(user, *models):
         return node

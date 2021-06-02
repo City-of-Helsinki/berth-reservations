@@ -180,6 +180,8 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = "users.User"
 
+CUSTOMER_GROUP_NAME = "Berth customer"
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

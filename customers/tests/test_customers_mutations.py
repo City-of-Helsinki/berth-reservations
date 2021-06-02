@@ -1,5 +1,6 @@
 import random
 import uuid
+from unittest import mock
 
 import pytest
 from dateutil.utils import today
@@ -8,9 +9,11 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
     assert_field_missing,
+    assert_in_errors,
     assert_not_enough_permissions,
 )
 from resources.schema import BoatTypeType
+from users.utils import get_berth_customers_group
 from utils.numbers import random_decimal
 from utils.relay import from_global_id, to_global_id
 
@@ -22,8 +25,10 @@ from ..models import (
     get_boat_certificate_media_folder,
     get_boat_media_folder,
     Organization,
+    User,
 )
 from ..schema import BoatCertificateNode, BoatNode, OrganizationNode, ProfileNode
+from .conftest import mocked_response_my_profile
 from .factories import BoatCertificateFactory
 
 CREATE_BOAT_MUTATION = """
@@ -496,6 +501,86 @@ def test_create_berth_service_profile_no_id(superuser_api_client):
 
     assert CustomerProfile.objects.count() == 0
     assert_field_missing("id", executed)
+
+
+CREATE_MY_BERTH_PROFILE_MUTATION = """
+mutation CREATE_MY_BERTH_PROFILE($input: CreateMyBerthProfileMutationInput!) {
+    createMyBerthProfile(input: $input) {
+        profile {
+            id
+        }
+    }
+}
+"""
+
+
+def test_create_my_berth_profile(user_api_client, hki_profile_address):
+    customer_id = to_global_id(ProfileNode, uuid.uuid4())
+
+    variables = {"profileToken": "token"}
+
+    assert CustomerProfile.objects.count() == 0
+
+    with mock.patch(
+        "customers.services.profile.requests.post",
+        side_effect=mocked_response_my_profile(
+            data={
+                "id": customer_id,
+                "first_name": "test",
+                "last_name": "test",
+                "primary_email": {"email": "a@b.com"},
+                "primary_phone": {"phone": "0501234567"},
+                "primary_address": hki_profile_address,
+            },
+        ),
+    ):
+        executed = user_api_client.execute(
+            CREATE_MY_BERTH_PROFILE_MUTATION, input=variables
+        )
+
+    assert CustomerProfile.objects.count() == 1
+    assert executed["data"]["createMyBerthProfile"]["profile"] == {
+        "id": customer_id,
+    }
+    profile = CustomerProfile.objects.all().first()
+    assert profile.user is not None
+    assert profile.user.groups.count() == 1
+    assert profile.user.groups.first() == get_berth_customers_group()
+
+
+def test_create_my_berth_profile_does_not_exist(user_api_client):
+    variables = {"profileToken": "token"}
+    with mock.patch(
+        "customers.services.profile.requests.post",
+        side_effect=mocked_response_my_profile(None),
+    ):
+        executed = user_api_client.execute(
+            CREATE_MY_BERTH_PROFILE_MUTATION, input=variables
+        )
+
+    assert_in_errors("Open city profile not found", executed)
+
+
+def test_create_my_berth_profile_already_exists(user_api_client):
+    variables = {"profileToken": "token"}
+
+    CustomerProfile.objects.create(id=uuid.uuid4(), user=User.objects.first())
+
+    assert CustomerProfile.objects.count() == 1
+    assert CustomerProfile.objects.all().first().user.groups.count() == 0
+
+    executed = user_api_client.execute(
+        CREATE_MY_BERTH_PROFILE_MUTATION, input=variables
+    )
+
+    assert CustomerProfile.objects.count() == 1
+    assert executed["data"]["createMyBerthProfile"] is None
+
+    # the berth customer group is still assigned, if it was not assigned before
+    profile = CustomerProfile.objects.all().first()
+    assert profile.user is not None
+    assert profile.user.groups.count() == 1
+    assert profile.user.groups.first() == get_berth_customers_group()
 
 
 UPDATE_BERTH_SERVICE_PROFILE_MUTATION = """

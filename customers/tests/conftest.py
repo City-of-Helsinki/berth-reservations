@@ -91,6 +91,18 @@ def mocked_response_profile(count=3, data=None, use_edges=True, *args, **kwargs)
     return wrapper
 
 
+def mocked_response_my_profile(data="", *args, **kwargs):
+    def wrapper(*args, **kwargs):
+        if data != "":
+            profile_dict = data
+        else:
+            profile_dict = get_customer_profile_dict()
+        my_profile = {"my_profile": profile_dict}
+        return MockResponse(data={"data": my_profile})
+
+    return wrapper
+
+
 @pytest.fixture
 def notification_template_sms_invoice_notice():
     return NotificationTemplate.objects.language("fi").create(
