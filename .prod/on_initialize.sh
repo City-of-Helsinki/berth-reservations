@@ -5,6 +5,7 @@ python /app/manage.py geo_import finland --municipalities
 python /app/manage.py geo_import helsinki --divisions
 python /app/manage.py loaddata helsinki-ws-resources.json
 python /app/manage.py loaddata helsinki-harbor-resources.json
+python /app/manage.py loaddata helsinki-harbor-resources-fixes-2021-06-11.json
 python /app/manage.py assign_area_regions
 python /app/manage.py loaddata switch-reasons.json
 python /app/manage.py loaddata groups.json
