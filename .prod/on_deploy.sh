@@ -12,4 +12,5 @@ python /app/manage.py set_group_model_permissions
 
 # Create user objects for the existing customer profiles
 # This line can be removed after prod deployment done successfully
-python /app/manage.py create_users_for_customers
+# 2021-06-11: not including this in prod deployment, enable when required
+# python /app/manage.py create_users_for_customers
