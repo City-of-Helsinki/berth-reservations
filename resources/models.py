@@ -29,7 +29,7 @@ from leases.consts import ACTIVE_LEASE_STATUSES
 from leases.enums import LeaseStatus
 from leases.utils import (
     calculate_berth_lease_end_date,
-    calculate_berth_lease_start_date,
+    calculate_season_start_date,
     calculate_winter_storage_lease_end_date,
 )
 from payments.enums import OfferStatus, PriceTier
@@ -615,7 +615,7 @@ class BerthManager(models.Manager):
         from leases.models import BerthLease
         from payments.models import BerthSwitchOffer
 
-        season_start = calculate_berth_lease_start_date()
+        season_start = calculate_season_start_date()
         season_end = calculate_berth_lease_end_date()
         current_date = today().date()
 
