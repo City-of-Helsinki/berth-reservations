@@ -83,6 +83,14 @@ def harbor_services_api_client():
 
 
 @pytest.fixture
+def berth_customer_user():
+    user = UserFactory()
+    group = Group.objects.get(name="Berth customer")
+    user.groups.set([group])
+    return user
+
+
+@pytest.fixture
 def berth_customer_api_client():
     user = UserFactory()
     group = Group.objects.get(name="Berth customer")

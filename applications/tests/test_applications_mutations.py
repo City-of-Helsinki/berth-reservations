@@ -276,6 +276,78 @@ def test_delete_berth_application(api_client, berth_application, customer_profil
     assert BerthApplication.objects.count() == 0
 
 
+def test_delete_berth_application_by_customer(
+    berth_customer_api_client, berth_application, customer_profile
+):
+    variables = {
+        "id": to_global_id(BerthApplicationNode, berth_application.id),
+    }
+    berth_application.status = ApplicationStatus.PENDING
+    customer_profile.user = berth_customer_api_client.user
+    customer_profile.save()
+    berth_application.customer = customer_profile
+    berth_application.save()
+    assert BerthApplication.objects.count() == 1
+
+    berth_customer_api_client.execute(
+        DELETE_BERTH_APPLICATION_MUTATION, input=variables
+    )
+
+    assert BerthApplication.objects.count() == 0
+
+
+def test_delete_berth_application_by_wrong_customer(
+    berth_customer_api_client, berth_application, customer_profile, berth_customer_user
+):
+    variables = {
+        "id": to_global_id(BerthApplicationNode, berth_application.id),
+    }
+    assert berth_customer_api_client.user != berth_customer_user
+    customer_profile.user = berth_customer_user  # different customer
+    customer_profile.save()
+    berth_application.status = ApplicationStatus.PENDING
+    berth_application.customer = customer_profile
+    berth_application.save()
+    assert BerthApplication.objects.count() == 1
+
+    berth_customer_api_client.execute(
+        DELETE_BERTH_APPLICATION_MUTATION, input=variables
+    )
+
+    assert BerthApplication.objects.count() == 1
+
+
+@pytest.mark.parametrize(
+    "application_status",
+    [
+        ApplicationStatus.OFFER_GENERATED,
+        ApplicationStatus.OFFER_SENT,
+        ApplicationStatus.REJECTED,
+        ApplicationStatus.NO_SUITABLE_BERTHS,
+        ApplicationStatus.HANDLED,
+        ApplicationStatus.EXPIRED,
+    ],
+)
+def test_delete_berth_application_by_customer_invalid_status(
+    berth_customer_api_client, berth_application, customer_profile, application_status
+):
+    variables = {
+        "id": to_global_id(BerthApplicationNode, berth_application.id),
+    }
+    berth_application.status = ApplicationStatus.PENDING
+    customer_profile.user = berth_customer_api_client.user
+    customer_profile.save()
+    berth_application.customer = customer_profile
+    berth_application.save()
+    assert BerthApplication.objects.count() == 1
+
+    berth_customer_api_client.execute(
+        DELETE_BERTH_APPLICATION_MUTATION, input=variables
+    )
+
+    assert BerthApplication.objects.count() == 0
+
+
 @pytest.mark.parametrize(
     "api_client",
     ["api_client", "user", "berth_supervisor", "berth_handler"],

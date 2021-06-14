@@ -2,11 +2,12 @@ import django_filters
 import graphene
 from django.db.models import Q
 from graphene_django import DjangoObjectType
+from graphql_jwt.decorators import login_required
 from graphql_relay import to_global_id
 
 from customers.models import CustomerProfile
 from leases.models import BerthLease, WinterStorageLease
-from users.decorators import view_permission_required
+from utils.relay import return_node_if_user_has_permissions
 from utils.schema import CountConnection
 
 from ..enums import ApplicationAreaType, ApplicationStatus, WinterStorageMethod
@@ -103,9 +104,12 @@ class BerthApplicationNode(DjangoObjectType):
         return None
 
     @classmethod
-    @view_permission_required(BerthApplication, BerthLease, CustomerProfile)
+    @login_required
     def get_node(cls, info, id):
-        return super().get_node(info, id)
+        node = super().get_node(info, id)
+        return return_node_if_user_has_permissions(
+            node, info.context.user, BerthApplication, BerthLease, CustomerProfile
+        )
 
 
 class WinterStorageAreaChoiceType(DjangoObjectType):
@@ -162,8 +166,13 @@ class WinterStorageApplicationNode(DjangoObjectType):
         return None
 
     @classmethod
-    @view_permission_required(
-        WinterStorageApplication, WinterStorageLease, CustomerProfile
-    )
+    @login_required
     def get_node(cls, info, id):
-        return super().get_node(info, id)
+        node = super().get_node(info, id)
+        return return_node_if_user_has_permissions(
+            node,
+            info.context.user,
+            WinterStorageApplication,
+            WinterStorageLease,
+            CustomerProfile,
+        )

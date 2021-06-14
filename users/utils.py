@@ -5,6 +5,8 @@ from django.contrib.auth.models import Group
 from django.utils.translation import gettext_lazy as _
 from graphql_jwt.exceptions import PermissionDenied
 
+from utils.relay import get_node_user
+
 VALID_PERMS = ["view", "add", "change", "delete"]
 
 
@@ -16,7 +18,7 @@ def _build_permstring(perm, model):
     return f"{model._meta.app_label}.{perm}_{model._meta.model_name}"
 
 
-def _user_has_models_perms(perm, models):
+def user_has_models_perms(perm, models):
     """Check if the user has all the permissions required"""
     if len(list(models)) == 0:
         raise ValueError("Please provide at least one model")
@@ -30,20 +32,20 @@ def _user_has_models_perms(perm, models):
     return wrapper
 
 
-def user_has_view_permission(user, *models):
-    return _user_has_models_perms("view", models)(user)
+def user_has_view_permission(*models):
+    return user_has_models_perms("view", models)
 
 
-def user_has_add_permission(user, *models):
-    return _user_has_models_perms("add", models)(user)
+def user_has_add_permission(*models):
+    return user_has_models_perms("add", models)
 
 
-def user_has_change_permission(user, *models):
-    return _user_has_models_perms("change", models)(user)
+def user_has_change_permission(*models):
+    return user_has_models_perms("change", models)
 
 
-def user_has_delete_permission(user, *models):
-    return _user_has_models_perms("delete", models)(user)
+def user_has_delete_permission(*models):
+    return user_has_models_perms("delete", models)
 
 
 def is_customer(user):
@@ -60,23 +62,6 @@ def is_customer(user):
 @lru_cache(maxsize=3)
 def get_berth_customers_group() -> Group:
     return Group.objects.get(name=settings.CUSTOMER_GROUP_NAME)
-
-
-def get_node_user(node):
-    """
-       Try to get to the user this node belongs to
-       either directly by node.user or through CustomerProfile,
-       i.e. by doing node.customer.user
-    """
-    if not node:
-        return None
-
-    node_user = None
-    if hasattr(node, "user"):
-        node_user = node.user
-    elif hasattr(node, "customer") and hasattr(node.customer, "user"):
-        node_user = node.customer.user
-    return node_user
 
 
 def user_is_linked_to_node(user, node):
