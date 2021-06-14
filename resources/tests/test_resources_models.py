@@ -95,7 +95,7 @@ def test_berth_is_available_ends_during_season_after_lease_ends(
         status=LeaseStatus.TERMINATED,
     )
     with mock.patch(
-        "resources.models.calculate_berth_lease_start_date"
+        "resources.models.calculate_season_start_date"
     ) as mock_start, mock.patch(
         "resources.models.calculate_berth_lease_end_date"
     ) as mock_end:
@@ -136,6 +136,60 @@ def test_berth_is_not_available_next_season(status, date):
 
         # Need to fetch the berth from the DB to get the annotated value
         assert not Berth.objects.get(id=lease.berth_id).is_available
+
+
+@pytest.mark.parametrize(
+    "freeze_date,expected_is_available",
+    [
+        ("2018-09-14T08:00:00Z", True),
+        ("2019-09-14T08:00:00Z", True),
+        ("2019-09-15T08:00:00Z", True),
+        ("2020-01-01T08:00:00Z", True),
+        ("2020-06-09T08:00:00Z", True),
+        ("2020-06-10T08:00:00Z", True),
+        ("2020-06-11T08:00:00Z", True),
+        ("2020-06-12T08:00:00Z", True),
+        ("2020-09-12T08:00:00Z", True),
+        ("2020-09-13T08:00:00Z", True),
+        ("2020-09-14T08:00:00Z", False),
+        ("2020-09-15T08:00:00Z", False),
+        ("2020-09-16T08:00:00Z", False),
+        ("2021-01-01T08:00:00Z", False),
+        ("2021-06-09T08:00:00Z", False),
+        ("2021-06-10T08:00:00Z", False),
+        ("2021-06-11T08:00:00Z", False),
+        ("2021-06-12T08:00:00Z", False),
+        ("2021-07-12T08:00:00Z", False),
+        ("2021-09-14T08:00:00Z", False),
+        ("2021-09-15T08:00:00Z", False),
+        ("2021-12-31T08:00:00Z", False),
+        ("2022-01-01T08:00:00Z", False),
+        ("2022-06-09T08:00:00Z", False),
+        ("2022-06-10T08:00:00Z", False),
+        ("2022-06-11T08:00:00Z", False),
+        ("2022-06-12T08:00:00Z", False),
+        ("2022-09-13T08:00:00Z", False),
+        ("2022-09-14T08:00:00Z", True),
+        ("2022-09-15T08:00:00Z", True),
+        ("2022-09-16T08:00:00Z", True),
+        ("2023-06-09T08:00:00Z", True),
+        ("2023-06-10T08:00:00Z", True),
+        ("2023-06-11T08:00:00Z", True),
+        ("2024-06-11T08:00:00Z", True),
+    ],
+)
+def test_berth_is_available_one_paid_lease(freeze_date, expected_is_available):
+    with freeze_time(freeze_date):
+        lease = BerthLeaseFactory(
+            status=LeaseStatus.PAID,
+            start_date=date(2021, 6, 10),
+            end_date=date(2021, 9, 14),
+        )
+
+        # Need to fetch the berth from the DB to get the annotated value
+        assert (
+            Berth.objects.get(id=lease.berth_id).is_available == expected_is_available
+        )
 
 
 @pytest.mark.parametrize(
