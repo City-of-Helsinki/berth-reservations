@@ -54,7 +54,7 @@ class BerthApplicationInput(BaseApplicationInput):
     choices = graphene.List(graphene.NonNull(HarborChoiceInput), required=True)
 
 
-class UpdateBerthApplicationInput:
+class BaseUpdateApplicationInput:
     id = graphene.ID(required=True)
     customer_id = graphene.ID()
     language = graphene.String()
@@ -80,6 +80,22 @@ class UpdateBerthApplicationInput:
     accept_other_culture_news = graphene.Boolean()
     boat_draught = graphene.Decimal()
     boat_weight = graphene.Decimal()
+
+
+class WinterStorageAreaChoiceInput(graphene.InputObjectType):
+    winter_area_id = graphene.ID(required=True)
+    priority = graphene.Int(required=True)
+
+
+class WinterStorageApplicationInput(BaseApplicationInput):
+    storage_method = WinterStorageMethodEnum(required=True)
+    trailer_registration_number = graphene.String()
+    chosen_areas = graphene.List(
+        graphene.NonNull(WinterStorageAreaChoiceInput), required=True
+    )
+
+
+class UpdateBerthApplicationInput(BaseUpdateApplicationInput):
     accessibility_required = graphene.Boolean()
     boat_propulsion = graphene.String()
     boat_hull_material = graphene.String()
@@ -100,14 +116,16 @@ class UpdateBerthApplicationInput:
     )
 
 
-class WinterStorageAreaChoiceInput(graphene.InputObjectType):
-    winter_area_id = graphene.ID(required=True)
-    priority = graphene.Int(required=True)
-
-
-class WinterStorageApplicationInput(BaseApplicationInput):
-    storage_method = WinterStorageMethodEnum(required=True)
+class UpdateWinterStorageApplicationInput(BaseUpdateApplicationInput):
+    storage_method = WinterStorageMethodEnum()
     trailer_registration_number = graphene.String()
-    chosen_areas = graphene.List(
-        graphene.NonNull(WinterStorageAreaChoiceInput), required=True
+    add_choices = graphene.List(
+        graphene.NonNull(WinterStorageAreaChoiceInput),
+        description="A list of `WinterStorageAreaChoiceInput` that will be created for the passed application. "
+        "They are appended to the list of choices and do not replace the existing ones.",
+    )
+    remove_choices = graphene.List(
+        graphene.NonNull(graphene.ID),
+        description="A list of `ID`s of choices that will be deleted. It has higher priority than `addChoices` "
+        "(i.e. it's executed first)",
     )
