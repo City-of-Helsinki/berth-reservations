@@ -3,6 +3,7 @@ import random
 import pytest
 from django.core import mail
 
+from berth_reservations.tests.factories import CustomerProfileFactory
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
     assert_field_missing,
@@ -22,7 +23,8 @@ from utils.relay import to_global_id
 from ..enums import ApplicationStatus
 from ..models import BerthApplication, WinterStorageApplication
 from ..schema import BerthApplicationNode
-from ..schema.types import WinterStorageApplicationNode
+from ..schema.types import HarborChoiceType, WinterStorageApplicationNode
+from .factories import BerthApplicationFactory, HarborChoiceFactory
 
 CREATE_BERTH_APPLICATION_MUTATION = """
 mutation createBerthApplication($input: CreateBerthApplicationMutationInput!) {
@@ -212,6 +214,7 @@ def test_update_berth_application_no_customer_id(
     )
     variables = {
         "id": application_id,
+        "customerId": None,
     }
 
     executed = api_client.execute(UPDATE_BERTH_APPLICATION_MUTATION, input=variables)
@@ -702,3 +705,153 @@ def test_delete_winter_storage_application_inexistent_application(
     )
 
     assert_doesnt_exist("WinterStorageApplication", executed)
+
+
+UPDATE_BERTH_APPLICATION_OWNER_MUTATION = """
+mutation UpdateApplication($input: UpdateBerthApplicationInput!) {
+    updateBerthApplication(input: $input) {
+        berthApplication {
+            id
+            language
+            firstName
+            lastName
+            phoneNumber
+            email
+            address
+            zipCode
+            municipality
+            boatWidth
+            boatLength
+            acceptFitnessNews
+            acceptLibraryNews
+            acceptOtherCultureNews
+            acceptBoatingNewsletter
+            harborChoices {
+                harbor {
+                    id
+                }
+            }
+        }
+    }
+}
+"""
+
+
+def test_update_berth_application_by_owner(
+    berth_customer_api_client, berth_application, customer_profile
+):
+    berth_application_id = to_global_id(BerthApplicationNode, berth_application.id)
+    remove_choice = HarborChoiceFactory(application=berth_application)
+
+    berth = BerthFactory()
+    harbor_node_id = to_global_id(HarborNode, berth.pier.harbor.id)
+
+    customer_profile.user = berth_customer_api_client.user
+    customer_profile.save()
+    berth_application.customer = customer_profile
+    berth_application.save()
+
+    variables = {
+        "id": berth_application_id,
+        "language": "en",
+        "firstName": "John",
+        "lastName": "Doe",
+        "phoneNumber": "1234567890",
+        "email": "john.doe@example.com",
+        "address": "Mannerheimintie 1",
+        "zipCode": "00100",
+        "municipality": "Helsinki",
+        "boatWidth": "2.00",
+        "boatLength": "3.00",
+        "acceptFitnessNews": False,
+        "acceptLibraryNews": False,
+        "acceptOtherCultureNews": False,
+        "acceptBoatingNewsletter": True,
+        "addChoices": [{"harborId": harbor_node_id, "priority": 1}],
+        "removeChoices": [to_global_id(HarborChoiceType, remove_choice.id)],
+    }
+
+    assert berth_application.harborchoice_set.count() == 1
+
+    executed = berth_customer_api_client.execute(
+        UPDATE_BERTH_APPLICATION_OWNER_MUTATION, input=variables
+    )
+
+    assert executed == {
+        "data": {
+            "updateBerthApplication": {
+                "berthApplication": {
+                    "id": berth_application_id,
+                    "language": "EN",
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "phoneNumber": "1234567890",
+                    "email": "john.doe@example.com",
+                    "address": "Mannerheimintie 1",
+                    "zipCode": "00100",
+                    "municipality": "Helsinki",
+                    "boatWidth": "2.00",
+                    "boatLength": "3.00",
+                    "acceptFitnessNews": False,
+                    "acceptLibraryNews": False,
+                    "acceptOtherCultureNews": False,
+                    "acceptBoatingNewsletter": True,
+                    "harborChoices": [{"harbor": {"id": harbor_node_id}}],
+                }
+            }
+        }
+    }
+
+
+def test_update_berth_application_by_owner_cant_update_customer(
+    berth_customer_api_client, berth_application, customer_profile
+):
+    berth_application_id = to_global_id(BerthApplicationNode, berth_application.id)
+    other_customer = CustomerProfileFactory()
+
+    customer_profile.user = berth_customer_api_client.user
+    customer_profile.save()
+    berth_application.customer = customer_profile
+    berth_application.save()
+
+    variables = {
+        "id": berth_application_id,
+        "customerId": to_global_id(ProfileNode, other_customer.id),
+    }
+
+    executed = berth_customer_api_client.execute(
+        UPDATE_BERTH_APPLICATION_OWNER_MUTATION, input=variables
+    )
+
+    assert_in_errors(
+        "A customer cannot modify the customer connected to the application", executed
+    )
+
+
+@pytest.mark.parametrize(
+    "status", [ApplicationStatus.NO_SUITABLE_BERTHS, ApplicationStatus.EXPIRED],
+)
+def test_update_berth_application_by_owner_invalid_status(
+    berth_customer_api_client, customer_profile, status
+):
+    berth_application = BerthApplicationFactory(status=status)
+    berth_application_id = to_global_id(BerthApplicationNode, berth_application.id)
+    other_customer = CustomerProfileFactory()
+
+    customer_profile.user = berth_customer_api_client.user
+    customer_profile.save()
+    berth_application.customer = customer_profile
+    berth_application.save()
+
+    variables = {
+        "id": berth_application_id,
+        "customerId": to_global_id(ProfileNode, other_customer.id),
+    }
+
+    executed = berth_customer_api_client.execute(
+        UPDATE_BERTH_APPLICATION_OWNER_MUTATION, input=variables
+    )
+
+    assert_in_errors(
+        "Cannot modify the application once it has been processed", executed
+    )

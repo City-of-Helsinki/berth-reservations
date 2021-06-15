@@ -54,6 +54,52 @@ class BerthApplicationInput(BaseApplicationInput):
     choices = graphene.List(graphene.NonNull(HarborChoiceInput), required=True)
 
 
+class UpdateBerthApplicationInput:
+    id = graphene.ID(required=True)
+    customer_id = graphene.ID()
+    language = graphene.String()
+    first_name = graphene.String()
+    last_name = graphene.String()
+    email = graphene.String()
+    phone_number = graphene.String()
+    address = graphene.String()
+    zip_code = graphene.String()
+    municipality = graphene.String()
+    company_name = graphene.String()
+    business_id = graphene.String()
+    boat_type = graphene.ID()
+    boat_registration_number = graphene.String()
+    boat_name = graphene.String()
+    boat_model = graphene.String()
+    boat_length = graphene.Decimal()
+    boat_width = graphene.Decimal()
+    application_code = graphene.String()
+    accept_boating_newsletter = graphene.Boolean()
+    accept_fitness_news = graphene.Boolean()
+    accept_library_news = graphene.Boolean()
+    accept_other_culture_news = graphene.Boolean()
+    boat_draught = graphene.Decimal()
+    boat_weight = graphene.Decimal()
+    accessibility_required = graphene.Boolean()
+    boat_propulsion = graphene.String()
+    boat_hull_material = graphene.String()
+    boat_intended_use = graphene.String()
+    rent_from = graphene.String()
+    rent_till = graphene.String()
+    boat_is_inspected = graphene.Boolean()
+    boat_is_insured = graphene.Boolean()
+    add_choices = graphene.List(
+        graphene.NonNull(HarborChoiceInput),
+        description="A list of `HarborChoiceInput` that will be created for the passed application. "
+        "They are appended to the list of choices and do not replace the existing ones.",
+    )
+    remove_choices = graphene.List(
+        graphene.NonNull(graphene.ID),
+        description="A list of `ID`s of choices that will be deleted. It has higher priority than `addChoices` "
+        "(i.e. it's executed first)",
+    )
+
+
 class WinterStorageAreaChoiceInput(graphene.InputObjectType):
     winter_area_id = graphene.ID(required=True)
     priority = graphene.Int(required=True)

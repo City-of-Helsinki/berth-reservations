@@ -11,8 +11,13 @@ from users.decorators import (
     delete_permission_required,
     view_permission_required,
 )
-from users.utils import user_has_delete_permission
-from utils.relay import get_node_from_global_id
+from users.utils import (
+    is_customer,
+    user_has_change_permission,
+    user_has_delete_permission,
+    user_has_view_permission,
+)
+from utils.relay import from_global_id, get_node_from_global_id
 from utils.schema import update_object
 
 from ..constants import MARKED_WS_SENDER, REJECT_BERTH_SENDER, UNMARKED_WS_SENDER
@@ -29,9 +34,10 @@ from ..signals import application_rejected, application_saved
 from .inputs import (
     BerthApplicationInput,
     BerthSwitchInput,
+    UpdateBerthApplicationInput,
     WinterStorageApplicationInput,
 )
-from .types import BerthApplicationNode, WinterStorageApplicationNode
+from .types import BerthApplicationNode, HarborChoiceType, WinterStorageApplicationNode
 
 
 class CreateBerthApplicationMutation(graphene.ClientIDMutation):
@@ -82,15 +88,39 @@ class CreateBerthApplicationMutation(graphene.ClientIDMutation):
 
 
 class UpdateBerthApplication(graphene.ClientIDMutation):
-    class Input:
-        id = graphene.ID(required=True)
-        customer_id = graphene.ID()
+    class Input(UpdateBerthApplicationInput):
+        pass
 
     berth_application = graphene.Field(BerthApplicationNode)
 
     @classmethod
-    @view_permission_required(CustomerProfile, BerthLease)
-    @change_permission_required(BerthApplication)
+    def validate_application_status(cls, application, info, input):
+        if application.status != ApplicationStatus.PENDING:
+            if is_customer(info.context.user):
+                raise VenepaikkaGraphQLError(
+                    _("Cannot modify the application once it has been processed")
+                )
+
+            # If the input receives explicitly customerId: None
+            if "customer_id" in input and input.get("customer_id") is None:
+                raise VenepaikkaGraphQLError(
+                    _("Customer cannot be disconnected from processed applications")
+                )
+
+    def get_nodes_to_check(info, **input):
+        application = get_node_from_global_id(
+            info, input.get("id"), only_type=BerthApplicationNode, nullable=True
+        )
+        return [application]
+
+    @classmethod
+    @check_user_is_authorised(
+        get_nodes_to_check=get_nodes_to_check,
+        model_checks=[
+            user_has_view_permission(CustomerProfile, BerthLease),
+            user_has_change_permission(BerthApplication),
+        ],
+    )
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         from customers.schema import ProfileNode
@@ -99,16 +129,40 @@ class UpdateBerthApplication(graphene.ClientIDMutation):
             info, input.pop("id"), only_type=BerthApplicationNode
         )
 
-        customer_id = input.get("customer_id")
+        cls.validate_application_status(application, info, input)
 
-        if application.status != ApplicationStatus.PENDING and not customer_id:
-            raise VenepaikkaGraphQLError(
-                _("Customer cannot be disconnected from processed applications")
+        # This allows for getting explicit None values
+        if "customer_id" in input:
+            customer_id = input.pop("customer_id", None)
+
+            if is_customer(info.context.user):
+                raise VenepaikkaGraphQLError(
+                    _(
+                        "A customer cannot modify the customer connected to the application"
+                    )
+                )
+
+            input["customer"] = get_node_from_global_id(
+                info, customer_id, only_type=ProfileNode, nullable=True
             )
 
-        input["customer"] = get_node_from_global_id(
-            info, customer_id, only_type=ProfileNode, nullable=True
-        )
+        if remove_choices := input.pop("remove_choices", []):
+            for choice_id in remove_choices:
+                try:
+                    choice = HarborChoice.objects.get(
+                        id=from_global_id(choice_id, node_type=HarborChoiceType)
+                    )
+                    choice.delete()
+                except HarborChoice.DoesNotExist:
+                    pass
+
+        if add_choices := input.pop("add_choices", []):
+            for choice in add_choices:
+                HarborChoice.objects.get_or_create(
+                    harbor_id=from_global_id(choice.get("harbor_id")),
+                    priority=choice.get("priority"),
+                    application=application,
+                )
 
         update_object(application, input)
 
