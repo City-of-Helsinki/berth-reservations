@@ -1,13 +1,17 @@
 import graphene
+from django.utils.translation import gettext_lazy as _
 from graphene_django import DjangoConnectionField, DjangoObjectType
 from graphql_jwt.decorators import login_required
+from graphql_jwt.exceptions import PermissionDenied
 
+from applications.models import BerthApplication
 from customers.models import CustomerProfile
 from customers.schema import ProfileNode
 from leases.models import BerthLease, WinterStorageLease
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from resources.schema import WinterStorageAreaNode
 from users.decorators import view_permission_required
+from users.utils import is_customer, user_has_view_permission
 from utils.relay import return_node_if_user_has_permissions
 from utils.schema import CountConnection
 
@@ -273,17 +277,6 @@ class AbstractOfferNode:
 
 
 class BerthSwitchOfferNode(DjangoObjectType, AbstractOfferNode):
-    """
-    TODO:
-     Add permission check for this node
-     when the customer login is sorted out
-     Example:
-         @classmethod
-         @view_permission_required(BerthSwitchOffer)
-         def get_queryset(cls, queryset, info):
-             return super().get_queryset(queryset, info)
-    """
-
     application = graphene.Field(
         "applications.schema.BerthApplicationNode", required=True
     )
@@ -294,6 +287,40 @@ class BerthSwitchOfferNode(DjangoObjectType, AbstractOfferNode):
         model = BerthSwitchOffer
         interfaces = (graphene.relay.Node,)
         connection_class = CountConnection
+
+    @classmethod
+    @login_required
+    def get_queryset(cls, queryset, info):
+        user = info.context.user
+
+        if is_customer(user):
+            return queryset.filter(lease__customer__user=user)
+
+        if user_has_view_permission(BerthSwitchOffer, BerthLease, BerthApplication)(
+            user
+        ):
+            return queryset
+
+        raise PermissionDenied
+
+    @classmethod
+    @login_required
+    def get_node(cls, info, id):
+        node = super().get_node(info, id)
+        user = info.context.user
+        # The BerthSwitchOffer node does not have a customer, so it has to be retrieved
+        # from the node.customer and cannot use return_node_if_user_has_permissions
+
+        if user_has_view_permission(BerthSwitchOffer, BerthLease, BerthApplication)(
+            user
+        ) or (
+            node.lease.customer
+            and hasattr(node.lease.customer, "user")
+            and node.lease.customer.user == user
+        ):
+            return node
+
+        raise PermissionError(_("You do not have permission to perform this action."))
 
 
 class OrderDetailsType(graphene.ObjectType):
