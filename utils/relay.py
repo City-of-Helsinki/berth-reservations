@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from graphene import relay
 from graphql_jwt.exceptions import PermissionDenied
@@ -60,18 +59,6 @@ def from_global_id(global_id, node_type=None):
     return _id
 
 
-def is_customer(user):
-    if user.is_staff or user.is_superuser:
-        return False
-    elif (
-        user.groups.count() == 1
-        and user.groups.first().name == settings.CUSTOMER_GROUP_NAME
-    ):
-        return True
-    else:
-        return False
-
-
 def get_node_user(node):
     if not node:
         return None
@@ -127,3 +114,38 @@ def return_node_if_user_has_permissions(node, user, *models):
         raise VenepaikkaGraphQLError(
             _("You do not have permission to perform this action.")
         )
+
+
+def return_queryset_if_user_has_permissions(
+    queryset, user, *models, customer_queryset=None
+):
+    """
+    Checks whether the user has permissions to access the queryset.
+
+    1. If the passed queryset is falsy, we return None.
+    2. If the user making the request is a customer, the elements on the
+        queryset belonging to it are returned.
+    4. If the user is not a customer, but the user has permissions to view
+        the necessary models, the whole queryset is returned.
+    5. If the user has no permissions to view it, an error is raised.
+
+    :param queryset: Django QuerySet being accessed
+    :param user: the user from the current request / session
+    :param models: Django models that user has to have permissions to
+    :param customer_queryset: [Optional] If the customer property is nested on the model,
+    a custom filtered queryset can be passed
+    :return: None | Django QuerySet | Exception raised
+    """
+    from users.utils import is_customer, user_has_view_permission
+
+    if is_customer(user):
+        if customer_queryset:
+            return customer_queryset
+        return queryset.filter(customer__user=user)
+
+    if user_has_view_permission(*models)(user):
+        return queryset
+
+    raise VenepaikkaGraphQLError(
+        _("You do not have permission to perform this action.")
+    )
