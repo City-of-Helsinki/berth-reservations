@@ -12,7 +12,11 @@ from applications.schema.types import WinterStorageApplicationFilter
 from leases.models import BerthLease, WinterStorageLease
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from payments.models import BerthSwitchOffer, Order
-from utils.relay import get_node_from_global_id, return_node_if_user_has_permissions
+from utils.relay import (
+    get_node_from_global_id,
+    return_node_if_user_has_permissions,
+    return_queryset_if_user_has_permissions,
+)
 from utils.schema import CountConnection
 
 from ..enums import BoatCertificateType, InvoicingType, OrganizationType
@@ -55,6 +59,26 @@ class BoatNode(DjangoObjectType):
 
     def resolve_certificates(self, info):
         return self.certificates.all()
+
+    @classmethod
+    @login_required
+    def get_queryset(cls, queryset, info):
+        user = info.context.user
+        return return_queryset_if_user_has_permissions(
+            queryset,
+            user,
+            Boat,
+            CustomerProfile,
+            customer_queryset=queryset.filter(owner__user=user),
+        )
+
+    @classmethod
+    @login_required
+    def get_node(cls, info, id):
+        node = super().get_node(info, id)
+        return return_node_if_user_has_permissions(
+            node, info.context.user, Boat, CustomerProfile
+        )
 
 
 class OrganizationNode(DjangoObjectType):

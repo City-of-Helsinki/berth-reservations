@@ -7,7 +7,10 @@ from graphql_relay import to_global_id
 
 from customers.models import CustomerProfile
 from leases.models import BerthLease, WinterStorageLease
-from utils.relay import return_node_if_user_has_permissions
+from utils.relay import (
+    return_node_if_user_has_permissions,
+    return_queryset_if_user_has_permissions,
+)
 from utils.schema import CountConnection
 
 from ..enums import ApplicationAreaType, ApplicationStatus, WinterStorageMethod
@@ -105,6 +108,14 @@ class BerthApplicationNode(DjangoObjectType):
 
     @classmethod
     @login_required
+    def get_queryset(cls, queryset, info):
+        user = info.context.user
+        return return_queryset_if_user_has_permissions(
+            queryset, user, BerthApplication, BerthLease, CustomerProfile
+        )
+
+    @classmethod
+    @login_required
     def get_node(cls, info, id):
         node = super().get_node(info, id)
         return return_node_if_user_has_permissions(
@@ -164,6 +175,18 @@ class WinterStorageApplicationNode(DjangoObjectType):
         if self.winterstorageareachoice_set.count():
             return self.winterstorageareachoice_set.all()
         return None
+
+    @classmethod
+    @login_required
+    def get_queryset(cls, queryset, info):
+        user = info.context.user
+        return return_queryset_if_user_has_permissions(
+            queryset,
+            user,
+            WinterStorageApplication,
+            WinterStorageLease,
+            CustomerProfile,
+        )
 
     @classmethod
     @login_required
