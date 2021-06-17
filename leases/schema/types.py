@@ -7,7 +7,10 @@ from contracts.schema import WinterStorageContractNode
 from contracts.schema.types import BerthContractNode
 from customers.models import CustomerProfile
 from resources.schema import BerthNode, WinterStoragePlaceNode, WinterStorageSectionNode
-from utils.relay import return_node_if_user_has_permissions
+from utils.relay import (
+    return_node_if_user_has_permissions,
+    return_queryset_if_user_has_permissions,
+)
 from utils.schema import CountConnection
 
 from ..enums import LeaseStatus
@@ -36,6 +39,14 @@ class BerthLeaseNode(DjangoObjectType):
         model = BerthLease
         interfaces = (graphene.relay.Node,)
         connection_class = CountConnection
+
+    @classmethod
+    @login_required
+    def get_queryset(cls, queryset, info):
+        user = info.context.user
+        return return_queryset_if_user_has_permissions(
+            queryset, user, BerthLease, BerthApplication, CustomerProfile
+        )
 
     @classmethod
     @login_required
@@ -74,6 +85,18 @@ class WinterStorageLeaseNode(DjangoObjectType):
     def resolve_sticker_season(self, info, **kwargs):
         season = get_ws_sticker_season(self.start_date)
         return season.replace("_", "/")
+
+    @classmethod
+    @login_required
+    def get_queryset(cls, queryset, info):
+        user = info.context.user
+        return return_queryset_if_user_has_permissions(
+            queryset,
+            user,
+            WinterStorageLease,
+            WinterStorageApplication,
+            CustomerProfile,
+        )
 
     @classmethod
     @login_required

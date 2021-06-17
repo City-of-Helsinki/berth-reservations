@@ -1,6 +1,9 @@
 import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
+from graphql_jwt.decorators import login_required
+
+from utils.relay import return_queryset_if_user_has_permissions
 
 from ..enums import ContractStatus
 from ..models import VismaBerthContract, VismaWinterStorageContract
@@ -17,8 +20,12 @@ class BerthContractNode(DjangoObjectType):
     status = ContractStatusEnum()
 
     @classmethod
+    @login_required
     def get_queryset(cls, queryset, info):
-        return super().get_queryset(queryset, info)
+        user = info.context.user
+        return return_queryset_if_user_has_permissions(
+            queryset, user, VismaBerthContract,
+        )
 
 
 class WinterStorageContractNode(DjangoObjectType):
@@ -30,8 +37,12 @@ class WinterStorageContractNode(DjangoObjectType):
     status = ContractStatusEnum()
 
     @classmethod
+    @login_required
     def get_queryset(cls, queryset, info):
-        return super().get_queryset(queryset, info)
+        user = info.context.user
+        return return_queryset_if_user_has_permissions(
+            queryset, user, VismaWinterStorageContract,
+        )
 
 
 class AuthMethod(graphene.ObjectType):

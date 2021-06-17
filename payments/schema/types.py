@@ -2,7 +2,6 @@ import graphene
 from django.utils.translation import gettext_lazy as _
 from graphene_django import DjangoConnectionField, DjangoObjectType
 from graphql_jwt.decorators import login_required
-from graphql_jwt.exceptions import PermissionDenied
 
 from applications.models import BerthApplication
 from customers.models import CustomerProfile
@@ -11,8 +10,11 @@ from leases.models import BerthLease, WinterStorageLease
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from resources.schema import WinterStorageAreaNode
 from users.decorators import view_permission_required
-from users.utils import is_customer, user_has_view_permission
-from utils.relay import return_node_if_user_has_permissions
+from users.utils import user_has_view_permission
+from utils.relay import (
+    return_node_if_user_has_permissions,
+    return_queryset_if_user_has_permissions,
+)
 from utils.schema import CountConnection
 
 from ..enums import (
@@ -237,6 +239,14 @@ class OrderNode(DjangoObjectType):
 
     @classmethod
     @login_required
+    def get_queryset(cls, queryset, info):
+        user = info.context.user
+        return return_queryset_if_user_has_permissions(
+            queryset, user, Order, BerthLease, WinterStorageLease, CustomerProfile,
+        )
+
+    @classmethod
+    @login_required
     def get_node(cls, info, id):
         node = super().get_node(info, id)
         return return_node_if_user_has_permissions(
@@ -261,9 +271,12 @@ class OrderRefundNode(DjangoObjectType):
         connection_class = CountConnection
 
     @classmethod
-    @view_permission_required(Order, OrderRefund)
+    @login_required
     def get_queryset(cls, queryset, info):
-        return super().get_queryset(queryset, info)
+        user = info.context.user
+        return return_queryset_if_user_has_permissions(
+            queryset, user, Order, OrderRefund,
+        )
 
 
 class AbstractOfferNode:
@@ -292,16 +305,14 @@ class BerthSwitchOfferNode(DjangoObjectType, AbstractOfferNode):
     @login_required
     def get_queryset(cls, queryset, info):
         user = info.context.user
-
-        if is_customer(user):
-            return queryset.filter(lease__customer__user=user)
-
-        if user_has_view_permission(BerthSwitchOffer, BerthLease, BerthApplication)(
-            user
-        ):
-            return queryset
-
-        raise PermissionDenied
+        return return_queryset_if_user_has_permissions(
+            queryset,
+            user,
+            BerthSwitchOffer,
+            BerthLease,
+            BerthApplication,
+            customer_queryset=queryset.filter(lease__customer__user=user),
+        )
 
     @classmethod
     @login_required
