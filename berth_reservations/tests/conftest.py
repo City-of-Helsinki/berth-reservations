@@ -1,6 +1,7 @@
 from os.path import devnull
 
 import pytest
+from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core.management import call_command
 from django_ilmoitin.models import NotificationTemplate
@@ -135,7 +136,10 @@ def municipality():
 
 @pytest.fixture
 def customer_profile():
-    return CustomerProfileFactory()
+    profile = CustomerProfileFactory()
+    group, _created = Group.objects.get_or_create(name=settings.CUSTOMER_GROUP_NAME)
+    profile.user.groups.set([group])
+    return profile
 
 
 @pytest.fixture

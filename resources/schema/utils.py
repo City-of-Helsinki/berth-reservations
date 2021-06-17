@@ -33,7 +33,7 @@ def resolve_piers(info, **kwargs):
         if (
             user
             and user.is_authenticated
-            and user_has_view_permission(user, BerthApplication)
+            and user_has_view_permission(BerthApplication)(user)
         ):
             application = get_node_from_global_id(
                 info, application_global_id, only_type=BerthApplicationNode
