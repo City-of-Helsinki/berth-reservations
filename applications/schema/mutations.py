@@ -222,6 +222,38 @@ class RejectBerthApplicationMutation(graphene.ClientIDMutation):
         return RejectBerthApplicationMutation()
 
 
+class ExtendBerthApplicationMutation(graphene.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+
+    def get_nodes_to_check(info, **input):
+        application = get_node_from_global_id(
+            info, input.get("id"), only_type=BerthApplicationNode, nullable=True
+        )
+        return [application]
+
+    @classmethod
+    @transaction.atomic
+    @check_user_is_authorised(
+        get_nodes_to_check=get_nodes_to_check,
+        model_checks=[user_has_change_permission(BerthApplication)],
+    )
+    def mutate_and_get_payload(cls, root, info, **input):
+        application = get_node_from_global_id(
+            info, input.pop("id"), only_type=BerthApplicationNode, nullable=False
+        )
+
+        if application.status != ApplicationStatus.NO_SUITABLE_BERTHS:
+            raise VenepaikkaGraphQLError(
+                _("Cannot extend applications that have not been rejected")
+            )
+
+        application.status = ApplicationStatus.PENDING
+        application.save()
+
+        return ExtendBerthApplicationMutation()
+
+
 class CreateWinterStorageApplicationMutation(graphene.ClientIDMutation):
     class Input:
         winter_storage_application = WinterStorageApplicationInput(required=True)
@@ -383,6 +415,11 @@ class Mutation:
     )
     reject_berth_application = RejectBerthApplicationMutation.Field(
         description="**Requires permissions** to reject applications."
+    )
+    extend_berth_application = ExtendBerthApplicationMutation.Field(
+        description="Extends the validity of the application by moving it "
+        "from `NO SUITABLE BERTHS` status to `PENDING`"
+        "\n\n**Requires permissions** to update applications."
     )
 
     update_winter_storage_application = UpdateWinterStorageApplication.Field(
