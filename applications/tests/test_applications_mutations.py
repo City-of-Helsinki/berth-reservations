@@ -25,11 +25,7 @@ from utils.relay import to_global_id
 from ..enums import ApplicationPriority, ApplicationStatus
 from ..models import BerthApplication, WinterStorageApplication
 from ..schema import BerthApplicationNode
-from ..schema.types import (
-    HarborChoiceType,
-    WinterStorageApplicationNode,
-    WinterStorageAreaChoiceType,
-)
+from ..schema.types import WinterStorageApplicationNode, WinterStorageAreaChoiceType
 from .factories import (
     BerthApplicationFactory,
     HarborChoiceFactory,
@@ -852,7 +848,7 @@ def test_update_berth_application_by_owner(
         "acceptOtherCultureNews": False,
         "acceptBoatingNewsletter": True,
         "addChoices": [{"harborId": harbor_node_id, "priority": 1}],
-        "removeChoices": [to_global_id(HarborChoiceType, remove_choice.id)],
+        "removeChoices": [remove_choice.priority],
     }
 
     assert berth_application.harborchoice_set.count() == 1

@@ -39,7 +39,6 @@ from .inputs import (
 )
 from .types import (
     BerthApplicationNode,
-    HarborChoiceType,
     WinterStorageApplicationNode,
     WinterStorageAreaChoiceType,
 )
@@ -152,14 +151,15 @@ class UpdateBerthApplication(graphene.ClientIDMutation):
             )
 
         if remove_choices := input.pop("remove_choices", []):
-            for choice_id in remove_choices:
-                try:
-                    choice = HarborChoice.objects.get(
-                        id=from_global_id(choice_id, node_type=HarborChoiceType)
-                    )
-                    choice.delete()
-                except HarborChoice.DoesNotExist:
-                    pass
+            # Delete the choices based on their priority (passed as input)
+            application.harborchoice_set.filter(priority__in=remove_choices).delete()
+
+            # For the ones left, re-calculate their priority
+            for new_priority, choice in enumerate(
+                application.harborchoice_set.order_by("priority"), start=1
+            ):
+                choice.priority = new_priority
+                choice.save()
 
         if add_choices := input.pop("add_choices", []):
             for choice in add_choices:
