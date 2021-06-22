@@ -9,6 +9,7 @@ from berth_reservations.tests.utils import (
     assert_field_missing,
     assert_in_errors,
     assert_not_enough_permissions,
+    create_api_client,
 )
 from customers.schema import ProfileNode
 from leases.tests.factories import BerthLeaseFactory
@@ -462,6 +463,77 @@ def test_delete_berth_application_inexistent_application(superuser_api_client):
     )
 
     assert_doesnt_exist("BerthApplication", executed)
+
+
+EXTEND_BERTH_APPLICATION_MUTATION = """
+mutation ExtendBerthApplicationMutation($input: ExtendBerthApplicationMutationInput!) {
+    extendBerthApplication(input: $input) {
+        __typename
+    }
+}
+"""
+
+
+def test_extend_berth_application(
+    berth_customer_api_client, berth_application, customer_profile
+):
+    berth_application.status = ApplicationStatus.NO_SUITABLE_BERTHS
+    berth_application.customer = customer_profile
+    berth_application.save()
+
+    variables = {
+        "id": to_global_id(BerthApplicationNode, berth_application.id),
+    }
+
+    api_client = create_api_client(user=customer_profile.user)
+    api_client.execute(EXTEND_BERTH_APPLICATION_MUTATION, input=variables)
+
+    berth_application = BerthApplication.objects.get(id=berth_application.id)
+    assert berth_application.status == ApplicationStatus.PENDING
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "berth_supervisor", "berth_handler"],
+    indirect=True,
+)
+def test_extend_berth_application_not_enough_permissions(api_client, berth_application):
+    berth_application.status = ApplicationStatus.NO_SUITABLE_BERTHS
+    berth_application.save()
+
+    variables = {
+        "id": to_global_id(BerthApplicationNode, berth_application.id),
+    }
+
+    executed = api_client.execute(EXTEND_BERTH_APPLICATION_MUTATION, input=variables)
+
+    assert_not_enough_permissions(executed)
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        # BerthApplication with no lease can only be
+        # PENDING, EXPIRED, NO_SUITABLE_BERTH
+        ApplicationStatus.PENDING,
+        ApplicationStatus.EXPIRED,
+    ],
+)
+def test_extend_berth_application_not_rejected(
+    superuser_api_client, berth_application, status
+):
+    berth_application.status = status
+    berth_application.save()
+
+    variables = {
+        "id": to_global_id(BerthApplicationNode, berth_application.id),
+    }
+
+    executed = superuser_api_client.execute(
+        EXTEND_BERTH_APPLICATION_MUTATION, input=variables
+    )
+
+    assert_in_errors("Cannot extend applications that have not been rejected", executed)
 
 
 CREATE_WINTER_STORAGE_APPLICATION_MUTATION = """
