@@ -23,10 +23,12 @@ from ..constants import MARKED_WS_SENDER, REJECT_BERTH_SENDER, UNMARKED_WS_SENDE
 from ..enums import ApplicationAreaType, ApplicationPriority, ApplicationStatus
 from ..models import (
     BerthApplication,
+    BerthApplicationChange,
     BerthSwitch,
     BerthSwitchReason,
     HarborChoice,
     WinterStorageApplication,
+    WinterStorageApplicationChange,
     WinterStorageAreaChoice,
 )
 from ..signals import application_rejected, application_saved
@@ -37,11 +39,7 @@ from .inputs import (
     UpdateWinterStorageApplicationInput,
     WinterStorageApplicationInput,
 )
-from .types import (
-    BerthApplicationNode,
-    WinterStorageApplicationNode,
-    WinterStorageAreaChoiceType,
-)
+from .types import BerthApplicationNode, WinterStorageApplicationNode
 
 
 class CreateBerthApplicationMutation(graphene.ClientIDMutation):
@@ -150,6 +148,8 @@ class UpdateBerthApplication(graphene.ClientIDMutation):
                 info, customer_id, only_type=ProfileNode, nullable=True
             )
 
+        old_choices = set(application.harborchoice_set.all())
+
         if remove_choices := input.pop("remove_choices", []):
             # Delete the choices based on their priority (passed as input)
             application.harborchoice_set.filter(priority__in=remove_choices).delete()
@@ -168,6 +168,19 @@ class UpdateBerthApplication(graphene.ClientIDMutation):
                     priority=choice.get("priority"),
                     application=application,
                 )
+
+        new_choices = set(application.harborchoice_set.all())
+
+        if old_choices != new_choices:
+            old_choices = "\n".join([str(choice) for choice in old_choices])
+            new_choices = "\n".join([str(choice) for choice in new_choices])
+            change_list = (
+                f"Old harbor choices:\n{old_choices}\n\n"
+                f"New harbor choices:\n{new_choices}"
+            )
+            BerthApplicationChange.objects.create(
+                application=application, change_list=change_list
+            )
 
         update_object(application, input)
 
@@ -361,17 +374,20 @@ class UpdateWinterStorageApplication(graphene.ClientIDMutation):
                 info, customer_id, only_type=ProfileNode, nullable=True
             )
 
+        old_choices = set(application.winterstorageareachoice_set.all())
+
         if remove_choices := input.pop("remove_choices", []):
-            for choice_id in remove_choices:
-                try:
-                    choice = WinterStorageAreaChoice.objects.get(
-                        id=from_global_id(
-                            choice_id, node_type=WinterStorageAreaChoiceType
-                        )
-                    )
-                    choice.delete()
-                except WinterStorageAreaChoice.DoesNotExist:
-                    pass
+            # Delete the choices based on their priority (passed as input)
+            application.winterstorageareachoice_set.filter(
+                priority__in=remove_choices
+            ).delete()
+
+            # For the ones left, re-calculate their priority
+            for new_priority, choice in enumerate(
+                application.winterstorageareachoice_set.order_by("priority"), start=1
+            ):
+                choice.priority = new_priority
+                choice.save()
 
         if add_choices := input.pop("add_choices", []):
             for choice in add_choices:
@@ -380,6 +396,19 @@ class UpdateWinterStorageApplication(graphene.ClientIDMutation):
                     priority=choice.get("priority"),
                     application=application,
                 )
+
+        new_choices = set(application.winterstorageareachoice_set.all())
+
+        if old_choices != new_choices:
+            old_choices = "\n".join([str(choice) for choice in old_choices])
+            new_choices = "\n".join([str(choice) for choice in new_choices])
+            change_list = (
+                f"Old area choices:\n{old_choices}\n\n"
+                f"New area choices:\n{new_choices}"
+            )
+            WinterStorageApplicationChange.objects.create(
+                application=application, change_list=change_list
+            )
 
         update_object(application, input)
 

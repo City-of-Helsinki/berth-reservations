@@ -14,10 +14,12 @@ from pytz import timezone
 from .enums import ApplicationAreaType
 from .models import (
     BerthApplication,
+    BerthApplicationChange,
     BerthSwitch,
     BerthSwitchReason,
     HarborChoice,
     WinterStorageApplication,
+    WinterStorageApplicationChange,
     WinterStorageAreaChoice,
 )
 from .notifications import NotificationType
@@ -86,8 +88,20 @@ class BerthSwitchAdmin(admin.ModelAdmin):
     berth_applications.short_description = _("Applications")
 
 
+class BerthApplicationChangeInline(admin.StackedInline):
+    model = BerthApplicationChange
+    extra = 0
+    readonly_fields = ("change_list",)
+
+
+class WinterStorageApplicationChangeInline(admin.StackedInline):
+    model = WinterStorageApplicationChange
+    extra = 0
+    readonly_fields = ("change_list",)
+
+
 class BerthApplicationAdmin(admin.ModelAdmin):
-    inlines = [HarborChoiceInline]
+    inlines = [HarborChoiceInline, BerthApplicationChangeInline]
     readonly_fields = [
         "application_type",
         "created_at",
@@ -292,7 +306,7 @@ class WinterStorageApplicationInline(admin.StackedInline):
 
 
 class WinterStorageApplicationAdmin(admin.ModelAdmin):
-    inlines = [WinterStorageAreaChoiceInline]
+    inlines = [WinterStorageAreaChoiceInline, WinterStorageApplicationChangeInline]
     readonly_fields = [
         "created_at",
         "area_type",

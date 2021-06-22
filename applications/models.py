@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from babel.dates import format_date
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
@@ -10,6 +11,7 @@ from parler.models import TranslatableModel, TranslatedFields
 
 from customers.models import CustomerProfile
 from resources.models import Berth, BoatType, Harbor, WinterStorageArea
+from utils.models import TimeStampedModel, UUIDModel
 
 from .enums import (
     ApplicationAreaType,
@@ -31,6 +33,9 @@ class HarborChoice(SerializableMixin):
 
     serialize_fields = ({"name": "harbor", "accessor": lambda x: x.name},)
 
+    def __str__(self):
+        return f"{self.priority}: {self.harbor.name}"
+
 
 class WinterStorageAreaChoice(SerializableMixin):
     winter_storage_area = models.ForeignKey(WinterStorageArea, on_delete=models.CASCADE)
@@ -44,6 +49,9 @@ class WinterStorageAreaChoice(SerializableMixin):
         ordering = ("application", "priority")
 
     serialize_fields = ({"name": "winter_storage_area", "accessor": lambda x: x.name},)
+
+    def __str__(self):
+        return f"{self.priority}: {self.winter_storage_area.name}"
 
 
 class BerthSwitchReason(TranslatableModel):
@@ -175,6 +183,32 @@ class BaseApplication(models.Model):
 
     def __str__(self):
         return "{}: {} {}".format(self.pk, self.first_name, self.last_name)
+
+
+class BaseApplicationChange(TimeStampedModel, UUIDModel):
+    change_list = models.TextField(verbose_name="change list")
+
+    class Meta:
+        abstract = True
+        ordering = (
+            "created_at",
+            "change_list",
+        )
+
+    def __str__(self):
+        return f"{format_date(self.created_at, locale='fi')}\n{self.change_list}"
+
+
+class BerthApplicationChange(BaseApplicationChange):
+    application = models.ForeignKey(
+        "BerthApplication", on_delete=models.CASCADE, related_name="changes"
+    )
+
+
+class WinterStorageApplicationChange(BaseApplicationChange):
+    application = models.ForeignKey(
+        "WinterStorageApplication", on_delete=models.CASCADE, related_name="changes"
+    )
 
 
 class BerthApplicationManager(SerializableMixin.SerializableManager):
@@ -315,6 +349,65 @@ class BerthApplication(BaseApplication, SerializableMixin):
                     )
                 )
 
+    def create_change_entry(self):
+        fields_to_compare = [
+            "status",
+            "language",
+            "first_name",
+            "last_name",
+            "email",
+            "phone_number",
+            "address",
+            "zip_code",
+            "municipality",
+            "company_name",
+            "business_id",
+            "boat_type",
+            "boat_registration_number",
+            "boat_name",
+            "boat_model",
+            "boat_length",
+            "boat_width",
+            "accept_boating_newsletter",
+            "accept_fitness_news",
+            "accept_library_news",
+            "accept_other_culture_news",
+            "information_accuracy_confirmed",
+            "application_code",
+            "berth_switch",
+            "boat_draught",
+            "boat_weight",
+            "accessibility_required",
+            "boat_propulsion",
+            "boat_hull_material",
+            "boat_intended_use",
+            "renting_period",
+            "rent_from",
+            "rent_till",
+            "boat_is_inspected",
+            "boat_is_insured",
+            "agree_to_terms",
+        ]
+
+        creating = self._state.adding
+        if not creating:
+            old_instance = BerthApplication.objects.get(id=self.id)
+
+            change_list = ""
+            for field in fields_to_compare:
+                old_value = getattr(old_instance, field, "[Empty]")
+                new_value = getattr(self, field, "[Empty]")
+                if old_value != new_value:
+                    field_name = BerthApplication._meta.get_field(
+                        field
+                    ).verbose_name.capitalize()
+                    change_list += f"{field_name}: {old_value} -> {new_value}\n"
+
+            if len(change_list) > 0:
+                BerthApplicationChange.objects.create(
+                    application=self, change_list=change_list
+                )
+
     def save(self, *args, **kwargs):
         fields_to_strip = [
             "first_name",
@@ -340,6 +433,8 @@ class BerthApplication(BaseApplication, SerializableMixin):
         for field in fields_to_strip:
             if field_value := getattr(self, field):
                 setattr(self, field, field_value.strip())
+
+        self.create_change_entry()
 
         # Ensure clean is always ran
         # FIXME: exclude decimal fields for now, as GQL API uses floats for those
@@ -430,6 +525,53 @@ class WinterStorageApplication(BaseApplication, SerializableMixin):
         verbose_name=_("trailer registration number"), max_length=64, blank=True
     )
 
+    def create_change_entry(self):
+        fields_to_compare = [
+            "status",
+            "language",
+            "first_name",
+            "last_name",
+            "email",
+            "phone_number",
+            "address",
+            "zip_code",
+            "municipality",
+            "company_name",
+            "business_id",
+            "boat_registration_number",
+            "boat_name",
+            "boat_model",
+            "boat_length",
+            "boat_width",
+            "accept_boating_newsletter",
+            "accept_fitness_news",
+            "accept_library_news",
+            "accept_other_culture_news",
+            "information_accuracy_confirmed",
+            "application_code",
+            "storage_method",
+            "trailer_registration_number",
+        ]
+
+        creating = self._state.adding
+        if not creating:
+            old_instance = WinterStorageApplication.objects.get(id=self.id)
+
+            change_list = ""
+            for field in fields_to_compare:
+                old_value = getattr(old_instance, field, "[Empty]")
+                new_value = getattr(self, field, "[Empty]")
+                if old_value != new_value:
+                    field_name = WinterStorageApplication._meta.get_field(
+                        field
+                    ).verbose_name.capitalize()
+                    change_list += f"{field_name}: {old_value} -> {new_value}\n"
+
+            if len(change_list) > 0:
+                WinterStorageApplicationChange.objects.create(
+                    application=self, change_list=change_list
+                )
+
     def save(self, *args, **kwargs):
         fields_to_strip = [
             "first_name",
@@ -450,6 +592,9 @@ class WinterStorageApplication(BaseApplication, SerializableMixin):
         for field in fields_to_strip:
             if field_value := getattr(self, field):
                 setattr(self, field, field_value.strip())
+
+        self.create_change_entry()
+
         super().save(*args, **kwargs)
 
     def resolve_area_type(self) -> ApplicationAreaType:

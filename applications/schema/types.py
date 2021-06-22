@@ -21,10 +21,12 @@ from ..enums import (
 )
 from ..models import (
     BerthApplication,
+    BerthApplicationChange,
     BerthSwitch,
     BerthSwitchReason,
     HarborChoice,
     WinterStorageApplication,
+    WinterStorageApplicationChange,
     WinterStorageAreaChoice,
 )
 
@@ -90,12 +92,23 @@ class BerthApplicationFilter(django_filters.FilterSet):
         )
 
 
+class BerthApplicationChangeType(DjangoObjectType):
+    class Meta:
+        model = BerthApplicationChange
+
+
+class WinterStorageApplicationChangeType(DjangoObjectType):
+    class Meta:
+        model = WinterStorageApplicationChange
+
+
 class BerthApplicationNode(DjangoObjectType):
     boat_type = graphene.String()
     harbor_choices = graphene.List(HarborChoiceType)
     status = ApplicationStatusEnum(required=True)
     priority = ApplicationPriorityEnum(required=True)
     customer = graphene.Field("customers.schema.ProfileNode")
+    changes = graphene.List(BerthApplicationChangeType, required=True)
 
     class Meta:
         model = BerthApplication
@@ -112,6 +125,9 @@ class BerthApplicationNode(DjangoObjectType):
         if self.harborchoice_set.count():
             return self.harborchoice_set.all()
         return None
+
+    def resolve_changes(self, info, **kwargs):
+        return self.changes.all()
 
     @classmethod
     @login_required
@@ -167,6 +183,7 @@ class WinterStorageApplicationNode(DjangoObjectType):
     priority = ApplicationPriorityEnum(required=True)
     storage_method = WinterStorageMethodEnum(required=True)
     customer = graphene.Field("customers.schema.ProfileNode")
+    changes = graphene.List(WinterStorageApplicationChangeType, required=True)
 
     class Meta:
         model = WinterStorageApplication
@@ -183,6 +200,9 @@ class WinterStorageApplicationNode(DjangoObjectType):
         if self.winterstorageareachoice_set.count():
             return self.winterstorageareachoice_set.all()
         return None
+
+    def resolve_changes(self, info, **kwargs):
+        return self.changes.all()
 
     @classmethod
     @login_required
