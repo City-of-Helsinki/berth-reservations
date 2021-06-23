@@ -343,6 +343,13 @@ class OrderDetailsType(graphene.ObjectType):
     is_application_order = graphene.Boolean(required=True)
 
 
+class OfferDetailsType(graphene.ObjectType):
+    status = OfferStatusEnum(required=True)
+    harbor = graphene.String(required=True)
+    pier = graphene.String(required=True)
+    berth = graphene.String(required=True)
+
+
 class GenericErrorType(graphene.ObjectType):
     id = graphene.ID(required=True)
     error = graphene.String()

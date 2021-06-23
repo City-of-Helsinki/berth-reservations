@@ -10,6 +10,7 @@ from ..enums import AdditionalProductType, OrderType, ProductServiceType
 from ..models import (
     AdditionalProduct,
     BerthProduct,
+    BerthSwitchOffer,
     Order,
     OrderRefund,
     WinterStorageProduct,
@@ -20,6 +21,7 @@ from .types import (
     AdditionalProductTypeEnum,
     BerthProductNode,
     BerthSwitchOfferNode,
+    OfferDetailsType,
     OrderDetailsType,
     OrderNode,
     OrderRefundNode,
@@ -85,6 +87,7 @@ class Query:
     berth_switch_offers = DjangoConnectionField(BerthSwitchOfferNode)
 
     order_details = Field(OrderDetailsType, order_number=String(required=True))
+    offer_details = Field(OfferDetailsType, offer_number=String(required=True))
 
     @view_permission_required(BerthProduct)
     def resolve_berth_product_for_width(self, info, width, **kwargs):
@@ -174,6 +177,19 @@ class Query:
             section=section_identifier,
             place=place_number,
             is_application_order=is_application_order,
+        )
+
+    def resolve_offer_details(self, info, offer_number):
+        try:
+            offer = BerthSwitchOffer.objects.get(offer_number=offer_number)
+        except BerthSwitchOffer.DoesNotExist as e:
+            raise VenepaikkaGraphQLError(e)
+
+        return OfferDetailsType(
+            status=offer.status,
+            berth=offer.berth.number,
+            pier=offer.berth.pier.identifier,
+            harbor=offer.berth.pier.harbor.name,
         )
 
     @staticmethod
