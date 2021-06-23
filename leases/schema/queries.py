@@ -2,8 +2,6 @@ import django_filters
 import graphene
 from graphene_django.filter import DjangoFilterConnectionField
 
-from applications.models import BerthApplication, WinterStorageApplication
-from customers.models import CustomerProfile
 from users.decorators import view_permission_required
 
 from ..models import BerthLease, WinterStorageLease
@@ -45,7 +43,6 @@ class Query:
         SendExistingInvoicesPreviewType
     )
 
-    @view_permission_required(BerthLease, BerthApplication, CustomerProfile)
     def resolve_berth_leases(self, info, statuses=None, start_year=None, **kwargs):
         qs = BerthLease.objects
         if statuses:
@@ -65,9 +62,6 @@ class Query:
             .order_by("created_at")
         )
 
-    @view_permission_required(
-        WinterStorageLease, WinterStorageApplication, CustomerProfile
-    )
     def resolve_winter_storage_leases(
         self, info, statuses=None, start_year=None, **kwargs
     ):

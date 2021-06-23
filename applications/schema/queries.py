@@ -1,10 +1,6 @@
 import graphene
 from graphene_django.filter import DjangoFilterConnectionField
 
-from customers.models import CustomerProfile
-from leases.models import BerthLease, WinterStorageLease
-from users.decorators import view_permission_required
-
 from ..models import BerthApplication, BerthSwitchReason, WinterStorageApplication
 from .types import (
     ApplicationAreaTypeEnum,
@@ -51,7 +47,6 @@ class Query:
     def resolve_berth_switch_reasons(self, info, **kwargs):
         return BerthSwitchReason.objects.all()
 
-    @view_permission_required(BerthApplication, BerthLease, CustomerProfile)
     def resolve_berth_applications(self, info, **kwargs):
         statuses = kwargs.pop("statuses", [])
 
@@ -76,9 +71,6 @@ class Query:
             .order_by("created_at")
         )
 
-    @view_permission_required(
-        WinterStorageApplication, WinterStorageLease, CustomerProfile
-    )
     def resolve_winter_storage_applications(self, info, **kwargs):
         statuses = kwargs.pop("statuses", [])
         area_types = kwargs.pop("area_types", [])
