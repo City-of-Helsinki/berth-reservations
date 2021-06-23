@@ -3,7 +3,8 @@ from django.core.exceptions import ValidationError
 
 from resources.tests.factories import WinterStorageAreaFactory
 
-from ..enums import ApplicationAreaType, ApplicationStatus
+from ..enums import ApplicationAreaType, ApplicationPriority, ApplicationStatus
+from ..models import BerthApplication
 from .factories import (
     BerthApplicationFactory,
     WinterAreaChoiceFactory,
@@ -133,3 +134,26 @@ def test_winter_storage_application_stripped_fields():
     assert application.boat_model == "Buster"
     assert application.application_code == "code"
     assert application.trailer_registration_number == "trailer"
+
+
+def test_reset_application_priorities():
+    low_application = BerthApplicationFactory(priority=ApplicationPriority.LOW)
+    medium_application = BerthApplicationFactory(priority=ApplicationPriority.MEDIUM)
+    high_application = BerthApplicationFactory(priority=ApplicationPriority.HIGH)
+
+    assert BerthApplication.objects.reset_application_priority(dry_run=True) == 2
+    assert (
+        BerthApplication.objects.reset_application_priority(only_low_priority=True) == 1
+    )
+    assert (
+        BerthApplication.objects.reset_application_priority(only_low_priority=False)
+        == 1
+    )
+
+    low_application.refresh_from_db()
+    medium_application.refresh_from_db()
+    high_application.refresh_from_db()
+
+    assert low_application.priority == ApplicationPriority.MEDIUM
+    assert medium_application.priority == ApplicationPriority.MEDIUM
+    assert high_application.priority == ApplicationPriority.MEDIUM
