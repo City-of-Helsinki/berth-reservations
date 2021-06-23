@@ -55,20 +55,16 @@ class Query:
         if statuses:
             qs = qs.filter(status__in=statuses)
 
-        return (
-            qs.select_related(
-                "boat_type",
-                "berth_switch",
-                "berth_switch__berth",
-                "berth_switch__reason",
-                "customer",
-            )
-            .prefetch_related(
-                "berth_switch__reason__translations",
-                "harborchoice_set",
-                "harborchoice_set__harbor",
-            )
-            .order_by("created_at")
+        return qs.select_related(
+            "boat_type",
+            "berth_switch",
+            "berth_switch__berth",
+            "berth_switch__reason",
+            "customer",
+        ).prefetch_related(
+            "berth_switch__reason__translations",
+            "harborchoice_set",
+            "harborchoice_set__harbor",
         )
 
     def resolve_winter_storage_applications(self, info, **kwargs):
@@ -82,12 +78,8 @@ class Query:
         if area_types:
             qs = qs.filter(area_type__in=area_types)
 
-        return (
-            qs.select_related("boat_type", "customer",)
-            .prefetch_related(
-                "winterstorageareachoice_set",
-                "winterstorageareachoice_set__winter_storage_area",
-                "lease",
-            )
-            .order_by("created_at")
+        return qs.select_related("boat_type", "customer",).prefetch_related(
+            "winterstorageareachoice_set",
+            "winterstorageareachoice_set__winter_storage_area",
+            "lease",
         )

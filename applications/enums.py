@@ -1,4 +1,4 @@
-from django.db.models import TextChoices
+from django.db.models import IntegerChoices, TextChoices
 from django.utils.translation import gettext_lazy as _
 
 
@@ -21,3 +21,9 @@ class ApplicationStatus(TextChoices):
 class ApplicationAreaType(TextChoices):
     MARKED = "marked", _("Marked")
     UNMARKED = "unmarked", _("Unmarked")
+
+
+class ApplicationPriority(IntegerChoices):
+    LOW = 0, _("Low")
+    MEDIUM = 1, _("Medium")
+    HIGH = 2, _("High")

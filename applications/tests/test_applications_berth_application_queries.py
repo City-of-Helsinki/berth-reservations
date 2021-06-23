@@ -9,7 +9,7 @@ from berth_reservations.tests.utils import assert_in_errors, create_api_client
 from customers.schema import ProfileNode
 from leases.tests.factories import BerthLeaseFactory
 
-from ..enums import ApplicationStatus
+from ..enums import ApplicationPriority, ApplicationStatus
 from ..models import BerthApplication
 from ..schema import BerthApplicationNode
 from .factories import BerthApplicationFactory
@@ -493,4 +493,52 @@ def test_get_customer_own_berth_applications(customer_profile):
     assert executed["data"]["berthApplications"]["edges"][0]["node"] == {
         "id": to_global_id(BerthApplicationNode._meta.name, customer_application.id),
         "customer": {"id": to_global_id(ProfileNode._meta.name, customer_profile.id)},
+    }
+
+
+BERTH_APPLICATION_PRIORITIES_QUERY = """
+query APPLICATIONS {
+    berthApplications {
+        edges {
+            node {
+                createdAt
+                priority
+            }
+        }
+    }
+}
+"""
+
+
+def test_berth_application_priority(superuser_api_client):
+    # Because of "created_at", they should, be sorted from first-third, but with the
+    # change on priorities, they're first sorted by priority
+    with freeze_time("2020-01-01"):
+        first_application = BerthApplicationFactory(priority=ApplicationPriority.LOW)
+
+    with freeze_time("2020-02-01"):
+        second_application = BerthApplicationFactory(
+            priority=ApplicationPriority.MEDIUM
+        )
+
+    with freeze_time("2020-03-01"):
+        third_application = BerthApplicationFactory(priority=ApplicationPriority.HIGH)
+
+    executed = superuser_api_client.execute(BERTH_APPLICATION_PRIORITIES_QUERY)
+
+    assert len(executed["data"]["berthApplications"]["edges"]) == 3
+
+    assert executed["data"]["berthApplications"]["edges"][0]["node"] == {
+        "createdAt": third_application.created_at.isoformat(),
+        "priority": ApplicationPriority.HIGH.name,
+    }
+
+    assert executed["data"]["berthApplications"]["edges"][1]["node"] == {
+        "createdAt": second_application.created_at.isoformat(),
+        "priority": ApplicationPriority.MEDIUM.name,
+    }
+
+    assert executed["data"]["berthApplications"]["edges"][2]["node"] == {
+        "createdAt": first_application.created_at.isoformat(),
+        "priority": ApplicationPriority.LOW.name,
     }

@@ -11,7 +11,12 @@ from parler.models import TranslatableModel, TranslatedFields
 from customers.models import CustomerProfile
 from resources.models import Berth, BoatType, Harbor, WinterStorageArea
 
-from .enums import ApplicationAreaType, ApplicationStatus, WinterStorageMethod
+from .enums import (
+    ApplicationAreaType,
+    ApplicationPriority,
+    ApplicationStatus,
+    WinterStorageMethod,
+)
 from .utils import localize_datetime
 
 
@@ -81,6 +86,12 @@ class BaseApplication(models.Model):
         verbose_name=_("handling status"),
         max_length=32,
         default=ApplicationStatus.PENDING,
+    )
+
+    priority = models.PositiveSmallIntegerField(
+        choices=ApplicationPriority.choices,
+        verbose_name=_("priority"),
+        default=ApplicationPriority.MEDIUM,
     )
 
     language = models.CharField(
@@ -157,6 +168,7 @@ class BaseApplication(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ("-priority", "created_at")
         permissions = (
             ("resend_application", _("Can resend confirmation for applications")),
         )
