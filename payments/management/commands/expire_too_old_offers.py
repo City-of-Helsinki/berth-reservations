@@ -1,8 +1,9 @@
 from django.conf import settings
 from django.db.transaction import atomic
 
+from utils import base_expiration_command
+
 from ...models import BerthSwitchOffer
-from .. import base_expiration_command
 
 
 class Command(base_expiration_command.ExpirationCommand):
