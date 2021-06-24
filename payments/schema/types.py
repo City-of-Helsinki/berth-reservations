@@ -1,5 +1,4 @@
 import graphene
-from django.utils.translation import gettext_lazy as _
 from graphene_django import DjangoConnectionField, DjangoObjectType
 from graphql_jwt.decorators import login_required
 
@@ -10,7 +9,6 @@ from leases.models import BerthLease, WinterStorageLease
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from resources.schema import WinterStorageAreaNode
 from users.decorators import view_permission_required
-from users.utils import user_has_view_permission
 from utils.relay import (
     return_node_if_user_has_permissions,
     return_queryset_if_user_has_permissions,
@@ -306,12 +304,7 @@ class BerthSwitchOfferNode(DjangoObjectType, AbstractOfferNode):
     def get_queryset(cls, queryset, info):
         user = info.context.user
         return return_queryset_if_user_has_permissions(
-            queryset,
-            user,
-            BerthSwitchOffer,
-            BerthLease,
-            BerthApplication,
-            customer_queryset=queryset.filter(lease__customer__user=user),
+            queryset, user, BerthSwitchOffer, BerthLease, BerthApplication,
         )
 
     @classmethod
@@ -319,19 +312,9 @@ class BerthSwitchOfferNode(DjangoObjectType, AbstractOfferNode):
     def get_node(cls, info, id):
         node = super().get_node(info, id)
         user = info.context.user
-        # The BerthSwitchOffer node does not have a customer, so it has to be retrieved
-        # from the node.customer and cannot use return_node_if_user_has_permissions
-
-        if user_has_view_permission(BerthSwitchOffer, BerthLease, BerthApplication)(
-            user
-        ) or (
-            node.lease.customer
-            and hasattr(node.lease.customer, "user")
-            and node.lease.customer.user == user
-        ):
-            return node
-
-        raise PermissionError(_("You do not have permission to perform this action."))
+        return return_node_if_user_has_permissions(
+            node, user, BerthSwitchOffer, BerthLease, BerthApplication
+        )
 
 
 class OrderDetailsType(graphene.ObjectType):

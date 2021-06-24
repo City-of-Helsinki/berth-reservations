@@ -5,10 +5,12 @@ from dateutil.parser import isoparse
 from freezegun import freeze_time
 from graphql_relay.node.node import to_global_id
 
-from berth_reservations.tests.utils import assert_in_errors
+from berth_reservations.tests.utils import assert_in_errors, create_api_client
+from customers.schema import ProfileNode
 from leases.tests.factories import BerthLeaseFactory
 
 from ..enums import ApplicationStatus
+from ..models import BerthApplication
 from ..schema import BerthApplicationNode
 from .factories import BerthApplicationFactory
 
@@ -459,4 +461,36 @@ def test_get_berth_switch_reasons(superuser_api_client, berth_switch_reason):
                 {"id": str(berth_switch_reason.id), "title": berth_switch_reason.title}
             ]
         }
+    }
+
+
+CUSTOMER_OWN_BERTH_APPLICATIONS_QUERY = """
+query APPLICATIONS {
+    berthApplications {
+        edges {
+            node {
+                id
+                customer {
+                    id
+                }
+            }
+        }
+    }
+}
+"""
+
+
+def test_get_customer_own_berth_applications(customer_profile):
+    customer_application = BerthApplicationFactory(customer=customer_profile)
+    BerthApplicationFactory()
+
+    api_client = create_api_client(user=customer_profile.user)
+    executed = api_client.execute(CUSTOMER_OWN_BERTH_APPLICATIONS_QUERY)
+
+    assert BerthApplication.objects.count() == 2
+
+    assert len(executed["data"]["berthApplications"]["edges"]) == 1
+    assert executed["data"]["berthApplications"]["edges"][0]["node"] == {
+        "id": to_global_id(BerthApplicationNode._meta.name, customer_application.id),
+        "customer": {"id": to_global_id(ProfileNode._meta.name, customer_profile.id)},
     }
