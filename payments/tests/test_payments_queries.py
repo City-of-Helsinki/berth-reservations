@@ -7,6 +7,7 @@ from dateutil.utils import today
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
     assert_not_enough_permissions,
+    create_api_client,
 )
 from customers.schema import ProfileNode
 from leases.models import BerthLease, WinterStorageLease
@@ -899,4 +900,36 @@ def test_get_order_refunds(superuser_api_client, order):
         "status": refund.status.name,
         "refundId": refund.refund_id,
         "amount": str(order.price),
+    }
+
+
+CUSTOMER_OWN_ORDERS_QUERY = """
+query ORDERS {
+    orders {
+        edges {
+            node {
+                id
+                customer {
+                    id
+                }
+            }
+        }
+    }
+}
+"""
+
+
+def test_get_customer_own_orders(customer_profile):
+    customer_order = OrderFactory(customer=customer_profile)
+    OrderFactory()
+
+    api_client = create_api_client(user=customer_profile.user)
+    executed = api_client.execute(CUSTOMER_OWN_ORDERS_QUERY)
+
+    assert Order.objects.count() == 2
+
+    assert len(executed["data"]["orders"]["edges"]) == 1
+    assert executed["data"]["orders"]["edges"][0]["node"] == {
+        "id": to_global_id(OrderNode, customer_order.id),
+        "customer": {"id": to_global_id(ProfileNode, customer_profile.id)},
     }

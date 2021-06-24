@@ -1,6 +1,8 @@
 import graphene
 from django.db.models import QuerySet
 
+from users.utils import is_customer
+
 
 def update_object(instance, input):
     if not input:
@@ -30,6 +32,11 @@ class CountConnection(graphene.Connection):
         return len(set(self.iterable))
 
     def resolve_total_count(self, info, **kwargs):
+        if is_customer(info.context.user):
+            # If the user querying for the total is a customer (i.e. not an authorized admin),
+            # we only show the items available for them, not the whole count
+            return self.resolve_count(info)
+
         if isinstance(self.iterable, QuerySet):
             return self.iterable.model.objects.count()
 

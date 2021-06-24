@@ -7,7 +7,10 @@ from dateutil.utils import today
 from freezegun import freeze_time
 
 from applications.schema import BerthApplicationNode, WinterStorageApplicationNode
-from berth_reservations.tests.utils import assert_not_enough_permissions
+from berth_reservations.tests.utils import (
+    assert_not_enough_permissions,
+    create_api_client,
+)
 from contracts.schema.types import BerthContractNode, WinterStorageContractNode
 from contracts.tests.factories import BerthContractFactory, WinterStorageContractFactory
 from customers.schema import BoatNode, ProfileNode
@@ -25,6 +28,7 @@ from resources.tests.factories import (
 from utils.relay import to_global_id
 
 from ..enums import LeaseStatus
+from ..models import BerthLease
 from ..schema import BerthLeaseNode, WinterStorageLeaseNode
 from ..utils import (
     calculate_season_end_date,
@@ -808,4 +812,36 @@ def test_query_send_marked_winter_storage_invoice_preview(api_client):
 
     assert executed["data"]["sendMarkedWinterStorageInvoicePreview"] == {
         "expectedLeases": 1
+    }
+
+
+CUSTOMER_OWN_BERTH_LEASES_QUERY = """
+query BERTH_LEASES {
+    berthLeases {
+        edges {
+            node {
+                id
+                customer {
+                    id
+                }
+            }
+        }
+    }
+}
+"""
+
+
+def test_get_customer_own_berth_leases(customer_profile):
+    customer_lease = BerthLeaseFactory(customer=customer_profile)
+    BerthLeaseFactory()
+
+    api_client = create_api_client(user=customer_profile.user)
+    executed = api_client.execute(CUSTOMER_OWN_BERTH_LEASES_QUERY)
+
+    assert BerthLease.objects.count() == 2
+
+    assert len(executed["data"]["berthLeases"]["edges"]) == 1
+    assert executed["data"]["berthLeases"]["edges"][0]["node"] == {
+        "id": to_global_id(BerthLeaseNode, customer_lease.id),
+        "customer": {"id": to_global_id(ProfileNode, customer_profile.id)},
     }
