@@ -1,6 +1,6 @@
 import graphene
 
-from .types import WinterStorageMethodEnum
+from .types import ApplicationPriorityEnum, WinterStorageMethodEnum
 
 
 class HarborChoiceInput(graphene.InputObjectType):
@@ -57,6 +57,7 @@ class BerthApplicationInput(BaseApplicationInput):
 class BaseUpdateApplicationInput:
     id = graphene.ID(required=True)
     customer_id = graphene.ID()
+    priority = ApplicationPriorityEnum()
     language = graphene.String()
     first_name = graphene.String()
     last_name = graphene.String()

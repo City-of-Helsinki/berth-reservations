@@ -20,7 +20,7 @@ from utils.relay import from_global_id, get_node_from_global_id
 from utils.schema import update_object
 
 from ..constants import MARKED_WS_SENDER, REJECT_BERTH_SENDER, UNMARKED_WS_SENDER
-from ..enums import ApplicationAreaType, ApplicationStatus
+from ..enums import ApplicationAreaType, ApplicationPriority, ApplicationStatus
 from ..models import (
     BerthApplication,
     BerthSwitch,
@@ -249,6 +249,7 @@ class ExtendBerthApplicationMutation(graphene.ClientIDMutation):
             )
 
         application.status = ApplicationStatus.PENDING
+        application.priority = ApplicationPriority.LOW
         application.save()
 
         return ExtendBerthApplicationMutation()

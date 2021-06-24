@@ -13,7 +13,12 @@ from utils.relay import (
 )
 from utils.schema import CountConnection
 
-from ..enums import ApplicationAreaType, ApplicationStatus, WinterStorageMethod
+from ..enums import (
+    ApplicationAreaType,
+    ApplicationPriority,
+    ApplicationStatus,
+    WinterStorageMethod,
+)
 from ..models import (
     BerthApplication,
     BerthSwitch,
@@ -24,6 +29,7 @@ from ..models import (
 )
 
 ApplicationStatusEnum = graphene.Enum.from_enum(ApplicationStatus)
+ApplicationPriorityEnum = graphene.Enum.from_enum(ApplicationPriority)
 WinterStorageMethodEnum = graphene.Enum.from_enum(WinterStorageMethod)
 ApplicationAreaTypeEnum = graphene.Enum.from_enum(ApplicationAreaType)
 
@@ -88,6 +94,7 @@ class BerthApplicationNode(DjangoObjectType):
     boat_type = graphene.String()
     harbor_choices = graphene.List(HarborChoiceType)
     status = ApplicationStatusEnum(required=True)
+    priority = ApplicationPriorityEnum(required=True)
     customer = graphene.Field("customers.schema.ProfileNode")
 
     class Meta:
@@ -157,6 +164,7 @@ class WinterStorageApplicationNode(DjangoObjectType):
     boat_type = graphene.String()
     winter_storage_area_choices = graphene.List(WinterStorageAreaChoiceType)
     status = ApplicationStatusEnum(required=True)
+    priority = ApplicationPriorityEnum(required=True)
     storage_method = WinterStorageMethodEnum(required=True)
     customer = graphene.Field("customers.schema.ProfileNode")
 

@@ -96,7 +96,18 @@ class BerthApplicationAdmin(admin.ModelAdmin):
         "get_berth_switch_reason",
     ]
     fieldsets = [
-        (None, {"fields": ["application_type", "created_at", "status", "customer"]},),
+        (
+            None,
+            {
+                "fields": [
+                    "application_type",
+                    "created_at",
+                    "status",
+                    "customer",
+                    "priority",
+                ]
+            },
+        ),
         (
             _("Contact information"),
             {
@@ -179,7 +190,11 @@ class BerthApplicationAdmin(admin.ModelAdmin):
         "status",
     )
     autocomplete_fields = ("customer",)
-    list_filter = (ApplicationTypeFilter, "status")
+    list_filter = (
+        ApplicationTypeFilter,
+        "status",
+        "priority",
+    )
     search_fields = ("id", "first_name", "last_name")
     autocomplete_fields = ("customer",)
     actions = ["export_applications", "resend_application_confirmation"]
@@ -292,6 +307,7 @@ class WinterStorageApplicationAdmin(admin.ModelAdmin):
                     "customer",
                     "storage_method",
                     "trailer_registration_number",
+                    "priority",
                 ]
             },
         ),
@@ -348,7 +364,7 @@ class WinterStorageApplicationAdmin(admin.ModelAdmin):
         "status",
     )
     autocomplete_fields = ("customer",)
-    list_filter = ("area_type", "status")
+    list_filter = ("area_type", "status", "priority")
     actions = ["export_applications", "resend_application_confirmation"]
     search_fields = ("id", "first_name", "last_name")
 

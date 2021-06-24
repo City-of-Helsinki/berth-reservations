@@ -22,7 +22,7 @@ from resources.tests.factories import (
 )
 from utils.relay import to_global_id
 
-from ..enums import ApplicationStatus
+from ..enums import ApplicationPriority, ApplicationStatus
 from ..models import BerthApplication, WinterStorageApplication
 from ..schema import BerthApplicationNode
 from ..schema.types import (
@@ -490,6 +490,7 @@ def test_extend_berth_application(
 
     berth_application = BerthApplication.objects.get(id=berth_application.id)
     assert berth_application.status == ApplicationStatus.PENDING
+    assert berth_application.priority == ApplicationPriority.LOW
 
 
 @pytest.mark.parametrize(

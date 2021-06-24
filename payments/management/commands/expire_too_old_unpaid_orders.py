@@ -1,8 +1,8 @@
 from django.conf import settings
 from django.db.transaction import atomic
 
-from payments.management.base_expiration_command import ExpirationCommand
 from payments.models import Order
+from utils.base_expiration_command import ExpirationCommand
 
 
 class Command(ExpirationCommand):

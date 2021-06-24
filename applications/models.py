@@ -11,7 +11,12 @@ from parler.models import TranslatableModel, TranslatedFields
 from customers.models import CustomerProfile
 from resources.models import Berth, BoatType, Harbor, WinterStorageArea
 
-from .enums import ApplicationAreaType, ApplicationStatus, WinterStorageMethod
+from .enums import (
+    ApplicationAreaType,
+    ApplicationPriority,
+    ApplicationStatus,
+    WinterStorageMethod,
+)
 from .utils import localize_datetime
 
 
@@ -81,6 +86,12 @@ class BaseApplication(models.Model):
         verbose_name=_("handling status"),
         max_length=32,
         default=ApplicationStatus.PENDING,
+    )
+
+    priority = models.PositiveSmallIntegerField(
+        choices=ApplicationPriority.choices,
+        verbose_name=_("priority"),
+        default=ApplicationPriority.MEDIUM,
     )
 
     language = models.CharField(
@@ -157,12 +168,31 @@ class BaseApplication(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ("-priority", "created_at")
         permissions = (
             ("resend_application", _("Can resend confirmation for applications")),
         )
 
     def __str__(self):
         return "{}: {} {}".format(self.pk, self.first_name, self.last_name)
+
+
+class BerthApplicationManager(SerializableMixin.SerializableManager):
+    def reset_application_priority(
+        self, only_low_priority: bool = False, dry_run: bool = False
+    ):
+        # MEDIUM priority applications don't have to be modified either way
+        qs = self.get_queryset().exclude(priority=ApplicationPriority.MEDIUM)
+
+        if only_low_priority:
+            # If only the low priority are required, we exclude the HIGH priority ones
+            # to avoid modifying them
+            qs = qs.exclude(priority=ApplicationPriority.HIGH)
+
+        if dry_run:
+            return qs.count()
+
+        return qs.update(priority=ApplicationPriority.MEDIUM)
 
 
 class BerthApplication(BaseApplication, SerializableMixin):
@@ -233,6 +263,8 @@ class BerthApplication(BaseApplication, SerializableMixin):
     agree_to_terms = models.BooleanField(
         verbose_name=_("agree to terms"), null=True, blank=True
     )
+
+    objects = BerthApplicationManager()
 
     def get_notification_context(self):
         return {
