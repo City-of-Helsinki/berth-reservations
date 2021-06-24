@@ -1,6 +1,8 @@
 import random
 
 import pytest
+from dateutil.relativedelta import relativedelta
+from dateutil.utils import today
 
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
@@ -12,13 +14,14 @@ from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from resources.schema import WinterStorageAreaNode
 from utils.relay import to_global_id
 
-from ..enums import OrderStatus, OrderType, ProductServiceType
+from ..enums import OfferStatus, OrderStatus, OrderType, ProductServiceType
 from ..models import BerthProduct, Order, WinterStorageProduct
 from ..schema.types import (
     AdditionalProductNode,
     AdditionalProductTaxEnum,
     AdditionalProductTypeEnum,
     BerthProductNode,
+    OfferStatusEnum,
     OrderLineNode,
     OrderLogEntryNode,
     OrderNode,
@@ -787,6 +790,44 @@ def test_get_order_status_order_does_not_exist(superuser_api_client):
     )
 
     assert_doesnt_exist("Order", executed)
+
+
+OFFER_DETAILS_QUERY = """
+query OFFER_DETAILS {
+    offerDetails(offerNumber: "%s") {
+        status
+        berth
+        pier
+        harbor
+    }
+}
+"""
+
+
+@pytest.mark.parametrize("status", OfferStatus.values)
+def test_get_offer_status(superuser_api_client, status, berth_switch_offer):
+    berth_switch_offer.status = status
+    berth_switch_offer.due_date = today() + relativedelta(weeks=2)
+    berth_switch_offer.save()
+
+    executed = superuser_api_client.execute(
+        OFFER_DETAILS_QUERY % berth_switch_offer.offer_number
+    )
+
+    assert executed["data"]["offerDetails"] == {
+        "status": OfferStatusEnum.get(berth_switch_offer.status).name,
+        "berth": berth_switch_offer.berth.number,
+        "pier": berth_switch_offer.berth.pier.identifier,
+        "harbor": berth_switch_offer.berth.pier.harbor.name,
+    }
+
+
+def test_get_offer_status_order_does_not_exist(superuser_api_client):
+    executed = superuser_api_client.execute(
+        OFFER_DETAILS_QUERY % generate_order_number()
+    )
+
+    assert_doesnt_exist("BerthSwitchOffer", executed)
 
 
 ORDERS_FILTERED_STATUS_QUERY = """
