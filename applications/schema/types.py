@@ -70,9 +70,14 @@ class BerthApplicationFilter(django_filters.FilterSet):
         field_name="application_code", method="filter_application_code"
     )
     order_by = django_filters.OrderingFilter(
-        fields=("created_at",), label="Supports only `createdAt` and `-createdAt`.",
+        fields=("created_at",),
+        label="Supports only `createdAt` and `-createdAt`.",
+        method="filter_order_by",
     )
     name = django_filters.CharFilter(method="filter_name")
+
+    def filter_order_by(self, qs, name, value):
+        return qs.order_by("-priority", *value)
 
     def filter_name(self, qs, name, value):
         for part in value.split():
@@ -166,9 +171,14 @@ class WinterStorageApplicationFilter(django_filters.FilterSet):
         field_name="customer", lookup_expr="isnull"
     )
     order_by = django_filters.OrderingFilter(
-        fields=("created_at",), label="Supports only `createdAt` and `-createdAt`.",
+        fields=("created_at",),
+        label="Supports only `createdAt` and `-createdAt`.",
+        method="filter_order_by",
     )
     name = django_filters.CharFilter(method="filter_name")
+
+    def filter_order_by(self, qs, name, value):
+        return qs.order_by("-priority", *value)
 
     def filter_name(self, qs, name, value):
         for part in value.split():
