@@ -138,13 +138,16 @@ def return_queryset_if_user_has_permissions(
     """
     from users.utils import is_customer, user_has_view_permission
 
+    # First priority: an admin user OR a customer user with admin permissions
+    if user_has_view_permission(*models)(user):
+        return queryset
+
+    # If the user doesn't have the equivalent to admin permissions,
+    # check if it's a customer
     if is_customer(user):
         if customer_queryset:
             return customer_queryset
         return queryset.filter(customer__user=user)
-
-    if user_has_view_permission(*models)(user):
-        return queryset
 
     raise VenepaikkaGraphQLError(
         _("You do not have permission to perform this action.")

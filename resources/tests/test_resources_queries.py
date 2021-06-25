@@ -908,7 +908,7 @@ def test_get_harbor_min_width_query(api_client, pier, min_width, min_length):
         assert executed["data"]["harbor"]["properties"]["piers"]["edges"] == []
 
 
-def test_get_harbor_count_filtered(api_client):
+def test_get_harbor_count_filtered(superuser_api_client):
     electricity_count = random.randint(1, 10)
     no_electricity_count = random.randint(1, 10)
     total_count = electricity_count + no_electricity_count
@@ -929,12 +929,12 @@ def test_get_harbor_count_filtered(api_client):
         }
     """
 
-    executed = api_client.execute(query % "true")
+    executed = superuser_api_client.execute(query % "true")
     assert executed["data"] == {
         "harbors": {"count": electricity_count, "totalCount": total_count}
     }
 
-    executed = api_client.execute(query % "false")
+    executed = superuser_api_client.execute(query % "false")
     assert executed["data"] == {
         "harbors": {"count": no_electricity_count, "totalCount": total_count}
     }
@@ -958,7 +958,7 @@ def test_get_pier_count(api_client):
     assert executed["data"] == {"piers": {"count": count, "totalCount": count}}
 
 
-def test_get_pier_count_filtered(api_client):
+def test_get_pier_count_filtered(superuser_api_client):
     electricity_count = random.randint(1, 10)
     no_electricity_count = random.randint(1, 10)
     total_count = electricity_count + no_electricity_count
@@ -977,12 +977,12 @@ def test_get_pier_count_filtered(api_client):
         }
     """
 
-    executed = api_client.execute(query % "true")
+    executed = superuser_api_client.execute(query % "true")
     assert executed["data"] == {
         "piers": {"count": electricity_count, "totalCount": total_count}
     }
 
-    executed = api_client.execute(query % "false")
+    executed = superuser_api_client.execute(query % "false")
     assert executed["data"] == {
         "piers": {"count": no_electricity_count, "totalCount": total_count}
     }
@@ -1006,7 +1006,7 @@ def test_get_berth_count(api_client):
     assert executed["data"] == {"berths": {"count": count, "totalCount": count}}
 
 
-def test_get_berth_count_filtered(api_client):
+def test_get_berth_count_filtered(superuser_api_client):
     smaller_width_count = random.randint(1, 10)
     larger_width_count = random.randint(1, 10)
     total_count = smaller_width_count + larger_width_count
@@ -1027,12 +1027,12 @@ def test_get_berth_count_filtered(api_client):
         }
     """
 
-    executed = api_client.execute(query % 5)
+    executed = superuser_api_client.execute(query % 5)
     assert executed["data"] == {
         "berths": {"count": larger_width_count, "totalCount": total_count}
     }
 
-    executed = api_client.execute(query % 0)
+    executed = superuser_api_client.execute(query % 0)
     assert executed["data"] == {
         "berths": {
             "count": smaller_width_count + larger_width_count,
@@ -1061,7 +1061,7 @@ def test_get_winter_storage_area_count(api_client):
     }
 
 
-def test_get_winter_storage_area_count_filtered(api_client):
+def test_get_winter_storage_area_count_filtered(superuser_api_client):
     electricity_count = random.randint(1, 10)
     no_electricity_count = random.randint(1, 10)
     total_count = electricity_count + no_electricity_count
@@ -1082,12 +1082,12 @@ def test_get_winter_storage_area_count_filtered(api_client):
         }
     """
 
-    executed = api_client.execute(query % "true")
+    executed = superuser_api_client.execute(query % "true")
     assert executed["data"] == {
         "winterStorageAreas": {"count": electricity_count, "totalCount": total_count}
     }
 
-    executed = api_client.execute(query % "false")
+    executed = superuser_api_client.execute(query % "false")
     assert executed["data"] == {
         "winterStorageAreas": {"count": no_electricity_count, "totalCount": total_count}
     }
@@ -1113,7 +1113,7 @@ def test_get_winter_storage_section_count(api_client):
     }
 
 
-def test_get_winter_storage_section_count_filtered(api_client):
+def test_get_winter_storage_section_count_filtered(superuser_api_client):
     electricity_count = random.randint(1, 10)
     no_electricity_count = random.randint(1, 10)
     total_count = electricity_count + no_electricity_count
@@ -1132,7 +1132,7 @@ def test_get_winter_storage_section_count_filtered(api_client):
         }
     """
 
-    executed = api_client.execute(query % "true")
+    executed = superuser_api_client.execute(query % "true")
     assert executed["data"] == {
         "winterStorageSections": {
             "count": electricity_count,
@@ -1140,7 +1140,7 @@ def test_get_winter_storage_section_count_filtered(api_client):
         }
     }
 
-    executed = api_client.execute(query % "false")
+    executed = superuser_api_client.execute(query % "false")
     assert executed["data"] == {
         "winterStorageSections": {
             "count": no_electricity_count,
@@ -1169,7 +1169,7 @@ def test_get_winter_storage_place_count(api_client):
     }
 
 
-def test_berth_filtering_by_pier(api_client):
+def test_berth_filtering_by_pier(superuser_api_client):
     for _i in range(10):
         BerthFactory()
 
@@ -1186,11 +1186,11 @@ def test_berth_filtering_by_pier(api_client):
         PierNode._meta.name, berth.pier.id
     )
 
-    executed = api_client.execute(query)
+    executed = superuser_api_client.execute(query)
     assert executed["data"] == {"berths": {"count": 1, "totalCount": 11}}
 
 
-def test_berth_filtering_by_harbor(api_client):
+def test_berth_filtering_by_harbor(superuser_api_client):
     for _i in range(10):
         BerthFactory()
 
@@ -1207,7 +1207,7 @@ def test_berth_filtering_by_harbor(api_client):
         HarborNode._meta.name, berth.pier.harbor.id
     )
 
-    executed = api_client.execute(query)
+    executed = superuser_api_client.execute(query)
     assert executed["data"] == {"berths": {"count": 1, "totalCount": 11}}
 
 
@@ -1230,7 +1230,7 @@ def test_berth_filtering_by_pier_and_harbor(api_client, berth):
     assert_in_errors("Cannot pass both pier and harbor filters", executed)
 
 
-def test_pier_filtering_by_harbor(api_client):
+def test_pier_filtering_by_harbor(superuser_api_client):
     for _i in range(10):
         PierFactory()
 
@@ -1247,11 +1247,11 @@ def test_pier_filtering_by_harbor(api_client):
         HarborNode._meta.name, pier.harbor.id
     )
 
-    executed = api_client.execute(query)
+    executed = superuser_api_client.execute(query)
     assert executed["data"] == {"piers": {"count": 1, "totalCount": 11}}
 
 
-def test_berth_is_invoiceable(api_client):
+def test_berth_is_invoiceable(superuser_api_client):
     for _i in range(10):
         BerthFactory()
 
@@ -1266,7 +1266,7 @@ def test_berth_is_invoiceable(api_client):
         }
     """
 
-    executed = api_client.execute(query % "false")
+    executed = superuser_api_client.execute(query % "false")
     assert executed["data"] == {"berths": {"count": 1, "totalCount": 11}}
 
 

@@ -111,8 +111,9 @@ class UpdateBerthApplicationInput(BaseUpdateApplicationInput):
         "They are appended to the list of choices and do not replace the existing ones.",
     )
     remove_choices = graphene.List(
-        graphene.NonNull(graphene.ID),
-        description="A list of `ID`s of choices that will be deleted. It has higher priority than `addChoices` "
+        graphene.NonNull(graphene.Int),
+        description='A list of priority "ids" of choices that will be deleted. '
+        "It has higher priority than `addChoices` "
         "(i.e. it's executed first)",
     )
 
@@ -125,8 +126,10 @@ class UpdateWinterStorageApplicationInput(BaseUpdateApplicationInput):
         description="A list of `WinterStorageAreaChoiceInput` that will be created for the passed application. "
         "They are appended to the list of choices and do not replace the existing ones.",
     )
+
     remove_choices = graphene.List(
-        graphene.NonNull(graphene.ID),
-        description="A list of `ID`s of choices that will be deleted. It has higher priority than `addChoices` "
+        graphene.NonNull(graphene.Int),
+        description='A list of priority "ids" of choices that will be deleted. '
+        "It has higher priority than `addChoices` "
         "(i.e. it's executed first)",
     )

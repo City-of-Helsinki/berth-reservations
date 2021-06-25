@@ -25,11 +25,7 @@ from utils.relay import to_global_id
 from ..enums import ApplicationPriority, ApplicationStatus
 from ..models import BerthApplication, WinterStorageApplication
 from ..schema import BerthApplicationNode
-from ..schema.types import (
-    HarborChoiceType,
-    WinterStorageApplicationNode,
-    WinterStorageAreaChoiceType,
-)
+from ..schema.types import WinterStorageApplicationNode
 from .factories import (
     BerthApplicationFactory,
     HarborChoiceFactory,
@@ -852,13 +848,26 @@ def test_update_berth_application_by_owner(
         "acceptOtherCultureNews": False,
         "acceptBoatingNewsletter": True,
         "addChoices": [{"harborId": harbor_node_id, "priority": 1}],
-        "removeChoices": [to_global_id(HarborChoiceType, remove_choice.id)],
+        "removeChoices": [remove_choice.priority],
     }
 
     assert berth_application.harborchoice_set.count() == 1
+    assert berth_application.changes.count() == 0
 
     executed = berth_customer_api_client.execute(
         UPDATE_BERTH_APPLICATION_OWNER_MUTATION, input=variables
+    )
+
+    assert berth_application.harborchoice_set.count() == 1
+    assert berth_application.changes.count() == 2
+
+    application_change = berth_application.changes.filter(
+        change_list__icontains="old"
+    ).first()
+    assert (
+        application_change.change_list
+        == f"Old harbor choices:\n{remove_choice.priority}: {remove_choice.harbor.name}\n\n"
+        f"New harbor choices:\n1: {berth.pier.harbor.name}"
     )
 
     assert executed == {
@@ -1006,13 +1015,26 @@ def test_update_winter_storage_application_by_owner(
         "acceptOtherCultureNews": False,
         "acceptBoatingNewsletter": True,
         "addChoices": [{"winterAreaId": area_node_id, "priority": 1}],
-        "removeChoices": [to_global_id(WinterStorageAreaChoiceType, remove_choice.id)],
+        "removeChoices": [remove_choice.priority],
     }
 
     assert winter_storage_application.winterstorageareachoice_set.count() == 1
+    assert winter_storage_application.changes.count() == 0
 
     executed = berth_customer_api_client.execute(
         UPDATE_WINTER_STORAGE_APPLICATION_OWNER_MUTATION, input=variables
+    )
+
+    assert winter_storage_application.winterstorageareachoice_set.count() == 1
+    assert winter_storage_application.changes.count() == 2
+
+    application_change = winter_storage_application.changes.filter(
+        change_list__icontains="old"
+    ).first()
+    assert (
+        application_change.change_list
+        == f"Old area choices:\n{remove_choice.priority}: {remove_choice.winter_storage_area.name}\n\n"
+        f"New area choices:\n1: {place.winter_storage_section.area.name}"
     )
 
     assert executed == {
