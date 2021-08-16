@@ -815,6 +815,36 @@ def test_query_send_marked_winter_storage_invoice_preview(api_client):
     }
 
 
+# Test added specifically to be sure that the sending of invoices on 17.8.21 would work
+@freeze_time("2021-08-17")
+def test_query_send_marked_winter_storage_invoice_preview_2021_08_17(
+    superuser_api_client,
+):
+    lease = WinterStorageLeaseFactory(
+        boat=None,
+        status=LeaseStatus.PAID,
+        start_date="2020-09-15",
+        end_date="2021-06-10",
+    )
+    WinterStorageLeaseFactory(
+        boat=None,
+        status=LeaseStatus.REFUSED,
+        start_date="2020-09-15",
+        end_date="2021-06-10",
+    )
+    WinterStorageProductFactory(
+        winter_storage_area=lease.place.winter_storage_section.area
+    )
+
+    executed = superuser_api_client.execute(
+        QUERY_SEND_WINTER_STORAGE_LEASE_INVOICE_PREVIEW
+    )
+
+    assert executed["data"]["sendMarkedWinterStorageInvoicePreview"] == {
+        "expectedLeases": 1
+    }
+
+
 CUSTOMER_OWN_BERTH_LEASES_QUERY = """
 query BERTH_LEASES {
     berthLeases {
