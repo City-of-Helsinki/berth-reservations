@@ -21,6 +21,7 @@ from .utils import (
     calculate_berth_lease_end_date,
     calculate_berth_lease_start_date,
     calculate_season_start_date,
+    calculate_winter_season_end_date,
     calculate_winter_season_start_date,
     calculate_winter_storage_lease_end_date,
     calculate_winter_storage_lease_start_date,
@@ -260,10 +261,8 @@ class WinterStorageLeaseManager(SerializableMixin.SerializableManager):
         """
         Get the leases that were active last last season
         If today is:
-            (1) on the same year the season starts: leases that start on today's year
-                and end the next year (today.year + 1)
-            (2) on the same year the season ends: leases that start on the last year (today.year - 1)
-                and end today's year
+            (1) during the season: leases that start on the season's start year
+            (2) outside of the season: leases that start on season's previous year
         """
         qs = self.get_queryset()
 
@@ -271,13 +270,17 @@ class WinterStorageLeaseManager(SerializableMixin.SerializableManager):
         if not season_start:
             season_start = calculate_winter_season_start_date()
 
+        season_end = calculate_winter_season_end_date(season_start)
         current_date = today().date()
-        if current_date.year == season_start.year:  # (1)
-            start_year = current_date.year
-            end_year = current_date.year + 1
-        else:  # (2) if current_date.year == season_end.year:
-            start_year = current_date.year - 1
-            end_year = current_date.year
+
+        # (1) If the season is ongoing:
+        if season_start <= current_date < season_end:
+            start_year = season_start.year
+            end_year = season_start.year + 1
+        # (2) if the season is not going on:
+        else:
+            start_year = season_start.year - 1
+            end_year = season_start.year
 
         # Filter leases from the upcoming season
         future_leases = qs.filter(

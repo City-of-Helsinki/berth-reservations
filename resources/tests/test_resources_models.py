@@ -57,11 +57,11 @@ def test_berth_is_available_last_season_invalid_status(
     assert Berth.objects.get(id=berth.id).is_available
 
 
+@freeze_time("2020-01-01")
 @pytest.mark.parametrize("status", ["drafted", "offered", "paid", "error"])
 def test_berth_is_not_available_ends_during_season_before_lease_ends(
     superuser_api_client, berth, status
 ):
-
     start_date = calculate_berth_lease_start_date()
     end_date = calculate_berth_lease_end_date() - relativedelta(month=6, day=29)
 
@@ -81,6 +81,7 @@ def test_berth_is_not_available_ends_during_season_before_lease_ends(
         assert not Berth.objects.get(id=berth.id).is_available
 
 
+@freeze_time("2020-01-01")
 def test_berth_is_available_ends_during_season_after_lease_ends(
     superuser_api_client, berth
 ):
