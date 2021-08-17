@@ -1,6 +1,5 @@
 from datetime import date
 
-from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from django.db.models import QuerySet
 
@@ -20,20 +19,19 @@ class WinterStorageInvoicingService(BaseInvoicingService):
         super(WinterStorageInvoicingService, self).__init__(*args, **kwargs)
 
         current_date = today().date()
-        if current_date.year == calculate_winter_season_start_date().year:
-            self.season_start = calculate_winter_season_start_date() + relativedelta(
-                year=current_date.year + 1
-            )
-            self.season_end = calculate_winter_season_end_date() + relativedelta(
-                year=current_date.year + 2
-            )
+        season_start = calculate_winter_season_start_date()
+        season_end = calculate_winter_season_end_date(season_start)
+
+        # If today is during the last/ongoing winter season
+        if season_start <= current_date < season_end:
+            # Season starts on the year where the last/ongoing season ended
+            self.season_start = calculate_winter_season_start_date(season_end)
+            self.season_end = calculate_winter_season_end_date(self.season_start)
+        # If today is outside the last winter season
+        # The start/end dates are the default calculated
         else:
-            self.season_start = calculate_winter_season_start_date() + relativedelta(
-                year=current_date.year
-            )
-            self.season_end = calculate_winter_season_end_date() + relativedelta(
-                year=current_date.year + 1
-            )
+            self.season_start = season_start
+            self.season_end = season_end
 
     @staticmethod
     def get_product(lease: WinterStorageLease) -> WinterStorageProduct:
@@ -46,9 +44,7 @@ class WinterStorageInvoicingService(BaseInvoicingService):
 
     @staticmethod
     def get_valid_leases(season_start: date) -> QuerySet:
-        return WinterStorageLease.objects.get_renewable_marked_leases(
-            season_start - relativedelta(years=1)
-        )
+        return WinterStorageLease.objects.get_renewable_marked_leases(season_start)
 
     @staticmethod
     def get_failed_orders(season_start: date) -> QuerySet:
