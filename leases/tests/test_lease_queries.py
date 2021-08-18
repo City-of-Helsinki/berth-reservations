@@ -611,6 +611,8 @@ query WinterStorageLeaseCreatedAt {
         edges {
             node {
                 createdAt
+                startDate
+                endDate
             }
         }
     }
@@ -623,23 +625,23 @@ query WinterStorageLeaseCreatedAt {
     ["berth_services", "berth_handler", "berth_supervisor"],
     indirect=True,
 )
-def test_query_winter_storage_leases_order_by_created_at_default(api_client):
-    with freeze_time("2020-02-01"):
+def test_query_winter_storage_leases_order_by_start_date_default(api_client):
+    with freeze_time("2020-01-01"):
         WinterStorageLeaseFactory()
 
-    with freeze_time("2020-01-01"):
+    with freeze_time("2021-01-01"):
         WinterStorageLeaseFactory()
 
     executed = api_client.execute(QUERY_WINTER_STORAGE_LEASES_CREATED_AT)
 
     first_date = isoparse(
-        executed["data"]["winterStorageLeases"]["edges"][0]["node"]["createdAt"]
+        executed["data"]["winterStorageLeases"]["edges"][0]["node"]["startDate"]
     )
     second_date = isoparse(
-        executed["data"]["winterStorageLeases"]["edges"][1]["node"]["createdAt"]
+        executed["data"]["winterStorageLeases"]["edges"][1]["node"]["startDate"]
     )
 
-    assert first_date < second_date
+    assert first_date > second_date
 
 
 def test_query_winter_storage_lease_count(superuser_api_client):

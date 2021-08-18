@@ -26,7 +26,8 @@ class Query:
         statuses=graphene.List(LeaseStatusEnum),
         start_year=graphene.Int(),
         filterset_class=AbstractLeaseNodeFilter,
-        description="`BerthLeases` are ordered by `createdAt` in ascending order by default.",
+        description="`BerthLeases` are ordered by `startDate/endDate` in descending order, "
+        "and `createdAt` in ascending order by default.",
     )
 
     winter_storage_lease = graphene.relay.Node.Field(WinterStorageLeaseNode)
@@ -35,7 +36,8 @@ class Query:
         statuses=graphene.List(LeaseStatusEnum),
         start_year=graphene.Int(),
         filterset_class=AbstractLeaseNodeFilter,
-        description="`WinterStorageLeases` are ordered by `createdAt` in ascending order by default.",
+        description="`WinterStorageLeases` are ordered by `startDate/endDate` in descending order, "
+        "and `createdAt` in ascending order by default.",
     )
 
     send_berth_invoice_preview = graphene.Field(SendExistingInvoicesPreviewType)
@@ -50,17 +52,13 @@ class Query:
         if start_year:
             qs = qs.filter(start_date__year=start_year)
 
-        return (
-            qs.select_related(
-                "application",
-                "application__customer",
-                "berth",
-                "berth__pier",
-                "berth__pier__harbor",
-            )
-            .prefetch_related("application__customer__boats")
-            .order_by("created_at")
-        )
+        return qs.select_related(
+            "application",
+            "application__customer",
+            "berth",
+            "berth__pier",
+            "berth__pier__harbor",
+        ).prefetch_related("application__customer__boats")
 
     def resolve_winter_storage_leases(
         self, info, statuses=None, start_year=None, **kwargs
@@ -71,17 +69,13 @@ class Query:
         if start_year:
             qs = qs.filter(start_date__year=start_year)
 
-        return (
-            qs.select_related(
-                "application",
-                "application__customer",
-                "place",
-                "place__winter_storage_section",
-                "place__winter_storage_section__area",
-            )
-            .prefetch_related("application__customer__boats")
-            .order_by("created_at")
-        )
+        return qs.select_related(
+            "application",
+            "application__customer",
+            "place",
+            "place__winter_storage_section",
+            "place__winter_storage_section__area",
+        ).prefetch_related("application__customer__boats")
 
     @view_permission_required(BerthLease)
     def resolve_send_berth_invoice_preview(self, info, **kwargs):

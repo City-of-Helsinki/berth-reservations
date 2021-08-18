@@ -165,7 +165,7 @@ class WinterStorageLeaseAdmin(BaseLeaseAdmin):
         "id",
         "created_at",
         "area",
-        "section",
+        "section_identifier",
         "place_number",
         "start_date",
         "end_date",
@@ -191,12 +191,17 @@ class WinterStorageLeaseAdmin(BaseLeaseAdmin):
         section = obj.section or obj.place.winter_storage_section
         return section.area
 
-    def section(self, obj):
+    def section_identifier(self, obj):
         section = obj.section or obj.place.winter_storage_section
         return section.identifier
 
+    section_identifier.short_description = "Section"
+    section_identifier.admin_order_field = "section__identifier"
+
     def place_number(self, obj):
         return obj.place.number if obj.place else None
+
+    place_number.admin_order_field = "place__number"
 
 
 admin.site.register(BerthLease, BerthLeaseAdmin)

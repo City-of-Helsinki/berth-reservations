@@ -174,6 +174,11 @@ class BerthLease(AbstractLease, SerializableMixin):
         verbose_name = _("berth lease")
         verbose_name_plural = _("berth leases")
         default_related_name = "berth_leases"
+        ordering = (
+            "-start_date",
+            "-end_date",
+            "created_at",
+        )
 
     def clean(self):
         if self.start_date.year != self.end_date.year:
@@ -347,6 +352,11 @@ class WinterStorageLease(AbstractLease, SerializableMixin):
         verbose_name = _("winter storage lease")
         verbose_name_plural = _("winter storage leases")
         default_related_name = "winter_storage_leases"
+        ordering = (
+            "-start_date",
+            "-end_date",
+            "created_at",
+        )
 
     def get_winter_storage_area(self):
         if self.place:
