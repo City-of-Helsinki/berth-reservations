@@ -232,8 +232,10 @@ class BaseInvoicingService:
 
         logger.debug("Fetching profiles")
         # Fetch all the profiles from the Profile service
-        profile_ids = leases.distinct("customer_id").values_list(
-            "customer_id", flat=True
+        profile_ids = (
+            leases.distinct("customer_id")
+            .values_list("customer_id", flat=True)
+            .order_by()
         )
         profiles = ProfileService(self.profile_token).get_all_profiles(
             profile_ids=profile_ids
