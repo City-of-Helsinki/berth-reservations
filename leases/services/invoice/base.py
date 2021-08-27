@@ -66,6 +66,13 @@ class BaseInvoicingService:
         self.profile_token = profile_token
         self.due_date = due_date or (today() + relativedelta(days=14)).date()
 
+        self.successful_orders = []
+        self.failed_orders = []
+        self.failed_leases = []
+        self.processed_leases = []
+
+        self.failure_count = 0
+
     @staticmethod
     def get_product(
         lease: Union[BerthLease, WinterStorageLease]
@@ -218,30 +225,31 @@ class BaseInvoicingService:
             )
 
     def send_invoices(self) -> None:  # noqa: C901
-        logger.debug("Starting batch invoice sending")
-
-        self.successful_orders = []
-        self.failed_orders = []
-        self.failed_leases = []
-        self.processed_leases = []
-
-        self.failure_count = 0
+        logger.info("Starting batch invoice sending")
 
         leases = self.get_valid_leases(self.season_start)
-        logger.debug(f"Leases fetched: {len(leases)}")
+        logger.info(f"Leases to be renewed: {len(leases)}")
 
-        logger.debug("Fetching profiles")
-        # Fetch all the profiles from the Profile service
-        profile_ids = (
+        failed_order_customers = list(
+            self.get_failed_orders(self.season_start)
+            .distinct("customer_id")
+            .values_list("customer_id", flat=True)
+            .order_by()
+        )
+        lease_customers = list(
             leases.distinct("customer_id")
             .values_list("customer_id", flat=True)
             .order_by()
         )
+
+        # Fetch all the profiles from the Profile service
+        profile_ids = list(set(failed_order_customers + lease_customers))
+        logger.debug("Fetching profiles")
         profiles = ProfileService(self.profile_token).get_all_profiles(
             profile_ids=profile_ids
         )
 
-        logger.debug(f"Profiles fetched: {len(profiles)}")
+        logger.info(f"Profiles fetched: {len(profiles)}")
 
         self.resend_failed_invoices(profiles)
 
@@ -300,10 +308,16 @@ class BaseInvoicingService:
             exited_with_errors = True
         finally:
             self.email_admins(exited_with_errors)
+            logger.info("Finished batch invoicing")
+            logger.info(f"Successful orders: {len(self.successful_orders)}")
+            logger.info(f"Failed orders: {self.number_of_failed_orders}")
+            logger.info(f"{exited_with_errors=}")
 
     def resend_failed_invoices(self, profiles: dict) -> None:
-        logger.debug("Resending failed invoices")
+        logger.info("Resending failed invoices")
+
         orders = self.get_failed_orders(self.season_start)
+        logger.info(f"Failed leases to be resent: {orders.count()}")
 
         for order in orders:
             order.due_date = self.due_date
@@ -322,6 +336,10 @@ class BaseInvoicingService:
                 Order.DoesNotExist,
                 ValidationError,
                 VenepaikkaGraphQLError,
-                KeyError,
             ) as e:
                 self.fail_order(order, f'{_("Failed resending invoice")} ({e})')
+            except KeyError as missing_key:
+                self.fail_order(
+                    order,
+                    f'{_("Failed resending invoice")} (Missing profile: {missing_key})',
+                )
