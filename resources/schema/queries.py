@@ -2,7 +2,7 @@ from decimal import Decimal
 
 import graphene
 from django.db.models import Prefetch, Q
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import get_language, gettext_lazy as _
 from graphene import GlobalID, relay
 from graphene_django.fields import DjangoConnectionField, DjangoListField
 from graphene_django.filter import DjangoFilterConnectionField
@@ -141,21 +141,22 @@ class Query:
         # so, check the state of this against a newer version later
 
         servicemap_ids = kwargs.get("servicemap_ids", None)
-        qs = (
-            Harbor.objects.filter(servicemap_id__in=servicemap_ids)
-            if servicemap_ids
-            else Harbor.objects.all()
-        )
-        return qs.prefetch_related(
-            "translations",
-            Prefetch(
-                "piers",
-                queryset=Pier.objects.prefetch_related(
-                    Prefetch("berths", queryset=Berth.objects.all())
+        qs = Harbor.objects.translated(get_language())
+        qs = qs.filter(servicemap_id__in=servicemap_ids) if servicemap_ids else qs.all()
+
+        return (
+            qs.prefetch_related(
+                Prefetch(
+                    "piers",
+                    queryset=Pier.objects.prefetch_related(
+                        Prefetch("berths", queryset=Berth.objects.all())
+                    ),
                 ),
-            ),
-            "piers__suitable_boat_types",
-        ).select_related("availability_level", "municipality")
+                "piers__suitable_boat_types",
+            )
+            .select_related("availability_level", "municipality")
+            .order_by("translations__name")
+        )
 
     def resolve_winter_storage_places(self, info, **kwargs):
         return WinterStoragePlace.objects.prefetch_related(

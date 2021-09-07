@@ -162,6 +162,10 @@ class HarborFilter(django_filters.FilterSet):
             "piers__suitable_boat_types",
         )
 
+    order_by = django_filters.OrderingFilter(
+        fields=(("translations__name", "name"),),
+        label="Supports only `name` and `-name`, defaults to `name`.",
+    )
     max_width = django_filters.NumberFilter()
     max_length = django_filters.NumberFilter()
 
