@@ -69,7 +69,10 @@ class BaseLeaseAdmin(admin.ModelAdmin):
 
     has_contract.boolean = True
 
-    autocomplete_fields = ("customer",)
+    autocomplete_fields = (
+        "customer",
+        "boat",
+    )
     list_filter = ("status",)
 
     date_hierarchy = "start_date"
@@ -81,6 +84,8 @@ class GenericOrderInline(GenericStackedInline):
     model = Order
     extra = 0
     exclude = ("_product_content_type", "_lease_content_type")
+    readonly_fields = ("order_number",)
+    autocomplete_fields = ("customer",)
 
 
 class VismaBerthContractInline(admin.StackedInline):
