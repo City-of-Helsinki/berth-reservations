@@ -129,6 +129,7 @@ class BaseInvoicingService:
                     document_id=contract.document_id,
                     invitation_id=contract.invitation_id,
                     passphrase=contract.passphrase,
+                    status=contract.status,
                 )
             elif isinstance(lease, WinterStorageLease):
                 VismaWinterStorageContract.objects.create(
@@ -136,6 +137,7 @@ class BaseInvoicingService:
                     document_id=contract.document_id,
                     invitation_id=contract.invitation_id,
                     passphrase=contract.passphrase,
+                    status=contract.status,
                 )
 
         lease.refresh_from_db()
