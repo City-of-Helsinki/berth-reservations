@@ -380,7 +380,8 @@ class WinterStorageLease(AbstractLease, SerializableMixin):
             old_instance = WinterStorageLease.objects.get(id=self.id)
 
             # Check that the place/section are not being changed
-            self._check_lease_place(old_instance)
+            # TODO: Temporarily disabled (8.9.2021)
+            # self._check_lease_place(old_instance)
             # Check that the application belongs to the same customer
             self._check_application_customer(old_instance)
 
