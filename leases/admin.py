@@ -162,15 +162,6 @@ class BerthLeaseAdmin(BaseLeaseAdmin):
     berth_number.admin_order_field = "berth__number"
 
 
-class GenericOrderInline(GenericStackedInline):
-    readonly_fields = ("pk",)
-    ct_field = "_lease_content_type"
-    ct_fk_field = "_lease_object_id"
-    model = Order
-    extra = 0
-    exclude = ("_product_content_type", "_lease_content_type")
-
-
 class WinterStorageLeaseInline(admin.StackedInline):
     model = WinterStorageLease
     fk_name = "customer"
