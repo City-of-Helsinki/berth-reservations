@@ -1,7 +1,8 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.contenttypes.admin import GenericStackedInline
 
 from contracts.models import VismaBerthContract, VismaWinterStorageContract
+from contracts.services import get_contract_service
 from payments.models import Order
 
 from .models import (
@@ -68,7 +69,10 @@ class BaseLeaseAdmin(admin.ModelAdmin):
 
     has_contract.boolean = True
 
-    autocomplete_fields = ("customer",)
+    autocomplete_fields = (
+        "customer",
+        "boat",
+    )
     list_filter = ("status",)
 
     date_hierarchy = "start_date"
@@ -80,6 +84,8 @@ class GenericOrderInline(GenericStackedInline):
     model = Order
     extra = 0
     exclude = ("_product_content_type", "_lease_content_type")
+    readonly_fields = ("order_number",)
+    autocomplete_fields = ("customer",)
 
 
 class VismaBerthContractInline(admin.StackedInline):
@@ -120,6 +126,28 @@ class BerthLeaseAdmin(BaseLeaseAdmin):
         "berth__pier__identifier",
         "berth__number",
     )
+    actions = ("generate_contract",)
+
+    def generate_contract(self, request, queryset):
+        generated = 0
+        failed = 0
+        for lease in queryset.all():
+            try:
+                get_contract_service().create_berth_contract(lease)
+                generated += 1
+            except Exception:
+                failed += 1
+
+        if generated > 0:
+            self.message_user(
+                request,
+                f"Contracts generated successfully: {generated}",
+                messages.SUCCESS,
+            )
+        if failed > 0:
+            self.message_user(
+                request, f"Contracts failed to create: {failed}", messages.ERROR
+            )
 
     def harbor(self, obj):
         return obj.berth.pier.harbor
@@ -186,6 +214,28 @@ class WinterStorageLeaseAdmin(BaseLeaseAdmin):
         "place__number",
         "section__identifier",
     )
+    actions = ("generate_contract",)
+
+    def generate_contract(self, request, queryset):
+        generated = 0
+        failed = 0
+        for lease in queryset.all():
+            try:
+                get_contract_service().create_winter_storage_contract(lease)
+                generated += 1
+            except Exception:
+                failed += 1
+
+        if generated > 0:
+            self.message_user(
+                request,
+                f"Contracts generated successfully: {generated}",
+                messages.SUCCESS,
+            )
+        if failed > 0:
+            self.message_user(
+                request, f"Contracts failed to create: {failed}", messages.ERROR
+            )
 
     def area(self, obj):
         section = obj.section or obj.place.winter_storage_section
