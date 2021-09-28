@@ -30,6 +30,7 @@ from leases.enums import LeaseStatus
 from leases.utils import (
     calculate_berth_lease_end_date,
     calculate_season_start_date,
+    calculate_winter_season_start_date,
     calculate_winter_storage_lease_end_date,
 )
 from payments.enums import OfferStatus, PriceTier
@@ -743,6 +744,7 @@ class WinterStoragePlaceManager(models.Manager):
         """
         from leases.models import WinterStorageLease
 
+        season_start = calculate_winter_season_start_date()
         season_end = calculate_winter_storage_lease_end_date()
         current_date = today().date()
 
@@ -752,7 +754,15 @@ class WinterStoragePlaceManager(models.Manager):
         else:
             last_year = current_date.year
 
-        in_current_season = Q(end_date__gte=season_end)
+        in_current_season = Q(
+            # Check the lease starts at some point the during the season
+            start_date__gte=season_start,
+            # Check the lease ends earliest at the beginning of the season
+            # (for leases terminated before the season started)
+            end_date__gte=season_start,
+            # Check the lease ends latest at the end of the season
+            end_date__lte=season_end,
+        )
         in_last_season = Q(end_date__year=last_year)
 
         active_current_status = Q(status__in=ACTIVE_LEASE_STATUSES)
