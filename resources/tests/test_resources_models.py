@@ -13,6 +13,8 @@ from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from leases.utils import (
     calculate_berth_lease_end_date,
     calculate_berth_lease_start_date,
+    calculate_winter_season_end_date,
+    calculate_winter_season_start_date,
     calculate_winter_storage_lease_end_date,
     calculate_winter_storage_lease_start_date,
 )
@@ -297,8 +299,10 @@ def test_winter_storage_place_is_available_lease_status(
 
 
 @freeze_time("2020-01-01T08:00:00Z")
-@pytest.mark.parametrize("status", ["drafted", "offered", "paid", "expired", "refused"])
-def test_winter_storage_place_is_available_ends_during_season(
+@pytest.mark.parametrize(
+    "status", ["drafted", "offered", "terminated", "expired", "refused"]
+)
+def test_winter_storage_place_is_available_ends_during_season_after_lease_ends(
     superuser_api_client, winter_storage_place, status
 ):
     end_date = calculate_winter_storage_lease_end_date()
@@ -307,7 +311,16 @@ def test_winter_storage_place_is_available_ends_during_season(
     WinterStorageLeaseFactory(
         place=winter_storage_place, end_date=end_date, status=LeaseStatus(status),
     )
-    assert WinterStoragePlace.objects.get(id=winter_storage_place.id).is_available
+
+    with mock.patch(
+        "resources.models.calculate_winter_season_start_date"
+    ) as mock_start, mock.patch(
+        "resources.models.calculate_winter_storage_lease_end_date"
+    ) as mock_end:
+        mock_start.return_value = date(2020, 9, 15)
+        mock_end.return_value = date(2021, 6, 10)
+
+        assert WinterStoragePlace.objects.get(id=winter_storage_place.id).is_available
 
 
 @freeze_time("2020-01-01T08:00:00Z")
@@ -377,6 +390,33 @@ def test_winter_storage_place_is_not_available_renew_pending(date):
 
         # Need to fetch the berth from the DB to get the annotated value
         assert not WinterStoragePlace.objects.get(id=lease.place_id).is_available
+
+
+@freeze_time("2020-01-01T08:00:00Z")
+def test_winter_storage_place_is_available_when_customer_terminates_lease(
+    superuser_api_client, winter_storage_place, customer_profile
+):
+    season_start = calculate_winter_season_start_date()
+    season_end = calculate_winter_season_end_date()
+
+    # Terminated current season lease
+    WinterStorageLeaseFactory(
+        start_date=season_start,
+        end_date=season_end,
+        place=winter_storage_place,
+        customer=customer_profile,
+        status=LeaseStatus.TERMINATED,
+    )
+    # Paid previous season lease
+    WinterStorageLeaseFactory(
+        start_date=season_start - relativedelta(years=1),
+        end_date=season_end - relativedelta(years=1),
+        place=winter_storage_place,
+        customer=customer_profile,
+        status=LeaseStatus.PAID,
+    )
+
+    assert WinterStoragePlace.objects.get(id=winter_storage_place.id).is_available
 
 
 def test_winter_storage_section_number_of_places():
