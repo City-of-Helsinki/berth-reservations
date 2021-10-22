@@ -8,8 +8,8 @@ from berth_reservations.tests.factories import CustomerProfileFactory
 from leases.enums import LeaseStatus
 from leases.tests.factories import BerthLeaseFactory
 from resources.tests.factories import BerthFactory, WinterStorageAreaFactory
-from utils.numbers import rounded
 
+from utils.numbers import rounded
 from ..enums import (
     OfferStatus,
     OrderRefundStatus,
@@ -67,6 +67,7 @@ class BerthProductFactory(factory.django.DjangoModelFactory):
     max_width = factory.LazyAttribute(
         lambda o: rounded(random.uniform(float(o.min_width), 10), round_to_nearest=0.05)
     )
+
     tier_1_price = factory.LazyFunction(lambda: random_price(1, 100, decimals=0))
     tier_2_price = factory.LazyFunction(lambda: random_price(1, 100, decimals=0))
     tier_3_price = factory.LazyFunction(lambda: random_price(1, 100, decimals=0))
@@ -207,7 +208,8 @@ class BerthSwitchOfferFactory(AbstractOfferFactory):
     )
     berth = factory.SubFactory(BerthFactory)
     application = factory.SubFactory(
-        BerthApplicationFactory, berth_switch=factory.SubFactory(BerthSwitchFactory),
+        BerthApplicationFactory,
+        berth_switch=factory.SubFactory(BerthSwitchFactory),
     )
 
     class Meta:

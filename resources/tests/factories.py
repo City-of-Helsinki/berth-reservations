@@ -100,19 +100,13 @@ class WinterStorageSectionFactory(AbstractAreaSectionFactory):
 
 
 class AbstractPlaceTypeFactory(factory.django.DjangoModelFactory):
-    length = factory.Faker(
-        "pydecimal", min_value=0, max_value=99, right_digits=2, positive=True
-    )
-    width = factory.Faker(
-        "pydecimal", min_value=0, max_value=99, right_digits=2, positive=True
-    )
+    length = factory.fuzzy.FuzzyDecimal(0, 99, 2)
+    width = factory.fuzzy.FuzzyDecimal(0, 99, 2)
 
 
 class BerthTypeFactory(AbstractPlaceTypeFactory):
     mooring_type = factory.Faker("random_element", elements=list(BerthMooringType))
-    depth = factory.Faker(
-        "pydecimal", min_value=0, max_value=999, right_digits=2, positive=True
-    )
+    depth = factory.fuzzy.FuzzyDecimal(0, 999, 2)
 
     class Meta:
         model = BerthType

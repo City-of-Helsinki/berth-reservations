@@ -7,8 +7,8 @@ from sentry_sdk import capture_exception
 from .constants import MARKED_WS_SENDER, REJECT_BERTH_SENDER, UNMARKED_WS_SENDER
 from .notifications import NotificationType
 
-application_saved = Signal(providing_args=["application"])
-application_rejected = Signal(providing_args=["application"])
+application_saved = Signal()
+application_rejected = Signal()
 
 
 def application_notification_handler(sender, application, **kwargs):
@@ -26,7 +26,10 @@ def application_notification_handler(sender, application, **kwargs):
     }
     try:
         send_notification(
-            application.email, notification_type.value, context, application.language,
+            application.email,
+            notification_type.value,
+            context,
+            application.language,
         )
     except (OSError, AnymailError) as e:
         capture_exception(e)

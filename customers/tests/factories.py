@@ -12,9 +12,8 @@ class BoatFactory(factory.django.DjangoModelFactory):
     boat_type = factory.SubFactory(BoatTypeFactory)
     registration_number = factory.Faker("bs")
     name = factory.Faker("bs")
-    # even though these are decimals, Faker uses ints for generation ¯\_(ツ)_/¯
-    length = factory.Faker("pydecimal", min_value=1, max_value=100, right_digits=2)
-    width = factory.Faker("pydecimal", min_value=1, max_value=100, right_digits=2)
+    length = factory.fuzzy.FuzzyDecimal(1, 100.00, 2)
+    width = factory.fuzzy.FuzzyDecimal(1, 100.00, 2)
 
     class Meta:
         model = Boat

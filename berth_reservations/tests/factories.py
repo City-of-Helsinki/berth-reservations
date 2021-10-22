@@ -10,7 +10,9 @@ class UserFactory(factory.django.DjangoModelFactory):
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
     username = factory.Sequence(lambda n: f"{factory.Faker('user_name')} {n}")
-    email = factory.Faker("email")
+    email = factory.Sequence(
+        lambda n: "person{}@example.org".format(n)
+    )  # example.com is not valid
 
     class Meta:
         model = get_user_model()

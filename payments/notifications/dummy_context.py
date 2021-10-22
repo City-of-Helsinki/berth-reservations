@@ -39,7 +39,9 @@ provider = BamboraPayformProvider(
 
 
 def _get_order_context(
-    subject: str, order: Order, optional_services: List[OrderLine],
+    subject: str,
+    order: Order,
+    optional_services: List[OrderLine],
 ) -> Dict:
     return {
         "subject": subject,

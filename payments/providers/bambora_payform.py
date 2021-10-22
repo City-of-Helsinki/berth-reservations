@@ -4,6 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Iterable, List, Optional
+from django.utils import timezone
 
 import requests
 from dateutil.relativedelta import relativedelta
@@ -171,8 +172,8 @@ class BamboraPayformProvider(PaymentProvider):
         # always get the expiration at the same hour
         #   "Allowed values are 1 hour from current timestamp to 7 days from current timestamp."
         #   "Default value is 1 hour from current timestamp."
-        token_valid_until = datetime.combine(
-            today() + relativedelta(days=6), datetime.max.time()
+        token_valid_until = timezone.make_aware(
+            datetime.combine(today() + relativedelta(days=6), datetime.max.time())
         )
 
         order_token = (
@@ -559,12 +560,24 @@ class BamboraPayformProvider(PaymentProvider):
         """Validate that success/notify payload authcode matches"""
         return self.check_authcode_params(
             request,
-            ("RETURN_CODE", "ORDER_NUMBER", "SETTLED", "CONTACT_ID", "INCIDENT_ID",),
+            (
+                "RETURN_CODE",
+                "ORDER_NUMBER",
+                "SETTLED",
+                "CONTACT_ID",
+                "INCIDENT_ID",
+            ),
         )
 
     def check_new_refund_authcode(self, request: HttpRequest):
         """Validate that refund notify payload authcode matches"""
-        return self.check_authcode_params(request, ("RETURN_CODE", "REFUND_ID",))
+        return self.check_authcode_params(
+            request,
+            (
+                "RETURN_CODE",
+                "REFUND_ID",
+            ),
+        )
 
     def handle_success_request(self) -> HttpResponse:  # noqa: C901
         """Handle the payform response after user has completed the payment flow in normal fashion"""

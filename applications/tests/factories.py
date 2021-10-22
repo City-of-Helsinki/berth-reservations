@@ -20,10 +20,12 @@ from ..models import (
 class BaseApplicationFactory(factory.django.DjangoModelFactory):
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
-    email = factory.Faker("email")
+    email = factory.Sequence(
+        lambda n: "application{}@example.org".format(n)
+    )  # example.com is not valid
     boat_type = factory.SubFactory(BoatTypeFactory)
-    boat_length = factory.fuzzy.FuzzyDecimal(0.1, 100.00)
-    boat_width = factory.fuzzy.FuzzyDecimal(0.1, 100.00)
+    boat_length = factory.fuzzy.FuzzyDecimal(0.1, 100.00, 2)
+    boat_width = factory.fuzzy.FuzzyDecimal(0.1, 100.00, 2)
     phone_number = factory.Faker("phone_number")
     address = factory.Faker("address")
     zip_code = factory.Faker("zipcode")
@@ -45,7 +47,7 @@ class WinterStorageApplicationFactory(BaseApplicationFactory):
 class HarborChoiceFactory(factory.django.DjangoModelFactory):
     harbor = factory.SubFactory(HarborFactory)
     application = factory.SubFactory(BerthApplicationFactory)
-    priority = factory.Faker("random_int", min=1, max=10)
+    priority = factory.fuzzy.FuzzyInteger(1, 10)
 
     class Meta:
         model = HarborChoice
@@ -54,7 +56,7 @@ class HarborChoiceFactory(factory.django.DjangoModelFactory):
 class WinterAreaChoiceFactory(factory.django.DjangoModelFactory):
     winter_storage_area = factory.SubFactory(WinterStorageAreaFactory)
     application = factory.SubFactory(WinterStorageApplicationFactory)
-    priority = factory.Faker("random_int", min=1, max=10)
+    priority = factory.fuzzy.FuzzyInteger(1, 10)
 
     class Meta:
         model = WinterStorageAreaChoice
