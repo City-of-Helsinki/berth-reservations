@@ -12,5 +12,6 @@ class Command(ExpirationCommand):
     @atomic
     def run_expiration(self, dry_run):
         Order.objects.expire_too_old_unpaid_orders(
-            settings.EXPIRE_WAITING_ORDERS_OLDER_THAN_DAYS, dry_run=dry_run,
+            settings.EXPIRE_WAITING_ORDERS_OLDER_THAN_DAYS,
+            dry_run=dry_run,
         )

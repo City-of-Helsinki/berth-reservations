@@ -10,8 +10,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="berthapplication", name="is_processed",),
         migrations.RemoveField(
-            model_name="winterstorageapplication", name="is_processed",
+            model_name="berthapplication",
+            name="is_processed",
+        ),
+        migrations.RemoveField(
+            model_name="winterstorageapplication",
+            name="is_processed",
         ),
     ]

@@ -15,8 +15,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="boat", name="boat_is_inspected",),
-        migrations.RemoveField(model_name="boat", name="boat_is_insured",),
+        migrations.RemoveField(
+            model_name="boat",
+            name="boat_is_inspected",
+        ),
+        migrations.RemoveField(
+            model_name="boat",
+            name="boat_is_insured",
+        ),
         migrations.CreateModel(
             name="BoatCertificate",
             fields=[

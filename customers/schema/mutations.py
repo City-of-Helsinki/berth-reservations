@@ -224,7 +224,8 @@ class CreateBerthServicesProfileMutation(graphene.ClientIDMutation):
 class CreateMyBerthProfileMutation(graphene.ClientIDMutation):
     class Input:
         profile_token = graphene.String(
-            required=True, description="API token for Helsinki profile GraphQL API",
+            required=True,
+            description="API token for Helsinki profile GraphQL API",
         )
 
     profile = graphene.Field(ProfileNode)

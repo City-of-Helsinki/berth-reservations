@@ -163,7 +163,9 @@ mutation UpdateApplication($input: UpdateBerthApplicationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_update_berth_application(api_client, berth_application, customer_profile):
     berth_application_id = to_global_id(BerthApplicationNode, berth_application.id)
@@ -194,7 +196,9 @@ def test_update_berth_application(api_client, berth_application, customer_profil
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_update_berth_application_no_application_id(api_client, customer_profile):
     variables = {
@@ -207,7 +211,9 @@ def test_update_berth_application_no_application_id(api_client, customer_profile
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @pytest.mark.parametrize("status", ApplicationStatus.values)
 def test_update_berth_application_no_customer_id(
@@ -272,7 +278,9 @@ mutation DeleteBerthApplication($input: DeleteBerthApplicationMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_delete_berth_application(api_client, berth_application, customer_profile):
     variables = {
@@ -386,7 +394,9 @@ mutation RejectBerthApplicationMutation($input: RejectBerthApplicationMutationIn
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_reject_berth_application(
     api_client,
@@ -422,12 +432,17 @@ def test_reject_berth_application(
     assert mail.outbox[0].to == [berth_application.email]
 
     assert mail.outbox[0].alternatives == [
-        ("<b>test berth application rejected body HTML!</b>", "text/html",)
+        (
+            "<b>test berth application rejected body HTML!</b>",
+            "text/html",
+        )
     ]
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_reject_berth_application_fails_for_lease(
     api_client, berth_application, customer_profile
@@ -611,7 +626,9 @@ mutation UpdateApplication($input: UpdateWinterStorageApplicationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_update_winter_storage_application(
     api_client, winter_storage_application, customer_profile
@@ -645,7 +662,9 @@ def test_update_winter_storage_application(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_update_winter_storage_application_no_application_id(
     api_client, customer_profile
@@ -662,7 +681,9 @@ def test_update_winter_storage_application_no_application_id(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @pytest.mark.parametrize("status", ApplicationStatus.values)
 def test_update_winter_storage_application_no_customer_id(
@@ -735,7 +756,9 @@ mutation DeleteWinterStorageApplication($input: DeleteWinterStorageApplicationMu
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_delete_winter_storage_application(
     api_client, winter_storage_application, customer_profile
@@ -922,7 +945,8 @@ def test_update_berth_application_by_owner_cant_update_customer(
 
 
 @pytest.mark.parametrize(
-    "status", [ApplicationStatus.NO_SUITABLE_BERTHS, ApplicationStatus.EXPIRED],
+    "status",
+    [ApplicationStatus.NO_SUITABLE_BERTHS, ApplicationStatus.EXPIRED],
 )
 def test_update_berth_application_by_owner_invalid_status(
     berth_customer_api_client, customer_profile, status
@@ -1093,7 +1117,8 @@ def test_update_winter_storage_application_by_owner_cant_update_customer(
 
 
 @pytest.mark.parametrize(
-    "status", [ApplicationStatus.NO_SUITABLE_BERTHS, ApplicationStatus.EXPIRED],
+    "status",
+    [ApplicationStatus.NO_SUITABLE_BERTHS, ApplicationStatus.EXPIRED],
 )
 def test_update_winter_storage_application_by_owner_invalid_status(
     berth_customer_api_client, customer_profile, status

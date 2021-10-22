@@ -11,5 +11,6 @@ class Command(ExpirationCommand):
     @atomic
     def run_expiration(self, dry_run):
         return BerthApplication.objects.reset_application_priority(
-            only_low_priority=True, dry_run=dry_run,
+            only_low_priority=True,
+            dry_run=dry_run,
         )

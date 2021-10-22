@@ -10,5 +10,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="berthlease", name="renew_automatically",),
+        migrations.RemoveField(
+            model_name="berthlease",
+            name="renew_automatically",
+        ),
     ]

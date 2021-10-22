@@ -178,7 +178,9 @@ class Migration(migrations.Migration):
                 (
                     "price_unit",
                     models.CharField(
-                        choices=[("amount", "Amount")], default="amount", max_length=10,
+                        choices=[("amount", "Amount")],
+                        default="amount",
+                        max_length=10,
                     ),
                 ),
                 (
@@ -229,7 +231,9 @@ class Migration(migrations.Migration):
                 (
                     "price_unit",
                     models.CharField(
-                        choices=[("amount", "Amount")], default="amount", max_length=10,
+                        choices=[("amount", "Amount")],
+                        default="amount",
+                        max_length=10,
                     ),
                 ),
                 (

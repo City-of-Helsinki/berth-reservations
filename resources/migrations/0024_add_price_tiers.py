@@ -10,7 +10,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="berthtype", name="price_group",),
+        migrations.RemoveField(
+            model_name="berthtype",
+            name="price_group",
+        ),
         migrations.AddField(
             model_name="pier",
             name="price_tier",

@@ -280,7 +280,8 @@ def test_order_raise_error_berth_lease_and_different_customer(
 ):
     with pytest.raises(ValidationError) as exception:
         OrderFactory(
-            lease=berth_lease, customer=customer_profile,
+            lease=berth_lease,
+            customer=customer_profile,
         )
 
     errors = str(exception.value)
@@ -292,7 +293,8 @@ def test_order_raise_error_winter_storage_lease_and_different_customer(
 ):
     with pytest.raises(ValidationError) as exception:
         OrderFactory(
-            lease=winter_storage_lease, customer=customer_profile,
+            lease=winter_storage_lease,
+            customer=customer_profile,
         )
 
     errors = str(exception.value)
@@ -565,7 +567,9 @@ def test_order_cannot_change_berth_lease(berth_lease):
 
 
 def test_order_cannot_change_winter_storage_lease(winter_storage_lease):
-    order = OrderFactory(lease=winter_storage_lease,)
+    order = OrderFactory(
+        lease=winter_storage_lease,
+    )
     with pytest.raises(ValidationError) as exception:
         order.lease = WinterStorageLeaseFactory(customer=winter_storage_lease.customer)
         order.save()
@@ -589,7 +593,9 @@ def test_order_berth_lease_can_change_price(berth_lease):
 
 
 def test_order_winter_storage_lease_can_change_price(winter_storage_lease):
-    order = OrderFactory(lease=winter_storage_lease,)
+    order = OrderFactory(
+        lease=winter_storage_lease,
+    )
     price = random_price()
     tax_percentage = random_tax()
 
@@ -761,7 +767,9 @@ def test_order_winter_storage_lease_with_section_right_price(
 
 
 def test_order_winter_storage_lease_without_boat_right_price(
-    winter_storage_section, winter_storage_application, customer_profile,
+    winter_storage_section,
+    winter_storage_application,
+    customer_profile,
 ):
     winter_storage_lease = WinterStorageLeaseFactory(
         place=None,
@@ -889,7 +897,10 @@ def test_order_set_status_no_lease(berth):
 
 def test_order_set_status_no_application(berth):
     lease = BerthLeaseFactory(berth=berth, application=None, status=LeaseStatus.OFFERED)
-    order = OrderFactory(lease=lease, status=OrderStatus.OFFERED,)
+    order = OrderFactory(
+        lease=lease,
+        status=OrderStatus.OFFERED,
+    )
 
     order.set_status(OrderStatus.PAID)
     assert order.status == OrderStatus.PAID
@@ -942,7 +953,8 @@ def test_order_status_dates(order, from_status, to_status):
     indirect=True,
 )
 @pytest.mark.parametrize(
-    "status", OrderStatus.get_waiting_statuses(),
+    "status",
+    OrderStatus.get_waiting_statuses(),
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_order_status_dates_no_transitions(order, status):
@@ -1000,7 +1012,8 @@ def test_order_due_date_has_to_be_set_for_order_in_offered_status(
 
 
 @pytest.mark.parametrize(
-    "status", [OfferStatus.CANCELLED, OfferStatus.DRAFTED],
+    "status",
+    [OfferStatus.CANCELLED, OfferStatus.DRAFTED],
 )
 def test_offer_due_date_not_required(berth_switch_offer, status):
     berth_switch_offer.status = status

@@ -64,7 +64,10 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
                     )
                 )
             application: BerthApplication = get_node_from_global_id(
-                info, application_id, only_type=BerthApplicationNode, nullable=False,
+                info,
+                application_id,
+                only_type=BerthApplicationNode,
+                nullable=False,
             )
             if not application.customer:
                 raise VenepaikkaGraphQLError(
@@ -76,7 +79,10 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
         elif customer_id := input.pop("customer_id", None):
             assert "customer" not in input
             input["customer"] = get_node_from_global_id(
-                info, customer_id, only_type=ProfileNode, nullable=False,
+                info,
+                customer_id,
+                only_type=ProfileNode,
+                nullable=False,
             )
         else:
             raise VenepaikkaGraphQLError(
@@ -95,7 +101,10 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
             input["boat"] = boat
 
         berth = get_node_from_global_id(
-            info, input.pop("berth_id"), only_type=BerthNode, nullable=False,
+            info,
+            input.pop("berth_id"),
+            only_type=BerthNode,
+            nullable=False,
         )
         input["berth"] = berth
 
@@ -133,14 +142,20 @@ class UpdateBerthLeaseMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         lease = get_node_from_global_id(
-            info, input.pop("id"), only_type=BerthLeaseNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=BerthLeaseNode,
+            nullable=False,
         )
         application_id = input.get("application_id")
 
         if application_id:
             # If the application id was passed, raise an error if it doesn't exist
             application = get_node_from_global_id(
-                info, application_id, only_type=BerthApplicationNode, nullable=False,
+                info,
+                application_id,
+                only_type=BerthApplicationNode,
+                nullable=False,
             )
             if not application.customer:
                 raise VenepaikkaGraphQLError(
@@ -153,7 +168,10 @@ class UpdateBerthLeaseMutation(graphene.ClientIDMutation):
             from customers.schema import BoatNode
 
             boat = get_node_from_global_id(
-                info, input.pop("boat_id"), only_type=BoatNode, nullable=False,
+                info,
+                input.pop("boat_id"),
+                only_type=BoatNode,
+                nullable=False,
             )
 
             if boat.owner.id != input["customer"].id:
@@ -180,7 +198,10 @@ class DeleteBerthLeaseMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         lease = get_node_from_global_id(
-            info, input.pop("id"), only_type=BerthLeaseNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=BerthLeaseNode,
+            nullable=False,
         )
 
         if lease.status != LeaseStatus.DRAFTED:
@@ -234,18 +255,28 @@ class SwitchBerthMutation(graphene.ClientIDMutation):
         cls.validate_switch_date(switch_date)
 
         old_lease = get_node_from_global_id(
-            info, old_lease_id, only_type=BerthLeaseNode, nullable=False,
+            info,
+            old_lease_id,
+            only_type=BerthLeaseNode,
+            nullable=False,
         )
         cls.validate_old_lease(old_lease)
 
         new_berth = get_node_from_global_id(
-            info, new_berth_id, only_type=BerthNode, nullable=False,
+            info,
+            new_berth_id,
+            only_type=BerthNode,
+            nullable=False,
         )
 
         old_lease_comment = _("Lease terminated due to berth switch")
         new_lease_comment = _("Lease created from a berth switch")
         old_lease, new_lease = exchange_berth_for_lease(
-            old_lease, new_berth, switch_date, old_lease_comment, new_lease_comment,
+            old_lease,
+            new_berth,
+            switch_date,
+            old_lease_comment,
+            new_lease_comment,
         )
 
         return SwitchBerthMutation(old_berth_lease=old_lease, new_berth_lease=new_lease)
@@ -283,12 +314,18 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
 
         if place_id := input.pop("place_id", None):
             place = get_node_from_global_id(
-                info, place_id, only_type=WinterStoragePlaceNode, nullable=False,
+                info,
+                place_id,
+                only_type=WinterStoragePlaceNode,
+                nullable=False,
             )
             input["place"] = place
         elif section_id := input.pop("section_id", None):
             section = get_node_from_global_id(
-                info, section_id, only_type=WinterStorageSectionNode, nullable=False,
+                info,
+                section_id,
+                only_type=WinterStorageSectionNode,
+                nullable=False,
             )
             input["section"] = section
         else:
@@ -334,7 +371,10 @@ class UpdateWinterStorageLeaseMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         lease = get_node_from_global_id(
-            info, input.pop("id"), only_type=WinterStorageLeaseNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=WinterStorageLeaseNode,
+            nullable=False,
         )
         application_id = input.get("application_id")
 
@@ -357,7 +397,10 @@ class UpdateWinterStorageLeaseMutation(graphene.ClientIDMutation):
             from customers.schema import BoatNode
 
             boat = get_node_from_global_id(
-                info, input.pop("boat_id"), only_type=BoatNode, nullable=False,
+                info,
+                input.pop("boat_id"),
+                only_type=BoatNode,
+                nullable=False,
             )
 
             if boat.owner.id != input["customer"].id:
@@ -384,7 +427,10 @@ class DeleteWinterStorageLeaseMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         lease = get_node_from_global_id(
-            info, input.pop("id"), only_type=WinterStorageLeaseNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=WinterStorageLeaseNode,
+            nullable=False,
         )
 
         if lease.status != LeaseStatus.DRAFTED:
@@ -424,7 +470,10 @@ class TerminateBerthLeaseMutation(graphene.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, id, **input):
         try:
             lease: BerthLease = get_node_from_global_id(
-                info, id, only_type=BerthLeaseNode, nullable=False,
+                info,
+                id,
+                only_type=BerthLeaseNode,
+                nullable=False,
             )
 
             lease = terminate_lease(
@@ -457,7 +506,10 @@ class TerminateWinterStorageLeaseMutation(graphene.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, id, **input):
         try:
             lease: WinterStorageLease = get_node_from_global_id(
-                info, id, only_type=WinterStorageLeaseNode, nullable=False,
+                info,
+                id,
+                only_type=WinterStorageLeaseNode,
+                nullable=False,
             )
 
             lease = terminate_lease(
@@ -541,7 +593,8 @@ class SendExistingInvoicesInput:
 class SendExistingBerthInvoicesMutation(graphene.ClientIDMutation):
     class Input(SendExistingInvoicesInput):
         profile_token = graphene.String(
-            required=True, description="API token for Helsinki profile GraphQL API",
+            required=True,
+            description="API token for Helsinki profile GraphQL API",
         )
 
     ok = graphene.Boolean(required=True)
@@ -564,7 +617,8 @@ class SendExistingBerthInvoicesMutation(graphene.ClientIDMutation):
 class SendExistingWinterStorageInvoicesMutation(graphene.ClientIDMutation):
     class Input(SendExistingInvoicesInput):
         profile_token = graphene.String(
-            required=True, description="API token for Helsinki profile GraphQL API",
+            required=True,
+            description="API token for Helsinki profile GraphQL API",
         )
 
     ok = graphene.Boolean(required=True)

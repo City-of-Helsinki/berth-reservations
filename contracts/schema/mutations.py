@@ -44,7 +44,9 @@ class FulfillContractMutation(graphene.ClientIDMutation):
             )
 
         signing_url = get_contract_service().fulfill_contract(
-            contract, input.get("auth_service"), input.get("return_url"),
+            contract,
+            input.get("auth_service"),
+            input.get("return_url"),
         )
         return FulfillContractMutation(signing_url=signing_url)
 

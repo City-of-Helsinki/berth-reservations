@@ -19,7 +19,8 @@ class AbstractLeaseFactory(factory.django.DjangoModelFactory):
 class BerthLeaseFactory(AbstractLeaseFactory):
     berth = factory.SubFactory(BerthFactory)
     contract = factory.SubFactory(
-        "contracts.tests.factories.BerthContractFactory", lease=None,
+        "contracts.tests.factories.BerthContractFactory",
+        lease=None,
     )
 
     @factory.post_generation
@@ -36,7 +37,8 @@ class BerthLeaseFactory(AbstractLeaseFactory):
 class WinterStorageLeaseFactory(AbstractLeaseFactory):
     place = factory.SubFactory(WinterStoragePlaceFactory)
     contract = factory.SubFactory(
-        "contracts.tests.factories.WinterStorageContractFactory", lease=None,
+        "contracts.tests.factories.WinterStorageContractFactory",
+        lease=None,
     )
 
     @factory.post_generation

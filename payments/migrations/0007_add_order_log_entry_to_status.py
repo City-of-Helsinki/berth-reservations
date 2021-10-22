@@ -11,7 +11,9 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameField(
-            model_name="orderlogentry", old_name="status", new_name="to_status",
+            model_name="orderlogentry",
+            old_name="status",
+            new_name="to_status",
         ),
         migrations.AddField(
             model_name="orderlogentry",

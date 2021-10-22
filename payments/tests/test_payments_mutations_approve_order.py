@@ -35,14 +35,21 @@ mutation APPROVE_ORDER_MUTATION($input: ApproveOrderMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order(
-    api_client, order: Order, payment_provider, notification_template_orders_approved,
+    api_client,
+    order: Order,
+    payment_provider,
+    notification_template_orders_approved,
 ):
     order.status = OrderStatus.DRAFTED
     order.save(update_fields=["status"])
@@ -110,14 +117,21 @@ def test_approve_order(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_sms_not_sent(
-    api_client, order: Order, payment_provider, notification_template_orders_approved,
+    api_client,
+    order: Order,
+    payment_provider,
+    notification_template_orders_approved,
 ):
     order.status = OrderStatus.DRAFTED
     order.save(update_fields=["status"])
@@ -149,14 +163,21 @@ def test_approve_order_sms_not_sent(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_default_due_date(
-    api_client, order: Order, payment_provider, notification_template_orders_approved,
+    api_client,
+    order: Order,
+    payment_provider,
+    notification_template_orders_approved,
 ):
     order.status = OrderStatus.DRAFTED
     order.save(update_fields=["status"])
@@ -203,7 +224,9 @@ def test_approve_order_not_enough_permissions(api_client):
 
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_does_not_exist(
-    superuser_api_client, payment_provider, notification_template_orders_approved,
+    superuser_api_client,
+    payment_provider,
+    notification_template_orders_approved,
 ):
     order_id = to_global_id(OrderNode, uuid.uuid4())
 
@@ -225,7 +248,9 @@ def test_approve_order_does_not_exist(
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_anymail_error(
@@ -274,7 +299,9 @@ def test_approve_order_anymail_error(
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_one_success_one_failure(

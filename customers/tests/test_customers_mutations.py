@@ -59,7 +59,9 @@ mutation CREATE_BOAT($input: CreateBoatMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_create_boat(api_client, customer_profile, boat_type):
     check_date = today().date()
@@ -198,7 +200,9 @@ mutation UPDATE_BOAT($input: UpdateBoatMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_update_boat(api_client, boat):
     boat_id = to_global_id(BoatNode, boat.id)
@@ -274,7 +278,9 @@ def test_update_boat(api_client, boat):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_update_boat_certificates(api_client, boat):
     boat_id = to_global_id(BoatNode, boat.id)
@@ -370,7 +376,9 @@ mutation DELETE_BOAT($input: DeleteBoatMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_delete_boat(api_client, boat):
     variables = {
@@ -429,7 +437,9 @@ mutation CREATE_BERTH_SERVICE_PROFILE($input: CreateBerthServicesProfileMutation
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_create_berth_service_profile(api_client):
     customer_id = to_global_id(ProfileNode, uuid.uuid4())
@@ -603,7 +613,9 @@ mutation UPDATE_BERTH_SERVICE_PROFILE($input: UpdateBerthServicesProfileMutation
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_update_berth_service_profile(api_client, organization):
     profile = organization.customer
@@ -641,7 +653,9 @@ def test_update_berth_service_profile(api_client, organization):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_update_berth_service_profile_create_organization(api_client, customer_profile):
     variables = {
@@ -678,7 +692,9 @@ def test_update_berth_service_profile_create_organization(api_client, customer_p
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_update_berth_service_profile_delete_organization(api_client, organization):
     profile = organization.customer
@@ -754,7 +770,9 @@ mutation DELETE_BERTH_SERVICE_PROFILE_MUTATION($input: DeleteBerthServicesProfil
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_delete_berth_service_profile(api_client, customer_profile):
     variables = {

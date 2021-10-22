@@ -15,7 +15,8 @@ class Migration(migrations.Migration):
             options={"ordering": ["min_width", "pricing_category"]},
         ),
         migrations.RemoveConstraint(
-            model_name="berthproduct", name="unique_width_range",
+            model_name="berthproduct",
+            name="unique_width_range",
         ),
         migrations.AddField(
             model_name="berthproduct",

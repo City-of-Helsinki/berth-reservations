@@ -8,8 +8,8 @@ from berth_reservations.tests.factories import CustomerProfileFactory
 from leases.enums import LeaseStatus
 from leases.tests.factories import BerthLeaseFactory
 from resources.tests.factories import BerthFactory, WinterStorageAreaFactory
-
 from utils.numbers import rounded
+
 from ..enums import (
     OfferStatus,
     OrderRefundStatus,

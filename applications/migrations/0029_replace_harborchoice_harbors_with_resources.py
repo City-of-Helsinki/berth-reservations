@@ -162,7 +162,8 @@ class Migration(migrations.Migration):
             model_name="harborchoice",
             name="harbor",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="resources.harbor",
+                on_delete=django.db.models.deletion.CASCADE,
+                to="resources.harbor",
             ),
         ),
         # Point the BerthApplication to the right choice model
@@ -179,6 +180,7 @@ class Migration(migrations.Migration):
         # Drop the old through model and field
         migrations.DeleteModel(name="TmpHarborChoice"),
         migrations.RemoveField(
-            model_name="berthapplication", name="tmp_chosen_harbors",
+            model_name="berthapplication",
+            name="tmp_chosen_harbors",
         ),
     ]

@@ -22,7 +22,9 @@ class Migration(migrations.Migration):
             model_name="berthswitchoffer",
             name="offer_number",
             field=models.CharField(
-                max_length=64, null=True, verbose_name="offer number",
+                max_length=64,
+                null=True,
+                verbose_name="offer number",
             ),
         ),
         migrations.RunPython(

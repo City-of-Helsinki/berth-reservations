@@ -501,7 +501,9 @@ def test_query_winter_storage_lease(
     winter_storage_lease.application = winter_storage_application
     winter_storage_lease.save()
 
-    order = OrderFactory(lease=winter_storage_lease,)
+    order = OrderFactory(
+        lease=winter_storage_lease,
+    )
 
     query = QUERY_WINTER_STORAGE_LEASE % lease_id
     executed = api_client.execute(query)

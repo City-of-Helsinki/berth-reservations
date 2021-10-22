@@ -12,7 +12,9 @@ from payments.tests.factories import BerthSwitchOfferFactory
 
 @freeze_time("2021-01-09T08:00:00Z")
 def test_expire_too_old_offers():
-    offer = BerthSwitchOfferFactory(due_date=datetime.date(2021, 1, 2),)
+    offer = BerthSwitchOfferFactory(
+        due_date=datetime.date(2021, 1, 2),
+    )
     offer.status = OfferStatus.OFFERED
     offer.save()
     assert (

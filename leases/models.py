@@ -257,7 +257,8 @@ class WinterStorageLeaseManager(SerializableMixin.SerializableManager):
             .get_queryset()
             .annotate(
                 is_active=ExpressionWrapper(
-                    in_current_season & is_paid, output_field=models.BooleanField(),
+                    in_current_season & is_paid,
+                    output_field=models.BooleanField(),
                 )
             )
         )

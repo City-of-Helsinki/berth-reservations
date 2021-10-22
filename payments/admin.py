@@ -235,13 +235,22 @@ class OrderAdmin(admin.ModelAdmin):
             return f"{obj.customer_first_name or ''} {obj.customer_last_name or ''}"
 
     def paid_at(self, obj):
-        return strftime(timezone.localtime(obj.paid_at), "%d-%m-%Y %H:%M:%S",)
+        return strftime(
+            timezone.localtime(obj.paid_at),
+            "%d-%m-%Y %H:%M:%S",
+        )
 
     def cancelled_at(self, obj):
-        return strftime(timezone.localtime(obj.cancelled_at), "%d-%m-%Y %H:%M:%S",)
+        return strftime(
+            timezone.localtime(obj.cancelled_at),
+            "%d-%m-%Y %H:%M:%S",
+        )
 
     def rejected_at(self, obj):
-        return strftime(timezone.localtime(obj.rejected), "%d-%m-%Y %H:%M:%S",)
+        return strftime(
+            timezone.localtime(obj.rejected),
+            "%d-%m-%Y %H:%M:%S",
+        )
 
     def talpa_product_id(self, obj):
         return (

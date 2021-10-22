@@ -40,14 +40,21 @@ mutation REFUND_ORDER_MUTATION($input: RefundOrderMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_refund_order(
-    api_client, order: Order, payment_provider, notification_template_order_refunded,
+    api_client,
+    order: Order,
+    payment_provider,
+    notification_template_order_refunded,
 ):
     order.status = OrderStatus.PAID
     order.customer_email = "foo@email.com"
@@ -133,7 +140,9 @@ def test_refund_order_not_enough_permissions(api_client, order):
 
 @freeze_time("2020-01-01T08:00:00Z")
 def test_refund_order_does_not_exist(
-    superuser_api_client, payment_provider, notification_template_orders_approved,
+    superuser_api_client,
+    payment_provider,
+    notification_template_orders_approved,
 ):
     order_id = to_global_id(OrderNode, uuid.uuid4())
 

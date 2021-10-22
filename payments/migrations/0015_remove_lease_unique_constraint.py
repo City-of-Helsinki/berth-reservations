@@ -10,5 +10,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveConstraint(model_name="order", name="unique_lease",),
+        migrations.RemoveConstraint(
+            model_name="order",
+            name="unique_lease",
+        ),
     ]

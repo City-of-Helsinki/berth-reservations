@@ -12,10 +12,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameModel(
-            old_name="BerthReservation", new_name="BerthApplication",
+            old_name="BerthReservation",
+            new_name="BerthApplication",
         ),
         migrations.RenameModel(
-            old_name="WinterStorageReservation", new_name="WinterStorageApplication",
+            old_name="WinterStorageReservation",
+            new_name="WinterStorageApplication",
         ),
         migrations.AlterModelOptions(
             name="berthapplication",
@@ -34,7 +36,9 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.RenameField(
-            model_name="harborchoice", old_name="reservation", new_name="application",
+            model_name="harborchoice",
+            old_name="reservation",
+            new_name="application",
         ),
         migrations.RenameField(
             model_name="winterstorageareachoice",
@@ -42,7 +46,8 @@ class Migration(migrations.Migration):
             new_name="application",
         ),
         migrations.AlterUniqueTogether(
-            name="harborchoice", unique_together={("application", "priority")},
+            name="harborchoice",
+            unique_together={("application", "priority")},
         ),
         migrations.AlterUniqueTogether(
             name="winterstorageareachoice",

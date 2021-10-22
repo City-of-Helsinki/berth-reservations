@@ -44,7 +44,9 @@ def test_order_type_berth_switch_order():
 
 
 def test_order_type_winter_storage_order():
-    order = OrderFactory(lease=WinterStorageLeaseFactory(),)
+    order = OrderFactory(
+        lease=WinterStorageLeaseFactory(),
+    )
     assert order.lease_order_type == LeaseOrderType.WINTER_STORAGE_ORDER
 
 

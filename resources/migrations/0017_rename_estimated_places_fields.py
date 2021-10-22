@@ -11,10 +11,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RemoveField(
-            model_name="winterstoragearea", name="number_of_section_spaces",
+            model_name="winterstoragearea",
+            name="number_of_section_spaces",
         ),
         migrations.RemoveField(
-            model_name="winterstoragearea", name="number_of_unmarked_spaces",
+            model_name="winterstoragearea",
+            name="number_of_unmarked_spaces",
         ),
         migrations.AddField(
             model_name="winterstoragearea",

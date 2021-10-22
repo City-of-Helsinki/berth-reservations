@@ -25,13 +25,22 @@ class Command(BaseCommand):
             help="[Required] Customer's first name",
         )
         parser.add_argument(
-            "--last-name", nargs="?", type=str, help="[Required] Customer's last name",
+            "--last-name",
+            nargs="?",
+            type=str,
+            help="[Required] Customer's last name",
         )
         parser.add_argument(
-            "--email", nargs="?", type=str, help="Customer's email address",
+            "--email",
+            nargs="?",
+            type=str,
+            help="Customer's email address",
         )
         parser.add_argument(
-            "--phone", nargs="?", type=str, help="Customer's phone number",
+            "--phone",
+            nargs="?",
+            type=str,
+            help="Customer's phone number",
         )
 
     def handle(

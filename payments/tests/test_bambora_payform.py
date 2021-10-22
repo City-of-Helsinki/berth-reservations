@@ -39,7 +39,9 @@ success_params = {
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_initiate_payment_success(provider_base_config: dict, order: Order):
     """Test the request creator constructs the payload base and returns a url that contains a token"""
@@ -60,7 +62,9 @@ def test_initiate_payment_success(provider_base_config: dict, order: Order):
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_initiate_payment_error_unavailable(provider_base_config, order: Order):
     """Test the request creator raises service unavailable if request doesn't go through"""
@@ -116,7 +120,9 @@ def test_handle_initiate_payment_error_unknown_code(order, payment_provider):
 
 
 @pytest.mark.parametrize(
-    "order_with_products", ["berth_order", "winter_storage_order"], indirect=True,
+    "order_with_products",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_payload_add_products_success(payment_provider, order_with_products: Order):
     """Test the products and total order price data is added correctly into payload"""
@@ -204,7 +210,9 @@ def test_payload_additional_product_order(
 
 
 @pytest.mark.parametrize(
-    "order_with_products", ["berth_order", "winter_storage_order"], indirect=True,
+    "order_with_products",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_payload_add_customer_success(payment_provider, order_with_products: Order):
     """Test the customer data from order is added correctly into payload"""
@@ -342,7 +350,9 @@ def test_handle_success_request_order_not_found(provider_base_config, order):
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_handle_success_request_success(provider_base_config, order: Order):
     """Test request helper changes the order status to PAID
@@ -370,7 +380,9 @@ def test_handle_success_request_success(provider_base_config, order: Order):
 
 
 @pytest.mark.parametrize(
-    "order", ["winter_storage_order"], indirect=True,
+    "order",
+    ["winter_storage_order"],
+    indirect=True,
 )
 def test_generate_sticker_number_for_ws_lease(provider_base_config, order: Order):
     create_ws_sticker_sequences()
@@ -527,7 +539,8 @@ def test_handle_notify_request_success(
 
 
 def test_handle_notify_request_success_for_ap_order(
-    provider_base_config, berth_order: Order,
+    provider_base_config,
+    berth_order: Order,
 ):
     berth_order.order_number = "abc123"
     berth_order.status = OrderStatus.OFFERED
@@ -618,7 +631,9 @@ def test_get_payment_email_url(provider_base_config, order):
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_initiate_duplicated_payment(provider_base_config, order):
     request = RequestFactory().request()
@@ -646,7 +661,9 @@ def test_initiate_duplicated_payment(provider_base_config, order):
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 @freeze_time("2019-01-14T08:00:00Z")
 def test_initiate_duplicated_payment_new_token_after_expiry(
@@ -684,7 +701,9 @@ def test_initiate_duplicated_payment_new_token_after_expiry(
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 @freeze_time("2019-01-14T08:00:00Z")
 def test_duplicate_payments_tokens_cancelled(provider_base_config, order: Order):
@@ -755,7 +774,9 @@ def test_duplicate_payments_tokens_cancelled(provider_base_config, order: Order)
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 @freeze_time("2019-01-14T08:00:00Z")
 def test_duplicate_payments_tokens_cancelled_notify_payment(

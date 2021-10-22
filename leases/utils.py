@@ -250,7 +250,9 @@ def exchange_berth_for_lease(
         contract = old_lease.contract
 
     old_lease = terminate_lease(
-        lease=old_lease, end_date=switch_date, send_notice=False,
+        lease=old_lease,
+        end_date=switch_date,
+        send_notice=False,
     )
     if len(old_lease.comment) > 0:
         old_lease.comment += f"\n{old_lease_comment}"

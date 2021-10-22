@@ -10,6 +10,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="berthapplication", name="data",),
-        migrations.RemoveField(model_name="winterstorageapplication", name="data",),
+        migrations.RemoveField(
+            model_name="berthapplication",
+            name="data",
+        ),
+        migrations.RemoveField(
+            model_name="winterstorageapplication",
+            name="data",
+        ),
     ]

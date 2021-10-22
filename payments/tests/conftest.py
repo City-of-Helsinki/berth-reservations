@@ -66,7 +66,8 @@ def _generate_order(order_type: str = None):
         order = OrderFactory(
             customer=customer_profile,
             lease=BerthLeaseFactory(
-                application=BerthApplicationFactory(), customer=customer_profile,
+                application=BerthApplicationFactory(),
+                customer=customer_profile,
             ),
         )
     elif order_type == "winter_storage_order":
@@ -101,7 +102,8 @@ def _generate_order(order_type: str = None):
         )
     elif order_type == "additional_product_order_with_lease_order":
         lease = BerthLeaseFactory(
-            application=BerthApplicationFactory(), customer=customer_profile,
+            application=BerthApplicationFactory(),
+            customer=customer_profile,
         )
         OrderFactory(
             order_type=OrderType.LEASE_ORDER,

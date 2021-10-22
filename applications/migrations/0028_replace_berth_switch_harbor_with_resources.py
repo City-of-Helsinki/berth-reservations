@@ -116,7 +116,10 @@ class Migration(migrations.Migration):
         migrations.RunPython(
             berth_switch_save_servicemap_id, reverse_code=migrations.RunPython.noop
         ),
-        migrations.RemoveField(model_name="berthswitch", name="harbor",),
+        migrations.RemoveField(
+            model_name="berthswitch",
+            name="harbor",
+        ),
         migrations.AddField(
             model_name="berthswitch",
             name="harbor",
@@ -135,8 +138,12 @@ class Migration(migrations.Migration):
             model_name="berthswitch",
             name="harbor",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="resources.harbor",
+                on_delete=django.db.models.deletion.CASCADE,
+                to="resources.harbor",
             ),
         ),
-        migrations.RemoveField(model_name="berthswitch", name="_temp_servicemap_id",),
+        migrations.RemoveField(
+            model_name="berthswitch",
+            name="_temp_servicemap_id",
+        ),
     ]

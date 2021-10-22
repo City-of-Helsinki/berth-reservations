@@ -31,13 +31,17 @@ mutation SEND_BERTH_SWITCH_OFFER_MUTATION($input: SendBerthSwitchOfferMutationIn
 
 @freeze_time("2020-10-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @pytest.mark.parametrize(
-    "offer_has_contact_info", [True, False],
+    "offer_has_contact_info",
+    [True, False],
 )
 @pytest.mark.parametrize(
-    "profile_token", [None, "dummy_token"],
+    "profile_token",
+    [None, "dummy_token"],
 )
 @pytest.mark.parametrize("offer_status", [OfferStatus.DRAFTED, OfferStatus.OFFERED])
 def test_send_berth_switch_offer(

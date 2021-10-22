@@ -11,8 +11,13 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RemoveField(
-            model_name="winterstorageareamap", name="winter_storage_area",
+            model_name="winterstorageareamap",
+            name="winter_storage_area",
         ),
-        migrations.DeleteModel(name="HarborMap",),
-        migrations.DeleteModel(name="WinterStorageAreaMap",),
+        migrations.DeleteModel(
+            name="HarborMap",
+        ),
+        migrations.DeleteModel(
+            name="WinterStorageAreaMap",
+        ),
     ]

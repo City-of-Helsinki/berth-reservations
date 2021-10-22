@@ -54,7 +54,16 @@ class Migration(migrations.Migration):
                 verbose_name="berth",
             ),
         ),
-        migrations.RemoveField(model_name="berthswitch", name="berth_number",),
-        migrations.RemoveField(model_name="berthswitch", name="harbor",),
-        migrations.RemoveField(model_name="berthswitch", name="pier",),
+        migrations.RemoveField(
+            model_name="berthswitch",
+            name="berth_number",
+        ),
+        migrations.RemoveField(
+            model_name="berthswitch",
+            name="harbor",
+        ),
+        migrations.RemoveField(
+            model_name="berthswitch",
+            name="pier",
+        ),
     ]

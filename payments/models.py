@@ -118,10 +118,14 @@ class BerthProduct(
     """The range boundaries are (]"""
 
     min_width = models.DecimalField(
-        verbose_name=_("minimum width"), max_digits=5, decimal_places=2,
+        verbose_name=_("minimum width"),
+        max_digits=5,
+        decimal_places=2,
     )
     max_width = models.DecimalField(
-        verbose_name=_("maximum width"), max_digits=5, decimal_places=2,
+        verbose_name=_("maximum width"),
+        max_digits=5,
+        decimal_places=2,
     )
     tier_1_price = models.DecimalField(
         verbose_name=_("tier 1 price"),
@@ -321,7 +325,8 @@ class OrderManager(SerializableMixin.SerializableManager):
 
         expire_before_date = date.today() - timedelta(days=older_than_days)
         too_old_offered_orders = self.get_queryset().filter(
-            status=OrderStatus.OFFERED, due_date__lt=expire_before_date,
+            status=OrderStatus.OFFERED,
+            due_date__lt=expire_before_date,
         )
         num_expired = 0
         for order in too_old_offered_orders:
@@ -926,7 +931,9 @@ class OrderLine(UUIDModel, TimeStampedModel, SerializableMixin):
         on_delete=models.SET_NULL,
     )
     quantity = models.PositiveSmallIntegerField(
-        verbose_name=_("quantity"), default=1, validators=[MinValueValidator(1)],
+        verbose_name=_("quantity"),
+        default=1,
+        validators=[MinValueValidator(1)],
     )
     price = models.DecimalField(
         verbose_name=_("price"),
@@ -984,11 +991,15 @@ class OrderLine(UUIDModel, TimeStampedModel, SerializableMixin):
         if self.order.lease:
             if self.product.period == PeriodType.MONTH:
                 price = calculate_product_partial_month_price(
-                    price, self.order.lease.start_date, self.order.lease.end_date,
+                    price,
+                    self.order.lease.start_date,
+                    self.order.lease.end_date,
                 )
             elif self.product.period == PeriodType.YEAR:
                 price = calculate_product_partial_year_price(
-                    price, self.order.lease.start_date, self.order.lease.end_date,
+                    price,
+                    self.order.lease.start_date,
+                    self.order.lease.end_date,
                 )
             # The price for season products should always be full
         if hasattr(self.order.customer, "organization"):
@@ -996,7 +1007,8 @@ class OrderLine(UUIDModel, TimeStampedModel, SerializableMixin):
 
             self.price = calculate_organization_price(price, organization_type)
             self.tax_percentage = calculate_organization_tax_percentage(
-                self.product.tax_percentage, organization_type,
+                self.product.tax_percentage,
+                organization_type,
             )
         else:
             self.price = rounded_decimal(price)
@@ -1071,7 +1083,10 @@ class OrderLogEntry(UUIDModel, TimeStampedModel, SerializableMixin):
 
 class OrderToken(UUIDModel, TimeStampedModel):
     order = models.ForeignKey(
-        Order, verbose_name=_("order"), related_name="tokens", on_delete=models.CASCADE,
+        Order,
+        verbose_name=_("order"),
+        related_name="tokens",
+        on_delete=models.CASCADE,
     )
     token = models.CharField(verbose_name=_("token"), max_length=64, blank=True)
     valid_until = models.DateTimeField(verbose_name=_("valid until"))
@@ -1222,7 +1237,8 @@ class BerthSwitchOfferManager(SerializableMixin.SerializableManager):
 
         expire_before_date = date.today() - timedelta(days=older_than_days)
         too_old_pending_offers = self.get_queryset().filter(
-            status=OfferStatus.OFFERED, due_date__lt=expire_before_date,
+            status=OfferStatus.OFFERED,
+            due_date__lt=expire_before_date,
         )
         if not dry_run:
             for offer in too_old_pending_offers:

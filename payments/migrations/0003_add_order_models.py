@@ -122,7 +122,9 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"abstract": False,},
+            options={
+                "abstract": False,
+            },
         ),
         migrations.CreateModel(
             name="OrderLogEntry",
@@ -169,7 +171,9 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"verbose_name_plural": "order log entries",},
+            options={
+                "verbose_name_plural": "order log entries",
+            },
         ),
         migrations.CreateModel(
             name="OrderLine",
@@ -246,6 +250,8 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"abstract": False,},
+            options={
+                "abstract": False,
+            },
         ),
     ]

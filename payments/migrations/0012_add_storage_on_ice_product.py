@@ -37,7 +37,8 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.RemoveConstraint(
-            model_name="additionalproduct", name="optional_services_per_period",
+            model_name="additionalproduct",
+            name="optional_services_per_period",
         ),
         migrations.AddConstraint(
             model_name="additionalproduct",

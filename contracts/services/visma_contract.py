@@ -102,7 +102,10 @@ class VismaContractService(ContractService):
         return r.json()["methods"]
 
     def fulfill_contract(
-        self, contract: VismaContract, auth_service: str, return_url: str,
+        self,
+        contract: VismaContract,
+        auth_service: str,
+        return_url: str,
     ) -> str:
         payload = {"returnUrl": return_url, "authService": auth_service}
         if self.test_ssn:
@@ -116,7 +119,8 @@ class VismaContractService(ContractService):
 
     def get_document(self, contract: VismaContract) -> bytes:
         r = self._make_request(
-            f"/api/v1/document/{contract.document_id}/files/0", "GET",
+            f"/api/v1/document/{contract.document_id}/files/0",
+            "GET",
         )
         return r.content
 
@@ -175,7 +179,11 @@ class VismaContractService(ContractService):
         return r
 
     def _get_headers(
-        self, path: str, method: str, payload: bytes, content_type: str,
+        self,
+        path: str,
+        method: str,
+        payload: bytes,
+        content_type: str,
     ) -> Dict[str, str]:
         # date format: RFC 2822
         date = formatdate()

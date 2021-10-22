@@ -75,7 +75,9 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"abstract": False,},
+            options={
+                "abstract": False,
+            },
         ),
         migrations.CreateModel(
             name="OrderRefundLogEntry",
@@ -132,6 +134,8 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"verbose_name_plural": "refund log entries",},
+            options={
+                "verbose_name_plural": "refund log entries",
+            },
         ),
     ]

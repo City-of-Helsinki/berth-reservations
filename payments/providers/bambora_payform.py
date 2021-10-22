@@ -4,7 +4,6 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Iterable, List, Optional
-from django.utils import timezone
 
 import requests
 from dateutil.relativedelta import relativedelta
@@ -12,6 +11,7 @@ from dateutil.utils import today
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse, HttpResponseServerError
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _, override
 from requests.exceptions import RequestException
 

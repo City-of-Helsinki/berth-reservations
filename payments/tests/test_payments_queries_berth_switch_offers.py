@@ -60,7 +60,9 @@ def test_get_berth_switch_offers(berth_switch_offer, api_client):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+    "api_client",
+    ["api_client", "user", "harbor_services"],
+    indirect=True,
 )
 def test_get_berth_switch_offers_not_enough_permissions(berth_switch_offer, api_client):
     executed = api_client.execute(BERTH_SWITCH_OFFERS_QUERY)
