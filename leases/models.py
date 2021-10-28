@@ -61,6 +61,18 @@ class AbstractLease(TimeStampedModel, UUIDModel):
     def order(self):
         return self.orders.filter(order_type=OrderType.LEASE_ORDER).first()
 
+    @property
+    def has_started(self):
+        return today().date() >= self.start_date
+
+    @property
+    def has_ended(self):
+        return today().date() > self.end_date
+
+    @property
+    def is_ongoing(self):
+        return self.has_started and not self.has_ended
+
     def clean(self):
         if self.boat and self.boat.owner != self.customer:
             raise ValidationError(

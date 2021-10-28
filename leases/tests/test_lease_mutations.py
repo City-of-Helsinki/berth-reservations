@@ -2025,7 +2025,10 @@ mutation TERMINATE_BERTH_LEASE($input: TerminateBerthLeaseMutationInput!) {
 """
 
 
-@freeze_time("2020-07-01T08:00:00Z")
+@pytest.mark.parametrize(
+    "time,expected_end_date",
+    [("2020-07-01T08:00:00Z", "2020-07-01"), ("2020-10-01T08:00:00Z", "2020-09-14")],
+)
 @pytest.mark.parametrize(
     "api_client",
     ["berth_services", "berth_handler"],
@@ -2036,41 +2039,45 @@ mutation TERMINATE_BERTH_LEASE($input: TerminateBerthLeaseMutationInput!) {
     [LeaseStatus.PAID, LeaseStatus.ERROR, LeaseStatus.OFFERED],
 )
 def test_terminate_berth_lease_with_application(
-    api_client, lease_status, notification_template_berth_lease_terminated
+    api_client,
+    lease_status,
+    notification_template_berth_lease_terminated,
+    time,
+    expected_end_date,
 ):
-    berth_lease = BerthLeaseFactory(
-        start_date=today() - relativedelta(weeks=1),
-        end_date=today() + relativedelta(weeks=1),
-        status=lease_status,
-        application=BerthApplicationFactory(email="foo@email.com", language="fi"),
-    )
-
-    end_date = today().date()
-    variables = {
-        "id": to_global_id(BerthLeaseNode, berth_lease.id),
-    }
-
-    executed = api_client.execute(TERMINATE_BERTH_LEASE_MUTATION, input=variables)
-
-    assert executed["data"]["terminateBerthLease"]["berthLease"] == {
-        "status": LeaseStatus.TERMINATED.name,
-        "endDate": str(end_date),
-    }
-    assert len(mail.outbox) == 1
-    assert mail.outbox[0].subject == "test berth lease rejected subject"
-    assert (
-        mail.outbox[0].body
-        == f"test berth lease terminated { format_date(end_date, locale='fi') } { berth_lease.id }"
-    )
-    assert mail.outbox[0].to == ["foo@email.com"]
-
-    assert mail.outbox[0].alternatives == [
-        (
-            f"<b>test berth lease terminated</b> "
-            f"{ format_date(end_date, locale='fi') } { berth_lease.id }",
-            "text/html",
+    with freeze_time(time):
+        berth_lease = BerthLeaseFactory(
+            start_date="2020-06-10",
+            end_date="2020-09-14",
+            status=lease_status,
+            application=BerthApplicationFactory(email="foo@email.com", language="fi"),
         )
-    ]
+
+        variables = {
+            "id": to_global_id(BerthLeaseNode, berth_lease.id),
+        }
+
+        executed = api_client.execute(TERMINATE_BERTH_LEASE_MUTATION, input=variables)
+
+        assert executed["data"]["terminateBerthLease"]["berthLease"] == {
+            "status": LeaseStatus.TERMINATED.name,
+            "endDate": str(expected_end_date),
+        }
+        assert len(mail.outbox) == 1
+        assert mail.outbox[0].subject == "test berth lease rejected subject"
+        assert (
+            mail.outbox[0].body
+            == f"test berth lease terminated {format_date(today().date(), locale='fi')} {berth_lease.id}"
+        )
+        assert mail.outbox[0].to == ["foo@email.com"]
+
+        assert mail.outbox[0].alternatives == [
+            (
+                f"<b>test berth lease terminated</b> "
+                f"{format_date(today().date(), locale='fi')} {berth_lease.id}",
+                "text/html",
+            )
+        ]
 
 
 @pytest.mark.parametrize(
@@ -2162,14 +2169,14 @@ def test_terminate_berth_lease_without_application(
     assert mail.outbox[0].subject == "test berth lease rejected subject"
     assert (
         mail.outbox[0].body
-        == f"test berth lease terminated { format_date(end_date, locale='fi') } { berth_lease.id }"
+        == f"test berth lease terminated {format_date(end_date, locale='fi')} {berth_lease.id}"
     )
     assert mail.outbox[0].to == ["foo@email.com"]
 
     assert mail.outbox[0].alternatives == [
         (
             f"<b>test berth lease terminated</b> "
-            f"{ format_date(end_date, locale='fi') } { berth_lease.id }",
+            f"{format_date(end_date, locale='fi')} {berth_lease.id}",
             "text/html",
         )
     ]
@@ -2351,14 +2358,14 @@ def test_terminate_ws_lease_with_application(
     assert mail.outbox[0].subject == "test ws lease rejected subject"
     assert (
         mail.outbox[0].body
-        == f"test ws lease terminated { format_date(end_date, locale='fi') } { ws_lease.id }"
+        == f"test ws lease terminated {format_date(end_date, locale='fi')} {ws_lease.id}"
     )
     assert mail.outbox[0].to == ["foo@email.com"]
 
     assert mail.outbox[0].alternatives == [
         (
             f"<b>test ws lease terminated</b> "
-            f"{ format_date(end_date, locale='fi') } { ws_lease.id }",
+            f"{format_date(end_date, locale='fi')} {ws_lease.id}",
             "text/html",
         )
     ]
@@ -2407,14 +2414,14 @@ def test_terminate_ws_lease_without_application(
     assert mail.outbox[0].subject == "test ws lease rejected subject"
     assert (
         mail.outbox[0].body
-        == f"test ws lease terminated { format_date(end_date, locale='fi') } { ws_lease.id }"
+        == f"test ws lease terminated {format_date(end_date, locale='fi')} {ws_lease.id}"
     )
     assert mail.outbox[0].to == ["foo@email.com"]
 
     assert mail.outbox[0].alternatives == [
         (
             f"<b>test ws lease terminated</b> "
-            f"{ format_date(end_date, locale='fi') } { ws_lease.id }",
+            f"{format_date(end_date, locale='fi')} {ws_lease.id}",
             "text/html",
         )
     ]
