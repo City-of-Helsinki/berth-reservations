@@ -63,7 +63,9 @@ mutation CREATE_ADDITIONAL_PRODUCT_ORDER($input: CreateAdditionalProductOrderMut
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_additional_product_order(api_client):

@@ -1,7 +1,7 @@
 # Build a base image for development and production stages.
 # Note that this stage won't get thrown out so we need to think about
 # layer sizes from this point on.
-FROM helsinkitest/python:3.8-slim as appbase
+FROM helsinkitest/python:3.9-slim as appbase
 
 # Copy requirement files.
 COPY --chown=appuser:appuser requirements.txt /app/
@@ -11,18 +11,18 @@ COPY --chown=appuser:appuser requirements.txt /app/
 # that is the default state of the image and development stages are
 # just extras.
 RUN apt-install.sh \
-      gdal-bin \
-      python-gdal \
-      python3-gdal \
-      gettext \
-      build-essential \
-      netcat \
-      pkg-config \
-    && pip install --no-cache-dir \
-      -r /app/requirements.txt \
-    && apt-cleanup.sh \
-      build-essential \
-      pkg-config
+  gdal-bin \
+  python-gdal \
+  python3-gdal \
+  gettext \
+  build-essential \
+  netcat \
+  pkg-config \
+  && pip install --no-cache-dir \
+  -r /app/requirements.txt \
+  && apt-cleanup.sh \
+  build-essential \
+  pkg-config
 
 # Copy and set the entrypoint.
 COPY --chown=appuser:appuser docker-entrypoint.sh /app

@@ -325,10 +325,9 @@ def test_berth_lease_no_product():
 
     lease = BerthLease.objects.exclude(id=lease.id).first()
     assert lease.id in invoicing_service.failed_leases[0].keys()
-    assert "Order must have either product object or price value" in invoicing_service.failed_leases[
-        0
-    ].get(
-        lease.id
+    assert (
+        "Order must have either product object or price value"
+        in invoicing_service.failed_leases[0].get(lease.id)
     )
 
 
@@ -545,9 +544,11 @@ def test_send_berth_invoices_only_not_renewed(notification_template_orders_appro
 
     # The already renewed lease and the old one, plus the valid and it's renewed lease
     assert BerthLease.objects.count() == 4
-    lease: BerthLease = BerthLease.objects.filter(
-        customer=valid_lease.customer
-    ).exclude(id=valid_lease.id).first()
+    lease: BerthLease = (
+        BerthLease.objects.filter(customer=valid_lease.customer)
+        .exclude(id=valid_lease.id)
+        .first()
+    )
 
     assert lease.status == LeaseStatus.OFFERED
     assert lease.start_date.isoformat() == "2020-06-10"
@@ -604,7 +605,9 @@ def test_send_berth_invoices_invalid_limit_reached(
         side_effect=mocked_response_profile(count=1, data=data),
     ):
         with mock.patch.object(
-            invoicing_service, "email_admins", wraps=invoicing_service.email_admins,
+            invoicing_service,
+            "email_admins",
+            wraps=invoicing_service.email_admins,
         ) as email_admins_mock:
             invoicing_service.MAXIMUM_FAILURES = 1
             invoicing_service.send_invoices()

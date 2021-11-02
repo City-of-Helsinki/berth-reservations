@@ -51,7 +51,9 @@ mutation UPDATE_OFFER($input: UpdateBerthSwitchOfferMutationInput!) {
 
 @freeze_time("2021-01-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @pytest.mark.parametrize(
     "initial_offer_status, initial_application_status, offer_status, expected_application_status",

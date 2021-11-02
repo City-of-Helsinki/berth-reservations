@@ -240,7 +240,12 @@ class OrderNode(DjangoObjectType):
     def get_queryset(cls, queryset, info):
         user = info.context.user
         return return_queryset_if_user_has_permissions(
-            queryset, user, Order, BerthLease, WinterStorageLease, CustomerProfile,
+            queryset,
+            user,
+            Order,
+            BerthLease,
+            WinterStorageLease,
+            CustomerProfile,
         )
 
     @classmethod
@@ -273,7 +278,10 @@ class OrderRefundNode(DjangoObjectType):
     def get_queryset(cls, queryset, info):
         user = info.context.user
         return return_queryset_if_user_has_permissions(
-            queryset, user, Order, OrderRefund,
+            queryset,
+            user,
+            Order,
+            OrderRefund,
         )
 
 
@@ -304,7 +312,11 @@ class BerthSwitchOfferNode(DjangoObjectType, AbstractOfferNode):
     def get_queryset(cls, queryset, info):
         user = info.context.user
         return return_queryset_if_user_has_permissions(
-            queryset, user, BerthSwitchOffer, BerthLease, BerthApplication,
+            queryset,
+            user,
+            BerthSwitchOffer,
+            BerthLease,
+            BerthApplication,
         )
 
     @classmethod

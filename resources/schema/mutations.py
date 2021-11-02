@@ -114,7 +114,10 @@ class CreateBerthMutation(graphene.ClientIDMutation):
         input["berth_type"] = berth_type
 
         input["pier"] = get_node_from_global_id(
-            info, input.pop("pier_id"), only_type=PierNode, nullable=False,
+            info,
+            input.pop("pier_id"),
+            only_type=PierNode,
+            nullable=False,
         )
         berth = Berth.objects.create(**input)
         return CreateBerthMutation(berth=berth)
@@ -131,7 +134,10 @@ class UpdateBerthMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         berth = get_node_from_global_id(
-            info, input.pop("id"), only_type=BerthNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=BerthNode,
+            nullable=False,
         )
 
         width = input.pop("width", None)
@@ -155,7 +161,10 @@ class UpdateBerthMutation(graphene.ClientIDMutation):
 
         if input.get("pier_id"):
             input["pier"] = get_node_from_global_id(
-                info, input.pop("pier_id"), only_type=PierNode, nullable=False,
+                info,
+                input.pop("pier_id"),
+                only_type=PierNode,
+                nullable=False,
             )
 
         update_object(berth, input)
@@ -172,7 +181,10 @@ class DeleteBerthMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         berth = get_node_from_global_id(
-            info, input.get("id"), only_type=BerthNode, nullable=False,
+            info,
+            input.get("id"),
+            only_type=BerthNode,
+            nullable=False,
         )
 
         delete_inactive_leases(BerthLease, Q(berth=berth), "Berth")
@@ -261,7 +273,10 @@ class UpdateHarborMutation(graphene.ClientIDMutation, AbstractAreaMixin):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         harbor = get_node_from_global_id(
-            info, input.pop("id"), only_type=HarborNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=HarborNode,
+            nullable=False,
         )
 
         cls.validate_availability_level_id(input)
@@ -280,7 +295,10 @@ class DeleteHarborMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         harbor = get_node_from_global_id(
-            info, input.pop("id"), only_type=HarborNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=HarborNode,
+            nullable=False,
         )
 
         delete_inactive_leases(BerthLease, Q(berth__pier__harbor=harbor), "Harbor")
@@ -331,7 +349,10 @@ class DeleteWinterStorageAreaMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         winter_storage_area = get_node_from_global_id(
-            info, input.pop("id"), only_type=WinterStorageAreaNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=WinterStorageAreaNode,
+            nullable=False,
         )
 
         delete_inactive_leases(
@@ -360,7 +381,10 @@ class UpdateWinterStorageAreaMutation(graphene.ClientIDMutation, AbstractAreaMix
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         winter_storage_area = get_node_from_global_id(
-            info, input.pop("id"), only_type=WinterStorageAreaNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=WinterStorageAreaNode,
+            nullable=False,
         )
         cls.validate_availability_level_id(input)
         cls.validate_municipality_id(input)
@@ -407,7 +431,10 @@ class UpdateWinterStoragePlaceTypeMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         winter_storage_place_type = get_node_from_global_id(
-            info, input.pop("id"), only_type=WinterStoragePlaceTypeNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=WinterStoragePlaceTypeNode,
+            nullable=False,
         )
         update_object(winter_storage_place_type, input)
 
@@ -425,7 +452,10 @@ class DeleteWinterStoragePlaceTypeMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         winter_storage_place_type = get_node_from_global_id(
-            info, input.get("id"), only_type=WinterStoragePlaceTypeNode, nullable=False,
+            info,
+            input.get("id"),
+            only_type=WinterStoragePlaceTypeNode,
+            nullable=False,
         )
         if place_count := winter_storage_place_type.places.count():
             raise VenepaikkaGraphQLError(
@@ -463,7 +493,10 @@ class CreatePierMutation(graphene.ClientIDMutation):
 
         if input.get("harbor_id"):
             harbor = get_node_from_global_id(
-                info, input.pop("harbor_id"), only_type=HarborNode, nullable=False,
+                info,
+                input.pop("harbor_id"),
+                only_type=HarborNode,
+                nullable=False,
             )
             input["harbor"] = harbor
 
@@ -495,12 +528,18 @@ class UpdatePierMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         pier = get_node_from_global_id(
-            info, input.pop("id"), only_type=PierNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=PierNode,
+            nullable=False,
         )
 
         if input.get("harbor_id"):
             harbor = get_node_from_global_id(
-                info, input.pop("harbor_id"), only_type=HarborNode, nullable=False,
+                info,
+                input.pop("harbor_id"),
+                only_type=HarborNode,
+                nullable=False,
             )
             input["harbor"] = harbor
 
@@ -530,7 +569,10 @@ class DeletePierMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         pier = get_node_from_global_id(
-            info, input.pop("id"), only_type=PierNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=PierNode,
+            nullable=False,
         )
 
         delete_inactive_leases(BerthLease, Q(berth__pier=pier), "Pier")
@@ -589,7 +631,10 @@ class UpdateWinterStorageSectionMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         winter_storage_section = get_node_from_global_id(
-            info, input.pop("id"), only_type=WinterStorageSectionNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=WinterStorageSectionNode,
+            nullable=False,
         )
 
         if input.get("area_id"):
@@ -620,7 +665,10 @@ class DeleteWinterStorageSectionMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         winter_storage_section = get_node_from_global_id(
-            info, input.pop("id"), only_type=WinterStorageSectionNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=WinterStorageSectionNode,
+            nullable=False,
         )
 
         delete_inactive_leases(
@@ -686,7 +734,10 @@ class UpdateWinterStoragePlaceMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         winter_storage_place = get_node_from_global_id(
-            info, input.pop("id"), only_type=WinterStoragePlaceNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=WinterStoragePlaceNode,
+            nullable=False,
         )
 
         width = input.pop("width", None)
@@ -727,7 +778,10 @@ class DeleteWinterStoragePlaceMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         winter_storage_place = get_node_from_global_id(
-            info, input.get("id"), only_type=WinterStoragePlaceNode, nullable=False,
+            info,
+            input.get("id"),
+            only_type=WinterStoragePlaceNode,
+            nullable=False,
         )
 
         delete_inactive_leases(

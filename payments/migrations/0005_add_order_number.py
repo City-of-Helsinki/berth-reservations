@@ -22,7 +22,9 @@ class Migration(migrations.Migration):
             model_name="order",
             name="order_number",
             field=models.CharField(
-                max_length=64, null=True, verbose_name="order number",
+                max_length=64,
+                null=True,
+                verbose_name="order number",
             ),
         ),
         migrations.RunPython(

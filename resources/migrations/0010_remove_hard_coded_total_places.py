@@ -10,8 +10,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="harbor", name="number_of_places",),
         migrations.RemoveField(
-            model_name="winterstoragearea", name="number_of_marked_places",
+            model_name="harbor",
+            name="number_of_places",
+        ),
+        migrations.RemoveField(
+            model_name="winterstoragearea",
+            name="number_of_marked_places",
         ),
     ]

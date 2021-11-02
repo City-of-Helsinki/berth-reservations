@@ -11,7 +11,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterModelOptions(
-            name="harborchoice", options={"ordering": ("application", "priority")},
+            name="harborchoice",
+            options={"ordering": ("application", "priority")},
         ),
         migrations.AlterModelOptions(
             name="winterstorageareachoice",

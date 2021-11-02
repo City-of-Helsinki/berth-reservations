@@ -10,9 +10,24 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="harbor", name="maximum_depth",),
-        migrations.RemoveField(model_name="harbor", name="maximum_length",),
-        migrations.RemoveField(model_name="harbor", name="maximum_width",),
-        migrations.RemoveField(model_name="winterstoragearea", name="max_length",),
-        migrations.RemoveField(model_name="winterstoragearea", name="max_width",),
+        migrations.RemoveField(
+            model_name="harbor",
+            name="maximum_depth",
+        ),
+        migrations.RemoveField(
+            model_name="harbor",
+            name="maximum_length",
+        ),
+        migrations.RemoveField(
+            model_name="harbor",
+            name="maximum_width",
+        ),
+        migrations.RemoveField(
+            model_name="winterstoragearea",
+            name="max_length",
+        ),
+        migrations.RemoveField(
+            model_name="winterstoragearea",
+            name="max_width",
+        ),
     ]

@@ -18,7 +18,9 @@ from resources.enums import BerthMooringType
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_approve_order(
     order: Order,
@@ -66,10 +68,13 @@ def test_approve_order(
 
 
 @pytest.mark.parametrize(
-    "order", ["non_billable_customer_order"], indirect=True,
+    "order",
+    ["non_billable_customer_order"],
+    indirect=True,
 )
 def test_approve_order_with_non_billable_customer(
-    order: Order, helsinki_profile_user,
+    order: Order,
+    helsinki_profile_user,
 ):
     order.status = OrderStatus.DRAFTED
     order.save(update_fields=["status"])
@@ -84,7 +89,9 @@ def test_approve_order_with_non_billable_customer(
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order"], indirect=True,
+    "order",
+    ["berth_order"],
+    indirect=True,
 )
 def test_send_payment_notification_example_email(order: Order):
     order.customer_email = "foo@example.com"

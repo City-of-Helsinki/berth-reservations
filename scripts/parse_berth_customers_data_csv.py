@@ -800,7 +800,10 @@ def save_helsinki_profile_stubs_to_json():
 def save_berth_profile_stubs_to_json():
     with open("berth_profile_stubs.json", "w") as json_file:
         json.dump(
-            BERTH_RESERVATIONS_STUBS, json_file, ensure_ascii=False, indent=2,
+            BERTH_RESERVATIONS_STUBS,
+            json_file,
+            ensure_ascii=False,
+            indent=2,
         )
 
 

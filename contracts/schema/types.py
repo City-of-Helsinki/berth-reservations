@@ -24,7 +24,9 @@ class BerthContractNode(DjangoObjectType):
     def get_queryset(cls, queryset, info):
         user = info.context.user
         return return_queryset_if_user_has_permissions(
-            queryset, user, VismaBerthContract,
+            queryset,
+            user,
+            VismaBerthContract,
         )
 
 
@@ -41,7 +43,9 @@ class WinterStorageContractNode(DjangoObjectType):
     def get_queryset(cls, queryset, info):
         user = info.context.user
         return return_queryset_if_user_has_permissions(
-            queryset, user, VismaWinterStorageContract,
+            queryset,
+            user,
+            VismaWinterStorageContract,
         )
 
 

@@ -70,7 +70,10 @@ for application in BerthApplication.objects.filter(berth_switch__isnull=False):
         ).first()
         if not pier and harbor.piers.count() == 1:
             pier = harbor.piers.first()
-        _ = Berth.objects.get(pier=pier, number=switch.berth_number,)
+        _ = Berth.objects.get(
+            pier=pier,
+            number=switch.berth_number,
+        )
     except (Berth.DoesNotExist, Pier.DoesNotExist, Harbor.DoesNotExist):
         customers.append(
             [
@@ -89,6 +92,10 @@ for application in BerthApplication.objects.filter(berth_switch__isnull=False):
         # application.delete()
 
 with open("customers.csv", mode="w+") as csvfile:
-    writer = csv.writer(csvfile, delimiter=",", quotechar='"',)
+    writer = csv.writer(
+        csvfile,
+        delimiter=",",
+        quotechar='"',
+    )
     for customer in customers:
         writer.writerow(customer)

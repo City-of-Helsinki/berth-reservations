@@ -40,13 +40,17 @@ class Migration(migrations.Migration):
         ),
         # Actual changes
         migrations.RemoveConstraint(
-            model_name="berthproduct", name="unique_product_for_harbor_pricegroup",
+            model_name="berthproduct",
+            name="unique_product_for_harbor_pricegroup",
         ),
         migrations.AddField(
             model_name="berthproduct",
             name="max_width",
             field=models.DecimalField(
-                decimal_places=2, max_digits=5, verbose_name="maximum width", default=0,
+                decimal_places=2,
+                max_digits=5,
+                verbose_name="maximum width",
+                default=0,
             ),
             preserve_default=False,
         ),
@@ -54,7 +58,10 @@ class Migration(migrations.Migration):
             model_name="berthproduct",
             name="min_width",
             field=models.DecimalField(
-                decimal_places=2, max_digits=5, verbose_name="minimum width", default=0,
+                decimal_places=2,
+                max_digits=5,
+                verbose_name="minimum width",
+                default=0,
             ),
             preserve_default=False,
         ),
@@ -95,16 +102,28 @@ class Migration(migrations.Migration):
             preserve_default=False,
         ),
         migrations.AlterModelOptions(
-            name="berthproduct", options={"ordering": ["min_width"]},
+            name="berthproduct",
+            options={"ordering": ["min_width"]},
         ),
-        migrations.RemoveField(model_name="berthproduct", name="harbor",),
-        migrations.RemoveField(model_name="berthproduct", name="price_group",),
-        migrations.RemoveField(model_name="berthproduct", name="price_value",),
+        migrations.RemoveField(
+            model_name="berthproduct",
+            name="harbor",
+        ),
+        migrations.RemoveField(
+            model_name="berthproduct",
+            name="price_group",
+        ),
+        migrations.RemoveField(
+            model_name="berthproduct",
+            name="price_value",
+        ),
         migrations.AddConstraint(
             model_name="berthproduct",
             constraint=models.UniqueConstraint(
                 fields=("min_width", "max_width"), name="unique_width_range"
             ),
         ),
-        migrations.DeleteModel(name="BerthPriceGroup",),
+        migrations.DeleteModel(
+            name="BerthPriceGroup",
+        ),
     ]

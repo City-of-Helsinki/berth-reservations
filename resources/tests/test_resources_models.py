@@ -124,7 +124,10 @@ def test_berth_is_not_available_auto_renew_last_season(superuser_api_client, ber
     start_date = start_date.replace(year=start_date.year - 1)
     end_date = end_date.replace(year=end_date.year - 1)
     BerthLeaseFactory(
-        berth=berth, start_date=start_date, end_date=end_date, status=LeaseStatus.PAID,
+        berth=berth,
+        start_date=start_date,
+        end_date=end_date,
+        status=LeaseStatus.PAID,
     )
     assert not Berth.objects.get(id=berth.id).is_available
 
@@ -309,7 +312,9 @@ def test_winter_storage_place_is_available_ends_during_season_after_lease_ends(
     end_date = end_date.replace(month=end_date.month - 1)
 
     WinterStorageLeaseFactory(
-        place=winter_storage_place, end_date=end_date, status=LeaseStatus(status),
+        place=winter_storage_place,
+        end_date=end_date,
+        status=LeaseStatus(status),
     )
 
     with mock.patch(

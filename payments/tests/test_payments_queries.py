@@ -87,7 +87,9 @@ def test_get_berth_products(api_client, berth_product):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+    "api_client",
+    ["api_client", "user", "harbor_services"],
+    indirect=True,
 )
 def test_get_berth_products_not_enough_permissions(api_client):
     executed = api_client.execute(BERTH_PRODUCTS_QUERY)
@@ -133,7 +135,9 @@ def test_get_berth_product(api_client, berth_product):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+    "api_client",
+    ["api_client", "user", "harbor_services"],
+    indirect=True,
 )
 def test_get_berth_product_not_enough_permissions(api_client, berth_product):
     product_global_id = to_global_id(BerthProductNode, berth_product.id)
@@ -175,7 +179,9 @@ def test_get_berth_product_for_width_none_in_range(superuser_api_client):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+    "api_client",
+    ["api_client", "user", "harbor_services"],
+    indirect=True,
 )
 def test_get_berth_product_for_width_not_enough_permissions(api_client):
     executed = api_client.execute(BERTH_PRODUCT_FOR_WIDTH_QUERY % "3.33")
@@ -225,7 +231,9 @@ def test_get_winter_storage_products(api_client, winter_storage_product):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+    "api_client",
+    ["api_client", "user", "harbor_services"],
+    indirect=True,
 )
 def test_get_winter_storage_products_not_enough_permissions(api_client):
     executed = api_client.execute(WINTER_STORAGE_PRODUCTS_QUERY)
@@ -275,7 +283,9 @@ def test_get_winter_storage_product(api_client, winter_storage_product):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+    "api_client",
+    ["api_client", "user", "harbor_services"],
+    indirect=True,
 )
 def test_get_winter_storage_product_not_enough_permissions(
     api_client, winter_storage_product
@@ -331,7 +341,9 @@ def test_get_additional_products(api_client, additional_product):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+    "api_client",
+    ["api_client", "user", "harbor_services"],
+    indirect=True,
 )
 def test_get_additional_products_not_enough_permissions(api_client):
     executed = api_client.execute(ADDITIONAL_PRODUCTS_QUERY)
@@ -413,7 +425,9 @@ def test_get_additional_product(api_client, additional_product):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+    "api_client",
+    ["api_client", "user", "harbor_services"],
+    indirect=True,
 )
 def test_get_additional_product_not_enough_permissions(api_client, additional_product):
     product_global_id = to_global_id(AdditionalProductNode, additional_product.id)
@@ -479,7 +493,9 @@ query ORDERS {
     indirect=True,
 )
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_get_orders(api_client, order):
     OrderLogEntryFactory(order=order)
@@ -529,7 +545,9 @@ def test_get_orders(api_client, order):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+    "api_client",
+    ["api_client", "user", "harbor_services"],
+    indirect=True,
 )
 def test_get_orders_not_enough_permissions(api_client, order):
     executed = api_client.execute(ORDERS_QUERY)
@@ -589,7 +607,9 @@ query ORDER {
     indirect=True,
 )
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_get_order(api_client, order):
     order_global_id = to_global_id(OrderNode, order.id)
@@ -670,7 +690,9 @@ def test_get_order_without_due_date(api_client, order):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+    "api_client",
+    ["api_client", "user", "harbor_services"],
+    indirect=True,
 )
 def test_get_order_not_enough_permissions(api_client, order):
     order_global_id = to_global_id(OrderNode, order.id)

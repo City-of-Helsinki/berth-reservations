@@ -117,12 +117,18 @@ class CustomerProfileAdmin(admin.ModelAdmin):
             else:
                 form = ImportProfilesFromJsonForm()
                 return render(
-                    request, "admin/customers/upload_json.html", {"form": form},
+                    request,
+                    "admin/customers/upload_json.html",
+                    {"form": form},
                 )
         except Exception as err:
             messages.error(request, err)
             form = ImportProfilesFromJsonForm()
-            return render(request, "admin/customers/upload_json.html", {"form": form},)
+            return render(
+                request,
+                "admin/customers/upload_json.html",
+                {"form": form},
+            )
 
 
 admin.site.register(Boat, BoatAdmin)

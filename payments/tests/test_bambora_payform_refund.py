@@ -42,7 +42,9 @@ success_refund_params = {"result": 0, "type": "instant", "refund_id": 2587411}
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_initiate_refund_success(provider_base_config: dict, order: Order):
     """Test the request creator constructs the payload base and returns a url that contains a token"""
@@ -109,7 +111,9 @@ def test_initiate_refund_success(provider_base_config: dict, order: Order):
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_initiate_refund_no_order_email(provider_base_config: dict, order: Order):
     """Test the request creator constructs the payload base and returns a url that contains a token"""
@@ -166,7 +170,9 @@ def test_initiate_refund_no_order_email(provider_base_config: dict, order: Order
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_initiate_refund_refunded_amount_does_not_match(
     provider_base_config: dict, order: Order
@@ -221,7 +227,9 @@ def test_initiate_refund_refunded_amount_does_not_match(
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_initiate_refund_another_pending_refund(
     provider_base_config: dict, order: Order
@@ -273,7 +281,9 @@ def test_initiate_refund_another_pending_refund(
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_initiate_refund_no_order_email_or_application(
     provider_base_config: dict, order: Order
@@ -299,7 +309,9 @@ def test_initiate_refund_no_order_email_or_application(
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_initiate_refund_token_still_valid(provider_base_config: dict, order: Order):
     """Test the request creator constructs the payload base and returns a url that contains a token"""
@@ -326,7 +338,9 @@ def test_initiate_refund_token_still_valid(provider_base_config: dict, order: Or
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 @pytest.mark.parametrize(
     "order_status",
@@ -364,7 +378,9 @@ def test_initiate_refund_invalid_order_status(
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 @pytest.mark.parametrize(
     "lease_status",
@@ -401,7 +417,9 @@ def test_initiate_refund_invalid_lease_status(
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_initiate_refund_error_unavailable(provider_base_config, order: Order):
     """Test the request creator raises service unavailable if request doesn't go through"""
@@ -422,7 +440,9 @@ def test_initiate_refund_error_unavailable(provider_base_config, order: Order):
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_handle_initiate_refund_error_validation(order, provider_base_config):
     """Test the response handler raises PayloadValidationError as expected"""
@@ -467,10 +487,13 @@ def test_check_refund_authcode_invalid(payment_provider):
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_handle_notify_request_success(
-    provider_base_config, order: Order,
+    provider_base_config,
+    order: Order,
 ):
     """Test request notify helper returns http 204 and order status is correct when successful"""
     order.order_number = "abc123"
@@ -502,7 +525,9 @@ def test_handle_notify_request_success(
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_handle_notify_request_payment_failed(provider_base_config, order):
     """Test request notify helper returns http 204 and order status is correct when payment fails"""

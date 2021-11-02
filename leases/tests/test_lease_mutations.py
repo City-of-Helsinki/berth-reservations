@@ -78,7 +78,9 @@ mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_lease(api_client, berth_application, berth, customer_profile):
@@ -123,7 +125,9 @@ def test_create_berth_lease(api_client, berth_application, berth, customer_profi
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_lease_all_arguments(
@@ -191,7 +195,8 @@ def test_create_berth_lease_application_doesnt_exist(superuser_api_client, berth
     }
 
     executed = superuser_api_client.execute(
-        CREATE_BERTH_LEASE_MUTATION, input=variables,
+        CREATE_BERTH_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_doesnt_exist("BerthApplication", executed)
@@ -209,7 +214,8 @@ def test_create_berth_lease_berth_doesnt_exist(
     }
 
     executed = superuser_api_client.execute(
-        CREATE_BERTH_LEASE_MUTATION, input=variables,
+        CREATE_BERTH_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_doesnt_exist("Berth", executed)
@@ -221,7 +227,8 @@ def test_create_berth_lease_application_id_missing(superuser_api_client):
     }
 
     executed = superuser_api_client.execute(
-        CREATE_BERTH_LEASE_MUTATION, input=variables,
+        CREATE_BERTH_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_in_errors("Must specify either application or customer", executed)
@@ -234,7 +241,8 @@ def test_create_berth_lease_berth_id_missing(superuser_api_client, customer_prof
     }
 
     executed = superuser_api_client.execute(
-        CREATE_BERTH_LEASE_MUTATION, input=variables,
+        CREATE_BERTH_LEASE_MUTATION,
+        input=variables,
     )
     assert_in_errors("Must receive a BerthNode", executed)
 
@@ -251,7 +259,8 @@ def test_create_berth_lease_application_without_customer(
     }
 
     executed = superuser_api_client.execute(
-        CREATE_BERTH_LEASE_MUTATION, input=variables,
+        CREATE_BERTH_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_in_errors(
@@ -260,7 +269,10 @@ def test_create_berth_lease_application_without_customer(
 
 
 def test_create_berth_lease_application_already_has_lease(
-    superuser_api_client, berth_application, berth, customer_profile,
+    superuser_api_client,
+    berth_application,
+    berth,
+    customer_profile,
 ):
     BoatTypeFactory(id=berth_application.boat_type.id)
     BerthLeaseFactory(application=berth_application)
@@ -273,7 +285,8 @@ def test_create_berth_lease_application_already_has_lease(
     }
 
     executed = superuser_api_client.execute(
-        CREATE_BERTH_LEASE_MUTATION, input=variables,
+        CREATE_BERTH_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_in_errors("Berth lease with this Application already exists", executed)
@@ -310,7 +323,9 @@ mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_lease_with_order(api_client, berth_application, customer_profile):
@@ -384,7 +399,9 @@ mutation CreateBerthLease($input: CreateBerthLeaseMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_lease_without_application(api_client, berth, customer_profile):
@@ -437,7 +454,8 @@ def test_create_berth_lease_application_and_customer_mutually_exclusive(
     }
 
     executed = superuser_api_client.execute(
-        CREATE_BERTH_LEASE_MUTATION, input=variables,
+        CREATE_BERTH_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_in_errors("Can not specify both application and customer", executed)
@@ -453,7 +471,9 @@ mutation DELETE_DRAFTED_LEASE($input: DeleteBerthLeaseMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_delete_berth_lease_drafted(berth_lease, berth_application, api_client):
     variables = {"id": to_global_id(BerthLeaseNode, berth_lease.id)}
@@ -463,7 +483,8 @@ def test_delete_berth_lease_drafted(berth_lease, berth_application, api_client):
     assert BerthLease.objects.count() == 1
 
     api_client.execute(
-        DELETE_BERTH_LEASE_MUTATION, input=variables,
+        DELETE_BERTH_LEASE_MUTATION,
+        input=variables,
     )
 
     assert BerthLease.objects.count() == 0
@@ -479,7 +500,8 @@ def test_delete_berth_lease_not_drafted(berth_lease, superuser_api_client):
     assert BerthLease.objects.count() == 1
 
     executed = superuser_api_client.execute(
-        DELETE_BERTH_LEASE_MUTATION, input=variables,
+        DELETE_BERTH_LEASE_MUTATION,
+        input=variables,
     )
 
     assert BerthLease.objects.count() == 1
@@ -512,7 +534,8 @@ def test_delete_berth_lease_inexistent_lease(superuser_api_client):
     }
 
     executed = superuser_api_client.execute(
-        DELETE_BERTH_LEASE_MUTATION, input=variables,
+        DELETE_BERTH_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_doesnt_exist("BerthLease", executed)
@@ -543,7 +566,9 @@ mutation UpdateBerthLease($input: UpdateBerthLeaseMutationInput!) {
 
 @freeze_time("2020-01-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_update_berth_lease_all_fields(
     api_client, berth_lease, berth_application, boat, customer_profile
@@ -587,7 +612,9 @@ def test_update_berth_lease_all_fields(
 
 @freeze_time("2020-01-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_update_berth_lease_remove_application(
     api_client, berth_lease, berth_application
@@ -620,7 +647,8 @@ def test_update_berth_lease_application_doesnt_exist(superuser_api_client, berth
     }
 
     executed = superuser_api_client.execute(
-        UPDATE_BERTH_LEASE_MUTATION, input=variables,
+        UPDATE_BERTH_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_doesnt_exist("BerthApplication", executed)
@@ -638,7 +666,8 @@ def test_update_berth_lease_application_without_customer(
     }
 
     executed = superuser_api_client.execute(
-        UPDATE_BERTH_LEASE_MUTATION, input=variables,
+        UPDATE_BERTH_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_in_errors(
@@ -647,7 +676,10 @@ def test_update_berth_lease_application_without_customer(
 
 
 def test_update_berth_lease_application_already_has_lease(
-    superuser_api_client, berth_application, berth_lease, customer_profile,
+    superuser_api_client,
+    berth_application,
+    berth_lease,
+    customer_profile,
 ):
     BerthLeaseFactory(application=berth_application)
     berth_application.customer = customer_profile
@@ -659,7 +691,8 @@ def test_update_berth_lease_application_already_has_lease(
     }
 
     executed = superuser_api_client.execute(
-        UPDATE_BERTH_LEASE_MUTATION, input=variables,
+        UPDATE_BERTH_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_in_errors("Berth lease with this Application already exists", executed)
@@ -713,7 +746,9 @@ mutation SwitchBerth($input: SwitchBerthMutationInput!) {
 
 @freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_switch_berth(api_client, berth):
     berth_lease = BerthLeaseFactory(
@@ -771,7 +806,9 @@ def test_switch_berth(api_client, berth):
 
 @freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_switch_berth_with_switch_date(api_client, berth):
     berth_lease = BerthLeaseFactory(
@@ -832,7 +869,9 @@ def test_switch_berth_with_switch_date(api_client, berth):
 
 @freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_switch_berth_without_contract(api_client, berth):
     berth_lease = BerthLeaseFactory(
@@ -891,7 +930,9 @@ def test_switch_berth_without_contract(api_client, berth):
 
 @freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_switch_berth_with_berth_already_has_lease(api_client):
     old_lease = BerthLeaseFactory(
@@ -924,7 +965,9 @@ def test_switch_berth_with_berth_already_has_lease(api_client):
 
 @freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_switch_berth_non_paid_status(api_client, berth):
     berth_lease = BerthLeaseFactory(
@@ -952,7 +995,9 @@ def test_switch_berth_non_paid_status(api_client, berth):
 
 @freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_switch_berth_non_active(api_client, berth):
     berth_lease = BerthLeaseFactory(
@@ -980,7 +1025,9 @@ def test_switch_berth_non_active(api_client, berth):
 
 @freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_switch_berth_non_existing_berth_id(api_client):
     old_lease_id = to_global_id(BerthLeaseNode, uuid.uuid4())
@@ -1019,7 +1066,9 @@ def test_switch_berth_not_enough_permissions(api_client):
 
 @freeze_time("2020-08-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_switch_berth_with_switch_date_over_6_months_in_the_past(api_client):
     old_lease_id = to_global_id(BerthLeaseNode, uuid.uuid4())
@@ -1073,7 +1122,9 @@ mutation CreateWinterStorageLease($input: CreateWinterStorageLeaseMutationInput!
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_create_winter_storage_lease(
     api_client, winter_storage_application, winter_storage_place, customer_profile
@@ -1133,7 +1184,9 @@ def test_create_winter_storage_lease(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_create_winter_storage_lease_with_section(
     api_client, winter_storage_application, winter_storage_section, boat
@@ -1211,7 +1264,8 @@ def test_create_winter_storage_lease_application_doesnt_exist(
     }
 
     executed = superuser_api_client.execute(
-        CREATE_WINTER_STORAGE_LEASE_MUTATION, input=variables,
+        CREATE_WINTER_STORAGE_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_doesnt_exist("WinterStorageApplication", executed)
@@ -1230,7 +1284,8 @@ def test_create_winter_storage_lease_winter_storage_place_doesnt_exist(
     }
 
     executed = superuser_api_client.execute(
-        CREATE_WINTER_STORAGE_LEASE_MUTATION, input=variables,
+        CREATE_WINTER_STORAGE_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_doesnt_exist("WinterStoragePlace", executed)
@@ -1242,7 +1297,8 @@ def test_create_winter_storage_lease_application_id_missing(superuser_api_client
     }
 
     executed = superuser_api_client.execute(
-        CREATE_WINTER_STORAGE_LEASE_MUTATION, input=variables,
+        CREATE_WINTER_STORAGE_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_field_missing("applicationId", executed)
@@ -1262,7 +1318,8 @@ def test_create_winter_storage_lease_application_without_customer(
     }
 
     executed = superuser_api_client.execute(
-        CREATE_WINTER_STORAGE_LEASE_MUTATION, input=variables,
+        CREATE_WINTER_STORAGE_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_in_errors(
@@ -1289,7 +1346,8 @@ def test_create_winter_storage_lease_application_already_has_lease(
     }
 
     executed = superuser_api_client.execute(
-        CREATE_WINTER_STORAGE_LEASE_MUTATION, input=variables,
+        CREATE_WINTER_STORAGE_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_in_errors(
@@ -1316,14 +1374,17 @@ def test_create_winter_storage_lease_both_place_and_section(
     }
 
     executed = superuser_api_client.execute(
-        CREATE_WINTER_STORAGE_LEASE_MUTATION, input=variables,
+        CREATE_WINTER_STORAGE_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_in_errors("Cannot receive both Winter Storage Place and Section", executed)
 
 
 def test_create_winter_storage_lease_no_place_or_section(
-    superuser_api_client, winter_storage_application, customer_profile,
+    superuser_api_client,
+    winter_storage_application,
+    customer_profile,
 ):
     winter_storage_application.customer = customer_profile
     winter_storage_application.save()
@@ -1335,7 +1396,8 @@ def test_create_winter_storage_lease_no_place_or_section(
     }
 
     executed = superuser_api_client.execute(
-        CREATE_WINTER_STORAGE_LEASE_MUTATION, input=variables,
+        CREATE_WINTER_STORAGE_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_in_errors("Either Winter Storage Place or Section are required", executed)
@@ -1370,7 +1432,9 @@ mutation CreateWinterStorageLease($input: CreateWinterStorageLeaseMutationInput!
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 @freeze_time("2020-06-11T08:00:00Z")
 def test_create_winter_storage_lease_with_order(
@@ -1430,7 +1494,9 @@ def test_create_winter_storage_lease_with_order(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_winter_storage_lease_with_order_no_product(
@@ -1469,7 +1535,9 @@ mutation DELETE_DRAFTED_LEASE($input: DeleteWinterStorageLeaseMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_delete_winter_storage_lease_drafted(
     winter_storage_lease, winter_storage_application, api_client
@@ -1481,7 +1549,8 @@ def test_delete_winter_storage_lease_drafted(
     assert WinterStorageLease.objects.count() == 1
 
     api_client.execute(
-        DELETE_WINTER_STORAGE_LEASE_MUTATION, input=variables,
+        DELETE_WINTER_STORAGE_LEASE_MUTATION,
+        input=variables,
     )
 
     assert WinterStorageLease.objects.count() == 0
@@ -1499,7 +1568,8 @@ def test_delete_winter_storage_lease_not_drafted(
     assert WinterStorageLease.objects.count() == 1
 
     executed = superuser_api_client.execute(
-        DELETE_WINTER_STORAGE_LEASE_MUTATION, input=variables,
+        DELETE_WINTER_STORAGE_LEASE_MUTATION,
+        input=variables,
     )
 
     assert WinterStorageLease.objects.count() == 1
@@ -1534,7 +1604,8 @@ def test_delete_winter_storage_lease_inexistent_lease(superuser_api_client):
     }
 
     executed = superuser_api_client.execute(
-        DELETE_WINTER_STORAGE_LEASE_MUTATION, input=variables,
+        DELETE_WINTER_STORAGE_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_doesnt_exist("WinterStorageLease", executed)
@@ -1564,7 +1635,9 @@ mutation UpdateWinterStorageLease($input: UpdateWinterStorageLeaseMutationInput!
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_update_winter_storage_lease_all_fields(
     api_client, winter_storage_lease, winter_storage_application, boat, customer_profile
@@ -1609,7 +1682,9 @@ def test_update_winter_storage_lease_all_fields(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_update_winter_storage_lease_remove_application(
     api_client, winter_storage_lease, winter_storage_application
@@ -1644,7 +1719,8 @@ def test_update_winter_storage_lease_application_doesnt_exist(
     }
 
     executed = superuser_api_client.execute(
-        UPDATE_WINTER_STORAGE_LEASE_MUTATION, input=variables,
+        UPDATE_WINTER_STORAGE_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_doesnt_exist("WinterStorageApplication", executed)
@@ -1664,7 +1740,8 @@ def test_update_winter_storage_lease_application_without_customer(
     }
 
     executed = superuser_api_client.execute(
-        UPDATE_WINTER_STORAGE_LEASE_MUTATION, input=variables,
+        UPDATE_WINTER_STORAGE_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_in_errors(
@@ -1690,7 +1767,8 @@ def test_update_winter_storage_lease_application_already_has_lease(
     }
 
     executed = superuser_api_client.execute(
-        UPDATE_WINTER_STORAGE_LEASE_MUTATION, input=variables,
+        UPDATE_WINTER_STORAGE_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_in_errors(
@@ -1699,7 +1777,9 @@ def test_update_winter_storage_lease_application_already_has_lease(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_lease_for_non_billable_customer(
@@ -1741,7 +1821,9 @@ def test_create_berth_lease_for_non_billable_customer(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 @freeze_time("2020-06-11T08:00:00Z")
 def test_create_winter_storage_lease_for_non_billable_customer(
@@ -1794,7 +1876,9 @@ def test_create_winter_storage_lease_for_non_billable_customer(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_lease_creates_contract(
@@ -1828,7 +1912,9 @@ def test_create_berth_lease_creates_contract(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_lease_no_contract_for_non_billable_customer(
@@ -1861,7 +1947,9 @@ def test_create_berth_lease_no_contract_for_non_billable_customer(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_create_winter_storage_lease_creates_contract(
     api_client, winter_storage_application, winter_storage_place, customer_profile
@@ -1893,7 +1981,9 @@ def test_create_winter_storage_lease_creates_contract(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_create_winter_storage_lease_no_contract_for_non_billable_customer(
     api_client, winter_storage_application, winter_storage_place, non_billable_customer
@@ -1937,10 +2027,13 @@ mutation TERMINATE_BERTH_LEASE($input: TerminateBerthLeaseMutationInput!) {
 
 @freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 @pytest.mark.parametrize(
-    "lease_status", [LeaseStatus.PAID, LeaseStatus.ERROR, LeaseStatus.OFFERED],
+    "lease_status",
+    [LeaseStatus.PAID, LeaseStatus.ERROR, LeaseStatus.OFFERED],
 )
 def test_terminate_berth_lease_with_application(
     api_client, lease_status, notification_template_berth_lease_terminated
@@ -1981,7 +2074,9 @@ def test_terminate_berth_lease_with_application(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_terminate_berth_lease_with_offered_order(
     api_client, offered_berth_order, notification_template_berth_lease_terminated
@@ -2003,7 +2098,9 @@ def test_terminate_berth_lease_with_offered_order(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_terminate_berth_lease_with_drafted_order(
     api_client, drafted_berth_order, notification_template_berth_lease_terminated
@@ -2026,7 +2123,9 @@ def test_terminate_berth_lease_with_drafted_order(
 
 @freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_terminate_berth_lease_without_application(
     api_client, notification_template_berth_lease_terminated
@@ -2078,7 +2177,9 @@ def test_terminate_berth_lease_without_application(
 
 @freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_terminate_berth_lease_with_end_date(api_client):
     berth_lease = BerthLeaseFactory(
@@ -2122,7 +2223,8 @@ def test_terminate_berth_lease_doesnt_exist(superuser_api_client):
     }
 
     executed = superuser_api_client.execute(
-        TERMINATE_BERTH_LEASE_MUTATION, input=variables,
+        TERMINATE_BERTH_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_doesnt_exist("BerthLease", executed)
@@ -2130,7 +2232,9 @@ def test_terminate_berth_lease_doesnt_exist(superuser_api_client):
 
 @freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_terminate_berth_lease_no_email_no_token(api_client):
     berth_lease = BerthLeaseFactory(
@@ -2166,7 +2270,9 @@ mutation TERMINATE_BERTH_LEASE($input: TerminateBerthLeaseMutationInput!) {
 
 @freeze_time("2020-12-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_terminate_berth_lease_before_season(api_client):
     start_date = calculate_berth_lease_start_date()
@@ -2212,7 +2318,9 @@ mutation TERMINATE_WINTER_STORAGE_LEASE_MUTATION($input: TerminateWinterStorageL
 
 @freeze_time("2020-12-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_terminate_ws_lease_with_application(
     api_client, notification_template_ws_lease_terminated
@@ -2258,7 +2366,9 @@ def test_terminate_ws_lease_with_application(
 
 @freeze_time("2020-12-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_terminate_ws_lease_without_application(
     api_client, notification_template_ws_lease_terminated
@@ -2312,7 +2422,9 @@ def test_terminate_ws_lease_without_application(
 
 @freeze_time("2020-12-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_terminate_ws_lease_with_end_date(api_client):
     ws_lease = WinterStorageLeaseFactory(
@@ -2362,7 +2474,8 @@ def test_terminate_ws_lease_doesnt_exist(superuser_api_client):
     }
 
     executed = superuser_api_client.execute(
-        TERMINATE_WINTER_STORAGE_LEASE_MUTATION, input=variables,
+        TERMINATE_WINTER_STORAGE_LEASE_MUTATION,
+        input=variables,
     )
 
     assert_doesnt_exist("WinterStorageLease", executed)
@@ -2370,7 +2483,9 @@ def test_terminate_ws_lease_doesnt_exist(superuser_api_client):
 
 @freeze_time("2020-12-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_terminate_ws_lease_no_email_no_token(api_client):
     ws_lease = WinterStorageLeaseFactory(
@@ -2408,7 +2523,9 @@ mutation TERMINATE_WINTER_STORAGE_LEASE_MUTATION($input: TerminateWinterStorageL
 
 @freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services", "berth_handler"], indirect=True,
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
 )
 def test_terminate_ws_lease_before_season(api_client):
     start_date = calculate_winter_storage_lease_start_date()

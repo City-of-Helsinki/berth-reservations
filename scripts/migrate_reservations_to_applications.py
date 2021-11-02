@@ -19,7 +19,10 @@ TABLES = [
     ("reservations_berthswitch", "applications_berthswitch"),
     ("reservations_berthswitchreason", "applications_berthswitchreason"),
     ("reservations_harborchoice", "applications_harborchoice"),
-    ("reservations_winterstorageapplication", "applications_winterstorageapplication",),
+    (
+        "reservations_winterstorageapplication",
+        "applications_winterstorageapplication",
+    ),
     ("reservations_winterstorageareachoice", "applications_winterstorageareachoice"),
 ]
 

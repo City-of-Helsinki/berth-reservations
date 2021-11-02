@@ -9,5 +9,5 @@ pytest
 pytest-cov
 pytest-django
 requests-mock
-xlrd
+xlrd<2.0.0
 gql

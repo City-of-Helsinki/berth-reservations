@@ -145,6 +145,7 @@ class Migration(migrations.Migration):
         # Drop the old through model and field
         migrations.DeleteModel(name="TmpChoice"),
         migrations.RemoveField(
-            model_name="winterstorageapplication", name="tmp_chosen_areas",
+            model_name="winterstorageapplication",
+            name="tmp_chosen_areas",
         ),
     ]

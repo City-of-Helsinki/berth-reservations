@@ -157,7 +157,8 @@ def test_winter_storage_applications_statuses_filter_invalid_enum(
     executed = superuser_api_client.execute(query)
 
     assert_in_errors(
-        "invalid value [%s]." % nonexistent_enum_str, executed,
+        "invalid value [%s]." % nonexistent_enum_str,
+        executed,
     )
 
 
@@ -358,12 +359,15 @@ def test_winter_storage_application_query(winter_storage_application, api_client
     area = WinterStorageAreaFactory()
     section = WinterStorageSectionFactory(area=area)
     WinterAreaChoiceFactory(
-        priority=1, application=winter_storage_application, winter_storage_area=area,
+        priority=1,
+        application=winter_storage_application,
+        winter_storage_area=area,
     )
     WinterAreaChoiceFactory(priority=2, application=winter_storage_application)
 
     application_id = to_global_id(
-        WinterStorageApplicationNode._meta.name, winter_storage_application.id,
+        WinterStorageApplicationNode._meta.name,
+        winter_storage_application.id,
     )
 
     query = WINTER_STORAGE_APPLICATION_QUERY % application_id
@@ -385,7 +389,8 @@ def test_winter_storage_application_query(winter_storage_application, api_client
     sections_ids = first_area["winterStorageArea"]["properties"]["sections"]["edges"]
     assert len(sections_ids) == 1
     assert sections_ids[0]["node"]["id"] == to_global_id(
-        WinterStorageSectionNode._meta.name, section.id,
+        WinterStorageSectionNode._meta.name,
+        section.id,
     )
 
     second_area = areas[1]

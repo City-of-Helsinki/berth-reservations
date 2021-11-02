@@ -35,16 +35,22 @@ mutation RESEND_ORDER_MUTATION($input: ResendOrderMutationInput!) {
 #  "winter_storage_order"
 @freeze_time("2020-10-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @pytest.mark.parametrize(
-    "order", ["berth_order"], indirect=True,
+    "order",
+    ["berth_order"],
+    indirect=True,
 )
 @pytest.mark.parametrize(
-    "order_has_contact_info", [True, False],
+    "order_has_contact_info",
+    [True, False],
 )
 @pytest.mark.parametrize(
-    "request_has_profile_token", [True, False],
+    "request_has_profile_token",
+    [True, False],
 )
 @pytest.mark.parametrize("order_status", [OrderStatus.OFFERED, OrderStatus.ERROR])
 def test_resend_order(
@@ -175,7 +181,9 @@ def test_resend_order(
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order"], indirect=True,
+    "order",
+    ["berth_order"],
+    indirect=True,
 )
 def test_resend_order_in_error(
     order: Order,
@@ -251,10 +259,14 @@ def test_resend_order_in_error(
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order"], indirect=True,
+    "order",
+    ["berth_order"],
+    indirect=True,
 )
 def test_resend_order_not_fixed_in_error(
-    order: Order, superuser_api_client, notification_template_orders_approved,
+    order: Order,
+    superuser_api_client,
+    notification_template_orders_approved,
 ):
     order.status = OrderStatus.ERROR
     order.lease.status = LeaseStatus.ERROR
@@ -297,10 +309,14 @@ def test_resend_order_not_fixed_in_error(
 
 @freeze_time("2020-10-01T08:00:00Z")
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @pytest.mark.parametrize(
-    "order", ["berth_order"], indirect=True,
+    "order",
+    ["berth_order"],
+    indirect=True,
 )
 @pytest.mark.parametrize(
     "order_status",

@@ -57,7 +57,9 @@ mutation CreateBerth($input: CreateBerthMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_create_berth(pier, api_client, berth_type):
     variables = {
@@ -94,7 +96,9 @@ def test_create_berth(pier, api_client, berth_type):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_create_berth_new_berth_type(pier, api_client):
     variables = {
@@ -200,7 +204,9 @@ mutation DeleteBerth($input: DeleteBerthMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_delete_berth(api_client, berth):
     variables = {
@@ -264,7 +270,8 @@ def test_delete_berth_protected_with_lease(superuser_api_client, berth):
     executed = superuser_api_client.execute(DELETE_BERTH_MUTATION, input=variables)
 
     assert_in_errors(
-        "Cannot delete Berth because it has some related leases", executed,
+        "Cannot delete Berth because it has some related leases",
+        executed,
     )
 
 
@@ -292,7 +299,9 @@ mutation UpdateBerth($input: UpdateBerthMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_update_berth(berth, pier, api_client):
     global_id = to_global_id(BerthNode._meta.name, str(berth.id))
@@ -328,7 +337,9 @@ def test_update_berth(berth, pier, api_client):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_update_berth_existing_berth_type(berth, pier, berth_type, api_client):
     global_id = to_global_id(BerthNode._meta.name, str(berth.id))
@@ -367,7 +378,9 @@ def test_update_berth_existing_berth_type(berth, pier, berth_type, api_client):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_update_berth_existing_berth_type_null_depth(berth, pier, api_client):
     global_id = to_global_id(BerthNode._meta.name, str(berth.id))
@@ -408,7 +421,9 @@ def test_update_berth_existing_berth_type_null_depth(berth, pier, api_client):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_update_berth_existing_berth_type_only_depth(berth, pier, api_client):
     global_id = to_global_id(BerthNode._meta.name, str(berth.id))
@@ -442,7 +457,9 @@ def test_update_berth_existing_berth_type_only_depth(berth, pier, api_client):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_update_berth_new_berth_type(berth, pier, api_client):
     global_id = to_global_id(BerthNode._meta.name, str(berth.id))
@@ -479,7 +496,9 @@ def test_update_berth_new_berth_type(berth, pier, api_client):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_update_berth_to_non_invoiceable(berth, pier, api_client):
     global_id = to_global_id(BerthNode._meta.name, str(berth.id))
@@ -577,7 +596,9 @@ mutation CreateHarbor($input: CreateHarborMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_create_harbor(api_client, availability_level, municipality):
     variables = {
@@ -677,7 +698,9 @@ mutation DeleteHarbor($input: DeleteHarborMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_delete_harbor(api_client, harbor):
     variables = {
@@ -741,7 +764,8 @@ def test_delete_harbor_protected_with_lease(superuser_api_client, berth):
     executed = superuser_api_client.execute(DELETE_HARBOR_MUTATION, input=variables)
 
     assert_in_errors(
-        "Cannot delete Harbor because it has some related leases", executed,
+        "Cannot delete Harbor because it has some related leases",
+        executed,
     )
 
 
@@ -773,7 +797,9 @@ mutation UpdateHarbor($input: UpdateHarborMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_update_harbor(api_client, harbor, availability_level, municipality):
     global_id = to_global_id(HarborNode._meta.name, str(harbor.id))
@@ -900,7 +926,9 @@ mutation CreatePier($input: CreatePierMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_create_pier(api_client, harbor, boat_type):
     harbor_id = to_global_id(HarborNode._meta.name, harbor.id)
@@ -990,7 +1018,9 @@ mutation DeletePier($input: DeletePierMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_delete_pier(api_client, pier):
     variables = {"id": to_global_id(PierNode._meta.name, str(pier.id))}
@@ -998,7 +1028,8 @@ def test_delete_pier(api_client, pier):
     assert Pier.objects.count() == 1
 
     api_client.execute(
-        DELETE_PIER_MUTATION, input=variables,
+        DELETE_PIER_MUTATION,
+        input=variables,
     )
 
     assert Pier.objects.count() == 0
@@ -1050,7 +1081,8 @@ def test_delete_pier_protected_with_lease(superuser_api_client, berth):
     executed = superuser_api_client.execute(DELETE_PIER_MUTATION, input=variables)
 
     assert_in_errors(
-        "Cannot delete Pier because it has some related leases", executed,
+        "Cannot delete Pier because it has some related leases",
+        executed,
     )
 
 
@@ -1086,7 +1118,9 @@ mutation UpdatePier($input: UpdatePierMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_update_pier(api_client, pier, harbor, boat_type):
     global_id = to_global_id(PierNode._meta.name, str(pier.id))
@@ -1223,7 +1257,9 @@ mutation CreateWinterStorageArea($input: CreateWinterStorageAreaMutationInput!) 
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_create_winter_storage_area(pier, api_client, availability_level, municipality):
     variables = {
@@ -1287,7 +1323,9 @@ mutation DeleteWinterStorageArea($input: DeleteWinterStorageAreaMutationInput!) 
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_delete_winter_storage_area(api_client, winter_storage_area):
     variables = {
@@ -1399,7 +1437,8 @@ def test_delete_winter_storage_area_protected_with_lease_at_place(
     )
 
     assert_in_errors(
-        "Cannot delete WinterStorageArea because it has some related leases", executed,
+        "Cannot delete WinterStorageArea because it has some related leases",
+        executed,
     )
 
 
@@ -1420,7 +1459,8 @@ def test_delete_winter_storage_area_protected_with_lease_at_section(
     )
 
     assert_in_errors(
-        "Cannot delete WinterStorageArea because it has some related leases", executed,
+        "Cannot delete WinterStorageArea because it has some related leases",
+        executed,
     )
 
 
@@ -1438,7 +1478,9 @@ mutation CreateWinterStoragePlaceType($input: CreateWinterStoragePlaceTypeMutati
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_create_winter_storage_place_type(api_client):
     variables = {
@@ -1477,7 +1519,9 @@ mutation DeleteWinterStoragePlaceType($input: DeleteWinterStoragePlaceTypeMutati
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_delete_winter_storage_place_type(api_client, winter_storage_place_type):
     variables = {
@@ -1560,7 +1604,9 @@ mutation UpdateWinterStoragePlaceType($input: UpdateWinterStoragePlaceTypeMutati
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_update_winter_storage_place_type(api_client, winter_storage_place_type):
     global_id = to_global_id(
@@ -1641,7 +1687,9 @@ mutation CreateWinterStorageSection($input: CreateWinterStorageSectionMutationIn
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_create_winter_storage_section_plain(api_client, winter_storage_area):
     winter_storage_area_id = to_global_id(
@@ -1760,7 +1808,9 @@ mutation DeleteWinterStorageSection($input: DeleteWinterStorageSectionMutationIn
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_delete_winter_storage_section(api_client, winter_storage_section):
     variables = {
@@ -1772,7 +1822,8 @@ def test_delete_winter_storage_section(api_client, winter_storage_section):
     assert WinterStorageSection.objects.count() == 1
 
     api_client.execute(
-        DELETE_WINTER_STORAGE_SECTION_MUTATION, input=variables,
+        DELETE_WINTER_STORAGE_SECTION_MUTATION,
+        input=variables,
     )
 
     assert WinterStorageSection.objects.count() == 0
@@ -1888,7 +1939,9 @@ mutation UpdateWinterStorageSection($input: UpdateWinterStorageSectionMutationIn
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_update_winter_storage_section(
     api_client, winter_storage_section, winter_storage_area, boat_type
@@ -2027,7 +2080,9 @@ mutation CreateWinterStoragePlace($input: CreateWinterStoragePlaceMutationInput!
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_create_winter_storage_place(
     winter_storage_section, api_client, winter_storage_place_type
@@ -2064,7 +2119,9 @@ def test_create_winter_storage_place(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_create_winter_storage_place_new_winter_storage_place_type(
     winter_storage_section, api_client
@@ -2154,7 +2211,9 @@ mutation DeleteWinterStoragePlace($input: DeleteWinterStoragePlaceMutationInput!
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_delete_winter_storage_place(api_client, winter_storage_place):
     variables = {
@@ -2242,7 +2301,8 @@ def test_delete_winter_storage_place_protected_with_lease(
     )
 
     assert_in_errors(
-        "Cannot delete WinterStoragePlace because it has some related leases", executed,
+        "Cannot delete WinterStoragePlace because it has some related leases",
+        executed,
     )
 
 
@@ -2265,7 +2325,9 @@ mutation UpdateWinterStoragePlace($input: UpdateWinterStoragePlaceMutationInput!
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_update_winter_storage_place(
     winter_storage_place, winter_storage_section, api_client
@@ -2300,7 +2362,9 @@ def test_update_winter_storage_place(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_update_winter_storage_place_existing_winter_storage_place_type(
     winter_storage_place, winter_storage_place_type, api_client
@@ -2345,7 +2409,9 @@ def test_update_winter_storage_place_existing_winter_storage_place_type(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["harbor_services", "berth_services"], indirect=True,
+    "api_client",
+    ["harbor_services", "berth_services"],
+    indirect=True,
 )
 def test_update_winter_storage_place_new_place_type(winter_storage_place, api_client):
     global_id = to_global_id(

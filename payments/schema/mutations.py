@@ -135,7 +135,10 @@ class DeleteBerthProductMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         product = get_node_from_global_id(
-            info, input.pop("id"), only_type=BerthProductNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=BerthProductNode,
+            nullable=False,
         )
 
         product.delete()
@@ -206,7 +209,10 @@ class DeleteWinterStorageProductMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         product = get_node_from_global_id(
-            info, input.pop("id"), only_type=WinterStorageProductNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=WinterStorageProductNode,
+            nullable=False,
         )
 
         product.delete()
@@ -274,7 +280,10 @@ class DeleteAdditionalProductMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         product = get_node_from_global_id(
-            info, input.pop("id"), only_type=AdditionalProductNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=AdditionalProductNode,
+            nullable=False,
         )
 
         product.delete()
@@ -468,7 +477,10 @@ class DeleteOrderMutation(graphene.ClientIDMutation):
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
         order = get_node_from_global_id(
-            info, input.pop("id"), only_type=OrderNode, nullable=False,
+            info,
+            input.pop("id"),
+            only_type=OrderNode,
+            nullable=False,
         )
 
         order.delete()
@@ -529,7 +541,12 @@ class CancelOrderMutation(graphene.ClientIDMutation):
             # to have the updated value of rejected_at in the notice
             order = Order.objects.get(pk=order.pk)
             send_cancellation_notice(order)
-        except (Order.DoesNotExist, ValidationError, AnymailError, OSError,) as e:
+        except (
+            Order.DoesNotExist,
+            ValidationError,
+            AnymailError,
+            OSError,
+        ) as e:
             raise VenepaikkaGraphQLError(e)
 
         return CancelOrderMutation()
@@ -619,7 +636,9 @@ class SendBerthSwitchOfferMutation(graphene.ClientIDMutation):
     failed_offers = graphene.List(FailedOfferType)
 
     @classmethod
-    @change_permission_required(BerthSwitchOffer,)
+    @change_permission_required(
+        BerthSwitchOffer,
+    )
     def mutate_and_get_payload(cls, root, info, offers, **input):
         due_date = input.pop("due_date", None)
 
@@ -679,7 +698,8 @@ class ApproveOrderMutation(graphene.ClientIDMutation):
         orders = graphene.List(OrderApprovalInput, required=True)
         due_date = graphene.Date(description="Defaults to the Order due date")
         profile_token = graphene.String(
-            required=False, description="API token for Helsinki profile GraphQL API",
+            required=False,
+            description="API token for Helsinki profile GraphQL API",
         )
 
     failed_orders = graphene.List(FailedOrderType, required=True)
@@ -702,7 +722,10 @@ class ApproveOrderMutation(graphene.ClientIDMutation):
             try:
                 with transaction.atomic():
                     order = get_node_from_global_id(
-                        info, order_id, only_type=OrderNode, nullable=False,
+                        info,
+                        order_id,
+                        only_type=OrderNode,
+                        nullable=False,
                     )
                     email = order_input.get("email")
 
@@ -796,14 +819,17 @@ class RefundOrderMutation(graphene.ClientIDMutation):
     class Input:
         order_id = graphene.ID(required=True)
         profile_token = graphene.String(
-            required=False, description="API token for Helsinki profile GraphQL API",
+            required=False,
+            description="API token for Helsinki profile GraphQL API",
         )
 
     order_refund = graphene.Field(OrderRefundNode, required=True)
 
     @classmethod
     @change_permission_required(
-        Order, BerthLease, WinterStorageLease,
+        Order,
+        BerthLease,
+        WinterStorageLease,
     )
     def mutate_and_get_payload(cls, root, info, order_id, **input):
         profile_token = input.get("profile_token", None)

@@ -157,7 +157,8 @@ def test_berth_applications_statuses_filter_invalid_enum(berth_application, api_
     executed = api_client.execute(query)
 
     assert_in_errors(
-        "invalid value [%s]." % nonexistent_enum_str, executed,
+        "invalid value [%s]." % nonexistent_enum_str,
+        executed,
     )
 
 

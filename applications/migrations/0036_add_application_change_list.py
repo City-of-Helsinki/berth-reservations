@@ -44,7 +44,10 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"ordering": ("created_at", "change_list"), "abstract": False,},
+            options={
+                "ordering": ("created_at", "change_list"),
+                "abstract": False,
+            },
         ),
         migrations.CreateModel(
             name="BerthApplicationChange",
@@ -78,6 +81,9 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"ordering": ("created_at", "change_list"), "abstract": False,},
+            options={
+                "ordering": ("created_at", "change_list"),
+                "abstract": False,
+            },
         ),
     ]

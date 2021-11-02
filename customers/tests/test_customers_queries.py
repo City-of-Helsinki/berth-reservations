@@ -519,6 +519,7 @@ query GetBerthProfile {
 """
 
 
+@pytest.mark.django_db
 @pytest.mark.parametrize(
     "api_client",
     ["berth_services", "berth_handler", "berth_supervisor"],
@@ -538,7 +539,9 @@ def test_query_berth_profile(api_client, customer_profile):
     winter_storage_lease = WinterStorageLeaseFactory(
         customer=customer_profile, boat=boat
     )
-    order = OrderFactory(lease=berth_lease,)
+    order = OrderFactory(
+        lease=berth_lease,
+    )
     offer = BerthSwitchOfferFactory(customer=customer_profile, lease=berth_lease)
     organization = OrganizationFactory(customer=customer_profile)
 
@@ -634,7 +637,9 @@ def test_query_berth_profile_self_user(customer_profile):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["user", "harbor_services"], indirect=True,
+    "api_client",
+    ["user", "harbor_services"],
+    indirect=True,
 )
 def test_query_berth_profile_not_enough_permissions_valid_id(
     api_client, customer_profile

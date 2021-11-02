@@ -86,7 +86,8 @@ def load_email_templates():
         notifications.items()
     ):
         template = NotificationTemplate.objects.create(
-            id=notification_index, type=notification_type.value,
+            id=notification_index,
+            type=notification_type.value,
         )
         for (lang, _name) in languages:
             with override(lang), switch_language(template, lang):
@@ -127,7 +128,8 @@ def load_sms_templates(offset):
         sms_notifications.items()
     ):
         template = NotificationTemplate.objects.create(
-            id=notification_index + offset, type=notification_type.value,
+            id=notification_index + offset,
+            type=notification_type.value,
         )
         for (lang, _name) in languages:
             with override(lang), switch_language(template, lang):

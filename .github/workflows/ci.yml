@@ -30,7 +30,7 @@ jobs:
   test:
     name: Tests
     runs-on: ubuntu-latest
-    container: python:3.8-buster
+    container: python:3.9-buster
 
     services:
       postgres:
@@ -84,10 +84,10 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      - name: Set up Python 3.8
+      - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: '3.8'
+          python-version: '3.9'
 
       - name: Cache pip packages
         uses: actions/cache@v2

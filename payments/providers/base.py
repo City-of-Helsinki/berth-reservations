@@ -62,8 +62,7 @@ class PaymentProvider:
         return self._get_final_return_url(self.get_vene_failure_url(), lang=lang)
 
     def initiate_refund(self, order: Order) -> OrderRefund:
-        """Create a refund to the provider. Implement this in your subclass.
-        """
+        """Create a refund to the provider. Implement this in your subclass."""
         raise NotImplementedError
 
     def handle_notify_refund_request(self) -> None:

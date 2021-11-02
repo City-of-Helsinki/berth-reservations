@@ -50,7 +50,9 @@ mutation CREATE_BERTH_SWITCH_OFFER_MUTATION($input: CreateBerthSwitchOfferMutati
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_switch_offer(api_client, berth_application, berth):
@@ -81,7 +83,9 @@ def test_create_berth_switch_offer(api_client, berth_application, berth):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_switch_offer_old_lease(api_client, berth_application, berth):
@@ -118,7 +122,9 @@ def test_create_berth_switch_offer_old_lease(api_client, berth_application, bert
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_switch_offer_wrong_berth(api_client, berth_application, berth):
@@ -144,7 +150,9 @@ def test_create_berth_switch_offer_wrong_berth(api_client, berth_application, be
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_switch_offer_missing_customer(
@@ -169,7 +177,9 @@ def test_create_berth_switch_offer_missing_customer(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_switch_offer_missing_application_switch(
@@ -280,7 +290,9 @@ mutation CREATE_BERTH_SWITCH_OFFER_MUTATION($input: CreateBerthSwitchOfferMutati
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_switch_offer_refresh_profile(

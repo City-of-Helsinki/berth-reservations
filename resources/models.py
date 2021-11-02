@@ -389,7 +389,8 @@ class PierManager(models.Manager):
                     available_berths, output_field=PositiveIntegerField()
                 ),
                 number_of_inactive_places=Subquery(
-                    inactive_berths, output_field=PositiveIntegerField(),
+                    inactive_berths,
+                    output_field=PositiveIntegerField(),
                 ),
             )
         )
@@ -440,9 +441,13 @@ class WinterStorageSectionManager(models.Manager):
             super()
             .get_queryset()
             .annotate(
-                max_width=Subquery(dimension_qs("width"), output_field=DecimalField(),),
+                max_width=Subquery(
+                    dimension_qs("width"),
+                    output_field=DecimalField(),
+                ),
                 max_length=Subquery(
-                    dimension_qs("length"), output_field=DecimalField(),
+                    dimension_qs("length"),
+                    output_field=DecimalField(),
                 ),
                 number_of_places=Subquery(
                     all_places, output_field=PositiveIntegerField()
@@ -451,7 +456,8 @@ class WinterStorageSectionManager(models.Manager):
                     available_places, output_field=PositiveIntegerField()
                 ),
                 number_of_inactive_places=Subquery(
-                    inactive_places, output_field=PositiveIntegerField(),
+                    inactive_places,
+                    output_field=PositiveIntegerField(),
                 ),
             )
         )
@@ -647,7 +653,9 @@ class BerthManager(models.Manager):
         #
         # Pre-filter the leases for the upcoming/current season
         renewed_leases = BerthLease.objects.filter(
-            in_current_season, berth=OuterRef("berth"), customer=OuterRef("customer"),
+            in_current_season,
+            berth=OuterRef("berth"),
+            customer=OuterRef("customer"),
         ).values("pk")
         # Filter the leases from the previous season that have already been renewed
         previous_leases = (
@@ -707,9 +715,14 @@ class Berth(AbstractBoatPlace, SerializableMixin):
         related_name="berths",
         on_delete=models.PROTECT,
     )
-    comment = models.TextField(verbose_name=_("comment"), blank=True,)
+    comment = models.TextField(
+        verbose_name=_("comment"),
+        blank=True,
+    )
     is_accessible = models.BooleanField(
-        verbose_name=_("is accessible"), blank=True, null=True,
+        verbose_name=_("is accessible"),
+        blank=True,
+        null=True,
     )
 
     objects = BerthManager()
@@ -775,7 +788,9 @@ class WinterStoragePlaceManager(models.Manager):
         #
         # Pre-filter the leases for the upcoming/current season
         renewed_leases = WinterStorageLease.objects.filter(
-            in_current_season, place=OuterRef("place"), customer=OuterRef("customer"),
+            in_current_season,
+            place=OuterRef("place"),
+            customer=OuterRef("customer"),
         )
         # Filter the leases from the previous season that have already been renewed
         previous_leases = WinterStorageLease.objects.exclude(

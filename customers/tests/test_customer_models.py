@@ -46,7 +46,8 @@ def test_customer_can_have_only_one_organization():
 def test_company_requires_business_id():
     with pytest.raises(ValidationError) as exception:
         OrganizationFactory(
-            organization_type=OrganizationType.COMPANY, business_id="",
+            organization_type=OrganizationType.COMPANY,
+            business_id="",
         )
 
     assert "A company must have a business id" in str(exception.value)

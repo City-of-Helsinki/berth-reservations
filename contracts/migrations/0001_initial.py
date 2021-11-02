@@ -54,7 +54,9 @@ class Migration(migrations.Migration):
                 ("invitation_id", models.UUIDField()),
                 ("passphrase", models.CharField(max_length=32)),
             ],
-            options={"abstract": False,},
+            options={
+                "abstract": False,
+            },
         ),
         migrations.CreateModel(
             name="VismaWinterStorageContract",
@@ -81,7 +83,9 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"abstract": False,},
+            options={
+                "abstract": False,
+            },
             bases=("contracts.vismacontract", models.Model),
         ),
         migrations.CreateModel(
@@ -109,7 +113,9 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"abstract": False,},
+            options={
+                "abstract": False,
+            },
             bases=("contracts.vismacontract", models.Model),
         ),
     ]

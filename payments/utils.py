@@ -164,7 +164,9 @@ def calculate_product_partial_month_price(
 
         # Calculate price for the end month
         price += _calculate_price_for_partial_month(
-            end_date, base_price, days=lambda _: end_date.day - 1,
+            end_date,
+            base_price,
+            days=lambda _: end_date.day - 1,
         )
 
     return price
@@ -646,7 +648,10 @@ def get_context(
         }
 
 
-def send_berth_switch_offer(offer, due_date: date,) -> None:
+def send_berth_switch_offer(
+    offer,
+    due_date: date,
+) -> None:
     if due_date:
         offer.due_date = due_date
         offer.save()

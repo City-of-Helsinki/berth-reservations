@@ -88,7 +88,9 @@ mutation CREATE_BERTH_PRODUCT($input: CreateBerthProductMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_create_berth_product(api_client, harbor):
     min_width = rounded(random.uniform(0, 5), round_to_nearest=0.05, as_string=True)
@@ -152,7 +154,9 @@ mutation DELETE_BERTH_PRODUCT($input: DeleteBerthProductMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_delete_berth_product(api_client, berth_product):
     variables = {"id": to_global_id(BerthProductNode, berth_product.id)}
@@ -207,7 +211,9 @@ mutation UPDATE_BERTH_PRODUCT($input: UpdateBerthProductMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_update_berth_product(api_client, berth_product, harbor):
     variables = {
@@ -284,7 +290,9 @@ mutation CREATE_WINTER_STORAGE_PRODUCT($input: CreateWinterStorageProductMutatio
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_create_winter_storage_product(api_client, winter_storage_area):
     variables = {
@@ -357,7 +365,9 @@ mutation DELETE_WINTER_STORAGE_PRODUCT($input: DeleteWinterStorageProductMutatio
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_delete_winter_storage_product(api_client, winter_storage_product):
     variables = {
@@ -418,7 +428,9 @@ mutation UPDATE_WINTER_STORAGE_PRODUCT($input: UpdateWinterStorageProductMutatio
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_update_winter_storage_product(
     api_client, winter_storage_product, winter_storage_area
@@ -492,7 +504,9 @@ mutation CREATE_ADDITIONAL_PRODUCT($input: CreateAdditionalProductMutationInput!
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_create_additional_product(api_client):
     service = ProductServiceTypeEnum.get(random.choice(ProductServiceType.values))
@@ -569,7 +583,9 @@ mutation DELETE_ADDITIONAL_PRODUCT($input: DeleteAdditionalProductMutationInput!
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_delete_additional_product(api_client, additional_product):
     variables = {"id": to_global_id(AdditionalProductNode, additional_product.id)}
@@ -625,7 +641,9 @@ mutation UPDATE_ADDITIONAL_PRODUCT($input: UpdateAdditionalProductMutationInput!
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_update_additional_product(api_client, additional_product):
     product_global_id = to_global_id(AdditionalProductNode, additional_product.id)
@@ -721,7 +739,9 @@ mutation CREATE_ORDER($input: CreateOrderMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 # Freezing time to avoid season price miscalculation
 @freeze_time("2020-01-01T08:00:00Z")
@@ -761,7 +781,9 @@ def test_create_order_berth_product(api_client):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_create_order_winter_storage_lease(api_client, winter_storage_lease):
     lease_id = to_global_id(WinterStorageLeaseNode, winter_storage_lease.id)
@@ -870,7 +892,9 @@ mutation UPDATE_ORDERS($input: UpdateOrdersMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @pytest.mark.parametrize(
     "status_choice",
@@ -884,7 +908,10 @@ mutation UPDATE_ORDERS($input: UpdateOrdersMutationInput!) {
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_update_order_berth_product(api_client, status_choice, berth_lease):
-    order = OrderFactory(lease=berth_lease, status=OrderStatus.OFFERED,)
+    order = OrderFactory(
+        lease=berth_lease,
+        status=OrderStatus.OFFERED,
+    )
 
     global_id = to_global_id(OrderNode, order.id)
     due_date = today()
@@ -921,14 +948,19 @@ def test_update_order_berth_product(api_client, status_choice, berth_lease):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @pytest.mark.parametrize(
     "initial_status", [OrderStatus.DRAFTED, OrderStatus.OFFERED, OrderStatus.ERROR]
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_set_order_status_to_paid_manually(api_client, initial_status, berth_lease):
-    order = OrderFactory(lease=berth_lease, status=initial_status,)
+    order = OrderFactory(
+        lease=berth_lease,
+        status=initial_status,
+    )
     assert order.status == initial_status
     global_id = to_global_id(OrderNode, order.id)
 
@@ -970,13 +1002,18 @@ def test_set_order_status_to_paid_manually(api_client, initial_status, berth_lea
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 @pytest.mark.parametrize("initial_status", [OrderStatus.OFFERED, OrderStatus.ERROR])
 @freeze_time("2020-01-01T08:00:00Z")
 def test_set_order_status_to_cancelled(api_client, initial_status, berth_lease):
     # note: test_cancel_order tests the case where customer rejects the order(and berth).
-    order = OrderFactory(lease=berth_lease, status=initial_status,)
+    order = OrderFactory(
+        lease=berth_lease,
+        status=initial_status,
+    )
     lease_initial_status = berth_lease.status
     assert order.status == initial_status
     global_id = to_global_id(OrderNode, order.id)
@@ -1075,7 +1112,9 @@ mutation DELETE_ORDER($input: DeleteOrderMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_delete_order(api_client, order):
     variables = {"id": to_global_id(OrderNode, order.id)}
@@ -1132,7 +1171,9 @@ mutation CREATE_ORDER_LINE($input: CreateOrderLineMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_create_order_line(api_client, order, additional_product):
     order_id = to_global_id(OrderNode, order.id)
@@ -1177,7 +1218,8 @@ def test_create_order_line(api_client, order, additional_product):
             ),
             "pretaxPrice": str(
                 convert_aftertax_to_pretax(
-                    expected_price, additional_product.tax_percentage,
+                    expected_price,
+                    additional_product.tax_percentage,
                 )
             ),
             "product": {
@@ -1258,7 +1300,9 @@ mutation UPDATE_ORDER_LINE($input: UpdateOrderLineMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_update_order_line(api_client, order_line):
     order_line_id = to_global_id(OrderLineNode, order_line.id)
@@ -1319,7 +1363,9 @@ mutation DELETE_ORDER_LINE($input: DeleteOrderLineMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "api_client", ["berth_services"], indirect=True,
+    "api_client",
+    ["berth_services"],
+    indirect=True,
 )
 def test_delete_order_line(api_client, order_line):
     variables = {"id": to_global_id(OrderLineNode, order_line.id)}
@@ -1364,7 +1410,9 @@ mutation CONFIRM_PAYMENT_MUTATION($input: ConfirmPaymentMutationInput!) {
 
 @freeze_time("2020-01-31T08:00:00Z")
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 @pytest.mark.parametrize("status", [OrderStatus.OFFERED, OrderStatus.REJECTED])
 def test_confirm_payment(superuser_api_client, order: Order, status):
@@ -1418,7 +1466,9 @@ def test_confirm_payment_invalid_status(superuser_api_client, status):
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_payment_fails_doesnt_use_empty_token(superuser_api_client, order: Order):
     empty_token = OrderToken.objects.create(
@@ -1450,7 +1500,9 @@ mutation CANCEL_ORDER_MUTATION($input: CancelOrderMutationInput!) {
 
 
 @pytest.mark.parametrize(
-    "order", ["berth_order", "winter_storage_order"], indirect=True,
+    "order",
+    ["berth_order", "winter_storage_order"],
+    indirect=True,
 )
 def test_cancel_order(
     superuser_api_client, order: Order, notification_template_order_cancelled
@@ -1533,7 +1585,9 @@ def test_cancel_order_does_not_exist(superuser_api_client):
 
 
 @pytest.mark.parametrize(
-    "order", ["unmarked_winter_storage_order"], indirect=True,
+    "order",
+    ["unmarked_winter_storage_order"],
+    indirect=True,
 )
 def test_cancel_unmarked_order_fails(superuser_api_client, order: Order):
     order.status = OrderStatus.OFFERED

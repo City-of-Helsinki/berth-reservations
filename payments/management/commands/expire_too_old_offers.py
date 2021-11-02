@@ -13,5 +13,6 @@ class Command(base_expiration_command.ExpirationCommand):
     @atomic
     def run_expiration(self, dry_run):
         return BerthSwitchOffer.objects.expire_too_old_offers(
-            settings.EXPIRE_WAITING_OFFERS_OLDER_THAN_DAYS, dry_run=dry_run,
+            settings.EXPIRE_WAITING_OFFERS_OLDER_THAN_DAYS,
+            dry_run=dry_run,
         )

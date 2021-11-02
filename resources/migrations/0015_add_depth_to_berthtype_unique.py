@@ -10,7 +10,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterUniqueTogether(name="berthtype", unique_together=set(),),
+        migrations.AlterUniqueTogether(
+            name="berthtype",
+            unique_together=set(),
+        ),
         migrations.AddConstraint(
             model_name="berthtype",
             constraint=models.UniqueConstraint(

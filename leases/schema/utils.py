@@ -12,7 +12,7 @@ def parse_invoicing_result(node_type):
     """Wrapper function to allow reusing the parse function with different Node types"""
 
     def parse_to_dict(object):
-        """Util function to parse a dict of {"UUID": "message"} into {"id": "UUID", "error": "message"} """
+        """Util function to parse a dict of {"UUID": "message"} into {"id": "UUID", "error": "message"}"""
         id, error = list(object.items())[0]
         return {"id": to_global_id(node_type, id), "error": error}
 
@@ -26,7 +26,10 @@ def lookup_or_create_boat(info, input: dict) -> Optional[Boat]:
         from customers.schema import BoatNode
 
         boat = get_node_from_global_id(
-            info, input.pop("boat_id"), only_type=BoatNode, nullable=False,
+            info,
+            input.pop("boat_id"),
+            only_type=BoatNode,
+            nullable=False,
         )
 
         if boat.owner.id != input["customer"].id:

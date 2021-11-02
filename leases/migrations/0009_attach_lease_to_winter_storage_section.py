@@ -12,7 +12,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="winterstoragelease", name="area",),
+        migrations.RemoveField(
+            model_name="winterstoragelease",
+            name="area",
+        ),
         migrations.AddField(
             model_name="winterstoragelease",
             name="section",

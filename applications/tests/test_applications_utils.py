@@ -31,7 +31,9 @@ EXCEL_FILE_LANG = settings.LANGUAGES[0][0]
 # Parametrised berth_switch_reason inside berth_switch
 @pytest.mark.parametrize("berth_switch_info", [True, False], indirect=True)
 def test_exporting_berth_applications_to_excel(
-    berth_switch, berth_switch_info, customer_private,
+    berth_switch,
+    berth_switch_info,
+    customer_private,
 ):
     harbor = HarborFactory(name="Satama")
     harbor.create_translation("fi", name="Satama")
@@ -88,8 +90,10 @@ def test_exporting_berth_applications_to_excel(
     expected_berth_switch_reason = ""
     expected_berth_switch_str = ""
     if berth_switch:
-        switch_harbor_name = berth_switch_info.berth.pier.harbor.safe_translation_getter(
-            "name", language_code=EXCEL_FILE_LANG
+        switch_harbor_name = (
+            berth_switch_info.berth.pier.harbor.safe_translation_getter(
+                "name", language_code=EXCEL_FILE_LANG
+            )
         )
         expected_berth_switch_str = "{} ({}): {}".format(
             switch_harbor_name,

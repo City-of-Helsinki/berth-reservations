@@ -238,7 +238,9 @@ def test_get_berth_with_leases(api_client, berth):
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+    "api_client",
+    ["api_client", "user", "harbor_services"],
+    indirect=True,
 )
 def test_get_berth_with_leases_not_enough_permissions(api_client, berth):
     BerthLeaseFactory(berth=berth)
@@ -370,7 +372,9 @@ def test_get_winter_storage_section_with_leases(api_client, winter_storage_secti
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+    "api_client",
+    ["api_client", "user", "harbor_services"],
+    indirect=True,
 )
 def test_get_winter_storage_section_with_leases_not_enough_permissions(
     api_client, winter_storage_section
@@ -541,7 +545,9 @@ def test_get_winter_storage_place_with_leases(
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+    "api_client",
+    ["api_client", "user", "harbor_services"],
+    indirect=True,
 )
 def test_get_winter_storage_place_with_leases_not_enough_permissions(
     api_client, winter_storage_place
@@ -692,7 +698,9 @@ def test_get_piers_filter_error_both_filters(api_client, berth_application, bert
 
 
 @pytest.mark.parametrize(
-    "api_client", ["api_client", "user", "harbor_services"], indirect=True,
+    "api_client",
+    ["api_client", "user", "harbor_services"],
+    indirect=True,
 )
 def test_get_piers_filter_by_application_not_enough_permissions(
     api_client, berth_application

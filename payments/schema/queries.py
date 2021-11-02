@@ -33,10 +33,12 @@ from .types import (
 
 class Query:
     berth_products = DjangoConnectionField(
-        BerthProductNode, description="**Requires permissions** to access payments.",
+        BerthProductNode,
+        description="**Requires permissions** to access payments.",
     )
     berth_product = Node.Field(
-        BerthProductNode, description="**Requires permissions** to access payments.",
+        BerthProductNode,
+        description="**Requires permissions** to access payments.",
     )
     berth_product_for_width = Field(
         BerthProductNode,
@@ -67,7 +69,8 @@ class Query:
     )
 
     order = Node.Field(
-        OrderNode, description="**Requires permissions** to access payments.",
+        OrderNode,
+        description="**Requires permissions** to access payments.",
     )
     orders = DjangoConnectionField(
         OrderNode,
@@ -82,7 +85,8 @@ class Query:
         "\n\n**Requires permissions** to access payments.",
     )
     berth_switch_offer = Node.Field(
-        BerthSwitchOfferNode, description="**Requires permissions** to access offers.",
+        BerthSwitchOfferNode,
+        description="**Requires permissions** to access offers.",
     )
     berth_switch_offers = DjangoConnectionField(BerthSwitchOfferNode)
 

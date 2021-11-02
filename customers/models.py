@@ -117,7 +117,8 @@ class CustomerProfileManager(models.Manager):
                     raise Exception(_("No customer ID provided"))
 
                 customer = self.create(
-                    id=customer_data.get("id"), comment=customer_data.get("comment"),
+                    id=customer_data.get("id"),
+                    comment=customer_data.get("comment"),
                 )
                 customer.refresh_from_db()
 
@@ -388,7 +389,9 @@ class Boat(TimeStampedModel, UUIDModel, SerializableMixin):
         validators=[MinValueValidator(Decimal("0.01"))],
     )
     weight = models.PositiveIntegerField(
-        verbose_name=_("weight (kg)"), null=True, blank=True,
+        verbose_name=_("weight (kg)"),
+        null=True,
+        blank=True,
     )
 
     # Large vessel specific info (if applicable)

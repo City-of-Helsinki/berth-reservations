@@ -10,6 +10,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="harbor", name="image_link",),
-        migrations.RemoveField(model_name="winterstoragearea", name="image_link",),
+        migrations.RemoveField(
+            model_name="harbor",
+            name="image_link",
+        ),
+        migrations.RemoveField(
+            model_name="winterstoragearea",
+            name="image_link",
+        ),
     ]
