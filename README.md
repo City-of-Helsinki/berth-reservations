@@ -48,7 +48,7 @@ VENE_PAYMENTS_BAMBORA_API_KEY=dummy-key
 VENE_PAYMENTS_BAMBORA_API_SECRET=dummy-secret
 VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS="dummy-bank"
 
-PROFILE_API_URL=https://profiili-api.test.kuva.hel.ninja/graphql/
+PROFILE_API_URL=https://profile-api.test.hel.ninja/graphql/
 PROFILE_TOKEN_SERVICE=https://api.hel.fi/auth/helsinkiprofile
 
 VISMASIGN_API_URL=http://fake-vismasign-api.com

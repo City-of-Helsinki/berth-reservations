@@ -58,7 +58,7 @@ jobs:
           K8S_SECRET_ALLOWED_HOSTS: "*"
           K8S_SECRET_CORS_ORIGIN_ALLOW_ALL: 1
           K8S_SECRET_SECRET_KEY: ${{ secrets.GH_QA_DJANGO_SECRET_KEY }}
-          K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://tunnistamo.test.kuva.hel.ninja/openid"
+          K8S_SECRET_TOKEN_AUTH_AUTHSERVER_URL: "https://tunnistamo.test.hel.ninja/openid"
           K8S_SECRET_MAIL_MAILGUN_KEY: ${{ secrets.GH_QA_SECRET_MAILGUN_API_KEY }}
           K8S_SECRET_MAIL_MAILGUN_DOMAIN: "hel.fi"
           K8S_SECRET_MAIL_MAILGUN_API: "https://api.eu.mailgun.net/v3"
@@ -73,7 +73,7 @@ jobs:
           K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_KEY: ${{ secrets.GH_QA_BAMBORA_API_KEY }}
           K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_SECRET: ${{ secrets.GH_QA_BAMBORA_API_SECRET }}
           K8S_SECRET_VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS: ${{ secrets.GH_QA_BAMBORA_PAYMENT_METHODS }}
-          K8S_SECRET_PROFILE_API_URL: "https://profiili-api.test.kuva.hel.ninja/graphql/"
+          K8S_SECRET_PROFILE_API_URL: "https://profile-api.test.hel.ninja/graphql/"
           K8S_SECRET_ELASTIC_APM_ENVIRONMENT: "test"
           K8S_SECRET_ELASTIC_APM_SECRET_TOKEN: ${{ secrets.GH_QA_ELASTIC_APM_TOKEN }}
           K8S_SECRET_ELASTIC_APM_SERVER_URL: ${{ secrets.GH_QA_ELASTIC_APM_URL }}
