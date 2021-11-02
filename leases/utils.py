@@ -159,6 +159,36 @@ def calculate_winter_storage_lease_end_date() -> date:
     return calculate_winter_season_end_date()
 
 
+def calculate_lease_termination_date(
+    lease: Union[BerthLease, WinterStorageLease], end_date: date = None
+) -> date:
+    from .models import BerthLease
+
+    # The highest priority goes to the parameter, if the end_date is specified,
+    # it will be set, no matter the checks. It's assumed to be a valid date.
+    if end_date:
+        return end_date
+
+    # If the lease hasn't started, the lease will end on the same date as it starts.
+    elif not lease.has_started:
+        return lease.start_date
+
+    # If the lease is terminated during the season, the end date will be set to the
+    # current date.
+    elif lease.is_ongoing:
+        return today().date()
+
+    # If the lease is terminated after its season has ended, the end date will be set
+    # to the date when the season ends.
+    # The last case is when the lease has ended, which is also the "default" end date
+    # for the season.
+    if isinstance(lease, BerthLease):
+        return calculate_season_end_date(lease.start_date)
+
+    # Last case: WinterStorageLease
+    return calculate_winter_season_end_date(lease.start_date)
+
+
 def terminate_lease(
     lease: Union[BerthLease, WinterStorageLease],
     end_date: date = None,
@@ -180,13 +210,7 @@ def terminate_lease(
             order.set_status(OrderStatus.CANCELLED, _("Lease was terminated"))
 
     lease.status = LeaseStatus.TERMINATED
-
-    if isinstance(lease, BerthLease):
-        default_date = calculate_berth_lease_start_date()
-    else:  # WinterStorageLease
-        default_date = calculate_winter_storage_lease_start_date()
-    lease.end_date = end_date or default_date
-
+    lease.end_date = calculate_lease_termination_date(lease, end_date)
     lease.save()
 
     if send_notice:
