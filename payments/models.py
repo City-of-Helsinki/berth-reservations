@@ -66,6 +66,11 @@ logger = logging.getLogger(__name__)
 
 
 class AbstractBaseProduct(TimeStampedModel, UUIDModel):
+    talpa_ecom_id = models.UUIDField(
+        null=True,
+        blank=True,
+        verbose_name=_("talpa eCom product id"),
+    )
     price_value = models.DecimalField(
         verbose_name=_("price"),
         max_digits=10,
@@ -117,6 +122,11 @@ class BerthProduct(
 ):
     """The range boundaries are (]"""
 
+    talpa_ecom_id = models.UUIDField(
+        null=True,
+        blank=True,
+        verbose_name=_("talpa eCom product id"),
+    )
     min_width = models.DecimalField(
         verbose_name=_("minimum width"),
         max_digits=5,
@@ -394,6 +404,11 @@ class Order(UUIDModel, TimeStampedModel, SerializableMixin):
         unique=True,
         editable=False,
         db_index=True,
+    )
+    talpa_ecom_id = models.UUIDField(
+        null=True,
+        blank=True,
+        verbose_name=_("talpa eCom order id"),
     )
     order_type = models.CharField(
         choices=OrderType.choices,

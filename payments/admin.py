@@ -27,6 +27,7 @@ class AdditionalProductAdmin(admin.ModelAdmin):
     readonly_fields = (
         "product_type",
         "pretax_price",
+        "talpa_ecom_id",
     )
 
     @currency
@@ -51,6 +52,7 @@ class BerthProductAdmin(admin.ModelAdmin):
         "tier_2_price",
         "tier_3_price",
         "pricing_category",
+        "talpa_ecom_id",
     )
     list_filter = ("pricing_category",)
     ordering = (
@@ -58,10 +60,15 @@ class BerthProductAdmin(admin.ModelAdmin):
         "min_width",
         "max_width",
     )
+    search_fields = ("talpa_ecom_id",)
 
 
 class WinterStorageProductAdmin(admin.ModelAdmin):
-    list_display = ("winter_storage_area", "price")
+    list_display = (
+        "winter_storage_area",
+        "price",
+        "talpa_ecom_id",
+    )
 
     @currency
     def price(self, obj):
@@ -163,6 +170,7 @@ class OrderAdmin(admin.ModelAdmin):
         "customer_first_name",
         "customer_last_name",
         "customer_email",
+        "talpa_ecom_id",
     )
 
     def lease_order_type(self, obj):
