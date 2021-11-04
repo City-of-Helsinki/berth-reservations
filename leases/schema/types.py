@@ -45,7 +45,12 @@ class BerthLeaseNode(DjangoObjectType):
     def get_queryset(cls, queryset, info):
         user = info.context.user
         return return_queryset_if_user_has_permissions(
-            queryset, user, BerthLease, BerthApplication, CustomerProfile
+            queryset,
+            user,
+            BerthLease,
+            BerthApplication,
+            CustomerProfile,
+            request=info.context,
         )
 
     @classmethod
@@ -96,6 +101,7 @@ class WinterStorageLeaseNode(DjangoObjectType):
             WinterStorageLease,
             WinterStorageApplication,
             CustomerProfile,
+            request=info.context,
         )
 
     @classmethod

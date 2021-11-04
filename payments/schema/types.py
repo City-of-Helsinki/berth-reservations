@@ -246,6 +246,7 @@ class OrderNode(DjangoObjectType):
             BerthLease,
             WinterStorageLease,
             CustomerProfile,
+            request=info.context,
         )
 
     @classmethod
@@ -282,6 +283,7 @@ class OrderRefundNode(DjangoObjectType):
             user,
             Order,
             OrderRefund,
+            request=info.context,
         )
 
 
@@ -317,6 +319,7 @@ class BerthSwitchOfferNode(DjangoObjectType, AbstractOfferNode):
             BerthSwitchOffer,
             BerthLease,
             BerthApplication,
+            request=info.context,
         )
 
     @classmethod

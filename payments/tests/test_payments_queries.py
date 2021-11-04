@@ -941,12 +941,19 @@ query ORDERS {
 """
 
 
-def test_get_customer_own_orders(customer_profile):
+@pytest.mark.parametrize("has_strong_auth", (True, False))
+def test_get_customer_own_orders(customer_profile, has_strong_auth):
     customer_order = OrderFactory(customer=customer_profile)
     OrderFactory()
 
-    api_client = create_api_client(user=customer_profile.user)
+    api_client = create_api_client(
+        user=customer_profile.user, strong_auth=has_strong_auth
+    )
     executed = api_client.execute(CUSTOMER_OWN_ORDERS_QUERY)
+
+    if not has_strong_auth:
+        assert_not_enough_permissions(executed)
+        return
 
     assert Order.objects.count() == 2
 

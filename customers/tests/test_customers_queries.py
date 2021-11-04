@@ -581,7 +581,8 @@ def test_query_berth_profile(api_client, customer_profile):
     }
 
 
-def test_query_berth_profile_self_user(customer_profile):
+@pytest.mark.parametrize("has_strong_auth", (True, False))
+def test_query_berth_profile_self_user(customer_profile, has_strong_auth):
     berth_profile_id = to_global_id(ProfileNode, customer_profile.id)
 
     boat = BoatFactory(owner=customer_profile)
@@ -601,8 +602,14 @@ def test_query_berth_profile_self_user(customer_profile):
 
     query = QUERY_BERTH_PROFILE % berth_profile_id
 
-    api_client = create_api_client(user=customer_profile.user)
+    api_client = create_api_client(
+        user=customer_profile.user, strong_auth=has_strong_auth
+    )
     executed = api_client.execute(query)
+
+    if not has_strong_auth:
+        assert_not_enough_permissions(executed)
+        return
 
     boat_id = to_global_id(BoatNode, boat.id)
     berth_application_id = to_global_id(BerthApplicationNode, berth_application.id)

@@ -70,6 +70,7 @@ class BoatNode(DjangoObjectType):
             Boat,
             CustomerProfile,
             customer_queryset=queryset.filter(owner__user=user),
+            request=info.context,
         )
 
     @classmethod

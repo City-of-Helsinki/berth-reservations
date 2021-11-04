@@ -27,6 +27,7 @@ class BerthContractNode(DjangoObjectType):
             queryset,
             user,
             VismaBerthContract,
+            request=info.context,
         )
 
 
@@ -46,6 +47,7 @@ class WinterStorageContractNode(DjangoObjectType):
             queryset,
             user,
             VismaWinterStorageContract,
+            request=info.context,
         )
 
 

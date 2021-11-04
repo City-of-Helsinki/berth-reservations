@@ -117,7 +117,7 @@ def return_node_if_user_has_permissions(node, user, *models):
 
 
 def return_queryset_if_user_has_permissions(
-    queryset, user, *models, customer_queryset=None
+    queryset, user, *models, customer_queryset=None, request=None
 ):
     """
     Checks whether the user has permissions to access the queryset.
@@ -134,9 +134,14 @@ def return_queryset_if_user_has_permissions(
     :param models: Django models that user has to have permissions to
     :param customer_queryset: [Optional] If the customer property is nested on the model,
     a custom filtered queryset can be passed
+    :param request: [Optional] If provided, customers are required to use strong authentication.
     :return: None | Django QuerySet | Exception raised
     """
-    from users.utils import is_customer, user_has_view_permission
+    from users.utils import (
+        has_strong_authentication,
+        is_customer,
+        user_has_view_permission,
+    )
 
     # First priority: an admin user OR a customer user with admin permissions
     if user_has_view_permission(*models)(user):
@@ -144,7 +149,7 @@ def return_queryset_if_user_has_permissions(
 
     # If the user doesn't have the equivalent to admin permissions,
     # check if it's a customer
-    if is_customer(user):
+    if is_customer(user) and (not request or has_strong_authentication(request)):
         if customer_queryset:
             return customer_queryset
         return queryset.filter(customer__user=user)

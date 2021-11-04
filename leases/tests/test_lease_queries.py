@@ -865,12 +865,19 @@ query BERTH_LEASES {
 """
 
 
-def test_get_customer_own_berth_leases(customer_profile):
+@pytest.mark.parametrize("has_strong_auth", (True, False))
+def test_get_customer_own_berth_leases(customer_profile, has_strong_auth):
     customer_lease = BerthLeaseFactory(customer=customer_profile)
     BerthLeaseFactory()
 
-    api_client = create_api_client(user=customer_profile.user)
+    api_client = create_api_client(
+        user=customer_profile.user, strong_auth=has_strong_auth
+    )
     executed = api_client.execute(CUSTOMER_OWN_BERTH_LEASES_QUERY)
+
+    if not has_strong_auth:
+        assert_not_enough_permissions(executed)
+        return
 
     assert BerthLease.objects.count() == 2
 

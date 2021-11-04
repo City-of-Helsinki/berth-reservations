@@ -5,7 +5,11 @@ from dateutil.parser import isoparse
 from freezegun import freeze_time
 from graphql_relay.node.node import to_global_id
 
-from berth_reservations.tests.utils import assert_in_errors, create_api_client
+from berth_reservations.tests.utils import (
+    assert_in_errors,
+    assert_not_enough_permissions,
+    create_api_client,
+)
 from customers.schema import ProfileNode
 from leases.tests.factories import BerthLeaseFactory
 
@@ -481,12 +485,19 @@ query APPLICATIONS {
 """
 
 
-def test_get_customer_own_berth_applications(customer_profile):
+@pytest.mark.parametrize("has_strong_auth", (True, False))
+def test_get_customer_own_berth_applications(customer_profile, has_strong_auth):
     customer_application = BerthApplicationFactory(customer=customer_profile)
     BerthApplicationFactory()
 
-    api_client = create_api_client(user=customer_profile.user)
+    api_client = create_api_client(
+        user=customer_profile.user, strong_auth=has_strong_auth
+    )
     executed = api_client.execute(CUSTOMER_OWN_BERTH_APPLICATIONS_QUERY)
+
+    if not has_strong_auth:
+        assert_not_enough_permissions(executed)
+        return
 
     assert BerthApplication.objects.count() == 2
 

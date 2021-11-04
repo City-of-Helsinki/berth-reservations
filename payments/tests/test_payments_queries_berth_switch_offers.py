@@ -89,6 +89,17 @@ def test_get_berth_switch_offers_by_owner(
     }
 
 
+def test_get_berth_switch_offers_by_owner_with_weak_auth(
+    berth_customer_weak_auth_api_client, berth_switch_offer, customer_profile
+):
+    berth_switch_offer.customer.user = berth_customer_weak_auth_api_client.user
+    berth_switch_offer.customer.save()
+
+    executed = berth_customer_weak_auth_api_client.execute(BERTH_SWITCH_OFFERS_QUERY)
+
+    assert_not_enough_permissions(executed)
+
+
 BERTH_SWITCH_OFFER_QUERY = """
 query BERTH_SWITCH_OFFER_QUERY  {
     berthSwitchOffer(id: "%s") {
@@ -148,7 +159,8 @@ query ORDERS {
 """
 
 
-def test_get_customer_own_orders(customer_profile):
+@pytest.mark.parametrize("has_strong_auth", (True, False))
+def test_get_customer_own_orders(customer_profile, has_strong_auth):
     customer_order = BerthSwitchOfferFactory(
         customer=customer_profile,
         lease__customer=customer_profile,
@@ -156,8 +168,14 @@ def test_get_customer_own_orders(customer_profile):
     )
     BerthSwitchOfferFactory()
 
-    api_client = create_api_client(user=customer_profile.user)
+    api_client = create_api_client(
+        user=customer_profile.user, strong_auth=has_strong_auth
+    )
     executed = api_client.execute(CUSTOMER_OWN_BERTH_SWITCH_OFFERS_QUERY)
+
+    if not has_strong_auth:
+        assert_not_enough_permissions(executed)
+        return
 
     assert BerthSwitchOffer.objects.count() == 2
 
