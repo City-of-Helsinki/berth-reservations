@@ -73,3 +73,10 @@ def user_is_linked_to_node(user, node):
 def validate_user_is_linked_to_node(user, node):
     if not user_is_linked_to_node(user, node):
         raise PermissionDenied(_("You do not have permission to perform this action."))
+
+
+def has_strong_authentication(request):
+    if not (auth := getattr(request, "auth", None)):
+        return False
+
+    return auth.data.get("loa") in ("substantial", "high")

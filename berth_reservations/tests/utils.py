@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory
 from graphene.test import Client as GrapheneClient
+from helusers.authz import UserAuthorization
 from requests import RequestException
 
 from ..middlewares import GQLDataLoaders
@@ -25,13 +26,18 @@ class ApiClient(GrapheneClient):
         return super().execute(*args, middleware=[GQLDataLoaders()], **kwargs)
 
 
-def create_api_client(user=None):
-    if not user:
+def create_api_client(user=None, strong_auth=True):
+    request = RequestFactory().post("/graphql")
+
+    if user:
+        request.auth = UserAuthorization(
+            user, {"loa": "substantial" if strong_auth else "low"}
+        )
+    else:
         # Django's AuthenticationMiddleware inserts AnonymousUser
         # for all requests, where user is not authenticated.
         user = AnonymousUser()
 
-    request = RequestFactory().post("/graphql")
     request.user = user
     client = ApiClient(schema, context=request)
 

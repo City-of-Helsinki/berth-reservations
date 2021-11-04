@@ -366,6 +366,26 @@ def test_delete_berth_application_by_customer_invalid_status(
     assert BerthApplication.objects.count() == 0
 
 
+def test_delete_berth_application_by_customer_with_weak_auth(
+    berth_customer_weak_auth_api_client, berth_application, customer_profile
+):
+    variables = {
+        "id": to_global_id(BerthApplicationNode, berth_application.id),
+    }
+    berth_application.status = ApplicationStatus.PENDING
+    customer_profile.user = berth_customer_weak_auth_api_client.user
+    customer_profile.save()
+    berth_application.customer = customer_profile
+    berth_application.save()
+    assert BerthApplication.objects.count() == 1
+
+    berth_customer_weak_auth_api_client.execute(
+        DELETE_BERTH_APPLICATION_MUTATION, input=variables
+    )
+
+    assert BerthApplication.objects.count() == 1
+
+
 @pytest.mark.parametrize(
     "api_client",
     ["api_client", "user", "berth_supervisor", "berth_handler"],
@@ -546,6 +566,27 @@ def test_extend_berth_application_not_rejected(
     )
 
     assert_in_errors("Cannot extend applications that have not been rejected", executed)
+
+
+def test_extend_berth_application_with_weak_auth(
+    berth_customer_weak_auth_api_client, berth_application, customer_profile
+):
+    berth_application.status = ApplicationStatus.NO_SUITABLE_BERTHS
+    berth_application.customer = customer_profile
+    berth_application.save()
+
+    customer_profile.user = berth_customer_weak_auth_api_client.user
+    customer_profile.save()
+
+    variables = {
+        "id": to_global_id(BerthApplicationNode, berth_application.id),
+    }
+
+    executed = berth_customer_weak_auth_api_client.execute(
+        EXTEND_BERTH_APPLICATION_MUTATION, input=variables
+    )
+
+    assert_not_enough_permissions(executed)
 
 
 CREATE_WINTER_STORAGE_APPLICATION_MUTATION = """
@@ -974,6 +1015,52 @@ def test_update_berth_application_by_owner_invalid_status(
     )
 
 
+def test_update_berth_application_by_owner_with_weak_auth(
+    berth_customer_weak_auth_api_client, berth_application, customer_profile
+):
+    berth_application_id = to_global_id(BerthApplicationNode, berth_application.id)
+    remove_choice = HarborChoiceFactory(application=berth_application)
+
+    berth = BerthFactory()
+    harbor_node_id = to_global_id(HarborNode, berth.pier.harbor.id)
+
+    customer_profile.user = berth_customer_weak_auth_api_client.user
+    customer_profile.save()
+    berth_application.customer = customer_profile
+    berth_application.save()
+
+    variables = {
+        "id": berth_application_id,
+        "language": "en",
+        "firstName": "John",
+        "lastName": "Doe",
+        "phoneNumber": "1234567890",
+        "email": "john.doe@example.com",
+        "address": "Mannerheimintie 1",
+        "zipCode": "00100",
+        "municipality": "Helsinki",
+        "boatWidth": "2.00",
+        "boatLength": "3.00",
+        "acceptFitnessNews": False,
+        "acceptLibraryNews": False,
+        "acceptOtherCultureNews": False,
+        "acceptBoatingNewsletter": True,
+        "addChoices": [{"harborId": harbor_node_id, "priority": 1}],
+        "removeChoices": [remove_choice.priority],
+    }
+
+    assert berth_application.harborchoice_set.count() == 1
+    assert berth_application.changes.count() == 0
+
+    executed = berth_customer_weak_auth_api_client.execute(
+        UPDATE_BERTH_APPLICATION_OWNER_MUTATION, input=variables
+    )
+
+    assert berth_application.harborchoice_set.count() == 1
+    assert berth_application.changes.count() == 0
+    assert_not_enough_permissions(executed)
+
+
 UPDATE_WINTER_STORAGE_APPLICATION_OWNER_MUTATION = """
 mutation UpdateApplication($input: UpdateWinterStorageApplicationInput!) {
     updateWinterStorageApplication(input: $input) {
@@ -1142,3 +1229,54 @@ def test_update_winter_storage_application_by_owner_invalid_status(
     assert_in_errors(
         "Cannot modify the application once it has been processed", executed
     )
+
+
+def test_update_winter_storage_application_by_owner_with_weak_auth(
+    berth_customer_weak_auth_api_client, winter_storage_application, customer_profile
+):
+    winter_storage_application_id = to_global_id(
+        WinterStorageApplicationNode, winter_storage_application.id
+    )
+    remove_choice = WinterAreaChoiceFactory(application=winter_storage_application)
+
+    place = WinterStoragePlaceFactory()
+    area_node_id = to_global_id(
+        WinterStorageAreaNode, place.winter_storage_section.area.id
+    )
+
+    customer_profile.user = berth_customer_weak_auth_api_client.user
+    customer_profile.save()
+    winter_storage_application.customer = customer_profile
+    winter_storage_application.save()
+
+    variables = {
+        "id": winter_storage_application_id,
+        "language": "en",
+        "firstName": "John",
+        "lastName": "Doe",
+        "phoneNumber": "1234567890",
+        "email": "john.doe@example.com",
+        "address": "Mannerheimintie 1",
+        "zipCode": "00100",
+        "municipality": "Helsinki",
+        "boatWidth": "2.00",
+        "boatLength": "3.00",
+        "acceptFitnessNews": False,
+        "acceptLibraryNews": False,
+        "acceptOtherCultureNews": False,
+        "acceptBoatingNewsletter": True,
+        "addChoices": [{"winterAreaId": area_node_id, "priority": 1}],
+        "removeChoices": [remove_choice.priority],
+    }
+
+    assert winter_storage_application.winterstorageareachoice_set.count() == 1
+    assert winter_storage_application.changes.count() == 0
+
+    executed = berth_customer_weak_auth_api_client.execute(
+        UPDATE_WINTER_STORAGE_APPLICATION_OWNER_MUTATION, input=variables
+    )
+
+    assert winter_storage_application.winterstorageareachoice_set.count() == 1
+    assert winter_storage_application.changes.count() == 0
+
+    assert_not_enough_permissions(executed)

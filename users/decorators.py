@@ -4,7 +4,12 @@ from typing import Callable, List, Optional
 from graphql_jwt.decorators import permission_required, user_passes_test
 from graphql_jwt.exceptions import PermissionDenied
 
-from .utils import is_customer, user_has_models_perms, user_is_linked_to_node
+from .utils import (
+    has_strong_authentication,
+    is_customer,
+    user_has_models_perms,
+    user_is_linked_to_node,
+)
 
 
 def view_permission_required(*models):
@@ -54,6 +59,7 @@ def check_user_is_authorised(
 
             if (
                 is_customer(user)
+                and has_strong_authentication(info.context)
                 and all([user_is_linked_to_node(user, node) for node in nodes_to_check])
             ) or all([check(user) for check in model_checks]):
                 return f(cls, root, info, **input)

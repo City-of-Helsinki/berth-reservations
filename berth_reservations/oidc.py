@@ -15,7 +15,7 @@ class GraphQLApiTokenAuthentication(ApiTokenAuthentication):
         user_auth_tuple = super().authenticate(request)
         if not user_auth_tuple:
             return None
-        user, auth = user_auth_tuple
+        user, request.auth = user_auth_tuple
         return user
 
     def __convert_amr_to_list(self, id_token):

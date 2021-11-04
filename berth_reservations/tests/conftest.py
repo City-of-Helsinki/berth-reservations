@@ -100,6 +100,14 @@ def berth_customer_api_client():
 
 
 @pytest.fixture
+def berth_customer_weak_auth_api_client():
+    user = UserFactory()
+    group = Group.objects.get(name="Berth customer")
+    user.groups.set([group])
+    return create_api_client(user=user, strong_auth=False)
+
+
+@pytest.fixture
 def api_client(
     request,
     user_api_client,
