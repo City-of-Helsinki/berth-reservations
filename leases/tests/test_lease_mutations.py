@@ -17,7 +17,6 @@ from applications.tests.factories import (
 )
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
-    assert_field_missing,
     assert_in_errors,
     assert_not_enough_permissions,
 )
@@ -1237,6 +1236,49 @@ def test_create_winter_storage_lease_with_section(
 
 @pytest.mark.parametrize(
     "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
+)
+def test_create_winter_storage_lease_without_application(
+    api_client, winter_storage_place, customer_profile
+):
+    create_winter_storage_product(winter_storage_place.winter_storage_section.area)
+
+    variables = {
+        "customerId": to_global_id(ProfileNode, customer_profile.id),
+        "placeId": to_global_id(WinterStoragePlaceNode, winter_storage_place.id),
+    }
+
+    assert WinterStorageLease.objects.count() == 0
+
+    executed = api_client.execute(CREATE_WINTER_STORAGE_LEASE_MUTATION, input=variables)
+
+    assert WinterStorageLease.objects.count() == 1
+
+    assert (
+        executed["data"]["createWinterStorageLease"]["winterStorageLease"].pop("id")
+        is not None
+    )
+    assert (
+        executed["data"]["createWinterStorageLease"]["winterStorageLease"].pop("order")
+        is not None
+    )
+
+    assert executed["data"]["createWinterStorageLease"]["winterStorageLease"] == {
+        "status": "DRAFTED",
+        "startDate": str(calculate_winter_storage_lease_start_date()),
+        "endDate": str(calculate_winter_storage_lease_end_date()),
+        "comment": "",
+        "boat": None,
+        "customer": {"id": to_global_id(ProfileNode, customer_profile.id)},
+        "application": None,
+        "place": {"id": variables.get("placeId")},
+        "section": None,
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client",
     ["api_client", "user", "harbor_services", "berth_supervisor"],
     indirect=True,
 )
@@ -1289,19 +1331,6 @@ def test_create_winter_storage_lease_winter_storage_place_doesnt_exist(
     )
 
     assert_doesnt_exist("WinterStoragePlace", executed)
-
-
-def test_create_winter_storage_lease_application_id_missing(superuser_api_client):
-    variables = {
-        "placeId": to_global_id(WinterStoragePlaceNode, uuid.uuid4()),
-    }
-
-    executed = superuser_api_client.execute(
-        CREATE_WINTER_STORAGE_LEASE_MUTATION,
-        input=variables,
-    )
-
-    assert_field_missing("applicationId", executed)
 
 
 def test_create_winter_storage_lease_application_without_customer(
@@ -1401,6 +1430,51 @@ def test_create_winter_storage_lease_no_place_or_section(
     )
 
     assert_in_errors("Either Winter Storage Place or Section are required", executed)
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
+)
+def test_create_winter_storage_lease_no_customer_or_application(
+    api_client, winter_storage_place
+):
+    create_winter_storage_product(winter_storage_place.winter_storage_section.area)
+
+    variables = {
+        "placeId": to_global_id(WinterStoragePlaceNode, winter_storage_place.id),
+    }
+
+    assert WinterStorageLease.objects.count() == 0
+
+    executed = api_client.execute(CREATE_WINTER_STORAGE_LEASE_MUTATION, input=variables)
+
+    assert_in_errors(
+        "Must specify either application or customer when creating a new berth lease",
+        executed,
+    )
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_services", "berth_handler"],
+    indirect=True,
+)
+def test_create_winter_storage_lease_no_application_or_place(
+    api_client, winter_storage_place, customer_profile
+):
+    create_winter_storage_product(winter_storage_place.winter_storage_section.area)
+
+    variables = {"customerId": to_global_id(ProfileNode, customer_profile.id)}
+
+    assert WinterStorageLease.objects.count() == 0
+
+    executed = api_client.execute(CREATE_WINTER_STORAGE_LEASE_MUTATION, input=variables)
+
+    assert_in_errors(
+        "Winter Storage leases without a Place require an Application.", executed
+    )
 
 
 CREATE_WINTER_STORAGE_LEASE_WITH_ORDER_MUTATION = """

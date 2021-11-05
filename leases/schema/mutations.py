@@ -43,6 +43,45 @@ class AbstractLeaseInput:
     comment = graphene.String()
 
 
+def _lookup_application_and_customer(info, input, application_node_type):
+    from customers.schema import ProfileNode  # import here avoid circular import
+
+    if application_id := input.pop("application_id", None):
+        if "customer_id" in input:
+            raise VenepaikkaGraphQLError(
+                _(
+                    "Can not specify both application and customer when creating a new berth lease"
+                )
+            )
+        application = get_node_from_global_id(
+            info,
+            application_id,
+            only_type=application_node_type,
+            nullable=False,
+        )
+        if not application.customer:
+            raise VenepaikkaGraphQLError(
+                _("Application must be connected to an existing customer first")
+            )
+        input["application"] = application
+        input["customer"] = application.customer
+
+    elif customer_id := input.pop("customer_id", None):
+        assert "customer" not in input
+        input["customer"] = get_node_from_global_id(
+            info,
+            customer_id,
+            only_type=ProfileNode,
+            nullable=False,
+        )
+    else:
+        raise VenepaikkaGraphQLError(
+            _(
+                "Must specify either application or customer when creating a new berth lease"
+            )
+        )
+
+
 class CreateBerthLeaseMutation(graphene.ClientIDMutation):
     class Input(AbstractLeaseInput):
         # either application_id or customer_id must be provided, but not both
@@ -96,7 +135,8 @@ class CreateBerthLeaseMutation(graphene.ClientIDMutation):
     @add_permission_required(BerthLease)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):
-        cls.lookup_application_and_customer(info, input)
+        _lookup_application_and_customer(info, input, BerthApplicationNode)
+
         if boat := lookup_or_create_boat(info, input):
             input["boat"] = boat
 
@@ -284,7 +324,9 @@ class SwitchBerthMutation(graphene.ClientIDMutation):
 
 class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
     class Input(AbstractLeaseInput):
-        application_id = graphene.ID(required=True)
+        # either application_id or customer_id must be provided, but not both
+        application_id = graphene.ID()
+        customer_id = graphene.ID()
         place_id = graphene.ID()
         section_id = graphene.ID()
 
@@ -295,21 +337,16 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
     @add_permission_required(WinterStorageLease)
     @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **input):  # noqa: C901
+        if "place_id" not in input and "application_id" not in input:
+            raise VenepaikkaGraphQLError(
+                _("Winter Storage leases without a Place require an Application.")
+            )
+
+        _lookup_application_and_customer(info, input, WinterStorageApplicationNode)
+
         if "place_id" in input and "section_id" in input:
             raise VenepaikkaGraphQLError(
                 _("Cannot receive both Winter Storage Place and Section")
-            )
-
-        application = get_node_from_global_id(
-            info,
-            input.pop("application_id"),
-            only_type=WinterStorageApplicationNode,
-            nullable=False,
-        )
-
-        if not application.customer:
-            raise VenepaikkaGraphQLError(
-                _("Application must be connected to an existing customer first")
             )
 
         if place_id := input.pop("place_id", None):
@@ -333,9 +370,6 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
                 _("Either Winter Storage Place or Section are required")
             )
 
-        input["application"] = application
-        input["customer"] = application.customer
-
         if boat := lookup_or_create_boat(info, input):
             input["boat"] = boat
 
@@ -343,15 +377,16 @@ class CreateWinterStorageLeaseMutation(graphene.ClientIDMutation):
             lease = WinterStorageLease.objects.create(**input)
             order = Order.objects.create(customer=input["customer"], lease=lease)
             # Do not create a contract for non-billable customers.
-            if not application.customer.is_non_billable_customer():
+            if not input["customer"].is_non_billable_customer():
                 get_contract_service().create_winter_storage_contract(lease)
         except WinterStorageProduct.DoesNotExist as e:
             raise VenepaikkaGraphQLError(e)
         except ValidationError as e:
             raise VenepaikkaGraphQLError(str(e))
 
-        application.status = ApplicationStatus.OFFER_GENERATED
-        application.save()
+        if application := input.get("application"):
+            application.status = ApplicationStatus.OFFER_GENERATED
+            application.save()
 
         if order.customer.is_non_billable_customer():
             order.set_status(OrderStatus.PAID_MANUALLY, "Non-billable customer.")
@@ -693,6 +728,8 @@ class Mutation:
     create_winter_storage_lease = CreateWinterStorageLeaseMutation.Field(
         description="Creates a `WinterStorageLease` associated with the `WinterStorageApplication` "
         "and `WinterStoragePlace` passed. The lease is associated with the `CustomerProfile` that owns the application."
+        "\n\nIt is also possible to create a `WinterStorageLease` without a `WinterStorageApplication` by providing "
+        "`customerId` instead of `applicationId`. In that case, `placeId` is required also."
         "\n\nAn `Order` will be generated with this lease. A valid `WinterStorageProduct` is required."
         "\n\n**Requires permissions** to access applications."
         "\n\nErrors:"
@@ -700,6 +737,8 @@ class Mutation:
         "\n* A boat is passed and the owner of the boat differs from the owner of the application"
         "\n* There is no `WinterStorageProduct` that can be associated to the `order`/`lease`"
         "\n* Neither `placeId` or `areaId` is passed"
+        "\n* Both `applicationId` and `customerId` are passed"
+        "\n* Neither `applicationId` or `placeId` is passed"
     )
     update_winter_storage_lease = UpdateWinterStorageLeaseMutation.Field(
         description="Updates a `WinterStorageLease` object."
