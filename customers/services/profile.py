@@ -167,24 +167,24 @@ class ProfileService:
 
     def get_my_profile(self) -> Optional[HelsinkiProfileUser]:
         query = """
-            query MyProfile {{
-                my_profile: myProfile {{
+            query MyProfile {
+                my_profile: myProfile {
                     id
                     first_name: firstName
                     last_name: lastName
-                    primary_email: primaryEmail {{
+                    primary_email: primaryEmail {
                         email
-                    }}
-                    primary_phone: primaryPhone {{
+                    }
+                    primary_phone: primaryPhone {
                         phone
-                    }}
-                    primary_address: primaryAddress {{
+                    }
+                    primary_address: primaryAddress {
                         address
                         postal_code: postalCode
                         city
-                    }}
-                }}
-            }}
+                    }
+                }
+            }
         """
 
         response = self.query(query)
