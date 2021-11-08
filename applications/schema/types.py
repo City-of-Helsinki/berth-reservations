@@ -113,6 +113,7 @@ class BerthApplicationNode(DjangoObjectType):
     status = ApplicationStatusEnum(required=True)
     priority = ApplicationPriorityEnum(required=True)
     customer = graphene.Field("customers.schema.ProfileNode")
+    boat = graphene.Field("customers.schema.BoatNode")
     changes = graphene.List(BerthApplicationChangeType, required=True)
 
     class Meta:
@@ -193,6 +194,7 @@ class WinterStorageApplicationNode(DjangoObjectType):
     priority = ApplicationPriorityEnum(required=True)
     storage_method = WinterStorageMethodEnum(required=True)
     customer = graphene.Field("customers.schema.ProfileNode")
+    boat = graphene.Field("customers.schema.BoatNode")
     changes = graphene.List(WinterStorageApplicationChangeType, required=True)
 
     class Meta:

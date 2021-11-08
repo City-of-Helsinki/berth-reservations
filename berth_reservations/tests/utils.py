@@ -36,7 +36,6 @@ def create_api_client(user=None):
     client = ApiClient(schema, context=request)
 
     client.user = user
-
     return client
 
 

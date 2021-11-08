@@ -27,13 +27,13 @@ def export_berth_applications_as_xlsx(applications):
         ("Municipality", "municipality", 15),
         ("Phone number", "phone_number", 15),
         ("Boat type", "boat_type", 15),
-        ("Boat width", "boat_width", 15),
-        ("Boat length", "boat_length", 15),
-        ("Boat draught", "boat_draught", 15),
-        ("Boat weight", "boat_weight", 15),
-        ("Boat registration number", "boat_registration_number", 15),
-        ("Boat name", "boat_name", 15),
-        ("Boat model", "boat_model", 15),
+        ("Boat width", "get_boat_width", 15),
+        ("Boat length", "get_boat_length", 15),
+        ("Boat draught", "get_boat_draught", 15),
+        ("Boat weight", "get_boat_weight", 15),
+        ("Boat registration number", "get_boat_registration_number", 15),
+        ("Boat name", "get_boat_name", 15),
+        ("Boat model", "get_boat_model", 15),
         ("Accessibility required", "accessibility_required", 15),
         ("Accept boating newsletter", "accept_boating_newsletter", 15),
         ("Accept fitness news", "accept_fitness_news", 15),
@@ -75,8 +75,10 @@ def export_berth_applications_as_xlsx(applications):
 
             for column_number, field in enumerate(fields[2:], 2):
                 attr_name = field[1]
-                if attr_name == "boat_type" and application.boat_type:
-                    value = application.boat_type.name
+                if attr_name == "boat_type" and (
+                    boat_type := application.get_boat_type()
+                ):
+                    value = boat_type.name
                 elif attr_name == "berth_switch" and application.berth_switch:
                     value = parse_berth_switch_str(application.berth_switch)
                 elif attr_name == "berth_switch_reason":
@@ -89,6 +91,8 @@ def export_berth_applications_as_xlsx(applications):
                         )
                 else:
                     value = getattr(application, attr_name)
+                    if callable(value):
+                        value = value()
                     if isinstance(value, bool):
                         value = "Yes" if value else ""
 
@@ -115,11 +119,11 @@ def export_winter_storage_applications_as_xlsx(applications):
         ("Storage method", "storage_method", 15),
         ("Trailer registration number", "trailer_registration_number", 15),
         ("Boat type", "boat_type", 15),
-        ("Boat width", "boat_width", 15),
-        ("Boat length", "boat_length", 15),
-        ("Boat registration number", "boat_registration_number", 15),
-        ("Boat name", "boat_name", 15),
-        ("Boat model", "boat_model", 15),
+        ("Boat width", "get_boat_width", 15),
+        ("Boat length", "get_boat_length", 15),
+        ("Boat registration number", "get_boat_registration_number", 15),
+        ("Boat name", "get_boat_name", 15),
+        ("Boat model", "get_boat_model", 15),
         ("Accept boating newsletter", "accept_boating_newsletter", 15),
         ("Accept fitness news", "accept_fitness_news", 15),
         ("Accept library news", "accept_library_news", 15),
@@ -153,10 +157,14 @@ def export_winter_storage_applications_as_xlsx(applications):
 
             for column_number, field in enumerate(fields[2:], 2):
                 attr_name = field[1]
-                if attr_name == "boat_type" and application.boat_type:
-                    value = application.boat_type.name
+                if attr_name == "boat_type" and (
+                    boat_type := application.get_boat_type()
+                ):
+                    value = boat_type.name
                 else:
                     value = getattr(application, attr_name)
+                    if callable(value):
+                        value = value()
                     if isinstance(value, bool):
                         value = "Yes" if value else ""
                     elif value in WinterStorageMethod:

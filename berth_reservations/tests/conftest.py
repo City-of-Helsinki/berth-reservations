@@ -92,8 +92,8 @@ def berth_customer_user():
 
 
 @pytest.fixture
-def berth_customer_api_client():
-    user = UserFactory()
+def berth_customer_api_client(customer_profile):
+    user = customer_profile.user
     group = Group.objects.get(name="Berth customer")
     user.groups.set([group])
     return create_api_client(user=user)
@@ -120,7 +120,6 @@ def api_client(
         api_client = harbor_services_api_client
     elif client_type == "user":
         api_client = user_api_client
-
     # When the fixture is called without parameters, return the base api_client
     else:
         api_client = create_api_client()

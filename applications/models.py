@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from helsinki_gdpr.models import SerializableMixin
 from parler.models import TranslatableModel, TranslatedFields
 
-from customers.models import CustomerProfile
+from customers.models import Boat, CustomerProfile
 from resources.models import Berth, BoatType, Harbor, WinterStorageArea
 from utils.models import TimeStampedModel, UUIDModel
 
@@ -126,7 +126,88 @@ class BaseApplication(models.Model):
         verbose_name=_("business ID"), max_length=64, blank=True
     )
 
-    # General boat info
+    # Use the "boat" field if applicant has an existing boat in the database
+    # If it's a new boat, boat information should be provided in the Application fields.
+    # explicit boat values are not allowed if boat is defined.
+    # The fields are: boat_type, boat_registration_number, boat_name
+    boat = models.ForeignKey(
+        Boat, verbose_name=_("boat"), on_delete=models.PROTECT, null=True, blank=True,
+    )
+
+    def is_existing_boat(self):
+        return self.boat is not None
+
+    def get_new_boat_fields(self):
+        # these fields need to be empty/null when an existing boat is used
+        return [
+            "boat_type",
+            "boat_registration_number",
+            "boat_width",
+            "boat_length",
+            "boat_name",
+            "boat_model",
+        ]
+
+    def clear_new_boat_fields(self):
+        for field_name in self.get_new_boat_fields():
+            setattr(self, field_name, self._meta.get_field(field_name).get_default())
+
+    def get_boat_field(self, field_name):
+        prefix = "boat_"
+        assert field_name.startswith(prefix)
+        if self.boat:
+            return getattr(self.boat, field_name[len(prefix) :])
+        else:
+            return getattr(self, field_name)
+
+    def get_boat_type(self):
+        return self.boat.boat_type if self.boat else self.boat_type
+
+    def get_boat_registration_number(self):
+        return self.get_boat_field("boat_registration_number")
+
+    def get_boat_name(self):
+        return self.get_boat_field("boat_name")
+
+    def get_boat_model(self):
+        return self.get_boat_field("boat_model")
+
+    def get_boat_length(self):
+        return self.get_boat_field("boat_length")
+
+    def get_boat_width(self):
+        return self.get_boat_field("boat_width")
+
+    # These fields are required if there's not an existing boat that can be used.
+    REQUIRED_NEW_BOAT_FIELDS = [
+        "boat_type",
+        "boat_length",
+        "boat_width",
+    ]
+
+    def clean(self):
+        if self.boat:
+            if self.customer and self.boat.owner != self.customer:
+                raise ValidationError(
+                    _(
+                        "The boat should belong to the customer who is creating the application"
+                    )
+                )
+            for key in self.get_new_boat_fields():
+                if getattr(self, key):
+                    raise ValidationError(
+                        _(
+                            "Application has an existing boat, must not have new boat info"
+                        )
+                    )
+        else:
+            for field_name in self.REQUIRED_NEW_BOAT_FIELDS:
+                if not getattr(self, field_name):
+                    raise ValidationError(
+                        _("Required boat field missing for a new boat")
+                    )
+
+    # For a new boat: General boat info
     boat_type = models.ForeignKey(
         BoatType,
         verbose_name=_("boat type"),
@@ -147,12 +228,16 @@ class BaseApplication(models.Model):
         decimal_places=2,
         max_digits=5,
         validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
+        blank=True,
     )
     boat_width = models.DecimalField(
         verbose_name=_("boat width"),
         decimal_places=2,
         max_digits=5,
         validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
+        blank=True,
     )
 
     accept_boating_newsletter = models.BooleanField(
@@ -251,7 +336,31 @@ class BerthApplication(BaseApplication, SerializableMixin):
         blank=True,
     )
 
-    # Extra boat dimensions
+    def get_new_boat_fields(self):
+        return super().get_new_boat_fields() + [
+            "boat_draught",
+            "boat_weight",
+            "boat_propulsion",
+            "boat_hull_material",
+            "boat_intended_use",
+        ]
+
+    def get_boat_draught(self):
+        return self.get_boat_field("boat_draught")
+
+    def get_boat_weight(self):
+        return self.get_boat_field("boat_weight")
+
+    def get_boat_propulsion(self):
+        return self.get_boat_field("boat_propulsion")
+
+    def get_boat_hull_material(self):
+        return self.get_boat_field("boat_hull_material")
+
+    def get_boat_intended_use(self):
+        return self.get_boat_field("boat_intended_use")
+
+    # For a new boat: boat dimensions
     boat_draught = models.DecimalField(
         verbose_name=_("boat draught"),
         decimal_places=2,
@@ -273,7 +382,7 @@ class BerthApplication(BaseApplication, SerializableMixin):
         verbose_name=_("accessibility required"), default=False
     )
 
-    # Large vessel specific info (if applicable)
+    # For a new boat: Large vessel specific info (if applicable)
     boat_propulsion = models.CharField(
         verbose_name=_("boat propulsion"), max_length=64, blank=True
     )
@@ -437,12 +546,11 @@ class BerthApplication(BaseApplication, SerializableMixin):
         self.create_change_entry()
 
         # Ensure clean is always ran
-        # FIXME: exclude decimal fields for now, as GQL API uses floats for those
-        #  which does not work well with Django's validation for DecimalField
-        self.full_clean(exclude=["boat_length", "boat_width", "boat_draught"])
+        self.full_clean()
         super().save(*args, **kwargs)
 
     def clean(self):
+        super().clean()
         self._validate_status()
 
     serialize_fields = (
@@ -497,6 +605,7 @@ class WinterStorageApplication(BaseApplication, SerializableMixin):
         verbose_name=_("application area type"),
         max_length=30,
         null=True,
+        blank=True,
     )
 
     customer = models.ForeignKey(
@@ -594,6 +703,8 @@ class WinterStorageApplication(BaseApplication, SerializableMixin):
                 setattr(self, field, field_value.strip())
 
         self.create_change_entry()
+        # Ensure clean is always ran
+        self.full_clean()
 
         super().save(*args, **kwargs)
 

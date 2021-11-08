@@ -15,5 +15,6 @@ def debug_on_exception(func):
         except Exception:
             traceback.print_exc()
             pdb.post_mortem()
+            raise
 
     return wrapper

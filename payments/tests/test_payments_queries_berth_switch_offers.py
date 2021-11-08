@@ -70,6 +70,7 @@ def test_get_berth_switch_offers_not_enough_permissions(berth_switch_offer, api_
 def test_get_berth_switch_offers_by_owner(
     berth_customer_api_client, berth_switch_offer, customer_profile
 ):
+    berth_customer_api_client.user.customer.delete()
     berth_switch_offer.customer.user = berth_customer_api_client.user
     berth_switch_offer.customer.save()
 

@@ -12,6 +12,7 @@ from users.decorators import (
 )
 from users.utils import (
     is_customer,
+    user_has_add_permission,
     user_has_change_permission,
     user_has_delete_permission,
     user_has_view_permission,
@@ -42,6 +43,41 @@ from .inputs import (
 from .types import BerthApplicationNode, WinterStorageApplicationNode
 
 
+def get_application_customer(info):
+    if is_customer(info.context.user):
+        # customer-created applications are always linked to the current customer.
+        # If admins create applications, customer should be assigned later.
+        if not info.context.user.customer:
+            raise VenepaikkaGraphQLError(
+                _("Customer has no CustomerProfile, can not create application")
+            )
+        return info.context.user.customer
+    else:
+        return None
+
+
+def assign_boat(application_data, info):
+    from customers.schema import BoatNode
+
+    if "boat_id" in application_data:
+        if boat_id := application_data.pop("boat_id", None):
+            application_data["boat"] = get_node_from_global_id(
+                info, boat_id, only_type=BoatNode, nullable=False
+            )
+        else:
+            application_data["boat"] = None
+
+
+def assign_boat_type(application_data):
+    from resources.models import BoatType
+
+    if "boat_type" in application_data:
+        if boat_type_id := application_data.pop("boat_type", None):
+            application_data["boat_type"] = BoatType.objects.get(id=int(boat_type_id))
+        else:
+            application_data["boat_type"] = None
+
+
 class CreateBerthApplicationMutation(graphene.ClientIDMutation):
     class Input:
         berth_application = BerthApplicationInput(required=True)
@@ -50,7 +86,19 @@ class CreateBerthApplicationMutation(graphene.ClientIDMutation):
     ok = graphene.Boolean()
     berth_application = graphene.Field(BerthApplicationNode)
 
+    def get_nodes_to_check(info, **input):
+        # Application does not exist yet. Check if the logged in user has permission to
+        # their ProfileNode.
+        if not info.context.user:
+            raise VenepaikkaGraphQLError(_("Login required"))
+        return [info.context.user]
+
     @classmethod
+    @check_user_is_authorised(
+        get_nodes_to_check=get_nodes_to_check,
+        model_checks=[user_has_add_permission(BerthApplication)],
+    )
+    @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **kwargs):
         from resources.models import BoatType
         from resources.schema import BerthNode, HarborNode
@@ -72,6 +120,9 @@ class CreateBerthApplicationMutation(graphene.ClientIDMutation):
             application_data["berth_switch"] = berth_switch
 
         choices = application_data.pop("choices", [])
+
+        application_data["customer"] = get_application_customer(info)
+        assign_boat(application_data, info)
 
         application = BerthApplication.objects.create(**application_data)
 
@@ -133,23 +184,59 @@ class UpdateBerthApplication(graphene.ClientIDMutation):
 
         cls.validate_application_status(application, info, input)
 
-        # This allows for getting explicit None values
+        # don't change customer field in any way if no customer_id in input.
         if "customer_id" in input:
             customer_id = input.pop("customer_id", None)
-
-            if is_customer(info.context.user):
-                raise VenepaikkaGraphQLError(
-                    _(
-                        "A customer cannot modify the customer connected to the application"
-                    )
+            if customer_id:
+                customer = get_node_from_global_id(
+                    info, customer_id, only_type=ProfileNode, nullable=True
                 )
 
-            input["customer"] = get_node_from_global_id(
-                info, customer_id, only_type=ProfileNode, nullable=True
-            )
+                if is_customer(info.context.user):
+                    # the checks here are defensive programming - the checks in
+                    # check_user_is_authorised and get_node_from_global_id should catch these situations
+                    if (
+                        application.customer
+                        and info.context.user.customer != application.customer
+                    ):
+                        raise VenepaikkaGraphQLError(
+                            _(
+                                "Unexpected: A customer cannot modify application by another customer"
+                            )
+                        )
+                    if info.context.user.customer != customer:
+                        raise VenepaikkaGraphQLError(
+                            _(
+                                "Unexpected: A customer cannot set the customer of application to another customer"
+                            )
+                        )
 
+                input["customer"] = customer
+            else:
+                if is_customer(info.context.user) and application.customer:
+                    raise VenepaikkaGraphQLError(
+                        _(
+                            "A customer cannot unset the customer connected to the application"
+                        )
+                    )
+                input["customer"] = None
+
+        cls.handle_harbor_choices(application, input)
+
+        assign_boat_type(input)
+        assign_boat(input, info)
+        if input.get("boat"):
+            # if any of the new_boat_fields have non-empty values in input, that will result
+            # in validation error when saving the application.
+            application.clear_new_boat_fields()
+
+        update_object(application, input)
+
+        return UpdateBerthApplication(berth_application=application)
+
+    @classmethod
+    def handle_harbor_choices(cls, application, input):
         old_choices = set(application.harborchoice_set.all())
-
         if remove_choices := input.pop("remove_choices", []):
             # Delete the choices based on their priority (passed as input)
             application.harborchoice_set.filter(priority__in=remove_choices).delete()
@@ -160,7 +247,6 @@ class UpdateBerthApplication(graphene.ClientIDMutation):
             ):
                 choice.priority = new_priority
                 choice.save()
-
         if add_choices := input.pop("add_choices", []):
             for choice in add_choices:
                 HarborChoice.objects.get_or_create(
@@ -168,9 +254,7 @@ class UpdateBerthApplication(graphene.ClientIDMutation):
                     priority=choice.get("priority"),
                     application=application,
                 )
-
         new_choices = set(application.harborchoice_set.all())
-
         if old_choices != new_choices:
             old_choices = "\n".join([str(choice) for choice in old_choices])
             new_choices = "\n".join([str(choice) for choice in new_choices])
@@ -181,10 +265,6 @@ class UpdateBerthApplication(graphene.ClientIDMutation):
             BerthApplicationChange.objects.create(
                 application=application, change_list=change_list
             )
-
-        update_object(application, input)
-
-        return UpdateBerthApplication(berth_application=application)
 
 
 class DeleteBerthApplicationMutation(graphene.ClientIDMutation):
@@ -274,7 +354,19 @@ class CreateWinterStorageApplicationMutation(graphene.ClientIDMutation):
 
     winter_storage_application = graphene.Field(WinterStorageApplicationNode)
 
+    def get_nodes_to_check(info, **input):
+        # Application does not exist yet. Check if the logged in user has permission to
+        # their ProfileNode.
+        if not info.context.user:
+            raise VenepaikkaGraphQLError(_("Login required"))
+        return [info.context.user]
+
     @classmethod
+    @check_user_is_authorised(
+        get_nodes_to_check=get_nodes_to_check,
+        model_checks=[user_has_add_permission(BerthApplication)],
+    )
+    @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **kwargs):
         from resources.models import BoatType
         from resources.schema import WinterStorageAreaNode
@@ -287,6 +379,8 @@ class CreateWinterStorageApplicationMutation(graphene.ClientIDMutation):
 
         chosen_areas = application_data.pop("chosen_areas", [])
 
+        application_data["customer"] = get_application_customer(info)
+        assign_boat(application_data, info)
         application = WinterStorageApplication.objects.create(**application_data)
 
         for choice in chosen_areas:
@@ -309,7 +403,7 @@ class CreateWinterStorageApplicationMutation(graphene.ClientIDMutation):
             else MARKED_WS_SENDER
         )
         application_saved.send(sender=sender, application=application)
-
+        application.refresh_from_db()  # if some field was assigned a float value, load the actual decimal value from db
         return CreateWinterStorageApplicationMutation(
             winter_storage_application=application
         )
@@ -410,8 +504,15 @@ class UpdateWinterStorageApplication(graphene.ClientIDMutation):
                 application=application, change_list=change_list
             )
 
-        update_object(application, input)
+        assign_boat_type(input)
+        assign_boat(input, info)
+        if input.get("boat"):
+            # if any of the new_boat_fields have non-empty values in input, that will result
+            # in validation error when saving the application.
+            application.clear_new_boat_fields()
 
+        update_object(application, input)
+        application.refresh_from_db()
         return UpdateWinterStorageApplication(winter_storage_application=application)
 
 
