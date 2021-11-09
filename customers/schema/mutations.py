@@ -229,6 +229,7 @@ class CreateMyBerthProfileMutation(graphene.ClientIDMutation):
         )
 
     profile = graphene.Field(ProfileNode)
+    created = graphene.Boolean()
 
     @classmethod
     @login_required
@@ -238,9 +239,13 @@ class CreateMyBerthProfileMutation(graphene.ClientIDMutation):
         if not user.groups.exists():
             # customers need to belong to the berth customers group, and no other groups
             user.groups.add(get_berth_customers_group())
-        profile_exists = CustomerProfile.objects.filter(user=user).exists()
-        if profile_exists:
-            return None
+
+        try:
+            return CreateMyBerthProfileMutation(
+                profile=CustomerProfile.objects.get(user=user), created=False
+            )
+        except CustomerProfile.DoesNotExist:
+            pass
 
         profile_service = ProfileService(profile_token=profile_token)
         my_profile = profile_service.get_my_profile()
@@ -254,7 +259,7 @@ class CreateMyBerthProfileMutation(graphene.ClientIDMutation):
             errors = sum(e.message_dict.values(), [])
             raise VenepaikkaGraphQLError(errors)
 
-        return CreateMyBerthProfileMutation(profile=profile)
+        return CreateMyBerthProfileMutation(profile=profile, created=True)
 
 
 class UpdateBerthServicesProfileMutation(graphene.ClientIDMutation):
