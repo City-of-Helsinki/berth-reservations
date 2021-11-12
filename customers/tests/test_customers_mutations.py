@@ -519,6 +519,7 @@ mutation CREATE_MY_BERTH_PROFILE($input: CreateMyBerthProfileMutationInput!) {
         profile {
             id
         }
+        created
     }
 }
 """
@@ -549,8 +550,11 @@ def test_create_my_berth_profile(user_api_client, hki_profile_address):
         )
 
     assert CustomerProfile.objects.count() == 1
-    assert executed["data"]["createMyBerthProfile"]["profile"] == {
-        "id": customer_id,
+    assert executed["data"]["createMyBerthProfile"] == {
+        "profile": {
+            "id": customer_id,
+        },
+        "created": True,
     }
     profile = CustomerProfile.objects.all().first()
     assert profile.user is not None
@@ -574,7 +578,9 @@ def test_create_my_berth_profile_does_not_exist(user_api_client):
 def test_create_my_berth_profile_already_exists(user_api_client):
     variables = {"profileToken": "token"}
 
-    CustomerProfile.objects.create(id=uuid.uuid4(), user=User.objects.first())
+    customer_profile = CustomerProfile.objects.create(
+        id=uuid.uuid4(), user=User.objects.first()
+    )
 
     assert CustomerProfile.objects.count() == 1
     assert CustomerProfile.objects.all().first().user.groups.count() == 0
@@ -584,7 +590,12 @@ def test_create_my_berth_profile_already_exists(user_api_client):
     )
 
     assert CustomerProfile.objects.count() == 1
-    assert executed["data"]["createMyBerthProfile"] is None
+    assert executed["data"]["createMyBerthProfile"] == {
+        "profile": {
+            "id": to_global_id(ProfileNode, customer_profile.id),
+        },
+        "created": False,
+    }
 
     # the berth customer group is still assigned, if it was not assigned before
     profile = CustomerProfile.objects.all().first()
