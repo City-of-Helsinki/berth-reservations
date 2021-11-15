@@ -61,7 +61,7 @@ def test_resend_order(
     notification_template_orders_approved,
     berth_product,
     winter_storage_product,
-    payment_provider,
+    bambora_payment_provider,
     order_status,
 ):
     order.status = order_status
@@ -151,7 +151,7 @@ def test_resend_order(
         assert mail.outbox[0].alternatives[0][1] == "text/html"
 
         # Assert that the SMS is being sent
-        payment_url = payment_provider.get_payment_email_url(
+        payment_url = bambora_payment_provider.get_payment_email_url(
             order, lang=order.lease.application.language
         )
         sms_context = {
@@ -189,7 +189,7 @@ def test_resend_order_in_error(
     order: Order,
     superuser_api_client,
     notification_template_orders_approved,
-    payment_provider,
+    bambora_payment_provider,
 ):
     order.customer_email = "foo@email.com"
     order.status = OrderStatus.ERROR
@@ -239,7 +239,7 @@ def test_resend_order_in_error(
     assert mail.outbox[0].alternatives[0][1] == "text/html"
 
     # Assert that the SMS is being sent
-    payment_url = payment_provider.get_payment_email_url(
+    payment_url = bambora_payment_provider.get_payment_email_url(
         order, lang=order.lease.application.language
     )
     sms_context = {

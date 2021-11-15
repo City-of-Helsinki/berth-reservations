@@ -24,7 +24,7 @@ from resources.enums import BerthMooringType
 )
 def test_approve_order(
     order: Order,
-    payment_provider,
+    bambora_payment_provider,
     notification_template_orders_approved,
     helsinki_profile_user,
 ):
@@ -50,7 +50,7 @@ def test_approve_order(
     assert order.customer_zip_code == helsinki_profile_user.postal_code
     assert order.customer_city == helsinki_profile_user.city
 
-    payment_url = payment_provider.get_payment_email_url(
+    payment_url = bambora_payment_provider.get_payment_email_url(
         order, lang=order.lease.application.language
     )
 

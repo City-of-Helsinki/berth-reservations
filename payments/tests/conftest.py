@@ -43,7 +43,7 @@ from .factories import (
 from .utils import random_price, random_tax
 
 FAKE_BAMBORA_API_URL = "https://fake-bambora-api-url/api"
-PROVIDER_BASE_CONFIG = {
+BAMBORA_PROVIDER_BASE_CONFIG = {
     "VENE_PAYMENTS_BAMBORA_API_URL": "https://real-bambora-api-url/api",
     "VENE_PAYMENTS_BAMBORA_API_KEY": "dummy-key",
     "VENE_PAYMENTS_BAMBORA_API_SECRET": "dummy-secret",
@@ -203,8 +203,8 @@ def order_log_entry():
 
 
 @pytest.fixture()
-def provider_base_config():
-    return PROVIDER_BASE_CONFIG
+def bambora_provider_base_config():
+    return BAMBORA_PROVIDER_BASE_CONFIG
 
 
 @pytest.fixture
@@ -227,23 +227,23 @@ def helsinki_profile_user():
 
 
 @pytest.fixture()
-def payment_provider(provider_base_config):
+def bambora_payment_provider(bambora_provider_base_config):
     """When it doesn't matter if request is contained within provider the fixture can still be used"""
     return BamboraPayformProvider(
-        config=provider_base_config, ui_return_url=settings.VENE_UI_RETURN_URL
+        config=bambora_provider_base_config, ui_return_url=settings.VENE_UI_RETURN_URL
     )
 
 
-def create_bambora_provider(provider_base_config, request):
+def create_bambora_provider(bambora_provider_base_config, request):
     """Helper for creating a new instance of provider with request and optional return_url contained within"""
     return BamboraPayformProvider(
-        config=provider_base_config,
+        config=bambora_provider_base_config,
         request=request,
         ui_return_url=settings.VENE_UI_RETURN_URL,
     )
 
 
-def mocked_response_create(*args, **kwargs):
+def mocked_bambora_response_create(*args, **kwargs):
     """Mock Bambora auth token responses based on provider url"""
     if args[0].startswith(FAKE_BAMBORA_API_URL):
         return MockResponse(data={}, status_code=500)

@@ -19,9 +19,9 @@ from payments.providers.bambora_payform import (
 from payments.tests.conftest import (
     create_bambora_provider,
     FAKE_BAMBORA_API_URL,
+    mocked_bambora_response_create,
     mocked_refund_payment_details,
     mocked_refund_response_create,
-    mocked_response_create,
 )
 from payments.tests.factories import OrderRefundFactory
 from payments.utils import (
@@ -46,7 +46,7 @@ success_refund_params = {"result": 0, "type": "instant", "refund_id": 2587411}
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-def test_initiate_refund_success(provider_base_config: dict, order: Order):
+def test_initiate_refund_success(bambora_provider_base_config: dict, order: Order):
     """Test the request creator constructs the payload base and returns a url that contains a token"""
     request = RequestFactory().request()
     order.status = OrderStatus.PAID
@@ -87,7 +87,7 @@ def test_initiate_refund_success(provider_base_config: dict, order: Order):
         }
     ]
 
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
         side_effect=mocked_refund_response_create,
@@ -114,7 +114,9 @@ def test_initiate_refund_success(provider_base_config: dict, order: Order):
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-def test_initiate_refund_no_order_email(provider_base_config: dict, order: Order):
+def test_initiate_refund_no_order_email(
+    bambora_provider_base_config: dict, order: Order
+):
     """Test the request creator constructs the payload base and returns a url that contains a token"""
     request = RequestFactory().request()
     order.status = OrderStatus.PAID
@@ -154,7 +156,7 @@ def test_initiate_refund_no_order_email(provider_base_config: dict, order: Order
         }
     ]
 
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
         side_effect=mocked_refund_response_create,
@@ -173,7 +175,7 @@ def test_initiate_refund_no_order_email(provider_base_config: dict, order: Order
     indirect=True,
 )
 def test_initiate_refund_refunded_amount_does_not_match(
-    provider_base_config: dict, order: Order
+    bambora_provider_base_config: dict, order: Order
 ):
     """Test the request creator constructs the payload base and returns a url that contains a token"""
     request = RequestFactory().request()
@@ -205,7 +207,7 @@ def test_initiate_refund_refunded_amount_does_not_match(
         }
     ]
 
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
         side_effect=mocked_refund_response_create,
@@ -230,7 +232,7 @@ def test_initiate_refund_refunded_amount_does_not_match(
     indirect=True,
 )
 def test_initiate_refund_another_pending_refund(
-    provider_base_config: dict, order: Order
+    bambora_provider_base_config: dict, order: Order
 ):
     """Test the request creator constructs the payload base and returns a url that contains a token"""
     request = RequestFactory().request()
@@ -262,7 +264,7 @@ def test_initiate_refund_another_pending_refund(
 
     assert OrderRefund.objects.count() == 1
 
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
         side_effect=mocked_refund_response_create,
@@ -284,7 +286,7 @@ def test_initiate_refund_another_pending_refund(
     indirect=True,
 )
 def test_initiate_refund_no_order_email_or_application(
-    provider_base_config: dict, order: Order
+    bambora_provider_base_config: dict, order: Order
 ):
     """Test the request creator constructs the payload base and returns a url that contains a token"""
     request = RequestFactory().request()
@@ -299,7 +301,7 @@ def test_initiate_refund_no_order_email_or_application(
         order=order, token="12345", valid_until=now() - relativedelta(days=7)
     )
 
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     with pytest.raises(ValidationError) as exception:
         payment_provider.initiate_refund(order)
 
@@ -311,7 +313,9 @@ def test_initiate_refund_no_order_email_or_application(
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-def test_initiate_refund_token_still_valid(provider_base_config: dict, order: Order):
+def test_initiate_refund_token_still_valid(
+    bambora_provider_base_config: dict, order: Order
+):
     """Test the request creator constructs the payload base and returns a url that contains a token"""
     request = RequestFactory().request()
     order.status = OrderStatus.PAID
@@ -326,7 +330,7 @@ def test_initiate_refund_token_still_valid(provider_base_config: dict, order: Or
         order=order, token="98765", valid_until=now() + relativedelta(hours=1)
     )
 
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     with pytest.raises(ValidationError) as exception:
         payment_provider.initiate_refund(order)
 
@@ -354,7 +358,7 @@ def test_initiate_refund_token_still_valid(provider_base_config: dict, order: Or
     ],
 )
 def test_initiate_refund_invalid_order_status(
-    provider_base_config: dict, order: Order, order_status
+    bambora_provider_base_config: dict, order: Order, order_status
 ):
     """Test the request creator constructs the payload base and returns a url that contains a token"""
     request = RequestFactory().request()
@@ -368,7 +372,7 @@ def test_initiate_refund_invalid_order_status(
         order=order, token="12345", valid_until=now() - relativedelta(days=7)
     )
 
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     with pytest.raises(ValidationError) as exception:
         payment_provider.initiate_refund(order)
 
@@ -391,7 +395,7 @@ def test_initiate_refund_invalid_order_status(
     ],
 )
 def test_initiate_refund_invalid_lease_status(
-    provider_base_config: dict, order: Order, lease_status
+    bambora_provider_base_config: dict, order: Order, lease_status
 ):
     """Test the request creator constructs the payload base and returns a url that contains a token"""
     request = RequestFactory().request()
@@ -407,7 +411,7 @@ def test_initiate_refund_invalid_lease_status(
         order=order, token="12345", valid_until=now() - relativedelta(days=7)
     )
 
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     with pytest.raises(ValidationError) as exception:
         payment_provider.initiate_refund(order)
 
@@ -419,19 +423,19 @@ def test_initiate_refund_invalid_lease_status(
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-def test_initiate_refund_error_unavailable(provider_base_config, order: Order):
+def test_initiate_refund_error_unavailable(bambora_provider_base_config, order: Order):
     """Test the request creator raises service unavailable if request doesn't go through"""
     request = RequestFactory().request()
 
     invalid_config = {
-        **provider_base_config,
+        **bambora_provider_base_config,
         "VENE_PAYMENTS_BAMBORA_API_URL": FAKE_BAMBORA_API_URL,
     }
     unavailable_payment_provider = create_bambora_provider(invalid_config, request)
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ):
         with pytest.raises(ServiceUnavailableError):
             unavailable_payment_provider.initiate_payment(order)
@@ -442,7 +446,7 @@ def test_initiate_refund_error_unavailable(provider_base_config, order: Order):
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-def test_handle_initiate_refund_error_validation(order, provider_base_config):
+def test_handle_initiate_refund_error_validation(order, bambora_provider_base_config):
     """Test the response handler raises PayloadValidationError as expected"""
     r = {"result": 1, "type": "e-payment", "errors": ["Invalid auth code"]}
     OrderToken.objects.create(
@@ -455,7 +459,7 @@ def test_handle_initiate_refund_error_validation(order, provider_base_config):
     order.save()
     request = RequestFactory().request()
 
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
@@ -465,14 +469,14 @@ def test_handle_initiate_refund_error_validation(order, provider_base_config):
             payment_provider.initiate_refund(order)
 
 
-def test_check_refund_authcode_success(payment_provider):
+def test_check_refund_authcode_success(bambora_payment_provider):
     """Test the helper is able to extract necessary values from a request and compare authcodes"""
     rf = RequestFactory()
     request = rf.get("/payments/notify_refund/", notify_success_params)
-    assert payment_provider.check_new_refund_authcode(request)
+    assert bambora_payment_provider.check_new_refund_authcode(request)
 
 
-def test_check_refund_authcode_invalid(payment_provider):
+def test_check_refund_authcode_invalid(bambora_payment_provider):
     """Test the helper fails when params do not match the auth code"""
     params = {
         "AUTHCODE": "9C60B3077276A38495E2D785D1B5E6A293427BC4025E5C39AB870EA4CF187E0B",
@@ -481,7 +485,7 @@ def test_check_refund_authcode_invalid(payment_provider):
     }
     rf = RequestFactory()
     request = rf.get("/payments/notify_refund/", params)
-    assert not payment_provider.check_new_refund_authcode(request)
+    assert not bambora_payment_provider.check_new_refund_authcode(request)
 
 
 @pytest.mark.parametrize(
@@ -490,7 +494,7 @@ def test_check_refund_authcode_invalid(payment_provider):
     indirect=True,
 )
 def test_handle_notify_request_success(
-    provider_base_config,
+    bambora_provider_base_config,
     order: Order,
 ):
     """Test request notify helper returns http 204 and order status is correct when successful"""
@@ -505,7 +509,7 @@ def test_handle_notify_request_success(
 
     rf = RequestFactory()
     request = rf.get("/payments/notify_refund/", notify_success_params)
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
 
     assert refund.status == OrderRefundStatus.PENDING
 
@@ -527,7 +531,7 @@ def test_handle_notify_request_success(
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-def test_handle_notify_request_payment_failed(provider_base_config, order):
+def test_handle_notify_request_payment_failed(bambora_provider_base_config, order):
     """Test request notify helper returns http 204 and order status is correct when payment fails"""
     order.order_number = "abc123"
     order.status = OrderStatus.PAID
@@ -544,7 +548,7 @@ def test_handle_notify_request_payment_failed(provider_base_config, order):
 
     rf = RequestFactory()
     request = rf.get("/payments/notify_refund/", params)
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
 
     assert refund.status == OrderRefundStatus.PENDING
     lease_status = refund.order.lease.status

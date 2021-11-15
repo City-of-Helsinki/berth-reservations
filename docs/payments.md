@@ -22,7 +22,7 @@ In addition to the general configuration keys mentioned in the previous section,
 - `VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS`: An array of payment methods to show to the user to select from e.g.`['nordea', 'creditcards']`. Full list of supported values can be found in [the currencies section of](https://payform.bambora.com/docs/web_payments/?page=full-api-reference#currencies) Bambora's API documentation page.
 
 ## Payment flow
-![sequence diagram](./payment_flow.png)
+![sequence diagram](./payment_flow_vismapay.png)
 
 ## Refund flow
 ![sequence diagram](./refund_flow.png)

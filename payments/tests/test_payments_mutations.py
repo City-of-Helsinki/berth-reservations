@@ -64,7 +64,7 @@ from ..utils import (
     convert_aftertax_to_pretax,
     generate_order_number,
 )
-from .conftest import mocked_response_create
+from .conftest import mocked_bambora_response_create
 from .factories import OrderFactory
 from .utils import get_berth_lease_pricing_category, random_price
 
@@ -1420,7 +1420,7 @@ def test_confirm_payment(superuser_api_client, order: Order, status):
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ):
         executed = superuser_api_client.execute(
             CONFIRM_PAYMENT_MUTATION, input=variables
@@ -1434,7 +1434,7 @@ def test_confirm_payment_does_not_exist(superuser_api_client):
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ):
         executed = superuser_api_client.execute(
             CONFIRM_PAYMENT_MUTATION, input=variables
@@ -1452,7 +1452,7 @@ def test_confirm_payment_invalid_status(superuser_api_client, status):
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ) as mock_call:
         executed = superuser_api_client.execute(
             CONFIRM_PAYMENT_MUTATION, input=variables
@@ -1479,7 +1479,7 @@ def test_payment_fails_doesnt_use_empty_token(superuser_api_client, order: Order
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ):
         superuser_api_client.execute(CONFIRM_PAYMENT_MUTATION, input=variables)
 
@@ -1511,7 +1511,7 @@ def test_cancel_order(
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ):
         superuser_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
 
@@ -1563,7 +1563,7 @@ def test_cancel_order_invalid_status(
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ):
         executed = superuser_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
 
@@ -1575,7 +1575,7 @@ def test_cancel_order_does_not_exist(superuser_api_client):
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ):
         executed = superuser_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
 
@@ -1594,7 +1594,7 @@ def test_cancel_unmarked_order_fails(superuser_api_client, order: Order):
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ):
         executed = superuser_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
 
