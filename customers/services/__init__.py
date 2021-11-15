@@ -1,19 +1,7 @@
-import environ
-from django.conf import settings
+from utils.config import get_config_from_env
 
 from .profile import HelsinkiProfileUser, ProfileService
 from .sms_notification_service import SMSNotificationService
-
-
-def _load_config(template: dict) -> dict:
-    config = {}
-    env = environ.Env(**template)
-    for key in template.keys():
-        if hasattr(settings, key):
-            config[key] = getattr(settings, key)
-        else:
-            config[key] = env(key)
-    return config
 
 
 def load_services_config():
@@ -28,7 +16,7 @@ def load_services_config():
         SMSNotificationService,
     ]:
         template = service.get_config_template()
-        service.config = _load_config(template)
+        service.config = get_config_from_env(template)
 
 
 __all__ = [
