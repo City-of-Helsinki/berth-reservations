@@ -43,6 +43,9 @@ class HarborChoiceType(DjangoObjectType):
         model = HarborChoice
         exclude = ("id", "application")
 
+    def resolve_harbor(self, info, **kwargs):
+        return info.context.harbor_loader.load(self.harbor_id)
+
 
 class BerthSwitchReasonType(DjangoObjectType):
     title = graphene.String()
@@ -127,9 +130,7 @@ class BerthApplicationNode(DjangoObjectType):
         return None
 
     def resolve_harbor_choices(self, info, **kwargs):
-        if self.harborchoice_set.count():
-            return self.harborchoice_set.all()
-        return None
+        return self.harborchoice_set.all()
 
     def resolve_changes(self, info, **kwargs):
         return self.changes.all()
@@ -152,7 +153,9 @@ class BerthApplicationNode(DjangoObjectType):
 
 
 class WinterStorageAreaChoiceType(DjangoObjectType):
-    harbor = graphene.Field("resources.schema.HarborNode", required=True)
+    winter_storage_area = graphene.Field(
+        "resources.schema.WinterStorageAreaNode", required=True
+    )
     winter_storage_section_ids = graphene.List(graphene.ID)
 
     class Meta:
@@ -164,6 +167,9 @@ class WinterStorageAreaChoiceType(DjangoObjectType):
             to_global_id("WinterStorageSectionNode", section.id)
             for section in self.winter_storage_area.sections.all()
         )
+
+    def resolve_winter_storage_area(self, info, **kwargs):
+        return info.context.ws_area_loader.load(self.winter_storage_area_id)
 
 
 class WinterStorageApplicationFilter(django_filters.FilterSet):
@@ -207,9 +213,7 @@ class WinterStorageApplicationNode(DjangoObjectType):
         return None
 
     def resolve_winter_storage_area_choices(self, info, **kwargs):
-        if self.winterstorageareachoice_set.count():
-            return self.winterstorageareachoice_set.all()
-        return None
+        return self.winterstorageareachoice_set.all()
 
     def resolve_changes(self, info, **kwargs):
         return self.changes.all()
