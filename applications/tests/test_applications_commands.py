@@ -10,7 +10,7 @@ from resources.tests.factories import BoatTypeFactory
 def test_create_boats_berth_applications(berth_application_with_customer):
     # Renaming for simplicity
     application = berth_application_with_customer
-    BoatTypeFactory(id=application.boat_type_id)
+    BoatTypeFactory(id=application.boat.boat_type_id)
 
     application.status = ApplicationStatus.OFFER_SENT
     BerthLeaseFactory(
@@ -29,21 +29,17 @@ def test_create_boats_berth_applications(berth_application_with_customer):
     assert application.customer.boats.count() == 1
     boat = application.customer.boats.first()
 
-    assert boat.registration_number == application.boat_registration_number
-    assert boat.name == application.boat_name
-    assert boat.model == application.boat_model
-    assert boat.width == application.boat_width
-    assert boat.length == application.boat_length
-    assert application.lease.boat == boat
+    assert application.lease.boat == application.boat == boat
 
 
 def test_update_boats_berth_applications(berth_application_with_customer):
     # Renaming for simplicity
     application = berth_application_with_customer
-    boat_type = BoatTypeFactory(id=application.boat_type_id)
+    boat_type = BoatTypeFactory(id=application.boat.boat_type_id)
 
-    application.boat_name = "New name"
-    application.boat_registration_number = "NUMBER"
+    application.boat.name = "New name"
+    application.boat.registration_number = "NUMBER"
+    application.boat.save()
     application.status = ApplicationStatus.OFFER_SENT
     BerthLeaseFactory(
         application=application,
@@ -65,8 +61,8 @@ def test_update_boats_berth_applications(berth_application_with_customer):
     assert application.customer.boats.count() == 1
     boat = application.customer.boats.first()
 
-    assert boat.registration_number == application.boat_registration_number
-    assert boat.name == application.boat_name == "New name"
+    assert boat.registration_number == application.boat.registration_number
+    assert boat.name == "New name"
 
 
 def test_create_boats_winter_storage_applications(
@@ -74,7 +70,7 @@ def test_create_boats_winter_storage_applications(
 ):
     # Renaming for simplicity
     application = winter_storage_application_with_customer
-    BoatTypeFactory(id=application.boat_type_id)
+    BoatTypeFactory(id=application.boat.boat_type_id)
 
     application.status = ApplicationStatus.OFFER_SENT
     WinterStorageLeaseFactory(
@@ -93,11 +89,6 @@ def test_create_boats_winter_storage_applications(
     assert application.customer.boats.count() == 1
     boat = application.customer.boats.first()
 
-    assert boat.registration_number == application.boat_registration_number
-    assert boat.name == application.boat_name
-    assert boat.model == application.boat_model
-    assert boat.width == application.boat_width
-    assert boat.length == application.boat_length
     assert application.lease.boat == boat
 
 
@@ -108,8 +99,9 @@ def test_update_boats_winter_storage_applications(
     application = winter_storage_application_with_customer
     boat_type = BoatTypeFactory(id=application.boat_type_id)
 
-    application.boat_name = "New name"
-    application.boat_registration_number = "NUMBER"
+    application.boat.name = "New name"
+    application.boat.registration_number = "NUMBER"
+    application.boat.save()
     application.status = ApplicationStatus.OFFER_SENT
     WinterStorageLeaseFactory(
         application=application,
@@ -130,6 +122,4 @@ def test_update_boats_winter_storage_applications(
 
     assert application.customer.boats.count() == 1
     boat = application.customer.boats.first()
-
-    assert boat.registration_number == application.boat_registration_number
-    assert boat.name == application.boat_name == "New name"
+    assert boat.name == "New name"

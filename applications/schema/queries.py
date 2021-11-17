@@ -56,7 +56,8 @@ class Query:
             qs = qs.filter(status__in=statuses)
 
         return qs.select_related(
-            "boat_type",
+            "boat",
+            "boat__boat_type",
             "berth_switch",
             "berth_switch__berth",
             "berth_switch__reason",
@@ -78,7 +79,11 @@ class Query:
         if area_types:
             qs = qs.filter(area_type__in=area_types)
 
-        return qs.select_related("boat_type", "customer",).prefetch_related(
+        return qs.select_related(
+            "boat",
+            "boat__boat_type",
+            "customer",
+        ).prefetch_related(
             "winterstorageareachoice_set",
             "winterstorageareachoice_set__winter_storage_area",
             "lease",

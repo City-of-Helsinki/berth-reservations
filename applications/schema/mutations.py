@@ -3,7 +3,7 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
-from customers.models import CustomerProfile
+from customers.models import Boat, CustomerProfile
 from leases.models import BerthLease, WinterStorageLease
 from users.decorators import (
     change_permission_required,
@@ -42,6 +42,39 @@ from .inputs import (
 from .types import BerthApplicationNode, WinterStorageApplicationNode
 
 
+def _get_boat_data(application_data, info):
+    from resources.models import BoatType
+
+    boat_fields = [
+        "name",
+        "model",
+        "length",
+        "width",
+        "draught",
+        "weight",
+        "propulsion",
+        "hull_material",
+        "intended_use",
+        "is_inspected",
+        "is_insured",
+    ]
+    boat_data = {
+        boat_field: application_data.pop(f"boat_{boat_field}")
+        for boat_field in boat_fields
+        if f"boat_{boat_field}" in application_data
+    }
+
+    if "boat_type" in application_data:
+        boat_data["boat_type"] = BoatType.objects.get(
+            id=int(application_data.pop("boat_type"))
+        )
+
+    if is_customer(info.context.user):
+        boat_data["owner"] = info.context.user.customer
+
+    return boat_data
+
+
 class CreateBerthApplicationMutation(graphene.ClientIDMutation):
     class Input:
         berth_application = BerthApplicationInput(required=True)
@@ -52,14 +85,9 @@ class CreateBerthApplicationMutation(graphene.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **kwargs):
-        from resources.models import BoatType
         from resources.schema import BerthNode, HarborNode
 
         application_data = kwargs.pop("berth_application")
-
-        boat_type_id = application_data.pop("boat_type", None)
-        if boat_type_id:
-            application_data["boat_type"] = BoatType.objects.get(id=int(boat_type_id))
 
         switch_data = kwargs.pop("berth_switch", None)
         if switch_data:
@@ -73,7 +101,10 @@ class CreateBerthApplicationMutation(graphene.ClientIDMutation):
 
         choices = application_data.pop("choices", [])
 
-        application = BerthApplication.objects.create(**application_data)
+        boat_data = _get_boat_data(application_data, info)
+        boat = Boat.objects.create(**boat_data)
+
+        application = BerthApplication.objects.create(**application_data, boat=boat)
 
         for choice in choices:
             harbor = get_node_from_global_id(
@@ -182,6 +213,10 @@ class UpdateBerthApplication(graphene.ClientIDMutation):
                 application=application, change_list=change_list
             )
 
+        boat_data = _get_boat_data(input, info)
+        if boat_data:
+            update_object(application.boat, boat_data)
+
         update_object(application, input)
 
         return UpdateBerthApplication(berth_application=application)
@@ -276,18 +311,18 @@ class CreateWinterStorageApplicationMutation(graphene.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **kwargs):
-        from resources.models import BoatType
         from resources.schema import WinterStorageAreaNode
 
         application_data = kwargs.pop("winter_storage_application")
 
-        boat_type_id = application_data.pop("boat_type", None)
-        if boat_type_id:
-            application_data["boat_type"] = BoatType.objects.get(id=int(boat_type_id))
-
         chosen_areas = application_data.pop("chosen_areas", [])
 
-        application = WinterStorageApplication.objects.create(**application_data)
+        boat_data = _get_boat_data(application_data, info)
+        boat = Boat.objects.create(**boat_data)
+
+        application = WinterStorageApplication.objects.create(
+            **application_data, boat=boat
+        )
 
         for choice in chosen_areas:
             winter_storage_area = get_node_from_global_id(
@@ -409,6 +444,10 @@ class UpdateWinterStorageApplication(graphene.ClientIDMutation):
             WinterStorageApplicationChange.objects.create(
                 application=application, change_list=change_list
             )
+
+        boat_data = _get_boat_data(input, info)
+        if boat_data:
+            update_object(application.boat, boat_data)
 
         update_object(application, input)
 

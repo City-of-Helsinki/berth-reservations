@@ -117,6 +117,19 @@ class BerthApplicationNode(DjangoObjectType):
     priority = ApplicationPriorityEnum(required=True)
     customer = graphene.Field("customers.schema.ProfileNode")
     changes = graphene.List(BerthApplicationChangeType, required=True)
+    boat = graphene.Field("customers.schema.BoatNode")
+    boat_registration_number = graphene.String()
+    boat_name = graphene.String()
+    boat_model = graphene.String()
+    boat_length = graphene.Decimal()
+    boat_width = graphene.Decimal()
+    boat_draught = graphene.Decimal()
+    boat_weight = graphene.Int()
+    boat_propulsion = graphene.String()
+    boat_hull_material = graphene.String()
+    boat_intended_use = graphene.String()
+    boat_is_inspected = graphene.Boolean()
+    boat_is_insured = graphene.Boolean()
 
     class Meta:
         model = BerthApplication
@@ -125,9 +138,7 @@ class BerthApplicationNode(DjangoObjectType):
         connection_class = CountConnection
 
     def resolve_boat_type(self, info, **kwargs):
-        if self.boat_type:
-            return self.boat_type.id
-        return None
+        return self.boat.boat_type.id
 
     def resolve_harbor_choices(self, info, **kwargs):
         return self.harborchoice_set.all()
@@ -200,6 +211,12 @@ class WinterStorageApplicationNode(DjangoObjectType):
     storage_method = WinterStorageMethodEnum(required=True)
     customer = graphene.Field("customers.schema.ProfileNode")
     changes = graphene.List(WinterStorageApplicationChangeType, required=True)
+    boat = graphene.Field("customers.schema.BoatNode")
+    boat_registration_number = graphene.String()
+    boat_name = graphene.String()
+    boat_model = graphene.String()
+    boat_length = graphene.Decimal()
+    boat_width = graphene.Decimal()
 
     class Meta:
         model = WinterStorageApplication
@@ -208,9 +225,7 @@ class WinterStorageApplicationNode(DjangoObjectType):
         connection_class = CountConnection
 
     def resolve_boat_type(self, info, **kwargs):
-        if self.boat_type:
-            return self.boat_type.id
-        return None
+        return self.boat.boat_type_id
 
     def resolve_winter_storage_area_choices(self, info, **kwargs):
         return self.winterstorageareachoice_set.all()

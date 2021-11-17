@@ -11,7 +11,8 @@ from berth_reservations.tests.utils import (
     assert_not_enough_permissions,
     create_api_client,
 )
-from customers.schema import ProfileNode
+from customers.schema import BoatNode, ProfileNode
+from customers.tests.factories import BoatFactory
 from leases.tests.factories import BerthLeaseFactory
 from resources.schema import BerthNode, HarborNode, WinterStorageAreaNode
 from resources.tests.factories import (
@@ -854,6 +855,10 @@ def test_update_berth_application_by_owner(
     berth_application.customer = customer_profile
     berth_application.save()
 
+    berth_application.boat.width = "4.00"
+    berth_application.boat.length = "5.00"
+    berth_application.boat.save()
+
     variables = {
         "id": berth_application_id,
         "language": "en",
@@ -1021,6 +1026,10 @@ def test_update_winter_storage_application_by_owner(
     customer_profile.save()
     winter_storage_application.customer = customer_profile
     winter_storage_application.save()
+
+    winter_storage_application.boat.width = "4.00"
+    winter_storage_application.boat.length = "5.00"
+    winter_storage_application.boat.save()
 
     variables = {
         "id": winter_storage_application_id,

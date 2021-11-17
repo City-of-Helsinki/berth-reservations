@@ -352,6 +352,8 @@ class Boat(TimeStampedModel, UUIDModel, SerializableMixin):
         verbose_name=_("owner"),
         on_delete=models.CASCADE,
         related_name="boats",
+        null=True,
+        blank=True,
     )
     boat_type = models.ForeignKey(
         BoatType,
@@ -403,6 +405,13 @@ class Boat(TimeStampedModel, UUIDModel, SerializableMixin):
     )
     intended_use = models.TextField(verbose_name=_("intended use"), blank=True)
 
+    is_inspected = models.BooleanField(
+        verbose_name=_("is inspected"), null=True, blank=True
+    )
+    is_insured = models.BooleanField(
+        verbose_name=_("is insured"), null=True, blank=True
+    )
+
     class Meta:
         verbose_name = _("boat")
         verbose_name_plural = _("boats")
@@ -413,12 +422,36 @@ class Boat(TimeStampedModel, UUIDModel, SerializableMixin):
 
     serialize_fields = (
         {"name": "id"},
+        {"name": "boat_type", "accessor": lambda x: x.name},
         {"name": "certificates"},
         {"name": "registration_number"},
+        {"name": "name"},
+        {"name": "model"},
         {"name": "length"},
         {"name": "width"},
         {"name": "draught"},
+        {"name": "weight"},
+        {"name": "propulsion"},
+        {"name": "hull_material"},
+        {"name": "intended_use"},
+        {"name": "is_inspected"},
+        {"name": "is_insured"},
     )
+
+    def save(self, *args, **kwargs):
+        fields_to_strip = [
+            "registration_number",
+            "name",
+            "model",
+            "propulsion",
+            "hull_material",
+            "intended_use",
+        ]
+        for field in fields_to_strip:
+            if field_value := getattr(self, field):
+                setattr(self, field, field_value.strip())
+
+        super().save(*args, **kwargs)
 
 
 def get_boat_media_folder(instance, filename):

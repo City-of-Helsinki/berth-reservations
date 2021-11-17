@@ -3,6 +3,7 @@ import xlrd
 from django.conf import settings
 from freezegun import freeze_time
 
+from customers.tests.factories import BoatFactory
 from resources.tests.factories import (
     BoatTypeFactory,
     HarborFactory,
@@ -39,6 +40,20 @@ def test_exporting_berth_applications_to_excel(
     harbor.create_translation("fi", name="Satama")
     boat_type = BoatTypeFactory()
     boat_type.create_translation("fi", name="Jollapaikka")
+    boat_data = {
+        "boat_type": boat_type,
+        "width": "2",
+        "length": "3.5",
+        "draught": "1",
+        "weight": 20000,
+        "registration_number": "B0A7",
+        "name": "Vene",
+        "model": "BMW S 12",
+        "hull_material": "wood",
+        "intended_use": "cafe",
+        "is_insured": True,
+        "is_inspected": True,
+    }
     application_data = {
         "first_name": "Kyösti",
         "last_name": "Testaaja",
@@ -48,34 +63,22 @@ def test_exporting_berth_applications_to_excel(
         "municipality": "Helsinki",
         "phone_number": "0411234567",
         "berth_switch": berth_switch_info if berth_switch else None,
-        "boat_type": boat_type,
-        "boat_width": "2",
-        "boat_length": "3.5",
-        "boat_draught": "1",
-        "boat_weight": 20000,
-        "boat_registration_number": "B0A7",
-        "boat_name": "Vene",
-        "boat_model": "BMW S 12",
         "accessibility_required": True,
         "accept_boating_newsletter": False,
         "accept_fitness_news": False,
         "accept_library_news": False,
         "accept_other_culture_news": True,
-        "boat_hull_material": "wood",
-        "boat_intended_use": "cafe",
         "renting_period": "a while",
         "rent_from": "01.02.2019",
         "rent_till": "01.03.2019",
-        "boat_is_insured": True,
-        "boat_is_inspected": True,
         "agree_to_terms": True,
         "application_code": "1234567890",
     }
     if not customer_private:
         application_data["company_name"] = "ACME Inc."
         application_data["business_id"] = "123123-000"
-
-    application = BerthApplicationFactory(**application_data)
+    boat = BoatFactory(**boat_data)
+    application = BerthApplicationFactory(**application_data, boat=boat)
     HarborChoice.objects.create(application=application, priority=1, harbor=harbor)
 
     queryset = BerthApplication.objects.all()
@@ -155,6 +158,14 @@ def test_exporting_winter_storage_applications_to_excel(customer_private):
     winter_area.create_translation("fi", name="Satama")
     boat_type = BoatTypeFactory()
     boat_type.create_translation("fi", name="Jollapaikka")
+    boat_data = {
+        "boat_type": boat_type,
+        "width": "2",
+        "length": "3.5",
+        "registration_number": "B0A7",
+        "name": "Vene",
+        "model": "BMW S 12",
+    }
     application_data = {
         "first_name": "Kyösti",
         "last_name": "Testaaja",
@@ -165,12 +176,6 @@ def test_exporting_winter_storage_applications_to_excel(customer_private):
         "phone_number": "0411234567",
         "storage_method": WinterStorageMethod.ON_TRESTLES.label,
         "trailer_registration_number": "hel001",
-        "boat_type": boat_type,
-        "boat_width": "2",
-        "boat_length": "3.5",
-        "boat_registration_number": "B0A7",
-        "boat_name": "Vene",
-        "boat_model": "BMW S 12",
         "accept_boating_newsletter": False,
         "accept_fitness_news": False,
         "accept_library_news": False,
@@ -181,7 +186,8 @@ def test_exporting_winter_storage_applications_to_excel(customer_private):
         application_data["company_name"] = "ACME Inc."
         application_data["business_id"] = "123123-000"
 
-    application = WinterStorageApplicationFactory(**application_data)
+    boat = BoatFactory(**boat_data)
+    application = WinterStorageApplicationFactory(**application_data, boat=boat)
     WinterStorageAreaChoice.objects.create(
         application=application, priority=1, winter_storage_area=winter_area
     )
