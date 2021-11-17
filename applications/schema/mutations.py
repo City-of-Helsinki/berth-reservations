@@ -42,10 +42,81 @@ from .inputs import (
 from .types import BerthApplicationNode, WinterStorageApplicationNode
 
 
-def _get_boat_data(application_data, info):
+def _validate_boat_fields_common(application_data):
+    if "boat_id" in application_data:
+        if any(
+            field.startswith("boat_") and field != "boat_id"
+            for field in application_data
+        ):
+            raise VenepaikkaGraphQLError(
+                _('Cannot use both boat ID and other boat field(s) at the same time"')
+            )
+
+
+def _validate_boat_fields_on_create(application_data):
+    _validate_boat_fields_common(application_data)
+
+    # either all of these xor boat_id is required on create mutations
+    required_boat_fields = ["boat_type", "boat_length", "boat_width"]
+
+    if "boat_id" not in application_data and not all(
+        field in application_data for field in required_boat_fields
+    ):
+        raise VenepaikkaGraphQLError(
+            'Either "boatId" or "boatType", "boatLength" and "boatWidth" are required"'
+        )
+
+
+def _handle_boat_on_create(application_data, info) -> Boat:
+    from customers.schema import BoatNode
+
+    _validate_boat_fields_on_create(application_data)
+
+    if "boat_id" in application_data:
+        boat = get_node_from_global_id(
+            info, application_data.pop("boat_id"), only_type=BoatNode, nullable=False
+        )
+    else:
+        boat_data = _get_boat_data(application_data)
+
+        if is_customer(info.context.user):
+            boat_data["owner"] = info.context.user.customer
+
+        boat = Boat.objects.create(**boat_data)
+
+    return boat
+
+
+def _handle_boat_on_update(application, application_data, info) -> Boat:
+    from customers.schema import BoatNode
+
+    _validate_boat_fields_common(application_data)
+
+    if "boat_id" in application_data:
+        boat = get_node_from_global_id(
+            info, application_data.pop("boat_id"), only_type=BoatNode
+        )
+        boat_data = {}
+    else:
+        boat = application.boat
+        boat_data = _get_boat_data(application_data)
+
+    if application_data.get("customer") and not boat.owner:
+        # an anonymous application is begin assigned to a customer,
+        # assign the boat as well
+        boat_data["owner"] = application_data["customer"]
+
+    if boat_data:
+        update_object(boat, boat_data)
+
+    return boat
+
+
+def _get_boat_data(application_data):
     from resources.models import BoatType
 
     boat_fields = [
+        "registration_number",
         "name",
         "model",
         "length",
@@ -69,9 +140,6 @@ def _get_boat_data(application_data, info):
             id=int(application_data.pop("boat_type"))
         )
 
-    if is_customer(info.context.user):
-        boat_data["owner"] = info.context.user.customer
-
     return boat_data
 
 
@@ -84,6 +152,7 @@ class CreateBerthApplicationMutation(graphene.ClientIDMutation):
     berth_application = graphene.Field(BerthApplicationNode)
 
     @classmethod
+    @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **kwargs):
         from resources.schema import BerthNode, HarborNode
 
@@ -100,11 +169,12 @@ class CreateBerthApplicationMutation(graphene.ClientIDMutation):
             application_data["berth_switch"] = berth_switch
 
         choices = application_data.pop("choices", [])
+        application_data["boat"] = _handle_boat_on_create(application_data, info)
 
-        boat_data = _get_boat_data(application_data, info)
-        boat = Boat.objects.create(**boat_data)
+        if is_customer(info.context.user):
+            application_data["customer"] = info.context.user.customer
 
-        application = BerthApplication.objects.create(**application_data, boat=boat)
+        application = BerthApplication.objects.create(**application_data)
 
         for choice in choices:
             harbor = get_node_from_global_id(
@@ -213,9 +283,7 @@ class UpdateBerthApplication(graphene.ClientIDMutation):
                 application=application, change_list=change_list
             )
 
-        boat_data = _get_boat_data(input, info)
-        if boat_data:
-            update_object(application.boat, boat_data)
+        input["boat"] = _handle_boat_on_update(application, input, info)
 
         update_object(application, input)
 
@@ -310,6 +378,7 @@ class CreateWinterStorageApplicationMutation(graphene.ClientIDMutation):
     winter_storage_application = graphene.Field(WinterStorageApplicationNode)
 
     @classmethod
+    @transaction.atomic
     def mutate_and_get_payload(cls, root, info, **kwargs):
         from resources.schema import WinterStorageAreaNode
 
@@ -317,12 +386,12 @@ class CreateWinterStorageApplicationMutation(graphene.ClientIDMutation):
 
         chosen_areas = application_data.pop("chosen_areas", [])
 
-        boat_data = _get_boat_data(application_data, info)
-        boat = Boat.objects.create(**boat_data)
+        application_data["boat"] = _handle_boat_on_create(application_data, info)
 
-        application = WinterStorageApplication.objects.create(
-            **application_data, boat=boat
-        )
+        if is_customer(info.context.user):
+            application_data["customer"] = info.context.user.customer
+
+        application = WinterStorageApplication.objects.create(**application_data)
 
         for choice in chosen_areas:
             winter_storage_area = get_node_from_global_id(
@@ -445,9 +514,7 @@ class UpdateWinterStorageApplication(graphene.ClientIDMutation):
                 application=application, change_list=change_list
             )
 
-        boat_data = _get_boat_data(input, info)
-        if boat_data:
-            update_object(application.boat, boat_data)
+        input["boat"] = _handle_boat_on_update(application, input, info)
 
         update_object(application, input)
 

@@ -54,6 +54,7 @@ def is_customer(user):
     elif (
         user.groups.count() == 1
         and user.groups.first().name == settings.CUSTOMER_GROUP_NAME
+        and hasattr(user, "customer")
     ):
         return True
     return False
