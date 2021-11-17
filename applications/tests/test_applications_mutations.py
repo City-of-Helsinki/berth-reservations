@@ -11,8 +11,7 @@ from berth_reservations.tests.utils import (
     assert_not_enough_permissions,
     create_api_client,
 )
-from customers.schema import BoatNode, ProfileNode
-from customers.tests.factories import BoatFactory
+from customers.schema import ProfileNode
 from leases.tests.factories import BerthLeaseFactory
 from resources.schema import BerthNode, HarborNode, WinterStorageAreaNode
 from resources.tests.factories import (
