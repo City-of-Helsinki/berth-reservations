@@ -14,6 +14,7 @@ from berth_reservations.tests.utils import MockResponse
 from customers.enums import OrganizationType
 from customers.services import HelsinkiProfileUser
 from customers.tests.factories import CustomerProfileFactory, OrganizationFactory
+from customers.utils import get_customer_hash
 from leases.tests.conftest import *  # noqa
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from resources.enums import AreaRegion
@@ -28,7 +29,8 @@ from ..enums import (
     ProductServiceType,
     TalpaProductType,
 )
-from ..providers import BamboraPayformProvider
+from ..providers import BamboraPayformProvider, TalpaEComProvider
+from ..utils import price_as_fractional_int, resolve_area, resolve_product_talpa_ecom_id
 from .factories import (
     AdditionalProductFactory,
     BerthProductFactory,
@@ -48,6 +50,13 @@ BAMBORA_PROVIDER_BASE_CONFIG = {
     "VENE_PAYMENTS_BAMBORA_API_KEY": "dummy-key",
     "VENE_PAYMENTS_BAMBORA_API_SECRET": "dummy-secret",
     "VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS": ["dummy-bank"],
+}
+FAKE_TALPA_ECOM_ORDER_API_URL = "https://fake-talpa-ecom-api-url/api"
+TALPA_ECOM_PROVIDER_BASE_CONFIG = {
+    "VENE_PAYMENTS_TALPA_ECOM_PAYMENT_API_URL": "https://real-talpa-api-url/api/v1/payment",
+    "VENE_PAYMENTS_TALPA_ECOM_ORDER_API_URL": "https://real-talpa-api-url/api/v1/order",
+    "VENE_PAYMENTS_TALPA_ECOM_CHECKOUT_URL": "https://real-talpa-checkout-url",
+    "VENE_PAYMENTS_TALPA_ECOM_API_NAMESPACE": "venepaikat",
 }
 
 
@@ -123,7 +132,7 @@ def _generate_order(order_type: str = None):
         order = OrderFactory(
             order_type=OrderType.ADDITIONAL_PRODUCT_ORDER,
             customer=customer_profile,
-            price=random_price(),
+            price=0,
             tax_percentage=random_tax(),
             product=None,
             lease=lease,
@@ -164,10 +173,10 @@ def order_with_products(request):
 
     order = _generate_order(order_type)
 
-    OrderLineFactory(order=order)
-    OrderLineFactory(order=order)
-    OrderLineFactory(order=order)
-    OrderLineFactory(order=order)
+    OrderLineFactory(order=order, product__service=ProductServiceType.STORAGE_ON_ICE)
+    OrderLineFactory(order=order, product__service=ProductServiceType.STORAGE_ON_ICE)
+    OrderLineFactory(order=order, product__service=ProductServiceType.STORAGE_ON_ICE)
+    OrderLineFactory(order=order, product__service=ProductServiceType.STORAGE_ON_ICE)
 
     return order
 
@@ -207,6 +216,11 @@ def bambora_provider_base_config():
     return BAMBORA_PROVIDER_BASE_CONFIG
 
 
+@pytest.fixture()
+def talpa_ecom_provider_base_config():
+    return TALPA_ECOM_PROVIDER_BASE_CONFIG
+
+
 @pytest.fixture
 def berth_switch_offer():
     offer = BerthSwitchOfferFactory()
@@ -234,12 +248,26 @@ def bambora_payment_provider(bambora_provider_base_config):
     )
 
 
+@pytest.fixture()
+def talpa_ecom_payment_provider(talpa_ecom_provider_base_config):
+    """When it doesn't matter if request is contained within provider the fixture can still be used"""
+    return TalpaEComProvider(config=talpa_ecom_provider_base_config)
+
+
 def create_bambora_provider(bambora_provider_base_config, request):
     """Helper for creating a new instance of provider with request and optional return_url contained within"""
     return BamboraPayformProvider(
         config=bambora_provider_base_config,
         request=request,
         ui_return_url=settings.VENE_UI_RETURN_URL,
+    )
+
+
+def create_talpa_ecom_provider(talpa_ecom_provider_base_config, request):
+    """Helper for creating a new instance of provider with a  specific request"""
+    return TalpaEComProvider(
+        config=talpa_ecom_provider_base_config,
+        request=request,
     )
 
 
@@ -251,6 +279,89 @@ def mocked_bambora_response_create(*args, **kwargs):
         return MockResponse(
             data={"result": 0, "token": "token123", "type": "e-payment"}
         )
+
+
+def mocked_talpa_ecom_order_response(order):
+    """Mock the Order object that Talpa returns"""
+    return {
+        "orderId": "aa48b642-72f9-4d9b-8e1f-161c8cfe9702",
+        "namespace": "venepaikat",
+        "user": get_customer_hash(order.customer),
+        "createdAt": "2021-11-04T13:42:09.306265",
+        "items": [
+            {
+                "orderItemId": "8c9bc852-bfbe-357b-961d-11b414fccd41",
+                "orderId": "aa48b642-72f9-4d9b-8e1f-161c8cfe9702",
+                "productId": resolve_product_talpa_ecom_id(
+                    order.product, resolve_area(order)
+                ),
+                "productName": order.product.name,
+                "unit": "pcs",
+                "quantity": 1,
+                "rowPriceNet": price_as_fractional_int(order.pretax_price),
+                "rowPriceVat": price_as_fractional_int(order.price)
+                - price_as_fractional_int(order.pretax_price),
+                "rowPriceTotal": price_as_fractional_int(order.price),
+                "vatPercentage": "24",
+                "priceNet": price_as_fractional_int(order.pretax_price),
+                "priceVat": price_as_fractional_int(order.price)
+                - price_as_fractional_int(order.pretax_price),
+                "priceTotal": price_as_fractional_int(order.price),
+                "periodFrequency": None,
+                "periodUnit": None,
+                "periodCount": None,
+                "startDate": None,
+                "billingStartDate": None,
+                "meta": [],
+            }
+        ],
+        "customer": {
+            "firstName": order.customer_first_name,
+            "lastName": order.customer_first_name,
+            "email": order.customer_email,
+            "phone": order.customer_phone,
+        },
+        "status": "draft",
+        "type": "order",
+        "checkoutUrl": f"{TALPA_ECOM_PROVIDER_BASE_CONFIG['VENE_PAYMENTS_TALPA_ECOM_CHECKOUT_URL']}/"
+        "aa48b642-72f9-4d9b-8e1f-161c8cfe9702",
+        "priceNet": price_as_fractional_int(order.total_pretax_price),
+        "priceVat": order.total_tax_percentage,
+        "priceTotal": price_as_fractional_int(order.total_price),
+    }
+
+
+def mocked_response_talpa_ecom_order(order):
+    """Mock the whole Order response that Talpa returns"""
+
+    def wrapper(*args, **kwargs):
+        if (
+            args[0] and args[0].startswith(FAKE_TALPA_ECOM_ORDER_API_URL)
+        ) or not hasattr(order, "product"):
+            return MockResponse(data={}, status_code=500)
+        else:
+            return MockResponse(data=mocked_talpa_ecom_order_response(order))
+
+    return wrapper
+
+
+def mocked_response_talpa_ecom_errors(errors: dict = None, status_code: int = 400):
+    """Mock the error response that Talpa returns, with optional custom error messages or status code"""
+
+    def wrapper(*args, **kwargs):
+        response_errors = {
+            "errors": [
+                {
+                    "code": "request-validation-failed",
+                    "message": "headers.user is a required field",
+                }
+                if errors is None
+                else errors
+            ]
+        }
+        return MockResponse(data=response_errors, status_code=status_code)
+
+    return wrapper
 
 
 def mocked_refund_response_create(*args, **kwargs):

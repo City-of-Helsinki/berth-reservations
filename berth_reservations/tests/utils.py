@@ -51,7 +51,8 @@ class MockResponse:
     def raise_for_status(self):
         if self.status_code != 200:
             raise RequestException(
-                "Mock request error with status_code {}.".format(self.status_code)
+                "Mock request error with status_code {}.".format(self.status_code),
+                response=self,
             )
         pass
 

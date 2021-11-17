@@ -123,6 +123,7 @@ class AdditionalProductFactory(AbstractBaseProductFactory):
 class PlainAdditionalProductFactory(AbstractBaseProductFactory):
     class Meta:
         model = AdditionalProduct
+        django_get_or_create = ("service", "period")
 
 
 class TalpaProductAccountingFactory(factory.django.DjangoModelFactory):
@@ -139,7 +140,12 @@ class TalpaProductAccountingFactory(factory.django.DjangoModelFactory):
 
 
 class OrderFactory(factory.django.DjangoModelFactory):
+    customer_first_name = factory.Faker("first_name", locale="fi_FI")
+    customer_last_name = factory.Faker("last_name", locale="fi_FI")
     customer_phone = factory.Faker("phone_number", locale="fi_FI")
+    customer_email = factory.LazyAttribute(
+        lambda o: f"{o.customer_last_name.lower()}_{o.customer_first_name.lower()}@example.org"
+    )
     status = factory.Faker(
         "random_element",
         elements=list(
@@ -163,7 +169,7 @@ class OrderFactory(factory.django.DjangoModelFactory):
     @factory.lazy_attribute
     def tax_percentage(self):
         if not getattr(self, "lease", None):
-            return random_tax()
+            return random_tax(decimals=0)
 
     class Meta:
         model = Order

@@ -6,12 +6,15 @@ from utils.config import get_config_from_env
 
 from .bambora_payform import BamboraPayformProvider
 from .base import PaymentProvider
+from .talpa_ecom import TalpaEComProvider
 
 _provider_class: PaymentProvider
 
 __all__ = [
     "BamboraPayformProvider",
+    "TalpaEComProvider",
     "get_payment_provider",
+    "load_provider_config",
 ]
 
 

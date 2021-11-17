@@ -39,7 +39,6 @@ def test_product_order(order_with_products, region, default_talpa_product_accoun
 
 @pytest.mark.parametrize("region", [AreaRegion.WEST, AreaRegion.EAST])
 def test_storage_on_ice_product_order(
-    payment_provider,
     additional_product,
     berth_lease_without_product,
     region,

@@ -12,6 +12,9 @@ class SuccessView(View):
             request, ui_return_url=settings.VENE_UI_RETURN_URL
         ).handle_success_request()
 
+    def post(self, request: HttpRequest):
+        return get_payment_provider(request).handle_success_request()
+
 
 class FailureView(View):
     def get(self, request: HttpRequest):
