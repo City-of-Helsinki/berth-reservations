@@ -16,10 +16,18 @@ from customers.services import HelsinkiProfileUser
 from customers.tests.factories import CustomerProfileFactory, OrganizationFactory
 from leases.tests.conftest import *  # noqa
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
+from resources.enums import AreaRegion
 from resources.tests.conftest import *  # noqa
 from resources.tests.factories import WinterStorageSectionFactory
 
-from ..enums import OrderStatus, OrderType, PeriodType, PriceUnits, ProductServiceType
+from ..enums import (
+    OrderStatus,
+    OrderType,
+    PeriodType,
+    PriceUnits,
+    ProductServiceType,
+    TalpaProductType,
+)
 from ..providers import BamboraPayformProvider
 from .factories import (
     AdditionalProductFactory,
@@ -29,6 +37,7 @@ from .factories import (
     OrderLineFactory,
     OrderLogEntryFactory,
     PlainAdditionalProductFactory,
+    TalpaProductAccountingFactory,
     WinterStorageProductFactory,
 )
 from .utils import random_price, random_tax
@@ -303,3 +312,21 @@ def mocked_refund_payment_details(*args, products=None, **kwargs):
             )
 
     return wrapper
+
+
+@pytest.fixture()
+def default_talpa_product_accounting():
+    return [
+        TalpaProductAccountingFactory(
+            region=AreaRegion.EAST, product_type=TalpaProductType.BERTH
+        ),
+        TalpaProductAccountingFactory(
+            region=AreaRegion.EAST, product_type=TalpaProductType.WINTER
+        ),
+        TalpaProductAccountingFactory(
+            region=AreaRegion.WEST, product_type=TalpaProductType.BERTH
+        ),
+        TalpaProductAccountingFactory(
+            region=AreaRegion.WEST, product_type=TalpaProductType.WINTER
+        ),
+    ]

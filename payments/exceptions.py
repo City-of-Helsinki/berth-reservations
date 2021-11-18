@@ -32,3 +32,7 @@ class PaymentNotFoundError(VenepaikkaPaymentError):
 
 class RefundPriceError(VenepaikkaPaymentError):
     """When the amount to be refunded (taken from Bambora) is different than the price of the order"""
+
+
+class TalpaProductAccountingNotFoundError(VenepaikkaPaymentError):
+    """When the TalpaProductAccounting for the order can't be found"""

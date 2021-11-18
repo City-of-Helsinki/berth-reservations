@@ -7,6 +7,7 @@ from applications.tests.factories import BerthApplicationFactory, BerthSwitchFac
 from berth_reservations.tests.factories import CustomerProfileFactory
 from leases.enums import LeaseStatus
 from leases.tests.factories import BerthLeaseFactory
+from resources.enums import AreaRegion
 from resources.tests.factories import BerthFactory, WinterStorageAreaFactory
 from utils.numbers import rounded
 
@@ -18,6 +19,7 @@ from ..enums import (
     PriceUnits,
     PricingCategory,
     ProductServiceType,
+    TalpaProductType,
 )
 from ..models import (
     AbstractBaseProduct,
@@ -33,6 +35,7 @@ from ..models import (
     OrderLogEntry,
     OrderRefund,
     PLACE_PRODUCT_TAX_PERCENTAGES,
+    TalpaProductAccounting,
     WinterStorageProduct,
 )
 from .utils import random_price, random_tax
@@ -120,6 +123,20 @@ class AdditionalProductFactory(AbstractBaseProductFactory):
 class PlainAdditionalProductFactory(AbstractBaseProductFactory):
     class Meta:
         model = AdditionalProduct
+
+
+class TalpaProductAccountingFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = TalpaProductAccounting
+        django_get_or_create = (
+            "region",
+            "product_type",
+        )
+
+    region = AreaRegion.EAST
+    talpa_ecom_product_id = factory.Faker("uuid4")
+    talpa_ecom_accounting_id = factory.Faker("uuid4")
+    product_type = TalpaProductType.BERTH
 
 
 class OrderFactory(factory.django.DjangoModelFactory):

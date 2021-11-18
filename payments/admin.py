@@ -18,6 +18,7 @@ from .models import (
     OrderRefund,
     OrderRefundLogEntry,
     OrderToken,
+    TalpaProductAccounting,
     WinterStorageProduct,
 )
 from .utils import currency, get_talpa_product_id, percentage, resolve_area
@@ -159,6 +160,7 @@ class OrderAdmin(admin.ModelAdmin):
     ordering = ("-created_at",)
     search_fields = (
         "order_number",
+        "talpa_ecom_id",
         "customer__id",
         "customer_first_name",
         "customer_last_name",
@@ -457,3 +459,4 @@ admin.site.register(OrderRefundLogEntry, OrderRefundLogEntryAdmin)
 admin.site.register(OrderToken, OrderTokenAdmin)
 admin.site.register(BerthSwitchOfferLogEntry, BerthSwitchOfferLogEntryAdmin)
 admin.site.register(BerthSwitchOffer, BerthSwitchOfferAdmin)
+admin.site.register(TalpaProductAccounting)
