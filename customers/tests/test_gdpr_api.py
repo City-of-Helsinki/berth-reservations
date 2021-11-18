@@ -113,12 +113,12 @@ def test_get_full_profile_information_from_gdpr_api(
 ):
     customer_profile = CustomerProfileFactory()
     boat = BoatFactory(owner=customer_profile)
-    berth_application = BerthApplicationFactory(customer=customer_profile)
+    berth_application = BerthApplicationFactory(customer=customer_profile, boat=boat)
     berth_lease = BerthLeaseFactory(
         customer=customer_profile, boat=boat, status=LeaseStatus.PAID
     )
     winter_storage_application = WinterStorageApplicationFactory(
-        customer=customer_profile
+        customer=customer_profile, boat=boat
     )
     winter_storage_lease = WinterStorageLeaseFactory(
         customer=customer_profile, boat=boat

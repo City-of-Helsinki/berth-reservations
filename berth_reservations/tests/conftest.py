@@ -96,6 +96,7 @@ def berth_customer_api_client():
     user = UserFactory()
     group = Group.objects.get(name="Berth customer")
     user.groups.set([group])
+    user.customer = CustomerProfileFactory()
     return create_api_client(user=user)
 
 

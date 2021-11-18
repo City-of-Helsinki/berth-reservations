@@ -104,10 +104,10 @@ def test_query_extended_profile_nodes(api_client, customer_profile):
     customer_profile_id = to_global_id(ProfileNode, customer_profile.id)
 
     boat = BoatFactory(owner=customer_profile)
-    berth_application = BerthApplicationFactory(customer=customer_profile)
+    berth_application = BerthApplicationFactory(customer=customer_profile, boat=boat)
     berth_lease = BerthLeaseFactory(customer=customer_profile, boat=boat)
     winter_storage_application = WinterStorageApplicationFactory(
-        customer=customer_profile
+        customer=customer_profile, boat=boat
     )
     winter_storage_lease = WinterStorageLeaseFactory(
         customer=customer_profile, boat=boat
@@ -540,12 +540,12 @@ def test_query_berth_profile(api_client, customer_profile):
     berth_profile_id = to_global_id(ProfileNode, customer_profile.id)
 
     boat = BoatFactory(owner=customer_profile)
-    berth_application = BerthApplicationFactory(customer=customer_profile)
+    berth_application = BerthApplicationFactory(customer=customer_profile, boat=boat)
     berth_lease = BerthLeaseFactory(
         customer=customer_profile, boat=boat, status=LeaseStatus.PAID
     )
     winter_storage_application = WinterStorageApplicationFactory(
-        customer=customer_profile
+        customer=customer_profile, boat=boat
     )
     winter_storage_lease = WinterStorageLeaseFactory(
         customer=customer_profile, boat=boat
@@ -596,12 +596,12 @@ def test_query_berth_profile_self_user(customer_profile):
     berth_profile_id = to_global_id(ProfileNode, customer_profile.id)
 
     boat = BoatFactory(owner=customer_profile)
-    berth_application = BerthApplicationFactory(customer=customer_profile)
+    berth_application = BerthApplicationFactory(customer=customer_profile, boat=boat)
     berth_lease = BerthLeaseFactory(
         customer=customer_profile, boat=boat, status=LeaseStatus.PAID
     )
     winter_storage_application = WinterStorageApplicationFactory(
-        customer=customer_profile
+        customer=customer_profile, boat=boat
     )
     winter_storage_lease = WinterStorageLeaseFactory(
         customer=customer_profile, boat=boat

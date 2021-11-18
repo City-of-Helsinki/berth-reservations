@@ -27,7 +27,8 @@ class BaseApplicationFactory(factory.django.DjangoModelFactory):
     address = factory.Faker("address")
     zip_code = factory.Faker("zipcode")
     municipality = factory.Faker("word")
-    boat = factory.SubFactory(BoatFactory)
+    customer = None  # required by the SelfAttribute below
+    boat = factory.SubFactory(BoatFactory, owner=factory.SelfAttribute("..customer"))
 
 
 class BerthApplicationFactory(BaseApplicationFactory):

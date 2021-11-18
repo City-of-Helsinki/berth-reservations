@@ -7,7 +7,7 @@ from faker import Faker
 from freezegun import freeze_time
 
 from applications.schema import BerthApplicationNode
-from applications.tests.factories import BerthSwitchFactory
+from applications.tests.factories import BerthApplicationFactory, BerthSwitchFactory
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
     assert_in_errors,
@@ -55,15 +55,16 @@ mutation CREATE_BERTH_SWITCH_OFFER_MUTATION($input: CreateBerthSwitchOfferMutati
     indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
-def test_create_berth_switch_offer(api_client, berth_application, berth):
+def test_create_berth_switch_offer(api_client, berth):
     berth_lease = BerthLeaseFactory(
         start_date=calculate_season_start_date(),
         end_date=calculate_season_end_date(),
         status=LeaseStatus.PAID,
     )
-    berth_application.customer = berth_lease.customer
-    berth_application.berth_switch = BerthSwitchFactory(berth=berth_lease.berth)
-    berth_application.save()
+    berth_application = BerthApplicationFactory(
+        customer=berth_lease.customer,
+        berth_switch=BerthSwitchFactory(berth=berth_lease.berth),
+    )
     berth_lease.save()
 
     variables = {
@@ -88,7 +89,7 @@ def test_create_berth_switch_offer(api_client, berth_application, berth):
     indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
-def test_create_berth_switch_offer_old_lease(api_client, berth_application, berth):
+def test_create_berth_switch_offer_old_lease(api_client, berth):
     berth_lease = BerthLeaseFactory(
         start_date=calculate_season_start_date(),
         end_date=calculate_season_end_date(),
@@ -100,9 +101,10 @@ def test_create_berth_switch_offer_old_lease(api_client, berth_application, bert
         end_date=calculate_season_end_date(),
         status=LeaseStatus.PAID,
     )
-    berth_application.customer = berth_lease.customer
-    berth_application.berth_switch = BerthSwitchFactory(berth=berth_lease.berth)
-    berth_application.save()
+    berth_application = BerthApplicationFactory(
+        customer=berth_lease.customer,
+        berth_switch=BerthSwitchFactory(berth=berth_lease.berth),
+    )
 
     variables = {
         "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
@@ -127,19 +129,18 @@ def test_create_berth_switch_offer_old_lease(api_client, berth_application, bert
     indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
-def test_create_berth_switch_offer_wrong_berth(api_client, berth_application, berth):
+def test_create_berth_switch_offer_wrong_berth(api_client, berth):
     berth_lease = BerthLeaseFactory(
         start_date=calculate_season_start_date(),
         end_date=calculate_season_end_date(),
         status=LeaseStatus.PAID,
     )
-    berth_application.customer = berth_lease.customer
-
-    berth_application.berth_switch = BerthSwitchFactory(
-        berth=BerthFactory(number="9999"),
+    berth_application = BerthApplicationFactory(
+        customer=berth_lease.customer,
+        berth_switch=BerthSwitchFactory(
+            berth=BerthFactory(number="9999"),
+        ),
     )
-    berth_application.save()
-
     variables = {
         "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
         "newBerthId": to_global_id(BerthNode, berth.id),
@@ -182,15 +183,13 @@ def test_create_berth_switch_offer_missing_customer(
     indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
-def test_create_berth_switch_offer_missing_application_switch(
-    api_client, berth_application, berth
-):
+def test_create_berth_switch_offer_missing_application_switch(api_client, berth):
     berth_lease = BerthLeaseFactory(
         start_date=calculate_season_start_date(), end_date=calculate_season_end_date()
     )
-    berth_application.customer = berth_lease.customer
-    berth_application.berth_switch = None
-    berth_application.save()
+    berth_application = BerthApplicationFactory(
+        customer=berth_lease.customer, berth_switch=None
+    )
 
     berth_lease.status = LeaseStatus.PAID
     berth_lease.save()
@@ -237,11 +236,11 @@ def test_create_berth_switch_offer_application_does_not_exist(
 
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_switch_offer_berth_does_not_exist(
-    superuser_api_client, berth_application, customer_profile
+    superuser_api_client, customer_profile
 ):
-    berth_application.berth_switch = BerthSwitchFactory()
-    berth_application.customer = customer_profile
-    berth_application.save()
+    berth_application = BerthApplicationFactory(
+        berth_switch=BerthSwitchFactory(), customer=customer_profile
+    )
 
     variables = {
         "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
@@ -257,11 +256,11 @@ def test_create_berth_switch_offer_berth_does_not_exist(
 
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_switch_offer_lease_does_not_exist(
-    superuser_api_client, berth_application, berth, customer_profile
+    superuser_api_client, berth, customer_profile
 ):
-    berth_application.berth_switch = BerthSwitchFactory()
-    berth_application.customer = customer_profile
-    berth_application.save()
+    berth_application = BerthApplicationFactory(
+        berth_switch=BerthSwitchFactory(), customer=customer_profile
+    )
 
     variables = {
         "applicationId": to_global_id(BerthApplicationNode, berth_application.id),
@@ -295,18 +294,17 @@ mutation CREATE_BERTH_SWITCH_OFFER_MUTATION($input: CreateBerthSwitchOfferMutati
     indirect=True,
 )
 @freeze_time("2020-01-01T08:00:00Z")
-def test_create_berth_switch_offer_refresh_profile(
-    api_client, berth_application, berth
-):
+def test_create_berth_switch_offer_refresh_profile(api_client, berth):
     faker = Faker("fi_FI")
     berth_lease = BerthLeaseFactory(
         start_date=calculate_season_start_date(),
         end_date=calculate_season_end_date(),
         status=LeaseStatus.PAID,
     )
-    berth_application.customer = berth_lease.customer
-    berth_application.berth_switch = BerthSwitchFactory(berth=berth_lease.berth)
-    berth_application.save()
+    berth_application = BerthApplicationFactory(
+        customer=berth_lease.customer,
+        berth_switch=BerthSwitchFactory(berth=berth_lease.berth),
+    )
 
     first_name = faker.first_name()
     last_name = faker.last_name()

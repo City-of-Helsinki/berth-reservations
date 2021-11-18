@@ -63,8 +63,8 @@ berth_application2 = berth_application
 
 
 @pytest.fixture
-def berth_application_with_customer(berth_application):
-    berth_application.customer = CustomerProfileFactory()
+def berth_application_with_customer():
+    berth_application = BerthApplicationFactory(customer=CustomerProfileFactory())
     berth_application.save()
     return berth_application
 
@@ -76,9 +76,10 @@ def winter_storage_application():
 
 
 @pytest.fixture
-def winter_storage_application_with_customer(winter_storage_application):
-    winter_storage_application.customer = CustomerProfileFactory()
-    winter_storage_application.save()
+def winter_storage_application_with_customer():
+    winter_storage_application = WinterStorageApplicationFactory(
+        customer=CustomerProfileFactory()
+    )
     return winter_storage_application
 
 

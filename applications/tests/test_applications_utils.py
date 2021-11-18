@@ -174,7 +174,7 @@ def test_exporting_winter_storage_applications_to_excel(customer_private):
         "zip_code": "00170",
         "municipality": "Helsinki",
         "phone_number": "0411234567",
-        "storage_method": WinterStorageMethod.ON_TRESTLES.label,
+        "storage_method": WinterStorageMethod.ON_TRESTLES.value,
         "trailer_registration_number": "hel001",
         "accept_boating_newsletter": False,
         "accept_fitness_news": False,
