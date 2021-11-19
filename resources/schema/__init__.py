@@ -1,9 +1,11 @@
 from .loaders import (
     BerthLoader,
     BerthTypeLoader,
+    HarborLoader,
     PierLoader,
     PiersForHarborLoader,
     SuitableBoatTypeLoader,
+    WSAreaLoader,
 )
 from .mutations import Mutation
 from .queries import Query
@@ -30,6 +32,7 @@ __all__ = [
     "BerthTypeLoader",
     "BoatTypeType",
     "HarborFilter",
+    "HarborLoader",
     "HarborNode",
     "Mutation",
     "PierLoader",
@@ -37,6 +40,7 @@ __all__ = [
     "PiersForHarborLoader",
     "Query",
     "SuitableBoatTypeLoader",
+    "WSAreaLoader",
     "WinterStorageAreaFilter",
     "WinterStorageAreaNode",
     "WinterStoragePlaceNode",

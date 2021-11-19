@@ -3,7 +3,13 @@ from collections import defaultdict
 from promise import Promise
 from promise.dataloader import DataLoader
 
-from ..models import Berth, BerthType, BoatType, Pier
+from utils.dataloaders import model_loader
+
+from ..models import Berth, BerthType, BoatType, Harbor, Pier, WinterStorageArea
+
+BerthTypeLoader = model_loader(BerthType)
+HarborLoader = model_loader(Harbor)
+WSAreaLoader = model_loader(WinterStorageArea)
 
 
 class PierLoader(DataLoader):
@@ -59,16 +65,4 @@ class SuitableBoatTypeLoader(DataLoader):
 
         return Promise.resolve(
             [boat_types.get(boat_type_id) for boat_type_id in boat_type_ids]
-        )
-
-
-class BerthTypeLoader(DataLoader):
-    def batch_load_fn(self, berth_type_ids):
-        berth_types = defaultdict(BerthType)
-
-        for berth_type in BerthType.objects.filter(id__in=berth_type_ids).iterator():
-            berth_types[berth_type.id] = berth_type
-
-        return Promise.resolve(
-            [berth_types.get(berth_type_id) for berth_type_id in berth_type_ids]
         )

@@ -5,9 +5,11 @@ from leases.schema import BerthLeaseForBerthLoader
 from resources.schema import (
     BerthLoader,
     BerthTypeLoader,
+    HarborLoader,
     PierLoader,
     PiersForHarborLoader,
     SuitableBoatTypeLoader,
+    WSAreaLoader,
 )
 
 __all__ = ["HostFixupMiddleware", "GQLDataLoaders"]
@@ -16,6 +18,8 @@ LOADERS = {
     "leases_for_berth_loader": BerthLeaseForBerthLoader,
     "piers_for_harbor_loader": PiersForHarborLoader,
     "customer_loader": CustomerProfileLoader,
+    "harbor_loader": HarborLoader,
+    "ws_area_loader": WSAreaLoader,
     "pier_loader": PierLoader,
     "berth_loader": BerthLoader,
     "suitable_boat_type_loader": SuitableBoatTypeLoader,
