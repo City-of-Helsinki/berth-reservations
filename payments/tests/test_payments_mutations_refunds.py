@@ -73,7 +73,6 @@ def test_refund_order(
             order.product.price_value
             * order.lease.place.place_type.width
             * order.lease.place.place_type.length,
-            round_to_nearest=1,
         )
         area = order.lease.place.winter_storage_section.area
 

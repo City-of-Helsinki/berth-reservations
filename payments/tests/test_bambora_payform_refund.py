@@ -69,7 +69,6 @@ def test_initiate_refund_success(provider_base_config: dict, order: Order):
             order.product.price_value
             * order.lease.place.place_type.width
             * order.lease.place.place_type.length,
-            round_to_nearest=1,
         )
         area = order.lease.place.winter_storage_section.area
 
@@ -137,7 +136,6 @@ def test_initiate_refund_no_order_email(provider_base_config: dict, order: Order
             order.product.price_value
             * order.lease.place.place_type.width
             * order.lease.place.place_type.length,
-            round_to_nearest=1,
         )
         area = order.lease.place.winter_storage_section.area
 

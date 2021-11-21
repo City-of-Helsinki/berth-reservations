@@ -226,9 +226,7 @@ def test_order_retrieves_winter_storage_lease(winter_storage_lease):
         winter_storage_lease.place.place_type.width
         * winter_storage_lease.place.place_type.length
     )
-    expected_price = rounded(
-        order.product.price_value * sqm, decimals=2, round_to_nearest=1
-    )
+    expected_price = rounded(order.product.price_value * sqm, decimals=2)
 
     assert order.lease.id == winter_storage_lease.id
     assert order._lease_content_type.name == winter_storage_lease._meta.verbose_name
@@ -259,7 +257,6 @@ def test_order_winter_storage_product_price(winter_storage_lease):
         * winter_storage_lease.place.place_type.width
         * winter_storage_lease.place.place_type.length,
         decimals=2,
-        round_to_nearest=1,
     )
     assert order.product == expected_product
     assert order.price == expected_price
@@ -347,7 +344,7 @@ def test_order_winter_storage_lease_right_price_for_full_season(winter_storage_a
     assert order.lease.end_date == calculate_winter_storage_lease_end_date()
     sqm = order.lease.place.place_type.width * order.lease.place.place_type.length
 
-    expected_price = rounded(Decimal("100.00") * sqm, decimals=2, round_to_nearest=1)
+    expected_price = rounded(Decimal("100.00") * sqm, decimals=2)
     assert order.price == expected_price
 
     for service, created in services.items():
@@ -1089,27 +1086,20 @@ def test_berth_switch_offer_lease_changed_status():
 @pytest.mark.parametrize(
     "width,length,expected_price",
     [
-        (2.4, 6, 164),
-        (2.5, 6, 171),
-        (3.5, 12, 479),
-        (3, 10, 342),
-        (3, 8, 274),
-        (4, 12, 547),
-        (3.5, 10, 399),
-        (4.5, 12, 616),
+        ("2.4", "6", "164.16"),
+        ("2.5", "6", "171"),
+        ("3.5", "12", "478.80"),
+        ("3", "10", "342"),
+        ("3", "8", "273.60"),
+        ("4", "12", "547.20"),
+        ("3.5", "10", "399"),
+        ("4.5", "12", "615.60"),
     ],
 )
 def test_marked_winter_storage_price_rounded(width, length, expected_price):
-    """For a place of 2,4 x 6,0, with the regular price of 11,4e the actual
-    price would be 164,16e.
-    According to the pricing rules, the prices are "rounded" to the nearest integer,
-    in this case 164,00e.
-
-    Testing all the possible width-length-price combinations according to the pricing table.
-    """
     lease = WinterStorageLeaseFactory(
-        place__place_type__width=width,
-        place__place_type__length=length,
+        place__place_type__width=Decimal(width),
+        place__place_type__length=Decimal(length),
         create_product=False,
     )
     WinterStorageProductFactory(

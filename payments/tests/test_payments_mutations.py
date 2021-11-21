@@ -795,7 +795,6 @@ def test_create_order_winter_storage_lease(api_client, winter_storage_lease):
         winter_storage_lease.place.place_type.width
         * winter_storage_lease.place.place_type.length
         * expected_product.price_value,
-        round_to_nearest=1,
         as_string=True,
     )
 
