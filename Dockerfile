@@ -12,7 +12,6 @@ COPY --chown=appuser:appuser requirements.txt /app/
 # just extras.
 RUN apt-install.sh \
   gdal-bin \
-  python-gdal \
   python3-gdal \
   gettext \
   build-essential \
