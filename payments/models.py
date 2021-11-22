@@ -707,9 +707,7 @@ class Order(UUIDModel, TimeStampedModel, SerializableMixin):
                         self.lease.place.place_type.width
                         * self.lease.place.place_type.length
                     )
-                    price = round_to_nearest(
-                        price * place_sqm, round_to_nearest=1, decimals=2
-                    )
+                    price = round_to_nearest(price * place_sqm, decimals=2)
                 elif self.lease.boat:
                     # If the lease is only associated to an section,
                     # calculate the price based on the boat dimensions
