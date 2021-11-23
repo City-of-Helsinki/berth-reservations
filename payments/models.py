@@ -1,4 +1,5 @@
 import logging
+import uuid
 from datetime import date, timedelta
 from decimal import Decimal
 from typing import Optional, Union
@@ -339,16 +340,15 @@ class TalpaProductAccountingManager(models.Manager):
         return self.get(region=region, product_type=product_type)
 
 
-class TalpaProductAccounting(UUIDModel):
+class TalpaProductAccounting(models.Model):
+    # Explicit ID because it has to be editable
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     region = models.CharField(
         choices=AreaRegion.choices,
         verbose_name=_("area region"),
         max_length=32,
     )
     talpa_ecom_product_id = models.UUIDField(verbose_name=_("talpa eCom product ID"))
-    talpa_ecom_accounting_id = models.UUIDField(
-        verbose_name=_("talpa eCom accounting mapping ID")
-    )
     product_type = models.CharField(
         choices=TalpaProductType.choices,
         verbose_name=_("talpa eCom product type"),
