@@ -135,7 +135,6 @@ class TalpaProductAccountingFactory(factory.django.DjangoModelFactory):
 
     region = AreaRegion.EAST
     talpa_ecom_product_id = factory.Faker("uuid4")
-    talpa_ecom_accounting_id = factory.Faker("uuid4")
     product_type = TalpaProductType.BERTH
 
 

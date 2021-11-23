@@ -448,6 +448,15 @@ class OrderLineAdmin(admin.ModelAdmin):
     talpa_product_id.admin_order_field = "talpa_product_id"
 
 
+class TalpaProductAccountingAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "product_type",
+        "region",
+        "talpa_ecom_product_id",
+    )
+
+
 admin.site.register(WinterStorageProduct, WinterStorageProductAdmin)
 admin.site.register(BerthProduct, BerthProductAdmin)
 admin.site.register(AdditionalProduct, AdditionalProductAdmin)
@@ -459,4 +468,4 @@ admin.site.register(OrderRefundLogEntry, OrderRefundLogEntryAdmin)
 admin.site.register(OrderToken, OrderTokenAdmin)
 admin.site.register(BerthSwitchOfferLogEntry, BerthSwitchOfferLogEntryAdmin)
 admin.site.register(BerthSwitchOffer, BerthSwitchOfferAdmin)
-admin.site.register(TalpaProductAccounting)
+admin.site.register(TalpaProductAccounting, TalpaProductAccountingAdmin)
