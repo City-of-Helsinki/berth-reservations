@@ -24,7 +24,7 @@ from payments.providers.bambora_payform import (
 from payments.tests.conftest import (
     create_bambora_provider,
     FAKE_BAMBORA_API_URL,
-    mocked_response_create,
+    mocked_bambora_response_create,
 )
 from payments.tests.factories import OrderFactory, OrderLineFactory
 from payments.utils import get_talpa_product_id, price_as_fractional_int
@@ -43,14 +43,14 @@ success_params = {
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-def test_initiate_payment_success(provider_base_config: dict, order: Order):
+def test_initiate_payment_success(bambora_provider_base_config: dict, order: Order):
     """Test the request creator constructs the payload base and returns a url that contains a token"""
     request = RequestFactory().request()
 
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ) as mock_call:
         url = payment_provider.initiate_payment(order)
         assert url.startswith(payment_provider.url_payment_api)
@@ -66,57 +66,57 @@ def test_initiate_payment_success(provider_base_config: dict, order: Order):
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-def test_initiate_payment_error_unavailable(provider_base_config, order: Order):
+def test_initiate_payment_error_unavailable(bambora_provider_base_config, order: Order):
     """Test the request creator raises service unavailable if request doesn't go through"""
     request = RequestFactory().request()
 
     invalid_config = {
-        **provider_base_config,
+        **bambora_provider_base_config,
         "VENE_PAYMENTS_BAMBORA_API_URL": FAKE_BAMBORA_API_URL,
     }
     unavailable_payment_provider = create_bambora_provider(invalid_config, request)
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ):
         with pytest.raises(ServiceUnavailableError):
             unavailable_payment_provider.initiate_payment(order)
 
 
-def test_handle_initiate_payment_success(order, payment_provider):
+def test_handle_initiate_payment_success(order, bambora_payment_provider):
     """Test the response handler recognizes success and adds token as part of the returned url"""
     r = {"result": 0, "token": "token123", "type": "e-payment"}
-    return_value = payment_provider.handle_initiate_payment(order, r)
+    return_value = bambora_payment_provider.handle_initiate_payment(order, r)
     assert r["token"] in return_value
 
 
-def test_handle_initiate_payment_error_validation(order, payment_provider):
+def test_handle_initiate_payment_error_validation(order, bambora_payment_provider):
     """Test the response handler raises PayloadValidationError as expected"""
     r = {"result": 1, "type": "e-payment", "errors": ["Invalid auth code"]}
     with pytest.raises(PayloadValidationError):
-        payment_provider.handle_initiate_payment(order, r)
+        bambora_payment_provider.handle_initiate_payment(order, r)
 
 
-def test_handle_initiate_payment_error_duplicate(order, payment_provider):
+def test_handle_initiate_payment_error_duplicate(order, bambora_payment_provider):
     """Test the response handler raises DuplicateOrderError as expected"""
     r = {"result": 2, "type": "e-payment"}
     with pytest.raises(DuplicateOrderError):
-        payment_provider.handle_initiate_payment(order, r)
+        bambora_payment_provider.handle_initiate_payment(order, r)
 
 
-def test_handle_initiate_payment_error_unavailable(order, payment_provider):
+def test_handle_initiate_payment_error_unavailable(order, bambora_payment_provider):
     """Test the response handler raises ServiceUnavailableError as expected"""
     r = {"result": 10, "type": "e-payment"}
     with pytest.raises(ServiceUnavailableError):
-        payment_provider.handle_initiate_payment(order, r)
+        bambora_payment_provider.handle_initiate_payment(order, r)
 
 
-def test_handle_initiate_payment_error_unknown_code(order, payment_provider):
+def test_handle_initiate_payment_error_unknown_code(order, bambora_payment_provider):
     """Test the response handler raises UnknownReturnCodeError as expected"""
     r = {"result": 15, "type": "e-payment", "test": "unrecognized extra stuff"}
     with pytest.raises(UnknownReturnCodeError):
-        payment_provider.handle_initiate_payment(order, r)
+        bambora_payment_provider.handle_initiate_payment(order, r)
 
 
 @pytest.mark.parametrize(
@@ -124,10 +124,12 @@ def test_handle_initiate_payment_error_unknown_code(order, payment_provider):
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-def test_payload_add_products_success(payment_provider, order_with_products: Order):
+def test_payload_add_products_success(
+    bambora_payment_provider, order_with_products: Order
+):
     """Test the products and total order price data is added correctly into payload"""
     payload = {}
-    payment_provider.payload_add_products(
+    bambora_payment_provider.payload_add_products(
         payload, order_with_products, order_with_products.lease.application.language
     )
     assert "amount" in payload
@@ -152,7 +154,10 @@ def test_payload_add_products_success(payment_provider, order_with_products: Ord
 
 @pytest.mark.parametrize("storage_on_ice", [True, False])
 def test_payload_additional_product_order(
-    payment_provider, additional_product, storage_on_ice, berth_lease_without_product
+    bambora_payment_provider,
+    additional_product,
+    storage_on_ice,
+    berth_lease_without_product,
 ):
     if storage_on_ice:
         additional_product.service = ProductServiceType.STORAGE_ON_ICE
@@ -192,7 +197,9 @@ def test_payload_additional_product_order(
     )
 
     payload = {}
-    payment_provider.payload_add_products(payload, additional_product_order, "fi")
+    bambora_payment_provider.payload_add_products(
+        payload, additional_product_order, "fi"
+    )
     assert payload["amount"] > 0
 
     assert len(payload["products"]) == 1
@@ -214,14 +221,16 @@ def test_payload_additional_product_order(
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-def test_payload_add_customer_success(payment_provider, order_with_products: Order):
+def test_payload_add_customer_success(
+    bambora_payment_provider, order_with_products: Order
+):
     """Test the customer data from order is added correctly into payload"""
 
     # it should not use this value if application is present
     order_with_products.customer_first_name = "first_name"
 
     payload = {}
-    payment_provider.payload_add_customer(payload, order_with_products)
+    bambora_payment_provider.payload_add_customer(payload, order_with_products)
 
     assert "email" in payload
     assert payload.get("email") == order_with_products.lease.application.email
@@ -247,7 +256,9 @@ def test_payload_add_customer_success(payment_provider, order_with_products: Ord
     )
 
 
-def test_payload_add_customer_no_application(payment_provider, berth_order: Order):
+def test_payload_add_customer_no_application(
+    bambora_payment_provider, berth_order: Order
+):
     berth_order.customer_email = "test@test.com"
     berth_order.customer_first_name = "Matti"
     berth_order.customer_last_name = "Virtanen"
@@ -257,7 +268,7 @@ def test_payload_add_customer_no_application(payment_provider, berth_order: Orde
     berth_order.lease.application = None
 
     payload = {}
-    payment_provider.payload_add_customer(payload, berth_order)
+    bambora_payment_provider.payload_add_customer(payload, berth_order)
 
     assert payload.get("email") == berth_order.customer_email
 
@@ -271,37 +282,37 @@ def test_payload_add_customer_no_application(payment_provider, berth_order: Orde
     assert customer.get("address_city") == berth_order.customer_city.capitalize()
 
 
-def test_payload_add_auth_code_success(payment_provider, order):
+def test_payload_add_auth_code_success(bambora_payment_provider, order):
     """Test the auth code is added correctly into the payload"""
     payload = {
-        "api_key": payment_provider.config.get(VENE_PAYMENTS_BAMBORA_API_KEY),
+        "api_key": bambora_payment_provider.config.get(VENE_PAYMENTS_BAMBORA_API_KEY),
         "order_number": order.order_number,
     }
-    payment_provider.payload_add_auth_code(payload)
+    bambora_payment_provider.payload_add_auth_code(payload)
     assert "authcode" in payload
-    assert payload.get("authcode") == payment_provider.calculate_auth_code(
+    assert payload.get("authcode") == bambora_payment_provider.calculate_auth_code(
         f'{payload["api_key"]}|{payload["order_number"]}'
     )
 
 
-def test_calculate_auth_code_success(payment_provider):
+def test_calculate_auth_code_success(bambora_payment_provider):
     """Test the auth code calculation returns a correct hash"""
     data = "dummy-key|abc123-1602145394.662132"
-    calculated_code = payment_provider.calculate_auth_code(data)
+    calculated_code = bambora_payment_provider.calculate_auth_code(data)
     assert hmac.compare_digest(
         calculated_code,
         "A51A955F0888E2056C7D921E8E97ACAB0F922C1526C635D97BE5E445D486BCB2",
     )
 
 
-def test_check_new_payment_authcode_success(payment_provider):
+def test_check_new_payment_authcode_success(bambora_payment_provider):
     """Test the helper is able to extract necessary values from a request and compare authcodes"""
     rf = RequestFactory()
     request = rf.get("/payments/success/", success_params)
-    assert payment_provider.check_new_payment_authcode(request)
+    assert bambora_payment_provider.check_new_payment_authcode(request)
 
 
-def test_check_new_payment_authcode_invalid(payment_provider):
+def test_check_new_payment_authcode_invalid(bambora_payment_provider):
     """Test the helper fails when params do not match the auth code"""
     params = {
         "VENE_UI_RETURN_URL": "http%3A%2F%2F127.0.0.1%3A8000%2Fv1",
@@ -312,10 +323,10 @@ def test_check_new_payment_authcode_invalid(payment_provider):
     }
     rf = RequestFactory()
     request = rf.get("/payments/success/", params)
-    assert not payment_provider.check_new_payment_authcode(request)
+    assert not bambora_payment_provider.check_new_payment_authcode(request)
 
 
-def test_handle_success_request_return_url_missing(provider_base_config, order):
+def test_handle_success_request_return_url_missing(bambora_provider_base_config, order):
     """Test the handler returns a bad request object if return URL is missing from params"""
     params = {
         "AUTHCODE": "DD789BA71ACD627892517745AF4C4CE2068F006C602CD54264E1FC5E4C2EE6CF",
@@ -325,14 +336,14 @@ def test_handle_success_request_return_url_missing(provider_base_config, order):
     }
     rf = RequestFactory()
     request = rf.get("/payments/success/", params)
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
 
     returned = payment_provider.handle_success_request()
     assert isinstance(returned, HttpResponseServerError)
     assert returned.status_code == 500
 
 
-def test_handle_success_request_order_not_found(provider_base_config, order):
+def test_handle_success_request_order_not_found(bambora_provider_base_config, order):
     """Test request helper returns a failure url when order can't be found"""
     params = {
         "VENE_UI_RETURN_URL": "http%3A%2F%2F127.0.0.1%3A8000%2Fv1",
@@ -343,7 +354,7 @@ def test_handle_success_request_order_not_found(provider_base_config, order):
     }
     rf = RequestFactory()
     request = rf.get("/payments/success/", params)
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     returned = payment_provider.handle_success_request()
     assert isinstance(returned, HttpResponse)
     assert "payment_status=failure" in returned.url
@@ -354,7 +365,7 @@ def test_handle_success_request_order_not_found(provider_base_config, order):
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-def test_handle_success_request_success(provider_base_config, order: Order):
+def test_handle_success_request_success(bambora_provider_base_config, order: Order):
     """Test request helper changes the order status to PAID
 
     Also check it returns a success url with order number"""
@@ -364,7 +375,7 @@ def test_handle_success_request_success(provider_base_config, order: Order):
 
     rf = RequestFactory()
     request = rf.get("/payments/success/", success_params)
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     returned = payment_provider.handle_success_request()
 
     order_after = Order.objects.get(
@@ -384,7 +395,9 @@ def test_handle_success_request_success(provider_base_config, order: Order):
     ["winter_storage_order"],
     indirect=True,
 )
-def test_generate_sticker_number_for_ws_lease(provider_base_config, order: Order):
+def test_generate_sticker_number_for_ws_lease(
+    bambora_provider_base_config, order: Order
+):
     create_ws_sticker_sequences()
 
     order.status = OrderStatus.OFFERED
@@ -397,7 +410,7 @@ def test_generate_sticker_number_for_ws_lease(provider_base_config, order: Order
 
     rf = RequestFactory()
     request = rf.get("/payments/success/", success_params)
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     returned = payment_provider.handle_success_request()
 
     order_after = Order.objects.get(
@@ -413,7 +426,7 @@ def test_generate_sticker_number_for_ws_lease(provider_base_config, order: Order
     assert "payment_status=success" in url
 
 
-def test_handle_success_request_payment_failed(provider_base_config, order):
+def test_handle_success_request_payment_failed(bambora_provider_base_config, order):
     """Test request helper changes the order status to rejected and returns a failure url"""
     order.status = OrderStatus.OFFERED
     order.order_number = "abc123-1602145394.662132"
@@ -428,7 +441,7 @@ def test_handle_success_request_payment_failed(provider_base_config, order):
     }
     rf = RequestFactory()
     request = rf.get("/payments/success/", params)
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     returned = payment_provider.handle_success_request()
     order_after = Order.objects.get(order_number=params.get("ORDER_NUMBER"))
     assert order_after.status == OrderStatus.OFFERED
@@ -436,7 +449,7 @@ def test_handle_success_request_payment_failed(provider_base_config, order):
     assert "payment_status=failure" in returned.url
 
 
-def test_handle_success_request_status_not_updated(provider_base_config, order):
+def test_handle_success_request_status_not_updated(bambora_provider_base_config, order):
     """Test request helper reacts to transaction status update error by returning a failure url"""
     params = {
         "VENE_UI_RETURN_URL": "http%3A%2F%2F127.0.0.1%3A8000%2Fv1",
@@ -447,14 +460,14 @@ def test_handle_success_request_status_not_updated(provider_base_config, order):
     }
     rf = RequestFactory()
     request = rf.get("/payments/success/", params)
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     returned = payment_provider.handle_success_request()
     # TODO Handling isn't final yet so there might be something extra that needs to be tested here
     assert isinstance(returned, HttpResponse)
     assert "payment_status=failure" in returned.url
 
 
-def test_handle_success_request_maintenance_break(provider_base_config, order):
+def test_handle_success_request_maintenance_break(bambora_provider_base_config, order):
     """Test request helper reacts to maintenance break error by returning a failure url"""
     params = {
         "VENE_UI_RETURN_URL": "http%3A%2F%2F127.0.0.1%3A8000%2Fv1",
@@ -465,14 +478,14 @@ def test_handle_success_request_maintenance_break(provider_base_config, order):
     }
     rf = RequestFactory()
     request = rf.get("/payments/success/", params)
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     returned = payment_provider.handle_success_request()
     # TODO Handling isn't final yet so there might be something extra that needs to be tested here
     assert isinstance(returned, HttpResponse)
     assert "payment_status=failure" in returned.url
 
 
-def test_handle_success_request_unknown_error(provider_base_config, order):
+def test_handle_success_request_unknown_error(bambora_provider_base_config, order):
     """Test request helper returns a failure url when status code is unknown"""
     params = {
         "VENE_UI_RETURN_URL": "http%3A%2F%2F127.0.0.1%3A8000%2Fv1",
@@ -483,13 +496,13 @@ def test_handle_success_request_unknown_error(provider_base_config, order):
     }
     rf = RequestFactory()
     request = rf.get("/payments/success/", params)
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     returned = payment_provider.handle_success_request()
     assert isinstance(returned, HttpResponse)
     assert "payment_status=failure" in returned.url
 
 
-def test_handle_notify_request_order_not_found(provider_base_config, order):
+def test_handle_notify_request_order_not_found(bambora_provider_base_config, order):
     """Test request notify helper returns http 204 when order can't be found"""
     params = {
         "VENE_UI_RETURN_URL": "http%3A%2F%2F127.0.0.1%3A8000%2Fv1",
@@ -500,7 +513,7 @@ def test_handle_notify_request_order_not_found(provider_base_config, order):
     }
     rf = RequestFactory()
     request = rf.get("/payments/notify/", params)
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     returned = payment_provider.handle_notify_request()
     assert isinstance(returned, HttpResponse)
     assert returned.status_code == 204
@@ -516,7 +529,7 @@ def test_handle_notify_request_order_not_found(provider_base_config, order):
     ),
 )
 def test_handle_notify_request_success(
-    provider_base_config,
+    bambora_provider_base_config,
     berth_order: Order,
     order_status: OrderStatus,
     expected_order_status: OrderStatus,
@@ -528,7 +541,7 @@ def test_handle_notify_request_success(
 
     rf = RequestFactory()
     request = rf.get("/payments/notify/", success_params)
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     returned = payment_provider.handle_notify_request()
     order_after = Order.objects.get(
         order_number=success_params.get("ORDER_NUMBER").split("-")[0]
@@ -539,7 +552,7 @@ def test_handle_notify_request_success(
 
 
 def test_handle_notify_request_success_for_ap_order(
-    provider_base_config,
+    bambora_provider_base_config,
     berth_order: Order,
 ):
     berth_order.order_number = "abc123"
@@ -549,7 +562,7 @@ def test_handle_notify_request_success_for_ap_order(
 
     rf = RequestFactory()
     request = rf.get("/payments/notify/", success_params)
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     returned = payment_provider.handle_notify_request()
     order_after = Order.objects.get(
         order_number=success_params.get("ORDER_NUMBER").split("-")[0]
@@ -573,7 +586,7 @@ def test_handle_notify_request_success_for_ap_order(
     ),
 )
 def test_handle_notify_request_payment_failed(
-    provider_base_config, order, order_status, expected_order_status
+    bambora_provider_base_config, order, order_status, expected_order_status
 ):
     """Test request notify helper returns http 204 and order status is correct when payment fails"""
     order.order_number = "abc123"
@@ -590,7 +603,7 @@ def test_handle_notify_request_payment_failed(
 
     rf = RequestFactory()
     request = rf.get("/payments/notify/", params)
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     returned = payment_provider.handle_notify_request()
     order_after = Order.objects.get(
         order_number=params.get("ORDER_NUMBER").split("-")[0]
@@ -600,7 +613,7 @@ def test_handle_notify_request_payment_failed(
     assert returned.status_code == 204
 
 
-def test_handle_notify_request_unknown_error(provider_base_config, order):
+def test_handle_notify_request_unknown_error(bambora_provider_base_config, order):
     """Test request notify helper returns http 204 when status code is unknown"""
     params = {
         "VENE_UI_RETURN_URL": "http%3A%2F%2F127.0.0.1%3A8000%2Fv1",
@@ -611,15 +624,15 @@ def test_handle_notify_request_unknown_error(provider_base_config, order):
     }
     rf = RequestFactory()
     request = rf.get("/payments/notify/", params)
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     returned = payment_provider.handle_notify_request()
     assert isinstance(returned, HttpResponse)
     assert returned.status_code == 204
 
 
-def test_get_payment_email_url(provider_base_config, order):
+def test_get_payment_email_url(bambora_provider_base_config, order):
     request = RequestFactory().request()
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     lang = "fi"
     url = payment_provider.get_payment_email_url(order, lang)
     ui_return_url = settings.VENE_UI_RETURN_URL
@@ -635,15 +648,15 @@ def test_get_payment_email_url(provider_base_config, order):
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-def test_initiate_duplicated_payment(provider_base_config, order):
+def test_initiate_duplicated_payment(bambora_provider_base_config, order):
     request = RequestFactory().request()
 
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     assert OrderToken.objects.count() == 0
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ) as mock_call:
         payment_provider.initiate_payment(order)
         assert OrderToken.objects.count() == 1
@@ -667,16 +680,16 @@ def test_initiate_duplicated_payment(provider_base_config, order):
 )
 @freeze_time("2019-01-14T08:00:00Z")
 def test_initiate_duplicated_payment_new_token_after_expiry(
-    provider_base_config, order
+    bambora_provider_base_config, order
 ):
     request = RequestFactory().request()
 
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     assert OrderToken.objects.count() == 0
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ) as mock_call:
         payment_provider.initiate_payment(order)
         assert OrderToken.objects.count() == 1
@@ -706,20 +719,22 @@ def test_initiate_duplicated_payment_new_token_after_expiry(
     indirect=True,
 )
 @freeze_time("2019-01-14T08:00:00Z")
-def test_duplicate_payments_tokens_cancelled(provider_base_config, order: Order):
+def test_duplicate_payments_tokens_cancelled(
+    bambora_provider_base_config, order: Order
+):
     # Fake the Payment initiate flow
     order.status = OrderStatus.OFFERED
     order.order_number = "abc123"
     order.save()
 
     request = RequestFactory().request()
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
 
     assert OrderToken.objects.count() == 0
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ) as mock_call:
         payment_provider.initiate_payment(order)
         assert OrderToken.objects.count() == 1
@@ -751,7 +766,7 @@ def test_duplicate_payments_tokens_cancelled(provider_base_config, order: Order)
     }
     rf = RequestFactory()
     request = rf.get("/payments/success/", params)
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     payment_provider.handle_success_request()
 
     order_after = Order.objects.get(
@@ -762,7 +777,7 @@ def test_duplicate_payments_tokens_cancelled(provider_base_config, order: Order)
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ):
         with freeze_time("2019-01-31T08:00:00Z"):
             payment_provider.initiate_payment(order)
@@ -780,7 +795,7 @@ def test_duplicate_payments_tokens_cancelled(provider_base_config, order: Order)
 )
 @freeze_time("2019-01-14T08:00:00Z")
 def test_duplicate_payments_tokens_cancelled_notify_payment(
-    provider_base_config, order: Order
+    bambora_provider_base_config, order: Order
 ):
     # Fake the Payment initiate flow
     order.status = OrderStatus.OFFERED
@@ -788,13 +803,13 @@ def test_duplicate_payments_tokens_cancelled_notify_payment(
     order.save()
 
     request = RequestFactory().request()
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
 
     assert OrderToken.objects.count() == 0
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ) as mock_call:
         payment_provider.initiate_payment(order)
         assert OrderToken.objects.count() == 1
@@ -826,7 +841,7 @@ def test_duplicate_payments_tokens_cancelled_notify_payment(
     }
     rf = RequestFactory()
     request = rf.get("/payments/success/", params)
-    payment_provider = create_bambora_provider(provider_base_config, request)
+    payment_provider = create_bambora_provider(bambora_provider_base_config, request)
     payment_provider.handle_notify_request()
 
     order_after = Order.objects.get(
@@ -837,7 +852,7 @@ def test_duplicate_payments_tokens_cancelled_notify_payment(
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ):
         with freeze_time("2019-01-31T08:00:00Z"):
             payment_provider.initiate_payment(order)

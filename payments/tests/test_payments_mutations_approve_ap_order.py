@@ -44,7 +44,7 @@ mutation APPROVE_ORDER_MUTATION($input: ApproveOrderMutationInput!) {
 def test_approve_ap_order(
     api_client,
     order: Order,
-    payment_provider,
+    bambora_payment_provider,
     notification_template_orders_approved,
 ):
     order.status = OrderStatus.DRAFTED
@@ -66,7 +66,7 @@ def test_approve_ap_order(
     ) as mock_send_sms:
         executed = api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
 
-    payment_url = payment_provider.get_payment_email_url(
+    payment_url = bambora_payment_provider.get_payment_email_url(
         order, lang=order.lease.application.language
     )
 

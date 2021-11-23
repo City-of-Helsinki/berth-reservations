@@ -36,3 +36,18 @@ class RefundPriceError(VenepaikkaPaymentError):
 
 class TalpaProductAccountingNotFoundError(VenepaikkaPaymentError):
     """When the TalpaProductAccounting for the order can't be found"""
+
+
+class RequestValidationFailedError(VenepaikkaPaymentError):
+    """When creating the order fails on Talpa eCom side, conceptually similar to PayloadValidationError"""
+
+
+class MissingOrderIDError(VenepaikkaPaymentError):
+    """
+    If the response when creating an order comes without an order ID,
+    should not happen but if it does it should be caught.
+    """
+
+
+class UnknownWebhookEventError(VenepaikkaPaymentError):
+    """When the payment webhooks are called with an unknown event type"""

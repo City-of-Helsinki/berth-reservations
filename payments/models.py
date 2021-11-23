@@ -533,10 +533,6 @@ class Order(UUIDModel, TimeStampedModel, SerializableMixin):
     )
     _lease_object_id = models.UUIDField(null=True, blank=True, verbose_name=_("lease"))
 
-    talpa_order_id = models.UUIDField(
-        null=True, blank=True, verbose_name=_("Talpa order id")
-    )
-
     objects = OrderManager()
 
     def __str__(self):

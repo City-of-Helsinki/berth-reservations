@@ -1,15 +1,21 @@
-from typing import Optional
-
-import environ
 from django.conf import settings
 from django.http import HttpRequest
 from django.utils.module_loading import import_string
 
-# imported here so that we can refer to it like 'payments.providers.BamboraPayformProvider'
-from .bambora_payform import BamboraPayformProvider  # noqa
-from .base import PaymentProvider
+from utils.config import get_config_from_env
 
-_provider_class: Optional[PaymentProvider] = None
+from .bambora_payform import BamboraPayformProvider
+from .base import PaymentProvider
+from .talpa_ecom import TalpaEComProvider
+
+_provider_class: PaymentProvider
+
+__all__ = [
+    "BamboraPayformProvider",
+    "TalpaEComProvider",
+    "get_payment_provider",
+    "load_provider_config",
+]
 
 
 def load_provider_config():
@@ -25,16 +31,8 @@ def load_provider_config():
     # Provider tells what keys and types it requires for configuration
     # and the corresponding data has to be set in .env
     template = _provider_class.get_config_template()
-    env = environ.Env(**template)
 
-    config = {}
-    for key in template.keys():
-        if hasattr(settings, key):
-            config[key] = getattr(settings, key)
-        else:
-            config[key] = env(key)
-
-    _provider_class.config = config
+    _provider_class.config = get_config_from_env(template)
 
 
 def get_payment_provider(
@@ -42,4 +40,6 @@ def get_payment_provider(
 ) -> PaymentProvider:
     """Get a new instance of the active payment provider with associated request
     and optional return_url info"""
+    global _provider_class
+
     return _provider_class(request=request, ui_return_url=ui_return_url)

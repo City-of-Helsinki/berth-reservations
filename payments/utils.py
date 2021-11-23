@@ -6,7 +6,13 @@ from leases.models import BerthLease, WinterStorageLease
 
 if TYPE_CHECKING:
     from uuid import UUID
-    from .models import Order, AbstractOffer, BerthProduct, WinterStorageProduct
+    from .models import (
+        Order,
+        AbstractOffer,
+        BerthProduct,
+        WinterStorageProduct,
+        AdditionalProduct,
+    )
     from .notifications import NotificationType
 
 import base64
@@ -45,7 +51,13 @@ from leases.utils import (
     calculate_winter_season_start_date,
 )
 from resources.enums import AreaRegion, BerthMooringType
-from resources.models import Harbor, WinterStorageArea
+from resources.models import (
+    Berth,
+    Harbor,
+    WinterStorageArea,
+    WinterStoragePlace,
+    WinterStorageSection,
+)
 from utils.email import is_valid_email
 from utils.messaging import get_email_subject
 from utils.numbers import rounded as rounded_decimal
@@ -240,7 +252,10 @@ def generate_order_number() -> str:
     return b.decode("utf8")
 
 
-def resolve_area(order: Order):
+def resolve_area(order: Order) -> Optional[Union[Harbor, WinterStorageArea]]:
+    """
+    Resolve the area (Harbor/Winter storage area) to which the order is connected, if any.
+    """
     lease_order = (
         order
         if order.order_type == OrderType.LEASE_ORDER
@@ -258,10 +273,41 @@ def resolve_area(order: Order):
         lease_order.product, "winter_storage_area"
     ):
         return lease_order.product.winter_storage_area
-    elif hasattr(lease_order.lease, "berth"):
+    elif hasattr(lease_order, "lease") and hasattr(lease_order.lease, "berth"):
         return order.lease.berth.pier.harbor
 
     return None
+
+
+def resolve_order_place(
+    lease,
+) -> Optional[Union[Berth, WinterStoragePlace, WinterStorageSection]]:
+    """
+    Resolve the place (Berth/Winter storage place) or section (Winter storage section)
+    to which an order is connected, if any.
+    """
+    return (
+        getattr(lease, "berth", None)
+        or getattr(lease, "place", None)
+        or getattr(lease, "section", None)
+    )
+
+
+def resolve_product_talpa_ecom_id(
+    product: Union[BerthProduct, WinterStorageProduct, AdditionalProduct],
+    area: Optional[Harbor, WinterStorageArea],
+) -> str:
+    """
+    Resolves the corresponding Talpa eCom product id, according to the product type
+    and region where the associated area is located.
+    """
+    from .models import TalpaProductAccounting
+
+    return str(
+        TalpaProductAccounting.objects.get_product_accounting_for_product(
+            product, area
+        ).talpa_ecom_product_id
+    )
 
 
 def get_talpa_product_id(

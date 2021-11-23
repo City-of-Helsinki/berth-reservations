@@ -48,7 +48,7 @@ mutation APPROVE_ORDER_MUTATION($input: ApproveOrderMutationInput!) {
 def test_approve_order(
     api_client,
     order: Order,
-    payment_provider,
+    bambora_payment_provider,
     notification_template_orders_approved,
 ):
     order.status = OrderStatus.DRAFTED
@@ -76,7 +76,7 @@ def test_approve_order(
     ) as mock_send_sms:
         executed = api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
 
-    payment_url = payment_provider.get_payment_email_url(
+    payment_url = bambora_payment_provider.get_payment_email_url(
         order, lang=order.lease.application.language
     )
 
@@ -130,7 +130,7 @@ def test_approve_order(
 def test_approve_order_sms_not_sent(
     api_client,
     order: Order,
-    payment_provider,
+    bambora_payment_provider,
     notification_template_orders_approved,
 ):
     order.status = OrderStatus.DRAFTED
@@ -176,7 +176,7 @@ def test_approve_order_sms_not_sent(
 def test_approve_order_default_due_date(
     api_client,
     order: Order,
-    payment_provider,
+    bambora_payment_provider,
     notification_template_orders_approved,
 ):
     order.status = OrderStatus.DRAFTED
@@ -225,7 +225,7 @@ def test_approve_order_not_enough_permissions(api_client):
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_does_not_exist(
     superuser_api_client,
-    payment_provider,
+    bambora_payment_provider,
     notification_template_orders_approved,
 ):
     order_id = to_global_id(OrderNode, uuid.uuid4())
@@ -255,7 +255,7 @@ def test_approve_order_does_not_exist(
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_anymail_error(
     superuser_api_client,
-    payment_provider,
+    bambora_payment_provider,
     notification_template_orders_approved,
     order: Order,
 ):
@@ -307,7 +307,7 @@ def test_approve_order_anymail_error(
 def test_approve_order_one_success_one_failure(
     superuser_api_client,
     order: Order,
-    payment_provider,
+    bambora_payment_provider,
     notification_template_orders_approved,
 ):
     order.status = OrderStatus.DRAFTED
@@ -333,7 +333,7 @@ def test_approve_order_one_success_one_failure(
     ):
         executed = superuser_api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
 
-    payment_url = payment_provider.get_payment_email_url(
+    payment_url = bambora_payment_provider.get_payment_email_url(
         order, lang=order.lease.application.language
     )
 

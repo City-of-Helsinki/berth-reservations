@@ -1,3 +1,4 @@
+import hashlib
 from datetime import date
 from typing import Tuple
 
@@ -26,3 +27,7 @@ def calculate_lease_start_and_end_dates(start_date: date) -> Tuple[date, date]:
     # Otherwise, if the start date is during the season dates, it should be the same
 
     return start_date, end_date
+
+
+def get_customer_hash(profile) -> str:
+    return hashlib.sha256(str(profile.id).encode()).hexdigest()

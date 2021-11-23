@@ -10,7 +10,21 @@ There are a couple of required configuration keys that need to be set in order t
 
 `./manage.py expire_too_old_unpaid_orders` runs the order/reservation cleanup for current orders. You'll probably want to run it periodically at least in production. [Cron](https://en.wikipedia.org/wiki/Cron) is one candidate for doing that.
 
-### Bambora Payform configuration
+## Talpa eCommerce Platform 
+### Configuration
+
+In addition to the general configuration keys mentioned in the previous section, enabling the Talpa eCommerce Provider also requires some extra configuration to function:
+
+- `VENE_PAYMENTS_TALPA_ECOM_PAYMENT_API_URL`: URL of the Payment Experience API. Defaults to `https://checkout.api.hel.fi/v1/payment/`
+- `VENE_PAYMENTS_TALPA_ECOM_ORDER_API_URL`: URL of the Order Experience API. Defaults to `https://checkout.api.hel.fi/v1/order/`
+- `VENE_PAYMENTS_TALPA_ECOM_CHECKOUT_URL`: URL of the Kassa UI. Defaults to `https://checkout.hel.fi/`
+- `VENE_PAYMENTS_TALPA_ECOM_API_NAMESPACE`: Namespace of the service, set up by Talpa. Defaults to `venepaikat`
+- 
+### Payment flow
+![sequence diagram](./payment_flow_talpa_ecom.png)
+
+## VismaPay
+### Configuration
 
 The Bambora API version the provider implementation targets is `w3.1`. More information about the API can be found in [Bambora's official API documentation](https://payform.bambora.com/docs/web_payments/?page=full-api-reference) page.
 
@@ -21,8 +35,8 @@ In addition to the general configuration keys mentioned in the previous section,
 - `VENE_PAYMENTS_BAMBORA_API_SECRET`: Used to calculate hashes out of the data being sent and received, to verify it is not being tampered with. Also found in the merchant portal and provided as a string. No default value.
 - `VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS`: An array of payment methods to show to the user to select from e.g.`['nordea', 'creditcards']`. Full list of supported values can be found in [the currencies section of](https://payform.bambora.com/docs/web_payments/?page=full-api-reference#currencies) Bambora's API documentation page.
 
-## Payment flow
-![sequence diagram](./payment_flow.png)
+### Payment flow
+![sequence diagram](./payment_flow_vismapay.png)
 
-## Refund flow
+### Refund flow
 ![sequence diagram](./refund_flow.png)

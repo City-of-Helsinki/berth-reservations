@@ -69,10 +69,15 @@ jobs:
           K8S_SECRET_SENTRY_ENVIRONMENT: "staging"
           K8S_SECRET_VENE_UI_RETURN_URL: 'https://venepaikka.test.kuva.hel.ninja/{LANG}'
           K8S_SECRET_VENE_UI_URL: "https://venepaikka.test.kuva.hel.ninja"
+          K8S_SECRET_VENE_PAYMENTS_PROVIDER_CLASS: ${{ secrets.GH_QA_PAYMENTS_PROVIDER_CLASS }}
           K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_URL: ${{ secrets.GH_QA_BAMBORA_API_URL }}
           K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_KEY: ${{ secrets.GH_QA_BAMBORA_API_KEY }}
           K8S_SECRET_VENE_PAYMENTS_BAMBORA_API_SECRET: ${{ secrets.GH_QA_BAMBORA_API_SECRET }}
           K8S_SECRET_VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS: ${{ secrets.GH_QA_BAMBORA_PAYMENT_METHODS }}
+          K8S_SECRET_VENE_PAYMENTS_TALPA_ECOM_PAYMENT_API_URL: "https://talpa-verkkokauppa-payment-experience-api-test.agw.arodevtest.hel.fi/v1/payment"
+          K8S_SECRET_VENE_PAYMENTS_TALPA_ECOM_ORDER_API_URL: "https://talpa-verkkokauppa-order-experience-api-test.agw.arodevtest.hel.fi/v1/order"
+          K8S_SECRET_VENE_PAYMENTS_TALPA_ECOM_CHECKOUT_URL: "https://talpa-verkkokauppa-kassa-ui-test.agw.arodevtest.hel.fi"
+          K8S_SECRET_VENE_PAYMENTS_TALPA_ECOM_API_NAMESPACE: "venepaikat"
           K8S_SECRET_PROFILE_API_URL: "https://profile-api.test.hel.ninja/graphql/"
           K8S_SECRET_ELASTIC_APM_ENVIRONMENT: "test"
           K8S_SECRET_ELASTIC_APM_SECRET_TOKEN: ${{ secrets.GH_QA_ELASTIC_APM_TOKEN }}

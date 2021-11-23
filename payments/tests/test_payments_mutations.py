@@ -7,6 +7,7 @@ from babel.dates import format_date
 from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from django.core import mail
+from django.test import override_settings
 from django.utils.timezone import now
 from freezegun import freeze_time
 
@@ -64,7 +65,7 @@ from ..utils import (
     convert_aftertax_to_pretax,
     generate_order_number,
 )
-from .conftest import mocked_response_create
+from .conftest import mocked_bambora_response_create
 from .factories import OrderFactory
 from .utils import get_berth_lease_pricing_category, random_price
 
@@ -1413,32 +1414,26 @@ mutation CONFIRM_PAYMENT_MUTATION($input: ConfirmPaymentMutationInput!) {
     indirect=True,
 )
 @pytest.mark.parametrize("status", [OrderStatus.OFFERED, OrderStatus.REJECTED])
-def test_confirm_payment(superuser_api_client, order: Order, status):
+def test_confirm_payment(superuser_api_client, order: Order, status, settings):
     order.status = status
     order.save()
     variables = {"orderNumber": order.order_number}
 
     with mock.patch(
-        "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        f"{settings.VENE_PAYMENTS_PROVIDER_CLASS}.initiate_payment",
+        side_effect=lambda _x: "test_url",
     ):
         executed = superuser_api_client.execute(
             CONFIRM_PAYMENT_MUTATION, input=variables
         )
 
-    assert "token/token123" in executed["data"]["confirmPayment"]["url"]
+    assert executed["data"]["confirmPayment"]["url"] == "test_url"
 
 
-def test_confirm_payment_does_not_exist(superuser_api_client):
+def test_confirm_payment_does_not_exist(superuser_api_client, settings):
     variables = {"orderNumber": generate_order_number()}
 
-    with mock.patch(
-        "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
-    ):
-        executed = superuser_api_client.execute(
-            CONFIRM_PAYMENT_MUTATION, input=variables
-        )
+    executed = superuser_api_client.execute(CONFIRM_PAYMENT_MUTATION, input=variables)
 
     assert_doesnt_exist("Order", executed)
 
@@ -1446,13 +1441,12 @@ def test_confirm_payment_does_not_exist(superuser_api_client):
 @pytest.mark.parametrize(
     "status", [OrderStatus.EXPIRED, OrderStatus.CANCELLED, OrderStatus.PAID]
 )
-def test_confirm_payment_invalid_status(superuser_api_client, status):
+def test_confirm_payment_invalid_status(superuser_api_client, status, settings):
     order = OrderFactory(status=status)
     variables = {"orderNumber": order.order_number}
 
     with mock.patch(
-        "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        f"{settings.VENE_PAYMENTS_PROVIDER_CLASS}.initiate_payment",
     ) as mock_call:
         executed = superuser_api_client.execute(
             CONFIRM_PAYMENT_MUTATION, input=variables
@@ -1468,7 +1462,17 @@ def test_confirm_payment_invalid_status(superuser_api_client, status):
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-def test_payment_fails_doesnt_use_empty_token(superuser_api_client, order: Order):
+@override_settings(
+    VENE_PAYMENTS_PROVIDER_CLASS="payments.providers.BamboraPayformProvider"
+)
+def test_bambora_payment_fails_doesnt_use_empty_token(
+    superuser_api_client, order: Order
+):
+    # Required config for using a specific provider
+    from payments.providers import load_provider_config
+
+    load_provider_config()
+
     empty_token = OrderToken.objects.create(
         order=order, valid_until=now() + relativedelta(day=1)
     )
@@ -1479,7 +1483,7 @@ def test_payment_fails_doesnt_use_empty_token(superuser_api_client, order: Order
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ):
         superuser_api_client.execute(CONFIRM_PAYMENT_MUTATION, input=variables)
 
@@ -1511,7 +1515,7 @@ def test_cancel_order(
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ):
         superuser_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
 
@@ -1530,7 +1534,7 @@ def test_cancel_order(
         mail.outbox[0].body
         == f"{ order.order_number } {format_date(now().date(), locale='fi')}"
     )
-    assert mail.outbox[0].to == [order.lease.application.email]
+    assert mail.outbox[0].to == [order.customer_email or order.lease.application.email]
 
     assert mail.outbox[0].alternatives == [
         (
@@ -1563,7 +1567,7 @@ def test_cancel_order_invalid_status(
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ):
         executed = superuser_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
 
@@ -1575,7 +1579,7 @@ def test_cancel_order_does_not_exist(superuser_api_client):
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ):
         executed = superuser_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
 
@@ -1594,7 +1598,7 @@ def test_cancel_unmarked_order_fails(superuser_api_client, order: Order):
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=mocked_response_create,
+        side_effect=mocked_bambora_response_create,
     ):
         executed = superuser_api_client.execute(CANCEL_ORDER_MUTATION, input=variables)
 
