@@ -309,14 +309,14 @@ def test_payload_add_place_products(
     if not is_section:
         assert {
             "key": "placeWidth",
-            "value": "Width: "
+            "value": "Width (m): "
             + str(place.berth_type.width if is_berth else place.place_type.width),
             "visibleInCheckout": True,
             "ordinal": "2",
         } in payload_meta
         assert {
             "key": "placeLength",
-            "value": "Length: "
+            "value": "Length (m): "
             + str(place.berth_type.length if is_berth else place.place_type.length),
             "visibleInCheckout": True,
             "ordinal": "3",
@@ -411,10 +411,10 @@ def test_handle_notify_request_settles_order(
         "paymentId": "36985766-eb07-42c2-8277-9508630f42d1",
         "orderId": "c748b9cb-c2da-4340-a746-fe44fec9cc64",
         "namespace": "venepaikat",
-        "type": TALPA_ECOM_WEBHOOK_EVENT_PAYMENT_PAID,
+        "eventType": TALPA_ECOM_WEBHOOK_EVENT_PAYMENT_PAID,
         "timestamp": "2021-10-19T09:11:00.123Z",
     }
-    request = rf.post("/payments/success/", data=payload)
+    request = rf.post("/payments/notify/", data=payload)
 
     payment_provider = create_talpa_ecom_provider(
         talpa_ecom_provider_base_config, request
@@ -459,11 +459,11 @@ def test_handle_notify_request_order_does_not_exist(
 
     payload = {
         "orderId": uuid4(),
-        "type": event_type,
+        "eventType": event_type,
         "namespace": "venepaikat",
     }
 
-    request = rf.post("/payments/success/", data=payload)
+    request = rf.post("/payments/notify/", data=payload)
     payment_provider = create_talpa_ecom_provider(
         talpa_ecom_provider_base_config, request
     )
@@ -497,11 +497,11 @@ def test_handle_notify_request_wrong_namespace(
         "paymentId": "36985766-eb07-42c2-8277-9508630f42d1",
         "orderId": "c748b9cb-c2da-4340-a746-fe44fec9cc64",
         "namespace": "WRONG-NAMESPACE",
-        "type": TALPA_ECOM_WEBHOOK_EVENT_PAYMENT_PAID,
+        "eventType": TALPA_ECOM_WEBHOOK_EVENT_PAYMENT_PAID,
         "timestamp": "2021-10-19T09:11:00.123Z",
     }
 
-    request = rf.post("/payments/success/", data=payload)
+    request = rf.post("/payments/notify/", data=payload)
     payment_provider = create_talpa_ecom_provider(
         talpa_ecom_provider_base_config, request
     )
@@ -535,11 +535,11 @@ def test_handle_notify_request_wrong_event_type(
         "paymentId": "36985766-eb07-42c2-8277-9508630f42d1",
         "orderId": "c748b9cb-c2da-4340-a746-fe44fec9cc64",
         "namespace": "venepaikat",
-        "type": "WRONG_TYPE",
+        "eventType": "WRONG_TYPE",
         "timestamp": "2021-10-19T09:11:00.123Z",
     }
 
-    request = rf.post("/payments/success/", data=payload)
+    request = rf.post("/payments/notify/", data=payload)
     payment_provider = create_talpa_ecom_provider(
         talpa_ecom_provider_base_config, request
     )
@@ -590,11 +590,11 @@ def test_handle_notify_request_wrong_payment_status(
         "paymentId": "36985766-eb07-42c2-8277-9508630f42d1",
         "orderId": "c748b9cb-c2da-4340-a746-fe44fec9cc64",
         "namespace": "venepaikat",
-        "type": event_type,
+        "eventType": event_type,
         "timestamp": "2021-10-19T09:11:00.123Z",
     }
 
-    request = rf.post("/payments/success/", data=payload)
+    request = rf.post("/payments/notify/", data=payload)
     payment_provider = create_talpa_ecom_provider(
         talpa_ecom_provider_base_config, request
     )
@@ -629,11 +629,11 @@ def test_handle_notify_request_order_cancelled(
     payload = {
         "orderId": "c748b9cb-c2da-4340-a746-fe44fec9cc64",
         "namespace": "venepaikat",
-        "type": TALPA_ECOM_WEBHOOK_EVENT_ORDER_CANCELLED,
+        "eventType": TALPA_ECOM_WEBHOOK_EVENT_ORDER_CANCELLED,
         "timestamp": "2021-10-19T09:11:00.123Z",
     }
 
-    request = rf.post("/payments/success/", data=payload)
+    request = rf.post("/payments/notify/", data=payload)
     payment_provider = create_talpa_ecom_provider(
         talpa_ecom_provider_base_config, request
     )

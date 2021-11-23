@@ -384,7 +384,7 @@ class TalpaEComProvider(PaymentProvider):
              "paymentId": "36985766-eb07-42c2-8277-9508630f42d1",
              "orderId": "c748b9cb-c2da-4340-a746-fe44fec9cc64",
              "namespace": "venepaikat",
-             "type": "PAYMENT_PAID",
+             "eventType": "PAYMENT_PAID",
              "timestamp": "2021-10-19T09:11:00.123Z",
         }
         """
@@ -396,13 +396,13 @@ class TalpaEComProvider(PaymentProvider):
         data = request.POST
         order_id = data.get("orderId", "")
         namespace = data.get("namespace", "")
-        event_type = data.get("type", "")
+        event_type = data.get("eventType", "")
 
-        if (
-            namespace != self.config.get("VENE_PAYMENTS_TALPA_ECOM_API_NAMESPACE")
-            or event_type not in TALPA_ECOM_WEBHOOK_EVENT_TYPES
-        ):
-            return HttpResponseBadRequest()
+        if namespace != self.config.get("VENE_PAYMENTS_TALPA_ECOM_API_NAMESPACE"):
+            return HttpResponseBadRequest(_("Wrong namespace"))
+
+        if event_type not in TALPA_ECOM_WEBHOOK_EVENT_TYPES:
+            return HttpResponseBadRequest(f"{_('Wrong webhook event')}: {event_type}")
 
         try:
             order = Order.objects.get(talpa_ecom_id=order_id)
@@ -412,8 +412,8 @@ class TalpaEComProvider(PaymentProvider):
 
         try:
             return self.handle_settle_order(order, event_type)
-        except UnknownWebhookEventError:
-            return HttpResponseBadRequest()
+        except UnknownWebhookEventError as e:
+            return HttpResponseBadRequest(f"{_('Webhook event error')}: {e}")
 
     def get_payment_details(self, order: Order) -> TalpaEComPaymentDetails:
         headers = {"user": get_customer_hash(order.customer)}
