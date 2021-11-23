@@ -23,7 +23,7 @@ class BaseApplicationFactory(factory.django.DjangoModelFactory):
     email = factory.Sequence(
         lambda n: "application{}@example.org".format(n)
     )  # example.com is not valid
-    phone_number = factory.Faker("phone_number")
+    phone_number = factory.Sequence(lambda n: "+%03d%09d" % (n // 10000, n % 10000))
     address = factory.Faker("address")
     zip_code = factory.Faker("zipcode")
     municipality = factory.Faker("word")

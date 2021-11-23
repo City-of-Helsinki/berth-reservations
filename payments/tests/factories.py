@@ -142,7 +142,7 @@ class TalpaProductAccountingFactory(factory.django.DjangoModelFactory):
 class OrderFactory(factory.django.DjangoModelFactory):
     customer_first_name = factory.Faker("first_name", locale="fi_FI")
     customer_last_name = factory.Faker("last_name", locale="fi_FI")
-    customer_phone = factory.Faker("phone_number", locale="fi_FI")
+    customer_phone = factory.Sequence(lambda n: "+%03d%09d" % (n // 10000, n % 10000))
     customer_email = factory.LazyAttribute(
         lambda o: f"{o.customer_last_name.lower()}_{o.customer_first_name.lower()}@example.org"
     )

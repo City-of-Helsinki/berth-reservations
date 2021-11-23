@@ -309,17 +309,15 @@ def test_payload_add_place_products(
     if not is_section:
         assert {
             "key": "placeWidth",
-            "value": str(
-                place.berth_type.width if is_berth else place.place_type.width
-            ),
+            "value": "Width: "
+            + str(place.berth_type.width if is_berth else place.place_type.width),
             "visibleInCheckout": True,
             "ordinal": "2",
         } in payload_meta
         assert {
             "key": "placeLength",
-            "value": str(
-                place.berth_type.length if is_berth else place.place_type.length
-            ),
+            "value": "Length: "
+            + str(place.berth_type.length if is_berth else place.place_type.length),
             "visibleInCheckout": True,
             "ordinal": "3",
         } in payload_meta
@@ -327,7 +325,8 @@ def test_payload_add_place_products(
     if is_berth:
         assert {
             "key": "placeMooring",
-            "value": BerthMooringType(place.berth_type.mooring_type).label,
+            "value": "Mooring: "
+            + BerthMooringType(place.berth_type.mooring_type).label,
             "visibleInCheckout": True,
             "ordinal": "4",
         } in payload_meta
