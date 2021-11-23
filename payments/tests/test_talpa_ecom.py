@@ -197,14 +197,14 @@ def test_payload_add_products_success(
     )
 
     assert payload["priceNet"] == rounded(
-        order_with_products.pretax_price, as_string=True
+        order_with_products.total_pretax_price, as_string=True
     )
     assert payload["priceTotal"] == rounded(
         order_with_products.total_price, as_string=True
     )
     assert payload["priceVat"] == str(
         rounded(order_with_products.total_price)
-        - rounded(order_with_products.pretax_price)
+        - rounded(order_with_products.total_pretax_price)
     )
 
     assert "items" in payload
@@ -249,7 +249,7 @@ def test_payload_add_additional_product_order(
     assert len(payload["items"]) == 1
     item = payload["items"][0]
 
-    assert payload["priceNet"] == rounded(order.pretax_price, as_string=True)
+    assert payload["priceNet"] == rounded(order.total_pretax_price, as_string=True)
     assert (
         payload["priceTotal"]
         == rounded(order.total_price, as_string=True)
@@ -257,7 +257,7 @@ def test_payload_add_additional_product_order(
         == item.get("priceGross", "0")
     )
     assert payload["priceVat"] == str(
-        rounded(order.total_price) - rounded(order.pretax_price)
+        rounded(order.total_price) - rounded(order.total_pretax_price)
     )
 
 

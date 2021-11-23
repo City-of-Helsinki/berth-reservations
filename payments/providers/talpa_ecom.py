@@ -189,13 +189,13 @@ class TalpaEComProvider(PaymentProvider):
 
         for order_line in order_lines:
             with override(language):
-                product_name = order_line.product.name
+                product_name = str(order_line.product.name)
             self.payload_add_to_items(payload, order_line, area, product_name, [])
 
-        payload["priceNet"] = rounded(order.pretax_price, as_string=True)
+        payload["priceNet"] = rounded(order.total_pretax_price, as_string=True)
         payload["priceTotal"] = rounded(order.total_price, as_string=True)
         payload["priceVat"] = str(
-            rounded(order.total_price) - rounded(order.pretax_price)
+            rounded(order.total_price) - rounded(order.total_pretax_price)
         )
 
     def payload_add_to_items(
@@ -212,7 +212,7 @@ class TalpaEComProvider(PaymentProvider):
             {
                 "productId": resolve_product_talpa_ecom_id(product, area),
                 "quantity": 1,
-                "productName": product_name,
+                "productName": str(product_name),
                 "unit": "pcs",
                 "rowPriceNet": rounded(item.pretax_price, as_string=True),
                 "rowPriceVat": str(rounded(item.price) - rounded(item.pretax_price)),
@@ -226,7 +226,7 @@ class TalpaEComProvider(PaymentProvider):
                 "priceNet": rounded(item.pretax_price, as_string=True),
                 "priceVat": str(rounded(item.price) - rounded(item.pretax_price)),
                 "priceGross": rounded(item.price, as_string=True),
-                "meta": meta or [],
+                "meta": meta.copy() or [],
             },
         )
 
@@ -298,7 +298,7 @@ class TalpaEComProvider(PaymentProvider):
             meta_fields.append(
                 {
                     "key": "placeMooring",
-                    "value": mooring_type,
+                    "value": str(mooring_type),
                     "visibleInCheckout": True,
                     "ordinal": "4",
                 }
