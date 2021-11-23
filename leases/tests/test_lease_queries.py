@@ -7,6 +7,10 @@ from dateutil.utils import today
 from freezegun import freeze_time
 
 from applications.schema import BerthApplicationNode, WinterStorageApplicationNode
+from applications.tests.factories import (
+    BerthApplicationFactory,
+    WinterStorageApplicationFactory,
+)
 from berth_reservations.tests.utils import (
     assert_not_enough_permissions,
     create_api_client,
@@ -83,9 +87,10 @@ query GetBerthLeases {
     ["berth_services", "berth_handler", "berth_supervisor"],
     indirect=True,
 )
-def test_query_berth_leases(api_client, berth_lease, berth_application):
-    berth_application.customer = berth_lease.customer
-    berth_application.save()
+def test_query_berth_leases(api_client, berth_lease):
+    berth_application = BerthApplicationFactory(
+        customer=berth_lease.customer, boat=berth_lease.boat
+    )
     berth_lease.application = berth_application
     berth_lease.save()
 
@@ -171,11 +176,12 @@ query GetBerthLease {
     ["berth_services", "berth_handler", "berth_supervisor"],
     indirect=True,
 )
-def test_query_berth_lease(api_client, berth_lease, berth_application):
+def test_query_berth_lease(api_client, berth_lease):
     berth_lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
 
-    berth_application.customer = berth_lease.customer
-    berth_application.save()
+    berth_application = BerthApplicationFactory(
+        customer=berth_lease.customer, boat=berth_lease.boat
+    )
     berth_lease.contract = BerthContractFactory()
     berth_lease.contract.save()
     berth_lease.application = berth_application
@@ -379,7 +385,7 @@ query GetWinterStorageLeases {
     indirect=True,
 )
 @pytest.mark.parametrize("place", [True, False])
-def test_query_winter_storage_leases(api_client, place, winter_storage_application):
+def test_query_winter_storage_leases(api_client, place):
     if place:
         winter_storage_lease = WinterStorageLeaseFactory(
             place=WinterStoragePlaceFactory(), section=None
@@ -389,8 +395,9 @@ def test_query_winter_storage_leases(api_client, place, winter_storage_applicati
             place=None, section=WinterStorageSectionFactory()
         )
 
-    winter_storage_application.customer = winter_storage_lease.customer
-    winter_storage_application.save()
+    winter_storage_application = WinterStorageApplicationFactory(
+        customer=winter_storage_lease.customer, boat=winter_storage_lease.boat
+    )
     winter_storage_lease.application = winter_storage_application
     winter_storage_lease.save()
 
@@ -489,15 +496,14 @@ query GetWinterStorageLease {
     ["berth_services", "berth_handler", "berth_supervisor"],
     indirect=True,
 )
-def test_query_winter_storage_lease(
-    api_client, winter_storage_lease, winter_storage_application
-):
+def test_query_winter_storage_lease(api_client, winter_storage_lease):
+    winter_storage_application = WinterStorageApplicationFactory(
+        customer=winter_storage_lease.customer, boat=winter_storage_lease.boat
+    )
     lease_id = to_global_id(WinterStorageLeaseNode, winter_storage_lease.id)
 
     winter_storage_lease.contract = WinterStorageContractFactory()
     winter_storage_lease.contract.save()
-    winter_storage_application.customer = winter_storage_lease.customer
-    winter_storage_application.save()
     winter_storage_lease.application = winter_storage_application
     winter_storage_lease.save()
 

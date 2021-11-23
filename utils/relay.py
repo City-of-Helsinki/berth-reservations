@@ -68,6 +68,8 @@ def get_node_user(node):
         node_user = node.user
     elif hasattr(node, "customer") and hasattr(node.customer, "user"):
         node_user = node.customer.user
+    elif hasattr(node, "owner") and hasattr(node.owner, "user"):
+        node_user = node.owner.user
     return node_user
 
 
@@ -145,9 +147,14 @@ def return_queryset_if_user_has_permissions(
     # If the user doesn't have the equivalent to admin permissions,
     # check if it's a customer
     if is_customer(user):
-        if customer_queryset:
+        if customer_queryset is not None:
             return customer_queryset
-        return queryset.filter(customer__user=user)
+        if hasattr(queryset.model, "customer"):
+            return queryset.filter(customer__user=user)
+        elif hasattr(queryset.model, "owner"):
+            return queryset.filter(owner__user=user)
+        else:
+            raise TypeError(f"Unsupported model {queryset.model}.")
 
     raise VenepaikkaGraphQLError(
         _("You do not have permission to perform this action.")

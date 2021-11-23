@@ -5,8 +5,6 @@ from django.utils import dateformat, formats, timezone, translation
 from django.utils.translation import gettext_lazy as _
 from xlsxwriter import Workbook
 
-from customers.models import Boat
-
 from .enums import WinterStorageMethod
 
 
@@ -230,29 +228,3 @@ def localize_datetime(dt, language=settings.LANGUAGES[0][0]):
         return dateformat.format(
             timezone.localtime(dt), formats.get_format("DATETIME_FORMAT", lang=language)
         )
-
-
-def create_or_update_boat_for_application(application) -> (Boat, bool):
-    def prop_or_none(prop):
-        value = getattr(application, prop, None)
-        if value == 0:
-            value = None
-        return value
-
-    return Boat.objects.update_or_create(
-        owner=application.customer,
-        registration_number=application.boat_registration_number,
-        defaults={
-            "boat_type_id": application.boat_type_id,
-            "length": application.boat_length,
-            "width": application.boat_width,
-            "registration_number": getattr(application, "boat_registration_number", ""),
-            "name": getattr(application, "boat_name", ""),
-            "model": getattr(application, "boat_model", ""),
-            "draught": prop_or_none("boat_draught"),
-            "weight": prop_or_none("boat_weight"),
-            "propulsion": getattr(application, "boat_propulsion", ""),
-            "hull_material": getattr(application, "boat_hull_material", ""),
-            "intended_use": getattr(application, "boat_intended_use", ""),
-        },
-    )

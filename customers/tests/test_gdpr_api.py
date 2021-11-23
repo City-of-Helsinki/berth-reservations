@@ -113,12 +113,12 @@ def test_get_full_profile_information_from_gdpr_api(
 ):
     customer_profile = CustomerProfileFactory()
     boat = BoatFactory(owner=customer_profile)
-    berth_application = BerthApplicationFactory(customer=customer_profile)
+    berth_application = BerthApplicationFactory(customer=customer_profile, boat=boat)
     berth_lease = BerthLeaseFactory(
         customer=customer_profile, boat=boat, status=LeaseStatus.PAID
     )
     winter_storage_application = WinterStorageApplicationFactory(
-        customer=customer_profile
+        customer=customer_profile, boat=boat
     )
     winter_storage_lease = WinterStorageLeaseFactory(
         customer=customer_profile, boat=boat
@@ -226,20 +226,9 @@ def test_get_full_profile_information_from_gdpr_api(
                             "value": berth_application.company_name,
                         },
                         {"key": "BUSINESS_ID", "value": berth_application.business_id},
-                        {"key": "BOAT_TYPE", "value": berth_application.boat_type.name},
                         {
-                            "key": "BOAT_REGISTRATION_NUMBER",
-                            "value": berth_application.boat_registration_number,
-                        },
-                        {"key": "BOAT_NAME", "value": berth_application.boat_name},
-                        {"key": "BOAT_MODEL", "value": berth_application.boat_model},
-                        {
-                            "key": "BOAT_LENGTH",
-                            "value": float(berth_application.boat_length),
-                        },
-                        {
-                            "key": "BOAT_WIDTH",
-                            "value": float(berth_application.boat_width),
+                            "key": "BOAT",
+                            "value": str(berth_application.boat.id),
                         },
                         {
                             "key": "ACCEPT_BOATING_NEWSLETTER",
@@ -271,25 +260,8 @@ def test_get_full_profile_information_from_gdpr_api(
                             "value": berth_application.berth_switch,
                         },
                         {
-                            "key": "BOAT_DRAUGHT",
-                            "value": berth_application.boat_draught,
-                        },
-                        {"key": "BOAT_WEIGHT", "value": berth_application.boat_weight},
-                        {
                             "key": "ACCESSIBILITY_REQUIRED",
                             "value": berth_application.accessibility_required,
-                        },
-                        {
-                            "key": "BOAT_PROPULSION",
-                            "value": berth_application.boat_propulsion,
-                        },
-                        {
-                            "key": "BOAT_HULL_MATERIAL",
-                            "value": berth_application.boat_hull_material,
-                        },
-                        {
-                            "key": "BOAT_INTENDED_USE",
-                            "value": berth_application.boat_intended_use,
                         },
                         {
                             "key": "RENTING_PERIOD",
@@ -297,14 +269,6 @@ def test_get_full_profile_information_from_gdpr_api(
                         },
                         {"key": "RENT_FROM", "value": berth_application.rent_from},
                         {"key": "RENT_TILL", "value": berth_application.rent_till},
-                        {
-                            "key": "BOAT_IS_INSPECTED",
-                            "value": berth_application.boat_is_inspected,
-                        },
-                        {
-                            "key": "BOAT_IS_INSURED",
-                            "value": berth_application.boat_is_insured,
-                        },
                         {
                             "key": "AGREE_TO_TERMS",
                             "value": berth_application.agree_to_terms,
@@ -379,14 +343,23 @@ def test_get_full_profile_information_from_gdpr_api(
                     "key": "BOAT",
                     "children": [
                         {"key": "ID", "value": str(boat.id)},
+                        {"key": "BOAT_TYPE", "value": boat.boat_type.name},
                         {"key": "CERTIFICATES", "children": []},
                         {
                             "key": "REGISTRATION_NUMBER",
                             "value": boat.registration_number,
                         },
+                        {"key": "NAME", "value": boat.name},
+                        {"key": "MODEL", "value": boat.model},
                         {"key": "LENGTH", "value": float(boat.length)},
                         {"key": "WIDTH", "value": float(boat.width)},
                         {"key": "DRAUGHT", "value": boat.draught},
+                        {"key": "WEIGHT", "value": boat.weight},
+                        {"key": "PROPULSION", "value": boat.propulsion},
+                        {"key": "HULL_MATERIAL", "value": boat.hull_material},
+                        {"key": "INTENDED_USE", "value": boat.intended_use},
+                        {"key": "IS_INSPECTED", "value": boat.is_inspected},
+                        {"key": "IS_INSURED", "value": boat.is_insured},
                     ],
                 }
             ],
@@ -585,19 +558,8 @@ def test_get_full_profile_information_from_gdpr_api(
                         {"key": "COMPANY_NAME", "value": ""},
                         {"key": "BUSINESS_ID", "value": ""},
                         {
-                            "key": "BOAT_TYPE",
-                            "value": winter_storage_application.boat_type.name,
-                        },
-                        {"key": "BOAT_REGISTRATION_NUMBER", "value": ""},
-                        {"key": "BOAT_NAME", "value": ""},
-                        {"key": "BOAT_MODEL", "value": ""},
-                        {
-                            "key": "BOAT_LENGTH",
-                            "value": float(winter_storage_application.boat_length),
-                        },
-                        {
-                            "key": "BOAT_WIDTH",
-                            "value": float(winter_storage_application.boat_width),
+                            "key": "BOAT",
+                            "value": str(winter_storage_application.boat.id),
                         },
                         {"key": "ACCEPT_BOATING_NEWSLETTER", "value": False},
                         {"key": "ACCEPT_FITNESS_NEWS", "value": False},

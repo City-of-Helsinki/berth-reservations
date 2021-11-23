@@ -1,4 +1,3 @@
-import datetime
 import random
 import uuid
 from unittest import mock
@@ -1529,13 +1528,13 @@ def test_cancel_order(
     )
     assert (
         mail.outbox[0].body
-        == f"{ order.order_number } {format_date(datetime.date.today(), locale='fi')}"
+        == f"{ order.order_number } {format_date(now().date(), locale='fi')}"
     )
     assert mail.outbox[0].to == [order.lease.application.email]
 
     assert mail.outbox[0].alternatives == [
         (
-            f"<b>{ order.order_number } {format_date(datetime.date.today(), locale='fi')}</b>",
+            f"<b>{ order.order_number } {format_date(now().date(), locale='fi')}</b>",
             "text/html",
         )
     ]

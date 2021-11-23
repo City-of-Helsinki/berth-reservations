@@ -1,8 +1,8 @@
 import factory.fuzzy
 
+from customers.tests.factories import BoatFactory
 from resources.tests.factories import (
     BerthFactory,
-    BoatTypeFactory,
     HarborFactory,
     WinterStorageAreaFactory,
 )
@@ -23,13 +23,12 @@ class BaseApplicationFactory(factory.django.DjangoModelFactory):
     email = factory.Sequence(
         lambda n: "application{}@example.org".format(n)
     )  # example.com is not valid
-    boat_type = factory.SubFactory(BoatTypeFactory)
-    boat_length = factory.fuzzy.FuzzyDecimal(0.1, 100.00, 2)
-    boat_width = factory.fuzzy.FuzzyDecimal(0.1, 100.00, 2)
     phone_number = factory.Faker("phone_number")
     address = factory.Faker("address")
     zip_code = factory.Faker("zipcode")
     municipality = factory.Faker("word")
+    customer = None  # required by the SelfAttribute below
+    boat = factory.SubFactory(BoatFactory, owner=factory.SelfAttribute("..customer"))
 
 
 class BerthApplicationFactory(BaseApplicationFactory):

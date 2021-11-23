@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from freezegun import freeze_time
 
 from applications.enums import ApplicationStatus
+from applications.tests.factories import BerthApplicationFactory
 from leases.enums import LeaseStatus
 from payments.enums import OrderStatus
 from payments.models import Order
@@ -17,8 +18,7 @@ def test_expire_too_old_unpaid_orders(berth_lease, berth_application):
     # VEN-783:
     # The due date should only be editable up to 7 days after it has expired.
     # Therefore invalidated orders should be expired when due date + 7 days have gone.
-    berth_application.customer = berth_lease.customer
-    berth_application.save()
+    berth_application = BerthApplicationFactory(customer=berth_lease.customer)
 
     berth_lease.application = berth_application
     berth_lease.save()

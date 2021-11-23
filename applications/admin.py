@@ -142,14 +142,7 @@ class BerthApplicationAdmin(admin.ModelAdmin):
             _("Main boat information"),
             {
                 "fields": [
-                    "boat_type",
-                    "boat_registration_number",
-                    "boat_name",
-                    "boat_model",
-                    "boat_length",
-                    "boat_width",
-                    "boat_draught",
-                    "boat_weight",
+                    "boat",
                     "accessibility_required",
                 ]
             },
@@ -158,14 +151,9 @@ class BerthApplicationAdmin(admin.ModelAdmin):
             _("Large vessel information"),
             {
                 "fields": [
-                    "boat_propulsion",
-                    "boat_hull_material",
-                    "boat_intended_use",
                     "renting_period",
                     "rent_from",
                     "rent_till",
-                    "boat_is_inspected",
-                    "boat_is_insured",
                     "agree_to_terms",
                 ]
             },
@@ -203,14 +191,13 @@ class BerthApplicationAdmin(admin.ModelAdmin):
         "application_type",
         "status",
     )
-    autocomplete_fields = ("customer",)
     list_filter = (
         ApplicationTypeFilter,
         "status",
         "priority",
     )
     search_fields = ("id", "first_name", "last_name")
-    autocomplete_fields = ("customer",)
+    autocomplete_fields = ("customer", "boat")
     actions = ["export_applications", "resend_application_confirmation"]
 
     def application_type(self, obj):
@@ -345,12 +332,7 @@ class WinterStorageApplicationAdmin(admin.ModelAdmin):
             _("Main boat information"),
             {
                 "fields": [
-                    "boat_type",
-                    "boat_registration_number",
-                    "boat_name",
-                    "boat_model",
-                    "boat_length",
-                    "boat_width",
+                    "boat",
                 ]
             },
         ),
@@ -377,7 +359,7 @@ class WinterStorageApplicationAdmin(admin.ModelAdmin):
         "area_type",
         "status",
     )
-    autocomplete_fields = ("customer",)
+    autocomplete_fields = ("customer", "boat")
     list_filter = ("area_type", "status", "priority")
     actions = ["export_applications", "resend_application_confirmation"]
     search_fields = ("id", "first_name", "last_name")

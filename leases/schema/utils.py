@@ -2,7 +2,6 @@ from typing import Optional
 
 from django.utils.translation import gettext_lazy as _
 
-from applications.utils import create_or_update_boat_for_application
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.models import Boat
 from utils.relay import get_node_from_global_id, to_global_id
@@ -37,5 +36,5 @@ def lookup_or_create_boat(info, input: dict) -> Optional[Boat]:
                 _("Boat does not belong to the same customer as the Application")
             )
     elif application := input.get("application"):
-        boat, _created = create_or_update_boat_for_application(application)
+        boat = application.boat
     return boat

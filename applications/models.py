@@ -1,16 +1,13 @@
-from decimal import Decimal
-
 from babel.dates import format_date
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from helsinki_gdpr.models import SerializableMixin
 from parler.models import TranslatableModel, TranslatedFields
 
-from customers.models import CustomerProfile
-from resources.models import Berth, BoatType, Harbor, WinterStorageArea
+from customers.models import Boat, CustomerProfile
+from resources.models import Berth, Harbor, WinterStorageArea
 from utils.models import TimeStampedModel, UUIDModel
 
 from .enums import (
@@ -126,35 +123,7 @@ class BaseApplication(models.Model):
         verbose_name=_("business ID"), max_length=64, blank=True
     )
 
-    # General boat info
-    boat_type = models.ForeignKey(
-        BoatType,
-        verbose_name=_("boat type"),
-        related_name="+",
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-    )
-    boat_registration_number = models.CharField(
-        verbose_name=_("boat registration number"), max_length=64, blank=True
-    )
-    boat_name = models.CharField(verbose_name=_("boat name"), max_length=64, blank=True)
-    boat_model = models.CharField(
-        verbose_name=_("boat model"), max_length=64, blank=True
-    )
-    boat_length = models.DecimalField(
-        verbose_name=_("boat length"),
-        decimal_places=2,
-        max_digits=5,
-        validators=[MinValueValidator(Decimal("0.01"))],
-    )
-    boat_width = models.DecimalField(
-        verbose_name=_("boat width"),
-        decimal_places=2,
-        max_digits=5,
-        validators=[MinValueValidator(Decimal("0.01"))],
-    )
-
+    boat = models.ForeignKey(Boat, verbose_name=_("boat"), on_delete=models.PROTECT)
     accept_boating_newsletter = models.BooleanField(
         verbose_name=_("accept boating newsletter"), default=False
     )
@@ -174,6 +143,30 @@ class BaseApplication(models.Model):
 
     application_code = models.TextField(verbose_name=_("application code"), blank=True)
 
+    @property
+    def boat_type(self):
+        return self.boat.boat_type
+
+    @property
+    def boat_registration_number(self):
+        return self.boat.registration_number
+
+    @property
+    def boat_name(self):
+        return self.boat.name
+
+    @property
+    def boat_model(self):
+        return self.boat.model
+
+    @property
+    def boat_length(self):
+        return self.boat.length
+
+    @property
+    def boat_width(self):
+        return self.boat.width
+
     class Meta:
         abstract = True
         ordering = ("-priority", "created_at")
@@ -183,6 +176,12 @@ class BaseApplication(models.Model):
 
     def __str__(self):
         return "{}: {} {}".format(self.pk, self.first_name, self.last_name)
+
+    def clean(self):
+        if self.customer and self.boat.owner != self.customer:
+            raise ValidationError(
+                _("The boat should belong to the customer of the application")
+            )
 
 
 class BaseApplicationChange(TimeStampedModel, UUIDModel):
@@ -250,55 +249,47 @@ class BerthApplication(BaseApplication, SerializableMixin):
         null=True,
         blank=True,
     )
-
-    # Extra boat dimensions
-    boat_draught = models.DecimalField(
-        verbose_name=_("boat draught"),
-        decimal_places=2,
-        max_digits=5,
-        null=True,
-        blank=True,
-        validators=[MinValueValidator(Decimal("0.01"))],
-    )
-    boat_weight = models.DecimalField(
-        verbose_name=_("boat weight"),
-        decimal_places=2,
-        max_digits=10,
-        null=True,
-        blank=True,
-        validators=[MinValueValidator(Decimal("0.01"))],
-    )
-
     accessibility_required = models.BooleanField(
         verbose_name=_("accessibility required"), default=False
-    )
-
-    # Large vessel specific info (if applicable)
-    boat_propulsion = models.CharField(
-        verbose_name=_("boat propulsion"), max_length=64, blank=True
-    )
-    boat_hull_material = models.CharField(
-        verbose_name=_("boat hull material"), max_length=64, blank=True
-    )
-    boat_intended_use = models.CharField(
-        verbose_name=_("boat intended use"), max_length=150, blank=True
     )
     renting_period = models.CharField(
         verbose_name=_("renting period"), max_length=64, blank=True
     )
     rent_from = models.CharField(verbose_name=_("rent from"), max_length=64, blank=True)
     rent_till = models.CharField(verbose_name=_("rent till"), max_length=64, blank=True)
-    boat_is_inspected = models.BooleanField(
-        verbose_name=_("boat is inspected"), null=True, blank=True
-    )
-    boat_is_insured = models.BooleanField(
-        verbose_name=_("boat is insured"), null=True, blank=True
-    )
     agree_to_terms = models.BooleanField(
         verbose_name=_("agree to terms"), null=True, blank=True
     )
 
     objects = BerthApplicationManager()
+
+    @property
+    def boat_draught(self):
+        return self.boat.draught
+
+    @property
+    def boat_weight(self):
+        return self.boat.weight
+
+    @property
+    def boat_propulsion(self):
+        return self.boat.propulsion
+
+    @property
+    def boat_hull_material(self):
+        return self.boat.hull_material
+
+    @property
+    def boat_intended_use(self):
+        return self.boat.intended_use
+
+    @property
+    def boat_is_inspected(self):
+        return self.boat.is_inspected
+
+    @property
+    def boat_is_insured(self):
+        return self.boat.is_insured
 
     def get_notification_context(self):
         return {
@@ -362,12 +353,7 @@ class BerthApplication(BaseApplication, SerializableMixin):
             "municipality",
             "company_name",
             "business_id",
-            "boat_type",
-            "boat_registration_number",
-            "boat_name",
-            "boat_model",
-            "boat_length",
-            "boat_width",
+            "boat_id",
             "accept_boating_newsletter",
             "accept_fitness_news",
             "accept_library_news",
@@ -375,17 +361,10 @@ class BerthApplication(BaseApplication, SerializableMixin):
             "information_accuracy_confirmed",
             "application_code",
             "berth_switch",
-            "boat_draught",
-            "boat_weight",
             "accessibility_required",
-            "boat_propulsion",
-            "boat_hull_material",
-            "boat_intended_use",
             "renting_period",
             "rent_from",
             "rent_till",
-            "boat_is_inspected",
-            "boat_is_insured",
             "agree_to_terms",
         ]
 
@@ -419,13 +398,7 @@ class BerthApplication(BaseApplication, SerializableMixin):
             "municipality",
             "company_name",
             "business_id",
-            "boat_registration_number",
-            "boat_name",
-            "boat_model",
             "application_code",
-            "boat_propulsion",
-            "boat_hull_material",
-            "boat_intended_use",
             "renting_period",
             "rent_from",
             "rent_till",
@@ -437,12 +410,11 @@ class BerthApplication(BaseApplication, SerializableMixin):
         self.create_change_entry()
 
         # Ensure clean is always ran
-        # FIXME: exclude decimal fields for now, as GQL API uses floats for those
-        #  which does not work well with Django's validation for DecimalField
-        self.full_clean(exclude=["boat_length", "boat_width", "boat_draught"])
+        self.full_clean()
         super().save(*args, **kwargs)
 
     def clean(self):
+        super().clean()
         self._validate_status()
 
     serialize_fields = (
@@ -459,12 +431,7 @@ class BerthApplication(BaseApplication, SerializableMixin):
         {"name": "municipality"},
         {"name": "company_name"},
         {"name": "business_id"},
-        {"name": "boat_type", "accessor": lambda x: x.name if x else None},
-        {"name": "boat_registration_number"},
-        {"name": "boat_name"},
-        {"name": "boat_model"},
-        {"name": "boat_length"},
-        {"name": "boat_width"},
+        {"name": "boat", "accessor": lambda x: x.id},
         {"name": "accept_boating_newsletter"},
         {"name": "accept_fitness_news"},
         {"name": "accept_library_news"},
@@ -476,17 +443,10 @@ class BerthApplication(BaseApplication, SerializableMixin):
             "accessor": lambda x: x.serialize() if x else None,
         },
         {"name": "berth_switch", "accessor": lambda x: x.serialize() if x else None},
-        {"name": "boat_draught"},
-        {"name": "boat_weight"},
         {"name": "accessibility_required"},
-        {"name": "boat_propulsion"},
-        {"name": "boat_hull_material"},
-        {"name": "boat_intended_use"},
         {"name": "renting_period"},
         {"name": "rent_from"},
         {"name": "rent_till"},
-        {"name": "boat_is_inspected"},
-        {"name": "boat_is_insured"},
         {"name": "agree_to_terms"},
     )
 
@@ -497,6 +457,7 @@ class WinterStorageApplication(BaseApplication, SerializableMixin):
         verbose_name=_("application area type"),
         max_length=30,
         null=True,
+        blank=True,
     )
 
     customer = models.ForeignKey(
@@ -538,11 +499,7 @@ class WinterStorageApplication(BaseApplication, SerializableMixin):
             "municipality",
             "company_name",
             "business_id",
-            "boat_registration_number",
-            "boat_name",
-            "boat_model",
-            "boat_length",
-            "boat_width",
+            "boat_id",
             "accept_boating_newsletter",
             "accept_fitness_news",
             "accept_library_news",
@@ -583,9 +540,6 @@ class WinterStorageApplication(BaseApplication, SerializableMixin):
             "municipality",
             "company_name",
             "business_id",
-            "boat_registration_number",
-            "boat_name",
-            "boat_model",
             "application_code",
             "trailer_registration_number",
         ]
@@ -594,6 +548,9 @@ class WinterStorageApplication(BaseApplication, SerializableMixin):
                 setattr(self, field, field_value.strip())
 
         self.create_change_entry()
+
+        # Ensure clean is always ran
+        self.full_clean()
 
         super().save(*args, **kwargs)
 
@@ -633,12 +590,7 @@ class WinterStorageApplication(BaseApplication, SerializableMixin):
         {"name": "municipality"},
         {"name": "company_name"},
         {"name": "business_id"},
-        {"name": "boat_type", "accessor": lambda x: x.name if x else None},
-        {"name": "boat_registration_number"},
-        {"name": "boat_name"},
-        {"name": "boat_model"},
-        {"name": "boat_length"},
-        {"name": "boat_width"},
+        {"name": "boat", "accessor": lambda x: x.id},
         {"name": "accept_boating_newsletter"},
         {"name": "accept_fitness_news"},
         {"name": "accept_library_news"},

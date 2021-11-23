@@ -104,10 +104,10 @@ def test_query_extended_profile_nodes(api_client, customer_profile):
     customer_profile_id = to_global_id(ProfileNode, customer_profile.id)
 
     boat = BoatFactory(owner=customer_profile)
-    berth_application = BerthApplicationFactory(customer=customer_profile)
+    berth_application = BerthApplicationFactory(customer=customer_profile, boat=boat)
     berth_lease = BerthLeaseFactory(customer=customer_profile, boat=boat)
     winter_storage_application = WinterStorageApplicationFactory(
-        customer=customer_profile
+        customer=customer_profile, boat=boat
     )
     winter_storage_lease = WinterStorageLeaseFactory(
         customer=customer_profile, boat=boat
@@ -302,19 +302,24 @@ query GetBerthProfiles {
     indirect=True,
 )
 def test_query_berth_profiles(api_client, customer_profile):
-    berth_application = BerthApplicationFactory(customer=customer_profile)
     boat = BoatFactory(owner=customer_profile)
+    berth_application = BerthApplicationFactory(customer=customer_profile, boat=boat)
     berth_lease = BerthLeaseFactory(
         customer=customer_profile, boat=boat, status=LeaseStatus.PAID
     )
     winter_storage_application = WinterStorageApplicationFactory(
-        customer=customer_profile
+        customer=customer_profile, boat=boat
     )
     winter_storage_lease = WinterStorageLeaseFactory(
         customer=customer_profile, boat=boat
     )
-    order = OrderFactory(lease=berth_lease)
-    offer = BerthSwitchOfferFactory(customer=customer_profile, lease=berth_lease)
+    order = OrderFactory(lease=berth_lease, customer=customer_profile)
+    offer = BerthSwitchOfferFactory(
+        customer=customer_profile,
+        lease=berth_lease,
+        application__customer=customer_profile,
+        application__boat=boat,
+    )
     organization = OrganizationFactory(customer=customer_profile)
 
     executed = api_client.execute(QUERY_BERTH_PROFILES)
@@ -322,6 +327,7 @@ def test_query_berth_profiles(api_client, customer_profile):
     customer_id = to_global_id(ProfileNode, customer_profile.id)
     boat_id = to_global_id(BoatNode, boat.id)
     berth_application_id = to_global_id(BerthApplicationNode, berth_application.id)
+    offer_application_id = to_global_id(BerthApplicationNode, offer.application.id)
     berth_lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
     winter_storage_application_id = to_global_id(
         WinterStorageApplicationNode, winter_storage_application.id
@@ -341,7 +347,12 @@ def test_query_berth_profiles(api_client, customer_profile):
             "name": organization.name,
         },
         "boats": {"edges": [{"node": {"id": boat_id}}]},
-        "berthApplications": {"edges": [{"node": {"id": berth_application_id}}]},
+        "berthApplications": {
+            "edges": [
+                {"node": {"id": berth_application_id}},
+                {"node": {"id": offer_application_id}},
+            ]
+        },
         "berthLeases": {"edges": [{"node": {"id": berth_lease_id}}]},
         "winterStorageApplications": {
             "edges": [{"node": {"id": winter_storage_application_id}}]
@@ -529,12 +540,12 @@ def test_query_berth_profile(api_client, customer_profile):
     berth_profile_id = to_global_id(ProfileNode, customer_profile.id)
 
     boat = BoatFactory(owner=customer_profile)
-    berth_application = BerthApplicationFactory(customer=customer_profile)
+    berth_application = BerthApplicationFactory(customer=customer_profile, boat=boat)
     berth_lease = BerthLeaseFactory(
         customer=customer_profile, boat=boat, status=LeaseStatus.PAID
     )
     winter_storage_application = WinterStorageApplicationFactory(
-        customer=customer_profile
+        customer=customer_profile, boat=boat
     )
     winter_storage_lease = WinterStorageLeaseFactory(
         customer=customer_profile, boat=boat
@@ -585,12 +596,12 @@ def test_query_berth_profile_self_user(customer_profile):
     berth_profile_id = to_global_id(ProfileNode, customer_profile.id)
 
     boat = BoatFactory(owner=customer_profile)
-    berth_application = BerthApplicationFactory(customer=customer_profile)
+    berth_application = BerthApplicationFactory(customer=customer_profile, boat=boat)
     berth_lease = BerthLeaseFactory(
         customer=customer_profile, boat=boat, status=LeaseStatus.PAID
     )
     winter_storage_application = WinterStorageApplicationFactory(
-        customer=customer_profile
+        customer=customer_profile, boat=boat
     )
     winter_storage_lease = WinterStorageLeaseFactory(
         customer=customer_profile, boat=boat
