@@ -357,6 +357,11 @@ def test_payload_add_place_products(
 def test_payload_add_customer_order_with_application(
     talpa_ecom_payment_provider: TalpaEComProvider, order: Order
 ):
+    order.customer_first_name = None
+    order.customer_last_name = None
+    order.customer_email = None
+    order.save()
+
     payload = {}
     talpa_ecom_payment_provider.payload_add_customer(payload, order)
     application = order.lease.application

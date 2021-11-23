@@ -218,7 +218,10 @@ class TalpaEComProvider(PaymentProvider):
                 "rowPriceVat": str(rounded(item.price) - rounded(item.pretax_price)),
                 "rowPriceTotal": rounded(item.price, as_string=True),
                 "vatPercentage": rounded(
-                    item.tax_percentage, decimals=0, round_to_nearest=1
+                    item.tax_percentage,
+                    decimals=0,
+                    round_to_nearest=1,
+                    as_string=True,
                 ),
                 "priceNet": rounded(item.pretax_price, as_string=True),
                 "priceVat": str(rounded(item.price) - rounded(item.pretax_price)),
@@ -304,7 +307,19 @@ class TalpaEComProvider(PaymentProvider):
         self.payload_add_to_items(payload, order, area, product_name, meta_fields)
 
     def payload_add_customer(self, payload: dict, order: Order):
-        if (
+        # Order customer information will have higher priority since it's fetched from
+        # Profile everytime
+        customer = {}
+
+        if order.has_customer_information:
+            customer = {
+                "firstName": order.customer_first_name.capitalize(),
+                "lastName": order.customer_last_name.capitalize(),
+                "email": order.customer_email.strip(),
+                "phone": order.customer_phone.strip(),
+            }
+
+        elif (
             hasattr(order, "lease")
             and order.lease is not None
             and order.lease.application
@@ -315,13 +330,6 @@ class TalpaEComProvider(PaymentProvider):
                 "lastName": application.last_name.capitalize(),
                 "email": application.email.strip(),
                 "phone": application.phone_number.strip(),
-            }
-        else:
-            customer = {
-                "firstName": order.customer_first_name.capitalize(),
-                "lastName": order.customer_last_name.capitalize(),
-                "email": order.customer_email.strip(),
-                "phone": order.customer_phone.strip(),
             }
 
         payload["customer"] = customer
