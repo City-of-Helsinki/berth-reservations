@@ -631,6 +631,16 @@ class Order(UUIDModel, TimeStampedModel, SerializableMixin):
     def total_tax_value(self):
         return self.total_price - self.total_pretax_price
 
+    @property
+    def has_customer_information(self):
+        return all(
+            [
+                self.customer_first_name,
+                self.customer_last_name,
+                self.customer_email,
+            ]
+        )
+
     def _check_valid_products(self) -> None:
         if self.product and not isinstance(
             self.product, (BerthProduct, WinterStorageProduct)
