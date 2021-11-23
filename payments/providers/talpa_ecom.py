@@ -1,4 +1,5 @@
 import logging
+import re
 from dataclasses import dataclass
 from typing import Optional, Union
 
@@ -280,7 +281,7 @@ class TalpaEComProvider(PaymentProvider):
             meta_fields.append(
                 {
                     "key": "placeWidth",
-                    "value": str(width),
+                    "value": f"{_('width (m)').capitalize()}: {width}",
                     "visibleInCheckout": True,
                     "ordinal": "2",
                 }
@@ -289,7 +290,7 @@ class TalpaEComProvider(PaymentProvider):
             meta_fields.append(
                 {
                     "key": "placeLength",
-                    "value": str(length),
+                    "value": f"{_('length (m)').capitalize()}: {length}",
                     "visibleInCheckout": True,
                     "ordinal": "3",
                 }
@@ -298,7 +299,7 @@ class TalpaEComProvider(PaymentProvider):
             meta_fields.append(
                 {
                     "key": "placeMooring",
-                    "value": str(mooring_type),
+                    "value": f"{_('Mooring')}: {mooring_type}",
                     "visibleInCheckout": True,
                     "ordinal": "4",
                 }
@@ -310,14 +311,16 @@ class TalpaEComProvider(PaymentProvider):
         # Order customer information will have higher priority since it's fetched from
         # Profile everytime
         customer = {}
+        phone = ""
+        phone_regex = re.compile(r"^\+(?:[0-9] ?){6,14}[0-9]$")
 
         if order.has_customer_information:
             customer = {
                 "firstName": order.customer_first_name.capitalize(),
                 "lastName": order.customer_last_name.capitalize(),
                 "email": order.customer_email.strip(),
-                "phone": order.customer_phone.strip(),
             }
+            phone = order.customer_phone.strip()
 
         elif (
             hasattr(order, "lease")
@@ -329,8 +332,14 @@ class TalpaEComProvider(PaymentProvider):
                 "firstName": application.first_name.capitalize(),
                 "lastName": application.last_name.capitalize(),
                 "email": application.email.strip(),
-                "phone": application.phone_number.strip(),
             }
+            phone = application.phone_number.strip()
+
+        # Talpa only supports phones with a specific format, so if the phone is not in a valid
+        # format, to avoid errors from the API, we skip it from the order and let the customer
+        # enter it manually on the Talpa Checkout page.
+        if phone_regex.match(phone):
+            customer["phone"] = phone
 
         payload["customer"] = customer
 
