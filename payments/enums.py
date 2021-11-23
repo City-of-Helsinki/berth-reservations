@@ -125,3 +125,8 @@ class PricingCategory(IntegerChoices):
     DINGHY = 1, _("Dinghy places")
     TRAILER = 2, _("Trailer places")
     VASIKKASAARI = 3, _("Vasikkasaari berths")
+
+
+class TalpaProductType(TextChoices):
+    BERTH = "berth", _("Berth")
+    WINTER = "winter", _("Winter storage or storage on ice")

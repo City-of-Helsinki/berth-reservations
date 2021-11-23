@@ -1,7 +1,7 @@
 import logging
 from datetime import date, timedelta
 from decimal import Decimal
-from typing import Union
+from typing import Optional, Union
 
 from dateutil.utils import today
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -23,7 +23,8 @@ from leases.enums import LeaseStatus
 from leases.models import BerthLease, WinterStorageLease
 from leases.stickers import get_next_sticker_number
 from leases.utils import calculate_season_start_date
-from resources.models import Berth
+from resources.enums import AreaRegion
+from resources.models import AbstractArea, Berth
 from utils.models import TimeStampedModel, UUIDModel
 from utils.numbers import rounded as round_to_nearest, rounded as rounded_decimal
 
@@ -39,8 +40,9 @@ from .enums import (
     PriceUnits,
     PricingCategory,
     ProductServiceType,
+    TalpaProductType,
 )
-from .exceptions import OrderStatusTransitionError
+from .exceptions import OrderStatusTransitionError, TalpaProductAccountingNotFoundError
 from .utils import (
     calculate_organization_price,
     calculate_organization_tax_percentage,
@@ -296,6 +298,73 @@ class AdditionalProduct(AbstractBaseProduct, SerializableMixin):
     )
 
 
+class TalpaProductAccountingManager(models.Manager):
+    def get_product_accounting_for_product(
+        self,
+        product: Union[AdditionalProduct, BerthProduct, WinterStorageProduct],
+        area: Optional[AbstractArea],
+    ) -> "TalpaProductAccounting":
+        """
+        Talpa ecom requirements for accounting of products defined in Talpa:
+        * Orders in the EAST/WEST regions need to be for separate products
+        * Orders for winter storage (including storage on ice) and berths need to be separate products
+        """
+
+        if isinstance(product, AdditionalProduct):
+            # Only storage on ice is supported
+            if product.service != ProductServiceType.STORAGE_ON_ICE:
+                raise TalpaProductAccountingNotFoundError(
+                    _("Only STORAGE_ON_ICE additional product is supported")
+                )
+            product_type = TalpaProductType.WINTER
+
+        elif isinstance(product, WinterStorageProduct):
+            product_type = TalpaProductType.WINTER
+        elif isinstance(product, BerthProduct):
+            product_type = TalpaProductType.BERTH
+        else:
+            raise TalpaProductAccountingNotFoundError(
+                _("TalpaProductAccounting parameters for order not found")
+            )
+
+        region = getattr(area, "region", None)
+        if region is None:
+            raise TalpaProductAccountingNotFoundError(
+                _("Region for order could not be determined")
+            )
+        if product_type is None:
+            raise TalpaProductAccountingNotFoundError(
+                _("Talpa product type for order could not be determined")
+            )
+        return self.get(region=region, product_type=product_type)
+
+
+class TalpaProductAccounting(UUIDModel):
+    region = models.CharField(
+        choices=AreaRegion.choices,
+        verbose_name=_("area region"),
+        max_length=32,
+    )
+    talpa_ecom_product_id = models.UUIDField(verbose_name=_("talpa eCom product ID"))
+    talpa_ecom_accounting_id = models.UUIDField(
+        verbose_name=_("talpa eCom accounting mapping ID")
+    )
+    product_type = models.CharField(
+        choices=TalpaProductType.choices,
+        verbose_name=_("talpa eCom product type"),
+        max_length=32,
+    )
+    objects = TalpaProductAccountingManager()
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["region", "product_type"],
+                name="unique_accounting_region_and_product_type",
+            ),
+        ]
+
+
 class OrderManager(SerializableMixin.SerializableManager):
     def berth_orders(self):
         product_ct = ContentType.objects.get_for_model(BerthProduct)
@@ -395,6 +464,11 @@ class Order(UUIDModel, TimeStampedModel, SerializableMixin):
         editable=False,
         db_index=True,
     )
+    talpa_ecom_id = models.UUIDField(
+        null=True,
+        blank=True,
+        verbose_name=_("talpa eCom order id"),
+    )
     order_type = models.CharField(
         choices=OrderType.choices,
         verbose_name=_("order type"),
@@ -458,6 +532,10 @@ class Order(UUIDModel, TimeStampedModel, SerializableMixin):
         related_name="lease",
     )
     _lease_object_id = models.UUIDField(null=True, blank=True, verbose_name=_("lease"))
+
+    talpa_order_id = models.UUIDField(
+        null=True, blank=True, verbose_name=_("Talpa order id")
+    )
 
     objects = OrderManager()
 
