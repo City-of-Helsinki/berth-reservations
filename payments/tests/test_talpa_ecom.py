@@ -414,7 +414,9 @@ def test_handle_notify_request_settles_order(
         "eventType": TALPA_ECOM_WEBHOOK_EVENT_PAYMENT_PAID,
         "timestamp": "2021-10-19T09:11:00.123Z",
     }
-    request = rf.post("/payments/notify/", data=payload)
+    request = rf.post(
+        "/payments/notify/", data=payload, content_type="application/json"
+    )
 
     payment_provider = create_talpa_ecom_provider(
         talpa_ecom_provider_base_config, request
@@ -458,12 +460,14 @@ def test_handle_notify_request_order_does_not_exist(
     order.save()
 
     payload = {
-        "orderId": uuid4(),
+        "orderId": str(uuid4()),
         "eventType": event_type,
         "namespace": "venepaikat",
     }
 
-    request = rf.post("/payments/notify/", data=payload)
+    request = rf.post(
+        "/payments/notify/", data=payload, content_type="application/json"
+    )
     payment_provider = create_talpa_ecom_provider(
         talpa_ecom_provider_base_config, request
     )
@@ -501,7 +505,9 @@ def test_handle_notify_request_wrong_namespace(
         "timestamp": "2021-10-19T09:11:00.123Z",
     }
 
-    request = rf.post("/payments/notify/", data=payload)
+    request = rf.post(
+        "/payments/notify/", data=payload, content_type="application/json"
+    )
     payment_provider = create_talpa_ecom_provider(
         talpa_ecom_provider_base_config, request
     )
@@ -539,7 +545,9 @@ def test_handle_notify_request_wrong_event_type(
         "timestamp": "2021-10-19T09:11:00.123Z",
     }
 
-    request = rf.post("/payments/notify/", data=payload)
+    request = rf.post(
+        "/payments/notify/", data=payload, content_type="application/json"
+    )
     payment_provider = create_talpa_ecom_provider(
         talpa_ecom_provider_base_config, request
     )
@@ -594,7 +602,9 @@ def test_handle_notify_request_wrong_payment_status(
         "timestamp": "2021-10-19T09:11:00.123Z",
     }
 
-    request = rf.post("/payments/notify/", data=payload)
+    request = rf.post(
+        "/payments/notify/", data=payload, content_type="application/json"
+    )
     payment_provider = create_talpa_ecom_provider(
         talpa_ecom_provider_base_config, request
     )
@@ -633,7 +643,9 @@ def test_handle_notify_request_order_cancelled(
         "timestamp": "2021-10-19T09:11:00.123Z",
     }
 
-    request = rf.post("/payments/notify/", data=payload)
+    request = rf.post(
+        "/payments/notify/", data=payload, content_type="application/json"
+    )
     payment_provider = create_talpa_ecom_provider(
         talpa_ecom_provider_base_config, request
     )

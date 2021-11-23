@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 from dataclasses import dataclass
@@ -108,6 +109,7 @@ class TalpaEComProvider(PaymentProvider):
             VENE_PAYMENTS_TALPA_ECOM_PAYMENT_API_URL, ""
         ).rstrip("/")
         self.url_checkout = f"{checkout_url}/{{talpa_ecom_id}}?user={{user_hash}}"
+        self.namespace = self.config.get(VENE_PAYMENTS_TALPA_ECOM_API_NAMESPACE)
 
     @staticmethod
     def get_config_template() -> dict:
@@ -374,7 +376,7 @@ class TalpaEComProvider(PaymentProvider):
 
         # We don't have to redirect anything since it's Talpa eCom Payment API calling this
         # after the payment has settled on their system not the customer being redirected after payment
-        return HttpResponse(status=204)
+        return HttpResponse(str(order), status=204)
 
     def handle_notify_request(self) -> HttpResponse:
         """Handle incoming notify request from the payment provider.
@@ -388,18 +390,25 @@ class TalpaEComProvider(PaymentProvider):
              "timestamp": "2021-10-19T09:11:00.123Z",
         }
         """
-        request = self.request
+        if self.request.content_type != "application/json":
+            return HttpResponseBadRequest(_("Invalid content type"))
+
+        data = self.request.body
+        try:
+            data = json.loads(data)
+        except Exception as e:
+            return HttpResponseBadRequest(str(e))
+
         logger.debug(
-            "Handling Talpa eCommerce notify request, params: {}.".format(request.POST)
+            "Handling Talpa eCommerce notify request, params: {}.".format(data)
         )
 
-        data = request.POST
         order_id = data.get("orderId", "")
         namespace = data.get("namespace", "")
         event_type = data.get("eventType", "")
 
-        if namespace != self.config.get("VENE_PAYMENTS_TALPA_ECOM_API_NAMESPACE"):
-            return HttpResponseBadRequest(_("Wrong namespace"))
+        if namespace != self.namespace:
+            return HttpResponseBadRequest(f"{_('Wrong namespace')}: {namespace}")
 
         if event_type not in TALPA_ECOM_WEBHOOK_EVENT_TYPES:
             return HttpResponseBadRequest(f"{_('Wrong webhook event')}: {event_type}")
