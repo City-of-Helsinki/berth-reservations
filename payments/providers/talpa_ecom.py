@@ -104,10 +104,10 @@ class TalpaEComProvider(PaymentProvider):
 
         self.url_order_experience_api = self.config.get(
             VENE_PAYMENTS_TALPA_ECOM_ORDER_API_URL, ""
-        ).rstrip("/")
+        )
         self.url_payment_experience_api = self.config.get(
             VENE_PAYMENTS_TALPA_ECOM_PAYMENT_API_URL, ""
-        ).rstrip("/")
+        )
         self.url_checkout = f"{checkout_url}/{{talpa_ecom_id}}?user={{user_hash}}"
         self.namespace = self.config.get(VENE_PAYMENTS_TALPA_ECOM_API_NAMESPACE)
 
