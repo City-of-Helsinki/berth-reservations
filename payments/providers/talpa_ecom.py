@@ -428,7 +428,7 @@ class TalpaEComProvider(PaymentProvider):
         headers = {"user": get_customer_hash(order.customer)}
 
         r = requests.get(
-            f"{self.url_payment_experience_api}/{order.talpa_ecom_id}",
+            f"{self.url_payment_experience_api.rstrip('/')}/{order.talpa_ecom_id}",
             headers=headers,
             timeout=60,
         )
