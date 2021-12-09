@@ -117,13 +117,13 @@ class TalpaEComProvider(PaymentProvider):
         return {
             VENE_PAYMENTS_TALPA_ECOM_PAYMENT_API_URL: (
                 str,
-                "https://checkout.api.hel.fi/v1/payment",
+                "https://checkout.api.hel.fi/v1/payment/",
             ),
             VENE_PAYMENTS_TALPA_ECOM_ORDER_API_URL: (
                 str,
-                "https://checkout.api.hel.fi/v1/order",
+                "https://checkout.api.hel.fi/v1/order/",
             ),
-            VENE_PAYMENTS_TALPA_ECOM_CHECKOUT_URL: (str, "https://checkout.hel.fi"),
+            VENE_PAYMENTS_TALPA_ECOM_CHECKOUT_URL: (str, "https://checkout.hel.fi/"),
             VENE_PAYMENTS_TALPA_ECOM_API_NAMESPACE: (str, "venepaikat"),
         }
 
