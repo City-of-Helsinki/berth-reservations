@@ -322,7 +322,7 @@ class TalpaEComProvider(PaymentProvider):
                 "lastName": order.customer_last_name.capitalize(),
                 "email": order.customer_email.strip(),
             }
-            phone = order.customer_phone.strip()
+            phone = (order.customer_phone or "").strip()
 
         elif (
             hasattr(order, "lease")
