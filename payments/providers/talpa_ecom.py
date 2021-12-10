@@ -117,13 +117,13 @@ class TalpaEComProvider(PaymentProvider):
         return {
             VENE_PAYMENTS_TALPA_ECOM_PAYMENT_API_URL: (
                 str,
-                "https://checkout.api.hel.fi/v1/payment",
+                "https://checkout.api.hel.fi/v1/payment/",
             ),
             VENE_PAYMENTS_TALPA_ECOM_ORDER_API_URL: (
                 str,
-                "https://checkout.api.hel.fi/v1/order",
+                "https://checkout.api.hel.fi/v1/order/",
             ),
-            VENE_PAYMENTS_TALPA_ECOM_CHECKOUT_URL: (str, "https://checkout.hel.fi"),
+            VENE_PAYMENTS_TALPA_ECOM_CHECKOUT_URL: (str, "https://checkout.hel.fi/"),
             VENE_PAYMENTS_TALPA_ECOM_API_NAMESPACE: (str, "venepaikat"),
         }
 
@@ -322,7 +322,7 @@ class TalpaEComProvider(PaymentProvider):
                 "lastName": order.customer_last_name.capitalize(),
                 "email": order.customer_email.strip(),
             }
-            phone = order.customer_phone.strip()
+            phone = (order.customer_phone or "").strip()
 
         elif (
             hasattr(order, "lease")
@@ -428,7 +428,7 @@ class TalpaEComProvider(PaymentProvider):
         headers = {"user": get_customer_hash(order.customer)}
 
         r = requests.get(
-            f"{self.url_payment_experience_api}/{order.talpa_ecom_id}",
+            f"{self.url_payment_experience_api.rstrip('/')}/{order.talpa_ecom_id}",
             headers=headers,
             timeout=60,
         )
