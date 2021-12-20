@@ -18,9 +18,9 @@
 {% if application.berth_switch %}
     <hr/>
     <h4>Vaihtohakemus: Nykyinen satama</h4>
-    <b>Satama:</b> {{ application.berth_switch.harbor.name }}<br/>
-    <b>Laiturin tunnus:</b> {{ application.berth_switch.pier or "-" }}<br/>
-    <b>Paikan numero:</b> {{ application.berth_switch.berth_number }}<br/>
+    <b>Satama:</b> {{ application.berth_switch.berth.pier.harbor.name }}<br/>
+    <b>Laiturin tunnus:</b> {{ application.berth_switch.berth.pier.identifier or "-" }}<br/>
+    <b>Paikan numero:</b> {{ application.berth_switch.berth.number }}<br/>
     <b>Erityistoive:</b> {% if application.berth_switch.reason %}{{ application.berth_switch.reason.title }}{% else %}-{% endif %}<br/>
 {% endif %}
 
