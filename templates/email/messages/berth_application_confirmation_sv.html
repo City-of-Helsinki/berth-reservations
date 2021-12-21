@@ -18,9 +18,9 @@
 {% if application.berth_switch %}
     <hr/>
     <h4>Ansökan om byte: Nuvarande platsen</h4>
-    <b>Nuvarande hamn:</b> {{ application.berth_switch.harbor.name }}<br/>
-    <b>Kajkod:</b> {{ application.berth_switch.pier or "-" }}<br/>
-    <b>Nummer:</b> {{ application.berth_switch.berth_number }}<br/>
+    <b>Nuvarande hamn:</b> {{ application.berth_switch.berth.pier.harbor.name }}<br/>
+    <b>Kajkod:</b> {{ application.berth_switch.berth.pier.identifier or "-" }}<br/>
+    <b>Nummer:</b> {{ application.berth_switch.berth.number }}<br/>
     <b>Särskilda önskemål:</b> {% if application.berth_switch.reason %}{{ application.berth_switch.reason.title }}{% else %}-{% endif %}<br/>
 {% endif %}
 

@@ -157,3 +157,9 @@ def test_reset_application_priorities():
     assert low_application.priority == ApplicationPriority.MEDIUM
     assert medium_application.priority == ApplicationPriority.MEDIUM
     assert high_application.priority == ApplicationPriority.MEDIUM
+
+
+def test_serialize_berth_switch(berth_switch_info):
+    """No exceptions when serializing the model."""
+    data = berth_switch_info.serialize()
+    assert data["key"] == "BERTHSWITCH"

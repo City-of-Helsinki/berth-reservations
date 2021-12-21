@@ -76,9 +76,7 @@ class BerthSwitch(SerializableMixin):
     )
 
     serialize_fields = (
-        {"name": "harbor", "accessor": lambda x: x.name},
-        {"name": "pier"},
-        {"name": "berth_number"},
+        {"name": "berth", "accessor": lambda x: x.serialize() if x else None},
         {"name": "reason", "accessor": lambda x: x.title if x else None},
     )
 
