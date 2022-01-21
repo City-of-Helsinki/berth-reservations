@@ -119,7 +119,7 @@ MAILER_EMAIL_BACKEND = env.str("MAILER_EMAIL_BACKEND")
 
 try:
     version = subprocess.check_output(
-        ["git", "describe"], stderr=subprocess.STDOUT
+        ["git", "describe"], text=True, stderr=subprocess.STDOUT
     ).strip()
 except Exception:
     version = "n/a"
