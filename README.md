@@ -59,6 +59,9 @@ VISMASIGN_TEST_SSN=dummy-vismasign-test-ssn
 NOTIFICATION_SERVICE_API_URL=http://fake-notification-api.example.com/v1
 NOTIFICATION_SERVICE_TOKEN=dummy-notification-token
 NOTIFICATION_SERVICE_SENDER_NAME=Hel.fi
+
+# For local Tunnistamo use
+# TOKEN_AUTH_AUTHSERVER_URL=http://tunnistamo-backend:8000/openid
 ```
 
 2. Run `docker-compose up`
