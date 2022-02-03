@@ -1,9 +1,11 @@
 import random
+from datetime import date
 
 import pytest
 from dateutil.parser import isoparse
 from freezegun import freeze_time
 
+from applications.enums import ApplicationAreaType
 from applications.schema import BerthApplicationNode, WinterStorageApplicationNode
 from applications.tests.factories import (
     BerthApplicationFactory,
@@ -19,6 +21,22 @@ from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from payments.schema.types import BerthSwitchOfferNode, OrderNode
 from payments.tests.factories import BerthSwitchOfferFactory, OrderFactory
+from resources.schema import (
+    BerthNode,
+    HarborNode,
+    PierNode,
+    WinterStorageAreaNode,
+    WinterStoragePlaceNode,
+)
+from resources.tests.factories import (
+    BerthFactory,
+    BoatTypeFactory,
+    HarborFactory,
+    PierFactory,
+    WinterStorageAreaFactory,
+    WinterStoragePlaceFactory,
+    WinterStorageSectionFactory,
+)
 from utils.relay import to_global_id
 
 from ..enums import InvoicingType, OrganizationType
@@ -742,3 +760,544 @@ def test_query_berth_profile_count(superuser_api_client):
 
     executed = superuser_api_client.execute(query)
     assert executed["data"] == {"berthProfiles": {"count": count, "totalCount": count}}
+
+
+def test_filter_profile_by_customer_groups(superuser_api_client):
+    company_profile = CustomerProfileFactory()
+    OrganizationFactory(
+        customer=company_profile, organization_type=OrganizationType.INTERNAL
+    )
+    internal_profile = CustomerProfileFactory()
+    OrganizationFactory(
+        customer=internal_profile, organization_type=OrganizationType.INTERNAL
+    )
+    private_profile = (
+        CustomerProfileFactory()
+    )  # Private customer profile, just to add noise to the filter
+    query = (
+        """
+    {
+            berthProfiles(customerGroups: [%s]) {
+                edges{
+                    node{
+                       id
+                    }
+                }
+            }
+    }
+    """
+        % "PRIVATE"
+    )
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, private_profile.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, company_profile.id) not in str(executed["data"])
+    assert to_global_id(ProfileNode, internal_profile.id) not in str(executed["data"])
+
+    query = """
+    {
+            berthProfiles(customerGroups: [%s, %s]) {
+                edges{
+                    node{
+                       id
+                    }
+                }
+            }
+    }
+    """ % (
+        OrganizationType.INTERNAL.upper(),
+        OrganizationType.COMPANY.upper(),
+    )
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, private_profile.id) not in str(executed["data"])
+    assert to_global_id(ProfileNode, company_profile.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, internal_profile.id) in str(executed["data"])
+
+
+def test_filter_profile_by_lease_statuses(superuser_api_client):
+    offered_lease = BerthLeaseFactory(status=LeaseStatus.OFFERED)
+    refused_lease = WinterStorageLeaseFactory(status=LeaseStatus.REFUSED)
+    paid_lease = BerthLeaseFactory(status=LeaseStatus.PAID)
+
+    query = """
+    {
+            berthProfiles(leaseStatuses: [%s, %s]) {
+                edges{
+                    node{
+                       id
+                    }
+                }
+            }
+    }
+    """ % (
+        LeaseStatus.OFFERED.upper(),
+        LeaseStatus.REFUSED.upper(),
+    )
+
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, offered_lease.customer.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, refused_lease.customer.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, paid_lease.customer.id) not in str(
+        executed["data"]
+    )
+
+
+def test_filter_profile_by_lease_start(superuser_api_client):
+    lease_1 = BerthLeaseFactory(
+        start_date=date(day=15, month=9, year=2020),
+        end_date=date(day=15, month=10, year=2020),
+    )
+    lease_2 = WinterStorageLeaseFactory(
+        start_date=date(day=15, month=9, year=2020),
+        end_date=date(day=15, month=10, year=2020),
+    )
+    lease_3 = BerthLeaseFactory(
+        start_date=date(day=10, month=9, year=2020),
+        end_date=date(day=10, month=10, year=2020),
+    )
+
+    query = (
+        """
+    {
+            berthProfiles(leaseStart: "%s") {
+                edges{
+                    node{
+                       id
+                    }
+                }
+            }
+    }
+    """
+        % "2020-09-14"
+    )
+
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, lease_1.customer.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, lease_2.customer.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, lease_3.customer.id) not in str(executed["data"])
+
+
+def test_filter_profile_by_lease_end(superuser_api_client):
+    lease_1 = BerthLeaseFactory(
+        start_date=date(day=15, month=9, year=2020),
+        end_date=date(day=15, month=10, year=2020),
+    )
+    lease_2 = WinterStorageLeaseFactory(
+        start_date=date(day=15, month=9, year=2020),
+        end_date=date(day=15, month=10, year=2020),
+    )
+    lease_3 = BerthLeaseFactory(
+        start_date=date(day=10, month=9, year=2020),
+        end_date=date(day=20, month=10, year=2020),
+    )
+
+    query = (
+        """
+    {
+            berthProfiles(leaseEnd: "%s") {
+                edges{
+                    node{
+                       id
+                    }
+                }
+            }
+    }
+    """
+        % "2020-10-18"
+    )
+
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, lease_1.customer.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, lease_2.customer.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, lease_3.customer.id) not in str(executed["data"])
+
+
+def test_filter_profile_by_berth_count(superuser_api_client):
+    profile_1 = CustomerProfileFactory()
+    profile_2 = CustomerProfileFactory()
+    profile_3 = CustomerProfileFactory()
+    BerthLeaseFactory(customer=profile_1)
+    BerthLeaseFactory(customer=profile_1)
+    BerthLeaseFactory(customer=profile_2)
+    WinterStorageLeaseFactory(customer=profile_2)
+    query = """
+    {
+            berthProfiles(leaseCount: true) {
+                edges{
+                    node{
+                       id
+                    }
+                }
+            }
+    }
+    """
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_2.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_3.id) not in str(executed["data"])
+
+
+def test_filter_profile_by_boat_types(superuser_api_client):
+    boat_type_1 = BoatTypeFactory()
+    boat_type_2 = BoatTypeFactory()
+    boat_type_3 = BoatTypeFactory()
+    BoatTypeFactory()
+    boat_1 = BoatFactory(boat_type=boat_type_1)
+    boat_2 = BoatFactory(boat_type=boat_type_2)
+    boat_3 = BoatFactory(boat_type=boat_type_3)
+    query = """
+    {
+            berthProfiles(boatTypes: [ %d, %d]) {
+                edges{
+                    node{
+                       id
+                    }
+                }
+            }
+    }
+    """ % (
+        boat_type_1.id,
+        boat_type_2.id,
+    )
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, boat_1.owner.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, boat_2.owner.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, boat_3.owner.id) not in str(executed["data"])
+
+
+def test_filter_profile_by_boat_registration_number(superuser_api_client):
+    boat_1 = BoatFactory()
+    boat_2 = BoatFactory()
+    assert boat_1.registration_number != boat_2.registration_number
+    query = (
+        """
+    {
+            berthProfiles(boatRegistrationNumber: "%s") {
+                edges{
+                    node{
+                       id
+                    }
+                }
+            }
+    }
+    """
+        % boat_1.registration_number
+    )
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, boat_1.owner.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, boat_2.owner.id) not in str(executed["data"])
+
+
+def test_filter_profile_by_lease_customer_type(superuser_api_client):
+    profile_1 = BerthLeaseFactory().customer
+    profile_2 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.MARKED
+        )
+    ).customer
+    profile_3 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.UNMARKED
+        )
+    ).customer
+    query = """
+        {
+                berthProfiles(berthLeaseCustomer: true) {
+                    edges{
+                        node{
+                           id
+                        }
+                    }
+                }
+        }
+    """
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_2.id) not in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_3.id) not in str(executed["data"])
+
+    query = """
+        {
+                berthProfiles(markedWinterStorageLeaseCustomer: true) {
+                    edges{
+                        node{
+                           id
+                        }
+                    }
+                }
+        }
+    """
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, profile_1.id) not in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_2.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_3.id) not in str(executed["data"])
+
+    query = """
+        {
+                berthProfiles(unmarkedWinterStorageLeaseCustomer: true) {
+                    edges{
+                        node{
+                           id
+                        }
+                    }
+                }
+        }
+    """
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, profile_1.id) not in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_2.id) not in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_3.id) in str(executed["data"])
+
+
+def test_filter_profile_by_harbors(superuser_api_client):
+    harbor_1 = HarborFactory()
+    harbor_2 = HarborFactory()
+    harbor_3 = HarborFactory()
+    profile_1 = BerthLeaseFactory(
+        berth=BerthFactory(pier=PierFactory(harbor=harbor_1))
+    ).customer
+    profile_2 = BerthLeaseFactory(
+        berth=BerthFactory(pier=PierFactory(harbor=harbor_2))
+    ).customer
+    profile_3 = BerthLeaseFactory(
+        berth=BerthFactory(pier=PierFactory(harbor=harbor_3))
+    ).customer
+    query = """
+        {
+                berthProfiles(berthLeaseCustomer: true, harbors: ["%s", "%s"]) {
+                    edges{
+                        node{
+                           id
+                        }
+                    }
+                }
+        }
+    """ % (
+        to_global_id(HarborNode, harbor_1.id),
+        to_global_id(HarborNode, harbor_2.id),
+    )
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_2.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_3.id) not in str(executed["data"])
+
+
+def test_filter_profile_by_piers(superuser_api_client):
+    pier_1 = PierFactory()
+    pier_2 = PierFactory()
+    pier_3 = PierFactory()
+    profile_1 = BerthLeaseFactory(berth=BerthFactory(pier=pier_1)).customer
+    profile_2 = BerthLeaseFactory(berth=BerthFactory(pier=pier_2)).customer
+    profile_3 = BerthLeaseFactory(berth=BerthFactory(pier=pier_3)).customer
+    query = """
+            {
+                    berthProfiles(berthLeaseCustomer: true, piers: ["%s", "%s"]) {
+                        edges{
+                            node{
+                               id
+                            }
+                        }
+                    }
+            }
+        """ % (
+        to_global_id(PierNode, pier_1.id),
+        to_global_id(PierNode, pier_2.id),
+    )
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_2.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_3.id) not in str(executed["data"])
+
+
+def test_filter_profile_by_berth(superuser_api_client):
+    berth_1 = BerthFactory()
+    berth_2 = BerthFactory()
+    berth_3 = BerthFactory()
+    profile_1 = BerthLeaseFactory(berth=berth_1).customer
+    profile_2 = BerthLeaseFactory(berth=berth_2).customer
+    profile_3 = BerthLeaseFactory(berth=berth_3).customer
+    query = """
+        {
+                berthProfiles(berthLeaseCustomer: true, berths: ["%s", "%s"]) {
+                    edges{
+                        node{
+                           id
+                        }
+                    }
+                }
+        }
+    """ % (
+        to_global_id(BerthNode, berth_1.id),
+        to_global_id(BerthNode, berth_2.id),
+    )
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_2.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_3.id) not in str(executed["data"])
+
+
+def test_filter_profile_by_marked_ws_areas(superuser_api_client):
+    ws_area_1 = WinterStorageAreaFactory()
+    ws_area_2 = WinterStorageAreaFactory()
+    ws_area_3 = WinterStorageAreaFactory()
+    profile_1 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.MARKED
+        ),
+        place=WinterStoragePlaceFactory(
+            winter_storage_section=WinterStorageSectionFactory(area=ws_area_1)
+        ),
+    ).customer
+    profile_2 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.MARKED
+        ),
+        place=None,
+        section=WinterStorageSectionFactory(area=ws_area_2),
+    ).customer
+    profile_3 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.MARKED
+        ),
+        place=WinterStoragePlaceFactory(
+            winter_storage_section=WinterStorageSectionFactory(area=ws_area_3)
+        ),
+    ).customer
+    query = """
+        {
+                berthProfiles(markedWinterStorageLeaseCustomer: true, markedWinterStorageAreas: ["%s", "%s"]) {
+                    edges{
+                        node{
+                           id
+                        }
+                    }
+                }
+        }
+    """ % (
+        to_global_id(WinterStorageAreaNode, ws_area_1.id),
+        to_global_id(WinterStorageAreaNode, ws_area_2.id),
+    )
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_2.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_3.id) not in str(executed["data"])
+
+
+def test_filter_profile_by_marked_ws_places(superuser_api_client):
+    ws_place_1 = WinterStoragePlaceFactory()
+    ws_place_2 = WinterStoragePlaceFactory()
+    ws_place_3 = WinterStoragePlaceFactory()
+    profile_1 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.MARKED
+        ),
+        place=ws_place_1,
+    ).customer
+    profile_2 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.MARKED
+        ),
+        place=ws_place_2,
+    ).customer
+    profile_3 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.MARKED
+        ),
+        place=ws_place_3,
+    ).customer
+    query = """
+           {
+                   berthProfiles(markedWinterStorageLeaseCustomer: true, markedWinterStoragePlaces: ["%s", "%s"]) {
+                       edges{
+                           node{
+                              id
+                           }
+                       }
+                   }
+           }
+       """ % (
+        to_global_id(WinterStoragePlaceNode, ws_place_1.id),
+        to_global_id(WinterStoragePlaceNode, ws_place_2.id),
+    )
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_2.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_3.id) not in str(executed["data"])
+
+
+def test_filter_profile_by_unmarked_ws_areas(superuser_api_client):
+    ws_area_1 = WinterStorageAreaFactory()
+    ws_area_2 = WinterStorageAreaFactory()
+    ws_area_3 = WinterStorageAreaFactory()
+    profile_1 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.UNMARKED
+        ),
+        place=WinterStoragePlaceFactory(
+            winter_storage_section=WinterStorageSectionFactory(area=ws_area_1)
+        ),
+    ).customer
+    profile_2 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.UNMARKED
+        ),
+        place=None,
+        section=WinterStorageSectionFactory(area=ws_area_2),
+    ).customer
+    profile_3 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.UNMARKED
+        ),
+        place=WinterStoragePlaceFactory(
+            winter_storage_section=WinterStorageSectionFactory(area=ws_area_3)
+        ),
+    ).customer
+    query = """
+            {
+                    berthProfiles(unmarkedWinterStorageLeaseCustomer: true, unmarkedWinterStorageAreas: ["%s", "%s"]) {
+                        edges{
+                            node{
+                               id
+                            }
+                        }
+                    }
+            }
+        """ % (
+        to_global_id(WinterStorageAreaNode, ws_area_1.id),
+        to_global_id(WinterStorageAreaNode, ws_area_2.id),
+    )
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_2.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_3.id) not in str(executed["data"])
+
+
+def test_filter_profile_by_sticker_number(superuser_api_client):
+    profile_1 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.UNMARKED
+        ),
+        sticker_number="1",
+    ).customer
+    profile_2 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.UNMARKED
+        ),
+        sticker_number="2",
+    ).customer
+    query = (
+        """
+    {
+            berthProfiles(unmarkedWinterStorageLeaseCustomer: true, stickerNumber: "%s") {
+                edges{
+                    node{
+                       id
+                    }
+                }
+            }
+    }
+    """
+        % "1"
+    )
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_2.id) not in str(executed["data"])

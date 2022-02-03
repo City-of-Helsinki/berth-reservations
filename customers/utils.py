@@ -5,6 +5,7 @@ from typing import Tuple
 from dateutil.relativedelta import relativedelta
 
 from leases.utils import calculate_season_end_date, calculate_season_start_date
+from utils.relay import from_global_id
 
 
 def calculate_lease_start_and_end_dates(start_date: date) -> Tuple[date, date]:
@@ -31,3 +32,7 @@ def calculate_lease_start_and_end_dates(start_date: date) -> Tuple[date, date]:
 
 def get_customer_hash(profile) -> str:
     return hashlib.sha256(str(profile.id).encode()).hexdigest()
+
+
+def from_global_ids(global_ids: [str], node_type: object) -> [str]:
+    return [from_global_id(gid, node_type) for gid in global_ids]
