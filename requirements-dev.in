@@ -5,6 +5,7 @@ flake8
 flake8-print
 freezegun
 isort
+pip-tools
 pre-commit
 pytest
 pytest-cov
