@@ -11,17 +11,17 @@ COPY --chown=appuser:appuser requirements.txt /app/
 # that is the default state of the image and development stages are
 # just extras.
 RUN apt-install.sh \
+  build-essential \
+  libpq-dev \
+  netcat \
   gdal-bin \
   python3-gdal \
   gettext \
-  build-essential \
-  netcat \
   pkg-config \
-  && pip install --no-cache-dir \
-  -r /app/requirements.txt \
-  && apt-cleanup.sh \
-  build-essential \
-  pkg-config
+  && pip install -U "pip<22.0" \
+  && pip install --no-cache-dir -r /app/requirements.txt \
+  && apt-cleanup.sh build-essential pkg-config
+
 
 # Copy and set the entrypoint.
 COPY --chown=appuser:appuser docker-entrypoint.sh /app
@@ -41,7 +41,6 @@ FROM appbase as development
 # Install additional dependencies.
 COPY --chown=appuser:appuser requirements-dev.txt /app/requirements-dev.txt
 RUN pip install --no-cache-dir  -r /app/requirements-dev.txt \
-  && pip install --no-cache-dir prequ \
   && apt-install.sh postgresql-client
 
 # Set environment variables for development.

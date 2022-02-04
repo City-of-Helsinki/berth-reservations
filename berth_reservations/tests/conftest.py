@@ -1,3 +1,4 @@
+import shutil
 from os.path import devnull
 
 import pytest
@@ -12,6 +13,14 @@ from customers.tests.factories import OrganizationFactory
 
 from .factories import CustomerProfileFactory, MunicipalityFactory, UserFactory
 from .utils import create_api_client
+
+
+@pytest.fixture(autouse=True)
+def setup_test_media(settings):
+    """Create folder for test media/file uploads."""
+    settings.MEDIA_ROOT = "test_media"
+    yield
+    shutil.rmtree("test_media", ignore_errors=True)
 
 
 @pytest.fixture(autouse=True)

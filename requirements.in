@@ -20,7 +20,7 @@ factory-boy
 graphene-django
 graphene-federation
 graphene-file-upload
-psycopg2-binary
+psycopg2
 sentry-sdk
 uwsgi
 xlsxwriter

@@ -12,8 +12,6 @@ autopep8==1.5.7
     # via
     #   -c requirements.txt
     #   -r requirements-dev.in
-backports.entry-points-selectable==1.1.0
-    # via virtualenv
 black==21.9b0
     # via -r requirements-dev.in
 certifi==2021.10.8
@@ -27,12 +25,14 @@ charset-normalizer==2.0.7
     #   -c requirements.txt
     #   requests
 click==8.0.3
-    # via black
-coverage[toml]==6.0.2
+    # via
+    #   black
+    #   pip-tools
+coverage[toml]==6.3.1
     # via pytest-cov
-distlib==0.3.3
+distlib==0.3.4
     # via virtualenv
-filelock==3.3.1
+filelock==3.4.2
     # via virtualenv
 flake8==4.0.1
     # via
@@ -48,7 +48,7 @@ graphql-core==2.3.2
     # via
     #   -c requirements.txt
     #   gql
-identify==2.3.0
+identify==2.4.8
     # via pre-commit
 idna==3.3
     # via
@@ -70,20 +70,24 @@ packaging==21.0
     #   pytest
 pathspec==0.9.0
     # via black
-platformdirs==2.4.0
+pep517==0.12.0
+    # via pip-tools
+pip-tools==6.4.0
+    # via -r requirements-dev.in
+platformdirs==2.4.1
     # via
     #   black
     #   virtualenv
 pluggy==1.0.0
     # via pytest
-pre-commit==2.15.0
+pre-commit==2.17.0
     # via -r requirements-dev.in
 promise==2.3
     # via
     #   -c requirements.txt
     #   gql
     #   graphql-core
-py==1.10.0
+py==1.11.0
     # via pytest
 pycodestyle==2.8.0
     # via
@@ -104,7 +108,7 @@ pytest==6.2.5
     #   pytest-django
 pytest-cov==3.0.0
     # via -r requirements-dev.in
-pytest-django==4.4.0
+pytest-django==4.5.2
     # via -r requirements-dev.in
 python-dateutil==2.8.2
     # via
@@ -114,7 +118,7 @@ pyyaml==6.0
     # via
     #   -c requirements.txt
     #   pre-commit
-regex==2021.10.8
+regex==2022.1.18
     # via black
 requests==2.26.0
     # via
@@ -143,17 +147,24 @@ toml==0.10.2
     #   autopep8
     #   pre-commit
     #   pytest
-tomli==1.2.1
+tomli==1.2.3
     # via
     #   black
     #   coverage
-typing-extensions==3.10.0.2
+    #   pep517
+typing-extensions==4.0.1
     # via black
 urllib3==1.26.7
     # via
     #   -c requirements.txt
     #   requests
-virtualenv==20.8.1
+virtualenv==20.13.0
     # via pre-commit
+wheel==0.37.1
+    # via pip-tools
 xlrd==1.2.0
     # via -r requirements-dev.in
+
+# The following packages are considered to be unsafe in a requirements file:
+# pip
+# setuptools
