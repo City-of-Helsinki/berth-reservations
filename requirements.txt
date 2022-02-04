@@ -99,8 +99,9 @@ django-parler-rest==2.1
     # via django-munigeo
 django-silk==4.1.0
     # via -r requirements.in
-djangorestframework==3.12.4
+djangorestframework==3.13.1
     # via
+    #   -r requirements.in
     #   django-parler-rest
     #   drf-oidc-auth
     #   helsinki-profile-gdpr-api
@@ -217,6 +218,7 @@ pytz==2021.3
     #   babel
     #   django
     #   django-silk
+    #   djangorestframework
 pyyaml==6.0
     # via django-munigeo
 requests==2.26.0
