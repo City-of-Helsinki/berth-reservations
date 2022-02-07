@@ -1,5 +1,6 @@
 import django_filters
 import graphene
+import graphene_django_optimizer as gql_optimizer
 from graphene_django.filter import DjangoFilterConnectionField
 
 from users.decorators import view_permission_required
@@ -53,13 +54,10 @@ class Query:
         if start_year:
             qs = qs.filter(start_date__year=start_year)
 
-        return qs.select_related(
-            "application",
-            "application__customer",
-            "berth",
-            "berth__pier",
-            "berth__pier__harbor",
-        ).prefetch_related("application__customer__boats")
+        return gql_optimizer.query(
+            qs,
+            info,
+        )
 
     def resolve_winter_storage_leases(
         self, info, statuses=None, start_year=None, **kwargs
@@ -70,13 +68,10 @@ class Query:
         if start_year:
             qs = qs.filter(start_date__year=start_year)
 
-        return qs.select_related(
-            "application",
-            "application__customer",
-            "place",
-            "place__winter_storage_section",
-            "place__winter_storage_section__area",
-        ).prefetch_related("application__customer__boats")
+        return gql_optimizer.query(
+            qs,
+            info,
+        )
 
     @view_permission_required(BerthLease)
     def resolve_send_berth_invoice_preview(self, info, **kwargs):

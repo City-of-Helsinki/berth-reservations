@@ -1,4 +1,5 @@
 import graphene
+import graphene_django_optimizer as gql_optimizer
 from django.db.models import Count, Q
 from graphene_django.filter import DjangoFilterConnectionField
 
@@ -199,11 +200,4 @@ class Query:
         if sticker_number:
             qs = qs.filter(winter_storage_leases__sticker_number=sticker_number)
 
-        return qs.select_related("organization").prefetch_related(
-            "boats",
-            "berth_applications",
-            "berth_leases",
-            "winter_storage_applications",
-            "winter_storage_leases",
-            "orders",
-        )
+        return gql_optimizer.query(qs, info)
