@@ -18,6 +18,7 @@ ipython
 helsinki-profile-gdpr-api
 factory-boy
 graphene-django
+graphene-django-optimizer<0.9.0
 graphene-federation
 graphene-file-upload
 psycopg2

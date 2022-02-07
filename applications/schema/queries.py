@@ -1,4 +1,5 @@
 import graphene
+import graphene_django_optimizer as gql_optimizer
 from graphene_django.filter import DjangoFilterConnectionField
 
 from ..models import BerthApplication, BerthSwitchReason, WinterStorageApplication
@@ -79,12 +80,7 @@ class Query:
         if area_types:
             qs = qs.filter(area_type__in=area_types)
 
-        return qs.select_related(
-            "boat",
-            "boat__boat_type",
-            "customer",
-        ).prefetch_related(
-            "winterstorageareachoice_set",
-            "winterstorageareachoice_set__winter_storage_area",
-            "lease",
+        return gql_optimizer.query(
+            qs,
+            info,
         )
