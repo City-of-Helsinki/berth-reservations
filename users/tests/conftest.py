@@ -11,8 +11,14 @@ def user():
 
 
 @pytest.fixture
-def admin_user():
-    user = UserFactory()
+def admin_user(user):
     user.is_staff = True
+    user.save()
+    return user
+
+
+@pytest.fixture
+def superuser(user):
+    user.is_superuser = True
     user.save()
     return user

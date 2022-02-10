@@ -177,6 +177,7 @@ INSTALLED_APPS = [
     "leases",
     "payments",
     "contracts",
+    "exports",
 ]
 
 AUTH_USER_MODEL = "users.User"
