@@ -170,16 +170,21 @@ class Query:
         address=graphene.String(),
         sort_by=graphene.String(),
         api_token=graphene.String(),
-        description="The `invoicingTypes` filter takes a list of `InvoicingType` values "
-        "representing the desired invoicing types of the customers. If an empty list is "
-        "passed, no filter will be applied and all the results will be returned."
-        "\n\nThe `customerGroups` filter takes a list of `CustomerGroup` values "
-        "representing the desired groups of the customers. If an empty list is "
-        "passed, no filter will be applied and all the results will be returned."
-        "\n\n**Requires permissions** to access customer profiles."
-        "\n\nErrors:"
-        "\n* A value passed is not a valid invoicing type"
-        "\n* A value passed is not a valid customer group",
+        description=""" The `invoicingTypes` filter takes a list of `InvoicingType` values
+         representing the desired invoicing types of the customers. If an empty list is
+         passed, no filter will be applied and all the results will be returned.
+        \n\nThe `customerGroups` filter takes a list of `CustomerGroup` values
+         representing the desired groups of the customers. If an empty list is passed,
+         no filter will be applied and all the results will be returned.
+        \n\n When there is any HKI profiles filters (defined in `HELSINKI_PROFILES_FILTERS`) used in the query,
+         the API will ask for `apiToken`. Otherwise `apiToken` is not needed
+        \n\nThe `leaseStatus` filter take a list of `LeaseStatus` values representing the desired status of the lease
+        \n\n**Requires permissions** to access customer profiles.
+        \n\nErrors:
+        \n* A value passed is not a valid invoicing type
+        \n* A value passed is not a valid customer group
+        \n* Cannot filter by Helsinki Profile fields without API Token,
+        """,
     )
 
     @view_permission_required(CustomerProfile, BerthApplication, BerthLease)
