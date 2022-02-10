@@ -145,6 +145,7 @@ graphql-core==2.3.2
     #   graphql-relay
 graphql-relay==2.0.1
     # via
+    #   -r requirements.in
     #   django-ilmoitin
     #   graphene
 helsinki-profile-gdpr-api==0.1.0
