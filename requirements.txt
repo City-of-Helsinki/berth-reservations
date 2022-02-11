@@ -99,8 +99,9 @@ django-parler-rest==2.1
     # via django-munigeo
 django-silk==4.1.0
     # via -r requirements.in
-djangorestframework==3.12.4
+djangorestframework==3.13.1
     # via
+    #   -r requirements.in
     #   django-parler-rest
     #   drf-oidc-auth
     #   helsinki-profile-gdpr-api
@@ -144,6 +145,7 @@ graphql-core==2.3.2
     #   graphql-relay
 graphql-relay==2.0.1
     # via
+    #   -r requirements.in
     #   django-ilmoitin
     #   graphene
 helsinki-profile-gdpr-api==0.1.0
@@ -217,6 +219,7 @@ pytz==2021.3
     #   babel
     #   django
     #   django-silk
+    #   djangorestframework
 pyyaml==6.0
     # via django-munigeo
 requests==2.26.0
@@ -283,7 +286,7 @@ uwsgi==2.0.20
     # via -r requirements.in
 wcwidth==0.2.5
     # via prompt-toolkit
-xlsxwriter==3.0.1
+xlsxwriter==3.0.2
     # via -r requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:

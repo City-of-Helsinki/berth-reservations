@@ -18,7 +18,7 @@ RUN apt-install.sh \
   python3-gdal \
   gettext \
   pkg-config \
-  && pip install -U "pip<22.0" \
+  && pip install -U pip \
   && pip install --no-cache-dir -r /app/requirements.txt \
   && apt-cleanup.sh build-essential pkg-config
 

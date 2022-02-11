@@ -16,6 +16,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("graphql/", csrf_exempt(SentryGraphQLView.as_view(graphiql=True))),
     path("payments/", include(payment_urls)),
+    path("exports/", include("exports.urls")),
     path("gdpr-api/", include("helsinki_gdpr.urls")),
 ]
 
