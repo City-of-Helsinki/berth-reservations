@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import List
 from unittest import mock
 from uuid import uuid4
 
@@ -48,7 +49,7 @@ from utils.numbers import rounded
 def test_initiate_payment_success(
     talpa_ecom_payment_provider: TalpaEComProvider,
     order: Order,
-    default_talpa_product_accounting: list[TalpaProductAccounting],
+    default_talpa_product_accounting: List[TalpaProductAccounting],
     rf,
 ):
     """Test the request creator constructs the payload base and returns a url that contains a token"""
@@ -73,7 +74,7 @@ def test_initiate_payment_success(
 def test_initiate_payment_validation_errors(
     talpa_ecom_payment_provider: TalpaEComProvider,
     order: Order,
-    default_talpa_product_accounting: list[TalpaProductAccounting],
+    default_talpa_product_accounting: List[TalpaProductAccounting],
     rf,
 ):
     """Test the request creator raises service unavailable if request doesn't go through"""
@@ -102,7 +103,7 @@ def test_initiate_payment_validation_errors(
 def test_initiate_payment_error_unavailable(
     talpa_ecom_provider_base_config: dict,
     order: Order,
-    default_talpa_product_accounting: list[TalpaProductAccounting],
+    default_talpa_product_accounting: List[TalpaProductAccounting],
     rf,
 ):
     """Test the request creator raises service unavailable if request doesn't go through"""
@@ -131,7 +132,7 @@ def test_initiate_payment_error_unavailable(
 def test_handle_initiate_payment_success(
     talpa_ecom_payment_provider: TalpaEComProvider,
     order: Order,
-    default_talpa_product_accounting: list[TalpaProductAccounting],
+    default_talpa_product_accounting: List[TalpaProductAccounting],
 ):
     """Test the response handler recognizes success and adds token as part of the returned url"""
     r = mocked_talpa_ecom_order_response(order)
@@ -186,7 +187,7 @@ def test_handle_initiate_payment_error_missing_id(
 def test_payload_add_products_success(
     talpa_ecom_payment_provider: TalpaEComProvider,
     order_with_products: Order,
-    default_talpa_product_accounting: list[TalpaProductAccounting],
+    default_talpa_product_accounting: List[TalpaProductAccounting],
 ):
     """Test the products and total order price data is added correctly into payload"""
     payload = {}
@@ -238,7 +239,7 @@ def test_payload_add_products_success(
 def test_payload_add_additional_product_order(
     talpa_ecom_payment_provider: TalpaEComProvider,
     order: Order,
-    default_talpa_product_accounting: list[TalpaProductAccounting],
+    default_talpa_product_accounting: List[TalpaProductAccounting],
     settings,
 ):
     payload = {"items": []}
@@ -269,7 +270,7 @@ def test_payload_add_additional_product_order(
 def test_payload_add_place_products(
     talpa_ecom_payment_provider: TalpaEComProvider,
     order_with_products: Order,
-    default_talpa_product_accounting: list[TalpaProductAccounting],
+    default_talpa_product_accounting: List[TalpaProductAccounting],
     settings,
 ):
     payload = {"items": []}
