@@ -164,12 +164,20 @@ class Query:
         unmarked_winter_storage_lease_customer=graphene.Boolean(),
         unmarked_winter_storage_areas=graphene.List(graphene.String),
         sticker_number=graphene.String(),
-        first_name=graphene.String(),
-        last_name=graphene.String(),
-        email=graphene.String(),
-        address=graphene.String(),
-        sort_by=graphene.String(),
-        api_token=graphene.String(),
+        first_name=graphene.String(
+            description="Filter by Helsinki Profile `first_name` field"
+        ),
+        last_name=graphene.String(
+            description="Filter by Helsinki Profile `last_name` field"
+        ),
+        email=graphene.String(description="Filter by Helsinki Profile `email` field"),
+        address=graphene.String(
+            description="Filter by Helsinki Profile `address_Address` field"
+        ),
+        sort_by=graphene.String(description="Order by Helsinki Profile fields"),
+        api_token=graphene.String(
+            description="API Token is required when using Helsinki Profile filters"
+        ),
         description=""" The `invoicingTypes` filter takes a list of `InvoicingType` values
          representing the desired invoicing types of the customers. If an empty list is
          passed, no filter will be applied and all the results will be returned.
@@ -217,7 +225,7 @@ class Query:
                     "Cannot filter by Helsinki Profile fields without API Token"
                 )
             ids = _get_ids_from_profile_service(kwargs, profile_token)
-            qs = qs.filter(id__in=ids)
+            qs = qs.in_bulk(id_list=[ids])
 
         # General filters
         qs = _general_filters(kwargs, qs)
