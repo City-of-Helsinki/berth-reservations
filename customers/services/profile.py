@@ -198,6 +198,7 @@ class ProfileService:
         email: str = "",
         phone: str = "",
         address: str = "",
+        # TODO: exclude_city: str = "",
         order_by: str = "",
         first: int = None,
         last: int = None,
