@@ -21,7 +21,14 @@ from ..models import CustomerProfile
 from ..utils import from_global_ids
 from .types import CustomerGroupEnum, InvoicingTypeEnum, ProfileFilterSet, ProfileNode
 
-HELSINKI_PROFILES_FILTERS = ["first_name", "last_name", "email", "address", "sort_by"]
+HELSINKI_PROFILES_FILTERS = [
+    "first_name",
+    "last_name",
+    "email",
+    "address",
+    "non_helsinki_citizen",
+    "sort_by",
+]
 
 
 def _filter_winter_storage_leases(
@@ -134,6 +141,12 @@ def _get_ids_from_profile_service(kwargs, profile_token):
         "address": kwargs.pop("address", ""),
         "order_by": kwargs.pop("sort_by", ""),
     }
+    if kwargs.pop("non_helsinki_citizen", False):
+        # TODO: Need to find a way to exclude helsinki customer from profiles query
+        # Something like this, then change the ProfileSerivce.find_profile logic
+        # to add this argument to the profiles query
+        # params["exclude_city"] = "Helsinki"
+        pass
     from customers.services import ProfileService
 
     profile_service = ProfileService(profile_token=profile_token)
@@ -173,6 +186,10 @@ class Query:
         email=graphene.String(description="Filter by Helsinki Profile `email` field"),
         address=graphene.String(
             description="Filter by Helsinki Profile `address_Address` field"
+        ),
+        non_helsinki_citizen=graphene.Boolean(
+            description="Filter by Helsinki Profile `primaryAddress.City`, "
+            "if `True` only return customer outside of Helsinki region, else return all"
         ),
         sort_by=graphene.String(description="Order by Helsinki Profile fields"),
         api_token=graphene.String(
