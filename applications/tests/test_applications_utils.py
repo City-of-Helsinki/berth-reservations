@@ -1,7 +1,9 @@
+import io
+
 import pytest
-import xlrd
 from django.conf import settings
 from freezegun import freeze_time
+from openpyxl import load_workbook
 
 from customers.tests.factories import BoatFactory
 from resources.tests.factories import (
@@ -83,15 +85,15 @@ def test_exporting_berth_applications_to_excel(
 
     queryset = BerthApplication.objects.all()
     xlsx_bytes = export_berth_applications_as_xlsx(queryset)
-    wb = xlrd.open_workbook(file_contents=xlsx_bytes)
+    xlsx_file = io.BytesIO(xlsx_bytes)
 
-    assert "berth_applications" in wb.sheet_names()
+    wb = load_workbook(filename=xlsx_file, read_only=True)
+    assert "berth_applications" in wb.sheetnames
 
-    xl_sheet = wb.sheet_by_name("berth_applications")
-    row = xl_sheet.row(1)
+    xl_sheet = wb["berth_applications"]
 
-    expected_berth_switch_reason = ""
-    expected_berth_switch_str = ""
+    expected_berth_switch_reason = None
+    expected_berth_switch_str = None
     if berth_switch:
         switch_harbor_name = (
             berth_switch_info.berth.pier.harbor.safe_translation_getter(
@@ -112,43 +114,43 @@ def test_exporting_berth_applications_to_excel(
         "name", language_code=EXCEL_FILE_LANG
     )
 
-    assert xl_sheet.ncols == 35
+    assert xl_sheet.max_column == 35
 
-    assert row[0].value == "2019-01-14 10:00"
-    assert row[1].value == "1: {}".format(harbor_name)
-    assert row[2].value == expected_berth_switch_str
-    assert row[3].value == expected_berth_switch_reason
-    assert row[4].value == ("" if customer_private else "ACME Inc.")
-    assert row[5].value == ("" if customer_private else "123123-000")
-    assert row[6].value == "Kyösti"
-    assert row[7].value == "Testaaja"
-    assert row[8].value == "kyosti.testaaja@example.com"
-    assert row[9].value == "Mariankatu 2"
-    assert row[10].value == "00170"
-    assert row[11].value == "Helsinki"
-    assert row[12].value == "0411234567"
-    assert row[13].value == boat_type_name
-    assert row[14].value == 2.0
-    assert row[15].value == 3.5
-    assert row[16].value == 1
-    assert row[17].value == 20000
-    assert row[18].value == "B0A7"
-    assert row[19].value == "Vene"
-    assert row[20].value == "BMW S 12"
-    assert row[21].value == "Yes"
-    assert row[22].value == ""
-    assert row[23].value == ""
-    assert row[24].value == ""
-    assert row[25].value == "Yes"
-    assert row[26].value == "wood"
-    assert row[27].value == "cafe"
-    assert row[28].value == "a while"
-    assert row[29].value == "01.02.2019"
-    assert row[30].value == "01.03.2019"
-    assert row[31].value == "Yes"
-    assert row[32].value == "Yes"
-    assert row[33].value == "Yes"
-    assert row[34].value == "1234567890"
+    assert xl_sheet.cell(2, 1).value == "2019-01-14 10:00"
+    assert xl_sheet.cell(2, 2).value == "1: {}".format(harbor_name)
+    assert xl_sheet.cell(2, 3).value == expected_berth_switch_str
+    assert xl_sheet.cell(2, 4).value == expected_berth_switch_reason
+    assert xl_sheet.cell(2, 5).value == (None if customer_private else "ACME Inc.")
+    assert xl_sheet.cell(2, 6).value == (None if customer_private else "123123-000")
+    assert xl_sheet.cell(2, 7).value == "Kyösti"
+    assert xl_sheet.cell(2, 8).value == "Testaaja"
+    assert xl_sheet.cell(2, 9).value == "kyosti.testaaja@example.com"
+    assert xl_sheet.cell(2, 10).value == "Mariankatu 2"
+    assert xl_sheet.cell(2, 11).value == "00170"
+    assert xl_sheet.cell(2, 12).value == "Helsinki"
+    assert xl_sheet.cell(2, 13).value == "0411234567"
+    assert xl_sheet.cell(2, 14).value == boat_type_name
+    assert xl_sheet.cell(2, 15).value == 2.0
+    assert xl_sheet.cell(2, 16).value == 3.5
+    assert xl_sheet.cell(2, 17).value == 1
+    assert xl_sheet.cell(2, 18).value == 20000
+    assert xl_sheet.cell(2, 19).value == "B0A7"
+    assert xl_sheet.cell(2, 20).value == "Vene"
+    assert xl_sheet.cell(2, 21).value == "BMW S 12"
+    assert xl_sheet.cell(2, 22).value == "Yes"
+    assert xl_sheet.cell(2, 23).value is None
+    assert xl_sheet.cell(2, 24).value is None
+    assert xl_sheet.cell(2, 25).value is None
+    assert xl_sheet.cell(2, 26).value == "Yes"
+    assert xl_sheet.cell(2, 27).value == "wood"
+    assert xl_sheet.cell(2, 28).value == "cafe"
+    assert xl_sheet.cell(2, 29).value == "a while"
+    assert xl_sheet.cell(2, 30).value == "01.02.2019"
+    assert xl_sheet.cell(2, 31).value == "01.03.2019"
+    assert xl_sheet.cell(2, 32).value == "Yes"
+    assert xl_sheet.cell(2, 33).value == "Yes"
+    assert xl_sheet.cell(2, 34).value == "Yes"
+    assert xl_sheet.cell(2, 35).value == "1234567890"
 
 
 @freeze_time("2019-01-14T08:00:00Z")
@@ -194,12 +196,12 @@ def test_exporting_winter_storage_applications_to_excel(customer_private):
 
     queryset = WinterStorageApplication.objects.all()
     xlsx_bytes = export_winter_storage_applications_as_xlsx(queryset)
-    wb = xlrd.open_workbook(file_contents=xlsx_bytes)
+    xlsx_file = io.BytesIO(xlsx_bytes)
 
-    assert "winter_storage_applications" in wb.sheet_names()
+    wb = load_workbook(filename=xlsx_file, read_only=True)
+    assert "winter_storage_applications" in wb.sheetnames
 
-    xl_sheet = wb.sheet_by_name("winter_storage_applications")
-    row = xl_sheet.row(1)
+    xl_sheet = wb["winter_storage_applications"]
 
     winter_area_name = winter_area.safe_translation_getter(
         "name", language_code=EXCEL_FILE_LANG
@@ -208,29 +210,29 @@ def test_exporting_winter_storage_applications_to_excel(customer_private):
         "name", language_code=EXCEL_FILE_LANG
     )
 
-    assert xl_sheet.ncols == 24
+    assert xl_sheet.max_column == 24
 
-    assert row[0].value == "2019-01-14 10:00"
-    assert row[1].value == "1: {}".format(winter_area_name)
-    assert row[2].value == ("" if customer_private else "ACME Inc.")
-    assert row[3].value == ("" if customer_private else "123123-000")
-    assert row[4].value == "Kyösti"
-    assert row[5].value == "Testaaja"
-    assert row[6].value == "kyosti.testaaja@example.com"
-    assert row[7].value == "Mariankatu 2"
-    assert row[8].value == "00170"
-    assert row[9].value == "Helsinki"
-    assert row[10].value == "0411234567"
-    assert row[11].value == WinterStorageMethod.ON_TRESTLES.label
-    assert row[12].value == "hel001"
-    assert row[13].value == boat_type_name
-    assert row[14].value == 2.0
-    assert row[15].value == 3.5
-    assert row[16].value == "B0A7"
-    assert row[17].value == "Vene"
-    assert row[18].value == "BMW S 12"
-    assert row[19].value == ""
-    assert row[20].value == ""
-    assert row[21].value == ""
-    assert row[22].value == "Yes"
-    assert row[23].value == "1234567890"
+    assert xl_sheet.cell(2, 1).value == "2019-01-14 10:00"
+    assert xl_sheet.cell(2, 2).value == "1: {}".format(winter_area_name)
+    assert xl_sheet.cell(2, 3).value == (None if customer_private else "ACME Inc.")
+    assert xl_sheet.cell(2, 4).value == (None if customer_private else "123123-000")
+    assert xl_sheet.cell(2, 5).value == "Kyösti"
+    assert xl_sheet.cell(2, 6).value == "Testaaja"
+    assert xl_sheet.cell(2, 7).value == "kyosti.testaaja@example.com"
+    assert xl_sheet.cell(2, 8).value == "Mariankatu 2"
+    assert xl_sheet.cell(2, 9).value == "00170"
+    assert xl_sheet.cell(2, 10).value == "Helsinki"
+    assert xl_sheet.cell(2, 11).value == "0411234567"
+    assert xl_sheet.cell(2, 12).value == WinterStorageMethod.ON_TRESTLES.label
+    assert xl_sheet.cell(2, 13).value == "hel001"
+    assert xl_sheet.cell(2, 14).value == boat_type_name
+    assert xl_sheet.cell(2, 15).value == 2.0
+    assert xl_sheet.cell(2, 16).value == 3.5
+    assert xl_sheet.cell(2, 17).value == "B0A7"
+    assert xl_sheet.cell(2, 18).value == "Vene"
+    assert xl_sheet.cell(2, 19).value == "BMW S 12"
+    assert xl_sheet.cell(2, 20).value is None
+    assert xl_sheet.cell(2, 21).value is None
+    assert xl_sheet.cell(2, 22).value is None
+    assert xl_sheet.cell(2, 23).value == "Yes"
+    assert xl_sheet.cell(2, 24).value == "1234567890"

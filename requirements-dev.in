@@ -11,5 +11,5 @@ pytest
 pytest-cov
 pytest-django
 requests-mock
-xlrd<2.0.0
+openpyxl
 gql
