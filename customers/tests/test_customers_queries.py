@@ -12,7 +12,7 @@ from applications.tests.factories import (
     BerthApplicationFactory,
     WinterStorageApplicationFactory,
 )
-from berth_reservations.tests.factories import CustomerProfileFactory
+from berth_reservations.tests.factories import CustomerProfileFactory, UserFactory
 from berth_reservations.tests.utils import (
     assert_in_errors,
     assert_not_enough_permissions,
@@ -1386,3 +1386,48 @@ def test_filter_by_hki_profile_filters(mock_find_profile, superuser_api_client):
     assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
     assert to_global_id(ProfileNode, profile_2.id) not in str(executed["data"])
     assert to_global_id(ProfileNode, profile_3.id) not in str(executed["data"])
+
+
+@patch("customers.services.profile.ProfileService.find_profile")
+@pytest.mark.parametrize(
+    "names",
+    [
+        ["A", "B", "C", "D", "E", "F"],
+        ["D", "E", "F", "C", "B", "A"],
+        ["X", "X", "A", "X", "B", "C"],
+    ],
+)
+def test_filter_by_hki_profile_order_by(mock_find_profile, names, superuser_api_client):
+    profiles = [
+        CustomerProfileFactory(user=UserFactory(first_name=name, last_name=name))
+        for name in names
+    ]
+    mock_find_profile.return_value = [
+        HelsinkiProfileUser(
+            profile.id,
+            email=profile.user.email,
+            first_name=profile.user.first_name,
+            last_name="Last name",
+        )
+        for profile in profiles
+    ]
+
+    query = """
+            {
+                    berthProfiles(lastName: "Last Name", apiToken: "Sample token") {
+                        edges{
+                            node{
+                               id
+                            }
+                        }
+                    }
+            }
+        """
+    executed = superuser_api_client.execute(query)
+    # The results set should be ordered in the same order as mocked profiles
+    assert [to_global_id(ProfileNode, profile.id) for profile in profiles] == [
+        node["id"]
+        for node in [
+            edge["node"] for edge in executed["data"]["berthProfiles"]["edges"]
+        ]
+    ]

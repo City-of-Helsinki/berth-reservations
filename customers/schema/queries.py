@@ -1,6 +1,6 @@
 import graphene
 import graphene_django_optimizer as gql_optimizer
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Case, When
 from graphene_django.filter import DjangoFilterConnectionField
 
 from applications.enums import ApplicationAreaType
@@ -225,7 +225,8 @@ class Query:
                     "Cannot filter by Helsinki Profile fields without API Token"
                 )
             ids = _get_ids_from_profile_service(kwargs, profile_token)
-            qs = qs.in_bulk(id_list=[ids])
+            preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(ids)])
+            qs = qs.filter(id__in=ids).order_by(preserved)
 
         # General filters
         qs = _general_filters(kwargs, qs)
