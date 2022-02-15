@@ -197,6 +197,8 @@ class ProfileService:
         last_name: str = "",
         email: str = "",
         phone: str = "",
+        address: str = "",
+        order_by: str = "",
         force_only_one: bool = True,
     ) -> Union[List[HelsinkiProfileUser], HelsinkiProfileUser]:
         """
@@ -212,7 +214,9 @@ class ProfileService:
                     firstName: "{first_name}",
                     lastName: "{last_name}",
                     emails_Email: "{email}",
-                    phones_Phone: "{phone}"
+                    phones_Phone: "{phone}",
+                    addresses_Address: "{address}",
+                    orderBy: "{order_by}",
                 ) {{
                     edges {{
                         node {{

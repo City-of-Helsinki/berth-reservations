@@ -1,5 +1,6 @@
 import random
 from datetime import date
+from unittest.mock import patch
 
 import pytest
 from dateutil.parser import isoparse
@@ -11,8 +12,9 @@ from applications.tests.factories import (
     BerthApplicationFactory,
     WinterStorageApplicationFactory,
 )
-from berth_reservations.tests.factories import CustomerProfileFactory
+from berth_reservations.tests.factories import CustomerProfileFactory, UserFactory
 from berth_reservations.tests.utils import (
+    assert_in_errors,
     assert_not_enough_permissions,
     create_api_client,
 )
@@ -41,6 +43,7 @@ from utils.relay import to_global_id
 
 from ..enums import InvoicingType, OrganizationType
 from ..schema import BoatCertificateNode, BoatNode, ProfileNode
+from ..services import HelsinkiProfileUser
 from .factories import BoatFactory, OrganizationFactory
 
 FEDERATED_SCHEMA_QUERY = """
@@ -1301,3 +1304,130 @@ def test_filter_profile_by_sticker_number(superuser_api_client):
     executed = superuser_api_client.execute(query)
     assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
     assert to_global_id(ProfileNode, profile_2.id) not in str(executed["data"])
+
+
+def test_filter_by_hki_profile_filters_without_profile_token(superuser_api_client):
+    query = """
+        {
+                berthProfiles(email: "example@email.com") {
+                    edges{
+                        node{
+                           id
+                        }
+                    }
+                }
+        }
+    """
+    executed = superuser_api_client.execute(query)
+    assert_in_errors("API Token", executed)
+
+
+@patch("customers.services.profile.ProfileService.find_profile")
+def test_filter_by_hki_profile_filters(mock_find_profile, superuser_api_client):
+    profile_1 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.UNMARKED
+        ),
+        sticker_number="1",
+    ).customer
+    profile_2 = CustomerProfileFactory()
+    profile_3 = CustomerProfileFactory()
+    mock_find_profile.return_value = [
+        HelsinkiProfileUser(
+            profile_1.id,
+            email=profile_1.user.email,
+            first_name=profile_1.user.first_name,
+            last_name="Last Name",
+        ),
+        HelsinkiProfileUser(
+            profile_2.id,
+            email=profile_2.user.email,
+            first_name=profile_2.user.first_name,
+            last_name="Last Name",
+        ),
+        HelsinkiProfileUser(
+            profile_3.id,
+            email=profile_3.user.email,
+            first_name=profile_3.user.first_name,
+            last_name="Last Name",
+        ),
+    ]
+    # First query should return all mock profiles
+    query = """
+        {
+                berthProfiles(lastName: "Last Name", apiToken: "Sample token") {
+                    edges{
+                        node{
+                           id
+                        }
+                    }
+                }
+        }
+    """
+
+    executed = superuser_api_client.execute(query)
+    assert len(executed["data"]["berthProfiles"]["edges"]) == 3
+    assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_2.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_3.id) in str(executed["data"])
+    # Second query will filter profiles by Berth Profile fields
+    query = """
+            {
+                    berthProfiles(lastName: "Last Name", apiToken: "Sample token", stickerNumber: "1") {
+                        edges{
+                            node{
+                               id
+                            }
+                        }
+                    }
+            }
+        """
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_2.id) not in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_3.id) not in str(executed["data"])
+
+
+@patch("customers.services.profile.ProfileService.find_profile")
+@pytest.mark.parametrize(
+    "names",
+    [
+        ["A", "B", "C", "D", "E", "F"],
+        ["D", "E", "F", "C", "B", "A"],
+        ["X", "X", "A", "X", "B", "C"],
+    ],
+)
+def test_filter_by_hki_profile_order_by(mock_find_profile, names, superuser_api_client):
+    profiles = [
+        CustomerProfileFactory(user=UserFactory(first_name=name, last_name=name))
+        for name in names
+    ]
+    mock_find_profile.return_value = [
+        HelsinkiProfileUser(
+            profile.id,
+            email=profile.user.email,
+            first_name=profile.user.first_name,
+            last_name="Last name",
+        )
+        for profile in profiles
+    ]
+
+    query = """
+            {
+                    berthProfiles(lastName: "Last Name", apiToken: "Sample token") {
+                        edges{
+                            node{
+                               id
+                            }
+                        }
+                    }
+            }
+        """
+    executed = superuser_api_client.execute(query)
+    # The results set should be ordered in the same order as mocked profiles
+    assert [to_global_id(ProfileNode, profile.id) for profile in profiles] == [
+        node["id"]
+        for node in [
+            edge["node"] for edge in executed["data"]["berthProfiles"]["edges"]
+        ]
+    ]
