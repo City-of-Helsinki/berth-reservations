@@ -198,7 +198,6 @@ class ProfileService:
         email: str = "",
         phone: str = "",
         address: str = "",
-        # TODO: exclude_city: str = "",
         order_by: str = "",
         force_only_one: bool = True,
     ) -> Union[List[HelsinkiProfileUser], HelsinkiProfileUser]:
@@ -229,6 +228,11 @@ class ProfileService:
                             }}
                             primary_phone: primaryPhone {{
                                 phone
+                            }}
+                            primary_address: primaryAddress {{
+                                address
+                                postal_code: postalCode
+                                city
                             }}
                         }}
                     }}

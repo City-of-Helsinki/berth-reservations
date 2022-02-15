@@ -1,3 +1,4 @@
+from typing import List
 import graphene
 import graphene_django_optimizer as gql_optimizer
 from django.db.models import Count, Q, Case, When
@@ -6,6 +7,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from applications.enums import ApplicationAreaType
 from applications.models import BerthApplication
 from berth_reservations.exceptions import VenepaikkaGraphQLError
+from customers.services.profile import HelsinkiProfileUser
 from leases.models import BerthLease
 from leases.schema import LeaseStatusEnum
 from resources.schema import (
@@ -28,6 +30,11 @@ HELSINKI_PROFILES_FILTERS = [
     "address",
     "non_helsinki_citizen",
     "sort_by",
+]
+
+# Cities in the address field that should be mapped to the city of Helsinki
+HELSINKI_POSTAL_DISTRICTS = [
+    "Helsinki",
 ]
 
 
@@ -133,6 +140,12 @@ def _general_filters(params, qs):
     return qs
 
 
+def _exclude_helsinki_citizen(
+    users: List[HelsinkiProfileUser],
+) -> List[HelsinkiProfileUser]:
+    return [user for user in users if user.city not in HELSINKI_POSTAL_DISTRICTS]
+
+
 def _get_ids_from_profile_service(kwargs, profile_token):
     params = {
         "first_name": kwargs.pop("first_name", ""),
@@ -141,16 +154,18 @@ def _get_ids_from_profile_service(kwargs, profile_token):
         "address": kwargs.pop("address", ""),
         "order_by": kwargs.pop("sort_by", ""),
     }
-    if kwargs.pop("non_helsinki_citizen", False):
-        # TODO: Need to find a way to exclude helsinki customer from profiles query
-        # Something like this, then change the ProfileSerivce.find_profile logic
-        # to add this argument to the profiles query
-        # params["exclude_city"] = "Helsinki"
-        pass
     from customers.services import ProfileService
 
+    non_helsinki_citizen = kwargs.pop("non_helsinki_citizen", False)
     profile_service = ProfileService(profile_token=profile_token)
-    users = profile_service.find_profile(**params, force_only_one=False)
+    users: List[HelsinkiProfileUser] = profile_service.find_profile(
+        **params, force_only_one=False
+    )
+
+    # Exclude all Helsinki citizen
+    if non_helsinki_citizen:
+        users = _exclude_helsinki_citizen(users)
+
     return [user.id for user in users]
 
 
