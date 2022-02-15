@@ -1431,3 +1431,48 @@ def test_filter_by_hki_profile_order_by(mock_find_profile, names, superuser_api_
             edge["node"] for edge in executed["data"]["berthProfiles"]["edges"]
         ]
     ]
+
+
+@patch("customers.services.profile.ProfileService.find_profile")
+def test_filter_non_helsinki_citizen(mock_find_profile, superuser_api_client):
+    profile_1, profile_2, profile_3 = CustomerProfileFactory.create_batch(3)
+    mock_find_profile.return_value = [
+        HelsinkiProfileUser(
+            profile_1.id,
+            email=profile_1.user.email,
+            first_name=profile_1.user.first_name,
+            last_name="Last Name",
+            city="Helsinki",
+        ),
+        HelsinkiProfileUser(
+            profile_2.id,
+            email=profile_2.user.email,
+            first_name=profile_2.user.first_name,
+            last_name="Last Name",
+            city="Espoo",
+        ),
+        HelsinkiProfileUser(
+            profile_3.id,
+            email=profile_3.user.email,
+            first_name=profile_3.user.first_name,
+            last_name="Last Name",
+            city="Turku",
+        ),
+    ]
+    query = """
+            {
+                berthProfiles(nonHelsinkiCitizen: true, apiToken: "Sample token") {
+                    count
+                    edges{
+                        node{
+                            id
+                        }
+                    }
+                }
+            }
+        """
+    executed = superuser_api_client.execute(query)
+    assert executed["data"]["berthProfiles"]["count"] == 2
+    assert to_global_id(ProfileNode, profile_1.id) not in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_2.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_3.id) in str(executed["data"])

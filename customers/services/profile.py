@@ -198,7 +198,6 @@ class ProfileService:
         email: str = "",
         phone: str = "",
         address: str = "",
-        # TODO: exclude_city: str = "",
         order_by: str = "",
         first: int = None,
         last: int = None,
@@ -228,11 +227,25 @@ class ProfileService:
                         primary_phone: primaryPhone {
                             phone
                         }
+                        primary_address: primaryAddress {
+                            address
+                            postal_code: postalCode
+                            city
+                        }
                     }
                 }
             """
 
-        FIND_PROFILE_IDS_QUERY_FIELDS = "edges { node { id } }"
+        FIND_PROFILE_IDS_QUERY_FIELDS = """
+                edges { 
+                    node { 
+                        id 
+                        primary_address: primaryAddress {
+                            postal_code: postalCode
+                        }
+                    } 
+                }
+            """
 
         query = (
             """query FindProfile (

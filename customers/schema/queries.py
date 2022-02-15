@@ -1,3 +1,4 @@
+from typing import List
 import graphene
 import graphene_django_optimizer as gql_optimizer
 from django.db.models import Case, Count, Q, When
@@ -6,6 +7,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from applications.enums import ApplicationAreaType
 from applications.models import BerthApplication
 from berth_reservations.exceptions import VenepaikkaGraphQLError
+from customers.services.profile import HelsinkiProfileUser
 from leases.models import BerthLease
 from leases.schema import LeaseStatusEnum
 from resources.schema import (
@@ -133,6 +135,16 @@ def _general_filters(params, qs):
     return qs
 
 
+def _exclude_helsinki_citizen(
+    users: List[HelsinkiProfileUser],
+) -> List[HelsinkiProfileUser]:
+    return [
+        user
+        for user in users
+        if not user.postal_code or not user.postal_code.startswith("00")
+    ]
+
+
 def _get_ids_from_profile_service(kwargs, profile_token):
     from customers.services import ProfileService
     from customers.services.profile import BATCH_SIZE
@@ -145,18 +157,17 @@ def _get_ids_from_profile_service(kwargs, profile_token):
         "order_by": kwargs.pop("sort_by", ""),
         "first": BATCH_SIZE,  # fixed limit for recusrively fetch all -feature
     }
-    if kwargs.pop("non_helsinki_citizen", False):
-        # TODO: Need to find a way to exclude helsinki customer from profiles query
-        # Something like this, then change the ProfileSerivce.find_profile logic
-        # to add this argument to the profiles query
-        # params["exclude_city"] = "Helsinki"
-        pass
     from customers.services import ProfileService
 
+    non_helsinki_citizen = kwargs.pop("non_helsinki_citizen", False)
     profile_service = ProfileService(profile_token=profile_token)
-    users = profile_service.find_profile(
+    users: List[HelsinkiProfileUser] = profile_service.find_profile(
         **params, force_only_one=False, recursively_fetch_all=True, ids_only=True
     )
+
+    # Exclude all Helsinki citizen
+    if non_helsinki_citizen:
+        users = _exclude_helsinki_citizen(users)
     return [user.id for user in users]
 
 
