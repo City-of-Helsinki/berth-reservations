@@ -199,6 +199,10 @@ class ProfileService:
         phone: str = "",
         address: str = "",
         order_by: str = "",
+        first: int = None,
+        last: int = None,
+        before: int = None,
+        after: int = None,
         force_only_one: bool = True,
     ) -> Union[List[HelsinkiProfileUser], HelsinkiProfileUser]:
         """
@@ -207,34 +211,60 @@ class ProfileService:
 
         force_only_one: bool -> If more than one profile is found, it will raise an error
         """
-        query = f"""
-            query FindProfile {{
+        query = """query FindProfile (
+                    $firstName: String,
+                    $lastName: String,
+                    $email: String,
+                    $phone: String,
+                    $address: String,
+                    $sortBy: String,
+                    $first: Int,
+                    $last: Int,
+                    $before: String,
+                    $after: String
+                ) {
                 profiles(
                     serviceType: BERTH,
-                    firstName: "{first_name}",
-                    lastName: "{last_name}",
-                    emails_Email: "{email}",
-                    phones_Phone: "{phone}",
-                    addresses_Address: "{address}",
-                    orderBy: "{order_by}",
-                ) {{
-                    edges {{
-                        node {{
+                    firstName: $firstName,
+                    lastName: $lastName,
+                    emails_Email: $email,
+                    phones_Phone: $phone,
+                    addresses_Address: $address,
+                    orderBy: $sortBy,
+                    first: $first,
+                    last: $last,
+                    before: $before,
+                    after: $after
+                ) {
+                    edges {
+                        node {
                             id
                             first_name: firstName
                             last_name: lastName
-                            primary_email: primaryEmail {{
+                            primary_email: primaryEmail {
                                 email
-                            }}
-                            primary_phone: primaryPhone {{
+                            }
+                            primary_phone: primaryPhone {
                                 phone
-                            }}
-                        }}
-                    }}
-                }}
-            }}
+                            }
+                        }
+                    }
+                }
+            }
         """
-        response = self.query(query)
+        variables = {
+            "firstName": first_name,
+            "lastName": last_name,
+            "email": email,
+            "phone": phone,
+            "address": address,
+            "sortBy": order_by,
+            "first": first,
+            "last": last,
+            "before": before,
+            "after": after,
+        }
+        response = self.query(query, variables)
         profiles = (
             response.get("profiles", {}).get("edges", [])
             if response
