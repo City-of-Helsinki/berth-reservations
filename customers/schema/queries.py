@@ -133,15 +133,14 @@ def _get_ids_from_profile_service(kwargs, profile_token):
         "email": kwargs.pop("email", ""),
         "address": kwargs.pop("address", ""),
         "order_by": kwargs.pop("sort_by", ""),
-        "first": kwargs.pop("first", None),
-        "last": kwargs.pop("last", None),
-        "before": kwargs.pop("before", None),
-        "after": kwargs.pop("after", None),
+        "first": 100,  # fixed limit for recusrively fetch all -feature
     }
     from customers.services import ProfileService
 
     profile_service = ProfileService(profile_token=profile_token)
-    users = profile_service.find_profile(**params, force_only_one=False)
+    users = profile_service.find_profile(
+        **params, force_only_one=False, recursively_fetch_all=True
+    )
     return [user.id for user in users]
 
 

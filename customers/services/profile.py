@@ -201,15 +201,17 @@ class ProfileService:
         order_by: str = "",
         first: int = None,
         last: int = None,
-        before: int = None,
-        after: int = None,
+        before: str = "",
+        after: str = "",
         force_only_one: bool = True,
+        recursively_fetch_all: bool = False,
     ) -> Union[List[HelsinkiProfileUser], HelsinkiProfileUser]:
         """
         Find the profile based on the passed criteria, the missing parameters
         are replaced by empty values.
 
         force_only_one: bool -> If more than one profile is found, it will raise an error
+        recursively_fetch_all: bool -> If all the pages are needed
         """
         query = """query FindProfile (
                     $firstName: String,
@@ -236,6 +238,12 @@ class ProfileService:
                     before: $before,
                     after: $after
                 ) {
+                    pageInfo {
+                        has_next_page: hasNextPage,
+                        has_previous_page: hasPreviousPage,
+                        start_cursor: startCursor,
+                        end_cursor: endCursor
+                    }
                     edges {
                         node {
                             id
@@ -265,11 +273,14 @@ class ProfileService:
             "after": after,
         }
         response = self.query(query, variables)
+        pageInfo = (
+            response.get("profiles", {}).get("pageInfo", [])
+            if response and response.get("profiles", {}).get("pageInfo")
+            else None
+        )
         profiles = (
             response.get("profiles", {}).get("edges", [])
-            if response
-            and response.get("profiles", {})
-            and response.get("profiles", {}).get("edges")
+            if response and response.get("profiles", {}).get("edges")
             else []
         )
 
@@ -289,6 +300,25 @@ class ProfileService:
 
         if force_only_one:
             return users[0]
+
+        if (
+            recursively_fetch_all
+            and pageInfo.get("has_next_page")
+            and pageInfo.get("end_cursor")
+        ):
+            users = users + self.find_profile(
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                phone=phone,
+                address=address,
+                order_by=order_by,
+                first=first,
+                last=last,
+                after=pageInfo.get("end_cursor"),
+                recursively_fetch_all=True,
+                force_only_one=False,
+            )
 
         return users
 
@@ -360,7 +390,7 @@ class ProfileService:
             body["variables"] = variables
 
         headers = {"Authorization": "Bearer %s" % self.profile_token}
-        r = requests.post(url=self.api_url, json=body, headers=headers, timeout=40)
+        r = requests.post(url=self.api_url, json=body, headers=headers, timeout=10)
         r.raise_for_status()
         response = r.json()
         if errors := response.get("errors"):
