@@ -330,7 +330,7 @@ class ProfileService:
             body["variables"] = variables
 
         headers = {"Authorization": "Bearer %s" % self.profile_token}
-        r = requests.post(url=self.api_url, json=body, headers=headers)
+        r = requests.post(url=self.api_url, json=body, headers=headers, timeout=40)
         r.raise_for_status()
         response = r.json()
         if errors := response.get("errors"):
