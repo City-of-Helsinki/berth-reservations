@@ -134,6 +134,9 @@ def _get_ids_from_profile_service(kwargs, profile_token):
         "address": kwargs.pop("address", ""),
         "order_by": kwargs.pop("sort_by", ""),
         "first": kwargs.pop("first", None),
+        "last": kwargs.pop("last", None),
+        "before": kwargs.pop("before", None),
+        "after": kwargs.pop("after", None),
     }
     from customers.services import ProfileService
 
