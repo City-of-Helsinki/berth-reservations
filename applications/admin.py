@@ -11,6 +11,8 @@ from django_ilmoitin.utils import send_notification
 from parler.admin import TranslatableAdmin
 from pytz import timezone
 
+from exports.xlsx_writer import BerthApplicationXlsx
+
 from .enums import ApplicationAreaType
 from .models import (
     BerthApplication,
@@ -23,10 +25,7 @@ from .models import (
     WinterStorageAreaChoice,
 )
 from .notifications import NotificationType
-from .utils import (
-    export_berth_applications_as_xlsx,
-    export_winter_storage_applications_as_xlsx,
-)
+from .utils import export_winter_storage_applications_as_xlsx
 
 logger = logging.getLogger(__name__)
 
@@ -233,7 +232,8 @@ class BerthApplicationAdmin(admin.ModelAdmin):
         filename = "berth_applications_" + local_datetime_now_as_str
         response["Content-Disposition"] = "attachment; filename=%s.xlsx" % filename
 
-        response.content = export_berth_applications_as_xlsx(queryset)
+        exporter = BerthApplicationXlsx(queryset)
+        response.content = exporter.serialize()
         return response
 
     export_applications.short_description = _(

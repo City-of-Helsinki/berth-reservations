@@ -1,6 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 
+from applications.tests.conftest import *  # noqa
 from berth_reservations.tests.conftest import *  # noqa
 from users.tests.conftest import *  # noqa
 

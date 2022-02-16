@@ -5,6 +5,8 @@ from django.utils.timezone import localtime
 from django.utils.translation import gettext_lazy as _
 from xlsxwriter import Workbook
 
+from applications.models import BerthApplication
+from applications.utils import parse_berth_switch_str, parse_choices_to_multiline_string
 from customers.enums import InvoicingType
 from customers.models import CustomerProfile
 from customers.services import ProfileService
@@ -14,9 +16,10 @@ class BaseExportXlsxWriter:
 
     content_start_index = 1
     identifier = "export"
-    title = _("Export")
+    title = _("export")
 
     fields = []
+    wrapped_fields = []  # Fields with with wrapped text formatting
 
     def __init__(self, items, **kwargs):
         """Export the given set of items into an Excel.
@@ -54,7 +57,10 @@ class BaseExportXlsxWriter:
         for row_index, item in enumerate(self.items, self.content_start_index):
             for col_index, field_name in column_index:
                 value = self.get_value(field_name, item)
-                sheet.write(row_index, col_index, value)
+                if field_name in self.wrapped_fields:
+                    sheet.write(row_index, col_index, value, wrapped_cell_format)
+                else:
+                    sheet.write(row_index, col_index, value)
 
     def get_value(self, field_name, item):
         """Get value for a specific field in Excel."""
@@ -71,7 +77,7 @@ class BaseExportXlsxWriter:
                 "default_date_format": "YYYY-MM-DD HH:MM:SS",
             },
         )
-        worksheet = workbook.add_worksheet(name=str(self.title))
+        worksheet = workbook.add_worksheet(name=str(self.title).capitalize())
 
         self._write_header_row(workbook, worksheet)
         self._write_rows(workbook, worksheet)
@@ -83,8 +89,8 @@ class BaseExportXlsxWriter:
 
 class CustomerXlsx(BaseExportXlsxWriter):
     identifier = "customers"
-    title = _("Customers")
-    fields = [
+    title = _("customers")
+    fields = (
         ("id", _("id"), 37),
         ("first_name", _("first name"), 15),
         ("last_name", _("last name"), 15),
@@ -99,7 +105,7 @@ class CustomerXlsx(BaseExportXlsxWriter):
         ("created_at", _("time created"), 19),
         ("modified_at", _("time modified"), 19),
         ("user_source", _("user source"), 19),
-    ]
+    )
 
     helsinki_profile_values = {}
     helsinki_profile_field = {
@@ -166,4 +172,69 @@ class CustomerXlsx(BaseExportXlsxWriter):
                 return str(_("Helsinki profile"))
             else:
                 return str(_("Local"))
+        return fallback_value
+
+
+class BerthApplicationXlsx(BaseExportXlsxWriter):
+    identifier = "berth_applications"
+    title = _("berth applications")
+    fields = (
+        # Common fields
+        ("created_at", _("reserved at"), 15),
+        ("chosen_harbors", _("chosen harbors"), 55),
+        ("berth_switch", _("current berth"), 35),
+        ("berth_switch_reason", _("wwitch Reason"), 55),
+        ("company_name", _("company name"), 35),
+        ("business_id", _("business ID"), 15),
+        ("first_name", _("first name"), 15),
+        ("last_name", _("last name"), 15),
+        ("email", _("email"), 15),
+        ("address", _("address"), 15),
+        ("zip_code", _("zip code"), 15),
+        ("municipality", _("municipality"), 15),
+        ("phone_number", _("phone number"), 15),
+        ("boat_type", _("boat type"), 15),
+        ("boat_width", _("boat width"), 15),
+        ("boat_length", _("boat length"), 15),
+        ("boat_draught", _("boat draught"), 15),
+        ("boat_weight", _("boat weight"), 15),
+        ("boat_registration_number", _("boat registration number"), 15),
+        ("boat_name", _("boat name"), 15),
+        ("boat_model", _("boat model"), 15),
+        ("accessibility_required", _("accessibility required"), 15),
+        ("accept_boating_newsletter", _("accept boating newsletter"), 15),
+        ("accept_fitness_news", _("accept fitness news"), 15),
+        ("accept_library_news", _("accept library news"), 15),
+        ("accept_other_culture_news", _("accept other culture news"), 15),
+        # Big boat specific fields
+        ("boat_hull_material", _("boat hull material"), 15),
+        ("boat_intended_use", _("boat intended use"), 15),
+        ("renting_period", _("renting period"), 15),
+        ("rent_from", _("rent from"), 15),
+        ("rent_till", _("rent till"), 15),
+        ("boat_is_insured", _("boat is insured"), 15),
+        ("boat_is_inspected", _("boat is inspected"), 15),
+        ("agree_to_terms", _("agree to terms"), 15),
+        ("application_code", _("application code"), 15),
+    )
+    wrapped_fields = ("chosen_harbors",)
+
+    def get_value(self, field_name, item: BerthApplication):
+        fallback_value = getattr(item, field_name, "")
+
+        if field_name == "created_at":
+            return item.created_at.astimezone().strftime("%Y-%m-%d %H:%M")
+        elif field_name == "chosen_harbors":
+            harbor_choices = item.harborchoice_set.order_by("priority")
+            return parse_choices_to_multiline_string(harbor_choices)
+        elif field_name == "berth_switch" and item.berth_switch:
+            return parse_berth_switch_str(item.berth_switch)
+
+        elif field_name == "berth_switch_reason" and item.berth_switch:
+            return item.berth_switch.reason.title if item.berth_switch.reason else "---"
+        elif field_name == "boat_type":
+            return item.boat_type.name
+
+        if isinstance(fallback_value, bool):
+            return "Yes" if fallback_value else ""
         return fallback_value
