@@ -1,6 +1,6 @@
 import graphene
 import graphene_django_optimizer as gql_optimizer
-from django.db.models import Count, Q, Case, When
+from django.db.models import Case, Count, Q, When
 from graphene_django.filter import DjangoFilterConnectionField
 
 from applications.enums import ApplicationAreaType
@@ -133,6 +133,7 @@ def _get_ids_from_profile_service(kwargs, profile_token):
         "email": kwargs.pop("email", ""),
         "address": kwargs.pop("address", ""),
         "order_by": kwargs.pop("sort_by", ""),
+        "first": kwargs.pop("first", None),
     }
     from customers.services import ProfileService
 

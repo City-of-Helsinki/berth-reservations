@@ -199,6 +199,8 @@ class ProfileService:
         phone: str = "",
         address: str = "",
         order_by: str = "",
+        first: int = None,
+        last: int = None,
         force_only_one: bool = True,
     ) -> Union[List[HelsinkiProfileUser], HelsinkiProfileUser]:
         """
@@ -207,6 +209,9 @@ class ProfileService:
 
         force_only_one: bool -> If more than one profile is found, it will raise an error
         """
+        # Optional first -filter. If set to none, no limits are set.
+        firstFilter = f", first: {first}" if first else ""
+        lastFilter = f", last: {last}" if last else ""
         query = f"""
             query FindProfile {{
                 profiles(
@@ -216,7 +221,7 @@ class ProfileService:
                     emails_Email: "{email}",
                     phones_Phone: "{phone}",
                     addresses_Address: "{address}",
-                    orderBy: "{order_by}",
+                    orderBy: "{order_by}"{firstFilter}{lastFilter}
                 ) {{
                     edges {{
                         node {{
