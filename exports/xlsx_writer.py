@@ -7,6 +7,7 @@ from xlsxwriter import Workbook
 
 from customers.enums import InvoicingType
 from customers.models import CustomerProfile
+from customers.services import ProfileService
 
 
 class BaseExportXlsxWriter:
@@ -17,7 +18,7 @@ class BaseExportXlsxWriter:
 
     fields = []
 
-    def __init__(self, items):
+    def __init__(self, items, **kwargs):
         """Export the given set of items into an Excel.
 
         Example for fields:
@@ -84,19 +85,68 @@ class CustomerXlsx(BaseExportXlsxWriter):
     identifier = "customers"
     title = _("Customers")
     fields = [
-        ("id", _("id"), 36),
+        ("id", _("id"), 37),
         ("first_name", _("first name"), 15),
         ("last_name", _("last name"), 15),
         ("invoicing_type", _("invoicing type"), 15),
         ("customer_group", _("customer group"), 15),
+        ("email", _("email"), 25),
+        ("phone", _("phone"), 15),
+        ("address", _("address"), 25),
+        ("postal_code", _("postal code"), 6),
+        ("city", _("city"), 15),
         ("comment", _("comment"), 15),
         ("created_at", _("time created"), 19),
         ("modified_at", _("time modified"), 19),
+        ("user_source", _("user source"), 19),
     ]
 
-    def get_value(self, field_name, item: CustomerProfile):
+    helsinki_profile_values = {}
+    helsinki_profile_field = {
+        "first_name",
+        "last_name",
+        "email",
+        "phone",
+        "address",
+        "postal_code",
+        "city",
+    }
+
+    def __init__(self, items, profile_token: str = None, **kwargs):
+        super().__init__(items, **kwargs)
+        self.profile_service = ProfileService(profile_token) if profile_token else None
+
+    def serialize(self):
+        if self.profile_service:
+            profile_ids = self.items.values_list("id", flat=True)
+            self.helsinki_profile_values = self.profile_service.get_all_profiles(
+                profile_ids
+            )
+        return super().serialize()
+
+    def get_value(self, field_name, item: CustomerProfile):  # noqa: C901
         """Return the value for the given field name."""
         fallback_value = getattr(item, field_name, "")
+
+        if (
+            field_name in self.helsinki_profile_field
+            and item.id in self.helsinki_profile_values
+        ):
+            hp_item = self.helsinki_profile_values[item.id]
+            if field_name == "first_name":
+                return hp_item.first_name
+            elif field_name == "last_name":
+                return hp_item.last_name
+            elif field_name == "email":
+                return hp_item.email
+            elif field_name == "phone":
+                return hp_item.phone
+            elif field_name == "address":
+                return hp_item.address
+            elif field_name == "postal_code":
+                return hp_item.postal_code
+            elif field_name == "city":
+                return hp_item.city
 
         if field_name == "id":
             return str(fallback_value)
@@ -110,4 +160,10 @@ class CustomerXlsx(BaseExportXlsxWriter):
             return localtime(item.created_at)
         elif field_name == "modified_at":
             return localtime(item.modified_at)
+
+        if field_name == "user_source":
+            if item.id in self.helsinki_profile_values:
+                return str(_("Helsinki profile"))
+            else:
+                return str(_("Local"))
         return fallback_value
