@@ -2,18 +2,73 @@ import io
 
 import pytest
 from django.conf import settings
+from django.urls import reverse
+from django.utils import translation
 from freezegun import freeze_time
 from openpyxl import load_workbook
+from rest_framework import status
 
+from applications.enums import ApplicationAreaType, WinterStorageMethod
+from applications.models import WinterStorageApplication, WinterStorageAreaChoice
+from applications.schema import WinterStorageApplicationNode
+from applications.tests.factories import WinterStorageApplicationFactory
 from customers.tests.factories import BoatFactory
+from exports.tests.utils import to_global_ids
+from exports.xlsx_writer import WinterStorageApplicationXlsx
 from resources.tests.factories import BoatTypeFactory, WinterStorageAreaFactory
 
-from ..enums import WinterStorageMethod
-from ..models import WinterStorageApplication, WinterStorageAreaChoice
-from ..utils import export_winter_storage_applications_as_xlsx
-from .factories import WinterStorageApplicationFactory
-
 EXCEL_FILE_LANG = settings.LANGUAGES[0][0]
+
+
+@pytest.mark.skip(reason="Optimize later.")
+def test_amount_of_queries(superuser_api_client, django_assert_max_num_queries):
+    for _i in range(2):
+        winter_area = WinterStorageAreaFactory()
+        boat = BoatFactory()
+        application = WinterStorageApplicationFactory(
+            boat=boat, area_type=ApplicationAreaType.MARKED
+        )
+        WinterStorageAreaChoice.objects.create(
+            application=application, priority=1, winter_storage_area=winter_area
+        )
+
+    ids = WinterStorageApplication.objects.all().values_list("id", flat=True)
+    global_ids = to_global_ids(ids, WinterStorageApplicationNode)
+
+    with django_assert_max_num_queries(2):
+        response = superuser_api_client.post(
+            reverse("winter_storage_applications_xlsx"), data={"ids": global_ids}
+        )
+
+    assert response.status_code == status.HTTP_200_OK
+
+
+@freeze_time("2019-01-14T08:00:00Z")
+def test_export_view_produces_an_excel(superuser_api_client):
+    winter_area = WinterStorageAreaFactory()
+    boat = BoatFactory()
+    application = WinterStorageApplicationFactory(
+        boat=boat, area_type=ApplicationAreaType.MARKED
+    )
+    WinterStorageAreaChoice.objects.create(
+        application=application, priority=1, winter_storage_area=winter_area
+    )
+
+    ids = WinterStorageApplication.objects.all().values_list("id", flat=True)
+    global_ids = to_global_ids(ids, WinterStorageApplicationNode)
+
+    response = superuser_api_client.post(
+        reverse("winter_storage_applications_xlsx"), data={"ids": global_ids}
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    xlsx_bytes = response.content
+    xlsx_file = io.BytesIO(xlsx_bytes)
+    wb = load_workbook(filename=xlsx_file, read_only=True)
+    assert "Winter storage applications" in wb.sheetnames
+    xl_sheet = wb["Winter storage applications"]
+
+    assert xl_sheet.cell(2, 1).value == "2019-01-14 10:00"
 
 
 @freeze_time("2019-01-14T08:00:00Z")
@@ -32,6 +87,7 @@ def test_exporting_winter_storage_applications_to_excel(customer_private):
         "model": "BMW S 12",
     }
     application_data = {
+        "area_type": ApplicationAreaType.MARKED,
         "first_name": "Kyösti",
         "last_name": "Testaaja",
         "email": "kyosti.testaaja@example.com",
@@ -39,7 +95,7 @@ def test_exporting_winter_storage_applications_to_excel(customer_private):
         "zip_code": "00170",
         "municipality": "Helsinki",
         "phone_number": "0411234567",
-        "storage_method": WinterStorageMethod.ON_TRESTLES.value,
+        "storage_method": WinterStorageMethod.ON_TRESTLES,
         "trailer_registration_number": "hel001",
         "accept_boating_newsletter": False,
         "accept_fitness_news": False,
@@ -57,14 +113,15 @@ def test_exporting_winter_storage_applications_to_excel(customer_private):
         application=application, priority=1, winter_storage_area=winter_area
     )
 
-    queryset = WinterStorageApplication.objects.all()
-    xlsx_bytes = export_winter_storage_applications_as_xlsx(queryset)
+    with translation.override(EXCEL_FILE_LANG):
+        exporter = WinterStorageApplicationXlsx(WinterStorageApplication.objects.all())
+        xlsx_bytes = exporter.serialize()
+
     xlsx_file = io.BytesIO(xlsx_bytes)
-
     wb = load_workbook(filename=xlsx_file, read_only=True)
-    assert "winter_storage_applications" in wb.sheetnames
+    assert "Winter storage applications" in wb.sheetnames
 
-    xl_sheet = wb["winter_storage_applications"]
+    xl_sheet = wb["Winter storage applications"]
 
     winter_area_name = winter_area.safe_translation_getter(
         "name", language_code=EXCEL_FILE_LANG

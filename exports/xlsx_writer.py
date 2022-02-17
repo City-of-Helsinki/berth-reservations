@@ -5,11 +5,12 @@ from django.utils.timezone import localtime
 from django.utils.translation import gettext_lazy as _
 from xlsxwriter import Workbook
 
-from applications.models import BerthApplication
-from applications.utils import parse_berth_switch_str, parse_choices_to_multiline_string
+from applications.enums import WinterStorageMethod
+from applications.models import BerthApplication, WinterStorageApplication
 from customers.enums import InvoicingType
 from customers.models import CustomerProfile
 from customers.services import ProfileService
+from exports.utils import parse_berth_switch_str, parse_choices_to_multiline_string
 
 
 class BaseExportXlsxWriter:
@@ -234,6 +235,56 @@ class BerthApplicationXlsx(BaseExportXlsxWriter):
             return item.berth_switch.reason.title if item.berth_switch.reason else "---"
         elif field_name == "boat_type":
             return item.boat_type.name
+
+        if isinstance(fallback_value, bool):
+            return "Yes" if fallback_value else ""
+        return fallback_value
+
+
+class WinterStorageApplicationXlsx(BaseExportXlsxWriter):
+    identifier = "winter_storage_applications"
+    title = _("winter storage applications")
+    fields = (
+        ("created_at", _("reserved at"), 15),
+        ("chosen_harbors", _("chosen winter areas"), 55),
+        ("company_name", _("company name"), 35),
+        ("business_id", _("business ID"), 15),
+        ("first_name", _("first name"), 15),
+        ("last_name", _("last name"), 15),
+        ("email", _("email"), 15),
+        ("address", _("address"), 15),
+        ("zip_code", _("zip code"), 15),
+        ("municipality", _("municipality"), 15),
+        ("phone_number", _("phone number"), 15),
+        ("storage_method", _("storage method"), 15),
+        ("trailer_registration_number", _("trailer registration number"), 15),
+        ("boat_type", _("boat type"), 15),
+        ("boat_width", _("boat width"), 15),
+        ("boat_length", _("boat length"), 15),
+        ("boat_registration_number", _("boat registration number"), 15),
+        ("boat_name", _("boat name"), 15),
+        ("boat_model", _("boat model"), 15),
+        ("accept_boating_newsletter", _("accept boating newsletter"), 15),
+        ("accept_fitness_news", _("accept fitness news"), 15),
+        ("accept_library_news", _("accept library news"), 15),
+        ("accept_other_culture_news", _("accept other culture news"), 15),
+        ("application_code", _("application code"), 15),
+    )
+    wrapped_fields = ("chosen_harbors",)
+
+    def get_value(self, field_name, item: WinterStorageApplication):
+        fallback_value = getattr(item, field_name, "")
+
+        if field_name == "created_at":
+            return item.created_at.astimezone().strftime("%Y-%m-%d %H:%M")
+        elif field_name == "chosen_harbors":
+            winter_area_choices = item.winterstorageareachoice_set.order_by("priority")
+            return parse_choices_to_multiline_string(winter_area_choices)
+        elif field_name == "boat_type":
+            return item.boat_type.name
+        elif field_name == "storage_method":
+            status = WinterStorageMethod(fallback_value)
+            return str(getattr(status, "label", str(status)))
 
         if isinstance(fallback_value, bool):
             return "Yes" if fallback_value else ""
