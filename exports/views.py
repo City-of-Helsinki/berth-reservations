@@ -120,3 +120,15 @@ class WinterStorageApplicationExportView(BaseExportView):
         return (
             super().get_queryset(ids=ids).filter(area_type=ApplicationAreaType.MARKED)
         )
+
+
+class UnmarkedWinterStorageApplicationExportView(BaseExportView):
+    model = WinterStorageApplication
+    exporter_class = WinterStorageApplicationXlsx
+
+    def get_queryset(self, ids: Iterable = None):
+        if ids:
+            ids = from_global_ids(ids, WinterStorageApplicationNode)
+        return (
+            super().get_queryset(ids=ids).filter(area_type=ApplicationAreaType.UNMARKED)
+        )

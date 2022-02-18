@@ -3,6 +3,7 @@ from django.urls import path
 from exports.views import (
     BerthApplicationExportView,
     CustomerExportView,
+    UnmarkedWinterStorageApplicationExportView,
     WinterStorageApplicationExportView,
 )
 
@@ -21,5 +22,10 @@ urlpatterns = [
         "winter-storage-applications/xlsx/",
         WinterStorageApplicationExportView.as_view(),
         name="winter_storage_applications_xlsx",
+    ),
+    path(
+        "unmarked-winter-storage-applications/xlsx/",
+        UnmarkedWinterStorageApplicationExportView.as_view(),
+        name="unmarked_winter_storage_applications_xlsx",
     ),
 ]
