@@ -15,12 +15,8 @@ from customers.enums import InvoicingType
 from customers.models import CustomerProfile
 from customers.schema import ProfileNode
 from customers.services import HelsinkiProfileUser
+from exports.tests.utils import to_global_ids
 from exports.xlsx_writer import CustomerXlsx
-from utils.relay import to_global_id
-
-
-def to_global_profile_node_ids(ids):
-    return map(lambda x: to_global_id(ProfileNode, x), ids)
 
 
 def get_mock_data_for_profiles(profiles):
@@ -57,7 +53,7 @@ def test_admin_credentials_are_required(
     profile = CustomerProfileFactory()
     mock_get_all_profiles.return_value = get_mock_data_for_profiles([profile])
     ids = CustomerProfile.objects.all().values_list("id", flat=True)
-    global_ids = to_global_profile_node_ids(ids)
+    global_ids = to_global_ids(ids, ProfileNode)
 
     response = user_api_client.post(
         reverse("customer_xlsx"), data={"ids": global_ids, "profile_token": "token"}
@@ -79,7 +75,7 @@ def test_amount_of_queries(
         CustomerProfile.objects.all()
     )
     ids = CustomerProfile.objects.all().values_list("id", flat=True)
-    global_ids = to_global_profile_node_ids(ids)
+    global_ids = to_global_ids(ids, ProfileNode)
 
     with django_assert_max_num_queries(2):
         response = superuser_api_client.post(
@@ -96,7 +92,7 @@ def test_export_view_produces_an_excel(mock_get_all_profiles, superuser_api_clie
         CustomerProfile.objects.all()
     )
     ids = CustomerProfile.objects.all().values_list("id", flat=True)
-    global_ids = to_global_profile_node_ids(ids)
+    global_ids = to_global_ids(ids, ProfileNode)
 
     response = superuser_api_client.post(
         reverse("customer_xlsx"), data={"ids": global_ids, "profile_token": "token"}

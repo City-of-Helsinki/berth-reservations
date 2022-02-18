@@ -8,11 +8,19 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.views import APIView
 
+from applications.enums import ApplicationAreaType
+from applications.models import BerthApplication, WinterStorageApplication
+from applications.schema import BerthApplicationNode, WinterStorageApplicationNode
 from berth_reservations.oidc import BerthApiTokenAuthentication
 from customers.models import CustomerProfile
 from customers.schema import ProfileNode
 from exports.utils import from_global_ids
-from exports.xlsx_writer import BaseExportXlsxWriter, CustomerXlsx
+from exports.xlsx_writer import (
+    BaseExportXlsxWriter,
+    BerthApplicationXlsx,
+    CustomerXlsx,
+    WinterStorageApplicationXlsx,
+)
 
 
 class UserHasViewPermission(DjangoModelPermissions):
@@ -90,3 +98,37 @@ class CustomerExportView(BaseExportView):
             raise serializers.ValidationError("profile_token required.")
 
         return kwargs
+
+
+class BerthApplicationExportView(BaseExportView):
+    model = BerthApplication
+    exporter_class = BerthApplicationXlsx
+
+    def get_queryset(self, ids: Iterable = None):
+        if ids:
+            ids = from_global_ids(ids, BerthApplicationNode)
+        return super().get_queryset(ids=ids)
+
+
+class WinterStorageApplicationExportView(BaseExportView):
+    model = WinterStorageApplication
+    exporter_class = WinterStorageApplicationXlsx
+
+    def get_queryset(self, ids: Iterable = None):
+        if ids:
+            ids = from_global_ids(ids, WinterStorageApplicationNode)
+        return (
+            super().get_queryset(ids=ids).filter(area_type=ApplicationAreaType.MARKED)
+        )
+
+
+class UnmarkedWinterStorageApplicationExportView(BaseExportView):
+    model = WinterStorageApplication
+    exporter_class = WinterStorageApplicationXlsx
+
+    def get_queryset(self, ids: Iterable = None):
+        if ids:
+            ids = from_global_ids(ids, WinterStorageApplicationNode)
+        return (
+            super().get_queryset(ids=ids).filter(area_type=ApplicationAreaType.UNMARKED)
+        )
