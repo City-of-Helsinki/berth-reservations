@@ -56,7 +56,7 @@ def test_admin_credentials_are_required(
     global_ids = to_global_ids(ids, ProfileNode)
 
     response = user_api_client.post(
-        reverse("customer_xlsx"), data={"ids": global_ids, "profile_token": "token"}
+        reverse("customer_xlsx"), data={"ids": global_ids, "profileToken": "token"}
     )
 
     if has_permission:
@@ -79,7 +79,7 @@ def test_amount_of_queries(
 
     with django_assert_max_num_queries(2):
         response = superuser_api_client.post(
-            reverse("customer_xlsx"), data={"ids": global_ids, "profile_token": "token"}
+            reverse("customer_xlsx"), data={"ids": global_ids, "profileToken": "token"}
         )
 
     assert response.status_code == status.HTTP_200_OK
@@ -95,7 +95,7 @@ def test_export_view_produces_an_excel(mock_get_all_profiles, superuser_api_clie
     global_ids = to_global_ids(ids, ProfileNode)
 
     response = superuser_api_client.post(
-        reverse("customer_xlsx"), data={"ids": global_ids, "profile_token": "token"}
+        reverse("customer_xlsx"), data={"ids": global_ids, "profileToken": "token"}
     )
 
     assert response.status_code == status.HTTP_200_OK
@@ -123,7 +123,7 @@ def test_customer_excel_fields(mock_get_all_profiles):
     expected_datetime_format = "YYYY-MM-DD HH:MM:SS"
     exporter = CustomerXlsx(
         CustomerProfile.objects.all().order_by("created_at"),
-        profile_token="profile_token",
+        profile_token="token",
     )
 
     xlsx_bytes = exporter.serialize()

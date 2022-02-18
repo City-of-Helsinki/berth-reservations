@@ -38,7 +38,7 @@ class ExporterArgumentSerializer(serializers.Serializer):
     ids = serializers.ListField(
         child=serializers.CharField(min_length=1), required=False
     )
-    profile_token = serializers.CharField(
+    profileToken = serializers.CharField(
         required=False,
         help_text=_("API token for Helsinki profile GraphQL API"),
     )
@@ -92,7 +92,7 @@ class CustomerExportView(BaseExportView):
     def get_exporter_kwargs(self, arguments):
         kwargs = super().get_exporter_kwargs(arguments)
 
-        if profile_token := arguments.get("profile_token"):
+        if profile_token := arguments.get("profileToken"):
             kwargs["profile_token"] = profile_token
         else:
             raise serializers.ValidationError("profile_token required.")
