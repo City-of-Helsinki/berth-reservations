@@ -127,19 +127,21 @@ def _general_filters(params, qs):
 
 
 def _get_ids_from_profile_service(kwargs, profile_token):
+    from customers.services import ProfileService
+    from customers.services.profile import BATCH_SIZE
+
     params = {
         "first_name": kwargs.pop("first_name", ""),
         "last_name": kwargs.pop("last_name", ""),
         "email": kwargs.pop("email", ""),
         "address": kwargs.pop("address", ""),
         "order_by": kwargs.pop("sort_by", ""),
-        "first": 100,  # fixed limit for recusrively fetch all -feature
+        "first": BATCH_SIZE,  # fixed limit for recusrively fetch all -feature
     }
-    from customers.services import ProfileService
 
     profile_service = ProfileService(profile_token=profile_token)
     users = profile_service.find_profile(
-        **params, force_only_one=False, recursively_fetch_all=True
+        **params, force_only_one=False, recursively_fetch_all=True, ids_only=True
     )
     return [user.id for user in users]
 
