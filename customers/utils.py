@@ -1,6 +1,6 @@
 import hashlib
 from datetime import date
-from typing import Tuple
+from typing import List, Tuple
 
 from dateutil.relativedelta import relativedelta
 
@@ -34,5 +34,5 @@ def get_customer_hash(profile) -> str:
     return hashlib.sha256(str(profile.id).encode()).hexdigest()
 
 
-def from_global_ids(global_ids: [str], node_type: object) -> [str]:
+def from_global_ids(global_ids: List[str], node_type: object) -> List[str]:
     return [from_global_id(gid, node_type) for gid in global_ids]
