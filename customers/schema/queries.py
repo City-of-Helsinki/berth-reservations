@@ -107,8 +107,9 @@ def _general_filters(params, qs):
         qs = qs.filter(boats__boat_type__in=boat_types)
     if lease_count:
         qs = qs.annotate(
-            sum_leases=Count("berth_leases") + Count("winter_storage_leases")
-        ).filter(sum_leases__gt=1)
+            sum_leases_count=Count("berth_leases"),
+            winter_storage_leases_count=Count("winter_storage_leases"),
+        ).filter(Q(sum_leases_count__gt=1) | Q(winter_storage_leases_count__gt=1))
     if boat_registration_number:
         qs = qs.filter(boats__registration_number__icontains=boat_registration_number)
     if lease_start:
