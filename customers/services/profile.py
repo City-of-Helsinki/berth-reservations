@@ -205,6 +205,7 @@ class ProfileService:
         after: str = "",
         force_only_one: bool = True,
         recursively_fetch_all: bool = False,
+        ids_only: bool = False,
     ) -> Union[List[HelsinkiProfileUser], HelsinkiProfileUser]:
         """
         Find the profile based on the passed criteria, the missing parameters
@@ -212,8 +213,28 @@ class ProfileService:
 
         force_only_one: bool -> If more than one profile is found, it will raise an error
         recursively_fetch_all: bool -> If all the pages are needed
+        ids_only; bool -> Fetch only Helsinki profile ids: No names or addresses.
         """
-        query = """query FindProfile (
+        FIND_PROFILE_QUERY_FIELDS = """
+                edges {
+                    node {
+                        id
+                        first_name: firstName
+                        last_name: lastName
+                        primary_email: primaryEmail {
+                            email
+                        }
+                        primary_phone: primaryPhone {
+                            phone
+                        }
+                    }
+                }
+            """
+
+        FIND_PROFILE_IDS_QUERY_FIELDS = "edges { node { id } }"
+
+        query = (
+            """query FindProfile (
                     $firstName: String,
                     $lastName: String,
                     $email: String,
@@ -237,29 +258,21 @@ class ProfileService:
                     last: $last,
                     before: $before,
                     after: $after
-                ) {
-                    pageInfo {
-                        has_next_page: hasNextPage,
-                        has_previous_page: hasPreviousPage,
-                        start_cursor: startCursor,
-                        end_cursor: endCursor
-                    }
-                    edges {
-                        node {
-                            id
-                            first_name: firstName
-                            last_name: lastName
-                            primary_email: primaryEmail {
-                                email
-                            }
-                            primary_phone: primaryPhone {
-                                phone
-                            }
-                        }
-                    }
+                ){
+                pageInfo {
+                    has_next_page: hasNextPage,
+                    has_previous_page: hasPreviousPage,
+                    start_cursor: startCursor,
+                    end_cursor: endCursor
                 }
+                %s
             }
         """
+            % FIND_PROFILE_IDS_QUERY_FIELDS
+            if ids_only
+            else FIND_PROFILE_QUERY_FIELDS
+        )
+
         variables = {
             "firstName": first_name,
             "lastName": last_name,
@@ -390,7 +403,7 @@ class ProfileService:
             body["variables"] = variables
 
         headers = {"Authorization": "Bearer %s" % self.profile_token}
-        r = requests.post(url=self.api_url, json=body, headers=headers, timeout=10)
+        r = requests.post(url=self.api_url, json=body, headers=headers, timeout=30)
         r.raise_for_status()
         response = r.json()
         if errors := response.get("errors"):
