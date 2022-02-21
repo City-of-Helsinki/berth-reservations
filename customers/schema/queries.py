@@ -168,14 +168,11 @@ class Query:
         boat_types=graphene.List(graphene.ID),
         boat_registration_number=graphene.String(),
         lease_count=graphene.Boolean(),
-        berth_lease_customer=graphene.Boolean(),
         harbors=graphene.List(graphene.String),
         piers=graphene.List(graphene.String),
         berths=graphene.List(graphene.String),
-        marked_winter_storage_lease_customer=graphene.Boolean(),
         marked_winter_storage_areas=graphene.List(graphene.String),
         marked_winter_storage_places=graphene.List(graphene.String),
-        unmarked_winter_storage_lease_customer=graphene.Boolean(),
         unmarked_winter_storage_areas=graphene.List(graphene.String),
         sticker_number=graphene.String(),
         first_name=graphene.String(
@@ -211,21 +208,18 @@ class Query:
 
     @view_permission_required(CustomerProfile, BerthApplication, BerthLease)
     def resolve_berth_profiles(self, info, **kwargs):
-        berth_lease_customer = kwargs.pop("berth_lease_customer", False)
-        harbors = kwargs.pop("harbors", [])
-        piers = kwargs.pop("piers", [])
-        berths = kwargs.pop("berths", [])
-
-        marked_winter_storage_lease_customer = kwargs.pop(
-            "marked_winter_storage_lease_customer", False
-        )
-        marked_winter_storage_areas = kwargs.pop("marked_winter_storage_areas", [])
-        marked_winter_storage_places = kwargs.pop("marked_winter_storage_places", [])
-
-        unmarked_winter_storage_lease_customer = kwargs.pop(
-            "unmarked_winter_storage_lease_customer", False
-        )
-        unmarked_winter_storage_areas = kwargs.pop("unmarked_winter_storage_areas", [])
+        harbors = [h for h in kwargs.pop("harbors", []) if h is not None]
+        piers = [p for p in kwargs.pop("piers", []) if p is not None]
+        berths = [b for b in kwargs.pop("berths", []) if b is not None]
+        marked_winter_storage_areas = [
+            a for a in kwargs.pop("marked_winter_storage_areas", []) if a is not None
+        ]
+        marked_winter_storage_places = [
+            p for p in kwargs.pop("marked_winter_storage_places", []) if p is not None
+        ]
+        unmarked_winter_storage_areas = [
+            a for a in kwargs.pop("unmarked_winter_storage_areas", []) if a is not None
+        ]
         sticker_number = kwargs.pop("sticker_number", None)
 
         qs = CustomerProfile.objects
@@ -234,17 +228,17 @@ class Query:
         qs = _general_filters(kwargs, qs)
 
         # Berth leases filter
-        if berth_lease_customer:
+        if harbors or piers or berths:
             qs = _filter_berth_leases(berths, harbors, piers, qs)
 
         # Marked WS leases filter
-        if marked_winter_storage_lease_customer:
+        if marked_winter_storage_areas or marked_winter_storage_places:
             qs = _filter_winter_storage_leases(
                 marked_winter_storage_areas, marked_winter_storage_places, qs
             )
 
         # Unmarked WS leases filter
-        if unmarked_winter_storage_lease_customer:
+        if unmarked_winter_storage_areas:
             qs = _filter_unmarked_winter_storage_leases(
                 qs, unmarked_winter_storage_areas
             )
