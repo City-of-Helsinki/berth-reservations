@@ -267,6 +267,7 @@ class ProfileService:
                 }
                 %s
             }
+        }
         """
             % FIND_PROFILE_IDS_QUERY_FIELDS
             if ids_only
