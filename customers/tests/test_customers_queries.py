@@ -1382,7 +1382,27 @@ def test_filter_by_hki_profile_filters(mock_find_profile, superuser_api_client):
                     }
             }
         """
+    mock_find_profile.return_value = [
+        HelsinkiProfileUser(
+            profile_1.id,
+            email=profile_1.user.email,
+            first_name=profile_1.user.first_name,
+            last_name="Last Name",
+        ),
+    ]
     executed = superuser_api_client.execute(query)
+    mock_find_profile.assert_called_with(
+        first_name="",
+        last_name="Last Name",
+        email="",
+        address="",
+        order_by="",
+        first=100,
+        ids=[str(profile_1.id)],
+        force_only_one=False,
+        recursively_fetch_all=True,
+        ids_only=True,
+    )
     assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
     assert to_global_id(ProfileNode, profile_2.id) not in str(executed["data"])
     assert to_global_id(ProfileNode, profile_3.id) not in str(executed["data"])
