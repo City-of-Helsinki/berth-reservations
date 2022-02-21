@@ -199,6 +199,7 @@ class ProfileService:
         phone: str = "",
         address: str = "",
         order_by: str = "",
+        ids: List[str] = None,
         first: int = None,
         last: int = None,
         before: str = "",
@@ -235,12 +236,13 @@ class ProfileService:
 
         query = (
             """query FindProfile (
+                    $id: [UUID!],
                     $firstName: String,
                     $lastName: String,
                     $email: String,
                     $phone: String,
                     $address: String,
-                    $sortBy: String,
+                    $orderBy: String,
                     $first: Int,
                     $last: Int,
                     $before: String,
@@ -248,12 +250,13 @@ class ProfileService:
                 ) {
                 profiles(
                     serviceType: BERTH,
+                    id: $id,
                     firstName: $firstName,
                     lastName: $lastName,
                     emails_Email: $email,
                     phones_Phone: $phone,
                     addresses_Address: $address,
-                    orderBy: $sortBy,
+                    orderBy: $orderBy,
                     first: $first,
                     last: $last,
                     before: $before,
@@ -275,12 +278,13 @@ class ProfileService:
         )
 
         variables = {
+            "id": ids,
             "firstName": first_name,
             "lastName": last_name,
             "email": email,
             "phone": phone,
             "address": address,
-            "sortBy": order_by,
+            "orderBy": order_by,
             "first": first,
             "last": last,
             "before": before,
@@ -315,12 +319,15 @@ class ProfileService:
         if force_only_one:
             return users[0]
 
+        # NOTE: This rescursive fetch should never be needed,
+        # but it's here because the Open city profile responds with a connection timeout.
         if (
             recursively_fetch_all
             and pageInfo.get("has_next_page")
             and pageInfo.get("end_cursor")
         ):
             users = users + self.find_profile(
+                ids=ids,
                 first_name=first_name,
                 last_name=last_name,
                 email=email,
@@ -367,7 +374,7 @@ class ProfileService:
         response = self.query(query=mutation, variables=variables)
         global_id = response.get("createProfile", {}).get("profile", {}).get("id")
         profile_id = UUID(from_global_id(global_id))
-        profile = CustomerProfile.objects.create(id=profile_id)
+        profile = CustomerProfile.objects.get(id=profile_id)
         return profile
 
     def parse_user_edge(self, gql_edge: Dict[str, dict]) -> HelsinkiProfileUser:
@@ -400,6 +407,7 @@ class ProfileService:
         )
 
     def query(self, query: str, variables: Optional[dict] = None) -> Dict[str, dict]:
+        # TODO: Implement cache for this profile fetching
         body = {"query": query}
         if variables:
             body["variables"] = variables
