@@ -990,67 +990,6 @@ def test_filter_profile_by_boat_registration_number(superuser_api_client):
     assert to_global_id(ProfileNode, boat_2.owner.id) not in str(executed["data"])
 
 
-def test_filter_profile_by_lease_customer_type(superuser_api_client):
-    profile_1 = BerthLeaseFactory().customer
-    profile_2 = WinterStorageLeaseFactory(
-        application=WinterStorageApplicationFactory(
-            area_type=ApplicationAreaType.MARKED
-        )
-    ).customer
-    profile_3 = WinterStorageLeaseFactory(
-        application=WinterStorageApplicationFactory(
-            area_type=ApplicationAreaType.UNMARKED
-        )
-    ).customer
-    query = """
-        {
-                berthProfiles(berthLeaseCustomer: true) {
-                    edges{
-                        node{
-                           id
-                        }
-                    }
-                }
-        }
-    """
-    executed = superuser_api_client.execute(query)
-    assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
-    assert to_global_id(ProfileNode, profile_2.id) not in str(executed["data"])
-    assert to_global_id(ProfileNode, profile_3.id) not in str(executed["data"])
-
-    query = """
-        {
-                berthProfiles(markedWinterStorageLeaseCustomer: true) {
-                    edges{
-                        node{
-                           id
-                        }
-                    }
-                }
-        }
-    """
-    executed = superuser_api_client.execute(query)
-    assert to_global_id(ProfileNode, profile_1.id) not in str(executed["data"])
-    assert to_global_id(ProfileNode, profile_2.id) in str(executed["data"])
-    assert to_global_id(ProfileNode, profile_3.id) not in str(executed["data"])
-
-    query = """
-        {
-                berthProfiles(unmarkedWinterStorageLeaseCustomer: true) {
-                    edges{
-                        node{
-                           id
-                        }
-                    }
-                }
-        }
-    """
-    executed = superuser_api_client.execute(query)
-    assert to_global_id(ProfileNode, profile_1.id) not in str(executed["data"])
-    assert to_global_id(ProfileNode, profile_2.id) not in str(executed["data"])
-    assert to_global_id(ProfileNode, profile_3.id) in str(executed["data"])
-
-
 def test_filter_profile_by_harbors(superuser_api_client):
     harbor_1 = HarborFactory()
     harbor_2 = HarborFactory()
@@ -1066,7 +1005,7 @@ def test_filter_profile_by_harbors(superuser_api_client):
     ).customer
     query = """
         {
-                berthProfiles(berthLeaseCustomer: true, harbors: ["%s", "%s"]) {
+                berthProfiles(harbors: ["%s", "%s"]) {
                     edges{
                         node{
                            id
@@ -1093,7 +1032,7 @@ def test_filter_profile_by_piers(superuser_api_client):
     profile_3 = BerthLeaseFactory(berth=BerthFactory(pier=pier_3)).customer
     query = """
             {
-                    berthProfiles(berthLeaseCustomer: true, piers: ["%s", "%s"]) {
+                    berthProfiles(piers: ["%s", "%s"]) {
                         edges{
                             node{
                                id
@@ -1120,7 +1059,7 @@ def test_filter_profile_by_berth(superuser_api_client):
     profile_3 = BerthLeaseFactory(berth=berth_3).customer
     query = """
         {
-                berthProfiles(berthLeaseCustomer: true, berths: ["%s", "%s"]) {
+                berthProfiles(berths: ["%s", "%s"]) {
                     edges{
                         node{
                            id
@@ -1167,7 +1106,7 @@ def test_filter_profile_by_marked_ws_areas(superuser_api_client):
     ).customer
     query = """
         {
-                berthProfiles(markedWinterStorageLeaseCustomer: true, markedWinterStorageAreas: ["%s", "%s"]) {
+                berthProfiles(markedWinterStorageAreas: ["%s", "%s"]) {
                     edges{
                         node{
                            id
@@ -1209,7 +1148,7 @@ def test_filter_profile_by_marked_ws_places(superuser_api_client):
     ).customer
     query = """
            {
-                   berthProfiles(markedWinterStorageLeaseCustomer: true, markedWinterStoragePlaces: ["%s", "%s"]) {
+                   berthProfiles(markedWinterStoragePlaces: ["%s", "%s"]) {
                        edges{
                            node{
                               id
@@ -1256,7 +1195,7 @@ def test_filter_profile_by_unmarked_ws_areas(superuser_api_client):
     ).customer
     query = """
             {
-                    berthProfiles(unmarkedWinterStorageLeaseCustomer: true, unmarkedWinterStorageAreas: ["%s", "%s"]) {
+                    berthProfiles(unmarkedWinterStorageAreas: ["%s", "%s"]) {
                         edges{
                             node{
                                id
@@ -1290,7 +1229,7 @@ def test_filter_profile_by_sticker_number(superuser_api_client):
     query = (
         """
     {
-            berthProfiles(unmarkedWinterStorageLeaseCustomer: true, stickerNumber: "%s") {
+            berthProfiles(stickerNumber: "%s") {
                 edges{
                     node{
                        id
@@ -1307,6 +1246,7 @@ def test_filter_profile_by_sticker_number(superuser_api_client):
 
 
 def test_filter_by_hki_profile_filters_without_profile_token(superuser_api_client):
+    CustomerProfileFactory()  # needed to trigger the profile query, or otherwise no ids
     query = """
         {
                 berthProfiles(email: "example@email.com") {
