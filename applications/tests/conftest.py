@@ -12,7 +12,7 @@ from ..notifications import NotificationType
 from .factories import BerthApplicationFactory, WinterStorageApplicationFactory
 
 
-def _generate_berth_switch_info():
+def generate_berth_switch_info():
     berth = BerthFactory()
     berth.pier.harbor.create_translation("fi", name="Nykyinen satama")
 
@@ -26,7 +26,7 @@ def _generate_berth_switch_info():
 
 @pytest.fixture
 def berth_switch_info():
-    return _generate_berth_switch_info()
+    return generate_berth_switch_info()
 
 
 @pytest.fixture
@@ -43,7 +43,7 @@ def berth_application(request):
 
     if application_type == "switch":
         berth_switch_application = BerthApplicationFactory(
-            berth_switch=_generate_berth_switch_info()
+            berth_switch=generate_berth_switch_info()
         )
         return berth_switch_application
 
@@ -54,7 +54,7 @@ def berth_application(request):
 @pytest.fixture
 def berth_switch_application():
     berth_switch_application = BerthApplicationFactory(
-        berth_switch=_generate_berth_switch_info()
+        berth_switch=generate_berth_switch_info()
     )
     return berth_switch_application
 

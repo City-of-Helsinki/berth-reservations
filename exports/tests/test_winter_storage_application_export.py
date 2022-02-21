@@ -20,16 +20,18 @@ from resources.tests.factories import BoatTypeFactory, WinterStorageAreaFactory
 EXCEL_FILE_LANG = settings.LANGUAGES[0][0]
 
 
-@pytest.mark.skip(reason="Optimize later.")
 def test_amount_of_queries(superuser_api_client, django_assert_max_num_queries):
     for _i in range(2):
-        winter_area = WinterStorageAreaFactory()
+        winter_area_1, winter_area_2 = WinterStorageAreaFactory.create_batch(2)
         boat = BoatFactory()
         application = WinterStorageApplicationFactory(
             boat=boat, area_type=ApplicationAreaType.MARKED
         )
         WinterStorageAreaChoice.objects.create(
-            application=application, priority=1, winter_storage_area=winter_area
+            application=application, priority=1, winter_storage_area=winter_area_1
+        )
+        WinterStorageAreaChoice.objects.create(
+            application=application, priority=2, winter_storage_area=winter_area_2
         )
 
     ids = WinterStorageApplication.objects.all().values_list("id", flat=True)
@@ -74,8 +76,10 @@ def test_export_view_produces_an_excel(superuser_api_client):
 @freeze_time("2019-01-14T08:00:00Z")
 @pytest.mark.parametrize("customer_private", [True, False])
 def test_exporting_winter_storage_applications_to_excel(customer_private):
-    winter_area = WinterStorageAreaFactory(name="Satama")
-    winter_area.create_translation("fi", name="Satama")
+    winter_area_1 = WinterStorageAreaFactory(name="Satama 1")
+    winter_area_1.create_translation("fi", name="Satama 1")
+    winter_area_2 = WinterStorageAreaFactory(name="Satama 2")
+    winter_area_2.create_translation("fi", name="Satama 2")
     boat_type = BoatTypeFactory()
     boat_type.create_translation("fi", name="Jollapaikka")
     boat_data = {
@@ -110,7 +114,10 @@ def test_exporting_winter_storage_applications_to_excel(customer_private):
     boat = BoatFactory(**boat_data)
     application = WinterStorageApplicationFactory(**application_data, boat=boat)
     WinterStorageAreaChoice.objects.create(
-        application=application, priority=1, winter_storage_area=winter_area
+        application=application, priority=1, winter_storage_area=winter_area_1
+    )
+    WinterStorageAreaChoice.objects.create(
+        application=application, priority=2, winter_storage_area=winter_area_2
     )
 
     with translation.override(EXCEL_FILE_LANG):
@@ -123,7 +130,10 @@ def test_exporting_winter_storage_applications_to_excel(customer_private):
 
     xl_sheet = wb["Winter storage applications"]
 
-    winter_area_name = winter_area.safe_translation_getter(
+    winter_area_name_1 = winter_area_1.safe_translation_getter(
+        "name", language_code=EXCEL_FILE_LANG
+    )
+    winter_area_name_2 = winter_area_2.safe_translation_getter(
         "name", language_code=EXCEL_FILE_LANG
     )
     boat_type_name = boat_type.safe_translation_getter(
@@ -133,7 +143,10 @@ def test_exporting_winter_storage_applications_to_excel(customer_private):
     assert xl_sheet.max_column == 24
 
     assert xl_sheet.cell(2, 1).value == "2019-01-14 10:00"
-    assert xl_sheet.cell(2, 2).value == "1: {}".format(winter_area_name)
+    assert (
+        xl_sheet.cell(2, 2).value == f"1: {winter_area_name_1}\n2: {winter_area_name_2}"
+    )
+    assert xl_sheet.cell(2, 2).alignment.wrap_text is True
     assert xl_sheet.cell(2, 3).value == (None if customer_private else "ACME Inc.")
     assert xl_sheet.cell(2, 4).value == (None if customer_private else "123123-000")
     assert xl_sheet.cell(2, 5).value == "Kyösti"
@@ -156,3 +169,5 @@ def test_exporting_winter_storage_applications_to_excel(customer_private):
     assert xl_sheet.cell(2, 22).value is None
     assert xl_sheet.cell(2, 23).value == "Yes"
     assert xl_sheet.cell(2, 24).value == "1234567890"
+
+    assert exporter.filename == "winter_storage_applications-2019-01-14_10-00-00"

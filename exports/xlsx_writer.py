@@ -1,12 +1,18 @@
 import io
 
+from django.db.models import Prefetch, QuerySet
 from django.utils import timezone
 from django.utils.timezone import localtime
 from django.utils.translation import gettext_lazy as _
 from xlsxwriter import Workbook
 
 from applications.enums import WinterStorageMethod
-from applications.models import BerthApplication, WinterStorageApplication
+from applications.models import (
+    BerthApplication,
+    HarborChoice,
+    WinterStorageApplication,
+    WinterStorageAreaChoice,
+)
 from customers.enums import InvoicingType
 from customers.models import CustomerProfile
 from customers.services import ProfileService
@@ -20,10 +26,10 @@ class BaseExportXlsxWriter:
     title = _("export")
 
     fields = []
-    wrapped_fields = []  # Fields with with wrapped text formatting
+    wrapped_fields = []  # Fields with wrapped text formatting
 
-    def __init__(self, items, **kwargs):
-        """Export the given set of items into an Excel.
+    def __init__(self, queryset: QuerySet, **kwargs):
+        """Export the given queryset of items into an Excel.
 
         Example for fields:
 
@@ -32,7 +38,7 @@ class BaseExportXlsxWriter:
             ("first_name", _("First name"), 15),
         ]
         """
-        self.items = items
+        self.queryset = queryset
 
     @property
     def filename(self):
@@ -55,7 +61,7 @@ class BaseExportXlsxWriter:
             for index, (field_name, verbose_name, width) in enumerate(self.fields)
         ]
 
-        for row_index, item in enumerate(self.items, self.content_start_index):
+        for row_index, item in enumerate(self.queryset, self.content_start_index):
             for col_index, field_name in column_index:
                 value = self.get_value(field_name, item)
                 if field_name in self.wrapped_fields:
@@ -67,7 +73,12 @@ class BaseExportXlsxWriter:
         """Get value for a specific field in Excel."""
         raise NotImplementedError
 
+    def get_optimized_queryset(self):
+        """This method can be used to optimize the queryset with prefetches etc."""
+        return self.queryset
+
     def serialize(self):
+        self.queryset = self.get_optimized_queryset()
         output = io.BytesIO()
 
         workbook = Workbook(
@@ -119,13 +130,13 @@ class CustomerXlsx(BaseExportXlsxWriter):
         "city",
     }
 
-    def __init__(self, items, profile_token: str = None, **kwargs):
-        super().__init__(items, **kwargs)
+    def __init__(self, queryset, profile_token: str = None, **kwargs):
+        super().__init__(queryset, **kwargs)
         self.profile_service = ProfileService(profile_token) if profile_token else None
 
     def serialize(self):
         if self.profile_service:
-            profile_ids = self.items.values_list("id", flat=True)
+            profile_ids = self.queryset.values_list("id", flat=True)
             self.helsinki_profile_values = self.profile_service.get_all_profiles(
                 profile_ids
             )
@@ -174,6 +185,10 @@ class CustomerXlsx(BaseExportXlsxWriter):
             else:
                 return str(_("Local"))
         return fallback_value
+
+    def get_optimized_queryset(self):
+        qs = super().get_optimized_queryset()
+        return qs.select_related("user")
 
 
 class BerthApplicationXlsx(BaseExportXlsxWriter):
@@ -226,8 +241,7 @@ class BerthApplicationXlsx(BaseExportXlsxWriter):
         if field_name == "created_at":
             return item.created_at.astimezone().strftime("%Y-%m-%d %H:%M")
         elif field_name == "chosen_harbors":
-            harbor_choices = item.harborchoice_set.order_by("priority")
-            return parse_choices_to_multiline_string(harbor_choices)
+            return parse_choices_to_multiline_string(item.harborchoice_set.all())
         elif field_name == "berth_switch" and item.berth_switch:
             return parse_berth_switch_str(item.berth_switch)
 
@@ -239,6 +253,24 @@ class BerthApplicationXlsx(BaseExportXlsxWriter):
         if isinstance(fallback_value, bool):
             return "Yes" if fallback_value else ""
         return fallback_value
+
+    def get_optimized_queryset(self):
+        qs = super().get_optimized_queryset()
+        return qs.prefetch_related(
+            Prefetch(
+                "harborchoice_set",
+                queryset=HarborChoice.objects.order_by("priority").select_related(
+                    "harbor"
+                ),
+            ),
+            "berth_switch__reason__translations",
+        ).select_related(
+            "boat",
+            "boat__boat_type",
+            "berth_switch",
+            "berth_switch__reason",
+            "berth_switch__berth__pier__harbor",
+        )
 
 
 class WinterStorageApplicationXlsx(BaseExportXlsxWriter):
@@ -278,14 +310,26 @@ class WinterStorageApplicationXlsx(BaseExportXlsxWriter):
         if field_name == "created_at":
             return item.created_at.astimezone().strftime("%Y-%m-%d %H:%M")
         elif field_name == "chosen_harbors":
-            winter_area_choices = item.winterstorageareachoice_set.order_by("priority")
-            return parse_choices_to_multiline_string(winter_area_choices)
+            return parse_choices_to_multiline_string(
+                item.winterstorageareachoice_set.all()
+            )
         elif field_name == "boat_type":
             return item.boat_type.name
         elif field_name == "storage_method":
-            status = WinterStorageMethod(fallback_value)
-            return str(getattr(status, "label", str(status)))
+            storage_method = WinterStorageMethod(fallback_value)
+            return str(getattr(storage_method, "label", str(storage_method)))
 
         if isinstance(fallback_value, bool):
             return "Yes" if fallback_value else ""
         return fallback_value
+
+    def get_optimized_queryset(self):
+        qs = super().get_optimized_queryset()
+        return qs.prefetch_related(
+            Prefetch(
+                "winterstorageareachoice_set",
+                queryset=WinterStorageAreaChoice.objects.order_by(
+                    "priority"
+                ).select_related("winter_storage_area"),
+            ),
+        ).select_related("boat", "boat__boat_type")

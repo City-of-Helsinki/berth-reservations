@@ -69,15 +69,13 @@ def test_admin_credentials_are_required(
 def test_amount_of_queries(
     mock_get_all_profiles, superuser_api_client, django_assert_max_num_queries
 ):
-    CustomerProfileFactory.create_batch(2)
-    CustomerProfileFactory.create_batch(2, user=None)
-    mock_get_all_profiles.return_value = get_mock_data_for_profiles(
-        CustomerProfile.objects.all()
-    )
+    c1, c2, c3, c4 = CustomerProfileFactory.create_batch(4)
+    c5, c6, c7, c8 = CustomerProfileFactory.create_batch(4, user=None)
+    mock_get_all_profiles.return_value = get_mock_data_for_profiles([c1, c2, c5, c6])
     ids = CustomerProfile.objects.all().values_list("id", flat=True)
     global_ids = to_global_ids(ids, ProfileNode)
 
-    with django_assert_max_num_queries(2):
+    with django_assert_max_num_queries(1):
         response = superuser_api_client.post(
             reverse("customer_xlsx"), data={"ids": global_ids, "profileToken": "token"}
         )
@@ -108,6 +106,7 @@ def test_export_view_produces_an_excel(mock_get_all_profiles, superuser_api_clie
         assert xl_sheet.cell(row_number, 1).value == str(identifier)
 
 
+@freeze_time("2022-01-01T10:00:00+02:00")
 @patch("customers.services.profile.ProfileService.get_all_profiles")
 def test_customer_excel_fields(mock_get_all_profiles):
 
@@ -157,3 +156,5 @@ def test_customer_excel_fields(mock_get_all_profiles):
     assert xl_sheet.cell(2, 14).value == "Helsinki profile"
     assert xl_sheet.cell(3, 14).value == "Local"
     assert xl_sheet.cell(4, 14).value == "Local"
+
+    assert exporter.filename == "customers-2022-01-01_10-00-00"

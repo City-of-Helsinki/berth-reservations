@@ -1,6 +1,5 @@
 import io
 
-import pytest
 from django.conf import settings
 from django.urls import reverse
 from freezegun import freeze_time
@@ -18,16 +17,18 @@ from resources.tests.factories import WinterStorageAreaFactory
 EXCEL_FILE_LANG = settings.LANGUAGES[0][0]
 
 
-@pytest.mark.skip(reason="Optimize later.")
 def test_amount_of_queries(superuser_api_client, django_assert_max_num_queries):
     for _i in range(2):
-        winter_area = WinterStorageAreaFactory()
+        winter_area_1, winter_area_2 = WinterStorageAreaFactory.create_batch(2)
         boat = BoatFactory()
         application = WinterStorageApplicationFactory(
             boat=boat, area_type=ApplicationAreaType.UNMARKED
         )
         WinterStorageAreaChoice.objects.create(
-            application=application, priority=1, winter_storage_area=winter_area
+            application=application, priority=1, winter_storage_area=winter_area_1
+        )
+        WinterStorageAreaChoice.objects.create(
+            application=application, priority=2, winter_storage_area=winter_area_2
         )
 
     ids = WinterStorageApplication.objects.all().values_list("id", flat=True)
