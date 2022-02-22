@@ -374,7 +374,7 @@ class ProfileService:
         response = self.query(query=mutation, variables=variables)
         global_id = response.get("createProfile", {}).get("profile", {}).get("id")
         profile_id = UUID(from_global_id(global_id))
-        profile = CustomerProfile.objects.get(id=profile_id)
+        profile = CustomerProfile.objects.create(id=profile_id)
         return profile
 
     def parse_user_edge(self, gql_edge: Dict[str, dict]) -> HelsinkiProfileUser:
