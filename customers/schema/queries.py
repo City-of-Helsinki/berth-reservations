@@ -168,7 +168,9 @@ class Query:
         lease_statuses=graphene.List(LeaseStatusEnum),
         boat_types=graphene.List(graphene.ID),
         boat_registration_number=graphene.String(),
-        lease_count=graphene.Boolean(),
+        lease_count=graphene.Boolean(
+            description="Filter profiles who have more than 1 berth or winter storage lease"
+        ),
         harbors=graphene.List(graphene.String),
         piers=graphene.List(graphene.String),
         berths=graphene.List(graphene.String),

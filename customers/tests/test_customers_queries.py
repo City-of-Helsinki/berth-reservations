@@ -918,10 +918,16 @@ def test_filter_profile_by_berth_count(superuser_api_client):
     profile_1 = CustomerProfileFactory()
     profile_2 = CustomerProfileFactory()
     profile_3 = CustomerProfileFactory()
+    profile_4 = CustomerProfileFactory()
+    profile_5 = CustomerProfileFactory()
     BerthLeaseFactory(customer=profile_1)
     BerthLeaseFactory(customer=profile_1)
     BerthLeaseFactory(customer=profile_2)
+    BerthLeaseFactory(customer=profile_4)
+    BerthLeaseFactory(customer=profile_4)
     WinterStorageLeaseFactory(customer=profile_2)
+    WinterStorageLeaseFactory(customer=profile_5)
+    WinterStorageLeaseFactory(customer=profile_5)
     query = """
     {
             berthProfiles(leaseCount: true) {
@@ -935,8 +941,10 @@ def test_filter_profile_by_berth_count(superuser_api_client):
     """
     executed = superuser_api_client.execute(query)
     assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
-    assert to_global_id(ProfileNode, profile_2.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_2.id) not in str(executed["data"])
     assert to_global_id(ProfileNode, profile_3.id) not in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_4.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_5.id) in str(executed["data"])
 
 
 def test_filter_profile_by_boat_types(superuser_api_client):
