@@ -10,6 +10,7 @@ from rest_framework import status
 
 from applications.models import BerthApplication, HarborChoice
 from applications.schema import BerthApplicationNode
+from applications.tests.conftest import generate_berth_switch_info
 from applications.tests.factories import BerthApplicationFactory
 from customers.tests.factories import BoatFactory
 from resources.tests.factories import BoatTypeFactory, HarborFactory
@@ -20,18 +21,24 @@ from .utils import to_global_ids
 EXCEL_FILE_LANG = settings.LANGUAGES[0][0]
 
 
-@pytest.mark.skip(reason="Optimize later.")
 def test_amount_of_queries(superuser_api_client, django_assert_max_num_queries):
     for _i in range(2):
-        harbor = HarborFactory()
+        harbor_1, harbor_2 = HarborFactory.create_batch(2)
         boat = BoatFactory()
-        application = BerthApplicationFactory(boat=boat)
-        HarborChoice.objects.create(application=application, priority=1, harbor=harbor)
+        application = BerthApplicationFactory(
+            boat=boat, berth_switch=generate_berth_switch_info()
+        )
+        HarborChoice.objects.create(
+            application=application, priority=1, harbor=harbor_1
+        )
+        HarborChoice.objects.create(
+            application=application, priority=2, harbor=harbor_2
+        )
 
     ids = BerthApplication.objects.all().values_list("id", flat=True)
     global_ids = to_global_ids(ids, BerthApplicationNode)
 
-    with django_assert_max_num_queries(2):
+    with django_assert_max_num_queries(3):
         response = superuser_api_client.post(
             reverse("berth_applications_xlsx"), data={"ids": global_ids}
         )
@@ -73,8 +80,10 @@ def test_exporting_berth_applications_to_excel(
     berth_switch_info,
     customer_private,
 ):
-    harbor = HarborFactory(name="Satama")
-    harbor.create_translation("fi", name="Satama")
+    harbor_1 = HarborFactory(name="Satama 1")
+    harbor_1.create_translation("fi", name="Satama 1")
+    harbor_2 = HarborFactory(name="Satama 2")
+    harbor_2.create_translation("fi", name="Satama 2")
     boat_type = BoatTypeFactory()
     boat_type.create_translation("fi", name="Jollapaikka")
     boat_data = {
@@ -116,7 +125,8 @@ def test_exporting_berth_applications_to_excel(
         application_data["business_id"] = "123123-000"
     boat = BoatFactory(**boat_data)
     application = BerthApplicationFactory(**application_data, boat=boat)
-    HarborChoice.objects.create(application=application, priority=1, harbor=harbor)
+    HarborChoice.objects.create(application=application, priority=1, harbor=harbor_1)
+    HarborChoice.objects.create(application=application, priority=2, harbor=harbor_2)
 
     expected_berth_switch_reason = None
     expected_berth_switch_str = None
@@ -135,7 +145,12 @@ def test_exporting_berth_applications_to_excel(
             berth_switch_info.reason.title if berth_switch_info.reason else "---"
         )
 
-    harbor_name = harbor.safe_translation_getter("name", language_code=EXCEL_FILE_LANG)
+    harbor_1_name = harbor_1.safe_translation_getter(
+        "name", language_code=EXCEL_FILE_LANG
+    )
+    harbor_2_name = harbor_2.safe_translation_getter(
+        "name", language_code=EXCEL_FILE_LANG
+    )
     boat_type_name = boat_type.safe_translation_getter(
         "name", language_code=EXCEL_FILE_LANG
     )
@@ -152,7 +167,8 @@ def test_exporting_berth_applications_to_excel(
     assert xl_sheet.max_column == 35
 
     assert xl_sheet.cell(2, 1).value == "2019-01-14 10:00"
-    assert xl_sheet.cell(2, 2).value == "1: {}".format(harbor_name)
+    assert xl_sheet.cell(2, 2).value == f"1: {harbor_1_name}\n2: {harbor_2_name}"
+    assert xl_sheet.cell(2, 2).alignment.wrap_text is True
     assert xl_sheet.cell(2, 3).value == expected_berth_switch_str
     assert xl_sheet.cell(2, 4).value == expected_berth_switch_reason
     assert xl_sheet.cell(2, 5).value == (None if customer_private else "ACME Inc.")

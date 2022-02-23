@@ -61,7 +61,7 @@ class BaseExportView(APIView):
         else:
             qs = self.get_queryset()
 
-        return {"items": qs}
+        return {"queryset": qs}
 
     def post(self, request, *args, **kwargs):
         serializer = ExporterArgumentSerializer(data=request.data)
@@ -87,7 +87,7 @@ class CustomerExportView(BaseExportView):
     def get_queryset(self, ids: Iterable = None):
         if ids:
             ids = from_global_ids(ids, ProfileNode)
-        return super().get_queryset(ids=ids).select_related("user")
+        return super().get_queryset(ids=ids)
 
     def get_exporter_kwargs(self, arguments):
         kwargs = super().get_exporter_kwargs(arguments)
@@ -95,7 +95,7 @@ class CustomerExportView(BaseExportView):
         if profile_token := arguments.get("profileToken"):
             kwargs["profile_token"] = profile_token
         else:
-            raise serializers.ValidationError("profile_token required.")
+            raise serializers.ValidationError("profileToken required.")
 
         return kwargs
 
