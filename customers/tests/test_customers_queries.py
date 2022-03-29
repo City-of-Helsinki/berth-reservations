@@ -1346,7 +1346,6 @@ def test_filter_by_hki_profile_filters(mock_find_profile, superuser_api_client):
         address="",
         order_by="",
         first=100,
-        ids=[str(profile_1.id)],
         force_only_one=False,
         recursively_fetch_all=True,
         ids_only=True,
