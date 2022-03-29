@@ -1,6 +1,3 @@
-from typing import List
-from uuid import UUID
-
 import graphene
 import graphene_django_optimizer as gql_optimizer
 from django.db.models import Case, Count, Q, When
@@ -130,9 +127,7 @@ def _general_filters(params, qs):
     return qs
 
 
-def _get_ids_from_profile_service(
-    kwargs: dict, profile_token: str, helsinki_profile_query_ids: List[UUID]
-):
+def _get_ids_from_profile_service(kwargs: dict, profile_token: str):
     from customers.services import ProfileService
     from customers.services.profile import BATCH_SIZE
 
@@ -146,9 +141,6 @@ def _get_ids_from_profile_service(
     }
 
     profile_service = ProfileService(profile_token=profile_token)
-
-    if helsinki_profile_query_ids:
-        params["ids"] = [str(profile_id) for profile_id in helsinki_profile_query_ids]
 
     users = profile_service.find_profile(
         **params, force_only_one=False, recursively_fetch_all=True, ids_only=True
@@ -227,19 +219,31 @@ class Query:
 
         qs = CustomerProfile.objects
 
+        # Check if Helsinki Profiles filters are used in the query and query their ids for filter
+        if not set(kwargs.keys()).isdisjoint(set(HELSINKI_PROFILES_FILTERS)):
+            profile_token = kwargs.pop("api_token", None)
+            if not profile_token:
+                raise VenepaikkaGraphQLError(
+                    "Cannot filter by Helsinki Profile fields without API Token"
+                )
+            profile_ids = _get_ids_from_profile_service(kwargs, profile_token)
+            profile_preserved = Case(
+                *[When(pk=pk, then=pos) for pos, pk in enumerate(profile_ids)]
+            )
+            # New query of CustomerProfiles, filtered and ordered by ids from the profile query
+            qs = CustomerProfile.objects.filter(id__in=profile_ids).order_by(
+                profile_preserved
+            )
         # General filters
         qs = _general_filters(kwargs, qs)
-
         # Berth leases filter
         if harbors or piers or berths:
             qs = _filter_berth_leases(berths, harbors, piers, qs)
-
         # Marked WS leases filter
         if marked_winter_storage_areas or marked_winter_storage_places:
             qs = _filter_winter_storage_leases(
                 marked_winter_storage_areas, marked_winter_storage_places, qs
             )
-
         # Unmarked WS leases filter
         if unmarked_winter_storage_areas:
             qs = _filter_unmarked_winter_storage_leases(
@@ -247,26 +251,5 @@ class Query:
             )
         if sticker_number:
             qs = qs.filter(winter_storage_leases__sticker_number=sticker_number)
-
-        # Check if Helsinki Profiles filters are used in the query and query their ids for filter
-        if not set(kwargs.keys()).isdisjoint(set(HELSINKI_PROFILES_FILTERS)):
-            # only CustomerProfile ids needed in the profile query.
-            helsinki_profile_query_ids = list(qs.values_list("id", flat=True))
-            if helsinki_profile_query_ids:
-                profile_token = kwargs.pop("api_token", None)
-                if not profile_token:
-                    raise VenepaikkaGraphQLError(
-                        "Cannot filter by Helsinki Profile fields without API Token"
-                    )
-                profile_ids = _get_ids_from_profile_service(
-                    kwargs, profile_token, helsinki_profile_query_ids
-                )
-                profile_preserved = Case(
-                    *[When(pk=pk, then=pos) for pos, pk in enumerate(profile_ids)]
-                )
-                # New query of CustomerProfiles, filtered and ordered by ids from the profile query
-                qs = CustomerProfile.objects.filter(id__in=profile_ids).order_by(
-                    profile_preserved
-                )
 
         return gql_optimizer.query(qs, info)
