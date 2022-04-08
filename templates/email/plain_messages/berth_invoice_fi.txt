@@ -24,7 +24,7 @@ Nettohinta: {{ order.total_pretax_price }}€
 ALV: {{ order.total_tax_value }}€ ({{ order.tax_percentage }}%)
 Yhteensä: {{ order.total_price }}€ / vuosi
 
-Eräpäivä: {{ order.due_date }}
+Eräpäivä: {{ order.due_date.strftime("%d.%m.%Y") }}
 
 Linkki maksamiseen: {{ payment_url }}
 

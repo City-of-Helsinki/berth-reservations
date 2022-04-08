@@ -508,7 +508,7 @@ def send_cancellation_notice(order):
     )
     notification_type = NotificationType.ORDER_CANCELLED
     if rejected_at := getattr(order, "rejected_at", None):
-        rejected_at = format_date(rejected_at, locale=language)
+        rejected_at = format_date(rejected_at, locale="fi")
     context = {
         "order": order,
         "rejected_at": rejected_at,
@@ -629,7 +629,7 @@ def send_payment_notification(
 
         sms_context = {
             "product_name": product_name,
-            "due_date": format_date(order.due_date, locale=language),
+            "due_date": format_date(order.due_date, locale="fi"),
             "payment_url": payment_url,
         }
         sms_service = SMSNotificationService()
@@ -723,7 +723,7 @@ def send_berth_switch_offer(
         "offer": offer,
         "accept_url": get_offer_customer_url(offer, language, True),
         "cancel_url": get_offer_customer_url(offer, language, False),
-        "due_date": format_date(offer.due_date, locale=language),
+        "due_date": format_date(offer.due_date, locale="fi"),
     }
 
     send_notification(email, notification_type.value, context, language)

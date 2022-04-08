@@ -1,7 +1,7 @@
 <p>
     Bästa kund, tack för din ansökan. Vi har behandlat den och erbjuder dig båtplatsen
     nedan. Om du vill ta emot den ska du betala för den före förfallodatumet,
-    som är {{ order.due_date }}.
+    som är {{ order.due_date.strftime("%d.%m.%Y") }}.
 </p>
 
 <h3>Båtplats som erbjuds</h3>
@@ -170,7 +170,7 @@
                 1. Läs igenom de bifogade hyresavtalsvillkoren för båtplatsen och båthamnens regler
             </p>
             <p>
-                2. Betala fakturan för båtplatsen via denna länk före förfallodatumet {{ order.due_date }}:
+                2. Betala fakturan för båtplatsen via denna länk före förfallodatumet {{ order.due_date.strftime("%d.%m.%Y") }}:
             </p>
 
             <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"

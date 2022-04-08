@@ -1,7 +1,7 @@
 <p>
     Hyvä asiakas, kiitos hakemuksestasi. Olemme käsitelleet sen ja tarjoamme
     sinulle alla olevaa venepaikkaa. Jos haluat vastaanottaa sen, maksa se
-    ennen eräpäivää, joka on {{ order.due_date }}.
+    ennen eräpäivää, joka on {{ order.due_date.strftime("%d.%m.%Y") }}.
 </p>
 
 <h3>Tarjottava venepaikka</h3>
@@ -170,7 +170,7 @@
                 venesatamasääntöihin
             </p>
             <p>
-                2. Maksa venepaikan lasku tämän linkin kautta ennen eräpäivää {{ order.due_date }}:
+                2. Maksa venepaikan lasku tämän linkin kautta ennen eräpäivää {{ order.due_date.strftime("%d.%m.%Y") }}:
             </p>
 
             <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"

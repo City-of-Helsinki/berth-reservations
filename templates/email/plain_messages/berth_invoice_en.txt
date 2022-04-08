@@ -24,7 +24,7 @@ Net price: {{ order.total_pretax_price }}€
 VAT: {{ order.total_tax_value }}€ ({{ order.tax_percentage }}%)
 Total: {{ order.total_price }}€ / year
 
-Due date: {{ order.due_date }}
+Due date: {{ order.due_date.strftime("%d.%m.%Y") }}
 
 Payment link: {{ payment_url }}
 

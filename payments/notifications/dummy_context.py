@@ -174,7 +174,7 @@ def _get_offer_context(subject, offer) -> Dict:
         "offer": offer,
         "accept_url": get_offer_customer_url(offer, settings.LANGUAGE_CODE, True),
         "cancel_url": get_offer_customer_url(offer, settings.LANGUAGE_CODE, False),
-        "due_date": format_date(offer.due_date, locale=settings.LANGUAGE_CODE),
+        "due_date": format_date(offer.due_date, locale="fi"),
     }
 
 
@@ -227,11 +227,11 @@ def load_dummy_context():
             ),
             NotificationType.SMS_INVOICE_NOTICE: {
                 "product_name": "Berth",
-                "due_date": str(today()),
+                "due_date": format_date(today(), locale="fi"),
                 "payment_url": "https://foo.bar/payment",
             },
             NotificationType.SMS_BERTH_SWITCH_NOTICE: {
-                "due_date": str(today()),
+                "due_date": format_date(today(), locale="fi"),
                 "accept_url": "https://foo.bar/payment",
             },
         }

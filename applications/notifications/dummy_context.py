@@ -1,5 +1,4 @@
-from babel.dates import format_date
-from dateutil.utils import today
+from django.utils.timezone import now
 from django_ilmoitin.dummy_context import COMMON_CONTEXT, dummy_context
 
 from ..tests.factories import (
@@ -8,6 +7,7 @@ from ..tests.factories import (
     WinterAreaChoiceFactory,
     WinterStorageApplicationFactory,
 )
+from ..utils import localize_datetime
 from .types import NotificationType
 
 
@@ -23,7 +23,7 @@ def load_dummy_context():
 
     dummy_context.update(
         {
-            COMMON_CONTEXT: {"created_at": format_date(today(), locale="fi")},
+            COMMON_CONTEXT: {"created_at": localize_datetime(now(), "fi")},
             NotificationType.BERTH_APPLICATION_CREATED: {
                 "subject": NotificationType.BERTH_APPLICATION_CREATED.label,
                 "application": berth_application,

@@ -1,7 +1,7 @@
 <p>
     Dear customer, thank you for your application. We have processed it and we would
     now like to offer you the boat berth specified below. If you wish to accept it,
-    please pay the invoice before the due date {{ order.due_date }}.
+    please pay the invoice before the due date {{ order.due_date.strftime("%d.%m.%Y") }}.
 </p>
 
 <h3>Boat berth offered</h3>
@@ -170,7 +170,7 @@
                 1. Read the attached boat berth lease agreement terms and the harbor rules
             </p>
             <p>
-                2. Pay the invoice via this link before the due date {{ order.due_date }}:
+                2. Pay the invoice via this link before the due date {{ order.due_date.strftime("%d.%m.%Y") }}:
             </p>
 
             <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"

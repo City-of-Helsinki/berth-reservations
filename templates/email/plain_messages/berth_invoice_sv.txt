@@ -24,7 +24,7 @@ Nettopris: {{ order.total_pretax_price }}€
 MOMS: {{ order.total_tax_value }}€ ({{ order.tax_percentage }}%)
 Totalt: {{ order.total_price }}€ / år
 
-Förfallodatum: {{ order.due_date }}
+Förfallodatum: {{ order.due_date.strftime("%d.%m.%Y") }}
 
 Betalningslänk: {{ payment_url }}
 
