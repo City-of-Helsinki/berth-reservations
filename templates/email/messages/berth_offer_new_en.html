@@ -1,7 +1,7 @@
 <p>
     Dear customer, thank you for your application. We have processed it and we would
     now like to offer you the boat berth specified below. If you wish to accept it,
-    please pay the invoice before the due date {{ order.due_date }}.
+    please pay the invoice before the due date {{ order.due_date.strftime("%d.%m.%Y") }}.
 </p>
 
 <h3>Boat berth offered</h3>
@@ -167,10 +167,12 @@
         <td style="padding: 48px;">
             <b>If you wish to accept the boat berth, please:</b>
             <p>
-                1. Read the attached boat berth lease agreement terms and the harbor rules
+                1. Familiarize yourself with the
+                <a href="https://www.hel.fi/helsinki/en/culture/recreation/boating/boat-berths/Berth-lease-terms">berth lease terms</a> and
+                <a href="https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/veneilyn-saannot/venesatamasaannot/">marina rules</a>.
             </p>
             <p>
-                2. Pay the invoice via this link before the due date {{ order.due_date }}:
+                2. Pay the invoice via this link before the due date {{ order.due_date.strftime("%d.%m.%Y") }}:
             </p>
 
             <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
@@ -182,6 +184,13 @@
                 customer service department at <a
                     href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
             </p>
+            <p>
+                3. Contact customer service if you need a key to the pier gate of your berth.
+            </p>
+            <p>
+                4. For other questions, visit our boating <a href="https://www.hel.fi/helsinki/en/culture/recreation/boating">website</a>.
+            </p>
+
             <b>If you do NOT wish to reserve the boat berth, please:</b>
             <p>1. Notify us via this link:</p>
 

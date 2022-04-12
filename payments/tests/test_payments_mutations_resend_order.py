@@ -156,9 +156,7 @@ def test_resend_order(
         )
         sms_context = {
             "product_name": order.product.name,
-            "due_date": format_date(
-                order.due_date, locale=order.lease.application.language
-            ),
+            "due_date": format_date(order.due_date, locale="fi"),
             "payment_url": payment_url,
         }
 
@@ -244,9 +242,7 @@ def test_resend_order_in_error(
     )
     sms_context = {
         "product_name": order.product.name,
-        "due_date": format_date(
-            order.due_date, locale=order.lease.application.language
-        ),
+        "due_date": format_date(order.due_date, locale="fi"),
         "payment_url": payment_url,
     }
 

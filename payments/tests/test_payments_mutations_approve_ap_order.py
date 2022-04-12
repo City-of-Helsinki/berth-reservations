@@ -107,9 +107,7 @@ def test_approve_ap_order(
     # Assert that the SMS is being sent
     sms_context = {
         "product_name": product_name,
-        "due_date": format_date(
-            order.due_date, locale=order.lease.application.language
-        ),
+        "due_date": format_date(order.due_date, locale="fi"),
         "payment_url": payment_url,
     }
 

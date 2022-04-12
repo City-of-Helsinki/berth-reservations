@@ -249,7 +249,7 @@ def terminate_lease(
             notification_type,
             {
                 "subject": notification_type.label,
-                "cancelled_at": format_date(today(), locale=language),
+                "cancelled_at": format_date(today(), locale="fi"),
                 "lease": lease,
             },
             language=language,

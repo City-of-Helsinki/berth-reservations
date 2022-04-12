@@ -1,7 +1,7 @@
 <p>
     Bästa kund, tack för din ansökan. Vi har behandlat den och erbjuder dig båtplatsen
     nedan. Om du vill ta emot den ska du betala för den före förfallodatumet,
-    som är {{ order.due_date }}.
+    som är {{ order.due_date.strftime("%d.%m.%Y") }}.
 </p>
 
 <h3>Båtplats som erbjuds</h3>
@@ -167,10 +167,12 @@
         <td style="padding: 48px;">
             <b>Om du vill ta emot båtplatsen:</b>
             <p>
-                1. Läs igenom de bifogade hyresavtalsvillkoren för båtplatsen och båthamnens regler
+                1. Läs
+                <a href="https://www.hel.fi/helsinki/sv/kultur-och-fritid/friluftsliv/batliv/batplatser/Avtalsvillkoren-for-uthyrning-av-batplatser">hyresavtalsvillkoren för båtplatsen</a> och
+                <a href="https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/veneilyn-saannot/vuokrasopimusehdot/">båthamnens regler</a>.
             </p>
             <p>
-                2. Betala fakturan för båtplatsen via denna länk före förfallodatumet {{ order.due_date }}:
+                2. Betala fakturan för båtplatsen via denna länk före förfallodatumet {{ order.due_date.strftime("%d.%m.%Y") }}:
             </p>
 
             <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
@@ -181,6 +183,13 @@
                 annat sätt tas inte emot. För mer information, kontakta vår kundtjänst via
                 <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
             </p>
+            <p>
+                3. Kontakta kundtjänst om du behöver nyckel till porten.
+            </p>
+            <p>
+                4. Du kan hitta information om andra frågor på vår <a href="https://www.hel.fi/helsinki/sv/kultur-och-fritid/friluftsliv/batliv">hemsida</a>.
+            </p>
+
             <b>Om du INTE vill ta emot båtplatsen:</b>
             <p>1. Meddela om det via denna länk:</p>
 
