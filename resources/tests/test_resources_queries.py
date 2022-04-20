@@ -199,6 +199,36 @@ def test_get_berths(api_client, berth):
     }
 
 
+@pytest.mark.parametrize("is_active, count", [(True, 2), (False, 1)])
+def test_get_berths_with_is_active_filter(is_active, count, api_client):
+    BerthFactory.create_batch(2, is_active=True)
+    BerthFactory(is_active=False)
+
+    query = (
+        """
+        {
+            berths(isActive: %s) {
+                edges {
+                    node {
+                        id
+                        isActive
+                    }
+                }
+            }
+        }
+    """
+        % is_active.__str__().lower()
+    )
+    executed = api_client.execute(query)
+    assert all(
+        [
+            edge["node"]["isActive"] is is_active
+            for edge in executed["data"]["berths"]["edges"]
+        ]
+    )
+    assert len(executed["data"]["berths"]["edges"]) == count
+
+
 @pytest.mark.parametrize(
     "api_client",
     ["berth_supervisor", "berth_handler", "berth_services"],
