@@ -3,14 +3,108 @@
     the "make your payment" button below in this message.
 </p>
 
+
 <h3>Boat berth that the invoice concerns</h3>
 
-<p>
-    {{ order.lease.berth.pier.harbor.name }}<br/>
-    {{ order.lease.berth.pier.harbor.street_address }}<br/>
-    <br/>
-    Berth: {{ order.lease.berth.pier.identifier }} {{ order.lease.berth.number }}
+<img style="max-width:560px" src="{{ order.lease.berth.pier.harbor.image_file_url }}" alt="Harbor image"/>
+
+<h4>{{ order.lease.berth.pier.harbor.name }}</h4>
+
+<p style="margin-bottom: 16px;">
+    {{ order.lease.berth.pier.harbor.street_address }}
 </p>
+
+<p><a href="{{ order.lease.berth.pier.harbor.www_url }}">
+    Website
+</a></p>
+
+<table style="width: 100%; table-layout: fixed;">
+    <tr>
+        {% if order.lease.berth.pier.waste_collection %}
+            <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
+                <img src="https://venepaikat.hel.fi/img/email_assets/waste_management.png"
+                     alt="Waste management" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
+                Waste management
+            </th>
+        {% endif %}
+
+        {% if order.lease.berth.pier.gate %}
+            <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
+                <img src="https://venepaikat.hel.fi/img/email_assets/gate.png"
+                     alt="Gate" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
+                Gate
+            </th>
+        {% endif %}
+
+        {% if order.lease.berth.pier.electricity %}
+            <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
+                <img src="https://venepaikat.hel.fi/img/email_assets/electricity.png"
+                     alt="Electricity" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
+                Electricity
+            </th>
+        {% endif %}
+
+        {% if order.lease.berth.pier.lighting %}
+            <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
+                <img src="https://venepaikat.hel.fi/img/email_assets/lighting.png"
+                     alt="Lighting" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
+                Lighting
+            </th>
+        {% endif %}
+
+        {% if order.lease.berth.pier.water %}
+            <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
+                <img src="https://venepaikat.hel.fi/img/email_assets/water.png"
+                     alt="Water" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
+                Water
+            </th>
+        {% endif %}
+    </tr>
+</table>
+
+<table style="table-layout: fixed;">
+    <tbody>
+    <tr>
+        <td style="width: 20%;">
+            <b>
+                Pier:
+            </b>
+        </td>
+        <td style="width: 30%;">
+            <b>{{ order.lease.berth.pier.identifier }}</b>
+        </td>
+        <td style="width: 20%;">
+            <b>
+                Berth:
+            </b>
+        </td>
+        <td style="width: 30%;">
+            <b>{{ order.lease.berth.number }}</b>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<table style="table-layout: fixed;">
+    <tr>
+        <td style="width: 40%;">
+            Width:
+        </td>
+        <td style="width: 60%;">{{ order.lease.berth.berth_type.width }}</td>
+    </tr>
+    <tr>
+        <td style="width: 40%;">
+            Length:
+        </td>
+        <td style="width: 60%;">{{ order.lease.berth.berth_type.length }}</td>
+    </tr>
+    <tr>
+        <td style="width: 40%;">
+            Mooring type:
+        </td>
+        <td style="width: 60%;">{{ order.lease.berth.berth_type.get_mooring_type_display() }}</td>
+    </tr>
+</table>
 
 <h3>Price of the boat berth</h3>
 
@@ -21,6 +115,7 @@
         </td>
         <td>{{ order.price }}&euro;</td>
     </tr>
+
     {% if optional_services %}
         <tr>
             <td colspan="3">
@@ -39,6 +134,7 @@
             <td>{{ order_line.price }}&euro;</td>
         </tr>
     {% endfor %}
+
     <tr>
         <td colspan="3">
             <hr/>
@@ -68,9 +164,15 @@
 
 <table style="margin: 32px 0; background-color: #9fc9eb;">
     <tr>
-        <td style="padding: 32px 48px;">
+        <td style="padding: 48px;">
+            <b>If you wish to accept the boat berth, please:</b>
             <p>
-                Please pay the invoice via this link before the due date {{ order.due_date.strftime("%d.%m.%Y") }}:
+                1. Familiarize yourself with the
+                <a href="https://www.hel.fi/helsinki/en/culture/recreation/boating/boat-berths/Berth-lease-terms">berth lease terms</a> and
+                <a href="https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/veneilyn-saannot/venesatamasaannot/">marina rules</a>.
+            </p>
+            <p>
+                2. Pay the invoice via this link before the due date {{ order.due_date.strftime("%d.%m.%Y") }}:
             </p>
 
             <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
@@ -81,6 +183,25 @@
                 payments made through other means. For more information, please contact our
                 customer service department at <a
                     href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
+            </p>
+            <p>
+                3. Contact customer service if you need a key to the pier gate of your berth.
+            </p>
+            <p>
+                4. For other questions, visit our boating <a href="https://www.hel.fi/helsinki/en/culture/recreation/boating">website</a>.
+            </p>
+
+            <b>If you do NOT wish to reserve the boat berth, please:</b>
+            <p>1. Notify us via this link:</p>
+
+            <a style="display: block; padding: 16px; color: #0000BF; background-color: transparent; border: solid 2px #0000BF; text-align: center; text-decoration: none;"
+               href="{{ cancel_url }}">No thank you, I do not wish to reserve this boat berth &rarr;</a>
+
+            <p>
+                Please note that if you choose not to reserve the boat berth offered, your
+                application will expire. Your application will also expire if you do not pay the
+                boat berth invoice. If you want to apply for a boat berth again, you must submit a
+                new application at venepaikat.hel.fi.
             </p>
         </td>
     </tr>

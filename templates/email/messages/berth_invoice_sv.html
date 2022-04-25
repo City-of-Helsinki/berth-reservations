@@ -5,12 +5,105 @@
 
 <h3>Båtplats som fakturan gäller</h3>
 
-<p>
-    {{ order.lease.berth.pier.harbor.name }}<br/>
-    {{ order.lease.berth.pier.harbor.street_address }}<br/>
-    <br/>
-    Plats: {{ order.lease.berth.pier.identifier }} {{ order.lease.berth.number }}
+<img style="max-width:560px" src="{{ order.lease.berth.pier.harbor.image_file_url }}" alt="Hamnbild"/>
+
+<h4>{{ order.lease.berth.pier.harbor.name }}</h4>
+
+<p style="margin-bottom: 16px;">
+    {{ order.lease.berth.pier.harbor.street_address }}
 </p>
+
+<p><a href="{{ order.lease.berth.pier.harbor.www_url }}">
+    Webbplats
+</a></p>
+
+<table style="width: 100%; table-layout: fixed;">
+    <tr>
+        {% if order.lease.berth.pier.waste_collection %}
+            <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
+                <img src="https://venepaikat.hel.fi/img/email_assets/waste_management.png"
+                     alt="Avfallshantering" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
+                Avfallshantering
+            </th>
+        {% endif %}
+
+        {% if order.lease.berth.pier.gate %}
+            <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
+                <img src="https://venepaikat.hel.fi/img/email_assets/gate.png"
+                     alt="Port" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
+                Port
+            </th>
+        {% endif %}
+
+        {% if order.lease.berth.pier.electricity %}
+            <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
+                <img src="https://venepaikat.hel.fi/img/email_assets/electricity.png"
+                     alt="El" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
+                El
+            </th>
+        {% endif %}
+
+        {% if order.lease.berth.pier.lighting %}
+            <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
+                <img src="https://venepaikat.hel.fi/img/email_assets/lighting.png"
+                     alt="Belysning" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
+                Belysning
+            </th>
+        {% endif %}
+
+        {% if order.lease.berth.pier.water %}
+            <th style="width: 70px; font-size: 14px; text-align: center; font-weight: bold; vertical-align: top; line-height: 14px;">
+                <img src="https://venepaikat.hel.fi/img/email_assets/water.png"
+                     alt="Vatten" style="display: block; margin: 5px auto; height: 46px; width: 46px;"/>
+                Vatten
+            </th>
+        {% endif %}
+    </tr>
+</table>
+
+<table style="table-layout: fixed;">
+    <tbody>
+    <tr>
+        <td style="width: 20%;">
+            <b>
+                Kaj:
+            </b>
+        </td>
+        <td style="width: 30%;">
+            <b>{{ order.lease.berth.pier.identifier }}</b>
+        </td>
+        <td style="width: 20%;">
+            <b>
+                Plats:
+            </b>
+        </td>
+        <td style="width: 30%;">
+            <b>{{ order.lease.berth.number }}</b>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<table style="table-layout: fixed;">
+    <tr>
+        <td style="width: 40%;">
+            Bredd:
+        </td>
+        <td style="width: 60%;">{{ order.lease.berth.berth_type.width }}</td>
+    </tr>
+    <tr>
+        <td style="width: 40%;">
+            Längd:
+        </td>
+        <td style="width: 60%;">{{ order.lease.berth.berth_type.length }}</td>
+    </tr>
+    <tr>
+        <td style="width: 40%;">
+            Förtöjning:
+        </td>
+        <td style="width: 60%;">{{ order.lease.berth.berth_type.get_mooring_type_display() }}</td>
+    </tr>
+</table>
 
 <h3>Båtplatsens pris</h3>
 
@@ -21,6 +114,7 @@
         </td>
         <td>{{ order.price }}&euro;</td>
     </tr>
+
     {% if optional_services %}
         <tr>
             <td colspan="3">
@@ -39,6 +133,7 @@
             <td>{{ order_line.price }}&euro;</td>
         </tr>
     {% endfor %}
+
     <tr>
         <td colspan="3">
             <hr/>
@@ -68,9 +163,15 @@
 
 <table style="margin: 32px 0; background-color: #9fc9eb;">
     <tr>
-        <td style="padding: 32px 48px;">
+        <td style="padding: 48px;">
+            <b>Om du vill ta emot båtplatsen:</b>
             <p>
-                Betala fakturan via denna länk före förfallodatumet {{ order.due_date.strftime("%d.%m.%Y") }}:
+                1. Läs
+                <a href="https://www.hel.fi/helsinki/sv/kultur-och-fritid/friluftsliv/batliv/batplatser/Avtalsvillkoren-for-uthyrning-av-batplatser">hyresavtalsvillkoren för båtplatsen</a> och
+                <a href="https://www.hel.fi/helsinki/fi/kulttuuri-ja-vapaa-aika/ulkoilu/veneily/veneilyn-saannot/vuokrasopimusehdot/">båthamnens regler</a>.
+            </p>
+            <p>
+                2. Betala fakturan för båtplatsen via denna länk före förfallodatumet {{ order.due_date.strftime("%d.%m.%Y") }}:
             </p>
 
             <a style="display: block; padding: 16px; color: white; background-color: #0000BF; text-align: center; text-decoration: none;"
@@ -80,6 +181,24 @@
                 Observera att fakturan kan betalas endast via denna länk. Betalningar som gjorts på
                 annat sätt tas inte emot. För mer information, kontakta vår kundtjänst via
                 <a href="mailto:venepaikkavaraukset@hel.fi">venepaikkavaraukset@hel.fi</a>.
+            </p>
+            <p>
+                3. Kontakta kundtjänst om du behöver nyckel till porten.
+            </p>
+            <p>
+                4. Du kan hitta information om andra frågor på vår <a href="https://www.hel.fi/helsinki/sv/kultur-och-fritid/friluftsliv/batliv">hemsida</a>.
+            </p>
+
+            <b>Om du INTE vill ta emot båtplatsen:</b>
+            <p>1. Meddela om det via denna länk:</p>
+
+            <a style="display: block; padding: 16px; color: #0000BF; background-color: transparent; border: solid 2px #0000BF; text-align: center; text-decoration: none;"
+               href="{{ cancel_url }}">Nej tack, jag vill inte ha den här båtplatsen &rarr;</a>
+
+            <p>
+                Observera att din ansökan förfaller om du inte tar emot båtplatsen. Din ansökan
+                förfaller också om du inte betalar båtplatsavgiften. Om du vill ansöka om en
+                båtplats igen ska du göra en ny ansökan via venepaikat.hel.fi.
             </p>
         </td>
     </tr>
