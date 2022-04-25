@@ -31,6 +31,9 @@ Payment link: {{ payment_url }}
 Please note! You can only pay the invoice via this link. We cannot accept payments made through other means.
 Further information: venepaikkavaraukset@hel.fi
 
+If you do NOT wish to reserve the boat berth, please notify us via this link: {{ cancel_url }}
+
+Please note that if you choose not to reserve the boat berth offered, your application will expire. Your application will also expire if you do not pay the boat berth invoice. If you want to apply for a boat berth again, you must submit a new application at venepaikat.hel.fi.
 
 The City of Helsinki’s boat berths are leased out to customers until further notice, and an annual fee is charged for them in accordance with the currently valid price list. If the invoice is not paid by the due date, the lease is terminated automatically. The boating season is from 10 June to 14 September.
 
