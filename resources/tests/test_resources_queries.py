@@ -1,5 +1,6 @@
 import json
 import random
+from datetime import date
 
 import pytest
 from graphql_relay import to_global_id
@@ -12,6 +13,7 @@ from berth_reservations.tests.utils import (
 from leases.enums import LeaseStatus
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
+from leases.utils import calculate_season_end_date, calculate_season_start_date
 from resources.models import Harbor, WinterStorageArea, WinterStoragePlace
 
 from ..schema import (
@@ -284,6 +286,112 @@ def test_get_berth_with_leases_not_enough_permissions(api_client, berth):
                             id
                         }
                     }
+                }
+            }
+        }
+    """ % to_global_id(
+        BerthNode._meta.name, berth.id
+    )
+    executed = api_client.execute(query)
+    assert_not_enough_permissions(executed)
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_berths_with_prev_season_lease(api_client, berth):
+    today = date.today()
+    BerthLeaseFactory(
+        berth=berth,
+        start_date=calculate_season_start_date(),
+        end_date=calculate_season_end_date(),
+    )
+    prev_season_lease = BerthLeaseFactory(
+        berth=berth,
+        start_date=calculate_season_start_date(today.replace(year=today.year - 1)),
+        end_date=calculate_season_end_date(today.replace(year=today.year - 1)),
+    )
+    BerthLeaseFactory(
+        berth=berth,
+        start_date=calculate_season_start_date(today.replace(year=today.year - 2)),
+        end_date=calculate_season_end_date(today.replace(year=today.year - 2)),
+    )
+
+    query = """
+        {
+            berth(id: "%s") {
+                prevSeasonLease {
+                    id
+                    __typename
+                }
+            }
+        }
+    """ % to_global_id(
+        BerthNode._meta.name, berth.id
+    )
+    executed = api_client.execute(query)
+
+    assert executed["data"]["berth"] == {
+        "prevSeasonLease": {
+            "id": to_global_id(BerthLeaseNode._meta.name, prev_season_lease.id),
+            "__typename": "BerthLeaseNode",
+        }
+    }
+
+
+def test_get_berths_with_prev_season_lease_no_lease(superuser_api_client, berth):
+    today = date.today()
+    # Current, so not previous
+    BerthLeaseFactory(
+        berth=berth,
+        start_date=calculate_season_start_date(),
+        end_date=calculate_season_end_date(),
+    )
+    # older than previous
+    BerthLeaseFactory(
+        berth=berth,
+        start_date=calculate_season_start_date(today.replace(year=today.year - 2)),
+        end_date=calculate_season_end_date(today.replace(year=today.year - 2)),
+    )
+    query = """
+        {
+            berth(id: "%s") {
+                prevSeasonLease {
+                    id
+                    __typename
+                }
+            }
+        }
+    """ % to_global_id(
+        BerthNode._meta.name, berth.id
+    )
+    executed = superuser_api_client.execute(query)
+
+    assert executed["data"]["berth"] == {"prevSeasonLease": None}
+    assert "errors" not in executed
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["api_client", "user", "harbor_services"],
+    indirect=True,
+)
+def test_get_berths_with_prev_season_lease_not_enough_permissions(api_client, berth):
+    today = date.today()
+    BerthLeaseFactory(
+        berth=berth,
+        start_date=calculate_season_start_date(today.replace(year=today.year - 1)),
+        end_date=calculate_season_end_date(today.replace(year=today.year - 1)),
+    )
+
+    query = """
+        {
+            berth(id: "%s") {
+                prevSeasonLease {
+                    id
+                    __typename
                 }
             }
         }

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import TYPE_CHECKING, Union
+from typing import Tuple, TYPE_CHECKING, Union
 
 from babel.dates import format_date
 from dateutil.relativedelta import relativedelta
@@ -64,6 +64,16 @@ def calculate_season_end_date(lease_end: date = None) -> date:
 
     # Otherwise, return the default end date for the current year
     return default
+
+
+def calculate_prev_season_start_date() -> date:
+    today = date.today()
+    return date(day=10, month=6, year=today.year - 1)
+
+
+def calculate_prev_season_end_date() -> date:
+    today = date.today()
+    return date(day=14, month=9, year=today.year - 1)
 
 
 def calculate_winter_season_start_date(lease_start: date = None) -> date:
@@ -264,7 +274,7 @@ def exchange_berth_for_lease(
     switch_date: date,
     old_lease_comment: str,
     new_lease_comment: str,
-) -> (BerthLease, BerthLease):
+) -> Tuple(BerthLease, BerthLease):
     # Avoid circular imports
     from leases.models import BerthLease
 
