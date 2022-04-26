@@ -858,6 +858,61 @@ def test_create_winter_storage_application(superuser_api_client):
     }
 
 
+def test_create_winter_storage_application_decimal_field_floats(superuser_api_client):
+    """Related to an issue where the float would end up into a notification
+    template looking like 2.02 -> 2.020000000000000017763568394002504646778106689453125.
+
+    Ticket: PT-1436
+    """
+    winter_area = WinterStorageAreaFactory()
+    boat_type = BoatTypeFactory()
+
+    winter_area_node_id = to_global_id(WinterStorageAreaNode, winter_area.id)
+
+    variables = {
+        "winterStorageApplication": {
+            "language": "en",
+            "firstName": "John",
+            "lastName": "Doe",
+            "phoneNumber": "1234567890",
+            "email": "john.doe@example.com",
+            "address": "Mannerheimintie 1",
+            "zipCode": "00100",
+            "municipality": "Helsinki",
+            "boatType": boat_type.id,
+            "boatWidth": 2.02,
+            "boatLength": 3.1,
+            "informationAccuracyConfirmed": True,
+            "acceptFitnessNews": False,
+            "acceptLibraryNews": False,
+            "acceptOtherCultureNews": False,
+            "acceptBoatingNewsletter": True,
+            "storageMethod": "ON_TRESTLES",
+            "chosenAreas": [{"winterAreaId": winter_area_node_id, "priority": 1}],
+        }
+    }
+
+    executed = superuser_api_client.execute(
+        CREATE_WINTER_STORAGE_APPLICATION_MUTATION, input=variables
+    )
+
+    assert executed == {
+        "data": {
+            "createWinterStorageApplication": {
+                "winterStorageApplication": {
+                    "areaType": "MARKED",
+                    "winterStorageAreaChoices": [
+                        {"winterStorageArea": {"id": winter_area_node_id}}
+                    ],
+                    # Floats are handled correctly
+                    "boatWidth": "2.02",
+                    "boatLength": "3.1",
+                }
+            }
+        }
+    }
+
+
 def test_create_winter_storage_application_with_existing_boat(superuser_api_client):
     winter_area = WinterStorageAreaFactory()
     boat = BoatFactory(width="5.00", length="6.00")
