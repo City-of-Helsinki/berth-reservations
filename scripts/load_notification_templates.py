@@ -37,12 +37,12 @@ def load_email_templates():
             "plain": None,
         },
         PaymentNotificationType.NEW_BERTH_ORDER_APPROVED: {
-            "html": "berth_offer_new_{lang}.html",
-            "plain": None,
+            "html": "berth_offer_new_{lang}.html",  # Only lead text and heading differs from RENEW_BERTH_ORDER_APPROVED
+            "plain": "berth_invoice_{lang}.txt",  # Same plain text with RENEW_BERTH_ORDER_APPROVED
         },
         PaymentNotificationType.RENEW_BERTH_ORDER_APPROVED: {
-            "html": "berth_invoice_{lang}.html",
-            "plain": "berth_invoice_{lang}.txt",
+            "html": "berth_invoice_{lang}.html",  # Only the lead text and heading differs from NEW_BERTH_ORDER_APPROVED
+            "plain": "berth_invoice_{lang}.txt",  # Same plain text with NEW_BERTH_ORDER_APPROVED
         },
         PaymentNotificationType.BERTH_SWITCH_OFFER_APPROVED: {
             "html": "berth_offer_switch_{lang}.html",

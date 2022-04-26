@@ -31,6 +31,9 @@ Linkki maksamiseen: {{ payment_url }}
 Huom! Laskun voi maksaa vain tämän linkin kautta. Muulla tavoin maksettuja maksuja ei voida ottaa vastaan.
 Lisätietoja: venepaikkavaraukset@hel.fi
 
+Jos ET halua vastaanottaa venepaikkaa, ilmoita siitä tämän linkin kautta: {{ cancel_url }}
+
+Huomaathan, että jos päätät olla vastaanottamatta venepaikkaa, hakemuksesi raukeaa. Hakemuksesi raukeaa myös, jos et maksa venepaikkamaksua. Jos haluat hakea uudestaan venepaikkaa, sinun on tehtävä uusi hakemus osoitteessa venepaikat.hel.fi.
 
 Helsingin kaupungin venepaikat vuokrataan asiakkaille toistaiseksi voimassa olevina ja niistä peritään vuosittain kulloinkin voimassa olevan hinnaston mukainen maksu. Jos laskua ei maksa eräpäivään mennessä, vuokrasopimus irtisanoutuu automaattisesti. Purjehduskausi on 10.6. - 14.9.
 
