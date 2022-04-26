@@ -31,6 +31,9 @@ Betalningslänk: {{ payment_url }}
 Obs! Fakturan kan endast betalas via denna länk. Betalningar på annat sätt accepteras inte.
 Mer information: venepaikkavaraukset@hel.fi
 
+Om du INTE vill ta emot båtplatsen, meddela om det via denna länk: {{ cancel_url }}
+
+Observera att din ansökan förfaller om du inte tar emot båtplatsen. Din ansökan förfaller också om du inte betalar båtplatsavgiften. Om du vill ansöka om en båtplats igen ska du göra en ny ansökan via venepaikat.hel.fi.
 
 Helsingfors stads båtplatser hyrs ut till kunder tills vidare, och för platserna debiteras en årlig avgift enligt gällande prislista. Om fakturan inte betalas senast på förfallodagen sägs hyresavtalet upp automatiskt. Båtsäsongen pågår från den 10 juni till den 14 september.
 
