@@ -20,6 +20,8 @@ from .enums import LeaseStatus
 from .utils import (
     calculate_berth_lease_end_date,
     calculate_berth_lease_start_date,
+    calculate_prev_season_end_date,
+    calculate_prev_season_start_date,
     calculate_season_start_date,
     calculate_winter_season_end_date,
     calculate_winter_season_start_date,
@@ -160,6 +162,21 @@ class BerthLeaseManager(SerializableMixin.SerializableManager):
         )
 
         return leases
+
+    def filter_prev_season_leases(self):
+        qs = self.get_queryset()
+        prev_season_start = calculate_prev_season_start_date()
+        prev_season_end = calculate_prev_season_end_date()
+        in_prev_season = Q(
+            # Check the lease starts at some point the during the season
+            start_date__gte=prev_season_start,
+            # Check the lease ends earliest at the beginning of the season
+            # (for leases terminated before the season started)
+            end_date__gte=prev_season_start,
+            # Check the lease ends latest at the end of the season
+            end_date__lte=prev_season_end,
+        )
+        return qs.filter(in_prev_season)
 
 
 class BerthLease(AbstractLease, SerializableMixin):

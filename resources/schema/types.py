@@ -100,6 +100,10 @@ class BerthNode(DjangoObjectType):
         "leases.schema.BerthLeaseNode",
         description="**Requires permissions** to query this field.",
     )
+    prev_season_lease = graphene.Field(
+        "leases.schema.BerthLeaseNode",
+        description="The last lease from the previous season. **Requires permissions** to query this field.",
+    )
     is_accessible = graphene.Boolean()
     is_available = graphene.Boolean(required=True)
     width = graphene.Float(description=_("width (m)"), required=True)
@@ -125,6 +129,13 @@ class BerthNode(DjangoObjectType):
     @view_permission_required(BerthLease, BerthApplication, CustomerProfile)
     def resolve_leases(self, info, **kwargs):
         return info.context.leases_for_berth_loader.load(self.id)
+
+    @view_permission_required(BerthLease, BerthApplication, CustomerProfile)
+    def resolve_prev_season_lease(self, info, **kwargs):
+        try:
+            return self.leases.filter_prev_season_leases().latest("end_date")
+        except BerthLease.DoesNotExist:
+            return None
 
     def resolve_pier(self, info, **kwargs):
         return info.context.pier_loader.load(self.pier_id)
