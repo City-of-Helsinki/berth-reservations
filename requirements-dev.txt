@@ -12,7 +12,7 @@ autopep8==1.5.7
     # via
     #   -c requirements.txt
     #   -r requirements-dev.in
-black==21.9b0
+black==22.3.0
     # via -r requirements-dev.in
 certifi==2021.10.8
     # via
@@ -122,8 +122,6 @@ pyyaml==6.0
     # via
     #   -c requirements.txt
     #   pre-commit
-regex==2022.1.18
-    # via black
 requests==2.26.0
     # via
     #   -c requirements.txt
