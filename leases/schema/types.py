@@ -1,3 +1,5 @@
+from typing import List
+
 import graphene
 from graphene_django import DjangoObjectType
 from graphql_jwt.decorators import login_required
@@ -6,6 +8,8 @@ from applications.models import BerthApplication, WinterStorageApplication
 from contracts.schema import WinterStorageContractNode
 from contracts.schema.types import BerthContractNode
 from customers.models import CustomerProfile
+from payments.enums import OfferStatus
+from payments.models import BerthSwitchOffer
 from resources.schema import BerthNode, WinterStoragePlaceNode, WinterStorageSectionNode
 from utils.relay import (
     return_node_if_user_has_permissions,
@@ -24,6 +28,10 @@ class BerthLeaseNode(DjangoObjectType):
     berth = graphene.Field(BerthNode, required=True)
     status = LeaseStatusEnum(required=True)
     customer = graphene.Field("customers.schema.ProfileNode", required=True)
+    switch_offer_customer = graphene.Field(
+        "customers.schema.ProfileNode",
+        description="The customer profile from the latest switch offer with `status == OFFERED`.",
+    )
     order = graphene.Field("payments.schema.OrderNode")
     contract = graphene.Field(BerthContractNode)
     is_active = graphene.Boolean(
@@ -58,6 +66,29 @@ class BerthLeaseNode(DjangoObjectType):
 
     def resolve_customer(self, info, **kwargs):
         return info.context.customer_loader.load(self.customer_id)
+
+    def resolve_switch_offer_customer(self, info):
+        switch_offers_for_leases_loader = info.context.switch_offers_for_leases_loader
+        customer_loader = info.context.customer_loader
+
+        def __get_customer_from_offers(offers: List[BerthSwitchOffer]):
+            latest_pending_offer = next(
+                (
+                    offer
+                    for offer in reversed(offers)
+                    if offer.status == OfferStatus.OFFERED
+                ),
+                None,
+            )
+            if not latest_pending_offer:
+                return None
+            return customer_loader.load(latest_pending_offer.customer_id)
+
+        return switch_offers_for_leases_loader.load(self.id).then(
+            lambda offers: __get_customer_from_offers(offers)
+            if offers and len(offers) > 0
+            else None
+        )
 
 
 class WinterStorageLeaseNode(DjangoObjectType):
