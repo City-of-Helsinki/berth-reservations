@@ -1,6 +1,6 @@
 import json
 import random
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 from graphql_relay import to_global_id
@@ -10,10 +10,13 @@ from berth_reservations.tests.utils import (
     assert_in_errors,
     assert_not_enough_permissions,
 )
+from customers.schema.types import ProfileNode
 from leases.enums import LeaseStatus
 from leases.schema import BerthLeaseNode, WinterStorageLeaseNode
 from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from leases.utils import calculate_season_end_date, calculate_season_start_date
+from payments.enums import OfferStatus
+from payments.tests.factories import BerthSwitchOfferFactory
 from resources.models import Harbor, WinterStorageArea, WinterStoragePlace
 
 from ..schema import (
@@ -229,6 +232,76 @@ def test_get_berths_with_is_active_filter(is_active, count, api_client):
         ]
     )
     assert len(executed["data"]["berths"]["edges"]) == count
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_supervisor", "berth_handler", "berth_services"],
+    indirect=True,
+)
+def test_get_berth_with_pending_switch_offer(api_client):
+    current_berth, offered_berth = BerthFactory.create_batch(2, is_active=True)
+    current_berth_lease = BerthLeaseFactory(
+        berth=current_berth, status=LeaseStatus.PAID  # associated lease must be paid
+    )
+    current_berth_global_id = to_global_id(BerthNode._meta.name, current_berth.id)
+    offered_berth_global_id = to_global_id(BerthNode._meta.name, offered_berth.id)
+    customer_global_id = to_global_id(
+        ProfileNode._meta.name, current_berth_lease.customer.id
+    )
+
+    offer = BerthSwitchOfferFactory(
+        berth=offered_berth,
+        lease=current_berth_lease,
+        customer=current_berth_lease.customer,  # customer must be same in the lease
+        status=OfferStatus.OFFERED,
+        due_date=date.today() + timedelta(days=10),
+    )
+
+    query = (
+        """
+        {
+            berth(id: "%s") {
+                id
+                pendingSwitchOffer {
+                    offerNumber
+                    customer {
+                        id
+                    }
+                    berth {
+                        id
+                    }
+                    lease {
+                        berth {
+                            id
+                        }
+                        customer {
+                            id
+                        }
+                    }
+                }
+            }
+        }
+    """
+        % offered_berth_global_id
+    )
+
+    executed = api_client.execute(query)
+
+    assert executed["data"]["berth"] == {
+        "id": offered_berth_global_id,
+        "pendingSwitchOffer": {
+            "offerNumber": offer.offer_number,
+            "customer": {"id": customer_global_id},
+            "berth": {"id": offered_berth_global_id},
+            "lease": {
+                "berth": {
+                    "id": current_berth_global_id,
+                },
+                "customer": {"id": customer_global_id},
+            },
+        },
+    }
 
 
 @pytest.mark.parametrize(

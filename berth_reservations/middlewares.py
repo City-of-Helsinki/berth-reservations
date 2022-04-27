@@ -2,7 +2,10 @@ from django.conf import settings
 
 from customers.schema import CustomerProfileLoader
 from leases.schema import BerthLeaseForBerthLoader
-from payments.schema.loaders import BerthSwichOffersForLeasesLoader
+from payments.schema.loaders import (
+    BerthSwichOffersForLeasesLoader,
+    OfferedBerthSwichOffersForBerthLoader,
+)
 from resources.schema import (
     BerthLoader,
     BerthTypeLoader,
@@ -19,6 +22,7 @@ LOADERS = {
     "leases_for_berth_loader": BerthLeaseForBerthLoader,
     "switch_offers_for_leases_loader": BerthSwichOffersForLeasesLoader,
     "piers_for_harbor_loader": PiersForHarborLoader,
+    "offered_switch_offer_for_berth_loader": OfferedBerthSwichOffersForBerthLoader,
     "customer_loader": CustomerProfileLoader,
     "harbor_loader": HarborLoader,
     "ws_area_loader": WSAreaLoader,

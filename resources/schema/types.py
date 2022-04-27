@@ -11,6 +11,7 @@ from graphene_django.types import DjangoObjectType
 from applications.models import BerthApplication, WinterStorageApplication
 from customers.models import CustomerProfile
 from leases.models import BerthLease, WinterStorageLease
+from payments.models import BerthSwitchOffer
 from users.decorators import view_permission_required
 from utils.enum import graphene_enum
 from utils.schema import CountConnection
@@ -104,6 +105,13 @@ class BerthNode(DjangoObjectType):
         "leases.schema.BerthLeaseNode",
         description="The last lease from the previous season. **Requires permissions** to query this field.",
     )
+    pending_switch_offer = graphene.Field(
+        "payments.schema.BerthSwitchOfferNode",
+        description="""The pending berth switch offer for this berth.
+        The pending means the latest berth switch offer which has the `status=OFFERED` and
+        the due date is in future (`due_date__gte=date.today()`)
+        """,
+    )
     is_accessible = graphene.Boolean()
     is_available = graphene.Boolean(required=True)
     width = graphene.Float(description=_("width (m)"), required=True)
@@ -136,6 +144,10 @@ class BerthNode(DjangoObjectType):
             return self.leases.filter_prev_season_leases().latest("end_date")
         except BerthLease.DoesNotExist:
             return None
+
+    @view_permission_required(BerthSwitchOffer, BerthApplication, CustomerProfile)
+    def resolve_pending_switch_offer(self, info, **kwargs):
+        return info.context.offered_switch_offer_for_berth_loader.load(self.id)
 
     def resolve_pier(self, info, **kwargs):
         return info.context.pier_loader.load(self.pier_id)
