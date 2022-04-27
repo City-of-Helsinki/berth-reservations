@@ -442,7 +442,7 @@ def test_filter_berth_profiles_invoicing_type(
     customer_profile.invoicing_type = InvoicingType.ONLINE_PAYMENT
     customer_profile.save()
 
-    passed_invoicing_type = InvoicingType.DIGITAL_INVOICE.name
+    passed_invoicing_type = InvoicingType.PAPER_INVOICE.name
     if should_find_match:
         passed_invoicing_type = customer_profile.invoicing_type.name
 
