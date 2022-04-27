@@ -4,7 +4,6 @@ from django.utils.translation import gettext_lazy as _
 
 class InvoicingType(TextChoices):
     ONLINE_PAYMENT = "online-payment", _("Online payment")
-    DIGITAL_INVOICE = "digital-invoice", _("Digital invoice")
     PAPER_INVOICE = "paper-invoice", _("Paper invoice")
 
 
