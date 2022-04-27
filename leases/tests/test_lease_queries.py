@@ -225,7 +225,7 @@ def test_query_berth_lease(api_client, berth_lease):
     ["berth_services", "berth_handler", "berth_supervisor"],
     indirect=True,
 )
-def test_query_berth_lease_with_switch_offer_customer(api_client, berth_lease):
+def test_query_berth_lease_with_last_offered_to(api_client, berth_lease):
     berth_lease.status = LeaseStatus.PAID
     berth_lease.save()
     berth_lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
@@ -242,7 +242,7 @@ def test_query_berth_lease_with_switch_offer_customer(api_client, berth_lease):
         {
             berthLease(id: "%s") {
               id
-              switchOfferCustomer {
+              lastOfferedTo {
                 id
               }
             }
@@ -254,7 +254,7 @@ def test_query_berth_lease_with_switch_offer_customer(api_client, berth_lease):
 
     assert executed["data"]["berthLease"] == {
         "id": berth_lease_id,
-        "switchOfferCustomer": {"id": customer_id},
+        "lastOfferedTo": {"id": customer_id},
     }
 
 

@@ -28,7 +28,7 @@ class BerthLeaseNode(DjangoObjectType):
     berth = graphene.Field(BerthNode, required=True)
     status = LeaseStatusEnum(required=True)
     customer = graphene.Field("customers.schema.ProfileNode", required=True)
-    switch_offer_customer = graphene.Field(
+    last_offered_to = graphene.Field(
         "customers.schema.ProfileNode",
         description="The customer profile from the latest switch offer with `status == OFFERED`.",
     )
@@ -67,7 +67,7 @@ class BerthLeaseNode(DjangoObjectType):
     def resolve_customer(self, info, **kwargs):
         return info.context.customer_loader.load(self.customer_id)
 
-    def resolve_switch_offer_customer(self, info):
+    def resolve_last_offered_to(self, info):
         switch_offers_for_leases_loader = info.context.switch_offers_for_leases_loader
         customer_loader = info.context.customer_loader
 
