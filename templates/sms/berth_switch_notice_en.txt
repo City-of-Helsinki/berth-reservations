@@ -1,2 +1,6 @@
 Dear Customer. We are offering you a new boat berth. Here's a link to accept or cancel the berth offer. Please make your choice by {{ due_date }}.
 {{ accept_url }}
+
+Harbor: {{ offer.berth.pier.harbor.name }}
+Pier: {{ offer.berth.pier.identifier }}
+Berth: {{ offer.berth.number }}
