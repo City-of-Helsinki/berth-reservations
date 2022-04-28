@@ -1,4 +1,5 @@
 import random
+from datetime import date
 
 import pytest
 from dateutil.parser import isoparse
@@ -18,9 +19,11 @@ from berth_reservations.tests.utils import (
 from contracts.schema.types import BerthContractNode, WinterStorageContractNode
 from contracts.tests.factories import BerthContractFactory, WinterStorageContractFactory
 from customers.schema import BoatNode, ProfileNode
+from payments.enums import OfferStatus
 from payments.schema import OrderNode
 from payments.tests.factories import (
     BerthProductFactory,
+    BerthSwitchOfferFactory,
     OrderFactory,
     WinterStorageProductFactory,
 )
@@ -214,6 +217,44 @@ def test_query_berth_lease(api_client, berth_lease):
         },
         "order": {"id": to_global_id(OrderNode, order.id)},
         "contract": {"id": to_global_id(BerthContractNode, berth_lease.contract.id)},
+    }
+
+
+@pytest.mark.parametrize(
+    "api_client",
+    ["berth_services", "berth_handler", "berth_supervisor"],
+    indirect=True,
+)
+def test_query_berth_lease_with_last_offered_to(api_client, berth_lease):
+    berth_lease.status = LeaseStatus.PAID
+    berth_lease.save()
+    berth_lease_id = to_global_id(BerthLeaseNode, berth_lease.id)
+    customer_id = to_global_id(ProfileNode, berth_lease.customer.id)
+    BerthSwitchOfferFactory(
+        lease=berth_lease,
+        customer=berth_lease.customer,
+        status=OfferStatus.OFFERED,
+        due_date=date.today(),
+    )
+
+    query = (
+        """
+        {
+            berthLease(id: "%s") {
+              id
+              lastOfferedTo {
+                id
+              }
+            }
+        }
+    """
+        % berth_lease_id
+    )
+    executed = api_client.execute(query)
+
+    assert executed["data"]["berthLease"] == {
+        "id": berth_lease_id,
+        "lastOfferedTo": {"id": customer_id},
     }
 
 
