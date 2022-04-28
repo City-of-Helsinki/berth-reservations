@@ -40,8 +40,8 @@ class BaseApplicationInput(graphene.InputObjectType):
 
 
 class BerthApplicationInput(BaseApplicationInput):
-    boat_draught = graphene.Float()
-    boat_weight = graphene.Float()
+    boat_draught = graphene.Decimal()
+    boat_weight = graphene.Decimal()
     accessibility_required = graphene.Boolean()
     boat_propulsion = graphene.String()
     boat_hull_material = graphene.String()

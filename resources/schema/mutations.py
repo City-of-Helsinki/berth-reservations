@@ -83,9 +83,9 @@ class BerthInput(AbstractBoatPlaceInput):
     comment = graphene.String()
     is_accessible = graphene.Boolean()
     is_invoiceable = graphene.Boolean()
-    width = graphene.Float(description=_("width (m)"))
-    length = graphene.Float(description=_("length (m)"))
-    depth = graphene.Float(description=_("depth (m)"))
+    width = graphene.Decimal(description=_("width (m)"))
+    length = graphene.Decimal(description=_("length (m)"))
+    depth = graphene.Decimal(description=_("depth (m)"))
     mooring_type = BerthMooringTypeEnum()
 
 
@@ -93,8 +93,8 @@ class CreateBerthMutation(graphene.ClientIDMutation):
     class Input(BerthInput):
         number = graphene.String(required=True)
         pier_id = graphene.ID(required=True)
-        width = graphene.Float(description=_("width (m)"), required=True)
-        length = graphene.Float(description=_("length (m)"), required=True)
+        width = graphene.Decimal(description=_("width (m)"), required=True)
+        length = graphene.Decimal(description=_("length (m)"), required=True)
         mooring_type = BerthMooringTypeEnum(required=True)
 
     berth = graphene.Field(BerthNode)
@@ -394,8 +394,8 @@ class UpdateWinterStorageAreaMutation(graphene.ClientIDMutation, AbstractAreaMix
 
 
 class AbstractPlaceTypeInput:
-    width = graphene.Float(description=_("width (m)"))
-    length = graphene.Float(description=_("length (m)"))
+    width = graphene.Decimal(description=_("width (m)"))
+    length = graphene.Decimal(description=_("length (m)"))
 
 
 class WinterStoragePlaceTypeInput(AbstractPlaceTypeInput):
@@ -405,8 +405,8 @@ class WinterStoragePlaceTypeInput(AbstractPlaceTypeInput):
 class CreateWinterStoragePlaceTypeMutation(graphene.ClientIDMutation):
     class Input(WinterStoragePlaceTypeInput):
         pass
-        # width = graphene.Float(description=_("width (m)"), required=True)
-        # length = graphene.Float(description=_("length (m)"), required=True)
+        # width = graphene.Decimal(description=_("width (m)"), required=True)
+        # length = graphene.Decimal(description=_("length (m)"), required=True)
 
     winter_storage_place_type = graphene.Field(WinterStoragePlaceTypeNode)
 
@@ -687,15 +687,15 @@ class WinterStoragePlaceInput(AbstractBoatPlaceInput):
     number = graphene.String()
     winter_storage_section_id = graphene.ID()
     comment = graphene.String()
-    width = graphene.Float(description=_("width (m)"))
-    length = graphene.Float(description=_("length (m)"))
+    width = graphene.Decimal(description=_("width (m)"))
+    length = graphene.Decimal(description=_("length (m)"))
 
 
 class CreateWinterStoragePlaceMutation(graphene.ClientIDMutation):
     class Input(WinterStoragePlaceInput):
         number = graphene.String(required=True)
         winter_storage_section_id = graphene.ID(required=True)
-        width = graphene.Float(description=_("width (m)"), required=True)
+        width = graphene.Decimal(description=_("width (m)"), required=True)
 
     winter_storage_place = graphene.Field(WinterStoragePlaceNode)
 

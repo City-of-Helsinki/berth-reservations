@@ -6,6 +6,8 @@ import sentry_sdk
 from django.utils.translation import gettext_lazy as _
 from sentry_sdk.integrations.django import DjangoIntegration
 
+from utils.patch import monkeypatch_graphene_decimal
+
 checkout_dir = environ.Path(__file__) - 2
 assert os.path.exists(checkout_dir("manage.py"))
 
@@ -342,3 +344,8 @@ if os.path.exists(local_settings_path):
     exec(code, globals(), locals())
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
+#########################################
+# MONKEY-PATCHING A THIRD-PARTY LIBRARY #
+#########################################
+monkeypatch_graphene_decimal()
