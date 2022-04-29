@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Optional, TYPE_CHECKING, Union
 
 from leases.models import BerthLease, WinterStorageLease
+from payments.exceptions import InvoicingRejectedForPaperInvoiceCustomersError
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -37,7 +38,7 @@ from django_ilmoitin.utils import send_notification
 
 from applications.enums import ApplicationStatus
 from berth_reservations.exceptions import VenepaikkaGraphQLError
-from customers.enums import OrganizationType
+from customers.enums import InvoicingType, OrganizationType
 from customers.services import (
     HelsinkiProfileUser,
     ProfileService,
@@ -295,7 +296,7 @@ def resolve_order_place(
 
 def resolve_product_talpa_ecom_id(
     product: Union[BerthProduct, WinterStorageProduct, AdditionalProduct],
-    area: Optional[Harbor, WinterStorageArea],
+    area: Optional[Union[Harbor, WinterStorageArea]],
 ) -> str:
     """
     Resolves the corresponding Talpa eCom product id, according to the product type
@@ -493,9 +494,14 @@ def approve_order(
     if order.customer.is_non_billable_customer():
         order.set_status(OrderStatus.PAID_MANUALLY, "Non-billable customer.")
     else:
-        send_payment_notification(
-            order, request, email, phone_number=order.customer_phone
-        )
+        try:
+            send_payment_notification(
+                order, request, email, phone_number=order.customer_phone
+            )
+        except InvoicingRejectedForPaperInvoiceCustomersError:
+            # Dismiss the paper invoice rejections
+            # so the order handling won't be rolled back.
+            pass
 
 
 def send_cancellation_notice(order):
@@ -572,7 +578,22 @@ def resend_order(order, due_date: date, request: HttpRequest) -> None:
     order.recalculate_price()
     order.save()
 
-    send_payment_notification(order, request)
+    try:
+        send_payment_notification(order, request)
+    except InvoicingRejectedForPaperInvoiceCustomersError:
+        # Dismiss the paper invoice rejections
+        pass
+
+
+def check_notification_sending_rejection_rules(order: Order, order_email: str):
+
+    if order.customer.invoicing_type == InvoicingType.PAPER_INVOICE:
+        raise InvoicingRejectedForPaperInvoiceCustomersError(
+            _("The paper invoice customers should not receive any digital invoicing.")
+        )
+
+    if not is_valid_email(order_email):
+        raise ValidationError(_("Missing customer email"))
 
 
 def send_payment_notification(
@@ -583,6 +604,20 @@ def send_payment_notification(
     has_services: bool = True,
     has_payment_urls: bool = True,
 ):
+    """Sends the email and SMS notifications related to the payments of the Order instance.
+
+    Args:
+        order (Order): an Order instance
+        request (HttpRequest): current HTTP request
+        email (str, optional): an email address used as a recipient for notification.
+        If None, the customer email will be used. Defaults to None.
+        phone_number (str, optional): a phone number used as a recipient for sms notification.
+        If None, the customer phone number will be used. Defaults to None.
+        has_services (bool, optional): determines whether the product services should be included in the email body.
+        Defaults to True.
+        has_payment_urls (bool, optional): If true, a payment URL and a cancel URL will be included in the email body.
+        Defaults to True.
+    """
     from payments.providers import get_payment_provider
 
     from .notifications import NotificationType
@@ -590,8 +625,7 @@ def send_payment_notification(
     order_email = email or order.customer_email
     order_phone = phone_number or order.customer_phone
 
-    if not is_valid_email(order_email):
-        raise ValidationError(_("Missing customer email"))
+    check_notification_sending_rejection_rules(order, order_email)
 
     language = get_notification_language(order)
 
