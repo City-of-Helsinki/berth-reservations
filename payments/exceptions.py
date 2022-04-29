@@ -51,3 +51,7 @@ class MissingOrderIDError(VenepaikkaPaymentError):
 
 class UnknownWebhookEventError(VenepaikkaPaymentError):
     """When the payment webhooks are called with an unknown event type"""
+
+
+class InvoicingRejectedForPaperInvoiceCustomersError(VenepaikkaPaymentError):
+    """The paper invoice customers should not receive any digital invoicing"""

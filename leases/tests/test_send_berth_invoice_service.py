@@ -11,6 +11,7 @@ from freezegun import freeze_time
 
 from berth_reservations.tests.factories import UserFactory
 from contracts.tests.factories import BerthContractFactory
+from customers.enums import InvoicingType
 from customers.schema import ProfileNode
 from customers.tests.conftest import mocked_response_profile
 from payments.enums import OrderStatus
@@ -49,7 +50,13 @@ def _send_invoices(data):
 
 
 @freeze_time("2020-01-01T08:00:00Z")
-def test_send_berth_invoices_basic(notification_template_orders_approved):
+@pytest.mark.parametrize(
+    "invoicing_type,sent_mail_count",
+    [(InvoicingType.ONLINE_PAYMENT, 1), (InvoicingType.PAPER_INVOICE, 0)],
+)
+def test_send_berth_invoices_basic(
+    invoicing_type, sent_mail_count, notification_template_orders_approved
+):
     lease = _lease_with_contract(
         boat=None,
         status=LeaseStatus.PAID,
@@ -58,6 +65,10 @@ def test_send_berth_invoices_basic(notification_template_orders_approved):
     )
 
     customer = lease.customer
+
+    # Set the invoicing type
+    customer.invoicing_type = invoicing_type
+    customer.save()
 
     user = UserFactory()
 
@@ -95,10 +106,14 @@ def test_send_berth_invoices_basic(notification_template_orders_approved):
     assert order.customer.id == customer.id
     assert order.status == OrderStatus.OFFERED
 
-    assert len(mail.outbox) == 1
-    msg = mail.outbox[0]
-    assert msg.subject == f"test order approved subject, event: {order.order_number}!"
-    assert order.order_number in msg.body
+    assert len(mail.outbox) == sent_mail_count
+
+    if sent_mail_count > 0:
+        msg = mail.outbox[0]
+        assert (
+            msg.subject == f"test order approved subject, event: {order.order_number}!"
+        )
+        assert order.order_number in msg.body
 
 
 @freeze_time("2020-01-01T08:00:00Z")

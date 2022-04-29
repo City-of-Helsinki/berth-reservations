@@ -28,7 +28,7 @@ class MunicipalityFactory(factory.django.DjangoModelFactory):
 
 class CustomerProfileFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
-    invoicing_type = factory.Faker("random_element", elements=list(InvoicingType))
+    invoicing_type = InvoicingType.ONLINE_PAYMENT
     comment = factory.Faker("text")
 
     class Meta:
