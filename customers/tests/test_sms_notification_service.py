@@ -53,7 +53,7 @@ def test_send_message(notification_template_sms_invoice_notice):
     phone = Faker(["fi_FI"]).phone_number()
     message = "Remember to pay your invoice berth by 15-01-2020"
     notification_type = NotificationType.SMS_INVOICE_NOTICE
-    context = {"product_name": "berth", "due_date": "15-01-2020"}
+    context = {"product_name": "berth", "order": {"due_date": "15-01-2020"}}
 
     mock_response = {
         "errors": [],

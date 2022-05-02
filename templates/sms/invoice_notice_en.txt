@@ -1,2 +1,8 @@
-Dear Customer. Here's a link to pay or cancel {{ product_name }} for the next season. Please pay the bill by {{ due_date }}.
+Dear Customer. Here's a link to pay or cancel {{ product_name }} for the next season. Please pay the bill by {{ order.due_date.strftime("%d.%m.%Y") }}.
 {{ payment_url }}
+{% if new_berth_order %}
+
+Harbor: {{ order.lease.berth.pier.harbor.name }}
+Pier: {{ order.lease.berth.pier.identifier }}
+Berth: {{ order.lease.berth.number }}
+{% endif %}

@@ -223,9 +223,10 @@ def load_dummy_context():
                 get_email_subject(NotificationType.BERTH_SWITCH_OFFER_APPROVED)
             ),
             NotificationType.SMS_INVOICE_NOTICE: {
-                "product_name": "Berth",
-                "due_date": format_date(today(), locale="fi"),
-                "payment_url": "https://foo.bar/payment",
+                **_get_berth_order_context(
+                    get_email_subject(NotificationType.NEW_BERTH_ORDER_APPROVED)
+                ),
+                **{"product_name": "Berth", "new_berth_order": True},
             },
             NotificationType.SMS_BERTH_SWITCH_NOTICE: _get_berth_switch_offer_context(
                 get_email_subject(NotificationType.BERTH_SWITCH_OFFER_APPROVED)
