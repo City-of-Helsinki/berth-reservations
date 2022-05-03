@@ -103,7 +103,7 @@ def test_approve_order(
         "order": order,
         "product_name": order.product.name,
         "payment_url": payment_url,
-        "new_berth_order": order.lease_order_type == LeaseOrderType.NEW_BERTH_ORDER,
+        "include_berth": order.lease_order_type == LeaseOrderType.NEW_BERTH_ORDER,
     }
 
     mock_send_sms.assert_called_with(

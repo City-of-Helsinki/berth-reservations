@@ -157,7 +157,7 @@ def test_resend_order(
             "order": order,
             "product_name": order.product.name,
             "payment_url": payment_url,
-            "new_berth_order": True,
+            "include_berth": True,
         }
 
         mock_send_sms.assert_called_with(
@@ -244,7 +244,7 @@ def test_resend_order_in_error(
         "order": order,
         "product_name": order.product.name,
         "payment_url": payment_url,
-        "new_berth_order": True,
+        "include_berth": True,
     }
 
     mock_send_sms.assert_called_with(

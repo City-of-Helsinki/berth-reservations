@@ -1,6 +1,6 @@
 Hyvä asiakas. Tässä linkki tuotteen {{ product_name }} maksamiseen tai sen irtisanomiseen seuraavalle kaudelle. Maksathan laskun {{ order.due_date.strftime("%d.%m.%Y") }} mennessä.
 {{ payment_url }}
-{% if new_berth_order %}
+{% if include_berth %}
 
 Satama: {{ order.lease.berth.pier.harbor.name }}
 Laituri: {{ order.lease.berth.pier.identifier }}
