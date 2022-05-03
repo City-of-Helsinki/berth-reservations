@@ -662,10 +662,13 @@ def send_payment_notification(
             )
 
         sms_context = {
+            "order": order,
             "product_name": product_name,
-            "due_date": format_date(order.due_date, locale="fi"),
             "payment_url": payment_url,
+            "new_berth_order": notification_type
+            == NotificationType.NEW_BERTH_ORDER_APPROVED,
         }
+
         sms_service = SMSNotificationService()
         sms_service.send(
             NotificationType.SMS_INVOICE_NOTICE,

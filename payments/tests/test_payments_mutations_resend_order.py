@@ -2,7 +2,6 @@ import decimal
 from unittest import mock
 
 import pytest
-from babel.dates import format_date
 from django.core import mail
 from freezegun import freeze_time
 
@@ -155,9 +154,10 @@ def test_resend_order(
             order, lang=order.lease.application.language
         )
         sms_context = {
+            "order": order,
             "product_name": order.product.name,
-            "due_date": format_date(order.due_date, locale="fi"),
             "payment_url": payment_url,
+            "new_berth_order": True,
         }
 
         mock_send_sms.assert_called_with(
@@ -241,9 +241,10 @@ def test_resend_order_in_error(
         order, lang=order.lease.application.language
     )
     sms_context = {
+        "order": order,
         "product_name": order.product.name,
-        "due_date": format_date(order.due_date, locale="fi"),
         "payment_url": payment_url,
+        "new_berth_order": True,
     }
 
     mock_send_sms.assert_called_with(

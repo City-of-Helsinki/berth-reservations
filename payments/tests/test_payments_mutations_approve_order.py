@@ -4,7 +4,6 @@ from unittest.mock import patch
 
 import pytest
 from anymail.exceptions import AnymailError
-from babel.dates import format_date
 from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from django.core import mail
@@ -16,7 +15,7 @@ from berth_reservations.tests.utils import assert_not_enough_permissions
 from customers.services import SMSNotificationService
 from customers.tests.conftest import mocked_response_profile
 from leases.enums import LeaseStatus
-from payments.enums import OrderStatus
+from payments.enums import LeaseOrderType, OrderStatus
 from utils.relay import to_global_id
 
 from ..models import Order
@@ -101,9 +100,10 @@ def test_approve_order(
 
     # Assert that the SMS is being sent
     sms_context = {
+        "order": order,
         "product_name": order.product.name,
-        "due_date": format_date(order.due_date, locale="fi"),
         "payment_url": payment_url,
+        "new_berth_order": order.lease_order_type == LeaseOrderType.NEW_BERTH_ORDER,
     }
 
     mock_send_sms.assert_called_with(

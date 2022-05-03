@@ -190,8 +190,8 @@ def notification_template_orders_approved():
     NotificationTemplate.objects.language("fi").create(
         type=NotificationType.SMS_INVOICE_NOTICE.value,
         subject="SMS invoice notice",
-        body_html="Remember to pay your invoice {{ product_name }} by {{ due_date }}",
-        body_text="Remember to pay your invoice {{ product_name }} by {{ due_date }}",
+        body_html="Remember to pay your invoice {{ product_name }} by {{ order.due_date }}",
+        body_text="Remember to pay your invoice {{ product_name }} by {{ order.due_date }}",
     )
 
 

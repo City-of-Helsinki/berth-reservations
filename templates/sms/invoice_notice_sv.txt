@@ -1,2 +1,8 @@
-Kära kund. Här är en länk för att betala för eller avbryta {{ product_name }} för nästa säsong. Vänligen betala räkningen senast {{ due_date }}.
+Kära kund. Här är en länk för att betala för eller avbryta {{ product_name }} för nästa säsong. Vänligen betala räkningen senast {{ order.due_date.strftime("%d.%m.%Y") }}.
 {{ payment_url }}
+{% if new_berth_order %}
+
+Hamn: {{ order.lease.berth.pier.harbor.name }}
+Kaj: {{ order.lease.berth.pier.identifier }}
+Plats: {{ order.lease.berth.number }}
+{% endif %}
