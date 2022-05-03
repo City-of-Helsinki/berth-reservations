@@ -108,7 +108,7 @@ def test_approve_ap_order(
         "order": order,
         "product_name": product_name,
         "payment_url": payment_url,
-        "include_berth": False,
+        "include_berth": True,
     }
 
     mock_send_sms.assert_called_with(
