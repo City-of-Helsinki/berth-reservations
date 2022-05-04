@@ -226,7 +226,7 @@ def load_dummy_context():
                 **_get_berth_order_context(
                     get_email_subject(NotificationType.NEW_BERTH_ORDER_APPROVED)
                 ),
-                **{"product_name": "Berth", "new_berth_order": True},
+                **{"product_name": "Berth", "include_berth": True},
             },
             NotificationType.SMS_BERTH_SWITCH_NOTICE: _get_berth_switch_offer_context(
                 get_email_subject(NotificationType.BERTH_SWITCH_OFFER_APPROVED)

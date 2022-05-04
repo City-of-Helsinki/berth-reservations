@@ -665,8 +665,8 @@ def send_payment_notification(
             "order": order,
             "product_name": product_name,
             "payment_url": payment_url,
-            "new_berth_order": notification_type
-            == NotificationType.NEW_BERTH_ORDER_APPROVED,
+            "include_berth": hasattr(order, "lease")
+            and isinstance(order.lease, BerthLease),
         }
 
         sms_service = SMSNotificationService()
