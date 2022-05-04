@@ -6,13 +6,21 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('customers', '0017_make_boat_owner_nullable'),
+        ("customers", "0017_make_boat_owner_nullable"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='customerprofile',
-            name='invoicing_type',
-            field=models.CharField(choices=[('online-payment', 'Online payment'), ('paper-invoice', 'Paper invoice')], default='online-payment', max_length=30, verbose_name='invoicing type'),
+            model_name="customerprofile",
+            name="invoicing_type",
+            field=models.CharField(
+                choices=[
+                    ("online-payment", "Online payment"),
+                    ("paper-invoice", "Paper invoice"),
+                ],
+                default="online-payment",
+                max_length=30,
+                verbose_name="invoicing type",
+            ),
         ),
     ]
