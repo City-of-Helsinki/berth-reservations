@@ -130,6 +130,7 @@ class WinterStoragePlaceFactory(factory.django.DjangoModelFactory):
     number = factory.Faker("random_int")
     winter_storage_section = factory.SubFactory(WinterStorageSectionFactory)
     place_type = factory.SubFactory(WinterStoragePlaceTypeFactory)
+    comment = factory.Faker("text")
 
     class Meta:
         model = WinterStoragePlace

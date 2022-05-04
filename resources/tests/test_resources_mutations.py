@@ -2070,6 +2070,7 @@ mutation CreateWinterStoragePlace($input: CreateWinterStoragePlaceMutationInput!
         winterStoragePlace {
             id
             number
+            comment
             isActive
             width
             length
@@ -2089,6 +2090,7 @@ def test_create_winter_storage_place(
 ):
     variables = {
         "number": 123,
+        "comment": "perfect place for a boat",
         "winterStorageSectionId": to_global_id(
             WinterStorageSectionNode._meta.name, str(winter_storage_section.id)
         ),
@@ -2112,6 +2114,7 @@ def test_create_winter_storage_place(
 
     assert executed["data"]["createWinterStoragePlace"]["winterStoragePlace"] == {
         "number": 123,
+        "comment": variables["comment"],
         "isActive": False,
         "width": variables["width"],
         "length": variables["length"],
@@ -2151,6 +2154,7 @@ def test_create_winter_storage_place_new_winter_storage_place_type(
 
     assert executed["data"]["createWinterStoragePlace"]["winterStoragePlace"] == {
         "number": 1234,
+        "comment": "",
         "isActive": False,
         "width": variables["width"],
         "length": variables["length"],
@@ -2312,6 +2316,7 @@ mutation UpdateWinterStoragePlace($input: UpdateWinterStoragePlaceMutationInput!
         winterStoragePlace {
             id
             number
+            comment
             isActive
             winterStorageSection {
                 id
@@ -2342,6 +2347,7 @@ def test_update_winter_storage_place(
     variables = {
         "id": global_id,
         "number": 123,
+        "comment": "updated comment",
         "winterStorageSectionId": winter_storage_section_id,
         "isActive": False,
     }
@@ -2354,6 +2360,7 @@ def test_update_winter_storage_place(
     assert executed["data"]["updateWinterStoragePlace"]["winterStoragePlace"] == {
         "id": global_id,
         "number": variables["number"],
+        "comment": variables["comment"],
         "winterStorageSection": {"id": variables["winterStorageSectionId"]},
         "isActive": variables["isActive"],
         "width": float(winter_storage_place.place_type.width),
@@ -2392,6 +2399,7 @@ def test_update_winter_storage_place_existing_winter_storage_place_type(
     assert executed["data"]["updateWinterStoragePlace"]["winterStoragePlace"] == {
         "id": global_id,
         "number": variables["number"],
+        "comment": winter_storage_place.comment,
         "winterStorageSection": {
             "id": to_global_id(
                 WinterStorageSectionNode._meta.name,
@@ -2435,6 +2443,7 @@ def test_update_winter_storage_place_new_place_type(winter_storage_place, api_cl
     assert executed["data"]["updateWinterStoragePlace"]["winterStoragePlace"] == {
         "id": global_id,
         "number": winter_storage_place.number,
+        "comment": winter_storage_place.comment,
         "winterStorageSection": {
             "id": to_global_id(
                 WinterStorageSectionNode._meta.name,

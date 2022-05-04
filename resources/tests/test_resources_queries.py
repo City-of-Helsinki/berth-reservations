@@ -679,6 +679,7 @@ def test_get_winter_storage_places(api_client, winter_storage_place):
                 edges {
                     node {
                         number
+                        comment
                         isActive
                         isAvailable
                         createdAt
@@ -697,6 +698,7 @@ def test_get_winter_storage_places(api_client, winter_storage_place):
                 {
                     "node": {
                         "number": winter_storage_place.number,
+                        "comment": winter_storage_place.comment,
                         "isActive": winter_storage_place.is_active,
                         "isAvailable": True,  # no lease so must be available
                         "createdAt": winter_storage_place.created_at.isoformat(),
