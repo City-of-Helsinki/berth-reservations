@@ -825,6 +825,10 @@ class WinterStoragePlace(AbstractBoatPlace, SerializableMixin):
         related_name="places",
         on_delete=models.PROTECT,
     )
+    comment = models.TextField(
+        verbose_name=_("comment"),
+        blank=True,
+    )
     objects = WinterStoragePlaceManager()
 
     class Meta:
