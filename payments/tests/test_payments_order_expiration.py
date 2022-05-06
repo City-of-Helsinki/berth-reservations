@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from freezegun import freeze_time
 
 from applications.enums import ApplicationStatus
-from applications.tests.factories import BerthApplicationFactory
+from customers.enums import InvoicingType
 from leases.enums import LeaseStatus
 from payments.enums import OrderStatus
 from payments.models import Order
@@ -14,32 +14,56 @@ from payments.tests.factories import OrderFactory
 
 @freeze_time("2021-01-09T08:00:00Z")
 @pytest.mark.parametrize("berth_application", ["base", "switch"], indirect=True)
-def test_expire_too_old_unpaid_orders(berth_lease, berth_application):
+def test_expire_too_old_unpaid_orders(
+    berth_application, berth_lease, berth_lease_without_product
+):
     # VEN-783:
     # The due date should only be editable up to 7 days after it has expired.
     # Therefore invalidated orders should be expired when due date + 7 days have gone.
-    berth_application = BerthApplicationFactory(customer=berth_lease.customer)
-
     berth_lease.application = berth_application
     berth_lease.save()
 
+    # Create and order for a digital invoice customer (default)
     order = OrderFactory(
         lease=berth_lease,
-        due_date=datetime.date(2021, 1, 2),
+        customer=berth_lease.customer,
+        due_date=datetime.date(2021, 1, 2),  # unexpired
         status=OrderStatus.OFFERED,
     )
+
+    # Create an order for a paper invoice customer
+    berth_lease_without_product.customer.invoicing_type = InvoicingType.PAPER_INVOICE
+    berth_lease_without_product.customer.save()
+    OrderFactory(
+        lease=berth_lease_without_product,
+        price="9.99",
+        tax_percentage="14.0",
+        due_date=datetime.date(2021, 1, 1),  # expired
+        status=OrderStatus.OFFERED,
+        customer=berth_lease_without_product.customer,
+    )
+
+    # dry run: test that the paper invoice customers are included but the unexpired aren't
     assert (
-        Order.objects.expire_too_old_unpaid_orders(older_than_days=7, dry_run=False)
+        Order.objects.expire_too_old_unpaid_orders(older_than_days=7, dry_run=True) == 1
+    )
+    # real run: test that the paper invoice customers are excluded
+    assert (
+        Order.objects.expire_too_old_unpaid_orders(
+            older_than_days=7, dry_run=False, exclude_paper_invoice_customers=True
+        )
         == 0
     )
     order.refresh_from_db()
     assert order.status == OrderStatus.OFFERED
+
+    # Update the order to be expired
     order.due_date = datetime.date(2021, 1, 1)
     order.save()
 
     assert (
         Order.objects.expire_too_old_unpaid_orders(older_than_days=7, dry_run=False)
-        == 1
+        == 2
     )
 
     order.refresh_from_db()

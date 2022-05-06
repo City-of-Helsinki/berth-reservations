@@ -18,6 +18,7 @@ from helsinki_gdpr.models import SerializableMixin
 
 from applications.enums import ApplicationAreaType
 from applications.models import BerthApplication, WinterStorageApplication
+from customers.enums import InvoicingType
 from customers.models import CustomerProfile
 from customers.services import ProfileService
 from leases.enums import LeaseStatus
@@ -383,7 +384,9 @@ class OrderManager(SerializableMixin.SerializableManager):
             Q(Q(_product_content_type=product_ct) | Q(_lease_content_type=lease_ct))
         )
 
-    def expire_too_old_unpaid_orders(self, older_than_days, dry_run=False) -> int:
+    def expire_too_old_unpaid_orders(
+        self, older_than_days, dry_run=False, exclude_paper_invoice_customers=False
+    ) -> int:
         # Check all orders that are in OFFERED status, and if there is
         # {older_than_days} full days elapsed after the order's due_date, then
         # set the order status to EXPIRED.
@@ -397,6 +400,13 @@ class OrderManager(SerializableMixin.SerializableManager):
             status=OrderStatus.OFFERED,
             due_date__lt=expire_before_date,
         )
+
+        # The paper invoice customers may be wanted to be excluded
+        if exclude_paper_invoice_customers:
+            too_old_offered_orders = too_old_offered_orders.exclude(
+                customer__invoicing_type=InvoicingType.PAPER_INVOICE
+            )
+
         num_expired = 0
         for order in too_old_offered_orders:
             if order.order_type == OrderType.LEASE_ORDER and not order.lease:
