@@ -47,7 +47,7 @@ class ProfileService:
         }
 
     def get_all_profiles(
-        self, profile_ids: List[UUID] = None
+        self, profile_ids: List[Union[str, UUID]] = None
     ) -> Dict[UUID, HelsinkiProfileUser]:
         query = """
             query GetProfiles {{
@@ -102,7 +102,7 @@ class ProfileService:
         returned_users = []
         end_cursor = ""
         has_next = True
-        next_batch_ids = []
+        next_batch_ids = None
         id_batches = (
             [
                 profile_ids[x : x + BATCH_SIZE]
