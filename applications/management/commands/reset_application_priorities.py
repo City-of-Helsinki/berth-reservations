@@ -9,7 +9,7 @@ class Command(ExpirationCommand):
     feature_flag_name = "BERTH_APPLICATION_PRIORITY_RESET_CRONJOB_ENABLED"
 
     @atomic
-    def run_expiration(self, dry_run):
+    def run_expiration(self, dry_run, **kwargs):
         return BerthApplication.objects.reset_application_priority(
             only_low_priority=True,
             dry_run=dry_run,
