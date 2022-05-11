@@ -6,12 +6,12 @@ from utils import base_expiration_command
 from ...models import BerthSwitchOffer
 
 
-class Command(base_expiration_command.ExpirationCommand):
+class Command(base_expiration_command.FeatureFlagCommand):
     help = 'Sets too old offers from state "offered" to state "expired".'
     feature_flag_name = "OFFER_EXPIRATION_CRONJOB_ENABLED"
 
     @atomic
-    def run_expiration(self, dry_run, **kwargs):
+    def run_operation(self, dry_run, **options) -> int:
         return BerthSwitchOffer.objects.expire_too_old_offers(
             settings.EXPIRE_WAITING_OFFERS_OLDER_THAN_DAYS,
             dry_run=dry_run,
