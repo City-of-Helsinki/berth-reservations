@@ -3,6 +3,7 @@ from dateutil.utils import today
 from django.core import mail
 from django.core.exceptions import ValidationError
 from django.test import RequestFactory
+from django.utils import timezone
 
 from applications.enums import ApplicationStatus
 from leases.enums import LeaseStatus
@@ -65,6 +66,10 @@ def test_approve_order(
     assert mail.outbox[0].alternatives == [
         (f"<b>{ order.order_number } { payment_url }</b>", "text/html")
     ]
+    assert (
+        order.payment_notification_sent
+        and order.payment_notification_sent <= timezone.now()
+    )
 
 
 @pytest.mark.parametrize(

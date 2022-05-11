@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Optional, TYPE_CHECKING, Union
 
+from django.utils import timezone
+
 from leases.models import BerthLease, WinterStorageLease
 from payments.exceptions import InvoicingRejectedForPaperInvoiceCustomersError
 
@@ -676,6 +678,9 @@ def send_payment_notification(
             order_phone,
             language=language,
         )
+
+    order.payment_notification_sent = timezone.now()
+    order.save(update_fields=["payment_notification_sent"])
 
 
 def get_notification_language(order):
