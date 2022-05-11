@@ -100,7 +100,7 @@ jobs:
           K8S_SECRET_ORDER_EXPIRATION_CRONJOB_ENABLED: "true"
           K8S_SECRET_OFFER_EXPIRATION_CRONJOB_ENABLED: "true"
           K8S_SECRET_BERTH_APPLICATION_PRIORITY_RESET_CRONJOB_ENABLED: "true"
-          K8S_SECRET_PAYMENTS_REMINDER_NOTIFICATION_CRONJOB_ENABLED: "true"
+          K8S_SECRET_PAYMENTS_REMINDER_NOTIFICATION_CRONJOB_ENABLED: 1
 
       - name: Deploy Order Expiration Cronjob
         uses: City-of-Helsinki/setup-cronjob-action@main
@@ -140,3 +140,16 @@ jobs:
           schedule: '30 3 1 1 *'
           command: "{/bin/sh}"
           args: "{-c,cd /app && /usr/bin/timeout --kill-after=20m 19m python manage.py reset_application_priorities 2>&1}"
+
+      - name: Deploy Payment Reminder Cronjob
+        uses: City-of-Helsinki/setup-cronjob-action@main
+        with:
+          image_repository: ghcr.io/city-of-helsinki/${{ github.event.repository.name }}
+          image_tag:  ${{ github.sha }}
+          secret_name: project-staging-berth-reservations-secret
+          kubeconfig_raw: ${{ secrets.KUBECONFIG_RAW_STAGING}}
+          target_namespace: ${{ secrets.K8S_NAMESPACE_STAGING }}
+          name: "payment-reminder-notification-cronjob-qa"
+          schedule: '45 7 * * *'
+          command: "{/bin/sh}"
+          args: "{-c,cd /app && /usr/bin/timeout --kill-after=20m 19m python manage.py send_payment_reminders 2>&1}"
