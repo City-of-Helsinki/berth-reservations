@@ -522,6 +522,9 @@ class Order(UUIDModel, TimeStampedModel, SerializableMixin):
         validators=[MinValueValidator(Decimal("0.00"))],
     )
     due_date = models.DateField(verbose_name=_("due date"), blank=True, null=True)
+    payment_notification_sent = models.DateTimeField(
+        verbose_name=_("payment notification sent"), blank=True, null=True
+    )
 
     _product_content_type = models.ForeignKey(
         ContentType,
