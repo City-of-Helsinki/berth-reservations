@@ -10,8 +10,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Max, OuterRef, Q, Subquery, UniqueConstraint, Value
+from django.db.models import F, Max, OuterRef, Q, Subquery, UniqueConstraint, Value
 from django.db.models.functions import Coalesce
+from django.test import RequestFactory
+from django.utils import timezone
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from helsinki_gdpr.models import SerializableMixin
@@ -44,7 +46,11 @@ from .enums import (
     ProductServiceType,
     TalpaProductType,
 )
-from .exceptions import OrderStatusTransitionError, TalpaProductAccountingNotFoundError
+from .exceptions import (
+    InvoicingRejectedForPaperInvoiceCustomersError,
+    OrderStatusTransitionError,
+    TalpaProductAccountingNotFoundError,
+)
 from .utils import (
     calculate_organization_price,
     calculate_organization_tax_percentage,
@@ -58,6 +64,7 @@ from .utils import (
     get_order_product,
     get_switch_application_status,
     rounded,
+    send_payment_notification,
 )
 
 PLACE_PRODUCT_TAX_PERCENTAGES = [Decimal(x) for x in ("24.00",)]
@@ -383,6 +390,55 @@ class OrderManager(SerializableMixin.SerializableManager):
         return self.get_queryset().filter(
             Q(Q(_product_content_type=product_ct) | Q(_lease_content_type=lease_ct))
         )
+
+    def send_payment_reminders_for_unpaid_orders(self, dry_run=False) -> int:
+        """Sends reminders by email and by SMS to customers who have open bills.
+
+        Reminder will be sent at dates related to Order's due date:
+        - One week before the due date
+        - Three days before the due date
+        - One day before the due date
+        """
+        seven = timedelta(days=7)
+        three = timedelta(days=3)
+        one = timedelta(days=1)
+
+        orders = (
+            self.get_queryset()
+            .filter(status=OrderStatus.OFFERED)
+            .exclude(
+                Q(due_date__isnull=True)
+                | Q(due_date__gt=timezone.localdate() + seven)
+                | Q(due_date__lt=timezone.localdate())
+            )
+            .annotate(
+                notification_timestamp=Coalesce(
+                    F("payment_notification_sent__date"), date(1970, 1, 1)
+                ),
+                last_notifiation_sent=F("due_date") - F("notification_timestamp"),
+                until_due_date=F("due_date") - timezone.localdate(),
+            )
+            .filter(
+                Q(last_notifiation_sent__gt=seven, until_due_date__lte=seven)
+                | Q(last_notifiation_sent__gt=three, until_due_date__lte=three)
+                | Q(last_notifiation_sent__gt=one, until_due_date__lte=one)
+            )
+        )
+
+        if dry_run:
+            return orders.count()
+
+        changed = 0
+        for order in orders:
+            try:
+                request = RequestFactory().request()
+                send_payment_notification(order, request)
+                changed += 1
+            except InvoicingRejectedForPaperInvoiceCustomersError:
+                # Dismiss the paper invoice rejections
+                pass
+
+        return changed
 
     def expire_too_old_unpaid_orders(
         self, older_than_days, dry_run=False, exclude_paper_invoice_customers=False
