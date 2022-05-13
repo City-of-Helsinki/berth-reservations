@@ -43,7 +43,7 @@
 4. Create superuser if needed:
    - `docker exec -it berth python manage.py createsuperuser`
 
-The project is now running at [localhost:8000](http://localhost:8000)
+The project is now running at [localhost:8081](http://localhost:8081)
 
 <a name="development-without-docker"></a>
 
