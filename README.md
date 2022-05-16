@@ -32,37 +32,7 @@
 
 ## Development with Docker
 
-1. Create `.env` docker-compose environment file with default contents:
-
-```
-DEBUG=1
-APPLY_MIGRATIONS=1
-ALLOWED_HOSTS=*
-CORS_ORIGIN_ALLOW_ALL=1
-NOTIFICATIONS_ENABLED=1
-ORDER_EXPIRATION_CRONJOB_ENABLED=1
-OFFER_EXPIRATION_CRONJOB_ENABLED=1
-
-VENE_PAYMENTS_BAMBORA_API_URL=https://real-bambora-api-url/api
-VENE_PAYMENTS_BAMBORA_API_KEY=dummy-key
-VENE_PAYMENTS_BAMBORA_API_SECRET=dummy-secret
-VENE_PAYMENTS_BAMBORA_PAYMENT_METHODS="dummy-bank"
-
-PROFILE_API_URL=https://profile-api.test.hel.ninja/graphql/
-PROFILE_TOKEN_SERVICE=https://api.hel.fi/auth/helsinkiprofile
-
-VISMASIGN_API_URL=http://fake-vismasign-api.com
-VISMASIGN_CLIENT_IDENTIFIER=dummy-vismasign-client-identifier
-VISMASIGN_SECRET=dummy-vismasign-secret
-VISMASIGN_TEST_SSN=dummy-vismasign-test-ssn
-
-NOTIFICATION_SERVICE_API_URL=http://fake-notification-api.example.com/v1
-NOTIFICATION_SERVICE_TOKEN=dummy-notification-token
-NOTIFICATION_SERVICE_SENDER_NAME=Hel.fi
-
-# For local Tunnistamo use
-# TOKEN_AUTH_AUTHSERVER_URL=http://tunnistamo-backend:8000/openid
-```
+1. Copy `.env.example` to `.env` and modify it if needed.
 
 2. Run `docker-compose up`
 
@@ -73,7 +43,7 @@ NOTIFICATION_SERVICE_SENDER_NAME=Hel.fi
 4. Create superuser if needed:
    - `docker exec -it berth python manage.py createsuperuser`
 
-The project is now running at [localhost:8000](http://localhost:8000)
+The project is now running at [localhost:8081](http://localhost:8081)
 
 <a name="development-without-docker"></a>
 
