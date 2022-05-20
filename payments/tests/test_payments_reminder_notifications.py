@@ -79,3 +79,34 @@ def test_payment_reminder_is_sent(
         assert changes == 0
         assert len(mail.outbox) == 0
         mock_send_sms.assert_not_called()
+
+
+@freeze_time("2020-10-20T08:00:00Z")
+@pytest.mark.parametrize(
+    "order", ["berth_order", "winter_storage_order"], indirect=True
+)
+@pytest.mark.parametrize("order_status", [status for status in OrderStatus])
+def test_payment_reminder_is_sent_only_to_offered_orders(
+    order: Order, order_status: OrderStatus, notification_template_orders_approved
+):
+    order.status = order_status
+    order.due_date = timezone.localdate() + datetime.timedelta(days=7)
+    order.save()
+
+    with mock.patch.object(
+        SMSNotificationService, "send", return_value=None
+    ) as mock_send_sms:
+        changes = Order.objects.send_payment_reminders_for_unpaid_orders()
+
+    order = Order.objects.get(pk=order.pk)
+
+    if order_status == OrderStatus.OFFERED:
+        assert order.payment_notification_sent == timezone.now()
+        assert changes == 1
+        assert len(mail.outbox) == 1
+        mock_send_sms.assert_called_once()
+    else:
+        assert order.payment_notification_sent is None
+        assert changes == 0
+        assert len(mail.outbox) == 0
+        mock_send_sms.assert_not_called()
