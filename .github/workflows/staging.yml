@@ -102,6 +102,7 @@ jobs:
           K8S_SECRET_BERTH_APPLICATION_PRIORITY_RESET_CRONJOB_ENABLED: "true"
           K8S_SECRET_PAYMENTS_REMINDER_NOTIFICATION_CRONJOB_ENABLED: 1
 
+
       - name: Deploy Order Expiration Cronjob
         uses: City-of-Helsinki/setup-cronjob-action@main
         with:
