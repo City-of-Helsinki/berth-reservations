@@ -4,6 +4,9 @@ on:
     tags:
       - 'release-*'
 
+# allow only one run at a time
+concurrency: ${{ github.workflow }}
+
 env:
   CONTAINER_REGISTRY: ghcr.io
   CONTAINER_REGISTRY_USER: ${{ secrets.GHCR_CONTAINER_REGISTRY_USER }}
