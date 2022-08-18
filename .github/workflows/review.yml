@@ -36,7 +36,6 @@ env:
   K8S_HPA_MAX_CPU_AVG: 80 # 80% from request
 #  K8S_HPA_MAX_RAM_AVG: 80 # 80% from request
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
