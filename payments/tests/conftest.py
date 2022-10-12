@@ -1,4 +1,5 @@
 from decimal import Decimal
+from unittest.mock import mock_open
 from uuid import UUID
 
 import pytest
@@ -441,3 +442,8 @@ def default_talpa_product_accounting():
             region=AreaRegion.WEST, product_type=TalpaProductType.WINTER
         ),
     ]
+
+
+@pytest.fixture
+def open_mock():
+    return mock_open()
