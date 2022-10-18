@@ -8,15 +8,20 @@ from django.db.models import QuerySet
 
 from payments.models import Order
 
-BERTH_ORDERS_START_DAY = 10
-BERTH_ORDERS_START_MONTH = 6
-BERTH_ORDERS_END_DAY = 9  # Inclusive range
-BERTH_ORDERS_END_MONTH = 6  # Inclusive range
+# Invoices for the next season's berth orders
+# (i.e. "seuraavan kauden venepaikkojen laskut") start to be sent during December
+# (e.g. 7th of December), relaxed lower bound is 1st of December.
+BERTH_ORDERS_START_DAY = 1
+BERTH_ORDERS_START_MONTH = 12
+BERTH_ORDERS_END_DAY = 14  # Inclusive range
+BERTH_ORDERS_END_MONTH = 9  # Inclusive range
 BERTH_ORDERS_END_NEXT_YEAR = True
 
-
-WINTER_STORAGE_ORDERS_START_DAY = 15
-WINTER_STORAGE_ORDERS_START_MONTH = 9
+# Invoices for the next season's winter storage orders
+# (i.e. "seuraavan kauden talvisäilytyspaikkojen laskut") start to be sent during August
+# (e.g. 15th of August), relaxed lower bound is 1st of August.
+WINTER_STORAGE_ORDERS_START_DAY = 1
+WINTER_STORAGE_ORDERS_START_MONTH = 8
 WINTER_STORAGE_ORDERS_END_DAY = 9  # Inclusive range
 WINTER_STORAGE_ORDERS_END_MONTH = 6  # Inclusive range
 WINTER_STORAGE_ORDERS_END_NEXT_YEAR = True

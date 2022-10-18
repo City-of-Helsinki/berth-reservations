@@ -182,8 +182,8 @@ def test_get_customer_emails_use_posix_line_separator(
         (date(2022, 6, 30), []),
         (date(2020, 6, 30), ["--year=2020"]),
         (date(2020, 6, 30), ["-y2020"]),
-        (date(2022, 9, 30), ["--month=9"]),
-        (date(2022, 9, 30), ["-m9"]),
+        (date(2022, 8, 30), ["--month=8"]),
+        (date(2022, 8, 30), ["-m8"]),
         (date(2022, 6, 25), ["--day=25"]),
         (date(2022, 6, 25), ["-d25"]),
         (date(2019, 12, 31), ["--year=2019", "--month=12", "--day=31"]),
@@ -211,16 +211,21 @@ def test_get_customer_emails_year_month_day(
 @pytest.mark.parametrize(
     "order_creation_date,today,expect_output",
     [
-        # At the inclusive end of berth orders date range
-        (date(2021, 6, 9), date(2022, 6, 9), False),
-        (date(2021, 6, 10), date(2022, 6, 9), True),
-        (date(2022, 6, 9), date(2022, 6, 9), True),
-        (date(2022, 6, 10), date(2022, 6, 9), False),
+        # At the inclusive end of berth orders' date range
+        (date(2021, 11, 30), date(2022, 9, 14), False),
+        (date(2021, 12, 1), date(2022, 9, 14), True),
+        (date(2022, 9, 14), date(2022, 9, 14), True),
+        (date(2022, 9, 15), date(2022, 9, 14), False),
+        # Just before the inclusive start of berth orders' date range
+        (date(2021, 11, 30), date(2022, 11, 30), False),
+        (date(2021, 12, 1), date(2022, 11, 30), True),
+        (date(2022, 9, 14), date(2022, 11, 30), True),
+        (date(2022, 9, 15), date(2022, 11, 30), False),
         # At the inclusive start of berth orders' date range
-        (date(2022, 6, 9), date(2022, 6, 10), False),
-        (date(2022, 6, 10), date(2022, 6, 10), True),
-        (date(2023, 6, 9), date(2022, 6, 10), True),
-        (date(2023, 6, 10), date(2022, 6, 10), False),
+        (date(2022, 11, 30), date(2022, 12, 1), False),
+        (date(2022, 12, 1), date(2022, 12, 1), True),
+        (date(2023, 9, 14), date(2022, 12, 1), True),
+        (date(2023, 9, 15), date(2022, 12, 1), False),
     ],
 )
 def test_get_customer_emails_berth_order_date_range(
@@ -250,20 +255,20 @@ def test_get_customer_emails_berth_order_date_range(
     "order_creation_date,today,expect_output",
     [
         # At the inclusive end of winter storage orders' date range
-        (date(2021, 9, 14), date(2022, 6, 9), False),
-        (date(2021, 9, 15), date(2022, 6, 9), True),
+        (date(2021, 7, 31), date(2022, 6, 9), False),
+        (date(2021, 8, 1), date(2022, 6, 9), True),
         (date(2022, 6, 9), date(2022, 6, 9), True),
         (date(2022, 6, 10), date(2022, 6, 9), False),
         # Just before the inclusive start of winter storage orders' date range
-        (date(2021, 9, 14), date(2022, 9, 14), False),
-        (date(2021, 9, 15), date(2022, 9, 14), True),
-        (date(2022, 6, 9), date(2022, 9, 14), True),
-        (date(2022, 6, 10), date(2022, 9, 14), False),
+        (date(2021, 7, 31), date(2022, 7, 31), False),
+        (date(2021, 8, 1), date(2022, 7, 31), True),
+        (date(2022, 6, 9), date(2022, 7, 31), True),
+        (date(2022, 6, 10), date(2022, 7, 31), False),
         # At the inclusive start of winter storage orders' date range
-        (date(2022, 9, 14), date(2022, 9, 15), False),
-        (date(2022, 9, 15), date(2022, 9, 15), True),
-        (date(2023, 6, 9), date(2022, 9, 15), True),
-        (date(2023, 6, 10), date(2022, 9, 15), False),
+        (date(2022, 7, 31), date(2022, 8, 1), False),
+        (date(2022, 8, 1), date(2022, 8, 1), True),
+        (date(2023, 6, 9), date(2022, 8, 1), True),
+        (date(2023, 6, 10), date(2022, 8, 1), False),
     ],
 )
 def test_get_customer_emails_winter_storage_order_date_range(
