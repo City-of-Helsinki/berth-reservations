@@ -13,11 +13,10 @@ from django_ilmoitin.utils import send_notification
 
 from berth_reservations.exceptions import VenepaikkaGraphQLError
 from customers.services import ProfileService
+from leases.consts import TERMINABLE_STATUSES
+from leases.enums import LeaseStatus
 from payments.enums import OrderStatus
 from utils.email import is_valid_email
-
-from .consts import TERMINABLE_STATUSES
-from .enums import LeaseStatus
 
 if TYPE_CHECKING:
     from leases.models import BerthLease, WinterStorageLease
@@ -68,11 +67,21 @@ def calculate_season_end_date(lease_end: date = None) -> date:
 
 def calculate_prev_season_start_date() -> date:
     today = date.today()
+    # If today is between 15.9 and 31.12, the start date is 10.6 of the current year
+    autumn_start = date(day=15, month=9, year=today.year)
+    autumn_end = date(day=31, month=12, year=today.year)
+    if today >= autumn_start and today <= autumn_end:
+        return date(day=10, month=6, year=today.year)
     return date(day=10, month=6, year=today.year - 1)
 
 
 def calculate_prev_season_end_date() -> date:
     today = date.today()
+    # If today is between 15.9 and 31.12, the end date is 14.9 of the current year
+    autumn_start = date(day=15, month=9, year=today.year)
+    autumn_end = date(day=31, month=12, year=today.year)
+    if today >= autumn_start and today <= autumn_end:
+        return date(day=14, month=9, year=today.year)
     return date(day=14, month=9, year=today.year - 1)
 
 

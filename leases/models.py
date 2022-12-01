@@ -11,13 +11,9 @@ from helsinki_gdpr.models import SerializableMixin
 
 from applications.models import BerthApplication, WinterStorageApplication
 from customers.models import Boat, CustomerProfile
-from payments.enums import OrderType
-from resources.models import Berth, WinterStoragePlace, WinterStorageSection
-from utils.models import TimeStampedModel, UUIDModel
-
-from .consts import ACTIVE_LEASE_STATUSES
-from .enums import LeaseStatus
-from .utils import (
+from leases.consts import ACTIVE_LEASE_STATUSES
+from leases.enums import LeaseStatus
+from leases.utils import (
     calculate_berth_lease_end_date,
     calculate_berth_lease_start_date,
     calculate_prev_season_end_date,
@@ -28,6 +24,9 @@ from .utils import (
     calculate_winter_storage_lease_end_date,
     calculate_winter_storage_lease_start_date,
 )
+from payments.enums import OrderType
+from resources.models import Berth, WinterStoragePlace, WinterStorageSection
+from utils.models import TimeStampedModel, UUIDModel
 
 
 class AbstractLease(TimeStampedModel, UUIDModel):
@@ -175,6 +174,8 @@ class BerthLeaseManager(SerializableMixin.SerializableManager):
             end_date__gte=prev_season_start,
             # Check the lease ends latest at the end of the season
             end_date__lte=prev_season_end,
+            # Only include paid leases, ie. the ones that were actually active
+            status=LeaseStatus.PAID,
         )
         return qs.filter(in_prev_season)
 
