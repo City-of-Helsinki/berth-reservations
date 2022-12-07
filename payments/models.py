@@ -27,12 +27,7 @@ from leases.enums import LeaseStatus
 from leases.models import BerthLease, WinterStorageLease
 from leases.stickers import get_next_sticker_number
 from leases.utils import calculate_season_start_date
-from resources.enums import AreaRegion
-from resources.models import AbstractArea, Berth
-from utils.models import TimeStampedModel, UUIDModel
-from utils.numbers import rounded as round_to_nearest, rounded as rounded_decimal
-
-from .enums import (
+from payments.enums import (
     AdditionalProductType,
     LeaseOrderType,
     OfferStatus,
@@ -46,12 +41,12 @@ from .enums import (
     ProductServiceType,
     TalpaProductType,
 )
-from .exceptions import (
+from payments.exceptions import (
     InvoicingRejectedForPaperInvoiceCustomersError,
     OrderStatusTransitionError,
     TalpaProductAccountingNotFoundError,
 )
-from .utils import (
+from payments.utils import (
     calculate_organization_price,
     calculate_organization_tax_percentage,
     calculate_product_partial_month_price,
@@ -66,6 +61,10 @@ from .utils import (
     rounded,
     send_payment_notification,
 )
+from resources.enums import AreaRegion
+from resources.models import AbstractArea, Berth
+from utils.models import TimeStampedModel, UUIDModel
+from utils.numbers import rounded as round_to_nearest, rounded as rounded_decimal
 
 PLACE_PRODUCT_TAX_PERCENTAGES = [Decimal(x) for x in ("24.00",)]
 ADDITIONAL_PRODUCT_TAX_PERCENTAGES = [Decimal(x) for x in ("24.00", "10.00")]
@@ -883,9 +882,11 @@ class Order(UUIDModel, TimeStampedModel, SerializableMixin):
         if hasattr(self.customer, "organization"):
             organization_type = self.customer.organization.organization_type
 
-            self.price = calculate_organization_price(price_value, organization_type)
             self.tax_percentage = calculate_organization_tax_percentage(
                 tax_percentage_value, organization_type
+            )
+            self.price = calculate_organization_price(
+                price_value, organization_type, self.tax_percentage
             )
         else:
             self.price = rounded_decimal(price_value)
@@ -1156,10 +1157,12 @@ class OrderLine(UUIDModel, TimeStampedModel, SerializableMixin):
         if hasattr(self.order.customer, "organization"):
             organization_type = self.order.customer.organization.organization_type
 
-            self.price = calculate_organization_price(price, organization_type)
             self.tax_percentage = calculate_organization_tax_percentage(
                 self.product.tax_percentage,
                 organization_type,
+            )
+            self.price = calculate_organization_price(
+                price, organization_type, self.tax_percentage
             )
         else:
             self.price = rounded_decimal(price)
