@@ -886,7 +886,7 @@ class Order(UUIDModel, TimeStampedModel, SerializableMixin):
                 tax_percentage_value, organization_type
             )
             self.price = calculate_organization_price(
-                price_value, organization_type, self.tax_percentage
+                price_value, organization_type, tax_percentage_value
             )
         else:
             self.price = rounded_decimal(price_value)
@@ -1157,12 +1157,12 @@ class OrderLine(UUIDModel, TimeStampedModel, SerializableMixin):
         if hasattr(self.order.customer, "organization"):
             organization_type = self.order.customer.organization.organization_type
 
+            self.price = calculate_organization_price(
+                price, organization_type, self.product.tax_percentage
+            )
             self.tax_percentage = calculate_organization_tax_percentage(
                 self.product.tax_percentage,
                 organization_type,
-            )
-            self.price = calculate_organization_price(
-                price, organization_type, self.tax_percentage
             )
         else:
             self.price = rounded_decimal(price)

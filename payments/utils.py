@@ -237,7 +237,10 @@ def calculate_organization_price(
 
 def calculate_organization_tax_percentage(tax, organization_type) -> Decimal:
     return (
-        Decimal("0.00") if organization_type == OrganizationType.NON_BILLABLE else tax
+        Decimal("0.00")
+        if organization_type == OrganizationType.NON_BILLABLE
+        or organization_type == OrganizationType.INTERNAL
+        else tax
     )
 
 
