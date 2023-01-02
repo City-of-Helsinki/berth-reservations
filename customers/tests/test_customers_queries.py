@@ -1253,6 +1253,171 @@ def test_filter_profile_by_sticker_number(superuser_api_client):
     assert to_global_id(ProfileNode, profile_2.id) not in str(executed["data"])
 
 
+def test_filter_profile_by_sticker_season_start_end_year(superuser_api_client):
+    profile_1 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.UNMARKED
+        ),
+        sticker_number="1",
+        start_date=date(day=15, month=9, year=2020),
+        end_date=date(day=15, month=4, year=2021),
+    ).customer
+    profile_2 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.UNMARKED
+        ),
+        sticker_number="2",
+        start_date=date(day=15, month=9, year=2021),
+        end_date=date(day=15, month=4, year=2022),
+    ).customer
+    profile_3 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.UNMARKED
+        ),
+        sticker_number="2",
+        start_date=date(day=15, month=9, year=2020),
+        end_date=date(day=15, month=4, year=2021),
+    ).customer
+    query = (
+        """
+    {
+            berthProfiles(stickerNumber: "%s" stickerSeason: "%s") {
+                edges{
+                    node{
+                       id
+                    }
+                }
+            }
+    }
+    """
+        % ("1", "2020/2021")
+    )
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_2.id) not in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_3.id) not in str(executed["data"])
+
+
+def test_filter_profile_by_sticker_season_start_year(superuser_api_client):
+    profile_1 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.UNMARKED
+        ),
+        sticker_number="1",
+        start_date=date(day=15, month=9, year=2020),
+        end_date=date(day=15, month=4, year=2021),
+    ).customer
+    profile_2 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.UNMARKED
+        ),
+        sticker_number="2",
+        start_date=date(day=15, month=9, year=2021),
+        end_date=date(day=15, month=4, year=2022),
+    ).customer
+    profile_3 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.UNMARKED
+        ),
+        sticker_number="2",
+        start_date=date(day=15, month=9, year=2020),
+        end_date=date(day=15, month=4, year=2021),
+    ).customer
+    query = (
+        """
+    {
+            berthProfiles(stickerNumber: "%s" stickerSeason: "%s") {
+                edges{
+                    node{
+                       id
+                    }
+                }
+            }
+    }
+    """
+        % ("1", "2020")
+    )
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_2.id) not in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_3.id) not in str(executed["data"])
+
+
+def test_filter_profile_by_sticker_season_invalid_delimeter(superuser_api_client):
+    profile_1 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.UNMARKED
+        ),
+        sticker_number="1",
+        start_date=date(day=15, month=9, year=2020),
+        end_date=date(day=15, month=4, year=2021),
+    ).customer
+    # only accepted format is "2020/2021"
+    query = (
+        """
+    {
+            berthProfiles(stickerNumber: "%s" stickerSeason: "%s") {
+                edges{
+                    node{
+                       id
+                    }
+                }
+            }
+    }
+    """
+        % ("1", "2020-2021")
+    )
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, profile_1.id) not in str(executed["data"])
+
+
+def test_filter_profile_by_sticker_season_only(superuser_api_client):
+    profile_1 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.UNMARKED
+        ),
+        sticker_number="1",
+        start_date=date(day=15, month=9, year=2020),
+        end_date=date(day=15, month=4, year=2021),
+    ).customer
+    profile_2 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.UNMARKED
+        ),
+        sticker_number="2",
+        start_date=date(day=15, month=9, year=2021),
+        end_date=date(day=15, month=4, year=2022),
+    ).customer
+    profile_3 = WinterStorageLeaseFactory(
+        application=WinterStorageApplicationFactory(
+            area_type=ApplicationAreaType.UNMARKED
+        ),
+        sticker_number="2",
+        start_date=date(day=15, month=9, year=2020),
+        end_date=date(day=15, month=4, year=2021),
+    ).customer
+
+    # Querying just season should return all matching start_dates & end_dates
+    query = (
+        """
+    {
+            berthProfiles(stickerSeason: "%s") {
+                edges{
+                    node{
+                       id
+                    }
+                }
+            }
+    }
+    """
+        % "2020/2021"
+    )
+    executed = superuser_api_client.execute(query)
+    assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_2.id) not in str(executed["data"])
+    assert to_global_id(ProfileNode, profile_3.id) in str(executed["data"])
+
+
 def test_filter_by_hki_profile_filters_without_profile_token(superuser_api_client):
     CustomerProfileFactory()  # needed to trigger the profile query, or otherwise no ids
     query = """
