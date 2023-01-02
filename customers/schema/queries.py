@@ -6,6 +6,14 @@ from graphene_django.filter import DjangoFilterConnectionField
 from applications.enums import ApplicationAreaType
 from applications.models import BerthApplication
 from berth_reservations.exceptions import VenepaikkaGraphQLError
+from customers.models import CustomerProfile
+from customers.schema.types import (
+    CustomerGroupEnum,
+    InvoicingTypeEnum,
+    ProfileFilterSet,
+    ProfileNode,
+)
+from customers.utils import from_global_ids
 from leases.models import BerthLease
 from leases.schema import LeaseStatusEnum
 from resources.schema import (
@@ -16,10 +24,6 @@ from resources.schema import (
     WinterStoragePlaceNode,
 )
 from users.decorators import view_permission_required
-
-from ..models import CustomerProfile
-from ..utils import from_global_ids
-from .types import CustomerGroupEnum, InvoicingTypeEnum, ProfileFilterSet, ProfileNode
 
 HELSINKI_PROFILES_FILTERS = ["first_name", "last_name", "email", "address", "sort_by"]
 
@@ -170,6 +174,7 @@ class Query:
         marked_winter_storage_places=graphene.List(graphene.String),
         unmarked_winter_storage_areas=graphene.List(graphene.String),
         sticker_number=graphene.String(),
+        sticker_season=graphene.String(),
         first_name=graphene.String(
             description="Filter by Helsinki Profile `first_name` field"
         ),
@@ -216,6 +221,7 @@ class Query:
             a for a in kwargs.pop("unmarked_winter_storage_areas", []) if a is not None
         ]
         sticker_number = kwargs.pop("sticker_number", None)
+        sticker_season = kwargs.pop("sticker_season", None)
 
         qs = CustomerProfile.objects
 
@@ -251,5 +257,15 @@ class Query:
             )
         if sticker_number:
             qs = qs.filter(winter_storage_leases__sticker_number=sticker_number)
+        if sticker_season:
+            # Support both the official format of YYYY/YYYY but also just the start year
+            if len(sticker_season.split("/")) > 1:
+                start, end = sticker_season.split("/")
+                qs = qs.filter(
+                    winter_storage_leases__start_date__year=start,
+                    winter_storage_leases__end_date__year=end,
+                )
+            else:
+                qs = qs.filter(winter_storage_leases__start_date__year=sticker_season)
 
         return gql_optimizer.query(qs, info)
