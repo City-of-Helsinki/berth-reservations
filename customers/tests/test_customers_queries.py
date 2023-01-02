@@ -1278,8 +1278,7 @@ def test_filter_profile_by_sticker_season_start_end_year(superuser_api_client):
         start_date=date(day=15, month=9, year=2020),
         end_date=date(day=15, month=4, year=2021),
     ).customer
-    query = (
-        """
+    query = """
     {
             berthProfiles(stickerNumber: "%s" stickerSeason: "%s") {
                 edges{
@@ -1289,8 +1288,9 @@ def test_filter_profile_by_sticker_season_start_end_year(superuser_api_client):
                 }
             }
     }
-    """
-        % ("1", "2020/2021")
+    """ % (
+        "1",
+        "2020/2021",
     )
     executed = superuser_api_client.execute(query)
     assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
@@ -1323,8 +1323,7 @@ def test_filter_profile_by_sticker_season_start_year(superuser_api_client):
         start_date=date(day=15, month=9, year=2020),
         end_date=date(day=15, month=4, year=2021),
     ).customer
-    query = (
-        """
+    query = """
     {
             berthProfiles(stickerNumber: "%s" stickerSeason: "%s") {
                 edges{
@@ -1334,8 +1333,9 @@ def test_filter_profile_by_sticker_season_start_year(superuser_api_client):
                 }
             }
     }
-    """
-        % ("1", "2020")
+    """ % (
+        "1",
+        "2020",
     )
     executed = superuser_api_client.execute(query)
     assert to_global_id(ProfileNode, profile_1.id) in str(executed["data"])
@@ -1353,8 +1353,7 @@ def test_filter_profile_by_sticker_season_invalid_delimeter(superuser_api_client
         end_date=date(day=15, month=4, year=2021),
     ).customer
     # only accepted format is "2020/2021"
-    query = (
-        """
+    query = """
     {
             berthProfiles(stickerNumber: "%s" stickerSeason: "%s") {
                 edges{
@@ -1364,8 +1363,9 @@ def test_filter_profile_by_sticker_season_invalid_delimeter(superuser_api_client
                 }
             }
     }
-    """
-        % ("1", "2020-2021")
+    """ % (
+        "1",
+        "2020-2021",
     )
     executed = superuser_api_client.execute(query)
     assert to_global_id(ProfileNode, profile_1.id) not in str(executed["data"])
