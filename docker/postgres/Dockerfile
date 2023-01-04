@@ -12,8 +12,8 @@ ENV LANG fi_FI.UTF-8
 USER root
 RUN usermod -a -G 0 postgres
 #RUN chgrp -R 0 /var/lib/pgsql && chmod g+rw -R /var/lib/pgsql
-RUN chgrp -R 0 /var/run/postgresql && chmod g+rwx -R /var/run/postgresql
-RUN chgrp -R 0 /var/lib/postgresql && chmod g+rwx -R /var/lib/postgresql
+RUN chgrp -R 0 /var/run/postgresql && chmod g+rwx -R /var/run/postgresql && chmod a+rwx -R /var/run/postgresql
+RUN chgrp -R 0 /var/lib/postgresql && chmod g+rwx -R /var/lib/postgresql && chmod a+rwx -R /var/lib/postgresql
 #USER postgres
 
 #chmod: changing permissions of '/var/lib/postgresql/data': Toiminto ei ole sallittu
