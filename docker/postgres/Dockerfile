@@ -9,6 +9,9 @@ RUN localedef -i fi_FI -c -f UTF-8 -A /usr/share/locale/locale.alias fi_FI.UTF-8
 ENV LANG fi_FI.UTF-8
 
 # Openshift 
+USER root
 RUN chgrp -R 0 /var/lib/postgresql && chmod g+w -R /var/lib/postgresql
+RUN chgrp -R 0 /var/lib/postgresql/data && chmod g+w -R /var/lib/postgresql/data
+USER postgres
 
 COPY ./docker-entrypoint.sh /docker-entrypoint-initdb.d/docker-entrypoint.sh
