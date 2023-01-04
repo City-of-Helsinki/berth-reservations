@@ -10,6 +10,7 @@ ENV LANG fi_FI.UTF-8
 
 # Openshift 
 USER root
+RUN usermod -a -G root postgres
 RUN chgrp -R 0 /var/lib/postgresql && chmod g+w -R /var/lib/postgresql
 RUN chgrp -R 0 /var/lib/postgresql/data && chmod g+w -R /var/lib/postgresql/data
 USER postgres
