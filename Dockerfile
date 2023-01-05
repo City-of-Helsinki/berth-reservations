@@ -66,6 +66,11 @@ FROM appbase as production
 COPY --chown=appuser:appuser . /app/
 RUN django-admin compilemessages -l fi -l sv
 
+# OpenShift write access to email templates for generated -folder
+USER root
+RUN chgrp -R 0 /app/templates/email && chmod g+w -R /app/templates/email
+RUN chgrp -R 0 /var/berth && chmod g+w -R /var/berth
+
 # Set user and document the port.
 USER appuser
 EXPOSE 8000/tcp
