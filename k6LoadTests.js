@@ -13,7 +13,10 @@ export const options = {
 };
 
 export default () => {
-  const url = 'https://venepaikka-api.test.kuva.hel.ninja/graphql';
+  let url = 'https://venepaikat-api.stage.hel.ninja/graphql';
+  if (`${__ENV.K6_LOADTEST_ENV_URL}` != 'undefined') {
+    url = `${__ENV.K6_LOADTEST_ENV_URL}`;
+  }
   const data = 'query=query        { \
             harbors { \
                 edges { \
