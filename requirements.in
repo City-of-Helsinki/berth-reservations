@@ -11,7 +11,7 @@ django-helusers
 django-mailer
 django-parler
 django-ilmoitin[graphql_api]
-git+https://github.com/a-rmz/django-munigeo.git@0.4.0-beta#egg=django-munigeo
+git+https://github.com/City-of-Helsinki/django-munigeo@v0.3.7#egg=django-munigeo
 django-silk
 djangorestframework
 elastic-apm

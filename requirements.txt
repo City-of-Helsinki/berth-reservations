@@ -87,7 +87,7 @@ django-mailer==2.1
     #   django-ilmoitin
 django-mptt==0.13.4
     # via django-munigeo
-django-munigeo @ git+https://github.com/a-rmz/django-munigeo.git@0.4.0-beta
+django-munigeo @ git+https://github.com/City-of-Helsinki/django-munigeo.git@v0.3.7
     # via -r requirements.in
 django-parler==2.2.1
     # via
