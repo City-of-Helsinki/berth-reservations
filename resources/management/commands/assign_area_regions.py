@@ -6,7 +6,8 @@ from resources.models import Harbor, WinterStorageArea
 
 HARBOR_REGIONS = {
     AreaRegion.EAST: [
-        "Airorannan venesatama",
+        "Airorannan venesatama A",
+        "Airorannan venesatama B",
         "Aurinkolahden venesatama (Aurinkoranta)",
         "Aurinkolahden venesatama (Pursilahdenranta)",
         "Honkaluoto / Venesatama",
@@ -34,7 +35,8 @@ HARBOR_REGIONS = {
         "Katajanokan venesatama",
         "Lähteelä retkisatama",
         "Merihaan venesatama (Hakaniemenranta 30)",
-        "Merisatama (Ehrenströmintie 21)",
+        "Merisatama (Ehrenströmintie 22)",
+        "Merisatama (Ehrenströmintie ranta)",
         "Merisatama (Merisatama 28)",
         "Merisatama (Merisatamanranta 20)",
         "Pajalahden venesatama (Meripuistotie) / Venesatama",
@@ -47,7 +49,8 @@ HARBOR_REGIONS = {
         "Saukonpaaden venesatama",
         "Saunalahden venesatama (Ramsaynranta 6)",
         "Siltavuoren venesatama",
-        "Tammasaaren allas",
+        "Tammasaaren allas (paikat 1-31)",
+        "Tammasaaren allas (paikat 32-75)",
         "Tervasaari (Tervasaarenkannas 1) / Venesatama",
     ],
 }
