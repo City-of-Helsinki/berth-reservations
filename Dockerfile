@@ -70,6 +70,9 @@ RUN django-admin compilemessages -l fi -l sv
 USER root
 RUN chgrp -R 0 /app/templates/email && chmod g+w -R /app/templates/email
 RUN chgrp -R 0 /var/berth && chmod g+w -R /var/berth
+# /app/data needs write access for Django management commands to work
+RUN mkdir -p /app/data
+RUN chgrp -R 0 /app/data && chmod g+w -R /app/data
 
 # Set user and document the port.
 USER appuser
