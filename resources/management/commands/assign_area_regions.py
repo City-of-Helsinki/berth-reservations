@@ -93,7 +93,10 @@ class Command(BaseCommand):
                     area = model.objects.translated("fi", name=area_name).first()
 
                     if not area:
-                        raise area.DoesNotExist()
+                        try:
+                            raise area.DoesNotExist()
+                        except(Exception) as e:
+                            raise ValidationError(str(e))
 
                     area.region = region.value
                     area.save()
