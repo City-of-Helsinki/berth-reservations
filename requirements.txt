@@ -113,7 +113,7 @@ factory-boy==3.2.0
     # via -r requirements.in
 faker==9.5.2
     # via factory-boy
-future==0.18.2
+future==0.18.3
     # via pyjwkest
 gprof2dot==2021.2.21
     # via django-silk
