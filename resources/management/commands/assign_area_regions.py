@@ -98,7 +98,7 @@ class Command(BaseCommand):
                     if not area:
                         try:
                             raise area.DoesNotExist()
-                        except(Exception) as e:
+                        except (Exception) as e:
                             raise ValidationError(str(e))
 
                     area.region = region.value
