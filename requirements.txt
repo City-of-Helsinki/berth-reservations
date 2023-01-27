@@ -150,7 +150,7 @@ helsinki-profile-gdpr-api==0.1.0
     # via -r requirements.in
 idna==3.3
     # via requests
-ipython==7.28.0
+ipython==7.31.1
     # via -r requirements.in
 itypes==1.2.0
     # via coreapi
