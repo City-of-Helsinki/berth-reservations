@@ -1,4 +1,3 @@
-from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 
 from resources.enums import AreaRegion
@@ -96,20 +95,13 @@ class Command(BaseCommand):
                     area = model.objects.translated("fi", name=area_name).first()
 
                     if not area:
-                        try:
-                            raise area.DoesNotExist()
-                        except (Exception) as e:
-                            raise ValidationError(str(e))
+                        raise area.DoesNotExist()
 
                     area.region = region.value
                     area.save()
                     successful[region.label] += 1
                     total_successful += 1
-                except (
-                    model.MultipleObjectsReturned,
-                    model.DoesNotExist,
-                    ValidationError,
-                ) as e:
+                except (Exception) as e:
                     failed.append({area_name: str(e)})
                     continue
 
