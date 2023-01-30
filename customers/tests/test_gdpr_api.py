@@ -63,7 +63,6 @@ def get_api_token_for_user_with_scopes(user, scopes, requests_mock):
     return auth_header
 
 
-@override_settings(GDPR_API_QUERY_SCOPE="berths.gdprquery")
 def test_get_profile_information_from_gdpr_api(
     rest_api_client, requests_mock, settings
 ):
@@ -107,7 +106,6 @@ def test_get_profile_information_from_gdpr_api(
     }
 
 
-@override_settings(GDPR_API_QUERY_SCOPE="berths.gdprquery")
 def test_get_full_profile_information_from_gdpr_api(
     rest_api_client, requests_mock, settings
 ):
@@ -648,7 +646,6 @@ def test_get_full_profile_information_from_gdpr_api(
     )
 
 
-@override_settings(GDPR_API_DELETE_SCOPE="berths.gdprdelete")
 def test_delete_profile(rest_api_client, requests_mock, settings):
     customer_profile = CustomerProfileFactory()
 
@@ -665,7 +662,6 @@ def test_delete_profile(rest_api_client, requests_mock, settings):
     assert User.objects.count() == 0
 
 
-@override_settings(GDPR_API_DELETE_SCOPE="berths.gdprdelete")
 def test_delete_profile_with_lease(rest_api_client, requests_mock, settings):
     """For now, if the profile has resources connected to it, they will prevent
     the deletion of the profile
