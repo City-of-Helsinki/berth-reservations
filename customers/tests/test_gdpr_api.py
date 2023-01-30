@@ -3,7 +3,6 @@ import json
 from unittest import TestCase
 
 from django.contrib.auth import get_user_model
-from django.test import override_settings
 from django.urls import reverse
 from helusers.settings import api_token_auth_settings
 from jose import jwt
