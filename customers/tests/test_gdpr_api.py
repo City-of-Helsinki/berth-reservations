@@ -3,6 +3,7 @@ import json
 from unittest import TestCase
 
 from django.contrib.auth import get_user_model
+from django.test import override_settings
 from django.urls import reverse
 from helusers.settings import api_token_auth_settings
 from jose import jwt
@@ -62,6 +63,7 @@ def get_api_token_for_user_with_scopes(user, scopes, requests_mock):
     return auth_header
 
 
+@override_settings(GDPR_API_QUERY_SCOPE="berthsapidev.gdprquery")
 def test_get_profile_information_from_gdpr_api(
     rest_api_client, requests_mock, settings
 ):
@@ -105,6 +107,7 @@ def test_get_profile_information_from_gdpr_api(
     }
 
 
+@override_settings(GDPR_API_QUERY_SCOPE="berthsapidev.gdprquery")
 def test_get_full_profile_information_from_gdpr_api(
     rest_api_client, requests_mock, settings
 ):
@@ -645,6 +648,7 @@ def test_get_full_profile_information_from_gdpr_api(
     )
 
 
+@override_settings(GDPR_API_DELETE_SCOPE="berthsapidev.gdprdelete")
 def test_delete_profile(rest_api_client, requests_mock, settings):
     customer_profile = CustomerProfileFactory()
 
@@ -661,6 +665,7 @@ def test_delete_profile(rest_api_client, requests_mock, settings):
     assert User.objects.count() == 0
 
 
+@override_settings(GDPR_API_DELETE_SCOPE="berthsapidev.gdprdelete")
 def test_delete_profile_with_lease(rest_api_client, requests_mock, settings):
     """For now, if the profile has resources connected to it, they will prevent
     the deletion of the profile
