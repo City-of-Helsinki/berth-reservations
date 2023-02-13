@@ -1,9 +1,12 @@
 import json
+import time
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
 from uuid import UUID
 
 import requests
+from requests.adapters import HTTPSAdapter, Retry
+
 from django.db import transaction
 
 from customers.exceptions import (
@@ -14,7 +17,7 @@ from customers.exceptions import (
 from utils.relay import from_global_id, to_global_id
 
 PROFILE_API_URL = "PROFILE_API_URL"
-BATCH_SIZE = 100
+BATCH_SIZE = 1000
 
 
 @dataclass
@@ -413,7 +416,10 @@ class ProfileService:
             body["variables"] = variables
 
         headers = {"Authorization": "Bearer %s" % self.profile_token}
-        r = requests.post(url=self.api_url, json=body, headers=headers, timeout=30)
+        s = requests.Session()
+        retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504])
+        s.mount("https://", HTTPSAdapter(max_retries=retries))
+        r = s.post(url=self.api_url, json=body, headers=headers, timeout=600)
         r.raise_for_status()
         response = r.json()
         if errors := response.get("errors"):
