@@ -43,7 +43,9 @@ mutation APPROVE_ORDER_MUTATION($input: ApproveOrderMutationInput!) {
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-@pytest.mark.skip(reason="temporarily disabled so that retry logic can be tested in test env")
+@pytest.mark.skip(
+    reason="temporarily disabled so that retry logic can be tested in test env"
+)
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order(
     api_client,
@@ -125,7 +127,9 @@ def test_approve_order(
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-@pytest.mark.skip(reason="temporarily disabled so that retry logic can be tested in test env")
+@pytest.mark.skip(
+    reason="temporarily disabled so that retry logic can be tested in test env"
+)
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_sms_not_sent(
     api_client,
@@ -172,7 +176,9 @@ def test_approve_order_sms_not_sent(
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-@pytest.mark.skip(reason="temporarily disabled so that retry logic can be tested in test env")
+@pytest.mark.skip(
+    reason="temporarily disabled so that retry logic can be tested in test env"
+)
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_default_due_date(
     api_client,
@@ -223,7 +229,9 @@ def test_approve_order_not_enough_permissions(api_client):
     assert_not_enough_permissions(executed)
 
 
-@pytest.mark.skip(reason="temporarily disabled so that retry logic can be tested in test env")
+@pytest.mark.skip(
+    reason="temporarily disabled so that retry logic can be tested in test env"
+)
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_does_not_exist(
     superuser_api_client,
@@ -254,7 +262,9 @@ def test_approve_order_does_not_exist(
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-@pytest.mark.skip(reason="temporarily disabled so that retry logic can be tested in test env")
+@pytest.mark.skip(
+    reason="temporarily disabled so that retry logic can be tested in test env"
+)
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_anymail_error(
     superuser_api_client,
@@ -306,7 +316,9 @@ def test_approve_order_anymail_error(
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-@pytest.mark.skip(reason="temporarily disabled so that retry logic can be tested in test env")
+@pytest.mark.skip(
+    reason="temporarily disabled so that retry logic can be tested in test env"
+)
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_one_success_one_failure(
     superuser_api_client,
