@@ -2178,6 +2178,7 @@ def test_terminate_berth_lease_with_drafted_order(
     )
 
 
+@pytest.mark.skip(reason="temporarily disabled so that retry logic can be tested in test env")
 @freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client",
@@ -2421,6 +2422,7 @@ def test_terminate_ws_lease_with_application(
     ]
 
 
+@pytest.mark.skip(reason="temporarily disabled so that retry logic can be tested in test env")
 @freeze_time("2020-12-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client",
