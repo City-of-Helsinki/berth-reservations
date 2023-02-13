@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Union
 from uuid import UUID
 
 import requests
-from requests.adapters import HTTPSAdapter, Retry
+from requests.adapters import HTTPAdapter, Retry
 
 from django.db import transaction
 
@@ -418,7 +418,7 @@ class ProfileService:
         headers = {"Authorization": "Bearer %s" % self.profile_token}
         s = requests.Session()
         retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504])
-        s.mount("https://", HTTPSAdapter(max_retries=retries))
+        s.mount("https://", HTTPAdapter(max_retries=retries))
         r = s.post(url=self.api_url, json=body, headers=headers, timeout=600)
         r.raise_for_status()
         response = r.json()
