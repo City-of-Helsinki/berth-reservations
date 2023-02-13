@@ -147,7 +147,7 @@ def _get_ids_from_profile_service(kwargs: dict, profile_token: str):
     profile_service = ProfileService(profile_token=profile_token)
 
     users = profile_service.find_profile(
-        **params, force_only_one=False, recursively_fetch_all=True, ids_only=True
+        **params, force_only_one=False, recursively_fetch_all=False, ids_only=True
     )
     return [user.id for user in users]
 
