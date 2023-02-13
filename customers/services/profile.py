@@ -4,9 +4,8 @@ from typing import Dict, List, Optional, Union
 from uuid import UUID
 
 import requests
-from requests.adapters import HTTPAdapter, Retry
-
 from django.db import transaction
+from requests.adapters import HTTPAdapter, Retry
 
 from customers.exceptions import (
     MultipleProfilesException,
