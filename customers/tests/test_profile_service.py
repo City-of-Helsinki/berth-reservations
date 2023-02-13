@@ -1,6 +1,7 @@
 from unittest import mock
 from uuid import UUID, uuid4
 
+import pytest
 from faker import Faker
 
 from customers.schema import ProfileNode
