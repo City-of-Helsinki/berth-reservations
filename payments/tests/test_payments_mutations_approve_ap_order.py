@@ -58,7 +58,7 @@ def test_approve_ap_order(
     }
 
     with mock.patch(
-        "customers.services.profile.requests.post",
+        "customers.services.profile.requests.session.post",
         side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
     ), mock.patch.object(
         SMSNotificationService, "send", return_value=None

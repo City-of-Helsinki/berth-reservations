@@ -68,7 +68,7 @@ def test_approve_order(
     order.save()
 
     with mock.patch(
-        "customers.services.profile.requests.post",
+        "customers.services.profile.requests.session.post",
         side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
     ), mock.patch.object(
         SMSNotificationService, "send", return_value=None
@@ -195,7 +195,7 @@ def test_approve_order_default_due_date(
     assert order.due_date != expected_due_date
 
     with mock.patch(
-        "customers.services.profile.requests.post",
+        "customers.services.profile.requests.session.post",
         side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
     ):
         api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
@@ -233,7 +233,7 @@ def test_approve_order_does_not_exist(
     }
 
     with mock.patch(
-        "customers.services.profile.requests.post",
+        "customers.services.profile.requests.session.post",
         side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
     ):
         executed = superuser_api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
@@ -270,7 +270,7 @@ def test_approve_order_anymail_error(
     }
 
     with patch(
-        "customers.services.profile.requests.post",
+        "customers.services.profile.requests.session.post",
         side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
     ):
         with patch(
@@ -326,7 +326,7 @@ def test_approve_order_one_success_one_failure(
     }
 
     with mock.patch(
-        "customers.services.profile.requests.post",
+        "customers.services.profile.requests.session.post",
         side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
     ):
         executed = superuser_api_client.execute(APPROVE_ORDER_MUTATION, input=variables)

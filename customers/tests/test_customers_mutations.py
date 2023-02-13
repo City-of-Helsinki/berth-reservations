@@ -533,7 +533,7 @@ def test_create_my_berth_profile(user_api_client, hki_profile_address):
     assert CustomerProfile.objects.count() == 0
 
     with mock.patch(
-        "customers.services.profile.requests.post",
+        "customers.services.profile.requests.session.post",
         side_effect=mocked_response_my_profile(
             data={
                 "id": customer_id,
@@ -565,7 +565,7 @@ def test_create_my_berth_profile(user_api_client, hki_profile_address):
 def test_create_my_berth_profile_does_not_exist(user_api_client):
     variables = {"profileToken": "token"}
     with mock.patch(
-        "customers.services.profile.requests.post",
+        "customers.services.profile.requests.session.post",
         side_effect=mocked_response_my_profile(None),
     ):
         executed = user_api_client.execute(

@@ -15,7 +15,7 @@ from customers.exceptions import (
 from utils.relay import from_global_id, to_global_id
 
 PROFILE_API_URL = "PROFILE_API_URL"
-BATCH_SIZE = 1000
+BATCH_SIZE = 500
 
 
 @dataclass

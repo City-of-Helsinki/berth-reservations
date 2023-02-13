@@ -324,7 +324,7 @@ def test_create_berth_switch_offer_refresh_profile(api_client, berth):
         "profileToken": "profile-token",
     }
     with mock.patch(
-        "customers.services.profile.requests.post",
+        "customers.services.profile.requests.session.post",
         side_effect=mocked_response_profile(count=0, data=data, use_edges=False),
     ):
         executed = api_client.execute(
