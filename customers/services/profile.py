@@ -4,9 +4,8 @@ from typing import Dict, List, Optional, Union
 from uuid import UUID
 
 import requests
-from requests.adapters import HTTPAdapter, Retry
-
 from django.db import transaction
+from requests.adapters import HTTPAdapter, Retry
 
 from customers.exceptions import (
     MultipleProfilesException,
@@ -16,7 +15,7 @@ from customers.exceptions import (
 from utils.relay import from_global_id, to_global_id
 
 PROFILE_API_URL = "PROFILE_API_URL"
-BATCH_SIZE = 1000
+BATCH_SIZE = 500
 
 
 @dataclass

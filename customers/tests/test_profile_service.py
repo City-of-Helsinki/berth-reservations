@@ -16,7 +16,7 @@ from .conftest import (
 
 def test_get_all_profiles():
     with mock.patch(
-        "customers.services.profile.requests.post",
+        "customers.services.profile.requests.session.post",
         side_effect=mocked_response_profile(count=5),
     ):
         profiles = ProfileService(profile_token="token").get_all_profiles()
@@ -35,7 +35,7 @@ def test_get_all_profiles_id_list():
     profile_ids = [UUID(from_global_id(profile["id"])) for profile in profiles]
 
     with mock.patch(
-        "customers.services.profile.requests.post",
+        "customers.services.profile.requests.session.post",
         side_effect=mocked_response_profile(data=profiles, count=0),
     ):
         profiles = ProfileService(profile_token="token").get_all_profiles(
@@ -56,7 +56,7 @@ def test_get_profile(customer_profile, user, hki_profile_address):
     faker = Faker()
     phone = faker.phone_number()
     with mock.patch(
-        "customers.services.profile.requests.post",
+        "customers.services.profile.requests.session.post",
         side_effect=mocked_response_profile(
             count=0,
             data={
@@ -86,7 +86,7 @@ def test_get_my_profile(customer_profile, user, hki_profile_address):
     faker = Faker()
     phone = faker.phone_number()
     with mock.patch(
-        "customers.services.profile.requests.post",
+        "customers.services.profile.requests.session.post",
         side_effect=mocked_response_my_profile(
             data={
                 "id": to_global_id(ProfileNode, customer_profile.id),

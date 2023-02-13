@@ -2206,7 +2206,7 @@ def test_terminate_berth_lease_without_application(
     }
 
     with mock.patch(
-        "customers.services.profile.requests.post",
+        "customers.services.profile.requests.session.post",
         side_effect=mocked_response_profile(count=0, data=data, use_edges=False),
     ):
         executed = api_client.execute(TERMINATE_BERTH_LEASE_MUTATION, input=variables)
@@ -2449,7 +2449,7 @@ def test_terminate_ws_lease_without_application(
     }
 
     with mock.patch(
-        "customers.services.profile.requests.post",
+        "customers.services.profile.requests.session.post",
         side_effect=mocked_response_profile(count=0, data=data, use_edges=False),
     ):
         executed = api_client.execute(

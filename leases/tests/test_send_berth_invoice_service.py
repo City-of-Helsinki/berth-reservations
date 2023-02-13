@@ -42,7 +42,7 @@ def _send_invoices(data):
         request=RequestFactory().request(), profile_token="token"
     )
     with mock.patch(
-        "customers.services.profile.requests.post",
+        "customers.services.profile.requests.session.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
         invoicing_service.send_invoices()
@@ -467,7 +467,7 @@ def test_send_berth_invoices_send_error(notification_template_orders_approved):
     assert Order.objects.count() == 0
 
     with mock.patch(
-        "customers.services.profile.requests.post",
+        "customers.services.profile.requests.session.post",
         side_effect=mocked_response_profile(count=0, data=data),
     ):
         with mock.patch(
@@ -616,7 +616,7 @@ def test_send_berth_invoices_invalid_limit_reached(
         request=RequestFactory().request(), profile_token="token"
     )
     with mock.patch(
-        "customers.services.profile.requests.post",
+        "customers.services.profile.requests.session.post",
         side_effect=mocked_response_profile(count=1, data=data),
     ):
         with mock.patch.object(
