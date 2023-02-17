@@ -1,4 +1,3 @@
-import pytest
 from dateutil.utils import today
 
 from applications.enums import ApplicationAreaType

@@ -2,11 +2,10 @@ import random
 import uuid
 from unittest import mock
 
-from requests import Session
-
 import pytest
 from dateutil.utils import today
 from django.core.files.uploadedfile import SimpleUploadedFile
+from requests import Session
 
 from berth_reservations.tests.utils import (
     assert_doesnt_exist,
@@ -534,9 +533,10 @@ def test_create_my_berth_profile(user_api_client, hki_profile_address):
 
     assert CustomerProfile.objects.count() == 0
 
-    with mock.patch.object(Session,
-                           "post",
-                           side_effect=mocked_response_my_profile(
+    with mock.patch.object(
+        Session,
+        "post",
+        side_effect=mocked_response_my_profile(
             data={
                 "id": customer_id,
                 "first_name": "test",
@@ -545,7 +545,7 @@ def test_create_my_berth_profile(user_api_client, hki_profile_address):
                 "primary_phone": {"phone": "0501234567"},
                 "primary_address": hki_profile_address,
             },
-                               ),
+        ),
     ):
         executed = user_api_client.execute(
             CREATE_MY_BERTH_PROFILE_MUTATION, input=variables
@@ -566,10 +566,11 @@ def test_create_my_berth_profile(user_api_client, hki_profile_address):
 
 def test_create_my_berth_profile_does_not_exist(user_api_client):
     variables = {"profileToken": "token"}
-    with mock.patch.object(Session,
-                           "post",
-                           side_effect=mocked_response_my_profile(None),
-                           ):
+    with mock.patch.object(
+        Session,
+        "post",
+        side_effect=mocked_response_my_profile(None),
+    ):
         executed = user_api_client.execute(
             CREATE_MY_BERTH_PROFILE_MUTATION, input=variables
         )

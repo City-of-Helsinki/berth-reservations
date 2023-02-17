@@ -1,8 +1,8 @@
 from unittest import mock
 from uuid import UUID, uuid4
-from requests import Session
 
 from faker import Faker
+from requests import Session
 
 from customers.schema import ProfileNode
 from customers.services.profile import ProfileService
@@ -36,10 +36,11 @@ def test_get_all_profiles_id_list():
     profiles = [get_customer_profile_dict() for _i in range(0, 5)]
     profile_ids = [UUID(from_global_id(profile["id"])) for profile in profiles]
 
-    with mock.patch.object(Session,
-                           "post",
-                           side_effect=mocked_response_profile(data=profiles, count=0),
-                           ):
+    with mock.patch.object(
+        Session,
+        "post",
+        side_effect=mocked_response_profile(data=profiles, count=0),
+    ):
         profiles = ProfileService(profile_token="token").get_all_profiles(
             profile_ids=profile_ids
         )
@@ -57,9 +58,10 @@ def test_get_all_profiles_id_list():
 def test_get_profile(customer_profile, user, hki_profile_address):
     faker = Faker()
     phone = faker.phone_number()
-    with mock.patch.object(Session,
-                           "post",
-                           side_effect=mocked_response_profile(
+    with mock.patch.object(
+        Session,
+        "post",
+        side_effect=mocked_response_profile(
             count=0,
             data={
                 "id": to_global_id(ProfileNode, customer_profile.id),
@@ -70,7 +72,7 @@ def test_get_profile(customer_profile, user, hki_profile_address):
                 "primary_address": hki_profile_address,
             },
             use_edges=False,
-                               ),
+        ),
     ):
         profile = ProfileService(profile_token="token").get_profile(customer_profile.id)
 
@@ -87,9 +89,10 @@ def test_get_profile(customer_profile, user, hki_profile_address):
 def test_get_my_profile(customer_profile, user, hki_profile_address):
     faker = Faker()
     phone = faker.phone_number()
-    with mock.patch.object(Session,
-                           "post",
-                           side_effect=mocked_response_my_profile(
+    with mock.patch.object(
+        Session,
+        "post",
+        side_effect=mocked_response_my_profile(
             data={
                 "id": to_global_id(ProfileNode, customer_profile.id),
                 "first_name": user.first_name,
@@ -98,7 +101,7 @@ def test_get_my_profile(customer_profile, user, hki_profile_address):
                 "primary_phone": {"phone": phone},
                 "primary_address": hki_profile_address,
             },
-                               ),
+        ),
     ):
         profile = ProfileService(profile_token="token").get_my_profile()
 

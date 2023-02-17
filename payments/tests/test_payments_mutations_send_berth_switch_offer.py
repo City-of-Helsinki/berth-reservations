@@ -1,9 +1,10 @@
 import datetime
 from unittest import mock
-from requests import Session
+
 import pytest
 from django.core import mail
 from freezegun import freeze_time
+from requests import Session
 
 from applications.enums import ApplicationStatus
 from berth_reservations.tests.factories import CustomerProfileFactory
@@ -93,12 +94,13 @@ def test_send_berth_switch_offer(
         "primary_phone": {"phone": profile_phone},
     }
 
-    with mock.patch.object(Session,
-                           "post",
-                           side_effect=mocked_response_profile(
+    with mock.patch.object(
+        Session,
+        "post",
+        side_effect=mocked_response_profile(
             count=0, data=profile_data, use_edges=False
-                               ),
-                           ), mock.patch.object(
+        ),
+    ), mock.patch.object(
         SMSNotificationService, "send", return_value=None
     ) as mock_send_sms:
         executed = api_client.execute(SEND_BERTH_SWITCH_OFFER_MUTATION, input=variables)

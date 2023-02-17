@@ -1,5 +1,4 @@
 from unittest import mock
-from requests import Session
 
 import pytest  # noqa
 from anymail.exceptions import AnymailError
@@ -9,6 +8,7 @@ from django.core import mail
 from django.test import RequestFactory
 from faker import Faker
 from freezegun import freeze_time
+from requests import Session
 
 from berth_reservations.tests.factories import UserFactory
 from contracts.tests.factories import BerthContractFactory
@@ -48,12 +48,10 @@ def _send_invoices(data):
     return invoicing_service
 
 
-@ freeze_time("2020-01-01T08:00:00Z")
-@ pytest.mark.parametrize(
+@freeze_time("2020-01-01T08:00:00Z")
+@pytest.mark.parametrize(
     "invoicing_type,sent_mail_count",
     [(InvoicingType.ONLINE_PAYMENT, 1), (InvoicingType.PAPER_INVOICE, 0)],
-
-
 )
 def test_send_berth_invoices_basic(
     invoicing_type, sent_mail_count, notification_template_orders_approved
@@ -117,7 +115,7 @@ def test_send_berth_invoices_basic(
         assert order.order_number in msg.body
 
 
-@ freeze_time("2020-01-01T08:00:00Z")
+@freeze_time("2020-01-01T08:00:00Z")
 def test_send_berth_invoices_no_contract(notification_template_orders_approved):
     lease = BerthLeaseFactory(
         boat=None,
@@ -154,7 +152,7 @@ def test_send_berth_invoices_no_contract(notification_template_orders_approved):
     assert BerthLease.objects.count() == 1
 
 
-@ freeze_time("2020-01-01T08:00:00Z")
+@freeze_time("2020-01-01T08:00:00Z")
 def test_use_berth_leases_from_last_season(notification_template_orders_approved):
     # This lease from the upcoming season should be ignored
     _lease_with_contract(
@@ -214,7 +212,7 @@ def test_use_berth_leases_from_last_season(notification_template_orders_approved
     assert order.order_number in msg.body
 
 
-@ freeze_time("2020-10-01T08:00:00Z")
+@freeze_time("2020-10-01T08:00:00Z")
 def test_use_berth_leases_from_current_season(notification_template_orders_approved):
     # This lease from last season should be ignored
     _lease_with_contract(
@@ -274,7 +272,7 @@ def test_use_berth_leases_from_current_season(notification_template_orders_appro
     assert order.order_number in msg.body
 
 
-@ freeze_time("2020-01-01T08:00:00Z")
+@freeze_time("2020-01-01T08:00:00Z")
 def test_berth_lease_berth_product(notification_template_orders_approved):
     lease = _lease_with_contract(
         boat=None,
@@ -308,7 +306,7 @@ def test_berth_lease_berth_product(notification_template_orders_approved):
     assert isinstance(order.product, BerthProduct)
 
 
-@ freeze_time("2020-01-01T08:00:00Z")
+@freeze_time("2020-01-01T08:00:00Z")
 def test_berth_lease_no_product():
     lease = _lease_with_contract(
         boat=None,
@@ -347,7 +345,7 @@ def test_berth_lease_no_product():
     )
 
 
-@ freeze_time("2020-01-01T08:00:00Z")
+@freeze_time("2020-01-01T08:00:00Z")
 def test_send_berth_invoices_missing_email(notification_template_orders_approved):
     lease = _lease_with_contract(
         boat=None,
@@ -395,7 +393,7 @@ def test_send_berth_invoices_missing_email(notification_template_orders_approved
     assert lease.end_date.isoformat() == "2020-09-14"
 
 
-@ freeze_time("2020-01-01T08:00:00Z")
+@freeze_time("2020-01-01T08:00:00Z")
 def test_send_berth_invoices_invalid_example_email(
     notification_template_orders_approved,
 ):
@@ -445,7 +443,7 @@ def test_send_berth_invoices_invalid_example_email(
     assert lease.end_date.isoformat() == "2020-09-14"
 
 
-@ freeze_time("2020-01-01T08:00:00Z")
+@freeze_time("2020-01-01T08:00:00Z")
 def test_send_berth_invoices_send_error(notification_template_orders_approved):
     lease = _lease_with_contract(
         boat=None,
@@ -467,10 +465,11 @@ def test_send_berth_invoices_send_error(notification_template_orders_approved):
 
     assert Order.objects.count() == 0
 
-    with mock.patch.object(Session,
-                           "post",
-                           side_effect=mocked_response_profile(count=0, data=data),
-                           ):
+    with mock.patch.object(
+        Session,
+        "post",
+        side_effect=mocked_response_profile(count=0, data=data),
+    ):
         with mock.patch(
             "payments.utils.send_notification",
             side_effect=AnymailError("Anymail error"),
@@ -509,7 +508,7 @@ def test_send_berth_invoices_send_error(notification_template_orders_approved):
     )
 
 
-@ freeze_time("2020-01-01T08:00:00Z")
+@freeze_time("2020-01-01T08:00:00Z")
 def test_send_berth_invoices_only_not_renewed(notification_template_orders_approved):
     # This lease should be ignored since it already has a lease for the upcoming season
     renewed_lease = _lease_with_contract(
@@ -579,7 +578,7 @@ def test_send_berth_invoices_only_not_renewed(notification_template_orders_appro
     assert order.status == OrderStatus.OFFERED
 
 
-@ freeze_time("2020-01-01T08:00:00Z")
+@freeze_time("2020-01-01T08:00:00Z")
 def test_send_berth_invoices_invalid_limit_reached(
     notification_template_orders_approved,
 ):
@@ -616,10 +615,11 @@ def test_send_berth_invoices_invalid_limit_reached(
     invoicing_service = BerthInvoicingService(
         request=RequestFactory().request(), profile_token="token"
     )
-    with mock.patch.object(Session,
-                           "post",
-                           side_effect=mocked_response_profile(count=1, data=data),
-                           ):
+    with mock.patch.object(
+        Session,
+        "post",
+        side_effect=mocked_response_profile(count=1, data=data),
+    ):
         with mock.patch.object(
             invoicing_service,
             "email_admins",
@@ -633,7 +633,7 @@ def test_send_berth_invoices_invalid_limit_reached(
             assert invoicing_service.failure_count == 1
 
 
-@ freeze_time("2020-01-01T08:00:00Z")
+@freeze_time("2020-01-01T08:00:00Z")
 def test_non_invoiceable_berth(notification_template_orders_approved):
     berth = BerthFactory(is_invoiceable=False)
 
