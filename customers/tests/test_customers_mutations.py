@@ -2,6 +2,8 @@ import random
 import uuid
 from unittest import mock
 
+from requests import Session
+
 import pytest
 from dateutil.utils import today
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -525,9 +527,6 @@ mutation CREATE_MY_BERTH_PROFILE($input: CreateMyBerthProfileMutationInput!) {
 """
 
 
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 def test_create_my_berth_profile(user_api_client, hki_profile_address):
     customer_id = to_global_id(ProfileNode, uuid.uuid4())
 
@@ -535,9 +534,9 @@ def test_create_my_berth_profile(user_api_client, hki_profile_address):
 
     assert CustomerProfile.objects.count() == 0
 
-    with mock.patch(
-        "customers.services.profile.requests.session.post",
-        side_effect=mocked_response_my_profile(
+    with mock.patch.object(Session,
+                           "post",
+                           side_effect=mocked_response_my_profile(
             data={
                 "id": customer_id,
                 "first_name": "test",
@@ -546,7 +545,7 @@ def test_create_my_berth_profile(user_api_client, hki_profile_address):
                 "primary_phone": {"phone": "0501234567"},
                 "primary_address": hki_profile_address,
             },
-        ),
+                               ),
     ):
         executed = user_api_client.execute(
             CREATE_MY_BERTH_PROFILE_MUTATION, input=variables
@@ -565,15 +564,12 @@ def test_create_my_berth_profile(user_api_client, hki_profile_address):
     assert profile.user.groups.first() == get_berth_customers_group()
 
 
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 def test_create_my_berth_profile_does_not_exist(user_api_client):
     variables = {"profileToken": "token"}
-    with mock.patch(
-        "customers.services.profile.requests.session.post",
-        side_effect=mocked_response_my_profile(None),
-    ):
+    with mock.patch.object(Session,
+                           "post",
+                           side_effect=mocked_response_my_profile(None),
+                           ):
         executed = user_api_client.execute(
             CREATE_MY_BERTH_PROFILE_MUTATION, input=variables
         )

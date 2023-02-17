@@ -1,6 +1,7 @@
 import uuid
 from random import randint
 from unittest import mock
+from requests import Session
 
 import pytest
 from babel.dates import format_date
@@ -2178,9 +2179,6 @@ def test_terminate_berth_lease_with_drafted_order(
     )
 
 
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @freeze_time("2020-07-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client",
@@ -2208,10 +2206,10 @@ def test_terminate_berth_lease_without_application(
         "primary_phone": {},
     }
 
-    with mock.patch(
-        "customers.services.profile.requests.session.post",
-        side_effect=mocked_response_profile(count=0, data=data, use_edges=False),
-    ):
+    with mock.patch.object(Session,
+                           "post",
+                           side_effect=mocked_response_profile(count=0, data=data, use_edges=False),
+                           ):
         executed = api_client.execute(TERMINATE_BERTH_LEASE_MUTATION, input=variables)
 
     assert executed["data"]["terminateBerthLease"]["berthLease"] == {
@@ -2424,9 +2422,6 @@ def test_terminate_ws_lease_with_application(
     ]
 
 
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @freeze_time("2020-12-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client",
@@ -2454,10 +2449,10 @@ def test_terminate_ws_lease_without_application(
         "primary_phone": {},
     }
 
-    with mock.patch(
-        "customers.services.profile.requests.session.post",
-        side_effect=mocked_response_profile(count=0, data=data, use_edges=False),
-    ):
+    with mock.patch.object(Session,
+                           "post",
+                           side_effect=mocked_response_profile(count=0, data=data, use_edges=False),
+                           ):
         executed = api_client.execute(
             TERMINATE_WINTER_STORAGE_LEASE_MUTATION, input=variables
         )
