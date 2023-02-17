@@ -1,7 +1,6 @@
 import uuid
 from random import randint
 from unittest import mock
-from requests import Session
 
 import pytest
 from babel.dates import format_date
@@ -9,6 +8,7 @@ from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from django.core import mail
 from freezegun import freeze_time
+from requests import Session
 
 from applications.enums import ApplicationStatus
 from applications.schema import BerthApplicationNode, WinterStorageApplicationNode
@@ -2206,10 +2206,11 @@ def test_terminate_berth_lease_without_application(
         "primary_phone": {},
     }
 
-    with mock.patch.object(Session,
-                           "post",
-                           side_effect=mocked_response_profile(count=0, data=data, use_edges=False),
-                           ):
+    with mock.patch.object(
+        Session,
+        "post",
+        side_effect=mocked_response_profile(count=0, data=data, use_edges=False),
+    ):
         executed = api_client.execute(TERMINATE_BERTH_LEASE_MUTATION, input=variables)
 
     assert executed["data"]["terminateBerthLease"]["berthLease"] == {
@@ -2449,10 +2450,11 @@ def test_terminate_ws_lease_without_application(
         "primary_phone": {},
     }
 
-    with mock.patch.object(Session,
-                           "post",
-                           side_effect=mocked_response_profile(count=0, data=data, use_edges=False),
-                           ):
+    with mock.patch.object(
+        Session,
+        "post",
+        side_effect=mocked_response_profile(count=0, data=data, use_edges=False),
+    ):
         executed = api_client.execute(
             TERMINATE_WINTER_STORAGE_LEASE_MUTATION, input=variables
         )

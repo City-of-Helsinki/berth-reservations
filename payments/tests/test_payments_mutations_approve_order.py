@@ -1,7 +1,6 @@
 import uuid
 from unittest import mock
 from unittest.mock import patch
-from requests import Session
 
 import pytest
 from anymail.exceptions import AnymailError
@@ -10,6 +9,7 @@ from dateutil.utils import today
 from django.core import mail
 from faker import Faker
 from freezegun import freeze_time
+from requests import Session
 
 from applications.enums import ApplicationStatus
 from berth_reservations.tests.utils import assert_not_enough_permissions
@@ -68,10 +68,11 @@ def test_approve_order(
     order.customer_phone = phone
     order.save()
 
-    with mock.patch.object(Session,
-                           "post",
-                           side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
-                           ), mock.patch.object(
+    with mock.patch.object(
+        Session,
+        "post",
+        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+    ), mock.patch.object(
         SMSNotificationService, "send", return_value=None
     ) as mock_send_sms:
         executed = api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
@@ -149,10 +150,11 @@ def test_approve_order_sms_not_sent(
         ],
     }
 
-    with mock.patch.object(Session,
-                           "post",
-                           side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
-                           ), mock.patch.object(
+    with mock.patch.object(
+        Session,
+        "post",
+        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+    ), mock.patch.object(
         SMSNotificationService, "send", return_value=None
     ) as mock_send_sms:
         api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
@@ -195,10 +197,11 @@ def test_approve_order_default_due_date(
     expected_due_date = today().date() + relativedelta(weeks=2)
     assert order.due_date != expected_due_date
 
-    with mock.patch.object(Session,
-                           "post",
-                           side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
-                           ):
+    with mock.patch.object(
+        Session,
+        "post",
+        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+    ):
         api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
 
     order = Order.objects.get(id=order.id)
@@ -233,10 +236,11 @@ def test_approve_order_does_not_exist(
         "orders": [{"orderId": order_id, "email": "foo@bar.com"}],
     }
 
-    with mock.patch.object(Session,
-                           "post",
-                           side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
-                           ):
+    with mock.patch.object(
+        Session,
+        "post",
+        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+    ):
         executed = superuser_api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
 
     assert len(executed["data"]["approveOrders"]["failedOrders"]) == 1
@@ -270,10 +274,11 @@ def test_approve_order_anymail_error(
         "orders": [{"orderId": order_id, "email": "foo@bar.com"}],
     }
 
-    with patch.object(Session,
-                      "post",
-                      side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
-                      ):
+    with patch.object(
+        Session,
+        "post",
+        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+    ):
         with patch(
             "payments.utils.send_notification",
             side_effect=AnymailError("Anymail error"),
@@ -326,10 +331,11 @@ def test_approve_order_one_success_one_failure(
         ],
     }
 
-    with mock.patch.object(Session,
-                           "post",
-                           side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
-                           ):
+    with mock.patch.object(
+        Session,
+        "post",
+        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+    ):
         executed = superuser_api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
 
     payment_url = bambora_payment_provider.get_payment_email_url(

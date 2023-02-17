@@ -1,11 +1,11 @@
 from unittest import mock
-from requests import Session
 
 import pytest
 from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from django.core import mail
 from freezegun import freeze_time
+from requests import Session
 
 from applications.enums import ApplicationStatus
 from customers.services import SMSNotificationService
@@ -58,10 +58,11 @@ def test_approve_ap_order(
         "profileToken": "mock_token",
     }
 
-    with mock.patch.object(Session,
-                           "post",
-                           side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
-                           ), mock.patch.object(
+    with mock.patch.object(
+        Session,
+        "post",
+        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+    ), mock.patch.object(
         SMSNotificationService, "send", return_value=None
     ) as mock_send_sms:
         executed = api_client.execute(APPROVE_ORDER_MUTATION, input=variables)

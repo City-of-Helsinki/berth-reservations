@@ -2,11 +2,10 @@ from random import randint
 from unittest import mock
 from uuid import uuid4
 
-from requests import Session
-
 import pytest
 from faker import Faker
 from freezegun import freeze_time
+from requests import Session
 
 from applications.schema import BerthApplicationNode
 from applications.tests.factories import BerthApplicationFactory, BerthSwitchFactory
@@ -325,10 +324,11 @@ def test_create_berth_switch_offer_refresh_profile(api_client, berth):
         "newBerthId": to_global_id(BerthNode, berth.id),
         "profileToken": "profile-token",
     }
-    with mock.patch.object(Session,
-                           "post",
-                           side_effect=mocked_response_profile(count=0, data=data, use_edges=False),
-                           ):
+    with mock.patch.object(
+        Session,
+        "post",
+        side_effect=mocked_response_profile(count=0, data=data, use_edges=False),
+    ):
         executed = api_client.execute(
             CREATE_BERTH_SWITCH_OFFER_MUTATION_CUSTOMER_FIELDS, input=variables
         )
