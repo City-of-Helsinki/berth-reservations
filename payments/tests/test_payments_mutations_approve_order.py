@@ -1,6 +1,7 @@
 import uuid
 from unittest import mock
 from unittest.mock import patch
+from requests import Session
 
 import pytest
 from anymail.exceptions import AnymailError
@@ -43,9 +44,6 @@ mutation APPROVE_ORDER_MUTATION($input: ApproveOrderMutationInput!) {
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order(
     api_client,
@@ -70,10 +68,10 @@ def test_approve_order(
     order.customer_phone = phone
     order.save()
 
-    with mock.patch(
-        "customers.services.profile.requests.session.post",
-        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
-    ), mock.patch.object(
+    with mock.patch.object(Session,
+                           "post",
+                           side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+                           ), mock.patch.object(
         SMSNotificationService, "send", return_value=None
     ) as mock_send_sms:
         executed = api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
@@ -127,9 +125,6 @@ def test_approve_order(
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_sms_not_sent(
     api_client,
@@ -154,10 +149,10 @@ def test_approve_order_sms_not_sent(
         ],
     }
 
-    with mock.patch(
-        "customers.services.profile.requests.post",
-        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
-    ), mock.patch.object(
+    with mock.patch.object(Session,
+                           "post",
+                           side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+                           ), mock.patch.object(
         SMSNotificationService, "send", return_value=None
     ) as mock_send_sms:
         api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
@@ -175,9 +170,6 @@ def test_approve_order_sms_not_sent(
     "order",
     ["berth_order", "winter_storage_order"],
     indirect=True,
-)
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_default_due_date(
@@ -203,10 +195,10 @@ def test_approve_order_default_due_date(
     expected_due_date = today().date() + relativedelta(weeks=2)
     assert order.due_date != expected_due_date
 
-    with mock.patch(
-        "customers.services.profile.requests.session.post",
-        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
-    ):
+    with mock.patch.object(Session,
+                           "post",
+                           side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+                           ):
         api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
 
     order = Order.objects.get(id=order.id)
@@ -229,9 +221,6 @@ def test_approve_order_not_enough_permissions(api_client):
     assert_not_enough_permissions(executed)
 
 
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_does_not_exist(
     superuser_api_client,
@@ -244,10 +233,10 @@ def test_approve_order_does_not_exist(
         "orders": [{"orderId": order_id, "email": "foo@bar.com"}],
     }
 
-    with mock.patch(
-        "customers.services.profile.requests.session.post",
-        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
-    ):
+    with mock.patch.object(Session,
+                           "post",
+                           side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+                           ):
         executed = superuser_api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
 
     assert len(executed["data"]["approveOrders"]["failedOrders"]) == 1
@@ -261,9 +250,6 @@ def test_approve_order_does_not_exist(
     "order",
     ["berth_order", "winter_storage_order"],
     indirect=True,
-)
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
 )
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_anymail_error(
@@ -284,10 +270,10 @@ def test_approve_order_anymail_error(
         "orders": [{"orderId": order_id, "email": "foo@bar.com"}],
     }
 
-    with patch(
-        "customers.services.profile.requests.session.post",
-        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
-    ):
+    with patch.object(Session,
+                      "post",
+                      side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+                      ):
         with patch(
             "payments.utils.send_notification",
             side_effect=AnymailError("Anymail error"),
@@ -316,9 +302,6 @@ def test_approve_order_anymail_error(
     ["berth_order", "winter_storage_order"],
     indirect=True,
 )
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_order_one_success_one_failure(
     superuser_api_client,
@@ -343,10 +326,10 @@ def test_approve_order_one_success_one_failure(
         ],
     }
 
-    with mock.patch(
-        "customers.services.profile.requests.session.post",
-        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
-    ):
+    with mock.patch.object(Session,
+                           "post",
+                           side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+                           ):
         executed = superuser_api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
 
     payment_url = bambora_payment_provider.get_payment_email_url(

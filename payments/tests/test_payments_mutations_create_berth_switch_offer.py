@@ -2,6 +2,8 @@ from random import randint
 from unittest import mock
 from uuid import uuid4
 
+from requests import Session
+
 import pytest
 from faker import Faker
 from freezegun import freeze_time
@@ -293,9 +295,6 @@ mutation CREATE_BERTH_SWITCH_OFFER_MUTATION($input: CreateBerthSwitchOfferMutati
     ["berth_services"],
     indirect=True,
 )
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @freeze_time("2020-01-01T08:00:00Z")
 def test_create_berth_switch_offer_refresh_profile(api_client, berth):
     faker = Faker("fi_FI")
@@ -326,10 +325,10 @@ def test_create_berth_switch_offer_refresh_profile(api_client, berth):
         "newBerthId": to_global_id(BerthNode, berth.id),
         "profileToken": "profile-token",
     }
-    with mock.patch(
-        "customers.services.profile.requests.session.post",
-        side_effect=mocked_response_profile(count=0, data=data, use_edges=False),
-    ):
+    with mock.patch.object(Session,
+                           "post",
+                           side_effect=mocked_response_profile(count=0, data=data, use_edges=False),
+                           ):
         executed = api_client.execute(
             CREATE_BERTH_SWITCH_OFFER_MUTATION_CUSTOMER_FIELDS, input=variables
         )

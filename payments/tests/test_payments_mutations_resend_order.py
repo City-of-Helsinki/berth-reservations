@@ -4,6 +4,7 @@ from unittest import mock
 import pytest
 from django.core import mail
 from freezegun import freeze_time
+from requests import Session
 
 from berth_reservations.tests.factories import CustomerProfileFactory
 from customers.schema import ProfileNode
@@ -32,39 +33,25 @@ mutation RESEND_ORDER_MUTATION($input: ResendOrderMutationInput!) {
 
 
 #  "winter_storage_order"
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
+
 @freeze_time("2020-10-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client",
     ["berth_services"],
     indirect=True,
 )
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @pytest.mark.parametrize(
     "order",
     ["berth_order"],
     indirect=True,
 )
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @pytest.mark.parametrize(
     "order_has_contact_info",
     [True, False],
 )
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @pytest.mark.parametrize(
     "request_has_profile_token",
     [True, False],
-)
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
 )
 @pytest.mark.parametrize("order_status", [OrderStatus.OFFERED, OrderStatus.ERROR])
 def test_resend_order(
@@ -126,12 +113,12 @@ def test_resend_order(
         "primary_phone": {"phone": order.lease.application.phone_number},
     }
 
-    with mock.patch(
-        "requests.post",
-        side_effect=mocked_response_profile(
+    with mock.patch.object(Session,
+                           "post",
+                           side_effect=mocked_response_profile(
             count=0, data=profile_data, use_edges=False
-        ),
-    ), mock.patch.object(
+                               ),
+                           ), mock.patch.object(
         SMSNotificationService, "send", return_value=None
     ) as mock_send_sms:
         executed = api_client.execute(RESEND_ORDER_MUTATION, input=variables)
@@ -193,9 +180,6 @@ def test_resend_order(
         mock_send_sms.assert_not_called()
 
 
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @pytest.mark.parametrize(
     "order",
     ["berth_order"],
@@ -224,12 +208,12 @@ def test_resend_order_in_error(
     }
     variables = {"orders": [to_global_id(OrderNode, order.id)]}
 
-    with mock.patch(
-        "requests.post",
-        side_effect=mocked_response_profile(
+    with mock.patch.object(Session,
+                           "post",
+                           side_effect=mocked_response_profile(
             count=0, data=profile_data, use_edges=False
-        ),
-    ), mock.patch.object(
+                               ),
+                           ), mock.patch.object(
         SMSNotificationService, "send", return_value=None
     ) as mock_send_sms:
         executed = superuser_api_client.execute(RESEND_ORDER_MUTATION, input=variables)
@@ -273,9 +257,6 @@ def test_resend_order_in_error(
     )
 
 
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @pytest.mark.parametrize(
     "order",
     ["berth_order"],
@@ -302,12 +283,12 @@ def test_resend_order_not_fixed_in_error(
     }
     variables = {"orders": [to_global_id(OrderNode, order.id)], "profileToken": "token"}
 
-    with mock.patch(
-        "requests.post",
-        side_effect=mocked_response_profile(
+    with mock.patch.object(Session,
+                           "post",
+                           side_effect=mocked_response_profile(
             count=0, data=profile_data, use_edges=False
-        ),
-    ):
+                               ),
+                           ):
         executed = superuser_api_client.execute(RESEND_ORDER_MUTATION, input=variables)
 
     order.refresh_from_db()
@@ -325,25 +306,16 @@ def test_resend_order_not_fixed_in_error(
     assert len(mail.outbox) == 0
 
 
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @freeze_time("2020-10-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client",
     ["berth_services"],
     indirect=True,
 )
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @pytest.mark.parametrize(
     "order",
     ["berth_order"],
     indirect=True,
-)
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
 )
 @pytest.mark.parametrize(
     "order_status",
@@ -353,9 +325,6 @@ def test_resend_order_not_fixed_in_error(
         OrderStatus.PAID_MANUALLY,
         OrderStatus.PAID,
     ],
-)
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
 )
 def test_resend_order_in_invalid_state(
     api_client, order: Order, notification_template_orders_approved, order_status

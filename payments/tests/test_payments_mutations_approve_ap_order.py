@@ -1,4 +1,5 @@
 from unittest import mock
+from requests import Session
 
 import pytest
 from dateutil.relativedelta import relativedelta
@@ -39,9 +40,6 @@ mutation APPROVE_ORDER_MUTATION($input: ApproveOrderMutationInput!) {
     ["additional_product_order_with_lease_order"],
     indirect=True,
 )
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @freeze_time("2020-01-01T08:00:00Z")
 def test_approve_ap_order(
     api_client,
@@ -60,10 +58,10 @@ def test_approve_ap_order(
         "profileToken": "mock_token",
     }
 
-    with mock.patch(
-        "customers.services.profile.requests.session.post",
-        side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
-    ), mock.patch.object(
+    with mock.patch.object(Session,
+                           "post",
+                           side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
+                           ), mock.patch.object(
         SMSNotificationService, "send", return_value=None
     ) as mock_send_sms:
         executed = api_client.execute(APPROVE_ORDER_MUTATION, input=variables)

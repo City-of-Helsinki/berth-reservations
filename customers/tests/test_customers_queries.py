@@ -1418,9 +1418,6 @@ def test_filter_profile_by_sticker_season_only(superuser_api_client):
     assert to_global_id(ProfileNode, profile_3.id) in str(executed["data"])
 
 
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 def test_filter_by_hki_profile_filters_without_profile_token(superuser_api_client):
     CustomerProfileFactory()  # needed to trigger the profile query, or otherwise no ids
     query = """
@@ -1438,9 +1435,6 @@ def test_filter_by_hki_profile_filters_without_profile_token(superuser_api_clien
     assert_in_errors("API Token", executed)
 
 
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @patch("customers.services.profile.ProfileService.find_profile")
 def test_filter_by_hki_profile_filters(mock_find_profile, superuser_api_client):
     profile_1 = WinterStorageLeaseFactory(

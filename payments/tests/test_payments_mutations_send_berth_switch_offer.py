@@ -1,6 +1,6 @@
 import datetime
 from unittest import mock
-
+from requests import Session
 import pytest
 from django.core import mail
 from freezegun import freeze_time
@@ -29,24 +29,15 @@ mutation SEND_BERTH_SWITCH_OFFER_MUTATION($input: SendBerthSwitchOfferMutationIn
 }"""
 
 
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @freeze_time("2020-10-01T08:00:00Z")
 @pytest.mark.parametrize(
     "api_client",
     ["berth_services"],
     indirect=True,
 )
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @pytest.mark.parametrize(
     "offer_has_contact_info",
     [True, False],
-)
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
 )
 @pytest.mark.parametrize(
     "profile_token",
@@ -102,12 +93,12 @@ def test_send_berth_switch_offer(
         "primary_phone": {"phone": profile_phone},
     }
 
-    with mock.patch(
-        "requests.post",
-        side_effect=mocked_response_profile(
+    with mock.patch.object(Session,
+                           "post",
+                           side_effect=mocked_response_profile(
             count=0, data=profile_data, use_edges=False
-        ),
-    ), mock.patch.object(
+                               ),
+                           ), mock.patch.object(
         SMSNotificationService, "send", return_value=None
     ) as mock_send_sms:
         executed = api_client.execute(SEND_BERTH_SWITCH_OFFER_MUTATION, input=variables)
@@ -166,9 +157,6 @@ def test_send_berth_switch_offer(
         mock_send_sms.assert_not_called()
 
 
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @pytest.mark.parametrize(
     "api_client",
     ["api_client", "user", "harbor_services", "berth_supervisor", "berth_handler"],
@@ -188,9 +176,6 @@ def test_send_berth_switch_offer_not_enough_permissions(api_client, berth_switch
     assert_not_enough_permissions(executed)
 
 
-@pytest.mark.skip(
-    reason="temporarily disabled so that retry logic can be tested in test env"
-)
 @freeze_time("2020-01-01T08:00:00Z")
 def test_send_berth_switch_offer_non_existent_offer(superuser_api_client, berth):
     variables = {
