@@ -35,6 +35,7 @@ env = environ.Env(
     DATABASE_CONN_MAX_AGE=(int, 60 * 60),  # 60 min
     CACHE_URL=(str, "locmemcache://"),
     MAILER_EMAIL_BACKEND=(str, "django.core.mail.backends.console.EmailBackend"),
+    MAILER_LOCK_PATH=(str, "/tmp/mailer_lockfile"),
     DEFAULT_FROM_EMAIL=(str, "venepaikkavaraukset@hel.fi"),
     MAIL_MAILGUN_KEY=(str, ""),
     MAIL_MAILGUN_DOMAIN=(str, ""),
@@ -119,6 +120,8 @@ if env("MAIL_MAILGUN_KEY"):
 
 EMAIL_BACKEND = "mailer.backend.DbBackend"
 MAILER_EMAIL_BACKEND = env.str("MAILER_EMAIL_BACKEND")
+if env("MAILER_LOCK_PATH"):
+    MAILER_LOCK_PATH = env.str("MAILER_LOCK_PATH")
 
 try:
     version = subprocess.check_output(
