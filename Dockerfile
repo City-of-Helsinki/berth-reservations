@@ -13,7 +13,7 @@ COPY --chown=appuser:appuser requirements.txt /app/
 RUN apt-install.sh \
   build-essential \
   libpq-dev \
-  netcat \
+  netcat-traditional \
   gdal-bin \
   python3-gdal \
   gettext \
