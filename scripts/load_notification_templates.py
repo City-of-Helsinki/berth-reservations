@@ -170,6 +170,7 @@ if __name__ == "__main__":
     from django.utils.translation import override
     from django_ilmoitin.models import NotificationTemplate
     from parler.utils.context import switch_language
+    from django.db import transaction
 
     from applications.notifications import (
         NotificationType as ApplicationNotificationType,
@@ -180,9 +181,10 @@ if __name__ == "__main__":
 
     generate_templates()
 
-    logger.info("Cleaning existing notifications")
-    delete_result = NotificationTemplate.objects.all().delete()
-    logger.info(f"Deleted: {delete_result}")
+    with transaction.atomic():
+        logger.info("Cleaning existing notifications")
+        delete_result = NotificationTemplate.objects.all().delete()
+        logger.info(f"Deleted: {delete_result}")
 
     load_email_templates()
     load_sms_templates(NotificationTemplate.objects.count())
