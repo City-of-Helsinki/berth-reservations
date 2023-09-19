@@ -167,10 +167,10 @@ if __name__ == "__main__":
     languages = settings.LANGUAGES
 
     # The rest of the imports that depend on Django
+    from django.db import transaction
     from django.utils.translation import override
     from django_ilmoitin.models import NotificationTemplate
     from parler.utils.context import switch_language
-    from django.db import transaction
 
     from applications.notifications import (
         NotificationType as ApplicationNotificationType,
