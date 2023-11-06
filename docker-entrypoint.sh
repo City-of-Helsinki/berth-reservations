@@ -29,6 +29,10 @@ if [[ "$CREATE_SUPERUSER" = "1" ]]; then
   echo "Admin user created with credentials admin:adminpass (email: admin@example.com)"
 fi
 
+# Translate messages
+echo "Updating translations..."
+django-admin compilemessages -l fi -l sv
+
 python ./scripts/load_notification_templates.py
 echo "Notification templates loaded"
 

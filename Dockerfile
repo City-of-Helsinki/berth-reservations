@@ -48,7 +48,9 @@ ENV DEV_SERVER=1
 
 # Copy the application code.
 COPY --chown=appuser:appuser . /app/
-RUN django-admin compilemessages -l fi -l sv
+
+# required to make compilemessages command work in OpenShift
+RUN chmod -R g+w /app/locale && chgrp -R root /app/locale
 
 # Use a non-root user.
 USER appuser
@@ -64,7 +66,6 @@ FROM appbase as production
 
 # Copy application code.
 COPY --chown=appuser:appuser . /app/
-RUN django-admin compilemessages -l fi -l sv
 
 # OpenShift write access to email templates for generated -folder
 USER root
@@ -73,6 +74,8 @@ RUN chgrp -R 0 /var/berth && chmod g+w -R /var/berth
 # /app/data needs write access for Django management commands to work
 RUN mkdir -p /app/data
 RUN chgrp -R 0 /app/data && chmod g+w -R /app/data
+# required to make compilemessages command work in OpenShift
+RUN chmod -R g+w /app/locale && chgrp -R root /app/locale
 
 # Set user and document the port.
 USER appuser
