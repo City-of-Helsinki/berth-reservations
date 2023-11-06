@@ -33,15 +33,15 @@ fi
 echo "Updating translations..."
 django-admin compilemessages -l fi -l sv
 
-python ./scripts/load_notification_templates.py
-echo "Notification templates loaded"
-
 # Start server
 if [[ ! -z "$@" ]]; then
     "$@"
 elif [[ "$DEV_SERVER" = "1" ]]; then
+    python ./scripts/load_notification_templates.py
+    echo "Notification templates loaded"
     python -Wd ./manage.py runserver 0.0.0.0:8000
 else
+    echo "Notification templates won't be loaded during the production pod startup. This was intended behaviour. Please run the script when needed."
     python ./manage.py collectstatic --noinput
     uwsgi --ini .prod/uwsgi.ini
 fi

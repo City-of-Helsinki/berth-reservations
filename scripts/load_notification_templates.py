@@ -85,7 +85,7 @@ def load_email_templates():
     for notification_index, (notification_type, templates) in enumerate(
         notifications.items()
     ):
-        template = NotificationTemplate.objects.create(
+        template, created = NotificationTemplate.objects.update_or_create(
             id=notification_index,
             type=notification_type.value,
         )
@@ -113,7 +113,8 @@ def load_email_templates():
 
                 template.save()
 
-        logger.info(f"Written template: {template}")
+         # If created = True, then template created. Otherwise it was updated
+        logger.info(f"Written template: {template}, created: {created}")
 
 
 def load_sms_templates(offset):
@@ -127,7 +128,7 @@ def load_sms_templates(offset):
     for notification_index, (notification_type, template_path) in enumerate(
         sms_notifications.items()
     ):
-        template = NotificationTemplate.objects.create(
+        template, created = NotificationTemplate.objects.update_or_create(
             id=notification_index + offset,
             type=notification_type.value,
         )
@@ -148,7 +149,8 @@ def load_sms_templates(offset):
 
                 template.save()
 
-        logger.info(f"Written template: {template}")
+         # If created = True, then template created. Otherwise it was updated
+        logger.info(f"Written template: {template}, created: {created}")
 
 
 if "DJANGO_SETTINGS_MODULE" not in env:
