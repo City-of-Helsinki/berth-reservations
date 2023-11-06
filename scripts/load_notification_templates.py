@@ -113,7 +113,7 @@ def load_email_templates():
 
                 template.save()
 
-         # If created = True, then template created. Otherwise it was updated
+        # If created = True, then template created. Otherwise it was updated
         logger.info(f"Written template: {template}, created: {created}")
 
 
@@ -149,7 +149,7 @@ def load_sms_templates(offset):
 
                 template.save()
 
-         # If created = True, then template created. Otherwise it was updated
+        # If created = True, then template created. Otherwise it was updated
         logger.info(f"Written template: {template}, created: {created}")
 
 
