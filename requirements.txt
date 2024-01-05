@@ -194,7 +194,7 @@ pyasn1==0.4.8
     #   rsa
 pycodestyle==2.8.0
     # via autopep8
-pycryptodomex==3.11.0
+pycryptodomex==3.19.1
     # via pyjwkest
 pygments==2.10.0
     # via
