@@ -162,9 +162,10 @@ urllib3==1.26.7
     #   requests
 virtualenv==20.13.0
     # via pre-commit
-wheel==0.37.1
+wheel==0.38.0
     # via pip-tools
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
 # setuptools
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
