@@ -148,7 +148,7 @@ graphql-relay==2.0.1
     #   graphene
 helsinki-profile-gdpr-api==0.1.0
     # via -r requirements.in
-idna==3.3
+idna==3.7
     # via requests
 ipython==7.28.0
     # via -r requirements.in
