@@ -24,7 +24,7 @@ cachetools==4.2.4
     # via django-helusers
 cattrs==1.8.0
     # via requests-cache
-certifi==2021.10.8
+certifi==2024.7.4
     # via
     #   elastic-apm
     #   requests
