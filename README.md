@@ -103,6 +103,8 @@ The project is now running at [localhost:8000](http://localhost:8000)
 1. Install `pip-tools`:
 
    - `pip install pip-tools`
+   - `pip install --upgrade pip-tools`
+     - Without this you'll probably get error `ImportError: cannot import name 'BAR_TYPES' from 'pip._internal.cli.progress_bars'`
 
 2. Add new packages to `requirements.in` or `requirements-dev.in`
 
