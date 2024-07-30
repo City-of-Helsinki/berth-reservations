@@ -274,7 +274,7 @@ uritemplate==4.1.1
     # via coreapi
 url-normalize==1.4.3
     # via requests-cache
-urllib3==1.26.7
+urllib3==1.26.19
     # via
     #   elastic-apm
     #   requests
