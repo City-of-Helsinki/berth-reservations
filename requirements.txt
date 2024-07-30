@@ -220,7 +220,7 @@ pytz==2021.3
     #   djangorestframework
 pyyaml==6.0
     # via django-munigeo
-requests==2.26.0
+requests==2.32.0
     # via
     #   coreapi
     #   django-anymail
