@@ -61,6 +61,9 @@ from faker import Faker
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 
+from payments.models import DEFAULT_TAX_PERCENTAGE
+from payments.utils import tax_percentage_as_string
+
 fake = Faker("fi_FI")
 
 HELSINKI_PROFILE_TEMPLATE = {
@@ -118,7 +121,7 @@ def _order_created_at():
 
 ORDER_TEMPLATE = {
     "order_sum": lambda: str(random_price()),
-    "vat_percentage": "24.0",
+    "vat_percentage": tax_percentage_as_string(DEFAULT_TAX_PERCENTAGE),
     "is_paid": lambda: random_bool(),
     "created_at": _order_created_at,
     "berth": {

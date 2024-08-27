@@ -14,7 +14,7 @@ from leases.tests.factories import BerthLeaseFactory, WinterStorageLeaseFactory
 from resources.tests.factories import BerthFactory
 
 from ..enums import OrderStatus, ProductServiceType
-from ..models import Order, OrderLine
+from ..models import DEFAULT_TAX_PERCENTAGE, Order, OrderLine
 from ..providers import BamboraPayformProvider
 from ..tests.factories import (
     BerthProductFactory,
@@ -65,7 +65,7 @@ def _get_berth_order_context(subject: str = "Berth order"):
             berth__pier__harbor__image_file="/img/helsinki_harbors/41189.jpg",
         ),
         price=Decimal("100"),
-        tax_percentage=Decimal("24.00"),
+        tax_percentage=DEFAULT_TAX_PERCENTAGE,
     )
     optional_services = [
         OrderLineFactory.build(
@@ -90,7 +90,7 @@ def _get_winter_storage_order_context(subject: str = "Winter storage order"):
         product=WinterStorageProductFactory.build(),
         lease=WinterStorageLeaseFactory.build(customer=customer),
         price=Decimal("100"),
-        tax_percentage=Decimal("24.00"),
+        tax_percentage=DEFAULT_TAX_PERCENTAGE,
     )
     optional_services = [
         OrderLineFactory.build(
@@ -138,7 +138,7 @@ def _get_cancelled_order_context(subject: str = "Order cancelled"):
                 product=BerthProductFactory.build(),
                 lease=BerthLeaseFactory.build(customer=customer),
                 price=Decimal("100"),
-                tax_percentage=Decimal("24.00"),
+                tax_percentage=DEFAULT_TAX_PERCENTAGE,
             ),
         },
         "rejected_at": str(
@@ -160,7 +160,7 @@ def _get_refunded_order_context(subject: str = "Order refunded"):
                 product=BerthProductFactory.build(),
                 lease=BerthLeaseFactory.build(customer=customer),
                 price=Decimal("100"),
-                tax_percentage=Decimal("24.00"),
+                tax_percentage=DEFAULT_TAX_PERCENTAGE,
                 order_number="1234567abc",
             ),
         },

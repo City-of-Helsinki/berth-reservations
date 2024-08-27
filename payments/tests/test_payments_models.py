@@ -37,12 +37,14 @@ from ..enums import (
     ProductServiceType,
 )
 from ..models import (
+    ADDITIONAL_PRODUCT_TAX_PERCENTAGES,
     AdditionalProduct,
     BerthProduct,
     DEFAULT_TAX_PERCENTAGE,
     Order,
     OrderLine,
     OrderRefund,
+    PLACE_PRODUCT_TAX_PERCENTAGES,
     WinterStorageProduct,
 )
 from ..utils import (
@@ -686,8 +688,11 @@ def test_order_line_pretax_price(order_line):
     )
 
 
-def test_order_tax_percentage():
-    # Hard-code the base price. Base tax percentage currently is always 24%
+def test_order_tax_percentage_with_pre_2024_09_01_default_vat():
+    """
+    VAT percentage 24% was the default between 2013-01-01 – 2024-08-31
+    """
+    # Hard-code the base price. Base tax percentage before 2024-09-01 was 24%
     o = OrderFactory(price=Decimal("100.00"), tax_percentage=Decimal("24.00"))
 
     # Create a product for an optional service
@@ -705,6 +710,31 @@ def test_order_tax_percentage():
     # order line: pretax = 80.64, tax = 10.0%, tax amount = 8.06
     # total tax should be: (24.0 + 10.0) / 2 == 17.0
     assert o.total_tax_percentage == Decimal("17.00")
+
+
+def test_order_tax_percentage_with_post_2024_09_01_default_vat():
+    """
+    VAT percentage 25.5% is the default as of 2024-09-01
+    """
+    # Hard-code the base price. Base tax percentage currently is 25.5% by default
+    o = OrderFactory(price=Decimal("100.00"), tax_percentage=Decimal("25.5"))
+
+    # Create a product for an optional service
+    ap = AdditionalProductFactory(
+        service=ProductServiceType.PARKING_PERMIT,
+        price_unit=PriceUnits.AMOUNT,
+        tax_percentage=Decimal("10.00"),
+    )
+
+    # Hard-code the price of additional product to override model's save method
+    OrderLineFactory(order=o, product=ap, price=Decimal("88.70"))
+
+    # Calculations:
+    # base product: price = 100.00, pretax = 79.68, tax = 25.5%, tax amount = 20.32
+    # order line: price = 88.70, pretax = 80.64, tax = 10.0%, tax amount = 8.06
+    # total tax percentage should be:
+    # (20.32 + 8.06) / (79.68 + 80.64) = 28.38 / 160.32 * 100 = 17.702... ~= 17.70%
+    assert o.total_tax_percentage == Decimal("17.70")
 
 
 def test_winter_season_price():
@@ -1085,8 +1115,10 @@ def test_berth_switch_offer_lease_changed_status():
 
 @pytest.mark.parametrize(
     "width,length,expected_price",
+    # expected_price = width * length * price_value (2 decimals, round away from zero)
+    # see payments.models.Order._update_price
     [
-        ("2.4", "6", "164.16"),
+        ("2.4", "6", "164.16"),  # e.g. 2.4 * 6 * 11.4 = 164.16
         ("2.5", "6", "171"),
         ("3.5", "12", "478.80"),
         ("3", "10", "342"),
@@ -1096,7 +1128,10 @@ def test_berth_switch_offer_lease_changed_status():
         ("4.5", "12", "615.60"),
     ],
 )
-def test_marked_winter_storage_price_rounded(width, length, expected_price):
+@pytest.mark.parametrize("tax_percentage", [Decimal("24.00"), Decimal("25.50")])
+def test_marked_winter_storage_price_rounded(
+    tax_percentage, width, length, expected_price
+):
     lease = WinterStorageLeaseFactory(
         place__place_type__width=Decimal(width),
         place__place_type__length=Decimal(length),
@@ -1105,7 +1140,7 @@ def test_marked_winter_storage_price_rounded(width, length, expected_price):
     WinterStorageProductFactory(
         winter_storage_area=lease.place.winter_storage_section.area,
         price_value=Decimal("11.40"),
-        tax_percentage=Decimal("24.00"),
+        tax_percentage=tax_percentage,
     )
     order = OrderFactory(lease=lease)
     assert order.price == Decimal(expected_price)
@@ -1167,3 +1202,23 @@ def test_order_berth_product_vasikkasaari(berth_width, expected_price):
     )
     order = OrderFactory(lease=lease)
     assert order.price == expected_price
+
+
+def test_default_tax_percentage_is_25_5():
+    assert DEFAULT_TAX_PERCENTAGE == Decimal("25.50")
+
+
+def test_default_tax_percentage_is_in_additional_product_tax_percentages():
+    assert DEFAULT_TAX_PERCENTAGE in ADDITIONAL_PRODUCT_TAX_PERCENTAGES
+
+
+def test_default_tax_percentage_is_in_place_product_tax_percentages():
+    assert DEFAULT_TAX_PERCENTAGE in PLACE_PRODUCT_TAX_PERCENTAGES
+
+
+def test_place_product_tax_percentages_are_decimals():
+    assert all(type(x) == Decimal for x in PLACE_PRODUCT_TAX_PERCENTAGES)
+
+
+def test_additional_product_tax_percentages_are_decimals():
+    assert all(type(x) == Decimal for x in ADDITIONAL_PRODUCT_TAX_PERCENTAGES)

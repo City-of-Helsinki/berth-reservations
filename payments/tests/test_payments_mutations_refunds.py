@@ -78,7 +78,9 @@ def test_refund_order(
 
     products = [
         {
-            "id": get_talpa_product_id(order.product.id, area, False),
+            "id": get_talpa_product_id(
+                order.product.id, order.product.tax_percentage, area, False
+            ),
             "product_id": 1123,
             "title": order.product.name,
             "count": 1,

@@ -10,8 +10,9 @@ from leases.tests.factories import BerthLeaseFactory
 from utils.relay import to_global_id
 
 from ..enums import OrderStatus, PeriodType, PriceUnits, ProductServiceType
-from ..models import Order, OrderLine
+from ..models import DEFAULT_TAX_PERCENTAGE, Order, OrderLine
 from ..schema.types import AdditionalProductNode
+from ..utils import tax_percentage_as_string
 from .factories import (
     BerthProductFactory,
     OrderFactory,
@@ -78,7 +79,7 @@ def test_create_additional_product_order(api_client):
         tier_2_price=Decimal("200.00"),
         tier_3_price=Decimal("200.00"),
         price_unit=PriceUnits.AMOUNT,
-        tax_percentage=Decimal("24.00"),
+        tax_percentage=DEFAULT_TAX_PERCENTAGE,
         pricing_category=get_berth_lease_pricing_category(berth_lease),
     )
     order = OrderFactory(
@@ -100,7 +101,7 @@ def test_create_additional_product_order(api_client):
     fixed_service = PlainAdditionalProductFactory(
         service=ProductServiceType.WASTE_COLLECTION,
         price_unit=PriceUnits.AMOUNT,
-        tax_percentage=Decimal("24.00"),
+        tax_percentage=DEFAULT_TAX_PERCENTAGE,
         period=PeriodType.SEASON,
     )
     OrderLineFactory(order=order, product=fixed_service, price=Decimal("10.00"))
@@ -109,7 +110,7 @@ def test_create_additional_product_order(api_client):
     additional_product = PlainAdditionalProductFactory(
         service=ProductServiceType.STORAGE_ON_ICE,
         period=PeriodType.SEASON,
-        tax_percentage=Decimal("24.00"),
+        tax_percentage=DEFAULT_TAX_PERCENTAGE,
         price_value=Decimal("60.00"),
         price_unit=PriceUnits.PERCENTAGE,
     )
@@ -155,6 +156,6 @@ def test_create_additional_product_order(api_client):
     assert order_lines["edges"][0]["node"] == {
         "quantity": 1,
         "price": expected_total_price,
-        "taxPercentage": "24.00",
+        "taxPercentage": tax_percentage_as_string(DEFAULT_TAX_PERCENTAGE),
         "product": {"id": additional_product_id},
     }

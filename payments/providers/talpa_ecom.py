@@ -240,9 +240,10 @@ class TalpaEComProvider(PaymentProvider):
         area: Optional[Union[Harbor, WinterStorageArea]],
         language: str,
     ):
-        product = order.product
-        int_tax = int(order.tax_percentage)
-        assert int_tax == product.tax_percentage  # make sure the tax is a whole number
+        # https://docs.python.org/3/reference/simple_stmts.html#the-assert-statement
+        # "The current code generator emits no code for an assert
+        # statement when optimization is requested at compile time."
+        assert order.tax_percentage == order.product.tax_percentage
 
         with override(language):
             lease = order.lease

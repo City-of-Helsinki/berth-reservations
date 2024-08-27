@@ -1,3 +1,4 @@
+import warnings
 from decimal import Decimal
 from unittest.mock import mock_open
 from uuid import UUID
@@ -30,8 +31,14 @@ from ..enums import (
     ProductServiceType,
     TalpaProductType,
 )
+from ..models import DEFAULT_TAX_PERCENTAGE
 from ..providers import BamboraPayformProvider, TalpaEComProvider
-from ..utils import price_as_fractional_int, resolve_area, resolve_product_talpa_ecom_id
+from ..utils import (
+    price_as_fractional_int,
+    resolve_area,
+    resolve_product_talpa_ecom_id,
+    tax_percentage_as_string,
+)
 from .factories import (
     AdditionalProductFactory,
     BerthProductFactory,
@@ -141,7 +148,7 @@ def _generate_order(order_type: str = None):
         storage_on_ice = PlainAdditionalProductFactory(
             service=ProductServiceType.STORAGE_ON_ICE,
             period=PeriodType.SEASON,
-            tax_percentage=Decimal("24.00"),
+            tax_percentage=DEFAULT_TAX_PERCENTAGE,
             price_value=Decimal("60.00"),
             price_unit=PriceUnits.PERCENTAGE,
         )
@@ -303,7 +310,7 @@ def mocked_talpa_ecom_order_response(order):
                 "rowPriceVat": price_as_fractional_int(order.price)
                 - price_as_fractional_int(order.pretax_price),
                 "rowPriceTotal": price_as_fractional_int(order.price),
-                "vatPercentage": "24",
+                "vatPercentage": tax_percentage_as_string(DEFAULT_TAX_PERCENTAGE),
                 "priceNet": price_as_fractional_int(order.pretax_price),
                 "priceVat": price_as_fractional_int(order.price)
                 - price_as_fractional_int(order.pretax_price),
@@ -373,6 +380,12 @@ def mocked_refund_response_create(*args, **kwargs):
 
 
 def mocked_refund_payment_details(*args, products=None, **kwargs):
+    warnings.warn(
+        "Bambora is deprecated and DOES NOT WORK CORRECTLY with VAT 25.5%! "
+        "It should be removed as dead code.",
+        DeprecationWarning,
+    )
+
     def wrapper(*args, **kwargs):
         if any([arg.startswith(FAKE_BAMBORA_API_URL) for arg in args]):
             return MockResponse(data={"result": 10})
@@ -400,7 +413,7 @@ def mocked_refund_payment_details(*args, products=None, **kwargs):
                     "title": "Product 1",
                     "count": 1,
                     "pretax_price": 100,
-                    "tax": 24,
+                    "tax": 24,  # DEPRECATED! Bambora
                     "price": 124,
                     "type": 1,
                 },

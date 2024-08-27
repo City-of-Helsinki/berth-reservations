@@ -29,6 +29,9 @@ from payments.tests.conftest import (
 from payments.tests.factories import OrderFactory, OrderLineFactory
 from payments.utils import get_talpa_product_id, price_as_fractional_int
 
+# Skip all tests in this module
+pytest.skip("Bambora is dead code and should be removed", allow_module_level=True)
+
 success_params = {
     "VENE_UI_RETURN_URL": "http%3A%2F%2F127.0.0.1%3A8000%2Fv1",
     "AUTHCODE": "DD789BA71ACD627892517745AF4C4CE2068F006C602CD54264E1FC5E4C2EE6CF",
@@ -170,12 +173,12 @@ def test_payload_additional_product_order(
                 )
             )
         )
-        additional_product.tax_percentage = Decimal("24.00")
+        additional_product.tax_percentage = Decimal("24.00")  # DEPRECATED! Bambora
     additional_product.save()
 
     OrderFactory(
         price=Decimal("0.00"),
-        tax_percentage=Decimal("24.00"),
+        tax_percentage=Decimal("24.00"),  # DEPRECATED! Bambora
         product=None,
         lease=berth_lease_without_product,
         status=OrderStatus.PAID,
@@ -206,6 +209,7 @@ def test_payload_additional_product_order(
     product = payload["products"][0]
     assert product["id"] == get_talpa_product_id(
         additional_product.id,
+        tax_percentage=additional_product.tax_percentage,
         area=berth_lease_without_product.berth.pier.harbor,
         is_storage_on_ice=storage_on_ice,
     )

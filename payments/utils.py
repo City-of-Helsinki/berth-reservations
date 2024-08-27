@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Optional, TYPE_CHECKING, Union
 
 from django.utils import timezone
@@ -115,6 +116,10 @@ def currency(func):
         return currency_format(value)
 
     return wrapped
+
+
+def tax_percentage_as_string(value: Decimal) -> str:
+    return rounded_decimal(value, decimals=2, as_string=True)
 
 
 def percentage_format(value):
@@ -313,8 +318,22 @@ def resolve_product_talpa_ecom_id(
     )
 
 
+VAT_24_TALPA_CODE = "44"  # Code for VAT 24% in Talpa
+VAT_25_5_TALPA_CODE = "47"  # Code for VAT 25.5% in Talpa
+
+
+def is_24_percent(tax_percentage: Union[Decimal | float | int | str]) -> bool:
+    """
+    Is the given tax percentage 24% VAT?
+    @note Supports various formats,
+          e.g. "24", 24, Decimal("24.00"), "24,0", "24.00" and "24.000 %"
+    """
+    return re.match(r"^\s*0*24([.,]0+)?\s*%?\s*$", str(tax_percentage)) is not None
+
+
 def get_talpa_product_id(
     product_id: Union[UUID, str],
+    tax_percentage: Union[Decimal | float | int | str],
     area: Optional[Union[Harbor, WinterStorageArea]] = None,
     is_storage_on_ice: bool = False,
 ):
@@ -332,7 +351,13 @@ def get_talpa_product_id(
     """
     account_number = "340100"
     project = " "  # Empty
-    vat_code = "44"  # Fixed
+    # Previously always used VAT 24% here,
+    # but now there's support for the old default VAT (24%)
+    # as well as the new default VAT (25.5%)
+    if is_24_percent(tax_percentage):
+        vat_code = VAT_24_TALPA_CODE  # Code for VAT 24% used 2013-01-01 – 2024-08-31
+    else:
+        vat_code = VAT_25_5_TALPA_CODE  # Default to VAT 25.5% used as of 2024-09-01
     own_product_number = str(product_id)
     business_unit = " "
     function_area = " "
