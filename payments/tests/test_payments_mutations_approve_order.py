@@ -202,9 +202,10 @@ def test_approve_order_default_due_date(
         "post",
         side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
     ):
-        api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
+        with mock.patch("customers.services.sms_notification_service.requests.post"):
+            api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
 
-    order = Order.objects.get(id=order.id)
+    order.refresh_from_db()
 
     assert order.due_date == expected_due_date
 
@@ -336,7 +337,10 @@ def test_approve_order_one_success_one_failure(
         "post",
         side_effect=mocked_response_profile(count=1, data=None, use_edges=False),
     ):
-        executed = superuser_api_client.execute(APPROVE_ORDER_MUTATION, input=variables)
+        with mock.patch("customers.services.sms_notification_service.requests.post"):
+            executed = superuser_api_client.execute(
+                APPROVE_ORDER_MUTATION, input=variables
+            )
 
     payment_url = bambora_payment_provider.get_payment_email_url(
         order, lang=order.lease.application.language

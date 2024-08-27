@@ -282,7 +282,7 @@ class AdditionalProduct(AbstractBaseProduct, SerializableMixin):
         if self.service in ProductServiceType.FIXED_SERVICES():
             if self.tax_percentage != DEFAULT_TAX_PERCENTAGE:
                 raise ValidationError(
-                    _(f"Fixed services must have VAT of {DEFAULT_TAX_PERCENTAGE}€")
+                    _(f"Fixed services must have VAT of {DEFAULT_TAX_PERCENTAGE}%")
                 )
             if self.period != PeriodType.SEASON:
                 raise ValidationError(_("Fixed services are only valid for season"))

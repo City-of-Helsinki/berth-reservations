@@ -26,7 +26,18 @@ from .keys import rsa_key
 
 User = get_user_model()
 
+TEST_OIDC_SETTINGS = {
+    "OIDC_API_TOKEN_AUTH": {
+        "AUDIENCE": "https://api.hel.fi/auth/berthsapitest",
+        "API_SCOPE_PREFIX": "berthsapitest",
+        "ISSUER": "https://tunnistamo.test.hel.ninja/openid",
+        "API_AUTHORIZATION_FIELD": "https://api.hel.fi/auth",
+        "REQUIRE_API_SCOPE_FOR_AUTHENTICATION": False,
+    }
+}
 
+
+@override_settings(**TEST_OIDC_SETTINGS)
 def get_api_token_for_user_with_scopes(user, scopes, requests_mock):
     """Build a proper auth token with desired scopes."""
 
@@ -63,7 +74,10 @@ def get_api_token_for_user_with_scopes(user, scopes, requests_mock):
     return auth_header
 
 
-@override_settings(GDPR_API_QUERY_SCOPE="berthsapidev.gdprquery")
+@override_settings(
+    **TEST_OIDC_SETTINGS,
+    GDPR_API_QUERY_SCOPE="berthsapidev.gdprquery",
+)
 def test_get_profile_information_from_gdpr_api(
     rest_api_client, requests_mock, settings
 ):
@@ -107,7 +121,10 @@ def test_get_profile_information_from_gdpr_api(
     }
 
 
-@override_settings(GDPR_API_QUERY_SCOPE="berthsapidev.gdprquery")
+@override_settings(
+    **TEST_OIDC_SETTINGS,
+    GDPR_API_QUERY_SCOPE="berthsapidev.gdprquery",
+)
 def test_get_full_profile_information_from_gdpr_api(
     rest_api_client, requests_mock, settings
 ):
@@ -648,7 +665,10 @@ def test_get_full_profile_information_from_gdpr_api(
     )
 
 
-@override_settings(GDPR_API_DELETE_SCOPE="berthsapidev.gdprdelete")
+@override_settings(
+    **TEST_OIDC_SETTINGS,
+    GDPR_API_DELETE_SCOPE="berthsapidev.gdprdelete",
+)
 def test_delete_profile(rest_api_client, requests_mock, settings):
     customer_profile = CustomerProfileFactory()
 
@@ -665,7 +685,10 @@ def test_delete_profile(rest_api_client, requests_mock, settings):
     assert User.objects.count() == 0
 
 
-@override_settings(GDPR_API_DELETE_SCOPE="berthsapidev.gdprdelete")
+@override_settings(
+    **TEST_OIDC_SETTINGS,
+    GDPR_API_DELETE_SCOPE="berthsapidev.gdprdelete",
+)
 def test_delete_profile_with_lease(rest_api_client, requests_mock, settings):
     """For now, if the profile has resources connected to it, they will prevent
     the deletion of the profile

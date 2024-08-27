@@ -139,6 +139,10 @@ def test_exporting_winter_storage_applications_to_excel(customer_private):
     boat_type_name = boat_type.safe_translation_getter(
         "name", language_code=EXCEL_FILE_LANG
     )
+    with translation.override(EXCEL_FILE_LANG):
+        # Force evaluation of gettext_lazy by using str()
+        # so that the translation gets evaluated in the correct language
+        winter_storage_method = str(WinterStorageMethod.ON_TRESTLES.label)
 
     assert xl_sheet.max_column == 24
 
@@ -156,7 +160,7 @@ def test_exporting_winter_storage_applications_to_excel(customer_private):
     assert xl_sheet.cell(2, 9).value == "00170"
     assert xl_sheet.cell(2, 10).value == "Helsinki"
     assert xl_sheet.cell(2, 11).value == "0411234567"
-    assert xl_sheet.cell(2, 12).value == WinterStorageMethod.ON_TRESTLES.label
+    assert xl_sheet.cell(2, 12).value == winter_storage_method
     assert xl_sheet.cell(2, 13).value == "hel001"
     assert xl_sheet.cell(2, 14).value == boat_type_name
     assert xl_sheet.cell(2, 15).value == 2.0
