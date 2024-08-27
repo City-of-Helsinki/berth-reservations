@@ -34,7 +34,6 @@ from ..models import (
     OrderLine,
     OrderLogEntry,
     OrderRefund,
-    PLACE_PRODUCT_TAX_PERCENTAGES,
     TalpaProductAccounting,
     WinterStorageProduct,
 )
@@ -55,9 +54,7 @@ class AbstractBaseProductFactory(factory.django.DjangoModelFactory):
 
 class AbstractPlaceProductFactory(factory.django.DjangoModelFactory):
     price_unit = factory.LazyFunction(lambda: PriceUnits.AMOUNT)
-    tax_percentage = factory.Faker(
-        "random_element", elements=PLACE_PRODUCT_TAX_PERCENTAGES
-    )
+    tax_percentage = factory.Faker("random_element", elements=[DEFAULT_TAX_PERCENTAGE])
 
     class Meta:
         model = AbstractPlaceProduct
@@ -74,9 +71,7 @@ class BerthProductFactory(factory.django.DjangoModelFactory):
     tier_1_price = factory.LazyFunction(lambda: random_price(1, 100, decimals=0))
     tier_2_price = factory.LazyFunction(lambda: random_price(1, 100, decimals=0))
     tier_3_price = factory.LazyFunction(lambda: random_price(1, 100, decimals=0))
-    tax_percentage = factory.Faker(
-        "random_element", elements=PLACE_PRODUCT_TAX_PERCENTAGES
-    )
+    tax_percentage = factory.Faker("random_element", elements=[DEFAULT_TAX_PERCENTAGE])
     pricing_category = PricingCategory.DEFAULT
 
     class Meta:
@@ -100,7 +95,7 @@ class AdditionalProductFactory(AbstractBaseProductFactory):
     period = factory.LazyFunction(lambda: PeriodType.SEASON)
     tax_percentage = factory.LazyFunction(lambda: DEFAULT_TAX_PERCENTAGE)
 
-    # Because of the FIXED_SERVICE restrictions (only allowed to have 24% VAT)
+    # Because of the FIXED_SERVICE restrictions (only allowed to have the default VAT percentage)
     # the actual assignment of a random Tax value is done once the service has
     # been assigned to the model.
     @factory.post_generation

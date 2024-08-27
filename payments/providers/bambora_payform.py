@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import logging
+import warnings
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Iterable, List, Optional
@@ -61,6 +62,12 @@ class BamboraPaymentCustomerDetails:
 
 @dataclass
 class BamboraPaymentProductDetails:
+    """
+    @deprecated DO NOT USE! THIS CLASS DOES NOT WORK CORRECTLY!
+                Does not support the default non-integer VAT percentage 25.5%.
+                This class should be removed as dead code to reduce technical debt.
+    """
+
     id: str
     product_id: int
     title: str
@@ -71,12 +78,17 @@ class BamboraPaymentProductDetails:
     type: int
 
     def __init__(self, product_dict: dict):
+        warnings.warn(
+            "BamboraPaymentProductDetails is deprecated and DOES NOT WORK CORRECTLY! "
+            "It should be removed as dead code.",
+            DeprecationWarning,
+        )
         self.id = product_dict.get("id", "")
         self.product_id = product_dict.get("product_id", "")
         self.title = product_dict.get("title", "")
         self.count = int(product_dict.get("count", 1))
         self.pretax_price = int(product_dict.get("pretax_price", 0))
-        self.tax = int(product_dict.get("tax", 24))
+        self.tax = int(product_dict.get("tax", 24))  # DEPRECATED & INCORRECT!
         self.price = int(product_dict.get("price", 0))
         self.type = int(product_dict.get("type", 1))
 
@@ -106,6 +118,10 @@ class BamboraPaymentDetails:
     refunds: List[BamboraPaymentRefundDetails]
 
     def __init__(self, payment_dict: dict):
+        warnings.warn(
+            "BamboraPaymentDetails is deprecated and should be removed as dead code",
+            DeprecationWarning,
+        )
         self.id = payment_dict.get("id", "")
         self.amount = int(payment_dict.get("amount", 0))
         self.currency = payment_dict.get("currency", "EUR")
@@ -142,6 +158,10 @@ class BamboraPayformProvider(PaymentProvider):
     """
 
     def __init__(self, **kwargs):
+        warnings.warn(
+            "BamboraPayformProvider is deprecated and should be removed as dead code",
+            DeprecationWarning,
+        )
         super().__init__(**kwargs)
         self.url_payment_api = self.config.get(VENE_PAYMENTS_BAMBORA_API_URL)
         self.url_payment_auth = "{}/auth_payment".format(self.url_payment_api)
@@ -283,7 +303,9 @@ class BamboraPayformProvider(PaymentProvider):
                 product_name = f"{product.name}: {place}"
             items.append(
                 {
-                    "id": get_talpa_product_id(product.id, area),
+                    "id": get_talpa_product_id(
+                        product.id, product.tax_percentage, area
+                    ),
                     "title": product_name,
                     "price": price_as_fractional_int(order.price),
                     "pretax_price": price_as_fractional_int(order.pretax_price),
@@ -305,6 +327,7 @@ class BamboraPayformProvider(PaymentProvider):
                 {
                     "id": get_talpa_product_id(
                         product.id,
+                        product.tax_percentage,
                         area,
                         is_storage_on_ice=product.service
                         == ProductServiceType.STORAGE_ON_ICE,

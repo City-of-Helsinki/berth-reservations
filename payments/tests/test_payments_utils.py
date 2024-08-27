@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pytest
 from dateutil.utils import today
 from django.core import mail
@@ -8,12 +10,21 @@ from django.utils import timezone
 from applications.enums import ApplicationStatus
 from leases.enums import LeaseStatus
 from payments.enums import OrderStatus, PricingCategory
-from payments.models import Order
+from payments.models import (
+    DEFAULT_TAX_PERCENTAGE,
+    Order,
+    VAT_10,
+    VAT_14,
+    VAT_24,
+    VAT_25_5,
+)
 from payments.utils import (
     _get_vasikkasaari_harbor,
     approve_order,
     get_berth_product_pricing_category,
+    is_24_percent,
     send_payment_notification,
+    tax_percentage_as_string,
 )
 from resources.enums import BerthMooringType
 
@@ -135,3 +146,90 @@ def test_get_berth_product_pricing_category_vasikkasaari(berth_order):
     assert (
         get_berth_product_pricing_category(berth_order) == PricingCategory.VASIKKASAARI
     )
+
+
+@pytest.mark.parametrize(
+    "input, expected_output",
+    [
+        (DEFAULT_TAX_PERCENTAGE, "25.50"),
+        (VAT_25_5, "25.50"),
+        (VAT_24, "24.00"),
+        (VAT_14, "14.00"),
+        (VAT_10, "10.00"),
+        (Decimal("0"), "0.00"),
+        (Decimal("24"), "24.00"),
+        (Decimal("25.5"), "25.50"),
+        (Decimal("25.50"), "25.50"),
+        (Decimal("1234.56789"), "1234.57"),
+        (Decimal("-.555"), "-0.56"),
+    ],
+)
+def test_tax_percentage_as_string(input: Decimal, expected_output: str):
+    assert tax_percentage_as_string(input) == expected_output
+
+
+@pytest.mark.parametrize(
+    "tax_percentage",
+    [
+        VAT_24,
+        "24",
+        "24.0",
+        "24.00",
+        "24,0",
+        "24,00",
+        "24%",
+        "24.0%",
+        "24.00%",
+        "24,0%",
+        "24,00%",
+        "  000024.000000  ",
+        "   000024.00000   %  ",
+        Decimal("24"),
+        Decimal("24.0"),
+        Decimal("24.00"),
+        24,
+        24.0,
+    ],
+)
+def test_is_24_percent_true(tax_percentage):
+    assert is_24_percent(tax_percentage)
+
+
+@pytest.mark.parametrize(
+    "tax_percentage",
+    [
+        None,
+        True,
+        False,
+        "",
+        " ",
+        "test",
+        VAT_10,
+        VAT_14,
+        VAT_25_5,
+        "10",
+        "14",
+        "23.01",
+        "24.",
+        "24,",
+        "24,01",
+        "24.01",
+        "23.0000000001",
+        "25,5",
+        "25,50",
+        "25.5%",
+        "25.50%",
+        "25,5%",
+        "25,50%",
+        "  000025.50000 % ",
+        Decimal("10"),
+        Decimal("14"),
+        Decimal("25.5"),
+        Decimal("25.50"),
+        10,
+        14,
+        25.5,
+    ],
+)
+def test_is_24_percent_false(tax_percentage):
+    assert not is_24_percent(tax_percentage)

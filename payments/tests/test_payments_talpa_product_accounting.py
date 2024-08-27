@@ -38,22 +38,24 @@ def test_product_order(order_with_products, region, default_talpa_product_accoun
 
 
 @pytest.mark.parametrize("region", [AreaRegion.WEST, AreaRegion.EAST])
+@pytest.mark.parametrize("tax_percentage", [Decimal("24.00"), Decimal("25.50")])
 def test_storage_on_ice_product_order(
     additional_product,
     berth_lease_without_product,
     region,
+    tax_percentage,
     default_talpa_product_accounting,
 ):
     berth_lease_without_product.berth.pier.harbor.region = region
     berth_lease_without_product.berth.pier.harbor.save()
 
     additional_product.service = ProductServiceType.STORAGE_ON_ICE
-    additional_product.tax_percentage = Decimal("24.00")
+    additional_product.tax_percentage = tax_percentage
     additional_product.save()
 
     OrderFactory(
         price=Decimal("0.00"),
-        tax_percentage=Decimal("24.00"),
+        tax_percentage=tax_percentage,
         product=None,
         lease=berth_lease_without_product,
         status=OrderStatus.PAID,

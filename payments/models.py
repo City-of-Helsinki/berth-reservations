@@ -67,10 +67,13 @@ from .utils import (
     send_payment_notification,
 )
 
-PLACE_PRODUCT_TAX_PERCENTAGES = [Decimal(x) for x in ("24.00",)]
-ADDITIONAL_PRODUCT_TAX_PERCENTAGES = [Decimal(x) for x in ("24.00", "10.00")]
+VAT_25_5 = DEFAULT_TAX_PERCENTAGE = Decimal("25.50")  # Used as of 2024-09-01
+VAT_24 = Decimal("24.00")  # Used between 2013-01-01 – 2024-08-31
+VAT_14 = Decimal("14.00")  # Used instead of VAT 10% as of 2025-01-01 if made law
+VAT_10 = Decimal("10.00")
 
-DEFAULT_TAX_PERCENTAGE = Decimal("24.0")
+PLACE_PRODUCT_TAX_PERCENTAGES = [VAT_25_5, VAT_24]
+ADDITIONAL_PRODUCT_TAX_PERCENTAGES = [VAT_25_5, VAT_24, VAT_14, VAT_10]
 
 
 logger = logging.getLogger(__name__)

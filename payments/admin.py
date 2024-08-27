@@ -94,6 +94,7 @@ class OrderLineInline(admin.StackedInline):
         return (
             get_talpa_product_id(
                 obj.product.id,
+                obj.product.tax_percentage,
                 resolve_area(obj.order),
                 is_storage_on_ice=obj.product.service
                 == ProductServiceType.STORAGE_ON_ICE,
@@ -256,7 +257,9 @@ class OrderAdmin(admin.ModelAdmin):
 
     def talpa_product_id(self, obj):
         return (
-            get_talpa_product_id(obj.product.id, resolve_area(obj))
+            get_talpa_product_id(
+                obj.product.id, obj.product.tax_percentage, resolve_area(obj)
+            )
             if hasattr(obj, "product")
             else "-"
         )
@@ -436,6 +439,7 @@ class OrderLineAdmin(admin.ModelAdmin):
         return (
             get_talpa_product_id(
                 obj.product.id,
+                obj.product.tax_percentage,
                 resolve_area(obj.order),
                 is_storage_on_ice=obj.product.service
                 == ProductServiceType.STORAGE_ON_ICE,
