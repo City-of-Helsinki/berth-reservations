@@ -923,8 +923,8 @@ msgid "service"
 msgstr "palvelu"
 
 #, python-brace-format
-msgid "Fixed services must have VAT of {DEFAULT_TAX_PERCENTAGE}€"
-msgstr "Kiinteillä palveluilla tulee olla ALV {DEFAULT_TAX_PERCENTAGE}€"
+msgid "Fixed services must have VAT of {DEFAULT_TAX_PERCENTAGE}%"
+msgstr "Kiinteillä palveluilla tulee olla ALV {DEFAULT_TAX_PERCENTAGE}%"
 
 msgid "Fixed services are only valid for season"
 msgstr "Kiinteät palvelut ovat voimassa vain kaudella"

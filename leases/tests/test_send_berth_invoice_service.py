@@ -43,8 +43,11 @@ def _send_invoices(data):
         request=RequestFactory().request(), profile_token="token"
     )
     with mock.patch("customers.services.profile.requests.Session") as mock_session:
-        mock_session().post.side_effect = mocked_response_profile(count=0, data=data)
-        invoicing_service.send_invoices()
+        with mock.patch("customers.services.sms_notification_service.requests.post"):
+            mock_session().post.side_effect = mocked_response_profile(
+                count=0, data=data
+            )
+            invoicing_service.send_invoices()
     return invoicing_service
 
 

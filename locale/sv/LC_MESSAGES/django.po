@@ -922,8 +922,8 @@ msgid "service"
 msgstr "tjänst"
 
 #, python-brace-format
-msgid "Fixed services must have VAT of {DEFAULT_TAX_PERCENTAGE}€"
-msgstr "Fasta tjänster måste ha en moms på {DEFAULT_TAX_PERCENTAGE}€"
+msgid "Fixed services must have VAT of {DEFAULT_TAX_PERCENTAGE}%"
+msgstr "Fasta tjänster måste ha en moms på {DEFAULT_TAX_PERCENTAGE}%"
 
 msgid "Fixed services are only valid for season"
 msgstr "Fasta tjänster gäller endast för en säsong"

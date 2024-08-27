@@ -155,7 +155,7 @@ def test_additional_product_fixed_service_tax_value():
         )
 
     errors = str(exception.value)
-    assert f"Fixed services must have VAT of {DEFAULT_TAX_PERCENTAGE}€" in errors
+    assert f"Fixed services must have VAT of {DEFAULT_TAX_PERCENTAGE}%" in errors
 
 
 def test_order_berth_product_winter_storage_lease_raise_error():
