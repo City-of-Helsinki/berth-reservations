@@ -7,7 +7,7 @@ export const options = {
   vus: 50,
   //  vus: 1,
   thresholds: {
-    //avg is around ?200ms? on https://venepaikka-api.test.kuva.hel.ninja
+    //avg is around ?200ms? on https://venepaikat-api.test.hel.ninja
     http_req_duration: ['p(95)<5000'],
   },
 };

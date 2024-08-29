@@ -336,7 +336,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "api_url",
         type=str,
-        default="https://venepaikka-api.test.kuva.hel.ninja/graphql_v2/",
+        default="https://venepaikat-api.test.hel.ninja/graphql_v2/",
         help="Berth API url",
         nargs="?",
     )
