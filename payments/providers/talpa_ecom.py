@@ -2,6 +2,7 @@ import json
 import logging
 import re
 from dataclasses import dataclass
+from decimal import Decimal
 from typing import Optional, Union
 
 import requests
@@ -59,9 +60,9 @@ class TalpaEComPaymentDetails:
     status: str
     payment_method: str
     payment_type: str
-    total_excl_tax: int
-    total: int
-    tax_amount: int
+    total_excl_tax: Decimal
+    total: Decimal
+    tax_amount: Decimal
     description: Optional[str]
     additional_info: str
     token: str
@@ -80,9 +81,9 @@ class TalpaEComPaymentDetails:
         self.status = payment_dict.get("status", "")
         self.payment_method = payment_dict.get("paymentMethod", "")
         self.payment_type = payment_dict.get("paymentType", "")
-        self.total_excl_tax = int(payment_dict.get("totalExclTax", 0))
-        self.total = int(payment_dict.get("total", 0))
-        self.tax_amount = int(payment_dict.get("taxAmount", 0))
+        self.total_excl_tax = Decimal(payment_dict.get("totalExclTax", 0))
+        self.total = Decimal(payment_dict.get("total", 0))
+        self.tax_amount = Decimal(payment_dict.get("taxAmount", 0))
         self.additional_info = payment_dict.get("additionalInfo", "")
         self.description = payment_dict.get("description", None)
         self.token = payment_dict.get("token", "")
@@ -434,7 +435,7 @@ class TalpaEComProvider(PaymentProvider):
             timeout=60,
         )
         r.raise_for_status()
-        response = r.json()
+        response = json.loads(r.text, parse_float=Decimal)
 
         return TalpaEComPaymentDetails(payment_dict=response)
 

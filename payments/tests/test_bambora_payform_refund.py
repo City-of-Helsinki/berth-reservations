@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.test.client import RequestFactory
 from django.utils.timezone import now
 
-from berth_reservations.tests.utils import MockResponse
+from berth_reservations.tests.utils import MockJsonResponse
 from leases.enums import LeaseStatus
 from payments.enums import OrderRefundStatus, OrderStatus
 from payments.exceptions import RefundPriceError
@@ -470,7 +470,7 @@ def test_handle_initiate_refund_error_validation(order, bambora_provider_base_co
 
     with mock.patch(
         "payments.providers.bambora_payform.requests.post",
-        side_effect=[MockResponse(data=r)],
+        side_effect=[MockJsonResponse(data=r)],
     ):
         with pytest.raises(PayloadValidationError):
             payment_provider.initiate_refund(order)

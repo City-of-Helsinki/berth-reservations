@@ -3,7 +3,7 @@ from unittest import mock
 from faker import Faker
 from freezegun import freeze_time
 
-from berth_reservations.tests.utils import MockResponse
+from berth_reservations.tests.utils import MockJsonResponse
 from customers.services.sms_notification_service import SMSNotificationService
 from payments.notifications import NotificationType
 
@@ -26,7 +26,7 @@ def test_send_plain_text_message():
 
     with mock.patch(
         "customers.services.sms_notification_service.requests.post",
-        side_effect=lambda *args, **kwargs: MockResponse(mock_response),
+        side_effect=lambda *args, **kwargs: MockJsonResponse(mock_response),
     ) as mock_exec:
         notification_service = SMSNotificationService(token="fake_token")
         response = notification_service.send_plain_text(
@@ -70,7 +70,7 @@ def test_send_message(notification_template_sms_invoice_notice):
 
     with mock.patch(
         "customers.services.sms_notification_service.requests.post",
-        side_effect=lambda *args, **kwargs: MockResponse(mock_response),
+        side_effect=lambda *args, **kwargs: MockJsonResponse(mock_response),
     ) as mock_exec:
         notification_service = SMSNotificationService(token="fake_token")
         response = notification_service.send(notification_type, context, phone)
