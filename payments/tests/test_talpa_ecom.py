@@ -7,7 +7,7 @@ import pytest
 from django.http import HttpResponse
 
 from applications.enums import ApplicationStatus
-from berth_reservations.tests.utils import MockResponse
+from berth_reservations.tests.utils import MockTextResponse
 from customers.utils import get_customer_hash
 from leases.enums import LeaseStatus
 from payments.consts import (
@@ -683,7 +683,8 @@ def test_get_payment_details(
 ):
     order.talpa_ecom_id = "abc55f14-36e3-3f97-a71b-f79b8a9811d5"
     order.save()
-    payment_data = {
+
+    payment_data = r"""{
         "paymentId": "abc55f14-36e3-3f97-a71b-f79b8a9811d5_at_20211117-112134",
         "namespace": "asukaspysakointi",
         "orderId": "abc55f14-36e3-3f97-a71b-f79b8a9811d5",
@@ -691,25 +692,45 @@ def test_get_payment_details(
         "status": "payment_created",
         "paymentMethod": "nordea",
         "paymentType": "order",
-        "totalExclTax": 100,
-        "total": 124,
-        "taxAmount": 24,
-        "description": None,
-        "additionalInfo": '{"payment_method": nordea}',
+        "totalExclTax": 101.22,
+        "total": 127.03,
+        "taxAmount": 25.81,
+        "description": null,
+        "additionalInfo": "{\"payment_method\": nordea}",
         "token": "ebb26c00f2e02919a1af2fe14affe3d8399e2f7f4352ca50e7b5de2ebf5a07e2",
         "timestamp": "20211117-112135",
-        "paymentMethodLabel": "Nordea",
-    }
+        "paymentMethodLabel": "Nordea"
+    }"""
 
-    mocked_response = MockResponse(
-        data=payment_data,
-        status_code=200,
-    )
+    mocked_response = MockTextResponse(text=payment_data, status_code=200)
 
     with mock.patch(
-        "payments.providers.talpa_ecom.requests.get",
-        side_effect=lambda _url, **kwargs: mocked_response,
+        "payments.providers.talpa_ecom.requests.get", return_value=mocked_response
     ):
         response = talpa_ecom_payment_provider.get_payment_details(order)
 
-    assert response == TalpaEComPaymentDetails(payment_data)
+    assert (
+        response.payment_id == "abc55f14-36e3-3f97-a71b-f79b8a9811d5_at_20211117-112134"
+    )
+    assert response.namespace == "asukaspysakointi"
+    assert response.order_id == "abc55f14-36e3-3f97-a71b-f79b8a9811d5"
+    assert response.user_id == "Keshaun39"
+    assert response.status == "payment_created"
+    assert response.payment_method == "nordea"
+    assert response.total_excl_tax == Decimal("101.22")
+    assert response.total == Decimal("127.03")
+    # ~25.5% tax i.e. tax_amount / total_excl_tax = 25.81 / 101.22 ~= 0,255
+    assert response.tax_amount == Decimal("25.81")
+    assert response.description is None
+    assert response.additional_info == '{"payment_method": nordea}'
+    assert (
+        response.token
+        == "ebb26c00f2e02919a1af2fe14affe3d8399e2f7f4352ca50e7b5de2ebf5a07e2"
+    )
+    assert response.timestamp == "20211117-112135"
+    assert response.payment_method_label == "Nordea"
+
+    # Make extra sure the Decimal values are Decimals and not floats
+    assert type(response.total_excl_tax) == Decimal
+    assert type(response.total) == Decimal
+    assert type(response.tax_amount) == Decimal

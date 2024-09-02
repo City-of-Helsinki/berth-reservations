@@ -40,13 +40,9 @@ def create_api_client(user=None):
     return client
 
 
-class MockResponse:
-    def __init__(self, data, status_code=200):
-        self.json_data = data
+class MockResponseBase:
+    def __init__(self, status_code):
         self.status_code = status_code
-
-    def json(self):
-        return self.json_data
 
     def raise_for_status(self):
         if self.status_code != 200:
@@ -54,7 +50,21 @@ class MockResponse:
                 "Mock request error with status_code {}.".format(self.status_code),
                 response=self,
             )
-        pass
+
+
+class MockTextResponse(MockResponseBase):
+    def __init__(self, text, status_code=200):
+        self.text = text
+        super().__init__(status_code)
+
+
+class MockJsonResponse(MockResponseBase):
+    def __init__(self, data, status_code=200):
+        self.json_data = data
+        super().__init__(status_code)
+
+    def json(self):
+        return self.json_data
 
 
 def assert_not_enough_permissions(executed):

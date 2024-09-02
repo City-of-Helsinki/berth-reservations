@@ -12,7 +12,7 @@ from applications.tests.factories import (
     WinterStorageApplicationFactory,
 )
 from berth_reservations.tests.conftest import *  # noqa
-from berth_reservations.tests.utils import MockResponse
+from berth_reservations.tests.utils import MockJsonResponse
 from customers.enums import OrganizationType
 from customers.services import HelsinkiProfileUser
 from customers.tests.factories import CustomerProfileFactory, OrganizationFactory
@@ -282,9 +282,9 @@ def create_talpa_ecom_provider(talpa_ecom_provider_base_config, request):
 def mocked_bambora_response_create(*args, **kwargs):
     """Mock Bambora auth token responses based on provider url"""
     if args[0].startswith(FAKE_BAMBORA_API_URL):
-        return MockResponse(data={}, status_code=500)
+        return MockJsonResponse(data={}, status_code=500)
     else:
-        return MockResponse(
+        return MockJsonResponse(
             data={"result": 0, "token": "token123", "type": "e-payment"}
         )
 
@@ -346,9 +346,9 @@ def mocked_response_talpa_ecom_order(order):
         if (
             args[0] and args[0].startswith(FAKE_TALPA_ECOM_ORDER_API_URL)
         ) or not hasattr(order, "product"):
-            return MockResponse(data={}, status_code=500)
+            return MockJsonResponse(data={}, status_code=500)
         else:
-            return MockResponse(data=mocked_talpa_ecom_order_response(order))
+            return MockJsonResponse(data=mocked_talpa_ecom_order_response(order))
 
     return wrapper
 
@@ -367,16 +367,18 @@ def mocked_response_talpa_ecom_errors(errors: dict = None, status_code: int = 40
                 else errors
             ]
         }
-        return MockResponse(data=response_errors, status_code=status_code)
+        return MockJsonResponse(data=response_errors, status_code=status_code)
 
     return wrapper
 
 
 def mocked_refund_response_create(*args, **kwargs):
     if any([arg.startswith(FAKE_BAMBORA_API_URL) for arg in args]):
-        return MockResponse(data={"result": 10})
+        return MockJsonResponse(data={"result": 10})
     else:
-        return MockResponse(data={"result": 0, "refund_id": 123456, "type": "instant"})
+        return MockJsonResponse(
+            data={"result": 0, "refund_id": 123456, "type": "instant"}
+        )
 
 
 def mocked_refund_payment_details(*args, products=None, **kwargs):
@@ -388,7 +390,7 @@ def mocked_refund_payment_details(*args, products=None, **kwargs):
 
     def wrapper(*args, **kwargs):
         if any([arg.startswith(FAKE_BAMBORA_API_URL) for arg in args]):
-            return MockResponse(data={"result": 10})
+            return MockJsonResponse(data={"result": 10})
         else:
             from ..providers.bambora_payform import BamboraPaymentDetails
 

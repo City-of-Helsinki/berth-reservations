@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 
 from berth_reservations.tests.conftest import *  # noqa
 from berth_reservations.tests.factories import CustomerProfileFactory
-from berth_reservations.tests.utils import MockResponse
+from berth_reservations.tests.utils import MockJsonResponse
 from customers.schema import ProfileNode
 from payments.notifications import NotificationType
 from resources.tests.conftest import berth, boat_type  # noqa
@@ -76,7 +76,7 @@ def mocked_response_profile(count=3, data=None, use_edges=True, *args, **kwargs)
 
         if use_edges:
             edges = [{"node": node} for node in profiles]
-            return MockResponse(
+            return MockJsonResponse(
                 data={
                     "data": {
                         "profiles": {"edges": edges},
@@ -86,7 +86,7 @@ def mocked_response_profile(count=3, data=None, use_edges=True, *args, **kwargs)
             )
 
         profiles = {"profile": profiles[0]}
-        return MockResponse(data={"data": profiles})
+        return MockJsonResponse(data={"data": profiles})
 
     return wrapper
 
@@ -98,7 +98,7 @@ def mocked_response_my_profile(data="", *args, **kwargs):
         else:
             profile_dict = get_customer_profile_dict()
         my_profile = {"my_profile": profile_dict}
-        return MockResponse(data={"data": my_profile})
+        return MockJsonResponse(data={"data": my_profile})
 
     return wrapper
 
