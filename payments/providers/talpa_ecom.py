@@ -37,7 +37,12 @@ from ..exceptions import (
     UnknownWebhookEventError,
 )
 from ..models import Order, OrderLine
-from ..utils import resolve_area, resolve_order_place, resolve_product_talpa_ecom_id
+from ..utils import (
+    resolve_area,
+    resolve_order_place,
+    resolve_product_talpa_ecom_id,
+    tax_percentage_as_string,
+)
 from .base import PaymentProvider
 
 logger = logging.getLogger(__name__)
@@ -221,12 +226,7 @@ class TalpaEComProvider(PaymentProvider):
                 "rowPriceNet": rounded(item.pretax_price, as_string=True),
                 "rowPriceVat": str(rounded(item.price) - rounded(item.pretax_price)),
                 "rowPriceTotal": rounded(item.price, as_string=True),
-                "vatPercentage": rounded(
-                    item.tax_percentage,
-                    decimals=0,
-                    round_to_nearest=1,
-                    as_string=True,
-                ),
+                "vatPercentage": tax_percentage_as_string(item.tax_percentage),
                 "priceNet": rounded(item.pretax_price, as_string=True),
                 "priceVat": str(rounded(item.price) - rounded(item.pretax_price)),
                 "priceGross": rounded(item.price, as_string=True),
