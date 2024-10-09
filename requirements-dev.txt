@@ -52,7 +52,7 @@ graphql-core==2.3.2
     #   gql
 identify==2.4.8
     # via pre-commit
-idna==3.3
+idna==3.7
     # via
     #   -c requirements.txt
     #   requests
