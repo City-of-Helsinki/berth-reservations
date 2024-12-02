@@ -12,7 +12,7 @@ autopep8==1.5.7
     # via
     #   -c requirements.txt
     #   -r requirements-dev.in
-black==22.3.0
+black==24.3.0
     # via -r requirements-dev.in
 certifi==2021.10.8
     # via
@@ -162,9 +162,10 @@ urllib3==1.26.7
     #   requests
 virtualenv==20.13.0
     # via pre-commit
-wheel==0.37.1
+wheel==0.38.0
     # via pip-tools
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
 # setuptools
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
