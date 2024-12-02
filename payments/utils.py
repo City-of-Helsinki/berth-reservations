@@ -54,6 +54,13 @@ from leases.utils import (
     calculate_winter_season_end_date,
     calculate_winter_season_start_date,
 )
+from payments.enums import (
+    OfferStatus,
+    OrderStatus,
+    OrderType,
+    PricingCategory,
+    ProductServiceType,
+)
 from resources.enums import AreaRegion, BerthMooringType
 from resources.models import (
     Berth,
@@ -65,14 +72,6 @@ from resources.models import (
 from utils.email import is_valid_email
 from utils.messaging import get_email_subject
 from utils.numbers import rounded as rounded_decimal
-
-from .enums import (
-    OfferStatus,
-    OrderStatus,
-    OrderType,
-    PricingCategory,
-    ProductServiceType,
-)
 
 
 def fetch_order_profile(order, profile_token):
@@ -228,9 +227,13 @@ def calculate_product_percentage_price(base_price, percentage):
 
 
 @rounded
-def calculate_organization_price(price, organization_type: OrganizationType) -> Decimal:
+def calculate_organization_price(
+    price, organization_type: OrganizationType, tax: Decimal = None
+) -> Decimal:
     if organization_type == OrganizationType.COMPANY:
         return price * 2
+    if organization_type == OrganizationType.INTERNAL:
+        return convert_aftertax_to_pretax(price, tax)
     elif organization_type == OrganizationType.NON_BILLABLE:
         return Decimal("0.00")
     else:
@@ -239,7 +242,10 @@ def calculate_organization_price(price, organization_type: OrganizationType) -> 
 
 def calculate_organization_tax_percentage(tax, organization_type) -> Decimal:
     return (
-        Decimal("0.00") if organization_type == OrganizationType.NON_BILLABLE else tax
+        Decimal("0.00")
+        if organization_type == OrganizationType.NON_BILLABLE
+        or organization_type == OrganizationType.INTERNAL
+        else tax
     )
 
 
