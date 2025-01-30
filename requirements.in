@@ -29,3 +29,4 @@ uwsgi
 xlsxwriter
 json_log_formatter
 ujson
+pytz
