@@ -1,7 +1,7 @@
 # Build a base image for development and production stages.
 # Note that this stage won't get thrown out so we need to think about
 # layer sizes from this point on.
-FROM public.ecr.aws/docker/library/python:3.9-slim AS appbase
+FROM public.ecr.aws/docker/library/python:3.11-slim AS appbase
 
 USER root
 WORKDIR /app
