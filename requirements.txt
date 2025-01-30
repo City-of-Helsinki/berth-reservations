@@ -87,7 +87,7 @@ django-helusers==0.13.0
     #   helsinki-profile-gdpr-api
 django-ilmoitin[graphql-api,graphql_api]==0.7.1
     # via -r requirements.in
-django-js-asset==2.2.0
+django-js-asset==3.0.1
     # via django-mptt
 django-mailer==2.3.2
     # via
@@ -162,7 +162,7 @@ helsinki-profile-gdpr-api==0.2.0
     # via -r requirements.in
 idna==3.10
     # via requests
-ipython==8.18.1
+ipython==8.31.0
     # via -r requirements.in
 itypes==1.2.0
     # via coreapi
@@ -267,6 +267,7 @@ traitlets==5.14.3
 typing-extensions==4.12.2
     # via
     #   faker
+    #   ipython
     #   psycopg
 ujson==5.10.0
     # via -r requirements.in
