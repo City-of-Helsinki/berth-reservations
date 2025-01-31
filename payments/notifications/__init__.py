@@ -4,7 +4,7 @@ from django_ilmoitin.registry import notifications
 from .dummy_context import load_dummy_context
 from .types import NotificationType
 
-for (value, label) in NotificationType.choices:
+for value, label in NotificationType.choices:
     notifications.register(value, label)
 
 # The reason to check for this is that there are some race conditions when running the initial migrations.

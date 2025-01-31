@@ -101,7 +101,7 @@ class Command(BaseCommand):
                     area.save()
                     successful[region.label] += 1
                     total_successful += 1
-                except (Exception) as e:
+                except Exception as e:
                     failed.append({area_name: str(e)})
                     continue
 

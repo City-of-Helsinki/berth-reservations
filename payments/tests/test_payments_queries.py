@@ -518,9 +518,11 @@ def test_get_orders(api_client, order):
         log_entries.append({"node": {"id": to_global_id(OrderLogEntryNode, le.id)}})
 
     product_id = to_global_id(
-        BerthProductNode
-        if isinstance(order.product, BerthProduct)
-        else WinterStorageProductNode,
+        (
+            BerthProductNode
+            if isinstance(order.product, BerthProduct)
+            else WinterStorageProductNode
+        ),
         order.product.id,
     )
 
@@ -634,9 +636,11 @@ def test_get_order(api_client, order):
         log_entries.append({"node": {"id": to_global_id(OrderLogEntryNode, le.id)}})
 
     product_id = to_global_id(
-        BerthProductNode
-        if isinstance(order.product, BerthProduct)
-        else WinterStorageProductNode,
+        (
+            BerthProductNode
+            if isinstance(order.product, BerthProduct)
+            else WinterStorageProductNode
+        ),
         order.product.id,
     )
 

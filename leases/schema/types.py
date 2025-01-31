@@ -85,9 +85,11 @@ class BerthLeaseNode(DjangoObjectType):
             return customer_loader.load(latest_pending_offer.customer_id)
 
         return switch_offers_for_leases_loader.load(self.id).then(
-            lambda offers: __get_customer_from_offers(offers)
-            if offers and len(offers) > 0
-            else None
+            lambda offers: (
+                __get_customer_from_offers(offers)
+                if offers and len(offers) > 0
+                else None
+            )
         )
 
 

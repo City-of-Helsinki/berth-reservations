@@ -129,10 +129,7 @@ def test_additional_product_one_service_per_period(service, period):
         product.save()
 
     errors = str(exception.value)
-    assert (
-        'Constraint “optional_services_per_period” is violated.'
-        in errors
-    )
+    assert "Constraint “optional_services_per_period” is violated." in errors
 
 
 @pytest.mark.parametrize("period", [PeriodType.MONTH, PeriodType.YEAR])
@@ -1216,8 +1213,8 @@ def test_default_tax_percentage_is_in_place_product_tax_percentages():
 
 
 def test_place_product_tax_percentages_are_decimals():
-    assert all(type(x) == Decimal for x in PLACE_PRODUCT_TAX_PERCENTAGES)
+    assert all(type(x) is Decimal for x in PLACE_PRODUCT_TAX_PERCENTAGES)
 
 
 def test_additional_product_tax_percentages_are_decimals():
-    assert all(type(x) == Decimal for x in ADDITIONAL_PRODUCT_TAX_PERCENTAGES)
+    assert all(type(x) is Decimal for x in ADDITIONAL_PRODUCT_TAX_PERCENTAGES)

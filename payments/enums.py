@@ -122,7 +122,7 @@ class PriceTier(ChoicesMixin, IntegerChoices):
     TIER_3 = 3, _("Tier 3")
 
 
-class PricingCategory(ChoicesMixin,IntegerChoices):
+class PricingCategory(ChoicesMixin, IntegerChoices):
     DEFAULT = 0, _("Default")
     DINGHY = 1, _("Dinghy places")
     TRAILER = 2, _("Trailer places")

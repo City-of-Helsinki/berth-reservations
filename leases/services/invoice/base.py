@@ -75,7 +75,7 @@ class BaseInvoicingService:
 
     @staticmethod
     def get_product(
-        lease: Union[BerthLease, WinterStorageLease]
+        lease: Union[BerthLease, WinterStorageLease],
     ) -> Union[BerthProduct, WinterStorageProduct]:
         """Get the product associated to the lease"""
         raise NotImplementedError

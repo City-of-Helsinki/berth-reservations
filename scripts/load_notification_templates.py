@@ -89,7 +89,7 @@ def load_email_templates():
             id=notification_index,
             type=notification_type.value,
         )
-        for (lang, _name) in languages:
+        for lang, _name in languages:
             with override(lang), switch_language(template, lang):
                 template.subject = notification_type.label
 
@@ -132,7 +132,7 @@ def load_sms_templates(offset):
             id=notification_index + offset,
             type=notification_type.value,
         )
-        for (lang, _name) in languages:
+        for lang, _name in languages:
             with override(lang), switch_language(template, lang):
                 template.subject = notification_type.label
                 full_path = os.path.join(
