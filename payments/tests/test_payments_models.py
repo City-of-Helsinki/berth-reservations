@@ -7,7 +7,6 @@ import pytest
 from dateutil.relativedelta import relativedelta
 from dateutil.utils import today
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
 from django.utils.timezone import now
 from freezegun import freeze_time
 
@@ -124,14 +123,14 @@ def test_additional_product_product_type_optional():
 def test_additional_product_one_service_per_period(service, period):
     product = AdditionalProductFactory(service=service, period=period)
 
-    with pytest.raises(IntegrityError) as exception:
+    with pytest.raises(ValidationError) as exception:
         # Copy the product to a new identical one
         product.pk = None
         product.save()
 
     errors = str(exception.value)
     assert (
-        'duplicate key value violates unique constraint "optional_services_per_period"'
+        'Constraint “optional_services_per_period” is violated.'
         in errors
     )
 
