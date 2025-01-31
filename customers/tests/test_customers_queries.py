@@ -59,8 +59,8 @@ FEDERATED_SCHEMA_QUERY = """
 def test_profile_node_gets_extended_properly(api_client):
     executed = api_client.execute(FEDERATED_SCHEMA_QUERY)
     assert (
-        "extend type ProfileNode  implements Node "
-        ' @key(fields: "id") {   id: ID! @external '
+        "extend type ProfileNode  implements Node  "
+        '@key(fields: "id") {\n  id: ID! @external'
         in executed["data"]["_service"]["sdl"]
     )
 
