@@ -1,8 +1,10 @@
 from django.db.models import IntegerChoices, TextChoices
 from django.utils.translation import gettext_lazy as _
 
+from berth_reservations.mixins import ChoicesMixin
 
-class BerthMooringType(IntegerChoices):
+
+class BerthMooringType(ChoicesMixin, IntegerChoices):
     # In Finnish: "ILMAN PERÄKIINNITYSTÄ"
     NO_STERN_TO_MOORING = 1, _("No stern-to mooring")
     # In Finnish: "AISAPAIKKA"
@@ -23,6 +25,6 @@ class BerthMooringType(IntegerChoices):
     TRAWLER_PLACE = 9, _("Trawler place")
 
 
-class AreaRegion(TextChoices):
+class AreaRegion(ChoicesMixin, TextChoices):
     EAST = "east", _("East")
     WEST = "west", _("West")
