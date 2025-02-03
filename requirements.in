@@ -23,7 +23,7 @@ graphene-django-optimizer<0.9.0
 graphene-federation
 graphene-file-upload
 graphql-relay
-psycopg[binary]
+psycopg
 sentry-sdk
 uwsgi
 xlsxwriter

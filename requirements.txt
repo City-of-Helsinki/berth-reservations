@@ -195,10 +195,8 @@ promise==2.3
     #   graphql-relay
 prompt-toolkit==3.0.50
     # via ipython
-psycopg[binary]==3.2.4
+psycopg==3.2.4
     # via -r requirements.in
-psycopg-binary==3.2.4
-    # via psycopg
 ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.3
