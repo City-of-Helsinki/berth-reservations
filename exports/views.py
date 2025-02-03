@@ -72,9 +72,9 @@ class BaseExportView(APIView):
         response = HttpResponse(
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-        response[
-            "Content-Disposition"
-        ] = f"attachment; filename={exporter.filename}.xlsx"
+        response["Content-Disposition"] = (
+            f"attachment; filename={exporter.filename}.xlsx"
+        )
 
         response.content = exporter.serialize()
         return response

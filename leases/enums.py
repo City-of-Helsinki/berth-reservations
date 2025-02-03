@@ -1,8 +1,10 @@
 from django.db.models import TextChoices
 from django.utils.translation import gettext_lazy as _
 
+from berth_reservations.mixins import ChoicesMixin
 
-class LeaseStatus(TextChoices):
+
+class LeaseStatus(ChoicesMixin, TextChoices):
     DRAFTED = "drafted", _("Drafted")
     OFFERED = "offered", _("Offered")
     REFUSED = "refused", _("Refused")

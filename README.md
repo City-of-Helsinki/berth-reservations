@@ -51,9 +51,9 @@ The project is now running at [localhost:8081](http://localhost:8081)
 
 Project uses following software versions:
 
-- Postgres 11
-- Postgis 2.5
-- Python 3.9
+- Postgres 13
+- Postgis 3
+- Python 3.11
 
 <a name="database"></a>
 

@@ -287,9 +287,7 @@ def test_payload_add_place_products(
     expected_product_name = (
         "Berth product"
         if is_berth
-        else "Winter storage product"
-        if is_section
-        else "Winter storage place product"
+        else "Winter storage product" if is_section else "Winter storage place product"
     )
 
     assert len(payload["items"]) == 1
@@ -731,6 +729,6 @@ def test_get_payment_details(
     assert response.payment_method_label == "Nordea"
 
     # Make extra sure the Decimal values are Decimals and not floats
-    assert type(response.total_excl_tax) == Decimal
-    assert type(response.total) == Decimal
-    assert type(response.tax_amount) == Decimal
+    assert type(response.total_excl_tax) is Decimal
+    assert type(response.total) is Decimal
+    assert type(response.tax_amount) is Decimal

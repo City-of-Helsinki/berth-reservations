@@ -1,8 +1,10 @@
 from django.db.models import IntegerChoices, TextChoices
 from django.utils.translation import gettext_lazy as _
 
+from berth_reservations.mixins import ChoicesMixin
 
-class ProductServiceType(TextChoices):
+
+class ProductServiceType(ChoicesMixin, TextChoices):
     # Fixed services
     ELECTRICITY = "electricity", _("Electricity")
     WATER = "water", _("Water")
@@ -46,23 +48,23 @@ class ProductServiceType(TextChoices):
         ]
 
 
-class AdditionalProductType(TextChoices):
+class AdditionalProductType(ChoicesMixin, TextChoices):
     FIXED_SERVICE = "fixed_service", _("Fixed service")
     OPTIONAL_SERVICE = "optional_service", _("Optional service")
 
 
-class PeriodType(TextChoices):
+class PeriodType(ChoicesMixin, TextChoices):
     YEAR = "year", _("Year")
     SEASON = "season", _("Season")
     MONTH = "month", _("Month")
 
 
-class PriceUnits(TextChoices):
+class PriceUnits(ChoicesMixin, TextChoices):
     AMOUNT = "amount", _("Amount")
     PERCENTAGE = "percentage", _("Percentage")
 
 
-class OrderStatus(TextChoices):
+class OrderStatus(ChoicesMixin, TextChoices):
     DRAFTED = "drafted", _("Drafted")
     OFFERED = "offered", _("Offered")
     REJECTED = "rejected", _("Rejected")
@@ -82,7 +84,7 @@ class OrderStatus(TextChoices):
         return (cls.PAID, cls.PAID_MANUALLY)
 
 
-class OfferStatus(TextChoices):
+class OfferStatus(ChoicesMixin, TextChoices):
     DRAFTED = "drafted", _("Drafted")
     OFFERED = "offered", _("Offered")
     ACCEPTED = "accepted", _("Accepted")
@@ -91,18 +93,18 @@ class OfferStatus(TextChoices):
     CANCELLED = "cancelled", _("Cancelled")
 
 
-class OrderRefundStatus(TextChoices):
+class OrderRefundStatus(ChoicesMixin, TextChoices):
     PENDING = "pending", _("Pending")
     ACCEPTED = "accepted", _("Accepted")
     REJECTED = "rejected", _("Rejected")
 
 
-class OrderType(TextChoices):
+class OrderType(ChoicesMixin, TextChoices):
     LEASE_ORDER = "lease_order", _("Lease order")
     ADDITIONAL_PRODUCT_ORDER = "additional_product_order", _("Additional product order")
 
 
-class LeaseOrderType(TextChoices):
+class LeaseOrderType(ChoicesMixin, TextChoices):
     NEW_BERTH_ORDER = "new_berth_order", _("New berth order")
     RENEW_BERTH_ORDER = "renew_berth_order", _("Renew berth order")
     BERTH_SWITCH_ORDER = "berth_switch_order", _("Berth switch order")
@@ -114,19 +116,19 @@ class LeaseOrderType(TextChoices):
     INVALID = "invalid_order", _("Invalid order")
 
 
-class PriceTier(IntegerChoices):
+class PriceTier(ChoicesMixin, IntegerChoices):
     TIER_1 = 1, _("Tier 1")
     TIER_2 = 2, _("Tier 2")
     TIER_3 = 3, _("Tier 3")
 
 
-class PricingCategory(IntegerChoices):
+class PricingCategory(ChoicesMixin, IntegerChoices):
     DEFAULT = 0, _("Default")
     DINGHY = 1, _("Dinghy places")
     TRAILER = 2, _("Trailer places")
     VASIKKASAARI = 3, _("Vasikkasaari berths")
 
 
-class TalpaProductType(TextChoices):
+class TalpaProductType(ChoicesMixin, TextChoices):
     BERTH = "berth", _("Berth")
     WINTER = "winter", _("Winter storage or storage on ice")

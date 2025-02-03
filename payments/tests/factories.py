@@ -43,9 +43,11 @@ from .utils import random_price, random_tax
 class AbstractBaseProductFactory(factory.django.DjangoModelFactory):
     price_unit = factory.Faker("random_element", elements=PriceUnits.values)
     price_value = factory.LazyAttribute(
-        lambda o: random_price()
-        if o.price_unit == PriceUnits.AMOUNT
-        else random_price(1, 100, decimals=0)
+        lambda o: (
+            random_price()
+            if o.price_unit == PriceUnits.AMOUNT
+            else random_price(1, 100, decimals=0)
+        )
     )
 
     class Meta:
@@ -99,7 +101,7 @@ class AdditionalProductFactory(AbstractBaseProductFactory):
     # the actual assignment of a random Tax value is done once the service has
     # been assigned to the model.
     @factory.post_generation
-    def tax_percentage(self, created, extracted, **kwargs):
+    def tax_percentage(self, created, extracted, **kwargs):  # noqa F811
         if extracted:
             self.tax_percentage = extracted
         elif self.service in ProductServiceType.FIXED_SERVICES():

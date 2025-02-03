@@ -359,12 +359,14 @@ def mocked_response_talpa_ecom_errors(errors: dict = None, status_code: int = 40
     def wrapper(*args, **kwargs):
         response_errors = {
             "errors": [
-                {
-                    "code": "request-validation-failed",
-                    "message": "headers.user is a required field",
-                }
-                if errors is None
-                else errors
+                (
+                    {
+                        "code": "request-validation-failed",
+                        "message": "headers.user is a required field",
+                    }
+                    if errors is None
+                    else errors
+                )
             ]
         }
         return MockJsonResponse(data=response_errors, status_code=status_code)
@@ -386,6 +388,7 @@ def mocked_refund_payment_details(*args, products=None, **kwargs):
         "Bambora is deprecated and DOES NOT WORK CORRECTLY with VAT 25.5%! "
         "It should be removed as dead code.",
         DeprecationWarning,
+        stacklevel=2,
     )
 
     def wrapper(*args, **kwargs):

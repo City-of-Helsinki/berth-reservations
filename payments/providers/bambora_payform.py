@@ -82,6 +82,7 @@ class BamboraPaymentProductDetails:
             "BamboraPaymentProductDetails is deprecated and DOES NOT WORK CORRECTLY! "
             "It should be removed as dead code.",
             DeprecationWarning,
+            stacklevel=2,
         )
         self.id = product_dict.get("id", "")
         self.product_id = product_dict.get("product_id", "")
@@ -121,6 +122,7 @@ class BamboraPaymentDetails:
         warnings.warn(
             "BamboraPaymentDetails is deprecated and should be removed as dead code",
             DeprecationWarning,
+            stacklevel=2,
         )
         self.id = payment_dict.get("id", "")
         self.amount = int(payment_dict.get("amount", 0))
@@ -161,6 +163,7 @@ class BamboraPayformProvider(PaymentProvider):
         warnings.warn(
             "BamboraPayformProvider is deprecated and should be removed as dead code",
             DeprecationWarning,
+            stacklevel=2,
         )
         super().__init__(**kwargs)
         self.url_payment_api = self.config.get(VENE_PAYMENTS_BAMBORA_API_URL)
@@ -294,11 +297,15 @@ class BamboraPayformProvider(PaymentProvider):
                 place = (
                     lease.berth
                     if hasattr(lease, "berth")
-                    else lease.place
-                    if hasattr(lease, "place") and lease.place
-                    else lease.section
-                    if hasattr(lease, "section") and lease.section
-                    else area
+                    else (
+                        lease.place
+                        if hasattr(lease, "place") and lease.place
+                        else (
+                            lease.section
+                            if hasattr(lease, "section") and lease.section
+                            else area
+                        )
+                    )
                 )
                 product_name = f"{product.name}: {place}"
             items.append(
@@ -365,18 +372,24 @@ class BamboraPayformProvider(PaymentProvider):
                 {
                     "email": order.customer_email.strip(),
                     "customer": {
-                        "firstname": order.customer_first_name.capitalize()
-                        if order.customer_first_name
-                        else "",
-                        "lastname": order.customer_last_name.capitalize()
-                        if order.customer_last_name
-                        else "",
+                        "firstname": (
+                            order.customer_first_name.capitalize()
+                            if order.customer_first_name
+                            else ""
+                        ),
+                        "lastname": (
+                            order.customer_last_name.capitalize()
+                            if order.customer_last_name
+                            else ""
+                        ),
                         "email": order.customer_email.strip(),
                         "address_street": order.customer_address,
                         "address_zip": order.customer_zip_code,
-                        "address_city": order.customer_city.capitalize()
-                        if order.customer_city
-                        else "",
+                        "address_city": (
+                            order.customer_city.capitalize()
+                            if order.customer_city
+                            else ""
+                        ),
                     },
                 }
             )

@@ -1,8 +1,7 @@
 from django.conf import settings
-from django.conf.urls import url
 from django.conf.urls.static import static
 from django.http import HttpResponse
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.views.decorators.csrf import csrf_exempt
 from helusers.admin_site import admin
 
@@ -21,7 +20,7 @@ urlpatterns = [
 ]
 
 if settings.ENABLE_PROFILING_TOOLS:
-    urlpatterns += [url(r"^silk/", include("silk.urls", namespace="silk"))]
+    urlpatterns += [re_path(r"^silk/", include("silk.urls", namespace="silk"))]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

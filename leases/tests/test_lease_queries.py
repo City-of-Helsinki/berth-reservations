@@ -452,18 +452,24 @@ def test_query_winter_storage_leases(api_client, place):
     boat_id = to_global_id(BoatNode, winter_storage_lease.boat.id)
 
     place_dict = {
-        "place": {
-            "id": to_global_id(WinterStoragePlaceNode, winter_storage_lease.place.id),
-        }
-        if place
-        else None,
-        "section": {
-            "id": to_global_id(
-                WinterStorageSectionNode, winter_storage_lease.section.id
-            ),
-        }
-        if not place
-        else None,
+        "place": (
+            {
+                "id": to_global_id(
+                    WinterStoragePlaceNode, winter_storage_lease.place.id
+                ),
+            }
+            if place
+            else None
+        ),
+        "section": (
+            {
+                "id": to_global_id(
+                    WinterStorageSectionNode, winter_storage_lease.section.id
+                ),
+            }
+            if not place
+            else None
+        ),
     }
 
     assert executed["data"]["winterStorageLeases"]["edges"][0]["node"] == {

@@ -257,9 +257,9 @@ class BerthLease(AbstractLease, SerializableMixin):
         {"name": "status", "accessor": lambda x: dict(LeaseStatus.choices)[x]},
         {
             "name": "orders",
-            "accessor": lambda orders: [order.id for order in orders.all()]
-            if orders
-            else None,
+            "accessor": lambda orders: (
+                [order.id for order in orders.all()] if orders else None
+            ),
         },
         {"name": "comment"},
         {"name": "berth", "accessor": lambda x: x.serialize()},
@@ -459,9 +459,9 @@ class WinterStorageLease(AbstractLease, SerializableMixin):
         {"name": "status", "accessor": lambda x: dict(LeaseStatus.choices)[x]},
         {
             "name": "orders",
-            "accessor": lambda orders: [order.id for order in orders.all()]
-            if orders
-            else None,
+            "accessor": lambda orders: (
+                [order.id for order in orders.all()] if orders else None
+            ),
         },
         {"name": "comment"},
         {"name": "place", "accessor": lambda x: x.serialize() if x else None},

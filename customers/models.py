@@ -131,9 +131,9 @@ class CustomerProfileManager(models.Manager):
                         address=organization.get("address"),
                         postal_code=organization.get("postal_code"),
                         city=organization.get("city"),
-                        business_id="-"
-                        if organization_type == OrganizationType.COMPANY
-                        else "",
+                        business_id=(
+                            "-" if organization_type == OrganizationType.COMPANY else ""
+                        ),
                     )
 
                 boats = []
@@ -149,12 +149,16 @@ class CustomerProfileManager(models.Manager):
                             registration_number=boat.get("registration_number"),
                             width=Decimal(boat.get("width")),
                             length=Decimal(boat.get("length")),
-                            draught=Decimal(boat.get("draught"))
-                            if boat.get("draught")
-                            else None,
-                            weight=Decimal(boat.get("weight"))
-                            if boat.get("weight")
-                            else None,
+                            draught=(
+                                Decimal(boat.get("draught"))
+                                if boat.get("draught")
+                                else None
+                            ),
+                            weight=(
+                                Decimal(boat.get("weight"))
+                                if boat.get("weight")
+                                else None
+                            ),
                         )
                     )
 
@@ -170,9 +174,11 @@ class CustomerProfileManager(models.Manager):
                         BerthLease.objects.create(
                             customer=customer,
                             berth=berth,
-                            boat=boats[lease.get("boat_index")]
-                            if lease.get("boat_index")
-                            else None,
+                            boat=(
+                                boats[lease.get("boat_index")]
+                                if lease.get("boat_index")
+                                else None
+                            ),
                             start_date=lease.get("start_date"),
                             end_date=lease.get("end_date"),
                             status=LeaseStatus.PAID,
@@ -221,9 +227,11 @@ class CustomerProfileManager(models.Manager):
                         customer=customer,
                         lease=lease,
                         created_at=order.get("created_at"),
-                        status=OrderStatus.PAID
-                        if order.get("is_paid")
-                        else OrderStatus.EXPIRED,
+                        status=(
+                            OrderStatus.PAID
+                            if order.get("is_paid")
+                            else OrderStatus.EXPIRED
+                        ),
                         price=Decimal(order.get("order_sum")),
                         tax_percentage=Decimal(order.get("vat_percentage")),
                         comment=order.get("comment"),

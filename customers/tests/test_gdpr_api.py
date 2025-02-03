@@ -400,9 +400,11 @@ def test_get_full_profile_information_from_gdpr_api(
                         },
                         {
                             "key": "DUE_DATE",
-                            "value": berth_switch_offer.due_date.strftime("%d-%m-%Y")
-                            if berth_switch_offer.due_date
-                            else None,
+                            "value": (
+                                berth_switch_offer.due_date.strftime("%d-%m-%Y")
+                                if berth_switch_offer.due_date
+                                else None
+                            ),
                         },
                         {
                             "key": "CUSTOMER_FIRST_NAME",
