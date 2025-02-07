@@ -54,6 +54,9 @@ env = environ.Env(
     TOKEN_AUTH_AUTHSERVER_URL=(str, "https://api.hel.fi/sso/openid"),
     TOKEN_AUTH_FIELD_FOR_CONSENTS=(str, "https://api.hel.fi/auth"),
     TOKEN_AUTH_REQUIRE_SCOPE_PREFIX=(bool, True),
+    HELUSERS_USER_MIGRATE_ENABLED=(bool, False),
+    HELUSERS_USER_MIGRATE_EMAIL_DOMAINS=([str], ["hel.fi"]),
+    HELUSERS_USER_MIGRATE_AMRS=(list, ["helsinkiad"]),
     VENE_PAYMENTS_PROVIDER_CLASS=(str, "payments.providers.BamboraPayformProvider"),
     VENE_CONTRACTS_SERVICE_CLASS=(str, "contracts.services.VismaContractService"),
     VENE_UI_RETURN_URL=(str, "https://venepaikat.hel.fi"),
@@ -253,6 +256,10 @@ OIDC_API_TOKEN_AUTH = {
 }
 
 OIDC_AUTH = {"OIDC_LEEWAY": 60 * 60}
+
+HELUSERS_USER_MIGRATE_ENABLED = env.bool("HELUSERS_USER_MIGRATE_ENABLED")
+HELUSERS_USER_MIGRATE_EMAIL_DOMAINS = env.list("HELUSERS_USER_MIGRATE_EMAIL_DOMAINS")
+HELUSERS_USER_MIGRATE_AMRS = env.list("HELUSERS_USER_MIGRATE_AMRS")
 
 GRAPHENE = {
     "SCHEMA": "berth_reservations.schema.schema",
