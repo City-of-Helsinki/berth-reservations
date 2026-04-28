@@ -5,6 +5,9 @@
 ![Coverage](https://codecov.io/gh/City-of-Helsinki/berth-reservations/branch/master/graph/badge.svg)
 ![License](https://img.shields.io/github/license/City-of-Helsinki/berth-reservations)
 
+[!NOTE]
+This repository was archived on 2026-04-28. Development has ceased because the project has been replaced by a SaaS-based solution.
+
 :boat: Bare-bones registration API for berth reservations :boat:
 
 **Contents**
