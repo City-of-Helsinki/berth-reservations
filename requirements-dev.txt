@@ -149,3 +149,4 @@ wheel==0.45.1
 # The following packages are considered to be unsafe in a requirements file:
 # pip
 # setuptools
+setuptools>=70.0.0 # not directly required, pinned by Snyk to avoid a vulnerability
