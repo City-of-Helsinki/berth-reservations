@@ -215,7 +215,7 @@ pyjwt==2.10.1
     # via django-graphql-jwt
 python-dateutil==2.9.0.post0
     # via faker
-python-jose==3.3.0
+python-jose==3.4.0
     # via django-helusers
 pytz==2024.2
     # via -r requirements.in
